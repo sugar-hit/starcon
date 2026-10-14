@@ -60,8 +60,20 @@ function balanced(over: Partial<AvailableQuantityTotals> = {}): AvailableQuantit
         bucketCount: 2,
         countedInSellable: false,
       }),
-      slice({ code: 'DEFECTIVE', label: '残次', amount: 3, bucketCount: 1, countedInSellable: false }),
-      slice({ code: 'UNLISTED', label: '未上架 / 不可发货', amount: 70, bucketCount: 2, countedInSellable: false }),
+      slice({
+        code: 'DEFECTIVE',
+        label: '残次',
+        amount: 3,
+        bucketCount: 1,
+        countedInSellable: false,
+      }),
+      slice({
+        code: 'UNLISTED',
+        label: '未上架 / 不可发货',
+        amount: 70,
+        bucketCount: 2,
+        countedInSellable: false,
+      }),
       slice({
         code: 'BLOCKED_LOT',
         label: '批次已冻结 / 耗尽 / 过期',
@@ -183,9 +195,7 @@ describe('恒等式：五片之和必须等于 available', () => {
       sliceBalanced: true,
     } as Partial<AvailableQuantityTotals>);
     // 各片之和 256.0000004 与 256 的差小于 1e-6 → 不报警
-    rounding.slices = rounding.slices.map((s, i) =>
-      i === 0 ? { ...s, amount: 120.0000004 } : s,
-    );
+    rounding.slices = rounding.slices.map((s, i) => (i === 0 ? { ...s, amount: 120.0000004 } : s));
     expect(sliceBalanced(rounding)).toBe(true);
   });
 });
@@ -247,7 +257,9 @@ describe('数量显示：null 不显示成 0', () => {
 
 describe('渠道口径：只展示不参与可售量计算', () => {
   it('未配置时明确说未配置，而不是按 0 比例渲染', () => {
-    const text = channelPolicyText({ configured: false } as AvailableQuantityReport['channelPolicy']);
+    const text = channelPolicyText({
+      configured: false,
+    } as AvailableQuantityReport['channelPolicy']);
     expect(text).toContain('未配置');
   });
 
@@ -313,7 +325,9 @@ describe('能力折叠区：未交付的维度要列出来并指认归属', () =
   });
 
   it('已接入的五项不在折叠区里出现', () => {
-    const keys = capabilityGaps(caps).filter((g) => !g.available).map((g) => g.key);
+    const keys = capabilityGaps(caps)
+      .filter((g) => !g.available)
+      .map((g) => g.key);
     expect(keys).not.toContain('safetyStock');
     expect(keys).not.toContain('channelPolicy');
   });

@@ -41,7 +41,10 @@ function ref(over: Partial<SkuMergeReferenceRow> = {}): SkuMergeReferenceRow {
   };
 }
 
-function report(references: SkuMergeReferenceRow[], over: Partial<SkuMergeReport> = {}): SkuMergeReport {
+function report(
+  references: SkuMergeReferenceRow[],
+  over: Partial<SkuMergeReport> = {},
+): SkuMergeReport {
   const sum = (k: keyof SkuMergeReferenceRow) =>
     references.reduce((n, r) => n + (r[k] as number), 0);
   return {
@@ -98,13 +101,7 @@ describe('执行门禁只读后端预演结论', () => {
   });
 
   it('决定过期/已执行/已合并/保留两条四种情况都要禁掉执行并给出理由', () => {
-    for (const check of [
-      'STALE',
-      'ALREADY_EXECUTED',
-      'ALREADY_MERGED',
-      'NOT_DECIDED',
-      'KEEP',
-    ]) {
+    for (const check of ['STALE', 'ALREADY_EXECUTED', 'ALREADY_MERGED', 'NOT_DECIDED', 'KEEP']) {
       const p = preview({ versionCheck: check, executable: false, blockReason: `原因-${check}` });
       expect(canExecuteMerge(p), check).toBe(false);
       expect(blockReason(p)).toBe(`原因-${check}`);
@@ -121,7 +118,14 @@ describe('执行门禁只读后端预演结论', () => {
   });
 
   it('六种版本比对结论的标签与语气都不相同', () => {
-    const labels = ['MATCHED', 'STALE', 'ALREADY_EXECUTED', 'NOT_DECIDED', 'ALREADY_MERGED', 'KEEP'];
+    const labels = [
+      'MATCHED',
+      'STALE',
+      'ALREADY_EXECUTED',
+      'NOT_DECIDED',
+      'ALREADY_MERGED',
+      'KEEP',
+    ];
     expect(new Set(labels.map(versionCheckLabel)).size).toBe(labels.length);
     expect(versionCheckTone('MATCHED')).toBe('ok');
     for (const c of labels.filter((x) => x !== 'MATCHED')) {
@@ -172,7 +176,12 @@ describe('引用迁移报告分项不折叠', () => {
   });
 
   it('被整维度拒绝的维度与「搬不动」分开表达', () => {
-    const blocked = ref({ dimension: 'ATTRIBUTE', sourceCount: 1, conflictCount: 1, blocked: true });
+    const blocked = ref({
+      dimension: 'ATTRIBUTE',
+      sourceCount: 1,
+      conflictCount: 1,
+      blocked: true,
+    });
     const conflict = ref({ dimension: 'PACKAGE', sourceCount: 1, conflictCount: 1 });
     expect(referenceOutcome(blocked)).toContain('整维度不搬');
     expect(referenceOutcome(conflict)).toBe('搬不动 1');
@@ -209,7 +218,9 @@ describe('跨商品合并的边界提示', () => {
 
   it('同商品合并或源商品已空时不提示', () => {
     expect(remainingSpuNote(preview({ scope: 'SKU' }))).toBeNull();
-    expect(remainingSpuNote(preview({ scope: 'SPU', secondarySpuRemainingSkuCount: 0 }))).toBeNull();
+    expect(
+      remainingSpuNote(preview({ scope: 'SPU', secondarySpuRemainingSkuCount: 0 })),
+    ).toBeNull();
     expect(remainingSpuNote(null)).toBeNull();
   });
 });

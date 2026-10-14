@@ -54,11 +54,7 @@ export function fetchPanel(skuId: string) {
 }
 
 export function addConversion(skuId: string, input: UnitConversionInput) {
-  return api<{ id: string }>(
-    `catalog/unit-conversion/skus/${skuId}/conversions`,
-    'POST',
-    input,
-  );
+  return api<{ id: string }>(`catalog/unit-conversion/skus/${skuId}/conversions`, 'POST', input);
 }
 
 /** 基础数量换算是纯计算（不写库），所以用只读权限即可调用。 */

@@ -30,23 +30,19 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.9.1.1 重复 SKU 识别：真实 PG16 + 强制 RLS 的落库往返、四条判定线、相似度是真的算出来的、
- * 以及<b>租户隔离三断言</b>。
+ * 3.9.1.1 重复 SKU 识别：真实 PG16 + 强制 RLS 的落库往返、四条判定线、相似度是真的算出来的、 以及<b>租户隔离三断言</b>。
  *
  * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本文件最重要的几组断言</b>：
  *
  * <ol>
- *   <li>{@link #四条判定线都在真实数据上命中()}：蓝图的四类重复逐条钉死，且相似度是
- *       <b>算出来的具体数值</b>（条码线必须 1.0000，近似同品线必须等于按 0.7/0.3 权重反算的值），
- *       不是常数、不是随机数。
- *   <li>{@link #重叠维度数与信号行数逐候选相等()}：蓝图点名「重叠维度」这一栏，
- *       它必须与逐维度信号行数严格一致，否则清单上两个数会互相矛盾。
- *   <li>{@link #决定只为下游预留expectedVersion且不碰任何业务列()}：本模块只登记决定，
- *       必须证明 sku/spu 一列都没被改写，而 expected_version 真的留给了 3.9.1.2。
- *   <li>{@link #租户隔离三断言覆盖候选与决定()}：候选清单里含本租户商品的标题、品牌与条码，
- *       串租户等于把 A 的商品资料泄漏给 B。
+ *   <li>{@link #四条判定线都在真实数据上命中()}：蓝图的四类重复逐条钉死，且相似度是 <b>算出来的具体数值</b>（条码线必须 1.0000，近似同品线必须等于按 0.7/0.3
+ *       权重反算的值）， 不是常数、不是随机数。
+ *   <li>{@link #重叠维度数与信号行数逐候选相等()}：蓝图点名「重叠维度」这一栏， 它必须与逐维度信号行数严格一致，否则清单上两个数会互相矛盾。
+ *   <li>{@link #决定只为下游预留expectedVersion且不碰任何业务列()}：本模块只登记决定， 必须证明 sku/spu 一列都没被改写，而
+ *       expected_version 真的留给了 3.9.1.2。
+ *   <li>{@link #租户隔离三断言覆盖候选与决定()}：候选清单里含本租户商品的标题、品牌与条码， 串租户等于把 A 的商品资料泄漏给 B。
  *   <li>{@link #timestamptz往返不偏28800()}：扫描时刻写回读出来必须还是写入的那个时刻。
  * </ol>
  */
@@ -57,7 +53,8 @@ class DuplicateDetectionIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper JSON = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final AtomicInteger SEQ = new AtomicInteger();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("spu", "sku", "attribute", "research", "compliance", "assets")
@@ -70,8 +67,13 @@ class DuplicateDetectionIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -108,7 +110,11 @@ class DuplicateDetectionIntegrationTest {
       // 只读身份：能读候选清单，写扫描与决定必须 403。
       actors.put(
           "Bearer reader",
-          actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read", "catalog.sku.read")))));
+          actor(
+              user,
+              a,
+              null,
+              List.of(grant("ALL", List.of("catalog.spu.read", "catalog.sku.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -170,41 +176,50 @@ class DuplicateDetectionIntegrationTest {
   /**
    * 建一个 SPU（saveSpu 直接返回 id）。
    *
-   * <p><b>一个 SPU 里只能有一个这样的 SKU</b>：V1 的 {@code UNIQUE(tenant_id,spu_id,variant_signature)}
-   * 与 {@code CatalogService.saveSku} 的签名算法共同决定 —— 没有规格轴属性时所有 SKU 的
-   * {@code variant_signature} 都是空串，所以同 SPU 的第二个 SKU 会直接 409。
-   * 需要同 SPU 两个 SKU 的测试走 {@link #variantSpu} + {@link #skuWithOption}。
+   * <p><b>一个 SPU 里只能有一个这样的 SKU</b>：V1 的 {@code UNIQUE(tenant_id,spu_id,variant_signature)} 与 {@code
+   * CatalogService.saveSku} 的签名算法共同决定 —— 没有规格轴属性时所有 SKU 的 {@code variant_signature} 都是空串，所以同 SPU
+   * 的第二个 SKU 会直接 409。 需要同 SPU 两个 SKU 的测试走 {@link #variantSpu} + {@link #skuWithOption}。
    */
   UUID spu(AccessService.Access who, String code, String name, String brand, String category) {
     return write(
-        who, () -> catalog.saveSpu(who, null, new SpuInput(code, name, "", brand, category, "DRAFT", 0)));
+        who,
+        () ->
+            catalog.saveSpu(who, null, new SpuInput(code, name, "", brand, category, "DRAFT", 0)));
   }
 
   /**
    * 建一个 SKU（不带规格取值）。
    *
-   * <p><b>{@code SkuInput.version} 传的是 SPU 的 version</b>（{@code CatalogService.saveSku}
-   * 第一行就是 {@code lock(spu, input.version())}），不是 SKU 的。所以每次建 SKU 前
-   * 都要现读 SPU 的 version —— 建档本身会把 SPU 的 version 顶上去，用 0 会撞 409。
+   * <p><b>{@code SkuInput.version} 传的是 SPU 的 version</b>（{@code CatalogService.saveSku} 第一行就是
+   * {@code lock(spu, input.version())}），不是 SKU 的。所以每次建 SKU 前 都要现读 SPU 的 version —— 建档本身会把 SPU 的
+   * version 顶上去，用 0 会撞 409。
    */
   UUID sku(AccessService.Access who, UUID spuId, String code, String name, String barcode) {
     return write(
         who,
         () ->
             catalog.saveSku(
-                who, spuId, null,
-                new SkuInput(code, name, barcode, "PCS", "ACTIVE", List.of(), spuVersion(who, spuId))));
+                who,
+                spuId,
+                null,
+                new SkuInput(
+                    code, name, barcode, "PCS", "ACTIVE", List.of(), spuVersion(who, spuId))));
   }
 
   long spuVersion(AccessService.Access who, UUID spuId) {
-    return tx(who, () -> sql.fetchOne("select version from spu where id=?", spuId)).get("version", Long.class);
+    return tx(who, () -> sql.fetchOne("select version from spu where id=?", spuId))
+        .get("version", Long.class);
   }
 
   /** 建一个带规格轴的 SPU（后续它的 SKU 各自带一个不同的轴取值）。 */
   record VariantSpu(UUID spuId, UUID axisId) {}
 
   VariantSpu variantSpu(
-      AccessService.Access who, String code, String name, String brand, String category,
+      AccessService.Access who,
+      String code,
+      String name,
+      String brand,
+      String category,
       List<String> options) {
     UUID spuId = spu(who, code, name, brand, category);
     UUID axisId =
@@ -212,13 +227,26 @@ class DuplicateDetectionIntegrationTest {
             who,
             () -> {
               catalog.saveAttribute(
-                  who, spuId, null,
+                  who,
+                  spuId,
+                  null,
                   new AttributeInput(
-                      "COLOR", "颜色", "OPTION", "SKU_ONLY", false, true, true, "", "规格",
-                      options, List.of(), 0));
+                      "COLOR",
+                      "颜色",
+                      "OPTION",
+                      "SKU_ONLY",
+                      false,
+                      true,
+                      true,
+                      "",
+                      "规格",
+                      options,
+                      List.of(),
+                      0));
               return sql.fetchOne(
                       "select id from attribute_definition where tenant_id=? and spu_id=? and code='COLOR'",
-                      who.tenantId(), spuId)
+                      who.tenantId(),
+                      spuId)
                   .get("id", UUID.class);
             });
     return new VariantSpu(spuId, axisId);
@@ -226,27 +254,37 @@ class DuplicateDetectionIntegrationTest {
 
   /** 建一个带规格取值的 SKU（走已交付的组合唯一性链路，签名由上游按轴值算出）。 */
   UUID skuWithOption(
-      AccessService.Access who, UUID spuId, UUID axisId, String code, String name, String barcode,
+      AccessService.Access who,
+      UUID spuId,
+      UUID axisId,
+      String code,
+      String name,
+      String barcode,
       String option) {
     return write(
         who,
         () ->
             catalog.saveSku(
-                who, spuId, null,
+                who,
+                spuId,
+                null,
                 new SkuInput(
-                    code, name, barcode, "PCS", "ACTIVE",
-                    List.of(new ValueInput(axisId, "SET", List.of(option))), spuVersion(who, spuId))));
+                    code,
+                    name,
+                    barcode,
+                    "PCS",
+                    "ACTIVE",
+                    List.of(new ValueInput(axisId, "SET", List.of(option))),
+                    spuVersion(who, spuId))));
   }
 
   /**
    * 直接按 SKU 写一组规格取值（不走组合服务）。
    *
-   * <p>刻意用显式 SQL 而不是 {@code catalog.saveSku}：本模块的判定只读
-   * {@code attribute_value × attribute_definition.variant_axis × attribute_value_item}，
-   * 而 {@code saveSku} 会校验组合唯一性 —— 而「同一 SPU 下两个 SKU 承载同一套真实轴值」
-   * 恰恰是 V36 要抓的重复，正常写入路径本来就该拒绝它。真实来源是批量导入
-   * （V29 给导入的 SKU 写 {@code IMPORT:<编码>} 占位签名，绕开了组合唯一性）。
-   * 所以这里用 SQL 复原导入之后的样子：签名文本不同、真实轴值相同。
+   * <p>刻意用显式 SQL 而不是 {@code catalog.saveSku}：本模块的判定只读 {@code attribute_value ×
+   * attribute_definition.variant_axis × attribute_value_item}， 而 {@code saveSku} 会校验组合唯一性 —— 而「同一
+   * SPU 下两个 SKU 承载同一套真实轴值」 恰恰是 V36 要抓的重复，正常写入路径本来就该拒绝它。真实来源是批量导入 （V29 给导入的 SKU 写 {@code
+   * IMPORT:<编码>} 占位签名，绕开了组合唯一性）。 所以这里用 SQL 复原导入之后的样子：签名文本不同、真实轴值相同。
    */
   void writeVariantValue(UUID attributeId, UUID skuId, String option) {
     writeVoid(
@@ -259,18 +297,21 @@ class DuplicateDetectionIntegrationTest {
               "update attribute_value_item set option_value=? where tenant_id=? and attribute_id=?"
                   + " and value_id=(select id from attribute_value where tenant_id=? and attribute_id=?"
                   + " and sku_id=?)",
-              option, a, attributeId, a, attributeId, skuId);
-          sql.execute(
-              "update sku set variant_signature=? where id=?", "IMPORT:" + skuId, skuId);
+              option,
+              a,
+              attributeId,
+              a,
+              attributeId,
+              skuId);
+          sql.execute("update sku set variant_signature=? where id=?", "IMPORT:" + skuId, skuId);
         });
   }
 
   /**
    * 直接改 {@code sku.barcode} 列（不建标识表）。
    *
-   * <p>用它构造「同条码多 SKU」：V7 的标识表有 {@code UNIQUE(tenant_id,scheme,value)} 挡着，
-   * 而这一列<b>没有</b>唯一约束 —— 批量导入只写列、不同步标识表时就会撞成这个形状，
-   * 所以它才是「同条码多 SKU」的真实来源。直接 UPDATE 也避免了 saveSku 的签名唯一性 409。
+   * <p>用它构造「同条码多 SKU」：V7 的标识表有 {@code UNIQUE(tenant_id,scheme,value)} 挡着， 而这一列<b>没有</b>唯一约束 ——
+   * 批量导入只写列、不同步标识表时就会撞成这个形状， 所以它才是「同条码多 SKU」的真实来源。直接 UPDATE 也避免了 saveSku 的签名唯一性 409。
    */
   void skuColumnBarcode(UUID skuId, String barcode) {
     writeVoid(actor, () -> sql.execute("update sku set barcode=? where id=?", barcode, skuId));
@@ -279,9 +320,8 @@ class DuplicateDetectionIntegrationTest {
   /**
    * 写一条物料标识（V7 的 {@code sku_identifier}）。
    *
-   * <p><b>同一个值只能挂一个 SKU</b>：V7 的 {@code UNIQUE(tenant_id,scheme,value)} 就是这么定的，
-   * 所以「同条码多 SKU」的真实来源是 {@code sku.barcode} 那个<b>没有唯一约束</b>的列
-   * （批量导入只写列、不同步标识表时就会撞），以及「A 的列 vs B 的标识表」这种跨来源。
+   * <p><b>同一个值只能挂一个 SKU</b>：V7 的 {@code UNIQUE(tenant_id,scheme,value)} 就是这么定的， 所以「同条码多 SKU」的真实来源是
+   * {@code sku.barcode} 那个<b>没有唯一约束</b>的列 （批量导入只写列、不同步标识表时就会撞），以及「A 的列 vs B 的标识表」这种跨来源。
    * 本夹具用它构造<b>跨来源</b>的那一类：只给一侧写标识表，另一侧靠列。
    */
   void identifier(UUID skuId, String scheme, String value) {
@@ -291,14 +331,17 @@ class DuplicateDetectionIntegrationTest {
             sql.execute(
                 "insert into sku_identifier(id,tenant_id,sku_id,scheme,value,is_primary,source,occurred_at)"
                     + " values(?::uuid,?::uuid,?::uuid,?,?,true,'MANUAL',now())",
-                UUID.randomUUID(), a, skuId, scheme, value));
+                UUID.randomUUID(),
+                a,
+                skuId,
+                scheme,
+                value));
   }
 
   /**
    * 造一张素材并挂到 SKU 上。
    *
-   * <p>内容哈希由<b>给定的 seed</b>算出而不是随机：相似图片这一维要断言的是
-   * 「两张图内容相同 → 命中」，所以哈希必须可控。{@code media_asset} 的
+   * <p>内容哈希由<b>给定的 seed</b>算出而不是随机：相似图片这一维要断言的是 「两张图内容相同 → 命中」，所以哈希必须可控。{@code media_asset} 的
    * {@code current_version} 由 V18 的触发器从版本行推进，所以必须先插素材再插版本行。
    */
   UUID media(UUID skuId, String seed) {
@@ -310,9 +353,8 @@ class DuplicateDetectionIntegrationTest {
   /**
    * 把一个**已有**素材再挂到另一个 SKU 上。
    *
-   * <p>{@code media_asset} 是内容寻址的（V18：{@code UNIQUE(tenant_id,content_sha256)}），
-   * 所以「两个 SKU 用同一张图」在数据上就是<b>同一个素材行被引用两次</b>，
-   * 而不是两个内容相同的素材行 —— 这正是「相似图片」的真实形状。
+   * <p>{@code media_asset} 是内容寻址的（V18：{@code UNIQUE(tenant_id,content_sha256)}）， 所以「两个 SKU
+   * 用同一张图」在数据上就是<b>同一个素材行被引用两次</b>， 而不是两个内容相同的素材行 —— 这正是「相似图片」的真实形状。
    */
   void attachMedia(UUID assetId, UUID skuId) {
     writeVoid(
@@ -321,7 +363,10 @@ class DuplicateDetectionIntegrationTest {
             sql.execute(
                 "insert into media_reference(id,tenant_id,asset_id,owner_type,sku_id)"
                     + " values(?::uuid,?::uuid,?::uuid,'SKU',?::uuid)",
-                UUID.randomUUID(), a, assetId, skuId));
+                UUID.randomUUID(),
+                a,
+                assetId,
+                skuId));
   }
 
   /** 只建素材与它的版本行（当前版本由 V18 的触发器从版本行推进，所以必须先插素材）。 */
@@ -338,12 +383,22 @@ class DuplicateDetectionIntegrationTest {
               "insert into media_asset(id,tenant_id,name,media_type,purpose,file_format,mime_type,"
                   + "byte_size,width_px,height_px,content_sha256,storage_key,original_filename)"
                   + " values(?::uuid,?::uuid,?,'IMAGE','PRIMARY','png','image/png',1024,100,100,?,?,?)",
-              assetId, a, owner, hash, key, owner + ".png");
+              assetId,
+              a,
+              owner,
+              hash,
+              key,
+              owner + ".png");
           sql.execute(
               "insert into media_asset_version(id,tenant_id,asset_id,version_no,storage_key,"
                   + "original_filename,file_format,mime_type,byte_size,width_px,height_px,content_sha256)"
                   + " values(?::uuid,?::uuid,?::uuid,1,?,?,'png','image/png',1024,100,100,?)",
-              versionId, a, assetId, key, owner + ".png", hash);
+              versionId,
+              a,
+              assetId,
+              key,
+              owner + ".png",
+              hash);
           return assetId;
         });
   }
@@ -358,8 +413,13 @@ class DuplicateDetectionIntegrationTest {
   }
 
   /** 跑一次扫描并返回扫描行。 */
-  DuplicateModels.DuplicateScanRow scan(AccessService.Access who, BigDecimal threshold, String category, String brand) {
-    return write(who, () -> duplicates.scan(who, new DuplicateModels.DuplicateScanInput(threshold, category, brand)));
+  DuplicateModels.DuplicateScanRow scan(
+      AccessService.Access who, BigDecimal threshold, String category, String brand) {
+    return write(
+        who,
+        () ->
+            duplicates.scan(
+                who, new DuplicateModels.DuplicateScanInput(threshold, category, brand)));
   }
 
   // ================================================================ 四条判定线
@@ -389,7 +449,10 @@ class DuplicateDetectionIntegrationTest {
     assertThat(hit.similarity()).isEqualByComparingTo("1.0000");
     assertThat(hit.overlapDimensionCount()).isEqualTo(1);
     var barcodeSignal =
-        hit.dimensions().stream().filter(d -> d.dimension().equals("BARCODE")).findFirst().orElseThrow();
+        hit.dimensions().stream()
+            .filter(d -> d.dimension().equals("BARCODE"))
+            .findFirst()
+            .orElseThrow();
     // 证据必须写明撞的是哪个条码值（否则页面上只有一个孤零零的 1.0000）。
     assertThat(barcodeSignal.evidence()).contains("6901234567892");
 
@@ -432,8 +495,7 @@ class DuplicateDetectionIntegrationTest {
     media(sim1, "only-left-image");
 
     var full = scan(actor, null, null, null);
-    var all =
-        tx(actor, () -> duplicates.candidates(full.id(), null, null, null, 0, 100)).items();
+    var all = tx(actor, () -> duplicates.candidates(full.id(), null, null, null, 0, 100)).items();
 
     // 规格组合：同一 SPU 下两个 SKU，签名现算后相同 → 1.0000
     var variant =
@@ -442,7 +504,8 @@ class DuplicateDetectionIntegrationTest {
             .findFirst()
             .orElseThrow();
     assertThat(variant.similarity()).isEqualByComparingTo("1.0000");
-    assertThat(variant.dimensions()).extracting(DuplicateModels.DuplicateSignalView::dimension)
+    assertThat(variant.dimensions())
+        .extracting(DuplicateModels.DuplicateSignalView::dimension)
         .contains("VARIANT_COMBINATION");
 
     // 跨 SPU：名称归一化后相同 + 品牌大小写不同 + 类目相同 → 1.0000
@@ -460,7 +523,8 @@ class DuplicateDetectionIntegrationTest {
             () ->
                 sql.fetch(
                     "select spu_id from sku where id in (?,?) order by spu_id",
-                    cross.leftSkuId(), cross.rightSkuId()));
+                    cross.leftSkuId(),
+                    cross.rightSkuId()));
     assertThat(pairSpus).hasSize(2);
     assertThat(pairSpus.get(0).get("spu_id", UUID.class))
         .isNotEqualTo(pairSpus.get(1).get("spu_id", UUID.class));
@@ -552,7 +616,8 @@ class DuplicateDetectionIntegrationTest {
     UUID right = sku(actor, spu2, unique("OV-2"), "重叠右", "6909999999999");
 
     var scan = scan(actor, null, null, null);
-    var candidates = tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
+    var candidates =
+        tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
     var overlap =
         candidates.stream()
             .filter(c -> Set.of(c.leftSkuId(), c.rightSkuId()).equals(Set.of(left, right)))
@@ -560,7 +625,8 @@ class DuplicateDetectionIntegrationTest {
             .orElseThrow();
     assertThat(overlap.overlapDimensionCount()).isEqualTo(2);
     assertThat(overlap.dimensions()).hasSize(2);
-    assertThat(overlap.dimensions()).extracting(DuplicateModels.DuplicateSignalView::dimension)
+    assertThat(overlap.dimensions())
+        .extracting(DuplicateModels.DuplicateSignalView::dimension)
         .containsExactlyInAnyOrder("BARCODE", "CROSS_SPU");
 
     // 全表逐候选断言：重叠维度数 == 信号行数；且 (left,right) 组合不重复。
@@ -580,7 +646,8 @@ class DuplicateDetectionIntegrationTest {
       assertThat(r.get("overlap_dimension_count", Integer.class))
           .as("候选 %s 的重叠维度数必须等于信号行数", r.get("id", UUID.class))
           .isEqualTo(r.get("signal_rows", Integer.class));
-      assertThat(pairs.add(r.get("left_sku_id", UUID.class) + "|" + r.get("right_sku_id", UUID.class)))
+      assertThat(
+              pairs.add(r.get("left_sku_id", UUID.class) + "|" + r.get("right_sku_id", UUID.class)))
           .as("同一对 SKU 在一份扫描里只能有一行")
           .isTrue();
       // 左右按 uuid 字符串升序规范化（V36 的 CHECK 也在 DB 层钉着这一条）。
@@ -607,7 +674,8 @@ class DuplicateDetectionIntegrationTest {
     attachMedia(rcShared, s2);
 
     var scan = scan(actor, null, null, null);
-    var candidates = tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
+    var candidates =
+        tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
     var found =
         candidates.stream()
             .filter(c -> Set.of(c.leftSkuId(), c.rightSkuId()).equals(Set.of(s1, s2)))
@@ -615,7 +683,8 @@ class DuplicateDetectionIntegrationTest {
             .orElseThrow(() -> new AssertionError("这一对同时命中三条线却没被找到"));
     // 条码（跨来源撞值）+ 规格组合（导入后轴值相同）+ 近似同品（名称近似 + 共用素材）三条都命中。
     assertThat(found.overlapDimensionCount()).isEqualTo(3);
-    assertThat(found.dimensions()).extracting(DuplicateModels.DuplicateSignalView::dimension)
+    assertThat(found.dimensions())
+        .extracting(DuplicateModels.DuplicateSignalView::dimension)
         .containsExactlyInAnyOrder("BARCODE", "VARIANT_COMBINATION", "SIMILAR_PRODUCT");
     // 逐维度筛选都能筛出这一对：exists 条件没有把候选筛没。
     for (String dimension : List.of("BARCODE", "VARIANT_COMBINATION", "SIMILAR_PRODUCT")) {
@@ -649,7 +718,9 @@ class DuplicateDetectionIntegrationTest {
             actor,
             () ->
                 duplicates.decide(
-                    actor, candidate.id(), new DuplicateModels.DuplicateDecisionInput("MERGE", keep, "同一个商品建了两遍", 0L)));
+                    actor,
+                    candidate.id(),
+                    new DuplicateModels.DuplicateDecisionInput("MERGE", keep, "同一个商品建了两遍", 0L)));
     assertThat(decision.decision()).isEqualTo("MERGE");
     assertThat(decision.primarySkuId()).isEqualTo(keep);
     assertThat(decision.secondarySkuId()).isEqualTo(drop);
@@ -666,12 +737,10 @@ class DuplicateDetectionIntegrationTest {
     assertThat(skuStatusOf(drop)).isEqualTo("ACTIVE");
 
     // 决定出现在候选行上，三态计数也跟着变。
-    var reread = tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
+    var reread =
+        tx(actor, () -> duplicates.candidates(scan.id(), null, null, null, 0, 200)).items();
     var after =
-        reread.stream()
-            .filter(c -> c.id().equals(candidate.id()))
-            .findFirst()
-            .orElseThrow();
+        reread.stream().filter(c -> c.id().equals(candidate.id())).findFirst().orElseThrow();
     assertThat(after.decision()).isEqualTo("MERGE");
     assertThat(after.decisionLabel()).isEqualTo("确认合并");
     assertThat(after.primarySkuId()).isEqualTo(keep);
@@ -699,7 +768,9 @@ class DuplicateDetectionIntegrationTest {
             actor,
             () ->
                 duplicates.decide(
-                    actor, candidate.id(), new DuplicateModels.DuplicateDecisionInput("KEEP", null, "规格不同，确实是两个商品", 0L)));
+                    actor,
+                    candidate.id(),
+                    new DuplicateModels.DuplicateDecisionInput("KEEP", null, "规格不同，确实是两个商品", 0L)));
     assertThat(decision.decision()).isEqualTo("KEEP");
     assertThat(decision.primarySkuId()).isNull();
     assertThat(decision.secondarySkuId()).isNull();
@@ -727,7 +798,8 @@ class DuplicateDetectionIntegrationTest {
                     actor,
                     () ->
                         duplicates.decide(
-                            actor, candidate.id(),
+                            actor,
+                            candidate.id(),
                             new DuplicateModels.DuplicateDecisionInput("MERGE", third, "", 0L))))
         .isInstanceOf(ResponseStatusException.class);
     // MERGE 不指主记录 → 400
@@ -737,7 +809,8 @@ class DuplicateDetectionIntegrationTest {
                     actor,
                     () ->
                         duplicates.decide(
-                            actor, candidate.id(),
+                            actor,
+                            candidate.id(),
                             new DuplicateModels.DuplicateDecisionInput("MERGE", null, "", 0L))))
         .isInstanceOf(ResponseStatusException.class);
     // 词表外的决定 → 400（不兜底成 KEEP：兜底会让「打错字」悄悄变成「保留两条」）
@@ -747,13 +820,20 @@ class DuplicateDetectionIntegrationTest {
                     actor,
                     () ->
                         duplicates.decide(
-                            actor, candidate.id(),
+                            actor,
+                            candidate.id(),
                             new DuplicateModels.DuplicateDecisionInput("MERGED", left, "", 0L))))
         .isInstanceOf(ResponseStatusException.class);
     // 以上三次都不该留下任何决定行。
-    assertThat(tx(actor, () -> sql.fetchOne(
-            "select count(*) from sku_duplicate_decision where candidate_id=?", candidate.id()))
-        .get(0, Long.class)).isZero();
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                            "select count(*) from sku_duplicate_decision where candidate_id=?",
+                            candidate.id()))
+                .get(0, Long.class))
+        .isZero();
   }
 
   @Test
@@ -770,7 +850,8 @@ class DuplicateDetectionIntegrationTest {
             actor,
             () ->
                 duplicates.decide(
-                    actor, candidate.id(),
+                    actor,
+                    candidate.id(),
                     new DuplicateModels.DuplicateDecisionInput("KEEP", null, "先保留", 0L)));
     assertThat(first.version()).isEqualTo(0);
     // 带着当前的 version（0）改判 → 成功，version 递增到 1
@@ -779,8 +860,10 @@ class DuplicateDetectionIntegrationTest {
             actor,
             () ->
                 duplicates.decide(
-                    actor, candidate.id(),
-                    new DuplicateModels.DuplicateDecisionInput("MERGE", left, "改判", first.version())));
+                    actor,
+                    candidate.id(),
+                    new DuplicateModels.DuplicateDecisionInput(
+                        "MERGE", left, "改判", first.version())));
     assertThat(second.version()).isEqualTo(1);
     assertThat(second.decision()).isEqualTo("MERGE");
     // 再拿<b>过期的</b> version（0）改 → 409（别人已经改过决定，别把别人的决定盖掉）
@@ -790,12 +873,19 @@ class DuplicateDetectionIntegrationTest {
                     actor,
                     () ->
                         duplicates.decide(
-                            actor, candidate.id(),
+                            actor,
+                            candidate.id(),
                             new DuplicateModels.DuplicateDecisionInput("KEEP", null, "过期改判", 0L))))
         .isInstanceOf(ResponseStatusException.class);
-    assertThat(tx(actor, () -> sql.fetchOne(
-            "select count(*) from sku_duplicate_decision where candidate_id=?", candidate.id()))
-        .get(0, Long.class)).isEqualTo(1L);
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                            "select count(*) from sku_duplicate_decision where candidate_id=?",
+                            candidate.id()))
+                .get(0, Long.class))
+        .isEqualTo(1L);
   }
 
   @Test
@@ -810,25 +900,30 @@ class DuplicateDetectionIntegrationTest {
         actor,
         () ->
             duplicates.decide(
-                actor, candidate.id(), new DuplicateModels.DuplicateDecisionInput("KEEP", null, "", 0L)));
+                actor,
+                candidate.id(),
+                new DuplicateModels.DuplicateDecisionInput("KEEP", null, "", 0L)));
 
-    var pending = tx(actor, () -> duplicates.candidates(scan.id(), null, "PENDING", null, 0, 200)).items();
-    var kept = tx(actor, () -> duplicates.candidates(scan.id(), null, "KEEP", null, 0, 200)).items();
+    var pending =
+        tx(actor, () -> duplicates.candidates(scan.id(), null, "PENDING", null, 0, 200)).items();
+    var kept =
+        tx(actor, () -> duplicates.candidates(scan.id(), null, "KEEP", null, 0, 200)).items();
     assertThat(kept).extracting(DuplicateModels.DuplicateCandidateRow::id).contains(candidate.id());
-    assertThat(pending).extracting(DuplicateModels.DuplicateCandidateRow::id)
+    assertThat(pending)
+        .extracting(DuplicateModels.DuplicateCandidateRow::id)
         .doesNotContain(candidate.id());
     // 最低相似度筛选：1.0 之上取不到任何候选
     var impossible =
         tx(
             actor,
-            () ->
-                duplicates.candidates(
-                    scan.id(), null, null, new BigDecimal("1.0001"), 0, 200));
+            () -> duplicates.candidates(scan.id(), null, null, new BigDecimal("1.0001"), 0, 200));
     assertThat(impossible.items()).isEmpty();
     // 非法筛选值 → 400
-    assertThatThrownBy(() -> tx(actor, () -> duplicates.candidates(scan.id(), null, "MAYBE", null, 0, 20)))
+    assertThatThrownBy(
+            () -> tx(actor, () -> duplicates.candidates(scan.id(), null, "MAYBE", null, 0, 20)))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(() -> tx(actor, () -> duplicates.candidates(scan.id(), "NOPE", null, null, 0, 20)))
+    assertThatThrownBy(
+            () -> tx(actor, () -> duplicates.candidates(scan.id(), "NOPE", null, null, 0, 20)))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -873,10 +968,8 @@ class DuplicateDetectionIntegrationTest {
     // 断言写回的值落在两次调用的真实时刻之间：偏 −28800s 会直接掉出这个区间。
     assertThat(scan.startedAt()).isNotNull();
     assertThat(scan.finishedAt()).isNotNull();
-    assertThat(scan.startedAt())
-        .isBetween(before.toInstant(), after.toInstant());
-    assertThat(scan.finishedAt())
-        .isBetween(scan.startedAt(), after.toInstant());
+    assertThat(scan.startedAt()).isBetween(before.toInstant(), after.toInstant());
+    assertThat(scan.finishedAt()).isBetween(scan.startedAt(), after.toInstant());
     // 读库再验一次（不只断言没抛异常）。
     var raw =
         tx(
@@ -895,9 +988,8 @@ class DuplicateDetectionIntegrationTest {
   /**
    * 租户隔离三断言，<b>并且覆盖候选与决定两行</b>。
    *
-   * <p>候选清单是本模块真正的越权面：它装着本租户商品的标题、品牌、条码与素材，
-   * 串租户等于把 A 的商品资料整份泄漏给 B；决定行更是治理动作，串了会让 A 顺手
-   * 判掉 B 的商品该不该合并。
+   * <p>候选清单是本模块真正的越权面：它装着本租户商品的标题、品牌、条码与素材， 串租户等于把 A 的商品资料整份泄漏给 B；决定行更是治理动作，串了会让 A 顺手 判掉 B
+   * 的商品该不该合并。
    */
   @Test
   void 租户隔离三断言覆盖候选与决定() throws Exception {
@@ -945,52 +1037,81 @@ class DuplicateDetectionIntegrationTest {
                     actor,
                     () ->
                         duplicates.decide(
-                            actor, theirCandidate.id(),
+                            actor,
+                            theirCandidate.id(),
                             new DuplicateModels.DuplicateDecisionInput("KEEP", null, "", 0L))))
         .isInstanceOf(ResponseStatusException.class);
     // A 的清单里不含 B 的任何 SKU（列表出口也要查，不能只查详情）
-    var myAll = tx(actor, () -> duplicates.candidates(myScan.id(), null, null, null, 0, 200)).items();
-    assertThat(myAll).noneMatch(c -> c.leftSkuId().equals(theirLeft) || c.rightSkuId().equals(theirLeft));
+    var myAll =
+        tx(actor, () -> duplicates.candidates(myScan.id(), null, null, null, 0, 200)).items();
+    assertThat(myAll)
+        .noneMatch(c -> c.leftSkuId().equals(theirLeft) || c.rightSkuId().equals(theirLeft));
     // B 侧候选行确实落在 B 名下（断言行归属，不只断言 A 看不见）
-    assertThat(tx(actorB, () -> sql.fetchOne(
-            "select tenant_id from sku_duplicate_candidate where id=?", theirCandidate.id())
-            .get(0, UUID.class))).isEqualTo(b);
+    assertThat(
+            tx(
+                actorB,
+                () ->
+                    sql.fetchOne(
+                            "select tenant_id from sku_duplicate_candidate where id=?",
+                            theirCandidate.id())
+                        .get(0, UUID.class)))
+        .isEqualTo(b);
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系
-    http.perform(get("/catalog/duplicate-scans/" + theirScan.id())
-            .header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
+    http.perform(
+            get("/catalog/duplicate-scans/" + theirScan.id())
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b))
         .andExpect(status().isNotFound());
-    http.perform(get("/catalog/duplicate-scans/" + myScan.id())
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/duplicate-scans/" + myScan.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
-    http.perform(get("/catalog/duplicate-candidates/" + theirCandidate.id())
-            .header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
+    http.perform(
+            get("/catalog/duplicate-candidates/" + theirCandidate.id())
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b))
         .andExpect(status().isNotFound());
     // A 读 B 那次扫描的候选清单 → 404 而不是 200 + 空列表：
     // 扫描本身对 A 不可见，候选是它的子集合。退化成 200 + 空清单的话，
     // 运营会以为「B 那次扫描没查出重复」，而真相是「那次扫描根本不是他的」。
-    http.perform(get("/catalog/duplicate-scans/" + theirScan.id() + "/candidates")
-            .header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
+    http.perform(
+            get("/catalog/duplicate-scans/" + theirScan.id() + "/candidates")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b))
         .andExpect(status().isNotFound());
     // 伪造头下写入仍落在 B 自己名下
-    http.perform(post("/catalog/duplicate-candidates/" + theirCandidate.id() + "/decision")
-            .header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b)
-            .contentType("application/json")
-            .content("{\"decision\":\"KEEP\",\"note\":\"伪造头\",\"expectedVersion\":0}"))
+    http.perform(
+            post("/catalog/duplicate-candidates/" + theirCandidate.id() + "/decision")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b)
+                .contentType("application/json")
+                .content("{\"decision\":\"KEEP\",\"note\":\"伪造头\",\"expectedVersion\":0}"))
         .andExpect(status().isNotFound());
-    assertThat(tx(actorB, () -> sql.fetchOne(
-            "select count(*) from sku_duplicate_decision where candidate_id=?", theirCandidate.id())
-            .get(0, Long.class))).isZero();
+    assertThat(
+            tx(
+                actorB,
+                () ->
+                    sql.fetchOne(
+                            "select count(*) from sku_duplicate_decision where candidate_id=?",
+                            theirCandidate.id())
+                        .get(0, Long.class)))
+        .isZero();
 
     // 3) 连接池归还后不串租户（单连接反复交替），逐轮断言候选集合不相交
     for (int i = 0; i < 5; i++) {
       var myIds =
           tx(actor, () -> duplicates.candidates(myScan.id(), null, null, null, 0, 200))
-              .items().stream().map(DuplicateModels.DuplicateCandidateRow::id)
+              .items()
+              .stream()
+              .map(DuplicateModels.DuplicateCandidateRow::id)
               .collect(java.util.stream.Collectors.toSet());
       var theirIds =
           tx(actorB, () -> duplicates.candidates(theirScan.id(), null, null, null, 0, 200))
-              .items().stream().map(DuplicateModels.DuplicateCandidateRow::id)
+              .items()
+              .stream()
+              .map(DuplicateModels.DuplicateCandidateRow::id)
               .collect(java.util.stream.Collectors.toSet());
       assertThat(myIds).as("第 %d 轮 A 的候选不该为空", i).isNotEmpty();
       assertThat(theirIds).as("第 %d 轮 B 的候选不该为空", i).isNotEmpty();
@@ -1011,20 +1132,40 @@ class DuplicateDetectionIntegrationTest {
   @Test
   void 四张表都强制RLS() {
     for (String table :
-        List.of("sku_duplicate_scan", "sku_duplicate_candidate", "sku_duplicate_signal",
+        List.of(
+            "sku_duplicate_scan",
+            "sku_duplicate_candidate",
+            "sku_duplicate_signal",
             "sku_duplicate_decision")) {
-      var row = tx(actor, () -> sql.fetchOne(
-          "select relrowsecurity,relforcerowsecurity from pg_class where relname=?", table));
+      var row =
+          tx(
+              actor,
+              () ->
+                  sql.fetchOne(
+                      "select relrowsecurity,relforcerowsecurity from pg_class where relname=?",
+                      table));
       assertThat(row.get("relrowsecurity", Boolean.class)).as("%s 开启 RLS", table).isTrue();
       assertThat(row.get("relforcerowsecurity", Boolean.class)).as("%s 强制 RLS", table).isTrue();
-      var policy = tx(actor, () -> sql.fetchOne(
-          "select count(*) from pg_policies where tablename=? and policyname='isolation'", table));
+      var policy =
+          tx(
+              actor,
+              () ->
+                  sql.fetchOne(
+                      "select count(*) from pg_policies where tablename=? and policyname='isolation'",
+                      table));
       assertThat(policy.get(0, Long.class)).as("%s 有 isolation 策略", table).isEqualTo(1L);
       // 所有业务表都必须带 tenant_id NOT NULL
-      var nullable = tx(actor, () -> sql.fetchOne(
-          "select is_nullable from information_schema.columns"
-              + " where table_name=? and column_name='tenant_id'", table));
-      assertThat(nullable.get(0, String.class)).as("%s 的 tenant_id NOT NULL", table).isEqualTo("NO");
+      var nullable =
+          tx(
+              actor,
+              () ->
+                  sql.fetchOne(
+                      "select is_nullable from information_schema.columns"
+                          + " where table_name=? and column_name='tenant_id'",
+                      table));
+      assertThat(nullable.get(0, String.class))
+          .as("%s 的 tenant_id NOT NULL", table)
+          .isEqualTo("NO");
     }
   }
 
@@ -1039,47 +1180,95 @@ class DuplicateDetectionIntegrationTest {
     UUID scanId = scan.id();
 
     // 左右顺序反了：V36 的 CHECK 会挡（否则同一对能插两行）
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "insert into sku_duplicate_candidate(id,tenant_id,scan_id,left_sku_id,right_sku_id,"
-                + "left_spu_id,right_spu_id,similarity,overlap_dimension_count,"
-                + "left_reference_count,right_reference_count,reason)"
-                + " values(?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,1.0,1,0,0,'反序')",
-            UUID.randomUUID(), a, scanId, right, left,
-            sql.fetchOne("select spu_id from sku where id=?", right).get(0, UUID.class),
-            sql.fetchOne("select spu_id from sku where id=?", left).get(0, UUID.class))))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into sku_duplicate_candidate(id,tenant_id,scan_id,left_sku_id,right_sku_id,"
+                                + "left_spu_id,right_spu_id,similarity,overlap_dimension_count,"
+                                + "left_reference_count,right_reference_count,reason)"
+                                + " values(?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,1.0,1,0,0,'反序')",
+                            UUID.randomUUID(),
+                            a,
+                            scanId,
+                            right,
+                            left,
+                            sql.fetchOne("select spu_id from sku where id=?", right)
+                                .get(0, UUID.class),
+                            sql.fetchOne("select spu_id from sku where id=?", left)
+                                .get(0, UUID.class))))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
     // 判成 MERGE 却不给主记录：自相矛盾的登记
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "insert into sku_duplicate_decision(id,tenant_id,scan_id,candidate_id,decision,note,decided_by)"
-                + " values(?::uuid,?::uuid,?::uuid,?::uuid,'MERGE','',?::uuid)",
-            UUID.randomUUID(), a, scanId, candidate.id(), user)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into sku_duplicate_decision(id,tenant_id,scan_id,candidate_id,decision,note,decided_by)"
+                                + " values(?::uuid,?::uuid,?::uuid,?::uuid,'MERGE','',?::uuid)",
+                            UUID.randomUUID(),
+                            a,
+                            scanId,
+                            candidate.id(),
+                            user)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
     // 词表外的维度
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "insert into sku_duplicate_signal(id,tenant_id,scan_id,candidate_id,dimension,score)"
-                + " values(?::uuid,?::uuid,?::uuid,?::uuid,'MAGIC',1.0)",
-            UUID.randomUUID(), a, scanId, candidate.id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into sku_duplicate_signal(id,tenant_id,scan_id,candidate_id,dimension,score)"
+                                + " values(?::uuid,?::uuid,?::uuid,?::uuid,'MAGIC',1.0)",
+                            UUID.randomUUID(),
+                            a,
+                            scanId,
+                            candidate.id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
     // 相似度越界
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "update sku_duplicate_candidate set similarity=1.5 where tenant_id=? and id=?", a, candidate.id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update sku_duplicate_candidate set similarity=1.5 where tenant_id=? and id=?",
+                            a,
+                            candidate.id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     // 重叠维度数越界（0 或 >4）
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "update sku_duplicate_candidate set overlap_dimension_count=0 where tenant_id=? and id=?", a, candidate.id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update sku_duplicate_candidate set overlap_dimension_count=0 where tenant_id=? and id=?",
+                            a,
+                            candidate.id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     // 同一对重复插入（UNIQUE(tenant_id,scan_id,left,right)）
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-            "insert into sku_duplicate_candidate(id,tenant_id,scan_id,left_sku_id,right_sku_id,"
-                + "left_spu_id,right_spu_id,similarity,overlap_dimension_count,"
-                + "left_reference_count,right_reference_count,reason)"
-                + " select ?::uuid,tenant_id,scan_id,left_sku_id,right_sku_id,left_spu_id,right_spu_id,"
-                + "similarity,overlap_dimension_count,left_reference_count,right_reference_count,reason"
-                + " from sku_duplicate_candidate where id=?",
-            UUID.randomUUID(), candidate.id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into sku_duplicate_candidate(id,tenant_id,scan_id,left_sku_id,right_sku_id,"
+                                + "left_spu_id,right_spu_id,similarity,overlap_dimension_count,"
+                                + "left_reference_count,right_reference_count,reason)"
+                                + " select ?::uuid,tenant_id,scan_id,left_sku_id,right_sku_id,left_spu_id,right_spu_id,"
+                                + "similarity,overlap_dimension_count,left_reference_count,right_reference_count,reason"
+                                + " from sku_duplicate_candidate where id=?",
+                            UUID.randomUUID(),
+                            candidate.id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -1099,16 +1288,39 @@ class DuplicateDetectionIntegrationTest {
     var leftIsItem = detail.candidate().leftSkuId().equals(item);
     var refs = leftIsItem ? detail.leftReferences() : detail.rightReferences();
     assertThat(refs).hasSize(9);
-    assertThat(refs).extracting(DuplicateModels.DuplicateReferenceBreakdown::dimension)
+    assertThat(refs)
+        .extracting(DuplicateModels.DuplicateReferenceBreakdown::dimension)
         .containsExactly(
-            "BARCODE", "ATTRIBUTE", "MEDIA", "QUOTE", "BUNDLE", "BOM", "PACKAGE", "SAFETY",
+            "BARCODE",
+            "ATTRIBUTE",
+            "MEDIA",
+            "QUOTE",
+            "BUNDLE",
+            "BOM",
+            "PACKAGE",
+            "SAFETY",
             "UNIT_CONVERSION");
-    assertThat(refs.stream().filter(r -> r.dimension().equals("BARCODE")).findFirst().orElseThrow().count())
+    assertThat(
+            refs.stream()
+                .filter(r -> r.dimension().equals("BARCODE"))
+                .findFirst()
+                .orElseThrow()
+                .count())
         .isEqualTo(1);
-    assertThat(refs.stream().filter(r -> r.dimension().equals("MEDIA")).findFirst().orElseThrow().count())
+    assertThat(
+            refs.stream()
+                .filter(r -> r.dimension().equals("MEDIA"))
+                .findFirst()
+                .orElseThrow()
+                .count())
         .isEqualTo(1);
     // 0 也要列出来：「报价 0 条」与「没查报价」不是一回事。
-    assertThat(refs.stream().filter(r -> r.dimension().equals("QUOTE")).findFirst().orElseThrow().count())
+    assertThat(
+            refs.stream()
+                .filter(r -> r.dimension().equals("QUOTE"))
+                .findFirst()
+                .orElseThrow()
+                .count())
         .isZero();
     // 详情里能读到全部条码（含 sku.barcode 列与物料标识表两个来源）
     var barcodes = leftIsItem ? detail.leftBarcodeValues() : detail.rightBarcodeValues();
@@ -1125,89 +1337,103 @@ class DuplicateDetectionIntegrationTest {
     UUID right = sku(actor, spu2, unique("HT-2"), "右", "6901234000099");
 
     // 概览读永远不该 404（没扫过时也要能渲染空态）
-    http.perform(get("/catalog/duplicate-scans/overview")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/duplicate-scans/overview").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.note").isString())
         .andExpect(jsonPath("$.totalCandidates").isNumber());
 
     // 发起扫描需要写权限：只读身份 403
-    http.perform(post("/catalog/duplicate-scans")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"minSimilarity\":0.8}"))
+    http.perform(
+            post("/catalog/duplicate-scans")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content("{\"minSimilarity\":0.8}"))
         .andExpect(status().isForbidden());
 
-    var response = http.perform(post("/catalog/duplicate-scans")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"minSimilarity\":0.8000}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.minSimilarity").value(0.8000))
-        .andExpect(jsonPath("$.scopeApplied").value(false))
-        .andReturn();
-    UUID scanUuid = UUID.fromString(JSON.readTree(response.getResponse().getContentAsString()).get("id").asText());
+    var response =
+        http.perform(
+                post("/catalog/duplicate-scans")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content("{\"minSimilarity\":0.8000}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.minSimilarity").value(0.8000))
+            .andExpect(jsonPath("$.scopeApplied").value(false))
+            .andReturn();
+    UUID scanUuid =
+        UUID.fromString(
+            JSON.readTree(response.getResponse().getContentAsString()).get("id").asText());
     String scanId = scanUuid.toString();
 
     // 候选清单 + 详情
-    http.perform(get("/catalog/duplicate-scans/" + scanId + "/candidates")
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            get("/catalog/duplicate-scans/" + scanId + "/candidates")
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.scan.id").value(scanId));
     // 取包含 left 的那一条：items.get(0) 未必是这一对，而 MERGE 的主记录必须落在候选两侧之内
     // （指到不相干的 SKU 会被 400 拒 —— 后面正好也验了这条）。
     String candidateId = pair(scanUuid, left, right).id().toString();
-    http.perform(get("/catalog/duplicate-candidates/" + candidateId)
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            get("/catalog/duplicate-candidates/" + candidateId)
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.signals").isArray())
         .andExpect(jsonPath("$.nextStepHint").exists());
 
     // 决定要写权限：只读身份 403
-    http.perform(post("/catalog/duplicate-candidates/" + candidateId + "/decision")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"decision\":\"KEEP\",\"note\":\"只读身份不该能决定\",\"expectedVersion\":0}"))
+    http.perform(
+            post("/catalog/duplicate-candidates/" + candidateId + "/decision")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content("{\"decision\":\"KEEP\",\"note\":\"只读身份不该能决定\",\"expectedVersion\":0}"))
         .andExpect(status().isForbidden());
     // 词表外的决定走 400
-    http.perform(post("/catalog/duplicate-candidates/" + candidateId + "/decision")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"decision\":\"MAYBE\",\"expectedVersion\":0}"))
+    http.perform(
+            post("/catalog/duplicate-candidates/" + candidateId + "/decision")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"decision\":\"MAYBE\",\"expectedVersion\":0}"))
         .andExpect(status().isBadRequest());
 
     // 未认证 401
-    http.perform(get("/catalog/duplicate-scans/overview"))
-        .andExpect(status().isUnauthorized());
+    http.perform(get("/catalog/duplicate-scans/overview")).andExpect(status().isUnauthorized());
     // 不存在的扫描 404
-    http.perform(get("/catalog/duplicate-scans/" + UUID.randomUUID())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/duplicate-scans/" + UUID.randomUUID())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isNotFound());
 
     // 合法决定：MERGE 指主记录，响应带 expected_version
-    var decided = http.perform(post("/catalog/duplicate-candidates/" + candidateId + "/decision")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"decision\":\"MERGE\",\"primarySkuId\":\"" + left + "\",\"note\":\"同一商品建两遍\",\"expectedVersion\":0}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.decision").value("MERGE"))
-        .andExpect(jsonPath("$.primarySkuId").value(left.toString()))
-        .andExpect(jsonPath("$.primaryVersion").isNumber())
-        .andReturn();
-    assertThat(JSON.readTree(decided.getResponse().getContentAsString()).get("executionHint").asText())
+    var decided =
+        http.perform(
+                post("/catalog/duplicate-candidates/" + candidateId + "/decision")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"decision\":\"MERGE\",\"primarySkuId\":\""
+                            + left
+                            + "\",\"note\":\"同一商品建两遍\",\"expectedVersion\":0}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.decision").value("MERGE"))
+            .andExpect(jsonPath("$.primarySkuId").value(left.toString()))
+            .andExpect(jsonPath("$.primaryVersion").isNumber())
+            .andReturn();
+    assertThat(
+            JSON.readTree(decided.getResponse().getContentAsString()).get("executionHint").asText())
         .contains("3.9.1.2");
     // 读回决定
-    http.perform(get("/catalog/duplicate-candidates/" + candidateId + "/decision")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/duplicate-candidates/" + candidateId + "/decision")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.decision").value("MERGE"));
     // 扫描列表
-    http.perform(get("/catalog/duplicate-scans")
-            .header("Authorization", "Bearer reader"))
+    http.perform(get("/catalog/duplicate-scans").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items").isArray());
-    http.perform(get("/catalog/duplicate-scans/overview")
-            .header("Authorization", "Bearer reader"))
+    http.perform(get("/catalog/duplicate-scans/overview").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.latestScan.id").value(scanId))
         .andExpect(jsonPath("$.mergeCount").value(1))
@@ -1226,8 +1452,7 @@ class DuplicateDetectionIntegrationTest {
 
   /** 按扫描 id（A 的租户上下文）找出包含指定两个 SKU 的候选。 */
   DuplicateModels.DuplicateCandidateRow pair(UUID scanId, UUID left, UUID right) {
-    return tx(actor, () -> duplicates.candidates(scanId, null, null, null, 0, 500))
-        .items().stream()
+    return tx(actor, () -> duplicates.candidates(scanId, null, null, null, 0, 500)).items().stream()
         .filter(c -> Set.of(c.leftSkuId(), c.rightSkuId()).equals(Set.of(left, right)))
         .findFirst()
         .orElseThrow(() -> new AssertionError("扫描 " + scanId + " 里找不到这一对"));
@@ -1237,7 +1462,8 @@ class DuplicateDetectionIntegrationTest {
   DuplicateModels.DuplicateCandidateRow pair(
       AccessService.Access who, DuplicateModels.DuplicateScanRow scan, UUID left, UUID right) {
     return tx(who, () -> duplicates.candidates(scan.id(), null, null, null, 0, 500))
-        .items().stream()
+        .items()
+        .stream()
         .filter(c -> Set.of(c.leftSkuId(), c.rightSkuId()).equals(Set.of(left, right)))
         .findFirst()
         .orElse(null);
@@ -1261,31 +1487,46 @@ class DuplicateDetectionIntegrationTest {
           sql.execute(
               "insert into sku_identifier(id,tenant_id,sku_id,scheme,value,is_primary,source,occurred_at)"
                   + " values(?::uuid,?::uuid,?::uuid,?,?,true,'MANUAL',now())",
-              UUID.randomUUID(), who.tenantId(), skuId, scheme, value);
+              UUID.randomUUID(),
+              who.tenantId(),
+              skuId,
+              scheme,
+              value);
           return null;
         });
   }
 
   String skuStatusOf(UUID skuId) {
-    return tx(actor, () -> sql.fetchOne("select status from sku where id=?", skuId)).get("status", String.class);
+    return tx(actor, () -> sql.fetchOne("select status from sku where id=?", skuId))
+        .get("status", String.class);
   }
 
   /** 当前 {@code sku.version} —— 3.9.1.2 说的 expected_version 就是它。 */
   long skuVersionOf(UUID skuId) {
-    return tx(actor, () -> sql.fetchOne("select version from sku where id=?", skuId)).get("version", Long.class);
+    return tx(actor, () -> sql.fetchOne("select version from sku where id=?", skuId))
+        .get("version", Long.class);
   }
 
   String columnPrecision(String table, String column) {
-    return tx(actor, () -> sql.fetchOne(
-            "select numeric_precision||','||numeric_scale from information_schema.columns"
-                + " where table_name=? and column_name=?", table, column))
+    return tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select numeric_precision||','||numeric_scale from information_schema.columns"
+                        + " where table_name=? and column_name=?",
+                    table,
+                    column))
         .get(0, String.class);
   }
 
   String columnType(String table, String column) {
-    return tx(actor, () -> sql.fetchOne(
-            "select data_type from information_schema.columns where table_name=? and column_name=?",
-            table, column))
+    return tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select data_type from information_schema.columns where table_name=? and column_name=?",
+                    table,
+                    column))
         .get(0, String.class);
   }
 }

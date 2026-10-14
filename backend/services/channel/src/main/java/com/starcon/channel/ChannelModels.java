@@ -15,10 +15,10 @@ import java.util.UUID;
  *
  * <p>Module references follow docs/product/capability-blueprint/02-channel-and-shop.md.
  *
- * <p>Deliberately absent: any type that can hold a plaintext token. 2.2.1.3 requires the database to
- * store only a secret-manager reference, so {@code CredentialRefView} exposes provider, reference,
- * validity window and scopes — never a secret. Making that unrepresentable at the type level means a
- * careless future endpoint cannot start echoing credentials.
+ * <p>Deliberately absent: any type that can hold a plaintext token. 2.2.1.3 requires the database
+ * to store only a secret-manager reference, so {@code CredentialRefView} exposes provider,
+ * reference, validity window and scopes — never a secret. Making that unrepresentable at the type
+ * level means a careless future endpoint cannot start echoing credentials.
  */
 public final class ChannelModels {
   private ChannelModels() {}
@@ -50,9 +50,8 @@ public final class ChannelModels {
   /**
    * 2.1.2.1 平台枚举映射：平台枚举 → 内部枚举。映射缺失必须显式暴露，不落兜底。
    *
-   * <p>一条记录是"平台默认"还是"本租户覆盖"由 {@code source} 说清：平台默认来自全局码表
-   * {@code platform_enum_mapping}，所有租户一致且不可改写；租户覆盖来自
-   * {@code platform_enum_override}，只有本租户可见可改。前端据此决定能不能删。
+   * <p>一条记录是"平台默认"还是"本租户覆盖"由 {@code source} 说清：平台默认来自全局码表 {@code
+   * platform_enum_mapping}，所有租户一致且不可改写；租户覆盖来自 {@code platform_enum_override}，只有本租户可见可改。前端据此决定能不能删。
    * {@code id} 是这条记录来源行的 id——平台默认行删不掉，它的 id 只能用于定位。
    */
   public record EnumMappingView(
@@ -64,10 +63,7 @@ public final class ChannelModels {
       /** {@code PLATFORM} = 平台默认（全局只读）；{@code TENANT} = 本租户覆盖。 */
       String source) {}
 
-  /**
-   * 2.1.2.1 登记租户覆盖。平台由路径上的 {@code platformCode} 决定，不在 body 里重复传，
-   * 避免两处写不一致。
-   */
+  /** 2.1.2.1 登记租户覆盖。平台由路径上的 {@code platformCode} 决定，不在 body 里重复传， 避免两处写不一致。 */
   public record EnumOverrideInput(
       @NotBlank @Size(max = 64) String enumKind,
       @NotBlank @Size(max = 128) String externalValue,
@@ -109,7 +105,8 @@ public final class ChannelModels {
 
   public record ConnectionInput(
       @NotBlank String platformCode,
-      @NotBlank @Pattern(regexp = ".+@.+\\..+|^[0-9]{6,}$", message = "平台账号格式不正确") String authorizedAccount,
+      @NotBlank @Pattern(regexp = ".+@.+\\..+|^[0-9]{6,}$", message = "平台账号格式不正确")
+          String authorizedAccount,
       String displayName) {}
 
   // ---- 2.2.1.2 授权向导 ----
@@ -117,11 +114,10 @@ public final class ChannelModels {
   /**
    * 2.2.1.2 第 1、2、3 步：发起授权。
    *
-   * <p>{@code loginHint} 就是向导第 2 步「选账号」的落点：有的平台用它预选账号，有的平台
-   * （eBay）用 {@code prompt=select_account} 强制在授权页重新选，适配器按平台协议处理。
+   * <p>{@code loginHint} 就是向导第 2 步「选账号」的落点：有的平台用它预选账号，有的平台 （eBay）用 {@code prompt=select_account}
+   * 强制在授权页重新选，适配器按平台协议处理。
    *
-   * <p>{@code scopes} 留空表示用平台配置的默认范围。{@code idempotencyKey} 必填：重复提交
-   * 同一个键会拿回同一个会话，不会重复跳转、也不会产生第二条会话。
+   * <p>{@code scopes} 留空表示用平台配置的默认范围。{@code idempotencyKey} 必填：重复提交 同一个键会拿回同一个会话，不会重复跳转、也不会产生第二条会话。
    */
   public record OAuthStartInput(
       @NotBlank String platformCode,
@@ -132,8 +128,8 @@ public final class ChannelModels {
   /**
    * 2.2.1.2 第 3 步结果：授权跳转地址。
    *
-   * <p>{@code authorizeUrl} 是完整可用的跳转地址（含 state 与 PKCE challenge），前端只需要
-   * {@code window.location.href = authorizeUrl}。令牌与 client_secret 不会出现在这里。
+   * <p>{@code authorizeUrl} 是完整可用的跳转地址（含 state 与 PKCE challenge），前端只需要 {@code window.location.href
+   * = authorizeUrl}。令牌与 client_secret 不会出现在这里。
    */
   public record OAuthStartView(
       UUID sessionId,
@@ -147,9 +143,8 @@ public final class ChannelModels {
   /**
    * 2.2.1.2 第 4 步：授权会话状态。
    *
-   * <p>前端在跳转后回到页面时轮询它，判断是"还在等用户授权""平台拒绝了"还是"已拿到令牌、
-   * 可以进入第 5 步"。{@code failureCode} / {@code failureMessage} 只在 FAILED 时有值，
-   * 且是可直接展示给用户的原因（凭据错、权限不足、店铺已被其他租户绑定）。
+   * <p>前端在跳转后回到页面时轮询它，判断是"还在等用户授权""平台拒绝了"还是"已拿到令牌、 可以进入第 5 步"。{@code failureCode} / {@code
+   * failureMessage} 只在 FAILED 时有值， 且是可直接展示给用户的原因（凭据错、权限不足、店铺已被其他租户绑定）。
    */
   public record OAuthSessionView(
       UUID id,
@@ -176,8 +171,7 @@ public final class ChannelModels {
   /**
    * 2.2.1.2 第 5、6 步输入：确认店铺范围并完成。
    *
-   * <p>{@code shopIds} 为空表示"全部候选都要"，但必须至少确认一个店铺：授权成功却一个店铺
-   * 都不纳管，会留下一条永远不参与同步的空连接，比直接失败更难排查。
+   * <p>{@code shopIds} 为空表示"全部候选都要"，但必须至少确认一个店铺：授权成功却一个店铺 都不纳管，会留下一条永远不参与同步的空连接，比直接失败更难排查。
    */
   public record OAuthConfirmInput(
       @Schema(nullable = true) List<UUID> shopIds,
@@ -187,15 +181,18 @@ public final class ChannelModels {
   /**
    * 2.2.1.2 第 6 步结果。
    *
-   * <p>{@code shopIds} 指向新建的 2.3.1.1 店铺档案，前端据此跳转"店铺配置"。
-   * {@code connectionId} / {@code credentialId} 让页面能立刻回连到 2.2.1.1 连接列表。
+   * <p>{@code shopIds} 指向新建的 2.3.1.1 店铺档案，前端据此跳转"店铺配置"。 {@code connectionId} / {@code credentialId}
+   * 让页面能立刻回连到 2.2.1.1 连接列表。
    */
   public record OAuthCompletedView(
-      UUID sessionId, UUID connectionId, UUID credentialId, List<UUID> shopIds, int shopCount, String nextRoute) {}
+      UUID sessionId,
+      UUID connectionId,
+      UUID credentialId,
+      List<UUID> shopIds,
+      int shopCount,
+      String nextRoute) {}
 
-  /**
-   * 2.2.1.3 凭据轮换：调用方只提交密钥管理器写入后的引用，绝不接受明文令牌。
-   */
+  /** 2.2.1.3 凭据轮换：调用方只提交密钥管理器写入后的引用，绝不接受明文令牌。 */
   public record CredentialRotateInput(
       @NotBlank String externalRef,
       @NotBlank String grantedScopes,
@@ -216,7 +213,12 @@ public final class ChannelModels {
 
   /** 2.2.2.2 重新授权提醒：按平台差异化阈值（Shopee 等令牌有效期短）。 */
   public record ReauthorizationReminderView(
-      UUID connectionId, String platformCode, String authorizedAccount, Instant expiresAt, long daysUntilExpiry, String severity) {}
+      UUID connectionId,
+      String platformCode,
+      String authorizedAccount,
+      Instant expiresAt,
+      long daysUntilExpiry,
+      String severity) {}
 
   // ---- 2.3 店铺与站点 ----
 
@@ -243,7 +245,12 @@ public final class ChannelModels {
       List<ShopMarketplaceView> marketplaces,
       Instant lastSyncAt) {}
 
-  public record ShopMarketplaceView(UUID marketplaceId, String marketplaceCode, String marketplaceName, String status, Instant enabledAt) {}
+  public record ShopMarketplaceView(
+      UUID marketplaceId,
+      String marketplaceCode,
+      String marketplaceName,
+      String status,
+      Instant enabledAt) {}
 
   public record ShopInput(
       @NotBlank @Pattern(regexp = "[A-Za-z0-9_-]{1,64}", message = "店铺编码只允许字母数字下划线中划线") String code,
@@ -256,8 +263,7 @@ public final class ChannelModels {
       /**
        * 乐观锁版本号。
        *
-       * <p>更新时必填且必须与库中当前版本一致，否则服务端拒绝写入——防止两个运营同时改同一家
-       * 店铺时后者的修改被静默覆盖。创建时传 0 或忽略。
+       * <p>更新时必填且必须与库中当前版本一致，否则服务端拒绝写入——防止两个运营同时改同一家 店铺时后者的修改被静默覆盖。创建时传 0 或忽略。
        */
       Long version) {}
 
@@ -340,8 +346,7 @@ public final class ChannelModels {
   /**
    * 2.4.2.1 失败记录。
    *
-   * <p>{@code externalKey} 是外部系统主键，重放去重靠它——同一 external_key 在同一游标下
-   * 只会有一条失败记录，因此重复重放不会产生第二张订单。
+   * <p>{@code externalKey} 是外部系统主键，重放去重靠它——同一 external_key 在同一游标下 只会有一条失败记录，因此重复重放不会产生第二张订单。
    */
   public record SyncFailureInput(
       @NotBlank @Size(max = 200) String externalKey,
@@ -377,15 +382,15 @@ public final class ChannelModels {
       Instant occurredAt) {}
 
   /** 2.4.2.1 失败原因分布。 */
-  public record SyncFailureSummary(String reason, long total, @Schema(nullable = true) Instant oldest) {}
+  public record SyncFailureSummary(
+      String reason, long total, @Schema(nullable = true) Instant oldest) {}
 
   // ---- 2.5 平台回写 ----
 
   /**
    * 2.5.1.1 回写任务。
    *
-   * <p>状态 UNKNOWN 表示"请求已发出但没收到明确结果"，它不是失败：
-   * 必须先核验平台实际状态再决定重发，否则会造成重复发货或库存错扣。
+   * <p>状态 UNKNOWN 表示"请求已发出但没收到明确结果"，它不是失败： 必须先核验平台实际状态再决定重发，否则会造成重复发货或库存错扣。
    */
   public record PlatformOperationView(
       UUID id,

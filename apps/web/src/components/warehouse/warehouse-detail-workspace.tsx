@@ -13,7 +13,16 @@ import {
   Settings2,
   Users,
 } from 'lucide-react';
-import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import type {
   DetailEntryPoint,
   LocationPage,
@@ -175,7 +184,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             {detail && (
               <Link
                 href={`/warehouse/facilities/${warehouseId}/config`}
-                className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-copy-13 hover:bg-muted"
+                className="border-border text-copy-13 hover:bg-muted inline-flex items-center rounded-md border px-3 py-1.5"
               >
                 <Settings2 className="mr-1.5 h-4 w-4" />
                 仓库配置
@@ -202,12 +211,12 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
       )}
 
       {loading && !detail && (
-        <p className="py-8 text-center text-copy-13 text-muted-foreground">加载中…</p>
+        <p className="text-copy-13 text-muted-foreground py-8 text-center">加载中…</p>
       )}
 
       {detail && (
         <>
-          <p className="mt-2 text-copy-12 text-muted-foreground">
+          <p className="text-copy-12 text-muted-foreground mt-2">
             <Link href="/warehouse/facilities" className="inline-flex items-center hover:underline">
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               返回仓库列表
@@ -221,7 +230,12 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
 
           {/* 概况 */}
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="自有账本在手" value={qty(detail.stock.onHand)} polarity="neutral" icon={<Boxes />} />
+            <StatCard
+              label="自有账本在手"
+              value={qty(detail.stock.onHand)}
+              polarity="neutral"
+              icon={<Boxes />}
+            />
             <StatCard
               label="库位占用"
               value={locationFillText(detail.locations.totalCount, detail.locations.occupiedCount)}
@@ -264,13 +278,13 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             <div className="mt-3 border-t pt-3">
               <Info label="地址" value={address.value} />
               {address.missing && (
-                <p className="mt-1 text-copy-12 text-muted-foreground">
+                <p className="text-copy-12 text-muted-foreground mt-1">
                   <MapPin className="mr-1 inline h-3.5 w-3.5" />
                   {address.missing}
                 </p>
               )}
               {isArchived(detail.base.status) && (
-                <p className="mt-1 text-copy-12 text-muted-foreground">
+                <p className="text-copy-12 text-muted-foreground mt-1">
                   归档是终态：已归档的仓库不能再修改，也不能取消归档。
                 </p>
               )}
@@ -288,9 +302,9 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
               <Info label="可用" value={qty(detail.stock.available)} />
             </div>
 
-            <h3 className="mt-4 text-copy-13 font-medium">按质量状态</h3>
-            <table className="mt-2 w-full text-copy-13">
-              <thead className="text-left text-muted-foreground">
+            <h3 className="text-copy-13 mt-4 font-medium">按质量状态</h3>
+            <table className="text-copy-13 mt-2 w-full">
+              <thead className="text-muted-foreground text-left">
                 <tr className="border-b">
                   <th className="py-2 pr-3">质量状态</th>
                   <th className="py-2 pr-3">角色</th>
@@ -315,8 +329,8 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             </table>
             {detail.stock.byLegalEntity.length > 0 && (
               <>
-                <h3 className="mt-4 text-copy-13 font-medium">按货权法人</h3>
-                <ul className="mt-2 list-disc pl-4 text-copy-13">
+                <h3 className="text-copy-13 mt-4 font-medium">按货权法人</h3>
+                <ul className="text-copy-13 mt-2 list-disc pl-4">
                   {detail.stock.byLegalEntity.map((e) => (
                     <li key={e.legalEntityId}>
                       {e.code} · {e.name}：{qty(e.onHand)}（{qty(e.skuCount)} 个 SKU）
@@ -327,8 +341,8 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             )}
             {detail.stock.byLocationType.length > 0 && (
               <>
-                <h3 className="mt-4 text-copy-13 font-medium">按库位类型</h3>
-                <ul className="mt-2 list-disc pl-4 text-copy-13">
+                <h3 className="text-copy-13 mt-4 font-medium">按库位类型</h3>
+                <ul className="text-copy-13 mt-2 list-disc pl-4">
                   {detail.stock.byLocationType.map((t) => (
                     <li key={t.type}>
                       {t.typeLabel ?? t.type}：{qty(t.locationCount)} 个库位（可拣{' '}
@@ -359,10 +373,10 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 value={`调入 ${qty(detail.work.transferInCount)} · 调出 ${qty(detail.work.transferOutCount)}`}
               />
             </div>
-            <p className="mt-3 text-copy-12 text-muted-foreground">
+            <p className="text-copy-12 text-muted-foreground mt-3">
               库存变动分录 {qty(detail.work.inventoryMovementCount)} 笔 · 作业单合计{' '}
-              {qty(detail.work.workOrderTotal)}（未结 {qty(detail.work.openWorkOrderCount)}）。本合计只含本服务
-              已落库的作业单据；上架、拣货出库与组装尚无单据，见下方入口清单。
+              {qty(detail.work.workOrderTotal)}（未结 {qty(detail.work.openWorkOrderCount)}
+              ）。本合计只含本服务 已落库的作业单据；上架、拣货出库与组装尚无单据，见下方入口清单。
             </p>
           </SectionCard>
 
@@ -373,14 +387,14 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 <li key={s.dimension}>
                   <div className="flex items-center gap-2">
                     <span className="text-copy-13 font-medium">{s.label}</span>
-                    <span className="rounded border border-border px-1.5 py-0.5 text-copy-12 text-muted-foreground">
+                    <span className="border-border text-copy-12 text-muted-foreground rounded border px-1.5 py-0.5">
                       未接入 · 属 {s.ownerModule}
                     </span>
                   </div>
                   <p className="text-copy-12 text-muted-foreground">{s.note}</p>
                   <p className="text-copy-12 text-muted-foreground">
-                    调入 {qty(s.facts.transferInCount)} · 调出 {qty(s.facts.transferOutCount)} · 在途腿{' '}
-                    {qty(s.facts.inTransitLegCount)}
+                    调入 {qty(s.facts.transferInCount)} · 调出 {qty(s.facts.transferOutCount)} ·
+                    在途腿 {qty(s.facts.inTransitLegCount)}
                     {s.facts.platformObservedOnHand !== null
                       ? ` · 平台观测在手 ${qty(s.facts.platformObservedOnHand)}`
                       : ''}
@@ -403,9 +417,9 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 detail.labor.distinctOperatorCount,
               )}
             </p>
-            <p className="mt-1 text-copy-12 text-muted-foreground">{detail.labor.taskNote}</p>
+            <p className="text-copy-12 text-muted-foreground mt-1">{detail.labor.taskNote}</p>
             {detail.labor.byWorkType.length > 0 && (
-              <ul className="mt-2 list-disc pl-4 text-copy-13">
+              <ul className="text-copy-13 mt-2 list-disc pl-4">
                 {detail.labor.byWorkType.map((w) => (
                   <li key={w.workType}>
                     {w.label}：{qty(w.taskCount)} 个任务（已完成 {qty(w.completedCount)}）
@@ -413,9 +427,15 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 ))}
               </ul>
             )}
-            <div className="mt-3 space-y-1 border-t pt-3 text-copy-12 text-muted-foreground">
-              <p>人员花名册与排班：未接入（属 {detail.labor.rosterOwnerModule}）。{detail.labor.rosterNote}</p>
-              <p>仓库设备：未接入（属 {detail.labor.equipmentOwnerModule}）。{detail.labor.equipmentNote}</p>
+            <div className="text-copy-12 text-muted-foreground mt-3 space-y-1 border-t pt-3">
+              <p>
+                人员花名册与排班：未接入（属 {detail.labor.rosterOwnerModule}）。
+                {detail.labor.rosterNote}
+              </p>
+              <p>
+                仓库设备：未接入（属 {detail.labor.equipmentOwnerModule}）。
+                {detail.labor.equipmentNote}
+              </p>
             </div>
           </SectionCard>
 
@@ -426,8 +446,8 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 <EntryLink key={p.key} point={p} />
               ))}
             </div>
-            <h3 className="mt-4 text-copy-13 font-medium">以下子模块尚未交付</h3>
-            <ul className="mt-1 list-disc pl-4 text-copy-12 text-muted-foreground">
+            <h3 className="text-copy-13 mt-4 font-medium">以下子模块尚未交付</h3>
+            <ul className="text-copy-12 text-muted-foreground mt-1 list-disc pl-4">
               {grouped.unavailable.map((p) => (
                 <li key={p.key}>
                   {p.label}（属 {p.module}）：{p.note}
@@ -440,12 +460,16 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
           {showEdit && writable && draft && (
             <SectionCard className="mt-4" title="维护基础信息与地址">
               <Notice tone="info" title="这几项在这里改不了是有原因的">
-                仓库编码是标识、仓库类型决定记账口径、货权法人是财务前提 —— 改它们会让已落库数据失去指向。
+                仓库编码是标识、仓库类型决定记账口径、货权法人是财务前提 ——
+                改它们会让已落库数据失去指向。
                 拣货策略、复核比例、工作时段与班次属仓库配置（8.1.1.3），尚未交付。
               </Notice>
               <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <FormField id="detail-name" label="仓库名称" required>
-                  <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+                  <Input
+                    value={draft.name}
+                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                  />
                 </FormField>
                 <FormField id="detail-country" label="国家地区" required>
                   <Input
@@ -456,7 +480,12 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                     }
                   />
                 </FormField>
-                <FormField id="detail-timezone" label="时区" required hint="填 IANA ID，如 Asia/Shanghai">
+                <FormField
+                  id="detail-timezone"
+                  label="时区"
+                  required
+                  hint="填 IANA ID，如 Asia/Shanghai"
+                >
                   <Input
                     value={draft.timezone}
                     onChange={(e) => setDraft({ ...draft, timezone: e.target.value })}
@@ -481,7 +510,10 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                   />
                 </FormField>
                 <FormField id="detail-city" label="城市">
-                  <Input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} />
+                  <Input
+                    value={draft.city}
+                    onChange={(e) => setDraft({ ...draft, city: e.target.value })}
+                  />
                 </FormField>
                 <FormField id="detail-postal" label="邮编">
                   <Input
@@ -492,7 +524,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 <FormField id="detail-status" label="启用状态" hint="归档是终态，不可回退">
                   <select
                     id="detail-status"
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                    className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                     value={draft.status}
                     onChange={(e) => setDraft({ ...draft, status: e.target.value })}
                   >
@@ -503,7 +535,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                 </FormField>
               </div>
               {draftError && (
-                <p role="alert" className="mt-2 text-copy-12 text-destructive">
+                <p role="alert" className="text-copy-12 text-destructive mt-2">
                   {draftError}
                 </p>
               )}
@@ -527,7 +559,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             <FormField id="detail-loc-type" label="库位类型">
               <select
                 id="detail-loc-type"
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                 value={type}
                 onChange={(e) => {
                   setType(e.target.value);
@@ -546,7 +578,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             <FormField id="detail-loc-status" label="库位状态">
               <select
                 id="detail-loc-status"
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
@@ -561,7 +593,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             <FormField id="detail-loc-sort" label="排序">
               <select
                 id="detail-loc-sort"
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
               >
@@ -585,15 +617,16 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
           </div>
 
           {locations && (
-            <p className="mt-3 text-copy-12 text-muted-foreground">
-              合计：{qty(locations.totals.locationCount)} 个库位 · 可拣 {qty(locations.totals.pickableCount)} ·{' '}
-              {locationFillText(locations.totals.locationCount, locations.totals.occupiedCount)} · 在手{' '}
-              {qty(locations.totals.onHand)}
+            <p className="text-copy-12 text-muted-foreground mt-3">
+              合计：{qty(locations.totals.locationCount)} 个库位 · 可拣{' '}
+              {qty(locations.totals.pickableCount)} ·{' '}
+              {locationFillText(locations.totals.locationCount, locations.totals.occupiedCount)} ·
+              在手 {qty(locations.totals.onHand)}
             </p>
           )}
 
           {loading && rows.length === 0 ? (
-            <p className="py-8 text-center text-copy-13 text-muted-foreground">加载中…</p>
+            <p className="text-copy-13 text-muted-foreground py-8 text-center">加载中…</p>
           ) : rows.length === 0 ? (
             <EmptyState
               icon={<MapPinned />}
@@ -602,8 +635,8 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
             />
           ) : (
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-copy-13">
-                <thead className="text-left text-muted-foreground">
+              <table className="text-copy-13 w-full">
+                <thead className="text-muted-foreground text-left">
                   <tr className="border-b">
                     <th className="py-2 pr-3">库位</th>
                     <th className="py-2 pr-3">类型</th>
@@ -628,7 +661,7 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
                       <td className="py-2 pr-3">{qty(row.onHand)}</td>
                       <td className="py-2 pr-3">{qty(row.available)}</td>
                       <td className="py-2 pr-3">{qty(row.skuCount)}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">
+                      <td className="text-muted-foreground py-2 pr-3">
                         {row.lastMovementAt ? momentText(row.lastMovementAt) : '—'}
                       </td>
                     </tr>
@@ -639,9 +672,10 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
           )}
 
           {locations && locations.total > 0 && (
-            <div className="mt-3 flex items-center justify-between text-copy-12 text-muted-foreground">
+            <div className="text-copy-12 text-muted-foreground mt-3 flex items-center justify-between">
               <span>
-                第 {locations.page + 1} / {totalPages} 页 · 每页 {locations.size} 条 · {locations.note}
+                第 {locations.page + 1} / {totalPages} 页 · 每页 {locations.size} 条 ·{' '}
+                {locations.note}
               </span>
               <span className="flex gap-2">
                 <Button
@@ -688,7 +722,7 @@ function EntryLink({ point }: { point: DetailEntryPoint }) {
     return (
       <span
         key={point.key}
-        className="rounded-md border border-border px-3 py-1.5 text-copy-12 text-muted-foreground"
+        className="border-border text-copy-12 text-muted-foreground rounded-md border px-3 py-1.5"
         title={point.note}
       >
         {point.label}（属 {point.module}，本服务未提供入口）
@@ -699,7 +733,7 @@ function EntryLink({ point }: { point: DetailEntryPoint }) {
     <Link
       key={point.key}
       href={point.href}
-      className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-copy-12 hover:bg-muted"
+      className="border-border text-copy-12 hover:bg-muted inline-flex items-center rounded-md border px-3 py-1.5"
       title={point.note}
     >
       <Building2 className="mr-1.5 h-3.5 w-3.5" />
@@ -707,4 +741,3 @@ function EntryLink({ point }: { point: DetailEntryPoint }) {
     </Link>
   );
 }
-

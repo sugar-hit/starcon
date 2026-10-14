@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { TitleGeneration, TitleTemplateInput } from '../../../../../packages/api-contracts/src/index';
+import type {
+  TitleGeneration,
+  TitleTemplateInput,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   GENERATION_STATUSES,
   KEYWORD_TYPES,
@@ -180,7 +183,10 @@ describe('标题库前端模型', () => {
       };
       expect(templateProblem(duplicate) ?? '').toContain('平台重复');
 
-      const tooLong = { ...emptyTemplateInput(), platforms: [{ platform: 'AMAZON', maxLength: 300 }] };
+      const tooLong = {
+        ...emptyTemplateInput(),
+        platforms: [{ platform: 'AMAZON', maxLength: 300 }],
+      };
       expect(templateProblem(tooLong) ?? '').toContain('1~255');
     });
 
@@ -252,9 +258,9 @@ describe('标题库前端模型', () => {
       expect(provenance).toContain('卖点「长续航」');
       expect(provenance).toContain('修饰词「新品」');
       // 空池子也是正常状态（租户刚开通还没建词），要如实显示而不是留空。
-      expect(keywordProvenance({ coreKeyword: '', sellingKeyword: '', modifierKeyword: '' })).toContain(
-        '没有可用的词根',
-      );
+      expect(
+        keywordProvenance({ coreKeyword: '', sellingKeyword: '', modifierKeyword: '' }),
+      ).toContain('没有可用的词根');
     });
 
     it('字符数被平台上限裁过时明确说出来', () => {
@@ -312,7 +318,6 @@ describe('标题库前端模型', () => {
       const hint = generatedHint(generation({ status: 'PARTIAL', rejectedCount: 2 }));
       expect(hint).toContain('另有 2 条因重复度超限被拒');
       expect(hint).toContain('修饰词池太小');
-
     });
 
     it('一个候选都没产出时指向真正的原因', () => {
@@ -325,7 +330,9 @@ describe('标题库前端模型', () => {
 
     it('逐 SKU 未产出的原因优先用后端给的，否则自己按计数兜底', () => {
       expect(skuRejectionText({ rejectedCount: 0, reason: '' })).toBeNull();
-      expect(skuRejectionText({ rejectedCount: 2, reason: '压不到 850‰ 之下' })).toBe('压不到 850‰ 之下');
+      expect(skuRejectionText({ rejectedCount: 2, reason: '压不到 850‰ 之下' })).toBe(
+        '压不到 850‰ 之下',
+      );
       expect(skuRejectionText({ rejectedCount: 2, reason: '' })).toContain('2 条候选');
     });
   });
@@ -347,15 +354,17 @@ describe('标题库前端模型', () => {
       expect(input.pattern).toContain('{core}');
       expect(input.pattern).toContain('{selling}');
       expect((input.variables ?? []).filter((v) => v !== null)).toHaveLength(5);
-      expect(defaultVariables().map((v) => v?.name).filter(Boolean)).toEqual([
-        'brand',
-        'category',
-        'core',
-        'selling',
-        'modifier',
-      ]);
+      expect(
+        defaultVariables()
+          .map((v) => v?.name)
+          .filter(Boolean),
+      ).toEqual(['brand', 'category', 'core', 'selling', 'modifier']);
       // eBay 80 / Amazon 200 / Shopify 255 的通行口径。
-      expect(defaultPlatforms().map((p) => p?.maxLength).filter(Boolean)).toEqual([200, 80, 255]);
+      expect(
+        defaultPlatforms()
+          .map((p) => p?.maxLength)
+          .filter(Boolean),
+      ).toEqual([200, 80, 255]);
       expect(emptyKeywordInput()).toEqual({
         code: '',
         text: '',

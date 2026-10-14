@@ -45,51 +45,33 @@ export function DomainPlaceholder({ spec, className }: DomainPlaceholderProps) {
       </SectionCard>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <SectionCard
-          title="数据来源"
-          description="本模块依赖的上游数据"
-        >
+        <SectionCard title="数据来源" description="本模块依赖的上游数据">
           {spec.upstream.length > 0 ? (
             <ul className="space-y-2">
               {spec.upstream.map((name) => (
-                <li
-                  key={name}
-                  className="text-copy-13 text-foreground flex items-center gap-2"
-                >
+                <li key={name} className="text-copy-13 text-foreground flex items-center gap-2">
                   <span className="bg-brand h-1.5 w-1.5 shrink-0 rounded-full" />
                   {name}
                 </li>
               ))}
             </ul>
           ) : (
-            <EmptyState
-              title="无上游依赖"
-              description="本模块为基础主数据,被其他模块依赖。"
-            />
+            <EmptyState title="无上游依赖" description="本模块为基础主数据,被其他模块依赖。" />
           )}
         </SectionCard>
 
-        <SectionCard
-          title="数据去向"
-          description="本模块输出的下游模块"
-        >
+        <SectionCard title="数据去向" description="本模块输出的下游模块">
           {spec.downstream.length > 0 ? (
             <ul className="space-y-2">
               {spec.downstream.map((name) => (
-                <li
-                  key={name}
-                  className="text-copy-13 text-foreground flex items-center gap-2"
-                >
+                <li key={name} className="text-copy-13 text-foreground flex items-center gap-2">
                   <span className="bg-muted-foreground h-1.5 w-1.5 shrink-0 rounded-full" />
                   {name}
                 </li>
               ))}
             </ul>
           ) : (
-            <EmptyState
-              title="无下游输出"
-              description="本模块为消费侧,聚合其他模块数据。"
-            />
+            <EmptyState title="无下游输出" description="本模块为消费侧,聚合其他模块数据。" />
           )}
         </SectionCard>
       </div>

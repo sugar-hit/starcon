@@ -55,24 +55,17 @@ export interface LocationDraft {
 }
 
 /** 新建：parentId 空串表示顶层根节点（「区」），不是漏填。 */
-export function createLocation(
-  warehouseId: string,
-  draft: LocationDraft,
-): Promise<LocationSaved> {
-  return api<LocationSaved>(
-    `${base}/${warehouseId}/locations`,
-    'POST',
-    {
-      code: draft.code,
-      name: draft.name,
-      // 空串 → null：根节点
-      parentId: draft.parentId === '' ? null : draft.parentId,
-      type: draft.type,
-      pickable: draft.pickable,
-      capacity: draft.capacity === '' ? null : draft.capacity,
-      weightLimit: draft.weightLimit === '' ? null : draft.weightLimit,
-    },
-  );
+export function createLocation(warehouseId: string, draft: LocationDraft): Promise<LocationSaved> {
+  return api<LocationSaved>(`${base}/${warehouseId}/locations`, 'POST', {
+    code: draft.code,
+    name: draft.name,
+    // 空串 → null：根节点
+    parentId: draft.parentId === '' ? null : draft.parentId,
+    type: draft.type,
+    pickable: draft.pickable,
+    capacity: draft.capacity === '' ? null : draft.capacity,
+    weightLimit: draft.weightLimit === '' ? null : draft.weightLimit,
+  });
 }
 
 /** 改属性。`move` 为真时附带 parentId（空串 = 升为根节点），否则完全不动层级。 */
@@ -82,20 +75,16 @@ export function updateLocation(
   draft: LocationDraft,
   move: boolean,
 ): Promise<LocationSaved> {
-  return api<LocationSaved>(
-    `${base}/${warehouseId}/locations/${locationId}`,
-    'PUT',
-    {
-      name: draft.name,
-      type: draft.type,
-      pickable: draft.pickable,
-      capacity: draft.capacity === '' ? null : draft.capacity,
-      weightLimit: draft.weightLimit === '' ? null : draft.weightLimit,
-      // parentProvided 是三态开关：不带 = 层级不动；带 true + null = 升为根
-      parentProvided: move,
-      parentId: move ? (draft.parentId === '' ? null : draft.parentId) : null,
-    },
-  );
+  return api<LocationSaved>(`${base}/${warehouseId}/locations/${locationId}`, 'PUT', {
+    name: draft.name,
+    type: draft.type,
+    pickable: draft.pickable,
+    capacity: draft.capacity === '' ? null : draft.capacity,
+    weightLimit: draft.weightLimit === '' ? null : draft.weightLimit,
+    // parentProvided 是三态开关：不带 = 层级不动；带 true + null = 升为根
+    parentProvided: move,
+    parentId: move ? (draft.parentId === '' ? null : draft.parentId) : null,
+  });
 }
 
 export function deleteLocation(warehouseId: string, locationId: string): Promise<void> {

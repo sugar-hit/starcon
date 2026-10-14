@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *
  * <p>数据库层约束冲突归 409（提示刷新重试），格式问题归 400。
  *
- * <p>刻意**不为本模块自己的业务拒绝另开一个 handler**：
- * 服务层用 {@code ResponseStatusException(BAD_REQUEST, "能看懂的话")} 直接给出原因，
- * 而 DB 层的 23514 / 23503 会落到下面的 409。把它们分开处理只会让同一个业务错误
- * 在不同路径下返回两种状态码，调用方无法据此做一致的处理。
+ * <p>刻意**不为本模块自己的业务拒绝另开一个 handler**： 服务层用 {@code ResponseStatusException(BAD_REQUEST, "能看懂的话")}
+ * 直接给出原因， 而 DB 层的 23514 / 23503 会落到下面的 409。把它们分开处理只会让同一个业务错误 在不同路径下返回两种状态码，调用方无法据此做一致的处理。
  */
 @RestControllerAdvice
 public class ApiErrorHandler {
@@ -33,8 +31,6 @@ public class ApiErrorHandler {
   @ExceptionHandler({IllegalArgumentException.class, java.time.format.DateTimeParseException.class})
   ResponseEntity<ProblemDetail> invalid(Exception e) {
     return ResponseEntity.badRequest()
-        .body(
-            ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST, "字段格式不正确，请检查类型、必填项与日期格式"));
+        .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "字段格式不正确，请检查类型、必填项与日期格式"));
   }
 }

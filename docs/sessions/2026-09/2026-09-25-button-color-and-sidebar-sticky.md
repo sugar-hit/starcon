@@ -14,11 +14,13 @@ twMerge 默认把所有 `text-*` 当作颜色类同组冲突，**最后出现的
 **证据**: Button 5 (`size="icon"` 不含 `text-btn-14`) **保留**了 `text-primary-foreground`，其他都丢。HTML 验证渲染输出对比一致。
 
 **修复** (`packages/ui/src/components/ui/button.tsx`):
+
 - 删除 size 变体里冗余的 `text-btn-14`
 - base 已经提供 font-size，size 只控制 height/padding
 - 注释里写明"不要在 size 里重复写"避免后人复现
 
 **验证** (Playwright):
+
 - 主操作 button: `color: rgb(255,255,255)`, `bg: rgb(10,10,10)` ✓
 - 所有 variant 都正确显示文字
 
@@ -27,15 +29,20 @@ twMerge 默认把所有 `text-*` 当作颜色类同组冲突，**最后出现的
 **根因**: `<aside>` 用 `flex-1` 在 `flex min-h-screen` 容器里 → 高度跟主区一起被撑高，主区滚动时侧栏跟着走。
 
 **修复** (`packages/ui/src/components/layout/app-shell.tsx`):
+
 ```html
-<aside class="hidden md:sticky md:top-0 md:h-screen md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-sidebar-border md:overflow-y-auto md:self-start">
+<aside
+  class="md:border-sidebar-border hidden md:sticky md:top-0 md:flex md:h-screen md:w-60 md:shrink-0 md:flex-col md:self-start md:overflow-y-auto md:border-r"
+></aside>
 ```
+
 - `md:sticky md:top-0` — 固定在视窗顶部
 - `md:h-screen` — 高度 = 视窗
 - `md:overflow-y-auto` — **只有内容溢出才出滚动条**（用户硬要求）
 - `md:self-start` — flex 容器里 sticky 必需（否则会被 align-items: stretch 拉伸失败）
 
 **验证** (Playwright):
+
 - 滚动 0 / 2000 / bottom 三档，sidebar boundingBox.y 恒为 0 ✓
 - `scrollHeight=900 clientHeight=900` → 无溢出 → 无滚动条 ✓
 

@@ -13,7 +13,8 @@
 
 `1b94f62 docs: 台账去重并落定 3.8.1.2 状态` 把 3.8.1.2 整行重置为「未开发 / 证据 —」，
 但该模块成果早已在集成头里：`eddbdef merge(3.8.1.2)` + `V34__import_validation_report.sql`
-+ `593a9fa` 前端页 + 契约重生成。
+
+- `593a9fa` 前端页 + 契约重生成。
 
 后果不是汇总数字少 1，而是**编排层会重排已交付模块**：`plan` 读台账 → 认为未开发 →
 排进 `toDispatch` → 且 `feat/3-8-1-2` 分支还存在所以「直接复用，不重新切」→
@@ -54,6 +55,7 @@ session_id 写回 lane 记录。**该改动不影响失联回收**：判据是 `
 新 worktree 落在 `d9bcd6e`（behind = 0）。
 
 **判法（每次 plan 完都要做）**：
+
 ```bash
 git -C .worktrees/<id> rev-list --count HEAD..integration/module-dev   # 必须为 0
 ```

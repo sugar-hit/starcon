@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.1.2.4 单位与换算：单位字典、SKU↔单位的换算版本、基础数量换算与单据冻结快照。
  *
- * <p>路由挂在 {@code /catalog/unit-conversion} 之下，与 3.1.2.3 的 {@code /catalog/sku-code} 分开：
- * 两者都是 SKU 档案的附属维护域，但换算还服务于 06 采购 / 07 库存 / 08 拣货这三个下游，
- * 混在 {@code /skus} 下会让「查单据当时的比例」这条读路径挤进列表路由。
+ * <p>路由挂在 {@code /catalog/unit-conversion} 之下，与 3.1.2.3 的 {@code /catalog/sku-code} 分开： 两者都是 SKU
+ * 档案的附属维护域，但换算还服务于 06 采购 / 07 库存 / 08 拣货这三个下游， 混在 {@code /skus} 下会让「查单据当时的比例」这条读路径挤进列表路由。
  *
- * <p>权限沿用 SKU 档案：读 {@code catalog.sku.read}，写 {@code catalog.sku.update}。
- * 单位字典是租户级共用数据，但改动它会直接改变所有 SKU 的换算可用性，
- * 权限口径与 SKU 档案保持一致，不另开更宽的口子。
+ * <p>权限沿用 SKU 档案：读 {@code catalog.sku.read}，写 {@code catalog.sku.update}。 单位字典是租户级共用数据，但改动它会直接改变所有
+ * SKU 的换算可用性， 权限口径与 SKU 档案保持一致，不另开更宽的口子。
  */
 @RestController
 @RequestMapping("/catalog/unit-conversion")
@@ -94,10 +92,7 @@ public class UnitConversionController {
 
   // ------------------------------------------------------------ 换算版本
 
-  /**
-   * 新增一条换算版本。生效区间与已有版本重叠时 409 并列出冲突区间。
-   * 基础单位不占换算行，用基础单位建行直接 400。
-   */
+  /** 新增一条换算版本。生效区间与已有版本重叠时 409 并列出冲突区间。 基础单位不占换算行，用基础单位建行直接 400。 */
   @PostMapping("/skus/{id}/conversions")
   public UnitConversionSaved addConversion(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -116,10 +111,7 @@ public class UnitConversionController {
     return call(auth, "sku.read", a -> service.convert(input));
   }
 
-  /**
-   * 冻结单据的换算快照。同一 (单据类型, 单据号, 行号) 幂等：重跑生成返回原行，不重复计数。
-   * 任何一行换算不到就整单拒绝。
-   */
+  /** 冻结单据的换算快照。同一 (单据类型, 单据号, 行号) 幂等：重跑生成返回原行，不重复计数。 任何一行换算不到就整单拒绝。 */
   @PostMapping("/snapshots")
   public UnitSnapshot freeze(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,

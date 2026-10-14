@@ -44,16 +44,17 @@
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 代价 |
-| --- | --- | --- |
-| 扣减落点怎么定 | 优先打包区（SHIPPING）库位的 bucket，打包区不够再顺延；**取不足就整单失败** | 不做「能扣多少扣多少」，现场遇到差异要先去查账 |
-| 一个明细行可能消耗多条预占分配 | 另开 `shipment_handover_reservation` 行表 | 多一张表；换来「哪几条预占被这次吃掉」完整可查 |
-| 交接人何时登记 | 放在**确认**那一步，与交接时刻成对落库 | 登记运单号时还不能填人（先填人会被 `(handover_user_id IS NULL) = (handover_at IS NULL)` 当场拒） |
-| 承运商与运单号 | 两个字段，缺一不可 | 比一个「物流信息」字段啰嗦，但「有渠道没号」和「有号没渠道」两种事故都被堵住 |
+| 取舍                           | 选择                                                                        | 代价                                                                                             |
+| ------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 扣减落点怎么定                 | 优先打包区（SHIPPING）库位的 bucket，打包区不够再顺延；**取不足就整单失败** | 不做「能扣多少扣多少」，现场遇到差异要先去查账                                                   |
+| 一个明细行可能消耗多条预占分配 | 另开 `shipment_handover_reservation` 行表                                   | 多一张表；换来「哪几条预占被这次吃掉」完整可查                                                   |
+| 交接人何时登记                 | 放在**确认**那一步，与交接时刻成对落库                                      | 登记运单号时还不能填人（先填人会被 `(handover_user_id IS NULL) = (handover_at IS NULL)` 当场拒） |
+| 承运商与运单号                 | 两个字段，缺一不可                                                          | 比一个「物流信息」字段啰嗦，但「有渠道没号」和「有号没渠道」两种事故都被堵住                     |
 
 ## 文件清单
 
 **新增**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V123__warehouse_shipment_handover.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/ShipmentHandoverModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/ShipmentHandoverService.java`
@@ -66,6 +67,7 @@
 - 本文件
 
 **改动**
+
 - `apps/web/src/lib/api-proxy.ts` —— **只在 warehouse 分支的 alternation 里追加一个分支**，
   外层括号与 `^…$` 锚点原样不动，另加一段说明新形状的注释。
 - `packages/api-contracts/src/contracts/warehouse.ts`（+19 类型）与
@@ -74,15 +76,15 @@
 
 ## 验证
 
-| 闸 | 命令 | 结果 |
-| --- | --- | --- |
-| 迁移 | 自建 PG16 全量灌迁移（`.tmp/check-migration.sh`） | `ALL MIGRATIONS OK` / 5 表 / 5 张 RLS / 9 个触发器 |
-| L0 后端 | `./mvnw -pl services/warehouse -am compile` | 通过 |
-| L0 前端 | `pnpm typecheck` | 3 successful |
-| L1 模块 | `./mvnw -pl services/warehouse -am test` | **1443 例 / 0 失败 / 1 错误** |
-| L1 前端 | `pnpm vitest run <本模块两个文件>` | 29 例通过 |
-| 白名单回归 | `pnpm vitest run api-proxy*.test.ts app/api/warehouse` | **241 例通过**（含 106 例 union 求并测试） |
-| lint | `pnpm lint` | 通过（仅既有模块的 warning） |
+| 闸         | 命令                                                   | 结果                                               |
+| ---------- | ------------------------------------------------------ | -------------------------------------------------- |
+| 迁移       | 自建 PG16 全量灌迁移（`.tmp/check-migration.sh`）      | `ALL MIGRATIONS OK` / 5 表 / 5 张 RLS / 9 个触发器 |
+| L0 后端    | `./mvnw -pl services/warehouse -am compile`            | 通过                                               |
+| L0 前端    | `pnpm typecheck`                                       | 3 successful                                       |
+| L1 模块    | `./mvnw -pl services/warehouse -am test`               | **1443 例 / 0 失败 / 1 错误**                      |
+| L1 前端    | `pnpm vitest run <本模块两个文件>`                     | 29 例通过                                          |
+| 白名单回归 | `pnpm vitest run api-proxy*.test.ts app/api/warehouse` | **241 例通过**（含 106 例 union 求并测试）         |
+| lint       | `pnpm lint`                                            | 通过（仅既有模块的 warning）                       |
 
 **那 1 个错误与本模块无关**，是 8.3.2.2 的既有挂钟依赖：
 `PickWaveIntegrationTest.plannedPickAtIsDerivedFromTheRuleSlotInWarehouseLocalTime` 把波次规则时段

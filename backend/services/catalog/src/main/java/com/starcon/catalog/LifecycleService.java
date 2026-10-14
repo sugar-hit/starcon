@@ -16,13 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.1.1.3 SPU 生命周期：状态流转、变更历史与批量规则。
  *
- * <p>状态取值由 {@link SpuLifecycle} 的矩阵唯一决定；每次流转写 {@code spu_lifecycle_event}
- * （业务时间 occurred_at 与系统时间 created_at 分列）并发出下游事实事件，
- * 停售是否联动下架平台商品由 04 刊登决定。
+ * <p>状态取值由 {@link SpuLifecycle} 的矩阵唯一决定；每次流转写 {@code spu_lifecycle_event} （业务时间 occurred_at 与系统时间
+ * created_at 分列）并发出下游事实事件， 停售是否联动下架平台商品由 04 刊登决定。
  *
- * <p>批量规则的判定指标分两类：catalog 自有指标（SKU 数、已启用 SKU 数、资料齐备 SKU 数）真实求值；
- * 库存、销量、刊登等跨服务指标经 {@link LifecycleProjectionPort} 读取，未接入时显式拒绝执行，
- * 不返回 0、不造数。
+ * <p>批量规则的判定指标分两类：catalog 自有指标（SKU 数、已启用 SKU 数、资料齐备 SKU 数）真实求值； 库存、销量、刊登等跨服务指标经 {@link
+ * LifecycleProjectionPort} 读取，未接入时显式拒绝执行， 不返回 0、不造数。
  */
 @Service
 public class LifecycleService {
@@ -30,7 +28,8 @@ public class LifecycleService {
   private final CatalogService catalog;
   private final LifecycleProjectionPort projections;
 
-  public LifecycleService(DSLContext sql, CatalogService catalog, LifecycleProjectionPort projections) {
+  public LifecycleService(
+      DSLContext sql, CatalogService catalog, LifecycleProjectionPort projections) {
     this.sql = sql;
     this.catalog = catalog;
     this.projections = projections;
@@ -53,7 +52,11 @@ public class LifecycleService {
             .map(
                 t ->
                     new TransitionOption(
-                        t.to().name(), t.to().label(), t.note(), t.reasonRequired(), t.requiresActiveSku()))
+                        t.to().name(),
+                        t.to().label(),
+                        t.note(),
+                        t.reasonRequired(),
+                        t.requiresActiveSku()))
             .toList();
     return new LifecycleView(
         spu, row.get("code", String.class), current.name(), current.label(), options, history(spu));
@@ -86,8 +89,8 @@ public class LifecycleService {
   }
 
   /**
-   * 单个 SPU 的状态流转。必须命中 {@link SpuLifecycle} 矩阵；标记为需要原因的流转拒绝空原因；
-   * 需要前置条件的流转用 catalog 自身权威数据校验（至少一个已启用且必填齐备的 SKU）。
+   * 单个 SPU 的状态流转。必须命中 {@link SpuLifecycle} 矩阵；标记为需要原因的流转拒绝空原因； 需要前置条件的流转用 catalog
+   * 自身权威数据校验（至少一个已启用且必填齐备的 SKU）。
    */
   public LifecycleEvent transition(
       AccessService.Access access, UUID spu, TransitionInput input, UUID ruleId) {
@@ -100,13 +103,13 @@ public class LifecycleService {
     String reason = input.reason() == null ? "" : input.reason().trim();
     check(!rule.reasonRequired() || !reason.isEmpty(), "该流转必须填写变更原因");
     check(reason.length() <= 500, "变更原因最多 500 字");
-    if (rule.requiresActiveSku())
-      check(readySkuCount(spu) > 0, "至少需要一个已启用且必填资料齐备的 SKU 才能进入该状态");
+    if (rule.requiresActiveSku()) check(readySkuCount(spu) > 0, "至少需要一个已启用且必填资料齐备的 SKU 才能进入该状态");
     Instant occurredAt =
         input.occurredAt() == null || input.occurredAt().isBlank()
             ? Instant.now()
             : OffsetDateTime.parse(input.occurredAt()).toInstant();
-    sql.execute("update spu set status=?,version=version+1,updated_at=now() where id=?", to.name(), spu);
+    sql.execute(
+        "update spu set status=?,version=version+1,updated_at=now() where id=?", to.name(), spu);
     UUID event = Ids.next();
     sql.execute(
         "insert into spu_lifecycle_event(id,tenant_id,spu_id,from_status,to_status,reason,source,rule_id,actor_id,occurred_at)"
@@ -214,8 +217,7 @@ public class LifecycleService {
     check(!input.conditions().isEmpty(), "批量规则至少需要一个判定条件");
     check(input.conditions().size() <= 20, "批量规则最多 20 个判定条件");
     check(
-        input.reasonTemplate() == null || input.reasonTemplate().length() <= 500,
-        "规则原因模板最多 500 字");
+        input.reasonTemplate() == null || input.reasonTemplate().length() <= 500, "规则原因模板最多 500 字");
     var conditions = new ArrayList<RuleCondition>();
     for (var c : input.conditions()) {
       var metric = LifecycleMetric.parse(c.metric());
@@ -275,7 +277,8 @@ public class LifecycleService {
 
   public void deleteRule(AccessService.Access access, UUID id, long version) {
     long events =
-        sql.fetchOne("select count(*) from spu_lifecycle_event where rule_id=?", id).get(0, Long.class);
+        sql.fetchOne("select count(*) from spu_lifecycle_event where rule_id=?", id)
+            .get(0, Long.class);
     check(events == 0, "该规则已产生过状态变更记录，不能删除，请改为停用");
     int n = sql.execute("delete from spu_lifecycle_rule where id=? and version=?", id, version);
     check(n == 1, "规则已更新或不存在，请刷新后重试");
@@ -297,10 +300,7 @@ public class LifecycleService {
         .toList();
   }
 
-  /**
-   * 规则求值预览：真实遍历候选 SPU 并逐条判定。规则引用未接入的上游投影时显式拒绝，
-   * 不以 0 代替未知值。返回的 nextCursor 用于继续扫描，绝不静默截断。
-   */
+  /** 规则求值预览：真实遍历候选 SPU 并逐条判定。规则引用未接入的上游投影时显式拒绝， 不以 0 代替未知值。返回的 nextCursor 用于继续扫描，绝不静默截断。 */
   public RulePreview preview(UUID ruleId, int limit, String cursor) {
     check(limit > 0 && limit <= 200, "单次扫描条数需在 1 到 200 之间");
     var rule = rule(ruleId);
@@ -369,10 +369,7 @@ public class LifecycleService {
         rule.id(), rule.code(), rule.targetStatus(), scanned, matched.size(), more, next, matched);
   }
 
-  /**
-   * 执行批量流转：逐个 SPU 走同一套矩阵校验（原因、前置条件、版本），
-   * 任何一条不合法即整体回滚——调用方已在同一租户事务内。
-   */
+  /** 执行批量流转：逐个 SPU 走同一套矩阵校验（原因、前置条件、版本）， 任何一条不合法即整体回滚——调用方已在同一租户事务内。 */
   public RuleRun run(AccessService.Access access, RuleInputScope scope) {
     var rule = rule(scope.ruleId());
     check(rule.enabled(), "规则已停用，请先启用再执行");
@@ -401,7 +398,8 @@ public class LifecycleService {
         applied++;
       }
     } while (cursor != null);
-    sql.execute("update spu_lifecycle_rule set version=version+1,updated_at=now() where id=?", rule.id());
+    sql.execute(
+        "update spu_lifecycle_rule set version=version+1,updated_at=now() where id=?", rule.id());
     return new RuleRun(rule.id(), rule.code(), rule.targetStatus(), matched, applied, reason);
   }
 
@@ -417,9 +415,7 @@ public class LifecycleService {
     if (!missing.isEmpty())
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
-          "规则引用了尚未接入的上游投影，无法求值："
-              + String.join("；", missing)
-              + "。请先接入对应服务的投影，或改用 catalog 自有指标。");
+          "规则引用了尚未接入的上游投影，无法求值：" + String.join("；", missing) + "。请先接入对应服务的投影，或改用 catalog 自有指标。");
   }
 
   private boolean matches(List<RuleCondition> conditions, org.jooq.Record spu) {
@@ -436,22 +432,22 @@ public class LifecycleService {
 
   private BigDecimal projected(LifecycleMetric metric, org.jooq.Record spu) {
     var q =
-        projections.quantity(
-            spu.get("tenant_id", UUID.class), spu.get("id", UUID.class), metric);
-    if (!q.available()) throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, q.note());
+        projections.quantity(spu.get("tenant_id", UUID.class), spu.get("id", UUID.class), metric);
+    if (!q.available())
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, q.note());
     return q.value();
   }
 
   private BigDecimal catalogMetric(LifecycleMetric metric, UUID spu) {
     long count =
         switch (metric) {
-          case SKU_COUNT -> sql.fetchOne("select count(*) from sku where spu_id=?", spu).get(0, Long.class);
+          case SKU_COUNT ->
+              sql.fetchOne("select count(*) from sku where spu_id=?", spu).get(0, Long.class);
           case ACTIVE_SKU_COUNT ->
               sql.fetchOne("select count(*) from sku where spu_id=? and status='ACTIVE'", spu)
                   .get(0, Long.class);
           case READY_SKU_COUNT -> readySkuCount(spu);
-          default ->
-              throw new IllegalStateException("非 catalog 自有指标必须经投影端口读取：" + metric);
+          default -> throw new IllegalStateException("非 catalog 自有指标必须经投影端口读取：" + metric);
         };
     return BigDecimal.valueOf(count);
   }

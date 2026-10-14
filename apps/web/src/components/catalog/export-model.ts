@@ -135,7 +135,10 @@ export function requestProblem(
 /** 默认勾选哪些字段：不带 PII 的前几个，避免默认就触发授权流程。 */
 export function defaultFields(source: ExportSourceInfo | null): string[] {
   if (!source) return [];
-  return source.fields.filter((f) => !f.pii).slice(0, 3).map((f) => f.key);
+  return source.fields
+    .filter((f) => !f.pii)
+    .slice(0, 3)
+    .map((f) => f.key);
 }
 
 export function availableFilters(source: ExportSourceInfo | null): ExportFilterInfo[] {

@@ -25,37 +25,28 @@ import org.springframework.web.server.ResponseStatusException;
  * 10.5.2.1 贸易单证。
  *
  * <p>蓝图：「管理与生成贸易相关单证：商业发票、装箱单、原产地证（RCEP/CO/FTA 优惠）、提单/空运单、
- * 进口许可与认证文件，按目的地国家规则校验完整性」。输入是「发货明细；目的地国家单证要求；
- * 16 合规的认证状态」，输出是「单证文件 + 完整性校验结果 + 缺失提醒」。
+ * 进口许可与认证文件，按目的地国家规则校验完整性」。输入是「发货明细；目的地国家单证要求； 16 合规的认证状态」，输出是「单证文件 + 完整性校验结果 + 缺失提醒」。
  *
  * <p>七条实现纪律：
  *
  * <ol>
- *   <li><b>「实质性改变」是业务判断，系统只校验与留档</b>（本模块最重要的一条）。蓝图关系段原文：
- *       「FTA 优惠原产地证能显著降低关税，其适用条件（尤其是"实质性改变"）需要业务确认，
- *       系统只负责按规则校验与留档」。所以本类<b>没有任何</b>实质性改变判定逻辑 ——
- *       {@link #confirmPreference} 只做三件事：要求确认人+确认依据、要求引用一条真实存在的
- *       优惠规则、把确认人与时间落库。系统能回答「有没有人确认过、依据是什么、什么时候」，
- *       <b>不能</b>回答「法律上成不成立」。DB 层 guard_trade_3_preference 同步钉死
- *       「主张优惠但没业务确认 → 不许进入已复核通过/已提交」。
- *   <li><b>单证要求规则是数据不是常量</b>：目的地国家 × 单证类型 × 必备程度落
- *       {@code trade_document_rule}，租户可维护。写死成 Java 常量或 CHECK 词表等于把海关
- *       要求抄成第二份且必然漂移。
+ *   <li><b>「实质性改变」是业务判断，系统只校验与留档</b>（本模块最重要的一条）。蓝图关系段原文： 「FTA
+ *       优惠原产地证能显著降低关税，其适用条件（尤其是"实质性改变"）需要业务确认， 系统只负责按规则校验与留档」。所以本类<b>没有任何</b>实质性改变判定逻辑 —— {@link
+ *       #confirmPreference} 只做三件事：要求确认人+确认依据、要求引用一条真实存在的 优惠规则、把确认人与时间落库。系统能回答「有没有人确认过、依据是什么、什么时候」，
+ *       <b>不能</b>回答「法律上成不成立」。DB 层 guard_trade_3_preference 同步钉死 「主张优惠但没业务确认 → 不许进入已复核通过/已提交」。
+ *   <li><b>单证要求规则是数据不是常量</b>：目的地国家 × 单证类型 × 必备程度落 {@code trade_document_rule}，租户可维护。写死成 Java 常量或
+ *       CHECK 词表等于把海关 要求抄成第二份且必然漂移。
  *   <li><b>有条件必备的条件是人口径，系统不执行</b>：{@code condition_expression} 是人读描述，
- *       缺失时只报一条**提示级**提醒请人判断，绝不自动判成「必备」或「不适用」——
- *       做成可执行表达式等于让运营在没有评审的情况下定义报关规则。
+ *       缺失时只报一条**提示级**提醒请人判断，绝不自动判成「必备」或「不适用」—— 做成可执行表达式等于让运营在没有评审的情况下定义报关规则。
  *   <li><b>校验结论 append-only，改结论只能重跑</b>：{@code trade_document_check} 一次一行、
- *       不改不删。重跑时把上一轮已不再报的提醒**显式自动结清**（带说明与处理人），
- *       否则「历史阻断提醒」会永久挡住一份已经补齐的单证包。
- *   <li><b>提交闸是三道且由 DB 钉死</b>：人工复核通过（V91 {@code trade_1_state}）、
- *       完整性校验必须 PASS 且无阻断提醒（{@code trade_2_submit_gate}）、
- *       优惠必须已获业务确认（{@code trade_3_preference}）。绕服务层直接改状态同样被挡。
- *   <li><b>16 合规上游未交付</b>：本仓库无 product_compliance 服务，所以认证状态来自
- *       <b>租户可维护</b>的 {@code trade_certification_status}，每行带
- *       {@code certificationSource} 如实标注「人登记的」还是「16 合规推来的」；
+ *       不改不删。重跑时把上一轮已不再报的提醒**显式自动结清**（带说明与处理人）， 否则「历史阻断提醒」会永久挡住一份已经补齐的单证包。
+ *   <li><b>提交闸是三道且由 DB 钉死</b>：人工复核通过（V91 {@code trade_1_state}）、 完整性校验必须 PASS 且无阻断提醒（{@code
+ *       trade_2_submit_gate}）、 优惠必须已获业务确认（{@code trade_3_preference}）。绕服务层直接改状态同样被挡。
+ *   <li><b>16 合规上游未交付</b>：本仓库无 product_compliance 服务，所以认证状态来自 <b>租户可维护</b>的 {@code
+ *       trade_certification_status}，每行带 {@code certificationSource} 如实标注「人登记的」还是「16 合规推来的」；
  *       <b>不建</b> 16 合规的镜像表（建了就是假的上游且会成为双 writer）。
- *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置，
- *       客户端伪造 {@code X-Tenant-Id} 进不来也改不动它。
+ *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置， 客户端伪造 {@code X-Tenant-Id}
+ *       进不来也改不动它。
  * </ol>
  *
  * <p>状态机只有一处真相：{@link DocumentSetStatus#allowedNext}。
@@ -69,10 +60,12 @@ public class TradeDocumentService {
   private static final List<String> SET_SORTS =
       List.of("UPDATED_AT", "CREATED_AT", "SET_CODE", "SUBMITTED_AT", "DECLARED_VALUE");
 
-  private static final List<String> RULE_SORTS = List.of("COUNTRY_CODE", "DOCUMENT_KIND", "UPDATED_AT");
+  private static final List<String> RULE_SORTS =
+      List.of("COUNTRY_CODE", "DOCUMENT_KIND", "UPDATED_AT");
   private static final List<String> TEMPLATE_SORTS = List.of("TEMPLATE_CODE", "UPDATED_AT");
   private static final List<String> CERT_SORTS = List.of("SKU", "UPDATED_AT", "EXPIRES_ON");
-  private static final List<String> PREF_SORTS = List.of("SCHEME", "DESTINATION_COUNTRY", "UPDATED_AT");
+  private static final List<String> PREF_SORTS =
+      List.of("SCHEME", "DESTINATION_COUNTRY", "UPDATED_AT");
   private static final List<String> REMINDER_SORTS = List.of("CREATED_AT", "SEVERITY");
 
   private static final String SOURCE_TENANT = "TENANT_MAINTAINED";
@@ -88,12 +81,10 @@ public class TradeDocumentService {
   // ================================================================ 能力
 
   /**
-   * 贸易单证能力清单：状态机、单证类型、要求级别、确认状态、校验结论、
-   * **未交付依赖逐条声明**与四条必须讲清的口径。
+   * 贸易单证能力清单：状态机、单证类型、要求级别、确认状态、校验结论、 **未交付依赖逐条声明**与四条必须讲清的口径。
    *
-   * <p>本车道对集成头实查的结论：16 合规（认证状态）未交付 —— {@code backend/services/} 下
-   * 没有 product_compliance 服务；外部报关行/目的仓系统对接未交付。两者都
-   * {@code available=false} + 原因 + {@code ownerModule} + {@code href}，
+   * <p>本车道对集成头实查的结论：16 合规（认证状态）未交付 —— {@code backend/services/} 下 没有 product_compliance
+   * 服务；外部报关行/目的仓系统对接未交付。两者都 {@code available=false} + 原因 + {@code ownerModule} + {@code href}，
    * <b>不建占位表、不返回空集冒充成功</b>。
    */
   public TradeDocumentCapabilities capabilities() {
@@ -124,8 +115,7 @@ public class TradeDocumentService {
                 true,
                 "10.5.1.1",
                 "/logistics/customs",
-                "上游 10.5.1.1 报关单已交付（V85），本模块的单证包以它为来源并建复合外键，"
-                    + "备证资料的收发货人/币种/金额快照全部固化在单证包上。"),
+                "上游 10.5.1.1 报关单已交付（V85），本模块的单证包以它为来源并建复合外键，" + "备证资料的收发货人/币种/金额快照全部固化在单证包上。"),
             new TradeDimension(
                 "DUTY_AND_TAX",
                 "10.5.1.3 关税与税费",
@@ -190,7 +180,12 @@ public class TradeDocumentService {
       for (var to : DocumentSetStatus.allowedNext(from)) {
         out.add(
             new TradeTransition(
-                from.name(), from.label(), to.name(), to.label(), actionOf(from, to), noteOf(from, to)));
+                from.name(),
+                from.label(),
+                to.name(),
+                to.label(),
+                actionOf(from, to),
+                noteOf(from, to)));
       }
     }
     return out;
@@ -215,8 +210,7 @@ public class TradeDocumentService {
 
   private static String noteOf(DocumentSetStatus from, DocumentSetStatus to) {
     if (to == DocumentSetStatus.SUBMITTED) {
-      return "提交报关行/目的仓：必须先人工复核通过、完整性校验 PASS、无阻断级缺失提醒、"
-          + "且 FTA 优惠主张已获业务确认。四道闸由 DB 触发器钉死。";
+      return "提交报关行/目的仓：必须先人工复核通过、完整性校验 PASS、无阻断级缺失提醒、" + "且 FTA 优惠主张已获业务确认。四道闸由 DB 触发器钉死。";
     }
     if (to == DocumentSetStatus.APPROVED) {
       return "复核通过：确认单证齐备、金额币种自洽、优惠确认痕迹完整。";
@@ -265,12 +259,13 @@ public class TradeDocumentService {
                 + " limit ? offset ?",
             pageArgs.toArray());
 
-    TradeRuleSummary summary = new TradeRuleSummary(
-        total,
-        count(where, args, "status='ACTIVE'"),
-        count(where, args, "status='RETIRED'"),
-        count(where, args, "requirement_level='MANDATORY'"),
-        count(where, args, "requires_certification"));
+    TradeRuleSummary summary =
+        new TradeRuleSummary(
+            total,
+            count(where, args, "status='ACTIVE'"),
+            count(where, args, "status='RETIRED'"),
+            count(where, args, "requirement_level='MANDATORY'"),
+            count(where, args, "requires_certification"));
 
     return new TradeRulePage(
         summary,
@@ -285,7 +280,9 @@ public class TradeDocumentService {
 
   private long count(String where, List<Object> args, String extra) {
     List<Object> a = new ArrayList<>(args);
-    return sql.fetchOne("select count(*) from trade_document_rule where " + where + " and " + extra, a.toArray())
+    return sql.fetchOne(
+            "select count(*) from trade_document_rule where " + where + " and " + extra,
+            a.toArray())
         .get(0, Long.class);
   }
 
@@ -327,11 +324,12 @@ public class TradeDocumentService {
     String condition = fit(request.conditionExpression(), 2000, "适用条件说明");
     // 有条件必备必须写清条件：留空等于让校验无据可依，只能默默当成「不适用」。
     if (level == RequirementLevel.CONDITIONAL && condition.isEmpty()) {
-      throw new IllegalArgumentException(
-          "「有条件必备」必须写清适用条件说明：条件是给人读的口径，系统不会执行它，留空就无从判断");
+      throw new IllegalArgumentException("「有条件必备」必须写清适用条件说明：条件是给人读的口径，系统不会执行它，留空就无从判断");
     }
-    if (requiresCert && !kind.isOriginCertificate()
-        && kind != TradeDocumentKind.CERTIFICATION_DOC && kind != TradeDocumentKind.IMPORT_LICENSE) {
+    if (requiresCert
+        && !kind.isOriginCertificate()
+        && kind != TradeDocumentKind.CERTIFICATION_DOC
+        && kind != TradeDocumentKind.IMPORT_LICENSE) {
       // 不是硬性报错：认证要求可以挂在任何单证上（目的国可能要求发票随附某项认证）。
       // 这里只是把口径讲清楚，不拦。
       assert true;
@@ -376,11 +374,11 @@ public class TradeDocumentService {
     if (level == RequirementLevel.CONDITIONAL && condition.isEmpty()) {
       throw new IllegalArgumentException("「有条件必备」必须写清适用条件说明");
     }
-    LocalDate validFrom = request.validFrom() == null ? head.get("valid_from", LocalDate.class) : request.validFrom();
+    LocalDate validFrom =
+        request.validFrom() == null ? head.get("valid_from", LocalDate.class) : request.validFrom();
     LocalDate validTo = request.validTo();
     if (validTo != null && validTo.isBefore(validFrom)) {
-      throw new IllegalArgumentException(
-          "失效日 " + validTo + " 早于生效日 " + validFrom + "：有效期必须自洽");
+      throw new IllegalArgumentException("失效日 " + validTo + " 早于生效日 " + validFrom + "：有效期必须自洽");
     }
     sql.execute(
         "update trade_document_rule set requirement_level=?,condition_expression=?,"
@@ -546,7 +544,9 @@ public class TradeDocumentService {
       throw new IllegalArgumentException("未知的模板状态：" + status);
     }
     LocalDate from =
-        request.effectiveFrom() == null ? head.get("effective_from", LocalDate.class) : request.effectiveFrom();
+        request.effectiveFrom() == null
+            ? head.get("effective_from", LocalDate.class)
+            : request.effectiveFrom();
     LocalDate to = request.effectiveTo();
     if (to != null && to.isBefore(from)) {
       throw new IllegalArgumentException("失效日 " + to + " 早于生效日 " + from + "：有效期必须自洽");
@@ -600,7 +600,8 @@ public class TradeDocumentService {
       args.add(query.certificationSource().trim().toUpperCase(java.util.Locale.ROOT));
     }
     if (notBlank(query.keyword())) {
-      w.append(" and (certification_code ilike ? or certification_name ilike ? or sku_code ilike ?)");
+      w.append(
+          " and (certification_code ilike ? or certification_name ilike ? or sku_code ilike ?)");
       args.add("%" + query.keyword().trim() + "%");
       args.add("%" + query.keyword().trim() + "%");
       args.add("%" + query.keyword().trim() + "%");
@@ -608,7 +609,8 @@ public class TradeDocumentService {
     String where = w.toString();
 
     long total =
-        sql.fetchOne("select count(*) from trade_certification_status where " + where, args.toArray())
+        sql.fetchOne(
+                "select count(*) from trade_certification_status where " + where, args.toArray())
             .get(0, Long.class);
     List<Object> pageArgs = new ArrayList<>(args);
     pageArgs.add(size);
@@ -633,11 +635,13 @@ public class TradeDocumentService {
   }
 
   @Transactional
-  public TradeCertificationSaved createCertification(UUID tenantId, TradeCertificationCreateRequest request) {
+  public TradeCertificationSaved createCertification(
+      UUID tenantId, TradeCertificationCreateRequest request) {
     if (request.skuId() == null) {
       throw new IllegalArgumentException("必须给出 skuId：认证状态挂在商品上，不能凭空登记");
     }
-    Record sku = sql.fetchOne("select * from sku_ref where tenant_id=? and id=?", tenantId, request.skuId());
+    Record sku =
+        sql.fetchOne("select * from sku_ref where tenant_id=? and id=?", tenantId, request.skuId());
     if (sku == null) {
       throw new IllegalArgumentException("SKU 不存在或无权访问：" + request.skuId());
     }
@@ -645,8 +649,7 @@ public class TradeDocumentService {
     CertificationStatus status = CertificationStatus.parse(request.status());
     String certificateNo = fit(request.certificateNo(), 64, "证书编号");
     if (status == CertificationStatus.VALID && certificateNo.isEmpty()) {
-      throw new IllegalArgumentException(
-          "认证标成有效但没有证书编号：一张没有编号的证书在目的国海关眼里等于没有");
+      throw new IllegalArgumentException("认证标成有效但没有证书编号：一张没有编号的证书在目的国海关眼里等于没有");
     }
     // 有效必须带有效期 —— 一张没有有效期的认证在目的国海关眼里等于没有。
     if (status == CertificationStatus.VALID
@@ -683,15 +686,12 @@ public class TradeDocumentService {
         fit(request.notes(), 2000, "备注"),
         currentActor());
     return new TradeCertificationSaved(
-        id,
-        code,
-        status.name(),
-        0,
-        "认证状态已登记。来源标记为「租户维护」—— 16 合规未交付，这条是人登记的，校验不会假装它来自系统。");
+        id, code, status.name(), 0, "认证状态已登记。来源标记为「租户维护」—— 16 合规未交付，这条是人登记的，校验不会假装它来自系统。");
   }
 
   @Transactional
-  public TradeCertificationSaved updateCertification(UUID id, TradeCertificationUpdateRequest request) {
+  public TradeCertificationSaved updateCertification(
+      UUID id, TradeCertificationUpdateRequest request) {
     Record head = certificationHead(id);
     if (request.expectedVersion() != null
         && request.expectedVersion() != head.get("version", Long.class)) {
@@ -787,7 +787,8 @@ public class TradeDocumentService {
   }
 
   @Transactional
-  public TradePreferenceRuleSaved createPreferenceRule(UUID tenantId, TradePreferenceRuleCreateRequest request) {
+  public TradePreferenceRuleSaved createPreferenceRule(
+      UUID tenantId, TradePreferenceRuleCreateRequest request) {
     String scheme = requireText(request.scheme(), "优惠方案").toUpperCase(java.util.Locale.ROOT);
     String country = requireCountry(request.destinationCountryCode(), "适用目的国/地区");
     String scope = upperOrDefault(request.productScope(), "ALL");
@@ -806,12 +807,10 @@ public class TradeDocumentService {
     String substantive = fit(request.substantiveChangeCriterion(), 2000, "实质性改变适用条件口径");
     if (substantive.isEmpty()) {
       throw new IllegalArgumentException(
-          "「实质性改变」的适用条件口径不能为空：它是业务确认时要依据的东西，"
-              + "系统不执行也不推断，留空就等于让业务在一张空白纸上签字");
+          "「实质性改变」的适用条件口径不能为空：它是业务确认时要依据的东西，" + "系统不执行也不推断，留空就等于让业务在一张空白纸上签字");
     }
     boolean requiresConfirmation =
-        request.requiresBusinessConfirmation() == null
-            || request.requiresBusinessConfirmation();
+        request.requiresBusinessConfirmation() == null || request.requiresBusinessConfirmation();
     LocalDate from = request.validFrom() == null ? LocalDate.now() : request.validFrom();
     LocalDate to = request.validTo();
     if (to != null && to.isBefore(from)) {
@@ -846,12 +845,12 @@ public class TradeDocumentService {
         0,
         requiresConfirmation
             ? "优惠规则已创建。优惠主张默认必须业务确认——系统只校验留痕，不代替业务判断「实质性改变」是否成立。"
-            : "优惠规则已创建，并**显式关闭了业务确认要求**。请注意：这一笔操作已记入事件留痕，"
-                + "「实质性改变」无人确认即主张优惠，风险由业务承担。");
+            : "优惠规则已创建，并**显式关闭了业务确认要求**。请注意：这一笔操作已记入事件留痕，" + "「实质性改变」无人确认即主张优惠，风险由业务承担。");
   }
 
   @Transactional
-  public TradePreferenceRuleSaved updatePreferenceRule(UUID id, TradePreferenceRuleUpdateRequest request) {
+  public TradePreferenceRuleSaved updatePreferenceRule(
+      UUID id, TradePreferenceRuleUpdateRequest request) {
     Record head = sql.fetchOne("select * from trade_origin_preference_rule where id=?", id);
     if (head == null) {
       throw new ResponseStatusException(
@@ -920,7 +919,14 @@ public class TradeDocumentService {
             "select * from trade_document_set where "
                 + where
                 + " order by "
-                + orderBy(sort, "updated_at", "created_at", "set_code", "submitted_at", "total_declared_value", "id")
+                + orderBy(
+                    sort,
+                    "updated_at",
+                    "created_at",
+                    "set_code",
+                    "submitted_at",
+                    "total_declared_value",
+                    "id")
                 + " limit ? offset ?",
             pageArgs.toArray());
 
@@ -964,8 +970,9 @@ public class TradeDocumentService {
       w.append(" and (missing_document_count > 0 or pending_business_count > 0)");
     }
     if (notBlank(q.keyword())) {
-      w.append(" and (set_code ilike ? or source_declaration_code ilike ? or consignee_name ilike ?"
-          + " or exporter_name ilike ?)");
+      w.append(
+          " and (set_code ilike ? or source_declaration_code ilike ? or consignee_name ilike ?"
+              + " or exporter_name ilike ?)");
       String k = "%" + q.keyword().trim() + "%";
       args.add(k);
       args.add(k);
@@ -987,7 +994,8 @@ public class TradeDocumentService {
                 + " count(*) filter (where pending_business_count>0) pending_business,"
                 + " coalesce(sum(total_declared_value),0) total_value,"
                 + " coalesce(max(document_currency),'') currency"
-                + " from trade_document_set where " + where,
+                + " from trade_document_set where "
+                + where,
             args.toArray());
     return new TradeSetSummary(
         r.get("total", Long.class),
@@ -1025,7 +1033,8 @@ public class TradeDocumentService {
   }
 
   public List<TradeDocumentRow> documents(UUID setId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select d.*, t.template_code from trade_document d"
                 + " left join trade_document_template t on t.tenant_id=d.tenant_id and t.id=d.template_id"
                 + " where d.set_id=? order by d.document_kind, d.document_version",
@@ -1036,15 +1045,16 @@ public class TradeDocumentService {
   }
 
   public List<TradeCheckRow> checks(UUID setId) {
-    return sql.fetch(
-            "select * from trade_document_check where set_id=? order by check_round desc", setId)
+    return sql
+        .fetch("select * from trade_document_check where set_id=? order by check_round desc", setId)
         .stream()
         .map(this::checkRow)
         .toList();
   }
 
   public List<TradeReminderRow> reminders(UUID setId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from trade_document_reminder where set_id=?"
                 + " order by (severity='BLOCKER') desc, created_at desc",
             setId)
@@ -1054,15 +1064,18 @@ public class TradeDocumentService {
   }
 
   public List<TradeEventRow> events(UUID setId) {
-    return sql.fetch(
-            "select * from trade_document_event where set_id=? order by occurred_at desc, id desc", setId)
+    return sql
+        .fetch(
+            "select * from trade_document_event where set_id=? order by occurred_at desc, id desc",
+            setId)
         .stream()
         .map(this::eventRow)
         .toList();
   }
 
   /** 优惠主张清单（跨单证包）：谁主张了优惠、确认到哪一步了。 */
-  public TradePreferenceConfirmationPage preferenceConfirmations(PreferenceConfirmationQuery query) {
+  public TradePreferenceConfirmationPage preferenceConfirmations(
+      PreferenceConfirmationQuery query) {
     int page = Math.max(0, query.page());
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, query.size()));
 
@@ -1086,8 +1099,7 @@ public class TradeDocumentService {
     String where = w.toString();
 
     long total =
-        sql.fetchOne(
-                "select count(*) from trade_document d where " + where, args.toArray())
+        sql.fetchOne("select count(*) from trade_document d where " + where, args.toArray())
             .get(0, Long.class);
     List<Object> pageArgs = new ArrayList<>(args);
     pageArgs.add(size);
@@ -1127,7 +1139,9 @@ public class TradeDocumentService {
             .map(
                 s ->
                     new TradeSubstantiveChangeOption(
-                        s.name(), s.label(), s == SubstantiveChangeStatus.PENDING_BUSINESS_CONFIRMATION))
+                        s.name(),
+                        s.label(),
+                        s == SubstantiveChangeStatus.PENDING_BUSINESS_CONFIRMATION))
             .toList(),
         total,
         page,
@@ -1239,14 +1253,15 @@ public class TradeDocumentService {
     // 因为「有没有报过关」是举证材料）。用时间戳判会把退回草稿的单错判成「已报关」。
     if (Set.of("DRAFT", "PENDING_REVIEW", "REJECTED").contains(declStatus)) {
       throw new IllegalArgumentException(
-          "来源报关单还处于「"
-              + declStatus
-              + "」，备证资料要基于已复核的申报资料：请先在 10.5.1.1 完成人工复核再回来建包");
+          "来源报关单还处于「" + declStatus + "」，备证资料要基于已复核的申报资料：请先在 10.5.1.1 完成人工复核再回来建包");
     }
     if ("CANCELLED".equals(declStatus)) {
       throw new IllegalArgumentException("来源报关单已取消，不能对它备证");
     }
-    UUID legalEntity = request.legalEntityId() == null ? decl.get("legal_entity_id", UUID.class) : request.legalEntityId();
+    UUID legalEntity =
+        request.legalEntityId() == null
+            ? decl.get("legal_entity_id", UUID.class)
+            : request.legalEntityId();
 
     UUID id = UUID.randomUUID();
     long seq = sql.fetchOne("select nextval('trade_document_set_code_seq')").get(0, Long.class);
@@ -1259,7 +1274,11 @@ public class TradeDocumentService {
     String consigneeCountry = decl.get("consignee_country_code", String.class);
     if (!destination.equals(consigneeCountry)) {
       throw new IllegalArgumentException(
-          "报关单的目的国「" + destination + "」与收货方国家「" + consigneeCountry + "」不一致："
+          "报关单的目的国「"
+              + destination
+              + "」与收货方国家「"
+              + consigneeCountry
+              + "」不一致："
               + "备证资料按目的国规则校验，目的国对不上会让整套校验结论失去意义");
     }
     BigDecimal value =
@@ -1300,9 +1319,7 @@ public class TradeDocumentService {
     DocumentSetStatus status = DocumentSetStatus.parse(head.get("status", String.class));
     if (status != DocumentSetStatus.DRAFT && status != DocumentSetStatus.UNDER_REVIEW) {
       throw new IllegalArgumentException(
-          "单证包处于「"
-              + status.label()
-              + "」状态，不允许改基本信息：要让改动被看到，请先撤回复核或等下游退回后再改");
+          "单证包处于「" + status.label() + "」状态，不允许改基本信息：要让改动被看到，请先撤回复核或等下游退回后再改");
     }
     if (request.expectedVersion() != null
         && request.expectedVersion() != head.get("version", Long.class)) {
@@ -1322,8 +1339,7 @@ public class TradeDocumentService {
     Record head = setHead(id);
     DocumentSetStatus current = DocumentSetStatus.parse(head.get("status", String.class));
     if (current != DocumentSetStatus.DRAFT && current != DocumentSetStatus.REJECTED) {
-      throw new IllegalArgumentException(
-          "单证包处于「" + current.label() + "」状态，不允许送复核：当前状态没有待复核这一说");
+      throw new IllegalArgumentException("单证包处于「" + current.label() + "」状态，不允许送复核：当前状态没有待复核这一说");
     }
     // 送复核前先看一眼有没有单证：一份都没有就送复核等于让人复核空气。
     long docs = countDocuments(id);
@@ -1333,7 +1349,15 @@ public class TradeDocumentService {
     sql.execute(
         "update trade_document_set set status='UNDER_REVIEW',version=version+1,updated_at=now() where id=?",
         id);
-    recordEvent(id, "UNDER_REVIEW", current.name(), "UNDER_REVIEW", "", request == null ? "" : request.reviewNotes(), "", null);
+    recordEvent(
+        id,
+        "UNDER_REVIEW",
+        current.name(),
+        "UNDER_REVIEW",
+        "",
+        request == null ? "" : request.reviewNotes(),
+        "",
+        null);
     return saved(id, "已送人工复核。复核通过后才能提交下游。");
   }
 
@@ -1348,8 +1372,7 @@ public class TradeDocumentService {
     Record head = setHead(id);
     DocumentSetStatus current = DocumentSetStatus.parse(head.get("status", String.class));
     if (current != DocumentSetStatus.UNDER_REVIEW) {
-      throw new IllegalArgumentException(
-          "单证包处于「" + current.label() + "」状态，不允许复核通过：只有待复核的单证包能复核");
+      throw new IllegalArgumentException("单证包处于「" + current.label() + "」状态，不允许复核通过：只有待复核的单证包能复核");
     }
     List<Map<String, Object>> blocking = pendingPreferenceDocuments(id);
     if (!blocking.isEmpty()) {
@@ -1366,8 +1389,7 @@ public class TradeDocumentService {
     }
     long notFinal = countNotFinalDocuments(id);
     if (notFinal > 0) {
-      throw new IllegalArgumentException(
-          "还有 " + notFinal + " 份单证没有定稿：定稿前的单证不是备证资料，复核一份草稿没有意义");
+      throw new IllegalArgumentException("还有 " + notFinal + " 份单证没有定稿：定稿前的单证不是备证资料，复核一份草稿没有意义");
     }
     sql.execute(
         "update trade_document_set set status='APPROVED',review_round=review_round+1,reviewed_at=?::timestamptz,"
@@ -1376,7 +1398,15 @@ public class TradeDocumentService {
         currentActor(),
         fit(request == null ? "" : request.reviewNotes(), 2000, "复核意见"),
         id);
-    recordEvent(id, "APPROVED", current.name(), "APPROVED", "", request == null ? "" : request.reviewNotes(), "", null);
+    recordEvent(
+        id,
+        "APPROVED",
+        current.name(),
+        "APPROVED",
+        "",
+        request == null ? "" : request.reviewNotes(),
+        "",
+        null);
     return saved(id, "复核通过。提交前仍要跑一次完整性校验并处理阻断级提醒。");
   }
 
@@ -1409,21 +1439,25 @@ public class TradeDocumentService {
     sql.execute(
         "update trade_document_set set status='DRAFT',version=version+1,updated_at=now() where id=?",
         id);
-    recordEvent(id, "REVIEW_WITHDRAWN", current.name(), "DRAFT", "", request == null ? "" : request.notes(), "", null);
+    recordEvent(
+        id,
+        "REVIEW_WITHDRAWN",
+        current.name(),
+        "DRAFT",
+        "",
+        request == null ? "" : request.notes(),
+        "",
+        null);
     return saved(id, "已撤回复核，回到草稿。改完重新走复核才能提交。");
   }
 
-  /**
-   * 提交报关行 / 目的仓。三道闸（复核、校验 PASS、无阻断提醒）由 DB 触发器钉死，
-   * 绕服务层直接改状态同样被挡。
-   */
+  /** 提交报关行 / 目的仓。三道闸（复核、校验 PASS、无阻断提醒）由 DB 触发器钉死， 绕服务层直接改状态同样被挡。 */
   @Transactional
   public TradeSaved submit(UUID id, TradeSetSubmitRequest request) {
     Record head = setHead(id);
     DocumentSetStatus current = DocumentSetStatus.parse(head.get("status", String.class));
     if (current != DocumentSetStatus.APPROVED) {
-      throw new IllegalArgumentException(
-          "单证包处于「" + current.label() + "」状态，不允许提交：必须先人工复核通过");
+      throw new IllegalArgumentException("单证包处于「" + current.label() + "」状态，不允许提交：必须先人工复核通过");
     }
     String to = fit(request == null ? "" : request.submittedTo(), 200, "接收方");
     if (to.isEmpty()) {
@@ -1455,7 +1489,15 @@ public class TradeDocumentService {
         OffsetDateTime.now(),
         fit(request == null ? "" : request.acknowledgementReference(), 64, "接收回执号"),
         id);
-    recordEvent(id, "ACKNOWLEDGED", current.name(), "ACKNOWLEDGED", "", request == null ? "" : request.acknowledgementReference(), "", null);
+    recordEvent(
+        id,
+        "ACKNOWLEDGED",
+        current.name(),
+        "ACKNOWLEDGED",
+        "",
+        request == null ? "" : request.acknowledgementReference(),
+        "",
+        null);
     return saved(id, "已登记下游接收。终态，不再接受任何动作。");
   }
 
@@ -1501,18 +1543,17 @@ public class TradeDocumentService {
   /**
    * 生成单证：按报关明细 + 模板生成**内容快照**。
    *
-   * <p>content 在这里固化而不是读取时重算 —— 备证资料必须可复现、可举证。
-   * 报关明细一改，历史单证不能跟着变。
+   * <p>content 在这里固化而不是读取时重算 —— 备证资料必须可复现、可举证。 报关明细一改，历史单证不能跟着变。
    */
   @Transactional
   public TradeDocumentSaved generateDocument(UUID setId, TradeDocumentCreateRequest request) {
     Record head = setHead(setId);
     DocumentSetStatus status = DocumentSetStatus.parse(head.get("status", String.class));
-    if (status != DocumentSetStatus.DRAFT && status != DocumentSetStatus.UNDER_REVIEW
+    if (status != DocumentSetStatus.DRAFT
+        && status != DocumentSetStatus.UNDER_REVIEW
         && status != DocumentSetStatus.REJECTED) {
       throw new IllegalArgumentException(
-          "单证包处于「" + status.label() + "」状态，不允许生成/改版单证："
-              + "要让改动被看到，请先撤回复核或等下游退回后再改");
+          "单证包处于「" + status.label() + "」状态，不允许生成/改版单证：" + "要让改动被看到，请先撤回复核或等下游退回后再改");
     }
     TradeDocumentKind kind = TradeDocumentKind.parse(request.documentKind());
     UUID templateId = request.templateId();
@@ -1520,13 +1561,21 @@ public class TradeDocumentService {
       Record t = templateHead(templateId);
       if (!kind.name().equals(t.get("document_kind", String.class))) {
         throw new IllegalArgumentException(
-            "模板类型是「" + t.get("document_kind", String.class) + "」，与要生成的「" + kind.name() + "」不是同一种单证");
+            "模板类型是「"
+                + t.get("document_kind", String.class)
+                + "」，与要生成的「"
+                + kind.name()
+                + "」不是同一种单证");
       }
     }
-    String currency = moneyOrDefault(request.currency(), head.get("document_currency", String.class), "单证币种");
+    String currency =
+        moneyOrDefault(request.currency(), head.get("document_currency", String.class), "单证币种");
     if (!currency.equals(head.get("document_currency", String.class))) {
       throw new IllegalArgumentException(
-          "单证币种「" + currency + "」与单证包币种「" + head.get("document_currency", String.class)
+          "单证币种「"
+              + currency
+              + "」与单证包币种「"
+              + head.get("document_currency", String.class)
               + "」不一致：币种对不上的发票提交上去是申报不实");
     }
 
@@ -1551,9 +1600,10 @@ public class TradeDocumentService {
       sql.execute(
           "update trade_document set status='SUPERSEDED',updated_at=now() where id=?", prev);
     }
-    String documentNo = notBlank(request.documentNo())
-        ? fit(request.documentNo(), 64, "单证号")
-        : prefixOf(kind) + "-" + head.get("set_code", String.class) + "-v" + nextVersion;
+    String documentNo =
+        notBlank(request.documentNo())
+            ? fit(request.documentNo(), 64, "单证号")
+            : prefixOf(kind) + "-" + head.get("set_code", String.class) + "-v" + nextVersion;
 
     Map<String, Object> content =
         request.content() == null || request.content().isEmpty()
@@ -1611,7 +1661,8 @@ public class TradeDocumentService {
 
   /** 定稿单证：必须有签发时间与来源定位 —— 定稿前的单证不是备证资料。 */
   @Transactional
-  public TradeDocumentSaved finalizeDocument(UUID setId, UUID documentId, TradeDocumentFinalizeRequest request) {
+  public TradeDocumentSaved finalizeDocument(
+      UUID setId, UUID documentId, TradeDocumentFinalizeRequest request) {
     Record doc = documentHead(documentId);
     if (!doc.get("set_id", UUID.class).equals(setId)) {
       throw new IllegalArgumentException("单证不存在或不属于这套单证包：" + documentId);
@@ -1621,9 +1672,7 @@ public class TradeDocumentService {
     }
     String reference = fit(request == null ? "" : request.sourceReference(), 64, "来源定位");
     if (reference.isEmpty()) {
-      throw new IllegalArgumentException(
-          "定稿必须写清来源定位（单证文件放在哪 / 出自哪个系统）："
-              + "没有定位的单证在举证时拿不出来");
+      throw new IllegalArgumentException("定稿必须写清来源定位（单证文件放在哪 / 出自哪个系统）：" + "没有定位的单证在举证时拿不出来");
     }
     String documentNo =
         notBlank(request == null ? null : request.documentNo())
@@ -1668,7 +1717,8 @@ public class TradeDocumentService {
    * 这正是蓝图关系段要的那道闸：系统按规则校验与留档，不替业务判断「实质性改变」是否成立。
    */
   @Transactional
-  public TradeDocumentSaved claimPreference(UUID setId, UUID documentId, TradePreferenceClaimRequest request) {
+  public TradeDocumentSaved claimPreference(
+      UUID setId, UUID documentId, TradePreferenceClaimRequest request) {
     Record head = setHead(setId);
     Record doc = documentHead(documentId);
     if (!doc.get("set_id", UUID.class).equals(setId)) {
@@ -1677,20 +1727,21 @@ public class TradeDocumentService {
     TradeDocumentKind kind = TradeDocumentKind.parse(doc.get("document_kind", String.class));
     if (!kind.isOriginCertificate()) {
       throw new IllegalArgumentException(
-          "「" + kind.label() + "」不是原产地证，不能主张 FTA 优惠："
-              + "只有原产地证 / RCEP 原产地证承载优惠主张");
+          "「" + kind.label() + "」不是原产地证，不能主张 FTA 优惠：" + "只有原产地证 / RCEP 原产地证承载优惠主张");
     }
     if ("SUPERSEDED".equals(doc.get("status", String.class))) {
       throw new IllegalArgumentException("这张单证已被新版本取代，不能在旧版本上主张优惠");
     }
-    String scheme = requireText(request == null ? null : request.ftaScheme(), "优惠方案").toUpperCase(java.util.Locale.ROOT);
+    String scheme =
+        requireText(request == null ? null : request.ftaScheme(), "优惠方案")
+            .toUpperCase(java.util.Locale.ROOT);
     String origin = requireCountry(request == null ? null : request.originCountryCode(), "原产国/地区");
     if (request == null || request.preferenceRuleId() == null) {
-      throw new IllegalArgumentException(
-          "必须引用一条真实存在的优惠规则：优惠主张要能留档，就必须答得出「按哪条规则主张的」");
+      throw new IllegalArgumentException("必须引用一条真实存在的优惠规则：优惠主张要能留档，就必须答得出「按哪条规则主张的」");
     }
     Record rule =
-        sql.fetchOne("select * from trade_origin_preference_rule where id=?", request.preferenceRuleId());
+        sql.fetchOne(
+            "select * from trade_origin_preference_rule where id=?", request.preferenceRuleId());
     if (rule == null) {
       throw new IllegalArgumentException("优惠规则不存在或无权访问：" + request.preferenceRuleId());
     }
@@ -1731,13 +1782,13 @@ public class TradeDocumentService {
   }
 
   /**
-   * 业务确认（或确认不成立）。**这是本模块唯一能把优惠从「待确认」推进去的入口**，
-   * 而且它只做三件事：收下确认人与依据、把规则版本钉在单证上、记事件。
+   * 业务确认（或确认不成立）。**这是本模块唯一能把优惠从「待确认」推进去的入口**， 而且它只做三件事：收下确认人与依据、把规则版本钉在单证上、记事件。
    *
    * <p>刻意没有第四条：不判断确认的依据在法律上是否站得住 —— 那是业务/法务的活。
    */
   @Transactional
-  public TradeDocumentSaved confirmPreference(UUID setId, UUID documentId, TradePreferenceClaimRequest request) {
+  public TradeDocumentSaved confirmPreference(
+      UUID setId, UUID documentId, TradePreferenceClaimRequest request) {
     Record head = setHead(setId);
     Record doc = documentHead(documentId);
     if (!doc.get("set_id", UUID.class).equals(setId)) {
@@ -1752,8 +1803,7 @@ public class TradeDocumentService {
     String note = requireText(request == null ? null : request.substantiveChangeNote(), "确认依据");
     if (note.length() < 5) {
       throw new IllegalArgumentException(
-          "确认依据太短：优惠原产地证能显著降低关税，「凭什么适用」必须写清楚，"
-              + "否则事后无法回答「这批货的优惠是谁批的、依据是什么」");
+          "确认依据太短：优惠原产地证能显著降低关税，「凭什么适用」必须写清楚，" + "否则事后无法回答「这批货的优惠是谁批的、依据是什么」");
     }
     boolean confirmed = request.confirmed() != null && request.confirmed();
     UUID ruleId = doc.get("preference_rule_id", UUID.class);
@@ -1795,7 +1845,9 @@ public class TradeDocumentService {
         doc.get("status", String.class),
         0,
         confirmed
-            ? "业务已留痕确认（按规则版本 " + ruleVersion + "）。这条留档只说明「有人确认过」，"
+            ? "业务已留痕确认（按规则版本 "
+                + ruleVersion
+                + "）。这条留档只说明「有人确认过」，"
                 + "不代表系统判定「实质性改变」在法律上成立 —— 那个结论由业务承担。"
             : "业务确认不成立，优惠主张已撤回。这张单证不再需要业务确认。");
   }
@@ -1817,8 +1869,7 @@ public class TradeDocumentService {
    *   <li>汇总数与明细逐项对账，对不上直接报
    * </ol>
    *
-   * <p>重跑时把上一轮已不再报的提醒**显式自动结清**（带说明与处理人），
-   * 否则「历史阻断提醒」会永久挡住一份已经补齐的单证包。
+   * <p>重跑时把上一轮已不再报的提醒**显式自动结清**（带说明与处理人）， 否则「历史阻断提醒」会永久挡住一份已经补齐的单证包。
    */
   @Transactional
   public TradeSaved runCheck(UUID setId) {
@@ -1864,8 +1915,7 @@ public class TradeDocumentService {
               "MANDATORY",
               "MISSING",
               "RULE",
-              "目的国 " + country + " 没有配置任何单证要求规则：无法确认这套单证齐不齐，"
-                  + "请先在「目的国单证要求」里配置规则再校验"));
+              "目的国 " + country + " 没有配置任何单证要求规则：无法确认这套单证齐不齐，" + "请先在「目的国单证要求」里配置规则再校验"));
       pendings.add(
           new Pending(
               "OTHER",
@@ -1924,7 +1974,8 @@ public class TradeDocumentService {
             items.add(item(kind, level.name(), "PROVIDED_FINAL", "DOCUMENT", "已提供并定稿"));
           } else {
             missing++;
-            items.add(item(kind, level.name(), "PROVIDED_NOT_FINAL", "DOCUMENT", "已生成但未定稿，定稿前不是备证资料"));
+            items.add(
+                item(kind, level.name(), "PROVIDED_NOT_FINAL", "DOCUMENT", "已生成但未定稿，定稿前不是备证资料"));
             pendings.add(
                 new Pending(
                     kind,
@@ -1990,14 +2041,19 @@ public class TradeDocumentService {
                   "MANDATORY",
                   "CERTIFICATION_MISSING",
                   "CERTIFICATION",
-                  "单证「" + labelOf(TradeDocumentKind.values(), kind) + "」要求附认证状态，"
+                  "单证「"
+                      + labelOf(TradeDocumentKind.values(), kind)
+                      + "」要求附认证状态，"
                       + "但该 SKU 没有登记任何认证"));
           pendings.add(
               new Pending(
                   kind,
                   ReminderType.CERTIFICATION_MISSING,
                   ReminderSeverity.BLOCKER,
-                  "「" + labelOf(TradeDocumentKind.values(), kind) + "」要求认证，但 SKU " + skuId
+                  "「"
+                      + labelOf(TradeDocumentKind.values(), kind)
+                      + "」要求认证，但 SKU "
+                      + skuId
                       + " 未登记任何认证状态（16 合规未交付，这条靠租户维护）"));
           continue;
         }
@@ -2010,7 +2066,12 @@ public class TradeDocumentService {
           if ("REVOKED".equals(cstatus)) {
             missing++;
             items.add(
-                item(kind, "MANDATORY", "CERTIFICATION_REVOKED", "CERTIFICATION", "认证 " + certCode + " 已被撤销"));
+                item(
+                    kind,
+                    "MANDATORY",
+                    "CERTIFICATION_REVOKED",
+                    "CERTIFICATION",
+                    "认证 " + certCode + " 已被撤销"));
             pendings.add(
                 new Pending(
                     kind,
@@ -2035,7 +2096,12 @@ public class TradeDocumentService {
           } else if ("PENDING".equals(cstatus)) {
             satisfied++;
             items.add(
-                item(kind, "MANDATORY", "CERTIFICATION_PENDING", "CERTIFICATION", "认证 " + certCode + " 待取证"));
+                item(
+                    kind,
+                    "MANDATORY",
+                    "CERTIFICATION_PENDING",
+                    "CERTIFICATION",
+                    "认证 " + certCode + " 待取证"));
             pendings.add(
                 new Pending(
                     kind,
@@ -2071,14 +2137,18 @@ public class TradeDocumentService {
                 "MANDATORY",
                 "SUBSTANTIVE_CHANGE_PENDING",
                 "PREFERENCE",
-                "主张了 " + doc.get("fta_scheme", String.class) + " 优惠但还没有业务确认痕迹"
+                "主张了 "
+                    + doc.get("fta_scheme", String.class)
+                    + " 优惠但还没有业务确认痕迹"
                     + "（实质性改变是否成立需业务确认，系统不代替业务下结论）"));
         pendings.add(
             new Pending(
                 kind,
                 ReminderType.UNCONFIRMED_SUBSTANTIVE_CHANGE,
                 ReminderSeverity.BLOCKER,
-                "「" + labelOf(TradeDocumentKind.values(), kind) + "」主张了 "
+                "「"
+                    + labelOf(TradeDocumentKind.values(), kind)
+                    + "」主张了 "
                     + doc.get("fta_scheme", String.class)
                     + " 优惠但还没有业务确认。实质性改变是否成立需要业务确认，"
                     + "系统只负责按规则校验与留档 —— 请业务确认或撤回优惠主张。"));
@@ -2089,7 +2159,8 @@ public class TradeDocumentService {
                 "MANDATORY",
                 "SUBSTANTIVE_CHANGE_" + sc,
                 "PREFERENCE",
-                sc + "（确认人 "
+                sc
+                    + "（确认人 "
                     + doc.get("business_confirmed_by", UUID.class)
                     + "，确认时间 "
                     + doc.get("business_confirmed_at", OffsetDateTime.class)
@@ -2106,23 +2177,22 @@ public class TradeDocumentService {
         continue;
       }
       items.add(
-          item(
-              kind,
-              "OPTIONAL",
-              "UNDECLARED",
-              "DOCUMENT",
-              "已出单证但目的国 " + country + " 的规则里没有要求这一类"));
+          item(kind, "OPTIONAL", "UNDECLARED", "DOCUMENT", "已出单证但目的国 " + country + " 的规则里没有要求这一类"));
       pendings.add(
           new Pending(
               kind,
               ReminderType.UNDECLARED_DOCUMENT,
               ReminderSeverity.WARNING,
-              "「" + labelOf(TradeDocumentKind.values(), kind) + "」已生成，但目的国 " + country
+              "「"
+                  + labelOf(TradeDocumentKind.values(), kind)
+                  + "」已生成，但目的国 "
+                  + country
                   + " 的单证要求规则里没有这一类，请确认是否多余"));
     }
 
     CheckResult result =
-        missing > 0 ? CheckResult.FAIL
+        missing > 0
+            ? CheckResult.FAIL
             : (pendingBusiness > 0 ? CheckResult.PENDING_BUSINESS_CONFIRMATION : CheckResult.PASS);
 
     int round =
@@ -2165,18 +2235,36 @@ public class TradeDocumentService {
         required,
         setId);
     refreshTotals(setId);
-    recordEvent(setId, "CHECK_RUN", status.name(), status.name(), missingSummary, "第 " + round + " 轮", "CHECK", checkId);
+    recordEvent(
+        setId,
+        "CHECK_RUN",
+        status.name(),
+        status.name(),
+        missingSummary,
+        "第 " + round + " 轮",
+        "CHECK",
+        checkId);
 
     return saved(
         setId,
         switch (result) {
           case PASS -> "完整性校验通过（第 " + round + " 轮，命中 " + rules.size() + " 条规则）。可以提交下游。";
-          case FAIL -> "完整性校验不通过（第 " + round + " 轮）：缺 " + missing + " 项、待业务确认 "
-              + pendingBusiness + " 项。补齐后重跑校验。";
+          case FAIL ->
+              "完整性校验不通过（第 "
+                  + round
+                  + " 轮）：缺 "
+                  + missing
+                  + " 项、待业务确认 "
+                  + pendingBusiness
+                  + " 项。补齐后重跑校验。";
           case PENDING_BUSINESS_CONFIRMATION ->
-            "单证齐备但有 " + pendingBusiness + " 项优惠待业务确认（第 " + round + " 轮）。"
-                + "「实质性改变」是否成立需要业务确认，系统只负责按规则校验与留档 —— "
-                + "这**不算通过**，确认或撤回优惠主张后才能提交。";
+              "单证齐备但有 "
+                  + pendingBusiness
+                  + " 项优惠待业务确认（第 "
+                  + round
+                  + " 轮）。"
+                  + "「实质性改变」是否成立需要业务确认，系统只负责按规则校验与留档 —— "
+                  + "这**不算通过**，确认或撤回优惠主张后才能提交。";
         });
   }
 
@@ -2190,8 +2278,7 @@ public class TradeDocumentService {
     }
     String target = upperOrDefault(request == null ? null : request.status(), "RESOLVED");
     if (!Set.of("RESOLVED", "DISMISSED").contains(target)) {
-      throw new IllegalArgumentException(
-          "未知的处理动作：" + target + "，可选：RESOLVED（已处理）/ DISMISSED（忽略）");
+      throw new IllegalArgumentException("未知的处理动作：" + target + "，可选：RESOLVED（已处理）/ DISMISSED（忽略）");
     }
     String note = fit(request == null ? "" : request.resolutionNote(), 2000, "处理说明");
     if (note.isEmpty()) {
@@ -2223,8 +2310,8 @@ public class TradeDocumentService {
   /**
    * 汇总数与实际一致。
    *
-   * <p>三列一起算、一次 UPDATE —— DB 延迟约束 {@code guard_trade_set_totals} 在提交时
-   * 复核这三列。分开 update 会在两次写之间留下一个不自洽的中间态。
+   * <p>三列一起算、一次 UPDATE —— DB 延迟约束 {@code guard_trade_set_totals} 在提交时 复核这三列。分开 update
+   * 会在两次写之间留下一个不自洽的中间态。
    */
   private void refreshTotals(UUID setId) {
     // 三列一次算、一次 UPDATE。
@@ -2306,7 +2393,8 @@ public class TradeDocumentService {
 
   private BigDecimal amountOf(UUID setId, TradeDocumentKind kind) {
     // 提单/空运单/认证文件按申报货值口径，商业发票同样按申报货值；装箱单按箱数（见下方 comment）。
-    Record set = sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
+    Record set =
+        sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
     if (set == null) {
       return BigDecimal.ZERO;
     }
@@ -2326,7 +2414,8 @@ public class TradeDocumentService {
   }
 
   private BigDecimal quantityOf(UUID setId) {
-    Record set = sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
+    Record set =
+        sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
     if (set == null) {
       return BigDecimal.ZERO;
     }
@@ -2339,7 +2428,8 @@ public class TradeDocumentService {
   }
 
   private Integer packagesOf(UUID setId) {
-    Record set = sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
+    Record set =
+        sql.fetchOne("select source_declaration_id from trade_document_set where id=?", setId);
     if (set == null) {
       return 0;
     }
@@ -2350,7 +2440,8 @@ public class TradeDocumentService {
     return p.get("v", Integer.class);
   }
 
-  private Map<String, Object> item(String kind, String level, String state, String source, String detail) {
+  private Map<String, Object> item(
+      String kind, String level, String state, String source, String detail) {
     Map<String, Object> m = new LinkedHashMap<>();
     m.put("documentKind", kind);
     m.put("documentKindLabel", labelOf(TradeDocumentKind.values(), kind));
@@ -2382,8 +2473,7 @@ public class TradeDocumentService {
   /**
    * 上一轮报过、这一轮不再报的提醒 → 显式自动结清。
    *
-   * <p>必须结清而不是留着：提交闸数的是「未处理的阻断级提醒」，一份已经补齐的单证包
-   * 不该被上一轮的旧提醒永久挡住。但也不能静默消失 —— 结清动作带说明与处理人。
+   * <p>必须结清而不是留着：提交闸数的是「未处理的阻断级提醒」，一份已经补齐的单证包 不该被上一轮的旧提醒永久挡住。但也不能静默消失 —— 结清动作带说明与处理人。
    */
   private void autoResolveStaleReminders(UUID setId, UUID checkId, List<Pending> current) {
     var open =
@@ -2442,7 +2532,8 @@ public class TradeDocumentService {
   }
 
   private long countNotFinalDocuments(UUID setId) {
-    return sql.fetchOne("select count(*) from trade_document where set_id=? and status<>'FINAL'", setId)
+    return sql.fetchOne(
+            "select count(*) from trade_document where set_id=? and status<>'FINAL'", setId)
         .get(0, Long.class);
   }
 
@@ -2813,9 +2904,8 @@ public class TradeDocumentService {
   /**
    * 单证包上的「最近校验结论」标签。
    *
-   * <p>{@code NOT_CHECKED} 是「**还没跑过校验**」，只出现在单证包上，刻意**不**进
-   * {@link CheckResult} 词表 —— trade_document_check 上的每一次校验都必须有真结论。
-   * 所以这里不能拿 CheckResult.parse 去读它，那会把「没校验过」变成一个异常。
+   * <p>{@code NOT_CHECKED} 是「**还没跑过校验**」，只出现在单证包上，刻意**不**进 {@link CheckResult} 词表 ——
+   * trade_document_check 上的每一次校验都必须有真结论。 所以这里不能拿 CheckResult.parse 去读它，那会把「没校验过」变成一个异常。
    */
   private static String checkResultLabel(String raw) {
     return "NOT_CHECKED".equals(raw) ? "未校验" : CheckResult.parse(raw).label();
@@ -2840,7 +2930,10 @@ public class TradeDocumentService {
       // 而这里是真实列名（小写下划线）。不做这个匹配，词表就永远命中不了，
       // 排序会**静默**退回 id —— 表还在、结果也对，只是顺序不是用户要的。
       if (a.equalsIgnoreCase(sort)) {
-        return a + (a.equals("id") ? "" : (a.startsWith("created") || a.startsWith("updated") ? " desc" : " asc"))
+        return a
+            + (a.equals("id")
+                ? ""
+                : (a.startsWith("created") || a.startsWith("updated") ? " desc" : " asc"))
             + ", id";
       }
     }
@@ -2878,15 +2971,22 @@ public class TradeDocumentService {
   }
 
   private static String sourceOrDefault(String raw) {
-    String v = raw == null || raw.isBlank() ? SOURCE_TENANT : raw.trim().toUpperCase(java.util.Locale.ROOT);
+    String v =
+        raw == null || raw.isBlank()
+            ? SOURCE_TENANT
+            : raw.trim().toUpperCase(java.util.Locale.ROOT);
     if (!Set.of("TENANT_MAINTAINED", "MODULE_16", "CUSTOMS_FEED").contains(v)) {
-      throw new IllegalArgumentException("未知的规则来源：" + v + "，可选：TENANT_MAINTAINED / MODULE_16 / CUSTOMS_FEED");
+      throw new IllegalArgumentException(
+          "未知的规则来源：" + v + "，可选：TENANT_MAINTAINED / MODULE_16 / CUSTOMS_FEED");
     }
     return v;
   }
 
   private static String sourceOrDefaultCert(String raw) {
-    String v = raw == null || raw.isBlank() ? SOURCE_TENANT : raw.trim().toUpperCase(java.util.Locale.ROOT);
+    String v =
+        raw == null || raw.isBlank()
+            ? SOURCE_TENANT
+            : raw.trim().toUpperCase(java.util.Locale.ROOT);
     if (!Set.of("TENANT_MAINTAINED", "MODULE_16").contains(v)) {
       throw new IllegalArgumentException(
           "未知的认证状态来源：" + v + "，可选：TENANT_MAINTAINED（租户维护）/ MODULE_16（16 合规推送）");
@@ -2903,9 +3003,8 @@ public class TradeDocumentService {
   }
 
   /**
-   * 排序键白名单。{@code List.of(...).contains(null)} 会直接抛 NPE（不可变 List 不收 null），
-   * 而排序键是**可选**查询参数，前端不传就是 null —— 所以必须先判空再查表。
-   * 不在白名单里的值静默回落到默认键（表还在），注入串也因此进不来。
+   * 排序键白名单。{@code List.of(...).contains(null)} 会直接抛 NPE（不可变 List 不收 null）， 而排序键是**可选**查询参数，前端不传就是
+   * null —— 所以必须先判空再查表。 不在白名单里的值静默回落到默认键（表还在），注入串也因此进不来。
    */
   private static String sortOf(List<String> allowed, String requested, String fallback) {
     return requested != null && allowed.contains(requested) ? requested : fallback;
@@ -2971,13 +3070,30 @@ public class TradeDocumentService {
       int size) {}
 
   public record TemplateQuery(
-      String documentKind, String countryCode, String status, String keyword, String sort, int page, int size) {}
+      String documentKind,
+      String countryCode,
+      String status,
+      String keyword,
+      String sort,
+      int page,
+      int size) {}
 
   public record CertificationQuery(
-      UUID skuId, String status, String certificationSource, String keyword, String sort, int page, int size) {}
+      UUID skuId,
+      String status,
+      String certificationSource,
+      String keyword,
+      String sort,
+      int page,
+      int size) {}
 
   public record PreferenceRuleQuery(
-      String scheme, String destinationCountryCode, String status, String sort, int page, int size) {}
+      String scheme,
+      String destinationCountryCode,
+      String status,
+      String sort,
+      int page,
+      int size) {}
 
   public record ReminderQuery(
       UUID setId,
@@ -2991,5 +3107,10 @@ public class TradeDocumentService {
       int size) {}
 
   public record PreferenceConfirmationQuery(
-      UUID setId, String substantiveChangeStatus, String ftaScheme, Boolean claimedOnly, int page, int size) {}
+      UUID setId,
+      String substantiveChangeStatus,
+      String ftaScheme,
+      Boolean claimedOnly,
+      int page,
+      int size) {}
 }

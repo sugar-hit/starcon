@@ -25,17 +25,17 @@
 
 ## 接通了哪些接线点
 
-| 接线点 | 位置 | 说明 |
-| --- | --- | --- |
-| Maven 模块 | `backend/pom.xml` | 只加一行 `<module>services/trade</module>` |
-| 服务 POM | `backend/services/trade/pom.xml` | 照抄 channel：jOOQ 显式 SQL + Flyway + springdoc + Testcontainers + `tenancy` |
-| 启动类 | `com.starcon.trade.TradeApplication` | 刻意**不注册任何业务 Bean** |
-| 租户上下文 | `com.starcon.trade.TradeTenancyConfiguration` | `TenantTransactions` 声明为 Bean |
-| 数据源/端口 | `application.yml` | 端口 **8085**（接在 warehouse 8084 之后）；`${DB_*}` 全部走环境变量 |
-| 迁移基线 | `db/migration/V1__baseline.sql` | 版本号从 **V1** 起（各服务独立迁移目录） |
-| 数据库 | `deploy/docker/catalog-init/01-databases.sh` | `trade_app` role + `starcon_trade` 库 + `REVOKE/GRANT CONNECT`，与既有 4 个服务完全对称 |
-| 编排 | `deploy/docker/docker-compose.catalog.yml` | `trade` 服务 + `migrate-trade`（tools profile） |
-| 前端路由 | `apps/web/src/lib/api-proxy.ts` | `trade/` 分支 + `TRADE_URL` |
+| 接线点      | 位置                                          | 说明                                                                                    |
+| ----------- | --------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Maven 模块  | `backend/pom.xml`                             | 只加一行 `<module>services/trade</module>`                                              |
+| 服务 POM    | `backend/services/trade/pom.xml`              | 照抄 channel：jOOQ 显式 SQL + Flyway + springdoc + Testcontainers + `tenancy`           |
+| 启动类      | `com.starcon.trade.TradeApplication`          | 刻意**不注册任何业务 Bean**                                                             |
+| 租户上下文  | `com.starcon.trade.TradeTenancyConfiguration` | `TenantTransactions` 声明为 Bean                                                        |
+| 数据源/端口 | `application.yml`                             | 端口 **8085**（接在 warehouse 8084 之后）；`${DB_*}` 全部走环境变量                     |
+| 迁移基线    | `db/migration/V1__baseline.sql`               | 版本号从 **V1** 起（各服务独立迁移目录）                                                |
+| 数据库      | `deploy/docker/catalog-init/01-databases.sh`  | `trade_app` role + `starcon_trade` 库 + `REVOKE/GRANT CONNECT`，与既有 4 个服务完全对称 |
+| 编排        | `deploy/docker/docker-compose.catalog.yml`    | `trade` 服务 + `migrate-trade`（tools profile）                                         |
+| 前端路由    | `apps/web/src/lib/api-proxy.ts`               | `trade/` 分支 + `TRADE_URL`                                                             |
 
 ## 三个关键决策
 
@@ -121,11 +121,11 @@ warehouse 700 与 trade 4 均为 0 失败 0 错误。
 
 本车道三次观察同一件事，结论是「间歇性、不稳定复现」，记录下来供派车道复查：
 
-| 轮次 | 命令 | 结果 |
-| --- | --- | --- |
-| A | 全量 `./mvnw verify`（与前端 build 并发） | ❌ warehouse 阶段红 |
-| B | `./mvnw -pl services/warehouse -am test -Dtest=SellablePolicyIntegrationTest` | ❌ 17 例红 1 例 |
-| C | 全量 `./mvnw verify -fae`（无并发） | ✅ 17 例全绿，整个反应堆 BUILD SUCCESS |
+| 轮次 | 命令                                                                          | 结果                                   |
+| ---- | ----------------------------------------------------------------------------- | -------------------------------------- |
+| A    | 全量 `./mvnw verify`（与前端 build 并发）                                     | ❌ warehouse 阶段红                    |
+| B    | `./mvnw -pl services/warehouse -am test -Dtest=SellablePolicyIntegrationTest` | ❌ 17 例红 1 例                        |
+| C    | 全量 `./mvnw verify -fae`（无并发）                                           | ✅ 17 例全绿，整个反应堆 BUILD SUCCESS |
 
 失败症状固定：
 
@@ -141,7 +141,7 @@ java.lang.AssertionError: Expected size: 1 but was: 0 in: []
 **不是本车道造成的**，两条独立证据：
 
 1. `git diff --stat 4ead1b7 HEAD -- backend/services/warehouse backend/services/channel
-   backend/services/catalog backend/services/identity backend/libraries` 输出为空 ——
+backend/services/catalog backend/services/identity backend/libraries` 输出为空 ——
    本车道对这五个目录零改动。
 2. 轮次 B 的 reactor 只有 `backend` 父 POM + `tenancy` + `warehouse`，
    **根本没有构建 `services/trade`**。
@@ -153,6 +153,7 @@ java.lang.AssertionError: Expected size: 1 but was: 0 in: []
 ## 文件清单
 
 新增：
+
 - `backend/services/trade/pom.xml`
 - `backend/services/trade/src/main/java/com/starcon/trade/TradeApplication.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/TradeTenancyConfiguration.java`
@@ -161,6 +162,7 @@ java.lang.AssertionError: Expected size: 1 but was: 0 in: []
 - `backend/services/trade/src/test/java/com/starcon/trade/TradeTenancyIntegrationTest.java`
 
 修改（共享文件，全部只做增量）：
+
 - `backend/pom.xml`（+1 行）
 - `deploy/docker/catalog-init/01-databases.sh`（+5 / -1）
 - `deploy/docker/docker-compose.catalog.yml`（+36）

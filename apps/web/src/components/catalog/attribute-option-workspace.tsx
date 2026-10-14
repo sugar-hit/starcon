@@ -101,7 +101,8 @@ export function AttributeOptionWorkspace() {
   }, [load]);
 
   const groups = useMemo(() => groupByAttribute(page), [page]);
-  const filtered = Boolean(keyword.trim()) || attributeId !== null || enabled !== null || referenced !== null;
+  const filtered =
+    Boolean(keyword.trim()) || attributeId !== null || enabled !== null || referenced !== null;
   const lastPage = Math.max(0, Math.ceil(total / PAGE_SIZE) - 1);
 
   const reset = () => {
@@ -145,9 +146,7 @@ export function AttributeOptionWorkspace() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-h-20 text-primary font-semibold tracking-tight">
-            属性选项管理
-          </h1>
+          <h1 className="text-h-20 text-primary font-semibold tracking-tight">属性选项管理</h1>
           <p className="text-muted-foreground text-copy-13 mt-1">
             租户下所有枚举属性的选项总览。停用只挡住新建使用，历史单据仍可展示该取值。
           </p>
@@ -328,9 +327,7 @@ export function AttributeOptionWorkspace() {
                                 </span>
                               )}
                             </div>
-                            {hint && (
-                              <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
-                            )}
+                            {hint && <p className="text-muted-foreground mt-1 text-xs">{hint}</p>}
                           </td>
                           {writable && (
                             <td className="px-3 py-2">
@@ -349,9 +346,7 @@ export function AttributeOptionWorkspace() {
                                   size="sm"
                                   disabled={busy || position === group.rows.length - 1}
                                   title="下移"
-                                  onClick={() =>
-                                    void onMove(group.rows, position, position + 1)
-                                  }
+                                  onClick={() => void onMove(group.rows, position, position + 1)}
                                 >
                                   <ArrowDown className="h-4 w-4" />
                                 </Button>

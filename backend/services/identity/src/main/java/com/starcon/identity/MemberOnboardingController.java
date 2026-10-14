@@ -26,23 +26,19 @@ import org.springframework.web.bind.annotation.*;
  * 17.2.2.2 成员开通与入职。
  *
  * <p>与 {@link AdministrationController} 的 17.2.2.1 成员管理分工：那边管「已经在册的成员」怎么改
- * （改部门、改角色、停用、移除），这里管「一个人怎么进来」——建立账号（新建或关联已有全局账号）、
- * 建立本租户成员关系、设定初始部门与初始角色。
+ * （改部门、改角色、停用、移除），这里管「一个人怎么进来」——建立账号（新建或关联已有全局账号）、 建立本租户成员关系、设定初始部门与初始角色。
  *
- * <p>蓝图把邮件邀请、接受令牌和自助激活划给后续独立 PRD，所以这里**没有**邀请态端点、
- * 也没有令牌列。需要特别说明的是本模块的凭据纪律：
+ * <p>蓝图把邮件邀请、接受令牌和自助激活划给后续独立 PRD，所以这里**没有**邀请态端点、 也没有令牌列。需要特别说明的是本模块的凭据纪律：
+ *
  * <ul>
  *   <li>初始凭据由**服务端生成**（不是管理员填写），所以不存在「管理员挑了个弱密码」这条路；
- *   <li>明文只在 {@code POST /identity/onboardings} 的这一次响应里返回，
- *       之后列表、详情、审计、CSV 导出都拿不到——库里根本没有这一列，连哈希都不在这里
- *       （哈希在 {@code app_user.password_hash}，只有一份）；
- *   <li>关联已有账号（LINKED）时服务端根本不知道那个人的密码，所以响应里的
- *       {@code initialCredential} 为 null。返回一个假的比不返回更糟。
+ *   <li>明文只在 {@code POST /identity/onboardings} 的这一次响应里返回， 之后列表、详情、审计、CSV
+ *       导出都拿不到——库里根本没有这一列，连哈希都不在这里 （哈希在 {@code app_user.password_hash}，只有一份）；
+ *   <li>关联已有账号（LINKED）时服务端根本不知道那个人的密码，所以响应里的 {@code initialCredential} 为 null。返回一个假的比不返回更糟。
  * </ul>
  *
- * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系，
- * <b>不采信 {@code X-Tenant-Id} 头</b>：三个数据库函数的签名里都没有 tenant_id 参数，
- * 客户端想传租户也无处可传。判定最终仍由 FORCE RLS 兜底。
+ * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系， <b>不采信 {@code X-Tenant-Id}
+ * 头</b>：三个数据库函数的签名里都没有 tenant_id 参数， 客户端想传租户也无处可传。判定最终仍由 FORCE RLS 兜底。
  */
 @RestController
 @RequestMapping("/identity")
@@ -50,12 +46,11 @@ public class MemberOnboardingController {
   private static final String READ = "identity.onboarding.read";
   private static final String CREATE = "identity.onboarding.create";
   private static final String UPDATE = "identity.onboarding.update";
+
   /** bcrypt 的输入上限是 72 字节；生成 20 位远在区间内，也满足 17.2.2.1 的 12–72 位校验。 */
   private static final int PASSWORD_LENGTH = 20;
-  /**
-   * 初始密码字符集：大小写字母 + 数字，去掉了容易互相看错的 I/l/1/O/0。
-   * 去掉歧义字符不是为了好看——这些字符在工单、IM 和截图里被认错，会直接变成「登录不上去」。
-   */
+
+  /** 初始密码字符集：大小写字母 + 数字，去掉了容易互相看错的 I/l/1/O/0。 去掉歧义字符不是为了好看——这些字符在工单、IM 和截图里被认错，会直接变成「登录不上去」。 */
   private static final String PASSWORD_ALPHABET =
       "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
 
@@ -77,8 +72,7 @@ public class MemberOnboardingController {
   /**
    * 入职记录列表项。
    *
-   * <p>刻意只有 {@code credentialIssued}（发过没有）而没有任何凭据字段：
-   * 蓝图写明「不在页面或日志返回完整初始凭据」，这一条由 DTO 形状保证——
+   * <p>刻意只有 {@code credentialIssued}（发过没有）而没有任何凭据字段： 蓝图写明「不在页面或日志返回完整初始凭据」，这一条由 DTO 形状保证——
    * 就算将来有人给它加字段，列表接口也拿不到可以泄露的东西。
    */
   public record OnboardingView(
@@ -104,9 +98,8 @@ public class MemberOnboardingController {
   /**
    * 开通入职入参。
    *
-   * <p>刻意**没有** password 字段：初始凭据由服务端生成。这是本模块与 17.2.2.1 成员新增
-   * 最实质的差别——那边管理员自己填密码（所以有 12–72 位校验和「留空表示关联已有账号」），
-   * 这边不给填的机会，凭据只在创建响应里出现一次。
+   * <p>刻意**没有** password 字段：初始凭据由服务端生成。这是本模块与 17.2.2.1 成员新增 最实质的差别——那边管理员自己填密码（所以有 12–72
+   * 位校验和「留空表示关联已有账号」）， 这边不给填的机会，凭据只在创建响应里出现一次。
    */
   public record OnboardingInput(
       @NotBlank @Size(max = 100) String username,
@@ -116,9 +109,8 @@ public class MemberOnboardingController {
   /**
    * 创建响应。
    *
-   * <p>{@code initialCredential} 是本模块唯一一处会出现凭据明文的地方，且只在账号**新建**时非空。
-   * 它不会落审计、不会进日志：审计快照由 {@link #snapshot} 从入库后的入职记录回读拼装，
-   * 压根不经过这个对象。
+   * <p>{@code initialCredential} 是本模块唯一一处会出现凭据明文的地方，且只在账号**新建**时非空。 它不会落审计、不会进日志：审计快照由 {@link
+   * #snapshot} 从入库后的入职记录回读拼装， 压根不经过这个对象。
    */
   public record OnboardingResult(
       UUID onboardingId,
@@ -161,22 +153,18 @@ public class MemberOnboardingController {
   /**
    * 开通入职。
    *
-   * <p>先在内存里生成一份初始凭据，再连同它的 bcrypt 哈希一起交给数据库函数；
-   * 函数返回 {@code account_mode} 告诉我们这次是不是真新建了账号：
+   * <p>先在内存里生成一份初始凭据，再连同它的 bcrypt 哈希一起交给数据库函数； 函数返回 {@code account_mode} 告诉我们这次是不是真新建了账号：
+   *
    * <ul>
    *   <li>CREATED —— 返回明文，管理员必须当场转交给本人；系统不再有第二次机会。
-   *   <li>LINKED —— 丢弃内存里那份凭据，返回 null。这个人的密码在人家自己手上，
-   *       本次操作没有、也不应该生成一个新的。
+   *   <li>LINKED —— 丢弃内存里那份凭据，返回 null。这个人的密码在人家自己手上， 本次操作没有、也不应该生成一个新的。
    * </ul>
    *
-   * <p>为什么不为「账号已存在」报错（17.2.2.1 的 member_user 在这种情况下会报
-   * 「不能重置已有账号」）：那份哈希是**本方法生成的**，调用方既不能选择也不能看到它，
-   * 关联分支直接丢弃即可。管理员填密码时那条拒绝规则才成立——那时继续走下去
-   * 等于允许借「建成员」改掉一个已有账号的登录凭据。
+   * <p>为什么不为「账号已存在」报错（17.2.2.1 的 member_user 在这种情况下会报 「不能重置已有账号」）：那份哈希是**本方法生成的**，调用方既不能选择也不能看到它，
+   * 关联分支直接丢弃即可。管理员填密码时那条拒绝规则才成立——那时继续走下去 等于允许借「建成员」改掉一个已有账号的登录凭据。
    *
-   * <p>代价是 LINKED 时也会白算一次 bcrypt。这是刻意的：运行时角色 identity_app 对
-   * {@code app_user} 根本没有 GRANT（全局用户表不可枚举），所以 Java 侧无法先查
-   * 「这个账号在不在」再决定要不要生成——生成与否只能由数据库函数判定，
+   * <p>代价是 LINKED 时也会白算一次 bcrypt。这是刻意的：运行时角色 identity_app 对 {@code app_user} 根本没有
+   * GRANT（全局用户表不可枚举），所以 Java 侧无法先查 「这个账号在不在」再决定要不要生成——生成与否只能由数据库函数判定，
    * 而函数要拿到哈希才知道该不该建号。开通是低频管理操作，这个代价可以接受。
    */
   @PostMapping("/onboardings")
@@ -242,7 +230,8 @@ public class MemberOnboardingController {
         true,
         a -> {
           var before = find(auth, id);
-          sql.fetch("select complete_onboarding(?::text,?::uuid,?::uuid)", hash(auth), id, a.userId());
+          sql.fetch(
+              "select complete_onboarding(?::text,?::uuid,?::uuid)", hash(auth), id, a.userId());
           var after = find(auth, id);
           record(a, auth, id, "MemberOnboardingCompleted", snapshot(before), snapshot(after));
           return null;
@@ -256,11 +245,13 @@ public class MemberOnboardingController {
   /**
    * 与 {@code AdministrationController.call} 同口径：租户事务 + 会话锁 + 租户二次校验 + 权限码。
    *
-   * <p>开通入职是授权与组织变更，必须由当前租户所有者执行——放一个人进来
-   * 等于给了他本租户的身份，这件事的闸与成员管理、子租户、层级授权完全一致。
+   * <p>开通入职是授权与组织变更，必须由当前租户所有者执行——放一个人进来 等于给了他本租户的身份，这件事的闸与成员管理、子租户、层级授权完全一致。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -272,12 +263,10 @@ public class MemberOnboardingController {
           if (!a.tenantId().equals(initial.tenantId()))
             throw IdentityController.error(HttpStatus.CONFLICT, "租户已切换，请重试");
           boolean allowed =
-              a.grants()
-                  .stream()
+              a.grants().stream()
                   .anyMatch(
                       g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission));
-          if (!allowed)
-            throw IdentityController.error(HttpStatus.FORBIDDEN, "当前角色没有此操作权限");
+          if (!allowed) throw IdentityController.error(HttpStatus.FORBIDDEN, "当前角色没有此操作权限");
           if (mutation && !a.owner())
             throw IdentityController.error(HttpStatus.FORBIDDEN, "授权与组织变更需由当前租户所有者执行");
           return work.apply(a);
@@ -287,9 +276,8 @@ public class MemberOnboardingController {
   /**
    * 生成初始凭据。
    *
-   * <p>用 {@link SecureRandom} 而不是 {@code UUID} 或 {@code Random}：初始凭据是账号的
-   * 第一道门，UUID 只有 122 位随机熵且格式可预测（版本位固定），{@code Random} 更是线性同余、
-   * 给定几个输出就能反推后续。字符集去掉了易混字符，见 {@link #PASSWORD_ALPHABET}。
+   * <p>用 {@link SecureRandom} 而不是 {@code UUID} 或 {@code Random}：初始凭据是账号的 第一道门，UUID 只有 122
+   * 位随机熵且格式可预测（版本位固定），{@code Random} 更是线性同余、 给定几个输出就能反推后续。字符集去掉了易混字符，见 {@link #PASSWORD_ALPHABET}。
    */
   private String generatePassword() {
     var chars = new char[PASSWORD_LENGTH];
@@ -305,10 +293,8 @@ public class MemberOnboardingController {
   /**
    * 入职快照。
    *
-   * <p>刻意**不含任何凭据字段**——连「初始密码是什么」都不该进审计。
-   * {@code AuditRedactor} 会把命中 credential/password 的键整值打成 {@code ***}，
-   * 但这里根本不构造这样的键：审计要回答的是「谁在什么时候把谁接进了哪个租户、给了什么角色」，
-   * 凭据不属于这个问题，写进去只会多一个泄露点。
+   * <p>刻意**不含任何凭据字段**——连「初始密码是什么」都不该进审计。 {@code AuditRedactor} 会把命中 credential/password 的键整值打成
+   * {@code ***}， 但这里根本不构造这样的键：审计要回答的是「谁在什么时候把谁接进了哪个租户、给了什么角色」， 凭据不属于这个问题，写进去只会多一个泄露点。
    */
   private static Map<String, Object> snapshot(OnboardingView o) {
     if (o == null) return null;
@@ -328,8 +314,7 @@ public class MemberOnboardingController {
 
   /** 取一条入职记录；不在本租户（或已被别的请求完成）时按 404 对外，不泄露「存在但无权」。 */
   private OnboardingView find(String auth, UUID id) {
-    for (var o : list(auth))
-      if (o.id().equals(id)) return o;
+    for (var o : list(auth)) if (o.id().equals(id)) return o;
     throw IdentityController.error(HttpStatus.NOT_FOUND, "入职记录不存在");
   }
 
@@ -368,18 +353,15 @@ public class MemberOnboardingController {
    * <p>规则与 17.2.2.1 的 {@code assignments()} 逐条一致（不能发 OWNER、不能给停用角色、
    * 本部门范围必须先有部门、管理权限只能绑全租户范围、角色不能重复）。
    *
-   * <p>放在 Java 侧是为了让「选了停用角色」返回 400 而不是笼统的 409：
-   * 前者告诉用户哪里填错了，后者只说「记录不可用」，用户会以为是并发冲突去刷新页面。
+   * <p>放在 Java 侧是为了让「选了停用角色」返回 400 而不是笼统的 409： 前者告诉用户哪里填错了，后者只说「记录不可用」，用户会以为是并发冲突去刷新页面。
    * 数据库函数里保留同样的判断，因为 {@code onboard_member} 可能被别的服务直接调用，绕过这一层。
    *
-   * <p>「不属于本租户」在这里表现为「查不到」而不是「越权」：role 与 department 都 FORCE RLS，
-   * 当前租户的事务里根本看不到别人的行，所以跨租户引用和引用一个不存在的 id 得到同一个答案。
+   * <p>「不属于本租户」在这里表现为「查不到」而不是「越权」：role 与 department 都 FORCE RLS， 当前租户的事务里根本看不到别人的行，所以跨租户引用和引用一个不存在的
+   * id 得到同一个答案。
    */
   private void validate(UUID department, List<RoleAssignmentInput> roles) {
     if (department != null)
-      check(
-          sql.fetchExists(sql.selectOne().from("department").where("id=?", department)),
-          "部门不存在");
+      check(sql.fetchExists(sql.selectOne().from("department").where("id=?", department)), "部门不存在");
     check(
         roles.stream().map(RoleAssignmentInput::roleId).distinct().count() == roles.size(),
         "角色不能重复");
@@ -388,9 +370,7 @@ public class MemberOnboardingController {
       if (role == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "角色不存在");
       require(!role.get("code", String.class).equals("OWNER"), "请使用转移所有者操作");
       check(role.get("status", String.class).equals("ACTIVE"), "不能分配停用角色");
-      check(
-          !input.scopeMode().equals("DEPARTMENT") || department != null,
-          "本部门范围需要先设置成员部门");
+      check(!input.scopeMode().equals("DEPARTMENT") || department != null, "本部门范围需要先设置成员部门");
       if (!input.scopeMode().equals("ALL"))
         check(
             !sql.fetchExists(

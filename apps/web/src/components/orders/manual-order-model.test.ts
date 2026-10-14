@@ -174,9 +174,7 @@ describe('状态与只读', () => {
 
 describe('提交前的缺口提示', () => {
   it('三道闸与 DB 延迟约束触发器逐条对应', () => {
-    expect(
-      submitBlockers({ lines: [], addresses: [], customer: null }),
-    ).toHaveLength(3);
+    expect(submitBlockers({ lines: [], addresses: [], customer: null })).toHaveLength(3);
   });
 
   it('行 / 收货地址 / 客户都齐了才放行', () => {

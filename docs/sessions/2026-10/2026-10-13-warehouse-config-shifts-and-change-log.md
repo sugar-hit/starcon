@@ -28,21 +28,22 @@
 否则「这个仓改过几次」会被无意义的提交灌水。
 
 **不可篡改两道防线。** `REVOKE UPDATE, DELETE`（权限层，只给 SELECT/INSERT）
-+ `BEFORE UPDATE OR DELETE` 触发器（表 owner 与超级用户仍能改）。
-集成测试两条都实跑：运行角色报 `permission denied`，超级用户报触发器的 `append-only`。
+
+- `BEFORE UPDATE OR DELETE` 触发器（表 owner 与超级用户仍能改）。
+  集成测试两条都实跑：运行角色报 `permission denied`，超级用户报触发器的 `append-only`。
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 理由 |
-| --- | --- | --- |
-| 权限码 | 新开 `warehouse.facilities.config`，不复用 8.1.1.2 的 `update` | 改地址填错是可恢复的录入事故；改拣货策略是**作业契约** —— 影响的是之后所有出库作业的执行方式，已按旧策略执行的部分不会改回来。且仓库主管与行政通常是不同岗位 |
-| 班次时刻类型 | `time`（当地墙上时刻），不是 `timestamptz` | 「早班 09:00-18:00」是每天重复的规则不是某个瞬间；存成 timestamptz 必须回答「09:00 是哪天的 09:00」而这个日期没有来源。**因此本模块没有 timestamptz 写入路径，也就不存在 `Timestamp.valueOf` 偏 −28800s 的风险** |
-| 跨夜班 | 允许（start > end） | 夜班是真实作业形态，拆成两条会让「22 点到次日 6 点」在数据层没有答案 |
-| 班次删除 | 不提供 DELETE 端点，出口是停用 `enabled=false` | 删班次会让「上周三夜班是谁上的」失去载体 —— 留痕会指向一个不存在的班次 |
-| 人员花名册 | **不建** | 蓝图措辞是「工作时段与班次」，说的是时间不是人。人员档案的真相来源在 identity（成员关系），本服务再建一份就是造第二个真相来源（与 V1 `legal_entity_ref` 纪律相反） |
-| 未配置态 | 返回默认值 + `unconfigured=true`，**不自动建行** | 自动建行会让「复核比例是 0」与「还没配过」在界面上分不开，而后者意味着作业正按默认值跑 |
-| 比例存储 | `NUMERIC(9,6)` + 入库前归一到 6 位小数 | 0.1 在二进制浮点里是 0.1000000000000000055；归一让「同一个比例」在留痕里只有一个写法 |
-| 配置全貌 | 一个端点返回配置 + 班次 + 留痕 + 影响声明 | 四请求会让页面在数据版本不一致时把「班次改过、配置没改」拼在一起显示 |
+| 取舍         | 选择                                                           | 理由                                                                                                                                                                                                             |
+| ------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 权限码       | 新开 `warehouse.facilities.config`，不复用 8.1.1.2 的 `update` | 改地址填错是可恢复的录入事故；改拣货策略是**作业契约** —— 影响的是之后所有出库作业的执行方式，已按旧策略执行的部分不会改回来。且仓库主管与行政通常是不同岗位                                                     |
+| 班次时刻类型 | `time`（当地墙上时刻），不是 `timestamptz`                     | 「早班 09:00-18:00」是每天重复的规则不是某个瞬间；存成 timestamptz 必须回答「09:00 是哪天的 09:00」而这个日期没有来源。**因此本模块没有 timestamptz 写入路径，也就不存在 `Timestamp.valueOf` 偏 −28800s 的风险** |
+| 跨夜班       | 允许（start > end）                                            | 夜班是真实作业形态，拆成两条会让「22 点到次日 6 点」在数据层没有答案                                                                                                                                             |
+| 班次删除     | 不提供 DELETE 端点，出口是停用 `enabled=false`                 | 删班次会让「上周三夜班是谁上的」失去载体 —— 留痕会指向一个不存在的班次                                                                                                                                           |
+| 人员花名册   | **不建**                                                       | 蓝图措辞是「工作时段与班次」，说的是时间不是人。人员档案的真相来源在 identity（成员关系），本服务再建一份就是造第二个真相来源（与 V1 `legal_entity_ref` 纪律相反）                                               |
+| 未配置态     | 返回默认值 + `unconfigured=true`，**不自动建行**               | 自动建行会让「复核比例是 0」与「还没配过」在界面上分不开，而后者意味着作业正按默认值跑                                                                                                                           |
+| 比例存储     | `NUMERIC(9,6)` + 入库前归一到 6 位小数                         | 0.1 在二进制浮点里是 0.1000000000000000055；归一让「同一个比例」在留痕里只有一个写法                                                                                                                             |
+| 配置全貌     | 一个端点返回配置 + 班次 + 留痕 + 影响声明                      | 四请求会让页面在数据版本不一致时把「班次改过、配置没改」拼在一起显示                                                                                                                                             |
 
 ## 上游依赖实查（按实查为准，与简报无出入）
 
@@ -67,16 +68,19 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V104__warehouse_operating_config.sql`（三张表 + 触发器 + GRANT）
 - `backend/services/identity/src/main/resources/db/migration/V104__warehouse_config_permission.sql`（与 warehouse 同取预分配 V104，是仓库既有先例，V69 就发生过）
 
 **后端**
+
 - `WarehouseConfigModels.java`（PickingStrategy 三值枚举 / WarehouseConfig 带 unconfigured / ShiftRow / ConfigChange / ConfigImpact）
 - `WarehouseConfigService.java`
 - `WarehouseConfigController.java`（**独立文件**，不并进 `WarehouseFacilityController` / `WarehouseDetailController`）
 - `WarehouseConfigIntegrationTest.java`（36 例）
 
 **前端**
+
 - `apps/web/src/components/warehouse/warehouse-config-model.ts` + `.test.ts`（19 例）
 - `apps/web/src/components/warehouse/warehouse-config-workspace.tsx`
 - `apps/web/src/app/warehouse/facilities/[id]/config/page.tsx`
@@ -84,9 +88,11 @@
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（放行 3 例 + 反向拒绝 1 例）
 
 **契约**（codegen 产物，未手改）
+
 - `packages/api-contracts/src/contracts/warehouse.ts` + `warehouse.openapi.json`
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（**只改 8.1.1.3 那一行的状态与证据两格**）
 
 ## 后续待办（不属本车道）

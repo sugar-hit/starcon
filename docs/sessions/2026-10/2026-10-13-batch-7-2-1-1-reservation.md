@@ -33,9 +33,9 @@
 - **页面**：`/inventory/reservation`（`components/inventory/inventory-reservation.tsx` +
   纯函数 `inventory-reservation-model.ts`），真实工作区，加载态／空态／错误态三态分开渲染
 - **测试**：`ReservationIntegrationTest` 35 例（Testcontainers 真实 PG16，连接池压到 1）
-  + `inventory-reservation-model.test.ts` 12 例 + `route.test.ts` 放行／反向拒绝两组用例
-  - 租户隔离三断言实跑：两租户互不可见、伪造 `X-Tenant-Id` 无效、连接池归还后不串租户
-  - `timestamptz` 断言**写回的值**（instant 与 offset 均比对），不是「没抛异常」
+  - `inventory-reservation-model.test.ts` 12 例 + `route.test.ts` 放行／反向拒绝两组用例
+  * 租户隔离三断言实跑：两租户互不可见、伪造 `X-Tenant-Id` 无效、连接池归还后不串租户
+  * `timestamptz` 断言**写回的值**（instant 与 offset 均比对），不是「没抛异常」
 
 **关键设计决策**：
 
@@ -53,7 +53,7 @@
 
 2. **刻意不实现释放／过期动作。** 蓝图 7.2.1.3 明写「承诺分配后不再自动 TTL 释放」，
    那是高风险不可逆动作，不属于本模块职责。页面与 `/capabilities` 显式报 `available=false`
-   + ownerModule，**页面上没有点下去必然 404 的释放按钮**。
+   - ownerModule，**页面上没有点下去必然 404 的释放按钮**。
 
 3. **摘要聚合用标量子查询而非 join 展开**，避免库位／批次维度 join 成笛卡尔积互相放大。
 
@@ -64,14 +64,14 @@
 
 ## L2 批次闸结果
 
-| 步骤 | 结果 |
-| --- | --- |
-| `./mvnw verify` | ✅ BUILD SUCCESS，7/7 模块，6m42s |
-| `pnpm typecheck` | ✅ 3/3 |
-| `pnpm lint` | ✅ 3/3（1 条 warning 经核为 `goods-receipt.tsx` 既有告警，非本车道） |
-| `pnpm test` | ✅ 2177/2177，114 文件 |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | ✅ 路由表出现 `/inventory/reservation` |
-| `sync.mjs --check` | ✅ 台账与蓝图一致 |
+| 步骤                                                         | 结果                                                                 |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `./mvnw verify`                                              | ✅ BUILD SUCCESS，7/7 模块，6m42s                                    |
+| `pnpm typecheck`                                             | ✅ 3/3                                                               |
+| `pnpm lint`                                                  | ✅ 3/3（1 条 warning 经核为 `goods-receipt.tsx` 既有告警，非本车道） |
+| `pnpm test`                                                  | ✅ 2177/2177，114 文件                                               |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | ✅ 路由表出现 `/inventory/reservation`                               |
+| `sync.mjs --check`                                           | ✅ 台账与蓝图一致                                                    |
 
 ### L2 抓到并已修复的一例（跨车道违约）
 
@@ -94,11 +94,11 @@
 
 ## ⚠️ 本批未并入的 3 条车道（挂起，非失败）
 
-| 模块 | 名称 | commit | L1 |
-| --- | --- | --- | --- |
-| 8.4.1.1 | 组装单 | `13b1309` | 945 例 0 失败 |
+| 模块    | 名称     | commit    | L1                              |
+| ------- | -------- | --------- | ------------------------------- |
+| 8.4.1.1 | 组装单   | `13b1309` | 945 例 0 失败                   |
 | 8.1.1.3 | 仓库配置 | `79a2280` | warehouse 960 / identity 236 绿 |
-| 8.1.2.1 | 库位树 | `a908634` | 949 例 0 失败 |
+| 8.1.2.1 | 库位树   | `a908634` | 949 例 0 失败                   |
 
 三条都已 `land`、工作区干净、commit 完整，**唯一障碍是 `apps/web/src/lib/api-proxy.ts`
 并入冲突**。按 `PIPELINE.md` 第 3 步「不要自己强行解冲突」，本轮未做人工求并。

@@ -43,7 +43,11 @@ export function fetchBomBinding(orderId: string) {
  * PUT 的语义是「把这份资源改成这样」，与冻结正好相反。
  */
 export function freezeBomBinding(orderId: string, input: BomFreezeInput) {
-  return api<BomFreezeResult>(`${base}/orders/${encodeURIComponent(orderId)}/bom-binding`, 'POST', input);
+  return api<BomFreezeResult>(
+    `${base}/orders/${encodeURIComponent(orderId)}/bom-binding`,
+    'POST',
+    input,
+  );
 }
 
 /** 只读展开树（纯本地读，不发跨服务请求）。 */
@@ -84,9 +88,7 @@ export function isPurchaseLine(line: BomSnapshotLine): boolean {
 }
 
 /** 冻结状态的展示口径：只有两种，且**截断必须显红**。 */
-export function snapshotTone(
-  snapshot: BomBinding['snapshot'],
-): 'neutral' | 'success' | 'danger' {
+export function snapshotTone(snapshot: BomBinding['snapshot']): 'neutral' | 'success' | 'danger' {
   if (!snapshot) return 'neutral';
   return snapshot.truncated ? 'danger' : 'success';
 }

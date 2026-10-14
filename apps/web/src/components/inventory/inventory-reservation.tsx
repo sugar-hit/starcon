@@ -279,8 +279,9 @@ export function InventoryReservationWorkspace() {
       {allocation && allocation.available ? (
         <SectionCard title="分配明细">
           <p className="text-muted-foreground text-sm">
-            点预占单号进明细：看这笔预占实际圈到了哪些（仓 / 货位 / 批次），以及每条分配的迁移时间线。
-            「已分配量」由分配行回写 —— 已分配但未出库的部分不计入剩余量，那部分货还在仓里占着可用量。
+            点预占单号进明细：看这笔预占实际圈到了哪些（仓 / 货位 /
+            批次），以及每条分配的迁移时间线。 「已分配量」由分配行回写 ——
+            已分配但未出库的部分不计入剩余量，那部分货还在仓里占着可用量。
           </p>
         </SectionCard>
       ) : allocation && !allocation.available ? (

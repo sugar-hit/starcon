@@ -167,10 +167,7 @@ export function canEdit(profile: { status: string | null }): boolean {
   return profile.status !== 'APPROVED';
 }
 
-export function canSubmit(profile: {
-  status: string | null;
-  submittedAt: string | null;
-}): boolean {
+export function canSubmit(profile: { status: string | null; submittedAt: string | null }): boolean {
   // 已提交的 DRAFT 不可重复提交；REJECTED 也不能（要先改再提交，而后端只认 DRAFT 可提交）。
   return profile.status === 'DRAFT' && !profile.submittedAt;
 }
@@ -216,8 +213,7 @@ export function readinessText(profile: {
   declarationReady: boolean;
   status: string | null;
 }): string {
-  if (profile.declarationReady)
-    return '已审核通过，10 报关可以引用这份申报资料。';
+  if (profile.declarationReady) return '已审核通过，10 报关可以引用这份申报资料。';
   return '未审核通过，10 报关取数会直接被拒绝（接口返回 409），不会拿到半成品资料。';
 }
 
@@ -228,10 +224,7 @@ export function incompleteRows(elements: readonly DeclarationElement[]): Declara
   return elements.filter((element) => element.required && element.elementValue.trim() === '');
 }
 
-export function elementLabel(element: {
-  elementCode: string;
-  elementName: string;
-}): string {
+export function elementLabel(element: { elementCode: string; elementName: string }): string {
   const code = element.elementCode.trim();
   const name = element.elementName.trim();
   if (code === '') return name === '' ? '未命名申报要素' : name;
@@ -355,7 +348,9 @@ export function validateDraft(draft: CustomsDraft): string[] {
   const value = draft.declaredValueReference.trim();
   if (value !== '') {
     if (!/^\d+(\.\d{1,6})?$/.test(value))
-      errors.push('申报价值参考最多 6 位小数：多出的位数会被数据库静默四舍五入，而报的那个数就不存在了');
+      errors.push(
+        '申报价值参考最多 6 位小数：多出的位数会被数据库静默四舍五入，而报的那个数就不存在了',
+      );
     else if (Number(value) <= 0) errors.push('申报价值参考必须大于 0');
   }
 
@@ -366,12 +361,13 @@ export function validateDraft(draft: CustomsDraft): string[] {
   if (!draft.preferentialOriginEligible && agreement !== '')
     errors.push(`没有勾可享惠就不该填协定代码（当前填了「${agreement}」）`);
 
-  if (draft.elements.length > MAX_ELEMENTS)
-    errors.push(`一次最多保存 ${MAX_ELEMENTS} 条申报要素`);
+  if (draft.elements.length > MAX_ELEMENTS) errors.push(`一次最多保存 ${MAX_ELEMENTS} 条申报要素`);
   draft.elements.forEach((element, index) => {
     const at = `第 ${index + 1} 条申报要素`;
-    if (element.elementCode.trim() === '') errors.push(`${at}：申报要素代码不能为空（例：01 品名）`);
-    else if (element.elementCode.trim().length > 32) errors.push(`${at}：申报要素代码最多 32 个字符`);
+    if (element.elementCode.trim() === '')
+      errors.push(`${at}：申报要素代码不能为空（例：01 品名）`);
+    else if (element.elementCode.trim().length > 32)
+      errors.push(`${at}：申报要素代码最多 32 个字符`);
     if (element.elementName.trim() === '') errors.push(`${at}：申报要素名称不能为空`);
     else if (element.elementName.trim().length > 200) errors.push(`${at}：申报要素名称最多 200 字`);
     if (element.elementValue.length > 2000) errors.push(`${at}：申报要素值最多 2000 字`);
@@ -433,10 +429,7 @@ function nullableValue(text: string): number | null {
 
 /** 列表行上的简要判定：审核队列与税则校验页直接读。 */
 export function rowState(
-  row: Pick<
-    CustomsRow,
-    'status' | 'requiredMissingCount' | 'elementCount' | 'submittedAt'
-  >,
+  row: Pick<CustomsRow, 'status' | 'requiredMissingCount' | 'elementCount' | 'submittedAt'>,
 ): {
   label: string;
   tone: ReviewState['tone'];

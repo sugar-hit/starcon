@@ -131,30 +131,34 @@ CHECK 在 PostgreSQL 里可被 `ALTER TABLE ... DROP CONSTRAINT` 或迁移脚本
 
 ## 反向验证（绿测不等于有效断言）
 
-| 手法 | 预期 | 实测 |
-|---|---|---|
-| 删掉 `sku_package_dims_positive` | 零长宽高用例转红 | ✅ 转红 |
-| 只留触发器、删 B3 的 CHECK | 仍绿（触发器独立咬住） | ✅ 仍绿 |
-| 只留 CHECK、删触发器 | 仍绿（CHECK 独立咬住） | ✅ 仍绿 |
-| 体积重公式「÷ 除数」改「× 除数」 | 多例转红 | ✅ 6 例转红（跨集成层与纯规则层） |
+| 手法                             | 预期                   | 实测                              |
+| -------------------------------- | ---------------------- | --------------------------------- |
+| 删掉 `sku_package_dims_positive` | 零长宽高用例转红       | ✅ 转红                           |
+| 只留触发器、删 B3 的 CHECK       | 仍绿（触发器独立咬住） | ✅ 仍绿                           |
+| 只留 CHECK、删触发器             | 仍绿（CHECK 独立咬住） | ✅ 仍绿                           |
+| 体积重公式「÷ 除数」改「× 除数」 | 多例转红               | ✅ 6 例转红（跨集成层与纯规则层） |
 
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V28__physical_safety_attributes.sql`
 
 **后端**（`backend/services/catalog/src/main/java/com/starcon/catalog/`）
+
 - `PhysicalSafetyModels.java` — 请求/响应 record
 - `PhysicalSafetyRules.java` — 纯规则（体积/体积重/计费重/申报/渠道判定/装箱/筛选归一化）
 - `PhysicalSafetyService.java` — jOOQ 显式 SQL 读写、筛选、判定、核算
 - `PhysicalSafetyController.java` — 5 个端点，权限 `catalog.compliance.read/update`
 
 **测试**（`backend/services/catalog/src/test/java/com/starcon/catalog/`）
+
 - `PhysicalSafetyRulesTest.java` — 纯规则
 - `PhysicalSafetyIntegrationTest.java` — 真实 PG16 Testcontainers + 强制 RLS，
   含**裸 SQL 绕开服务层写脏值**的约束用例
 
 **前端**
+
 - `apps/web/src/app/products/sku/[id]/physical/page.tsx`（与 `attributes/` tab 并列）
 - `apps/web/src/components/catalog/physical-safety-model.ts`
 - `apps/web/src/components/catalog/physical-safety-model.test.ts`
@@ -162,6 +166,7 @@ CHECK 在 PostgreSQL 里可被 `ALTER TABLE ... DROP CONSTRAINT` 或迁移脚本
 - `apps/web/src/components/catalog/sku-detail-workspace.tsx` — 包装卡加入口（仅加链接）
 
 **生成物 / 台账**
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`（codegen 产物，禁止手改）
 - `docs/product/capability-blueprint/module-progress.md` — 仅 3.7.2.1 那一行
 

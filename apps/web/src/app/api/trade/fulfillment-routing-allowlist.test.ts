@@ -29,7 +29,9 @@ import { GET, POST } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/orders/fulfillment-routing-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/orders/fulfillment-routing-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -92,7 +94,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了三个」也算通过。
@@ -130,7 +134,7 @@ it('评估与落决策的 POST 形状被放行，且真的转发到 8085', async
   ]) {
     const segments = path.split('/');
     const response = await POST(request(path, 'POST'), {
-      params: { path: segments },
+      params: Promise.resolve({ path: segments }),
     });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
@@ -161,7 +165,9 @@ it('未交付的形状仍然被拒 —— 放行不该存在的路径比 404 更
     `trade/fulfillment/routing/cost-profiles/${ID}`,
     `trade/fulfillment/routing/stock-snapshots/${ID}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -178,7 +184,7 @@ it('裸路径 fulfillment/routing 被拒：既不转发，也不冒充成上游�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/fulfillment/routing';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status, '裸路径不应被白名单放行').toBe(404);
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
 });
@@ -191,7 +197,7 @@ it('trade 出口真的转发到 8085（不是白名单放行后自己 404/503）
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/fulfillment/routing/decisions';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8085/trade/fulfillment/routing/decisions'),

@@ -45,7 +45,9 @@ describe('菜单只暴露已实现页面', () => {
   it('业务系统入口全部有真实页面', () => {
     for (const system of SYSTEMS)
       for (const item of system.items) {
-        expect(hasPage(item.href), `${system.label}/${item.label} -> ${item.href} 无页面`).toBe(true);
+        expect(hasPage(item.href), `${system.label}/${item.label} -> ${item.href} 无页面`).toBe(
+          true,
+        );
       }
   });
 
@@ -86,7 +88,9 @@ describe('菜单结构自洽', () => {
   it('业务系统分组不出现空子页', () => {
     for (const system of SYSTEMS)
       for (const item of system.items) {
-        expect(item.children?.length, `${system.label}/${item.label} 没有子页面`).toBeGreaterThan(0);
+        expect(item.children?.length, `${system.label}/${item.label} 没有子页面`).toBeGreaterThan(
+          0,
+        );
       }
   });
 

@@ -18,13 +18,12 @@ import org.springframework.http.MediaType;
 /**
  * 17.5.3.2 操作日志集成测试。
  *
- * <p>跑在真实 PostgreSQL 16（Testcontainers）上，日志真的落库、真的查得回来、真的能按请求 ID 串成链路。
- * 覆盖五件事：
+ * <p>跑在真实 PostgreSQL 16（Testcontainers）上，日志真的落库、真的查得回来、真的能按请求 ID 串成链路。 覆盖五件事：
+ *
  * <ol>
  *   <li><b>四类事件都真能记录</b>：登录、API 调用摘要、任务执行、错误堆栈；
  *   <li><b>链路关联视图</b>：同一次请求的多条日志按 request_id 真实聚合，统计量来自数据库；
- *   <li><b>技术细节与合规的分野</b>：堆栈有长度上限与截断标记，密码与令牌从未进库，
- *       并且操作日志<b>可删</b>而审计日志不可删——两者的留存策略差异是实的；
+ *   <li><b>技术细节与合规的分野</b>：堆栈有长度上限与截断标记，密码与令牌从未进库， 并且操作日志<b>可删</b>而审计日志不可删——两者的留存策略差异是实的；
  *   <li><b>多租户三断言</b>：两租户互不可见、伪造 tenant header 无效、连接池归还后不串租户；
  *   <li><b>时间与边界</b>：{@code occurred_at} 按 UTC 无漂移回写，非法检索参数被拒而非静默修正。
  * </ol>
@@ -89,7 +88,12 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
             post("/auth/login")
                 .header("X-Request-Id", requestId)
                 .contentType("application/json")
-                .content("{\"username\":\"" + username + "\",\"password\":\"wrong-password-" + tag + "\"}"))
+                .content(
+                    "{\"username\":\""
+                        + username
+                        + "\",\"password\":\"wrong-password-"
+                        + tag
+                        + "\"}"))
         .andExpect(status().isUnauthorized());
 
     var trace = trace(owner, requestId);
@@ -119,7 +123,8 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     var page = logs(token, Map.of("eventType", "API_CALL", "size", "200"));
     JsonNode created = null;
     for (JsonNode row : page.get("items")) {
-      if (row.get("statusCode").asInt() == 200 && "/identity/departments".equals(row.get("path").asText())) {
+      if (row.get("statusCode").asInt() == 200
+          && "/identity/departments".equals(row.get("path").asText())) {
         created = row;
         break;
       }
@@ -128,14 +133,16 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(created.get("httpMethod").asText()).isEqualTo("POST");
     assertThat(created.get("level").asText()).isEqualTo("INFO");
     // 耗时是真实测量出来的，不是常量 0
-    assertThat(new BigDecimal(created.get("durationMs").asText())).isGreaterThanOrEqualTo(BigDecimal.ZERO);
+    assertThat(new BigDecimal(created.get("durationMs").asText()))
+        .isGreaterThanOrEqualTo(BigDecimal.ZERO);
     // 操作人可读名有值（不是空串）
     assertThat(created.get("actorName").asText()).isEqualTo("local-admin");
     assertThat(created.get("requestId").asText()).isNotBlank();
     assertThat(department).isNotNull();
 
     // 4xx 记成 WARNING 而不是 ERROR：那是调用方的问题，不是服务端故障。
-    http.perform(get("/identity/audit/" + UUID.randomUUID()).header("Authorization", "Bearer " + token))
+    http.perform(
+            get("/identity/audit/" + UUID.randomUUID()).header("Authorization", "Bearer " + token))
         .andExpect(status().isNotFound());
     var warnings = logs(token, Map.of("level", "WARNING", "size", "50"));
     assertThat(warnings.get("total").asLong()).isPositive();
@@ -144,8 +151,7 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 任务执行：保留期清理任务自身就是一次真实的 TASK_RUN 记录。
    *
-   * <p>这样「任务执行」不是靠一个假的任务入口糊出来的——清理任务确实执行了，
-   * 确实删了行（或者如实报告删了 0 行），并把耗时与结果记进链路。
+   * <p>这样「任务执行」不是靠一个假的任务入口糊出来的——清理任务确实执行了， 确实删了行（或者如实报告删了 0 行），并把耗时与结果记进链路。
    */
   @Test
   void taskExecutionIsRecordedWithDurationAndResult() throws Exception {
@@ -179,22 +185,47 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     // 删掉的必须包含那条已到期的
     assertThat(result.get("removed").asLong()).isPositive();
     assertThat(logs(token, Map.of("requestId", "expired-" + tag)).get("total").asLong())
-        .as("已到期的日志必须被清掉").isZero();
+        .as("已到期的日志必须被清掉")
+        .isZero();
     assertThat(logs(token, Map.of("requestId", "fresh-" + tag)).get("total").asLong())
-        .as("未到期的日志必须保留").isPositive();
+        .as("未到期的日志必须保留")
+        .isPositive();
 
     // cutoff 设到过去 → 什么都不该删
-    var past = request(token, "POST", "/identity/operation-log/purge?before=" + Instant.now().minus(1, ChronoUnit.DAYS), null, 200);
+    var past =
+        request(
+            token,
+            "POST",
+            "/identity/operation-log/purge?before=" + Instant.now().minus(1, ChronoUnit.DAYS),
+            null,
+            200);
     assertThat(past.get("removed").asLong()).isZero();
     assertThat(logs(token, Map.of("requestId", "fresh-" + tag)).get("total").asLong()).isPositive();
 
     // 只有所有者能清理：非所有者必须被拒，而不是静默删 0 条
-    String role = request(token, "POST", "/identity/roles",
-        Map.of("code", "OPNOPURGE_" + tag, "name", "No purge", "status", "ACTIVE",
-            "permissions", List.of("identity.operation_log.read")), 200).asText();
+    String role =
+        request(
+                token,
+                "POST",
+                "/identity/roles",
+                Map.of(
+                    "code",
+                    "OPNOPURGE_" + tag,
+                    "name",
+                    "No purge",
+                    "status",
+                    "ACTIVE",
+                    "permissions",
+                    List.of("identity.operation_log.read")),
+                200)
+            .asText();
     String member = "oplog-nopurge-" + tag.toLowerCase();
-    request(token, "POST", "/identity/members",
-        memberInput(member, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))), 200);
+    request(
+        token,
+        "POST",
+        "/identity/members",
+        memberInput(member, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
+        200);
     String memberToken = loginUser(member);
     request(memberToken, "GET", "/identity/operation-log?size=1", null, 200);
     request(memberToken, "POST", "/identity/operation-log/purge", null, 403);
@@ -203,17 +234,18 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 直接写一条指定 expires_at 的日志。
    *
-   * <p>用真实 SQL 而不是走 API：留存期是运维参数，不是业务操作，
-   * 而只有这样才能构造出「已到期」的状态——任何走 API 的写入都会落在 90 天之后。
+   * <p>用真实 SQL 而不是走 API：留存期是运维参数，不是业务操作， 而只有这样才能构造出「已到期」的状态——任何走 API 的写入都会落在 90 天之后。
    */
   private void seedRow(String token, String requestId, String summary, Instant expiresAt)
       throws Exception {
     var tenantId =
         UUID.fromString(request(token, "GET", "/auth/session", null, 200).get("tenantId").asText());
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
-        var st = c.prepareStatement(
-            "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,occurred_at,expires_at)"
-                + " values(gen_random_uuid(),?,'API_CALL','INFO',?,?,now(),?::timestamptz)")) {
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var st =
+            c.prepareStatement(
+                "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,occurred_at,expires_at)"
+                    + " values(gen_random_uuid(),?,'API_CALL','INFO',?,?,now(),?::timestamptz)")) {
       st.setObject(1, tenantId);
       st.setString(2, requestId);
       st.setString(3, summary);
@@ -231,12 +263,13 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     String token = login(), tag = suffix();
     String requestId = "trace-" + tag;
     // 一次真实请求：带上 X-Request-Id，并让同一个请求 ID 下的多条日志聚合
-    http.perform(post("/identity/departments")
-            .header("Authorization", "Bearer " + token)
-            .header("X-Request-Id", requestId)
-            .header("X-Trace-Id", "gw-" + tag)
-            .contentType("application/json")
-            .content(json.writeValueAsString(departmentInput("TR" + tag, "链路部门" + tag, null))))
+    http.perform(
+            post("/identity/departments")
+                .header("Authorization", "Bearer " + token)
+                .header("X-Request-Id", requestId)
+                .header("X-Trace-Id", "gw-" + tag)
+                .contentType("application/json")
+                .content(json.writeValueAsString(departmentInput("TR" + tag, "链路部门" + tag, null))))
         .andExpect(status().isOk());
 
     var trace = trace(token, requestId);
@@ -277,20 +310,34 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
 
     // 按用户
     UUID adminId = currentUserId(token);
-    assertThat(logs(token, Map.of("actorId", adminId.toString(), "size", "200")).get("total").asLong()).isPositive();
-    assertThat(logs(token, Map.of("actorId", UUID.randomUUID().toString())).get("total").asLong()).isZero();
+    assertThat(
+            logs(token, Map.of("actorId", adminId.toString(), "size", "200")).get("total").asLong())
+        .isPositive();
+    assertThat(logs(token, Map.of("actorId", UUID.randomUUID().toString())).get("total").asLong())
+        .isZero();
 
     // 按时间窗：设在这次操作之前应当查不到
-    var windowed = logs(token, Map.of("from", Instant.now().minus(1, ChronoUnit.HOURS).toString(),
-        "to", Instant.now().minus(30, ChronoUnit.MINUTES).toString()));
+    var windowed =
+        logs(
+            token,
+            Map.of(
+                "from",
+                Instant.now().minus(1, ChronoUnit.HOURS).toString(),
+                "to",
+                Instant.now().minus(30, ChronoUnit.MINUTES).toString()));
     assertThat(windowed.get("total").asLong()).isZero();
-    assertThat(logs(token, Map.of("from", Instant.now().minus(1, ChronoUnit.HOURS).toString()))
-        .get("total").asLong()).isPositive();
+    assertThat(
+            logs(token, Map.of("from", Instant.now().minus(1, ChronoUnit.HOURS).toString()))
+                .get("total")
+                .asLong())
+        .isPositive();
 
     // 按请求 ID（用真实存在的端点：成员列表）
     String rid = "search-" + tag;
-    http.perform(get("/identity/members")
-            .header("Authorization", "Bearer " + token).header("X-Request-Id", rid))
+    http.perform(
+            get("/identity/members")
+                .header("Authorization", "Bearer " + token)
+                .header("X-Request-Id", rid))
         .andExpect(status().isOk());
     var byRequest = logs(token, Map.of("requestId", rid));
     assertThat(byRequest.get("total").asLong()).isPositive();
@@ -307,8 +354,14 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     logsExpect(token, Map.of("page", "-1"), 400);
     logsExpect(token, Map.of("eventType", "NOT_A_TYPE"), 400);
     logsExpect(token, Map.of("level", "FATAL"), 400);
-    logsExpect(token, Map.of("from", Instant.now().toString(),
-        "to", Instant.now().minus(1, ChronoUnit.HOURS).toString()), 400);
+    logsExpect(
+        token,
+        Map.of(
+            "from",
+            Instant.now().toString(),
+            "to",
+            Instant.now().minus(1, ChronoUnit.HOURS).toString()),
+        400);
   }
 
   // ------------------------------------------------------------------
@@ -319,15 +372,21 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   void stackTraceIsTruncatedAndSecretsNeverReachTheDatabase() throws Exception {
     String token = login(), tag = suffix();
     // 写一条超长堆栈的应用层记录（走真实写入路径）
-    request(token, "POST", "/identity/members",
-        memberInput("oplog-stack-" + tag.toLowerCase(), null, List.of(),
-            "St4ck-P@ss-" + tag), 200);
+    request(
+        token,
+        "POST",
+        "/identity/members",
+        memberInput("oplog-stack-" + tag.toLowerCase(), null, List.of(), "St4ck-P@ss-" + tag),
+        200);
 
     // 直接查库：密码绝不能出现
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
+    try (var c =
+        DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
       var raw = new StringBuilder();
       try (var st = c.createStatement();
-          var rs = st.executeQuery("select coalesce(summary,'')||' '||coalesce(stack_trace,'')||' '||coalesce(detail::text,'') from operation_log")) {
+          var rs =
+              st.executeQuery(
+                  "select coalesce(summary,'')||' '||coalesce(stack_trace,'')||' '||coalesce(detail::text,'') from operation_log")) {
         while (rs.next()) raw.append(rs.getString(1)).append('\n');
       }
       assertThat(raw.toString()).doesNotContain("St4ck-P@ss-" + tag);
@@ -342,20 +401,24 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(OperationLog.stack("short")).isEqualTo("short");
 
     // 截断后的堆栈真的能写进库（CHECK 是 8200，不拦应用侧的 8000+标记）
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
-        var st = c.prepareStatement(
-            "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,stack_trace,occurred_at,expires_at)"
-                + " values(gen_random_uuid(),(select id from tenant limit 1),'ERROR','ERROR',?,?,?,now(),now()+interval '1 day')")) {
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var st =
+            c.prepareStatement(
+                "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,stack_trace,occurred_at,expires_at)"
+                    + " values(gen_random_uuid(),(select id from tenant limit 1),'ERROR','ERROR',?,?,?,now(),now()+interval '1 day')")) {
       st.setString(1, "stack-" + tag);
       st.setString(2, "截断堆栈测试");
       st.setString(3, truncated);
       assertThat(st.executeUpdate()).isEqualTo(1);
     }
     // 但超过上限的会被数据库直接拒绝——长度约束在库层是实的
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
-        var st = c.prepareStatement(
-            "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,stack_trace,occurred_at,expires_at)"
-                + " values(gen_random_uuid(),(select id from tenant limit 1),'ERROR','ERROR',?,?,?,now(),now()+interval '1 day')")) {
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var st =
+            c.prepareStatement(
+                "insert into operation_log(id,tenant_id,event_type,level,request_id,summary,stack_trace,occurred_at,expires_at)"
+                    + " values(gen_random_uuid(),(select id from tenant limit 1),'ERROR','ERROR',?,?,?,now(),now()+interval '1 day')")) {
       st.setString(1, "stack-over-" + tag);
       st.setString(2, "超限堆栈");
       st.setString(3, longStack);
@@ -370,18 +433,31 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     createDepartment(token, "DL" + tag, "留存部门" + tag, null);
 
     // 审计行：超级用户也删不掉（V7 触发器）
-    var auditRow = request(token, "GET", "/identity/audit?size=1", null, 200).get("items").get(0).get("id").asText();
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
-      assertThatThrownBy(() -> c.createStatement().executeUpdate("delete from identity_audit where id='" + auditRow + "'"))
+    var auditRow =
+        request(token, "GET", "/identity/audit?size=1", null, 200)
+            .get("items")
+            .get(0)
+            .get("id")
+            .asText();
+    try (var c =
+        DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
+      assertThatThrownBy(
+              () ->
+                  c.createStatement()
+                      .executeUpdate("delete from identity_audit where id='" + auditRow + "'"))
           .hasMessageContaining("不可修改或删除");
     }
 
     // 操作日志行：本用例自己埋一条（不依赖其他用例的数据，测试之间彼此独立）
     seedRow(token, "deletable-" + tag, "待删除日志", Instant.now().plus(30, ChronoUnit.DAYS));
-    assertThat(logs(token, Map.of("requestId", "deletable-" + tag)).get("total").asLong()).isPositive();
-    var tenantId = UUID.fromString(request(token, "GET", "/auth/session", null, 200).get("tenantId").asText());
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
-        var st = c.prepareStatement("delete from operation_log where tenant_id=? and request_id=?")) {
+    assertThat(logs(token, Map.of("requestId", "deletable-" + tag)).get("total").asLong())
+        .isPositive();
+    var tenantId =
+        UUID.fromString(request(token, "GET", "/auth/session", null, 200).get("tenantId").asText());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var st =
+            c.prepareStatement("delete from operation_log where tenant_id=? and request_id=?")) {
       st.setObject(1, tenantId);
       st.setString(2, "deletable-" + tag);
       assertThat(st.executeUpdate()).as("操作日志必须可删——这正是「可短期留存」的执行方式").isPositive();
@@ -400,7 +476,8 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     var page = logs(token, Map.of("size", "50"));
     var row = page.get("items").get(0);
 
-    var detail = request(token, "GET", "/identity/operation-log/" + row.get("id").asText(), null, 200);
+    var detail =
+        request(token, "GET", "/identity/operation-log/" + row.get("id").asText(), null, 200);
     assertThat(detail.get("id").asText()).isEqualTo(row.get("id").asText());
     assertThat(detail.get("expiresAt").asText()).isNotBlank();
     // 「未观测到堆栈」与「堆栈为空」要能区分：没有堆栈时 stackTrace 为 null 而不是空串
@@ -430,20 +507,28 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     var page = logs(token, Map.of("eventType", "API_CALL", "size", "50"));
     JsonNode row = null;
     for (JsonNode item : page.get("items"))
-      if ("/identity/departments".equals(item.get("path").asText())) { row = item; break; }
+      if ("/identity/departments".equals(item.get("path").asText())) {
+        row = item;
+        break;
+      }
     assertThat(row).isNotNull();
 
     var occurredAt = Instant.parse(row.get("occurredAt").asText());
     // 若误用 LocalDateTime.now()，在 Asia/Shanghai 下会静默偏 -28800 秒
-    assertThat(occurredAt).isBetween(Instant.now().minus(5, ChronoUnit.MINUTES), Instant.now().plus(5, ChronoUnit.MINUTES));
+    assertThat(occurredAt)
+        .isBetween(
+            Instant.now().minus(5, ChronoUnit.MINUTES), Instant.now().plus(5, ChronoUnit.MINUTES));
 
     // 库里的原值必须一致，而不是只有 API 视图正确
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
-        var st = c.prepareStatement("select occurred_at,expires_at from operation_log where id = ?")) {
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+        var st =
+            c.prepareStatement("select occurred_at,expires_at from operation_log where id = ?")) {
       st.setObject(1, UUID.fromString(row.get("id").asText()));
       try (var rs = st.executeQuery()) {
         assertThat(rs.next()).isTrue();
-        assertThat(rs.getObject(1, java.time.OffsetDateTime.class).toInstant()).isEqualTo(occurredAt);
+        assertThat(rs.getObject(1, java.time.OffsetDateTime.class).toInstant())
+            .isEqualTo(occurredAt);
         // expires_at = occurred_at + 留存天数（真实计算，不是常量）
         assertThat(rs.getObject(2, java.time.OffsetDateTime.class).toInstant())
             .isEqualTo(occurredAt.plus(OperationLog.RETENTION_DAYS, ChronoUnit.DAYS));
@@ -463,9 +548,20 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
 
     // 建子租户，用子租户所有者身份产生自己的日志
     String childUser = "oplog-child-" + tag.toLowerCase();
-    request(owner, "POST", "/identity/children",
-        Map.of("code", "OPC" + tag, "name", "操作日志子租户",
-            "ownerUsername", childUser, "ownerPassword", "test-member-password"), 200);
+    request(
+        owner,
+        "POST",
+        "/identity/children",
+        Map.of(
+            "code",
+            "OPC" + tag,
+            "name",
+            "操作日志子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
+        200);
     String childToken = loginUser(childUser);
     UUID childDepartment = createDepartment(childToken, "CT" + tag, "子租户部门" + tag, null);
 
@@ -488,12 +584,20 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
 
     // 断言二：伪造 tenant header 无效。request() 每次都带随机 X-Tenant-Id
     String forged = UUID.randomUUID().toString();
-    var forgedView = http.perform(get("/identity/operation-log?size=50")
-            .header("Authorization", "Bearer " + owner).header("X-Tenant-Id", childDepartment.toString()))
-        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    var forgedView =
+        http.perform(
+                get("/identity/operation-log?size=50")
+                    .header("Authorization", "Bearer " + owner)
+                    .header("X-Tenant-Id", childDepartment.toString()))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     assertThat(forgedView).doesNotContain("子租户部门" + tag);
-    http.perform(get("/identity/operation-log?size=5")
-            .header("Authorization", "Bearer " + owner).header("X-Tenant-Id", forged))
+    http.perform(
+            get("/identity/operation-log?size=5")
+                .header("Authorization", "Bearer " + owner)
+                .header("X-Tenant-Id", forged))
         .andExpect(status().isOk());
     // 未登录查不到任何日志
     http.perform(get("/identity/operation-log")).andExpect(status().isUnauthorized());
@@ -501,9 +605,11 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
     // 断言三：连接池归还后不串租户。池被压到 1，交替请求复用同一物理连接
     for (int i = 0; i < 3; i++) {
       assertThat(logs(owner, Map.of("size", "200")).toString())
-          .as("第 %s 轮父租户不得看到子租户日志", i).doesNotContain("子租户部门" + tag);
+          .as("第 %s 轮父租户不得看到子租户日志", i)
+          .doesNotContain("子租户部门" + tag);
       assertThat(logs(childToken, Map.of("size", "200")).toString())
-          .as("第 %s 轮子租户不得看到父租户日志", i).doesNotContain("父租户部门" + tag);
+          .as("第 %s 轮子租户不得看到父租户日志", i)
+          .doesNotContain("父租户部门" + tag);
     }
     // 事务外（无租户上下文）直查应当为空
     assertThat(sql.fetch("select id from operation_log")).isEmpty();
@@ -512,21 +618,50 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   @Test
   void operationLogReadRequiresTheOperationLogPermission() throws Exception {
     String owner = login(), tag = suffix();
-    String role = request(owner, "POST", "/identity/roles",
-        Map.of("code", "NOOPLOG_" + tag, "name", "No oplog", "status", "ACTIVE",
-            "permissions", List.of("catalog.spu.read")), 200).asText();
+    String role =
+        request(
+                owner,
+                "POST",
+                "/identity/roles",
+                Map.of(
+                    "code",
+                    "NOOPLOG_" + tag,
+                    "name",
+                    "No oplog",
+                    "status",
+                    "ACTIVE",
+                    "permissions",
+                    List.of("catalog.spu.read")),
+                200)
+            .asText();
     String member = "oplog-noread-" + tag.toLowerCase();
-    request(owner, "POST", "/identity/members",
-        memberInput(member, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))), 200);
+    request(
+        owner,
+        "POST",
+        "/identity/members",
+        memberInput(member, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
+        200);
     String memberToken = loginUser(member);
     request(memberToken, "GET", "/identity/operation-log", null, 403);
     request(memberToken, "GET", "/identity/operation-log/export", null, 403);
 
-    request(owner, "PUT", "/identity/roles/" + role,
-        Map.of("code", "NOOPLOG_" + tag, "name", "No oplog", "status", "ACTIVE",
-            "permissions", List.of("catalog.spu.read", "identity.operation_log.read")), 200);
+    request(
+        owner,
+        "PUT",
+        "/identity/roles/" + role,
+        Map.of(
+            "code",
+            "NOOPLOG_" + tag,
+            "name",
+            "No oplog",
+            "status",
+            "ACTIVE",
+            "permissions",
+            List.of("catalog.spu.read", "identity.operation_log.read")),
+        200);
     request(memberToken, "GET", "/identity/operation-log?size=5", null, 200);
-    assertThat(request(memberToken, "GET", "/auth/session", null, 200).get("permissions").toString())
+    assertThat(
+            request(memberToken, "GET", "/auth/session", null, 200).get("permissions").toString())
         .contains("identity.operation_log.read");
   }
 
@@ -540,9 +675,11 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
 
   JsonNode logsExpect(String token, Map<String, String> filters, int status) throws Exception {
     var query = new StringBuilder();
-    filters.forEach((k, v) -> {
-      if (!v.isEmpty()) query.append(query.isEmpty() ? "?" : "&").append(k).append('=').append(v);
-    });
+    filters.forEach(
+        (k, v) -> {
+          if (!v.isEmpty())
+            query.append(query.isEmpty() ? "?" : "&").append(k).append('=').append(v);
+        });
     return request(token, "GET", "/identity/operation-log" + query, null, status);
   }
 
@@ -552,12 +689,19 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
 
   String exportCsv(String token, Map<String, String> filters) throws Exception {
     var query = new StringBuilder();
-    filters.forEach((k, v) -> {
-      if (!v.isEmpty()) query.append(query.isEmpty() ? "?" : "&").append(k).append('=').append(v);
-    });
-    var response = http.perform(get("/identity/operation-log/export" + query)
-            .header("Authorization", "Bearer " + token).accept(MediaType.ALL))
-        .andExpect(status().isOk()).andReturn().getResponse();
+    filters.forEach(
+        (k, v) -> {
+          if (!v.isEmpty())
+            query.append(query.isEmpty() ? "?" : "&").append(k).append('=').append(v);
+        });
+    var response =
+        http.perform(
+                get("/identity/operation-log/export" + query)
+                    .header("Authorization", "Bearer " + token)
+                    .accept(MediaType.ALL))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
     return response.getContentAsString();
   }
 
@@ -568,8 +712,7 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   JsonNode findByPath(JsonNode page, String path) {
-    for (JsonNode item : page.get("items"))
-      if (path.equals(item.get("path").asText())) return item;
+    for (JsonNode item : page.get("items")) if (path.equals(item.get("path").asText())) return item;
     return null;
   }
 
@@ -582,6 +725,7 @@ class OperationLogIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   UUID currentUserId(String token) throws Exception {
-    return UUID.fromString(request(token, "GET", "/auth/session", null, 200).get("userId").asText());
+    return UUID.fromString(
+        request(token, "GET", "/auth/session", null, 200).get("userId").asText());
   }
 }

@@ -327,11 +327,14 @@ export function BomWorkspace() {
     }
     const id = bomEditor.id;
     const input = bomEditor.input;
-    await guard(async () => {
-      const saved = await saveBom(id, input);
-      setBomEditor(null);
-      if (!id) await openBom(saved.id);
-    }, id ? 'BOM 已更新（编码与成品建后不可改）' : 'BOM 已建');
+    await guard(
+      async () => {
+        const saved = await saveBom(id, input);
+        setBomEditor(null);
+        if (!id) await openBom(saved.id);
+      },
+      id ? 'BOM 已更新（编码与成品建后不可改）' : 'BOM 已建',
+    );
   }
 
   async function submitVersionEditor() {
@@ -350,17 +353,20 @@ export function BomWorkspace() {
       effectiveFrom: localInputToInstant(input.effectiveFrom),
       effectiveTo: input.effectiveTo ? localInputToInstant(input.effectiveTo) : null,
     };
-    await guard(async () => {
-      if (editingId) {
-        const saved = await updateVersion(editingId, body);
-        await openBom(bomId);
-        await openVersion(saved.id);
-      } else {
-        const saved = await createVersion(bomId, body);
-        await openBom(bomId);
-        await openVersion(saved.id);
-      }
-    }, editingId ? '草稿版本已更新' : '草稿版本已建（填完组件才能发布）');
+    await guard(
+      async () => {
+        if (editingId) {
+          const saved = await updateVersion(editingId, body);
+          await openBom(bomId);
+          await openVersion(saved.id);
+        } else {
+          const saved = await createVersion(bomId, body);
+          await openBom(bomId);
+          await openVersion(saved.id);
+        }
+      },
+      editingId ? '草稿版本已更新' : '草稿版本已建（填完组件才能发布）',
+    );
   }
 
   async function submitCopy() {
@@ -428,7 +434,7 @@ export function BomWorkspace() {
 
   if (loading && !page) {
     return (
-      <div className="text-muted-foreground flex items-center gap-2 p-8 text-copy-13">
+      <div className="text-muted-foreground text-copy-13 flex items-center gap-2 p-8">
         <Loader2 className="size-4 animate-spin" />
         正在读取 BOM 列表…
       </div>
@@ -438,7 +444,7 @@ export function BomWorkspace() {
   if (error && !page) {
     return (
       <div className="space-y-3 p-4">
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 flex items-start gap-2 rounded-md border px-3 py-2">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -453,12 +459,14 @@ export function BomWorkspace() {
   return (
     <div className="space-y-4">
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md border px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md border px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md border px-3 py-2">
+          {notice}
+        </div>
       )}
 
       {/* 概览：开放区间是唯一需要每天盯的数字；「已发布但没有组件」必须恒为 0 */}
@@ -491,8 +499,8 @@ export function BomWorkspace() {
           <p>{overview.note}</p>
           {overview.publishedWithoutComponentCount > 0 && (
             <p className="text-destructive font-medium">
-              有 {overview.publishedWithoutComponentCount} 个已发布版本没有任何组件 —— 08 组装单按它们
-              领不出任何料。发布时本应被拦住，出现非 0 说明数据被绕过应用层写进来了。
+              有 {overview.publishedWithoutComponentCount} 个已发布版本没有任何组件 —— 08
+              组装单按它们 领不出任何料。发布时本应被拦住，出现非 0 说明数据被绕过应用层写进来了。
             </p>
           )}
         </div>
@@ -548,7 +556,7 @@ export function BomWorkspace() {
               <ul className="divide-border divide-y">
                 {page.items.map((b) => (
                   <li key={b.id} className="py-2">
-                    <button className="min-w-0 w-full text-left" onClick={() => void openBom(b.id)}>
+                    <button className="w-full min-w-0 text-left" onClick={() => void openBom(b.id)}>
                       <div className="flex items-center gap-2">
                         <span className="truncate font-medium">{b.code}</span>
                         <Badge tone={bomStatusTone(b.status)}>{bomStatusLabel(b.status)}</Badge>
@@ -564,8 +572,12 @@ export function BomWorkspace() {
             )}
 
             {page && page.totalPages > 1 && (
-              <div className="text-muted-foreground flex items-center justify-end gap-2 text-copy-12">
-                <Button disabled={pageIndex === 0} onClick={() => setPageIndex((p) => p - 1)} size="sm">
+              <div className="text-muted-foreground text-copy-12 flex items-center justify-end gap-2">
+                <Button
+                  disabled={pageIndex === 0}
+                  onClick={() => setPageIndex((p) => p - 1)}
+                  size="sm"
+                >
                   上一页
                 </Button>
                 <span>
@@ -658,15 +670,12 @@ export function BomWorkspace() {
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      void guard(
-                        async () => {
-                          await deleteBom(detail.bom.id, detail.bom.version);
-                          setDetail(null);
-                          setEffective(null);
-                          setVersions([]);
-                        },
-                        'BOM 已删除',
-                      )
+                      void guard(async () => {
+                        await deleteBom(detail.bom.id, detail.bom.version);
+                        setDetail(null);
+                        setEffective(null);
+                        setVersions([]);
+                      }, 'BOM 已删除')
                     }
                   >
                     <Trash2 className="mr-2 size-4" />
@@ -752,8 +761,8 @@ export function BomWorkspace() {
                           {v.effective && <Badge tone="success">此刻生效</Badge>}
                         </div>
                         <div className="text-muted-foreground text-copy-12">
-                          {rangeText(v.effectiveFrom, v.effectiveTo)} · {v.componentCount} 个组件 · 每件
-                          用量合计 {String(v.totalUnitQuantity)}
+                          {rangeText(v.effectiveFrom, v.effectiveTo)} · {v.componentCount} 个组件 ·
+                          每件 用量合计 {String(v.totalUnitQuantity)}
                           {v.scrapPercent != null && Number(v.scrapPercent) > 0
                             ? ` · 最高损耗 ${String(v.scrapPercent)}%`
                             : ' · 无损耗'}
@@ -762,7 +771,11 @@ export function BomWorkspace() {
                             : ''}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => void openVersion(v.id)}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => void openVersion(v.id)}
+                          >
                             组件与需求量
                           </Button>
                           {writable && (
@@ -796,13 +809,10 @@ export function BomWorkspace() {
                               <Button
                                 size="sm"
                                 onClick={() =>
-                                  void guard(
-                                    async () => {
-                                      await publishVersion(v.id);
-                                      await openBom(v.bomId);
-                                    },
-                                    '已发布：用量与损耗率一并冻结，08 已经能按它领料了',
-                                  )
+                                  void guard(async () => {
+                                    await publishVersion(v.id);
+                                    await openBom(v.bomId);
+                                  }, '已发布：用量与损耗率一并冻结，08 已经能按它领料了')
                                 }
                               >
                                 <Check className="mr-2 size-4" />
@@ -812,13 +822,10 @@ export function BomWorkspace() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() =>
-                                  void guard(
-                                    async () => {
-                                      await deleteVersion(v.id, v.version);
-                                      await openBom(v.bomId);
-                                    },
-                                    '草稿版本已删除',
-                                  )
+                                  void guard(async () => {
+                                    await deleteVersion(v.id, v.version);
+                                    await openBom(v.bomId);
+                                  }, '草稿版本已删除')
                                 }
                               >
                                 <Trash2 className="size-4" />
@@ -852,7 +859,11 @@ export function BomWorkspace() {
 
       {/* ------------------------------------------------ 版本详情：组件与需求量 */}
       <SectionCard
-        title={versionDetail ? `版本 ${versionDetail.version.versionNo} 的组件与需求量` : '版本组件与需求量'}
+        title={
+          versionDetail
+            ? `版本 ${versionDetail.version.versionNo} 的组件与需求量`
+            : '版本组件与需求量'
+        }
         description={
           versionDetail
             ? `${versionDetail.version.name} · ${componentSummary(versionDetail.components, versionDetail.totalUnitQuantity)}`
@@ -877,7 +888,7 @@ export function BomWorkspace() {
               />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground text-copy-12">
                     <tr>
                       <th className="py-1 pr-2 font-medium">组件 SKU</th>
@@ -930,7 +941,7 @@ export function BomWorkspace() {
                     {String(requirement.outputQuantity)} 个
                   </p>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-copy-13">
+                    <table className="text-copy-13 w-full text-left">
                       <thead className="text-muted-foreground text-copy-12">
                         <tr>
                           <th className="py-1 pr-2 font-medium">组件 SKU</th>
@@ -947,7 +958,9 @@ export function BomWorkspace() {
                             </td>
                             <td className="py-1 pr-2">{String(l.unitQuantity)}</td>
                             <td className="py-1 pr-2">{String(l.scrapRate)}%</td>
-                            <td className="py-1 pr-2 font-medium">{requiredText(l.requiredQuantity)}</td>
+                            <td className="py-1 pr-2 font-medium">
+                              {requiredText(l.requiredQuantity)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1015,10 +1028,7 @@ export function BomWorkspace() {
                 onChange={(e) => setExplosion((f) => ({ ...f, outputQuantity: e.target.value }))}
               />
             </Field>
-            <Field
-              label="按仓库过滤"
-              hint="留空 = 全仓合计。在途取的是发往该仓的货"
-            >
+            <Field label="按仓库过滤" hint="留空 = 全仓合计。在途取的是发往该仓的货">
               <select
                 className={control}
                 value={explosion.warehouseId ?? ''}
@@ -1039,9 +1049,7 @@ export function BomWorkspace() {
                 className={control}
                 value={explosion.maxDepth ?? ''}
                 inputMode="numeric"
-                onChange={(e) =>
-                  setExplosion((f) => ({ ...f, maxDepth: e.target.value || null }))
-                }
+                onChange={(e) => setExplosion((f) => ({ ...f, maxDepth: e.target.value || null }))}
               />
             </Field>
             <Field label="展开基准时刻" hint="留空 = 此刻。决定每一层子 BOM 取哪一版">
@@ -1074,7 +1082,7 @@ export function BomWorkspace() {
 
           {/* 错误态：循环引用 / 库存服务不可用 的原因原样显示。 */}
           {explosionError && (
-            <div className="border-destructive bg-destructive/5 text-destructive rounded-md border p-3 text-copy-13">
+            <div className="border-destructive bg-destructive/5 text-destructive text-copy-13 rounded-md border p-3">
               {explosionError}
             </div>
           )}
@@ -1088,7 +1096,7 @@ export function BomWorkspace() {
           )}
 
           {explosionBusy && !explosionRun && (
-            <p className="text-muted-foreground flex items-center gap-2 text-copy-13">
+            <p className="text-muted-foreground text-copy-13 flex items-center gap-2">
               <Loader2 className="size-4 animate-spin" />
               正在展开并向库存服务取可用量与在途…
             </p>
@@ -1098,16 +1106,16 @@ export function BomWorkspace() {
             <div className="space-y-3">
               {/* 截断必须显眼：这份清单不完整。 */}
               {explosionRun.truncated && (
-                <div className="border-destructive bg-destructive/5 text-destructive rounded-md border p-3 text-copy-13">
+                <div className="border-destructive bg-destructive/5 text-destructive text-copy-13 rounded-md border p-3">
                   <p className="font-medium">
-                    这份清单不完整 —— 命中了展开深度上限（{explosionRun.maxDepth} 层），
-                    仍有下级 BOM 没有展开。逐成品的采购量会偏小，请调高深度上限后重试，
+                    这份清单不完整 —— 命中了展开深度上限（{explosionRun.maxDepth} 层）， 仍有下级
+                    BOM 没有展开。逐成品的采购量会偏小，请调高深度上限后重试，
                     或检查是不是把工艺步骤做成了物料清单。
                   </p>
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-2 text-copy-13">
+              <div className="text-copy-13 flex flex-wrap items-center gap-2">
                 <Badge tone={explosionStatusTone(explosionRun.status)}>
                   {explosionStatusLabel(explosionRun.status)}
                 </Badge>
@@ -1119,12 +1127,12 @@ export function BomWorkspace() {
                   成品 {explosionRun.outputSkuCode} × {explosionRun.outputQuantity} 个
                 </span>
                 <span className="text-muted-foreground">
-                  {explosionRun.lineCount} 行 · 采购对象 {explosionRun.purchaseLineCount} 行 · 合计缺口{' '}
-                  {explosionRun.totalGap}
+                  {explosionRun.lineCount} 行 · 采购对象 {explosionRun.purchaseLineCount} 行 ·
+                  合计缺口 {explosionRun.totalGap}
                 </span>
                 <span className="text-muted-foreground">
-                  深度上限 {explosionRun.maxDepth} / 实际到达第 {explosionRun.reachedDepth} 层 · 基准时刻{' '}
-                  {explosionRun.asOf}
+                  深度上限 {explosionRun.maxDepth} / 实际到达第 {explosionRun.reachedDepth} 层 ·
+                  基准时刻 {explosionRun.asOf}
                 </span>
               </div>
 
@@ -1136,7 +1144,7 @@ export function BomWorkspace() {
                 />
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-copy-13">
+                  <table className="text-copy-13 w-full text-left">
                     <thead className="text-muted-foreground text-copy-12">
                       <tr>
                         <th className="py-1 pr-2 font-medium">组件 SKU</th>
@@ -1153,10 +1161,9 @@ export function BomWorkspace() {
                     <tbody className="divide-border divide-y">
                       {explosionRun.lines.map((l) => (
                         <tr key={l.id} className={l.truncated ? 'text-destructive' : undefined}>
-                          <td className="py-1 pr-2 whitespace-nowrap">
+                          <td className="whitespace-nowrap py-1 pr-2">
                             <span className="text-muted-foreground">{indentOf(l.depth)}</span>
-                            {l.skuCode}{' '}
-                            <span className="text-muted-foreground">{l.skuName}</span>
+                            {l.skuCode} <span className="text-muted-foreground">{l.skuName}</span>
                           </td>
                           <td className="py-1 pr-2">
                             <Badge tone={lineRoleTone(l)}>{lineRoleLabel(l)}</Badge>
@@ -1172,7 +1179,7 @@ export function BomWorkspace() {
                           <td className="py-1 pr-2">{String(l.available)}</td>
                           <td className="py-1 pr-2">{String(l.inTransit)}</td>
                           <td className="py-1 pr-2 font-medium">{gapText(l)}</td>
-                          <td className="text-muted-foreground py-1 pr-2 whitespace-nowrap">
+                          <td className="text-muted-foreground whitespace-nowrap py-1 pr-2">
                             {l.sourceBomCode} {l.sourceVersionNo}
                           </td>
                         </tr>
@@ -1202,11 +1209,12 @@ export function BomWorkspace() {
             <div className="border-muted space-y-2 rounded-md border p-3">
               <p className="text-copy-13 font-medium">展开记录（这份建议的凭据）</p>
               <p className="text-muted-foreground text-copy-12">
-                展开结果是建议不是事实，实际采购由 06 生成单据后成立。采购单引用的是某一次展开的
-                id ——「现在的 BOM × 现在的库存」随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
+                展开结果是建议不是事实，实际采购由 06 生成单据后成立。采购单引用的是某一次展开的 id
+                ——「现在的 BOM ×
+                现在的库存」随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
               </p>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground text-copy-12">
                     <tr>
                       <th className="py-1 pr-2 font-medium">摘要</th>
@@ -1287,7 +1295,7 @@ export function BomWorkspace() {
                 <div className="text-muted-foreground text-copy-12 mb-2">
                   {usage.skuCode} {usage.skuName} · 共 {usage.total} 处
                 </div>
-                <table className="w-full text-left text-copy-13">
+                <table className="text-copy-13 w-full text-left">
                   <thead className="text-muted-foreground text-copy-12">
                     <tr>
                       <th className="py-1 pr-2 font-medium">BOM</th>
@@ -1336,12 +1344,18 @@ export function BomWorkspace() {
           close={() => setBomEditor(null)}
         >
           <div className="space-y-3">
-            <Field label="BOM 编码" hint="租户内唯一，建后不可改（06 采购建议与 08 加工单的稳定引用）">
+            <Field
+              label="BOM 编码"
+              hint="租户内唯一，建后不可改（06 采购建议与 08 加工单的稳定引用）"
+            >
               <input
                 className={control}
                 value={bomEditor.input.code}
                 onChange={(e) =>
-                  setBomEditor({ ...bomEditor, input: { ...bomEditor.input, code: e.target.value } })
+                  setBomEditor({
+                    ...bomEditor,
+                    input: { ...bomEditor.input, code: e.target.value },
+                  })
                 }
               />
             </Field>
@@ -1374,7 +1388,10 @@ export function BomWorkspace() {
                 rows={2}
                 value={bomEditor.input.note ?? ''}
                 onChange={(e) =>
-                  setBomEditor({ ...bomEditor, input: { ...bomEditor.input, note: e.target.value } })
+                  setBomEditor({
+                    ...bomEditor,
+                    input: { ...bomEditor.input, note: e.target.value },
+                  })
                 }
               />
             </Field>
@@ -1579,15 +1596,12 @@ export function BomWorkspace() {
               </Button>
               <Button
                 onClick={() =>
-                  void guard(
-                    async () => {
-                      const bomId = closing.bomId;
-                      await closeVersion(closing.id, localInputToInstant(closeAt));
-                      setClosing(null);
-                      await openBom(bomId);
-                    },
-                    '本版已停用（只影响未来，历史不受影响）',
-                  )
+                  void guard(async () => {
+                    const bomId = closing.bomId;
+                    await closeVersion(closing.id, localInputToInstant(closeAt));
+                    setClosing(null);
+                    await openBom(bomId);
+                  }, '本版已停用（只影响未来，历史不受影响）')
                 }
               >
                 停用

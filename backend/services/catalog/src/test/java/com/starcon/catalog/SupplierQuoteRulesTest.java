@@ -12,11 +12,9 @@ import org.junit.jupiter.api.Test;
  * 3.6.2.1 供应商报价的纯规则离线单测。
  *
  * <p>与 {@code PartyRoleProfileRulesTest} / {@code PartyRulesTest} 同一纪律：
- * 能在保存前判定的规则必须有可以穷举的单测，因为集成测试里每加一条规则就多一轮
- * Testcontainers 启动。
+ * 能在保存前判定的规则必须有可以穷举的单测，因为集成测试里每加一条规则就多一轮 Testcontainers 启动。
  *
- * <p>本文件<b>刻意</b>钉死三组断言，它们是「两处各说一套」最容易漂的地方：
- * R2 的优先级方向与歧义、**R5 的阶梯取价边界**、R3/R4 的必填与格式。
+ * <p>本文件<b>刻意</b>钉死三组断言，它们是「两处各说一套」最容易漂的地方： R2 的优先级方向与歧义、**R5 的阶梯取价边界**、R3/R4 的必填与格式。
  *
  * <p>其中阶梯取价（{@link SupplierQuoteRules#applicableTier}）是本模块最容易写错的一段：
  * 写错了不会报错，只会让采购单按<b>更贵或更便宜</b>的那一档结算，而账面看不出异常。
@@ -106,9 +104,9 @@ class SupplierQuoteRulesTest {
   /**
    * 取适用档的窄化包装。
    *
-   * <p>显式指定类型参数 {@code <String>}：{@code applicableTier} 的第三个参数与两个
-   * {@code List} 在传 {@code null} 或 {@code List.of()} 时都让 {@code T} 无从推断，
-   * Java 21 会把它解析成 AssertJ 的 {@code assertThat(Predicate)} 而报"引用不明确"。
+   * <p>显式指定类型参数 {@code <String>}：{@code applicableTier} 的第三个参数与两个 {@code List} 在传 {@code null} 或
+   * {@code List.of()} 时都让 {@code T} 无从推断， Java 21 会把它解析成 AssertJ 的 {@code assertThat(Predicate)}
+   * 而报"引用不明确"。
    */
   private static String tier(List<BigDecimal> mins, List<String> tiers, BigDecimal quantity) {
     return SupplierQuoteRules.<String>applicableTier(mins, tiers, quantity);

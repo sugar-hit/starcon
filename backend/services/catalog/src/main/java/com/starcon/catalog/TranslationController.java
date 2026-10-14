@@ -16,21 +16,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
- * 3.4.3.1 多语言内容：SPU/SKU 的多语言名称与描述、租户语言需求（人工维护 ∪ 店铺站点推导）、
- * AI 翻译建议的采纳/驳回、翻译完整度与批量操作。
+ * 3.4.3.1 多语言内容：SPU/SKU 的多语言名称与描述、租户语言需求（人工维护 ∪ 店铺站点推导）、 AI 翻译建议的采纳/驳回、翻译完整度与批量操作。
  *
- * <p>路由挂在 {@code /catalog/translations} 之下，与 {@code /catalog/descriptions}（3.4.2.2）
- * {@code /catalog/titles}（3.4.2.1）**并列而不合并**：那两套也带 locale，但那是
- * 「模板与其渲染段落」的多语言（见 V22 文件头边界），挂在商品档案上的多语言名称与描述是
- * 另一套口径，合在一个路由下会让两边的 locale 迟早被当成同一个东西。
- * 台账里的 {@code /products/translations} 是**前端页面路径**。
+ * <p>路由挂在 {@code /catalog/translations} 之下，与 {@code /catalog/descriptions}（3.4.2.2） {@code
+ * /catalog/titles}（3.4.2.1）**并列而不合并**：那两套也带 locale，但那是 「模板与其渲染段落」的多语言（见 V22
+ * 文件头边界），挂在商品档案上的多语言名称与描述是 另一套口径，合在一个路由下会让两边的 locale 迟早被当成同一个东西。 台账里的 {@code
+ * /products/translations} 是**前端页面路径**。
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：译文挂在商品上、
- * 上游是 3.1.1.1 的 SPU/SKU，所以复用已有词表而不是新造
- * （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：译文挂在商品上、 上游是 3.1.1.1 的
+ * SPU/SKU，所以复用已有词表而不是新造 （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  *
- * <p><b>批量接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同：
- * 补占位、采纳建议、标校对都是几百行的短事务，几十毫秒。
+ * <p><b>批量接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同： 补占位、采纳建议、标校对都是几百行的短事务，几十毫秒。
  */
 @RestController
 @RequestMapping("/catalog/translations")
@@ -74,7 +70,8 @@ public class TranslationController {
     return call(
         auth,
         "spu.read",
-        a -> translations.locales(new TranslationLocaleQuery(keyword, source, enabled, page, size)));
+        a ->
+            translations.locales(new TranslationLocaleQuery(keyword, source, enabled, page, size)));
   }
 
   @GetMapping("/locales/{id}")
@@ -259,15 +256,13 @@ public class TranslationController {
       @RequestParam String targetType,
       @RequestParam UUID targetId,
       @RequestParam(required = false) List<String> locale) {
-    return call(
-        auth, "spu.read", a -> translations.coverage(targetType, targetId, locale));
+    return call(auth, "spu.read", a -> translations.coverage(targetType, targetId, locale));
   }
 
   /**
    * 导出译文 CSV（供 04 刊登与 18 批量校对取用）。
    *
-   * <p>StreamingResponseBody 分批写出，峰值内存与结果集大小无关。
-   * 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
+   * <p>StreamingResponseBody 分批写出，峰值内存与结果集大小无关。 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
    */
   @GetMapping(value = "/entries/export", produces = "text/csv")
   public ResponseEntity<StreamingResponseBody> exportEntries(
@@ -279,8 +274,7 @@ public class TranslationController {
       @RequestParam(required = false) String skuId,
       @RequestParam(required = false) String keyword) {
     var actor = access.require(auth, "catalog.spu.read");
-    var query =
-        new TranslationEntryQuery(targetType, status, locale, spuId, skuId, keyword, 0, 0);
+    var query = new TranslationEntryQuery(targetType, status, locale, spuId, skuId, keyword, 0, 0);
     // 先在租户事务里校验筛选条件，别等到已经开始写流才失败。
     access.run(
         actor,
@@ -291,8 +285,7 @@ public class TranslationController {
         });
     StreamingResponseBody body =
         out -> {
-          java.io.Writer writer =
-              new java.io.OutputStreamWriter(out, StandardCharsets.UTF_8);
+          java.io.Writer writer = new java.io.OutputStreamWriter(out, StandardCharsets.UTF_8);
           translations.streamEntriesCsv(query, chunk -> writeChunk(writer, chunk));
           writer.flush();
         };
@@ -359,10 +352,7 @@ public class TranslationController {
     return call(auth, "spu.update", a -> translations.submitSuggestions(a, input));
   }
 
-  /**
-   * 采纳一条 AI 建议。译文落在「已翻」而不是「已校对」——
-   * 机器译文拿去发平台等于没做校对这一步。
-   */
+  /** 采纳一条 AI 建议。译文落在「已翻」而不是「已校对」—— 机器译文拿去发平台等于没做校对这一步。 */
   @PostMapping("/suggestions/{id}/adopt")
   public TranslationEntry adoptSuggestion(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -400,8 +390,7 @@ public class TranslationController {
   /**
    * 执行一次批量操作（同步，返回即已完成）。
    *
-   * <p>补齐待翻占位 / 批量采纳 AI 建议 / 批量标记已校对。
-   * 逐条结果在批次详情里，不是一个汇总数字。
+   * <p>补齐待翻占位 / 批量采纳 AI 建议 / 批量标记已校对。 逐条结果在批次详情里，不是一个汇总数字。
    */
   @PostMapping("/batches")
   public TranslationBatchDetail runBatch(

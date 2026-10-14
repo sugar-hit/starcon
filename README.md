@@ -2,16 +2,18 @@
 
 <div align="center">
 
+<img src="apps/web/public/logo-mark-brand.svg" alt="starcon logo" width="88" height="88">
+
 # starcon
 
 ### Bring products, orders, and inventory together for cross-border commerce.
 
 A SaaS ERP for multi-platform businesses · Java microservices · Tenant data isolation
 
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
-[![Java 21](https://img.shields.io/badge/Java-21-orange)](backend/pom.xml)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](apps/web/package.json)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6)](apps/web/tsconfig.json)
+[![License: PolyForm Noncommercial](docs/design/readme/license.svg)](LICENSE)
+[![Java 21](docs/design/readme/java.svg)](backend/pom.xml)
+[![Next.js](docs/design/readme/next.svg)](apps/web/package.json)
+[![TypeScript](docs/design/readme/typescript.svg)](apps/web/tsconfig.json)
 
 [Quick start](#quick-start) · [Highlights](#highlights) · [Project status](#project-status) · [Architecture](#architecture) · [License](#license)
 
@@ -57,7 +59,7 @@ A page, configuration record, or task endpoint does not establish a working exte
 
 ### Requirements
 
-- **Node.js ≥ 20.11.0** and **pnpm 9**; the repository pins `pnpm@9.0.0`.
+- **Node.js ≥ 22.12.0** and **pnpm 9**; the repository pins `pnpm@9.0.0`.
 - Docker Desktop, or Docker Engine with Compose, for PostgreSQL and backend services.
 - **JDK 21** only when building the backend directly on the host; container startup includes its Java toolchain.
 
@@ -106,28 +108,13 @@ The warehouse steps require upstream records and permissions. Page prerequisites
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    Browser[Browser workspace] --> Web[Next.js · TypeScript]
-    Web --> Identity[identity · Authorization]
-    Web --> Catalog[catalog · Products]
-    Web --> Channel[channel · Channels]
-    Web --> Trade[trade · Orders]
-    Web --> Warehouse[warehouse · Inventory]
-    Web --> CRM[crm · Support]
-    Identity --> IDB[(identity DB)]
-    Catalog --> CDB[(catalog DB)]
-    Channel --> CHDB[(channel DB)]
-    Warehouse --> WDB[(warehouse DB)]
-    Trade --> TDB[(trade DB)]
-    CRM --> CRDB[(crm DB)]
-```
+![starcon service architecture](docs/design/readme/architecture.svg)
 
 The diagram shows current services and database ownership. Business services also verify identity and permissions through authorized interfaces; they do not access another service's database directly. See [ADR-0004](docs/decisions/0004-java-spring-boot-microservices.md) for service boundaries. Finance and other domains expand this architecture as implementation progresses.
 
 | Layer        | Technology                                                      |
 | ------------ | --------------------------------------------------------------- |
-| Frontend     | Next.js 14, React 18, strict TypeScript, Tailwind CSS, Radix UI |
+| Frontend     | Next.js 15, React 18, strict TypeScript, Tailwind CSS, Radix UI |
 | Backend      | Java 21, Spring Boot, Maven Wrapper, jOOQ                       |
 | Data         | PostgreSQL 16, Flyway SQL migrations, Row-Level Security        |
 | Contracts    | SpringDoc OpenAPI, TypeScript generation                        |

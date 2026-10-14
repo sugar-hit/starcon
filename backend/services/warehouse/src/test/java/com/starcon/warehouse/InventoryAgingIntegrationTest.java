@@ -26,19 +26,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 7.6.1.1 库龄与呆滞：库龄分桶边界、呆滞判定、处置建议优先级、阈值策略，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具与写入约定与 {@code InventoryExpiryIntegrationTest} 一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具与写入约定与 {@code InventoryExpiryIntegrationTest} 一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>夹具刻意在每个分桶边界两侧各放一行</b>（0/30/31/60/61/90/91 天），
- * 因为「90+ 到底含不含 90」是本模块唯一一处会让人误解的口径：
- * 若让 90 同时落进两个桶，各桶之和就会大于真实库存。用例
- * {@link #库龄分桶边界_90天归61_90桶而非90加桶()} 把这条钉死。
+ * <p><b>夹具刻意在每个分桶边界两侧各放一行</b>（0/30/31/60/61/90/91 天）， 因为「90+ 到底含不含 90」是本模块唯一一处会让人误解的口径： 若让 90
+ * 同时落进两个桶，各桶之和就会大于真实库存。用例 {@link #库龄分桶边界_90天归61_90桶而非90加桶()} 把这条钉死。
  *
- * <p>基准「今天」从数据库读 {@code current_date} 而不是 {@link LocalDate#now()} ——
- * 应用 JVM 与 PG 容器时区可能不同，用 JVM 的会让边界断言变成「看跑测试的时刻而定」。
+ * <p>基准「今天」从数据库读 {@code current_date} 而不是 {@link LocalDate#now()} —— 应用 JVM 与 PG 容器时区可能不同，用 JVM
+ * 的会让边界断言变成「看跑测试的时刻而定」。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -101,8 +98,7 @@ class InventoryAgingIntegrationTest {
               DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
-        s.execute(
-            "create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
+        s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
       identity.createContext(
@@ -176,52 +172,115 @@ class InventoryAgingIntegrationTest {
         dbToday = rs.getObject(1, LocalDate.class);
       }
     }
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-          leA, a, "LE-1", "主体一");
-      sql.execute(
-          "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuA, a, "SKU-1", "库龄商品");
-      sql.execute(
-          "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-          skuA2, a, "SKU-2", "非批次商品");
-      sql.execute(
-          "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-          whSh, a, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qSellable, a, "SELLABLE", "可售", "SELLABLE");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qDefective, a, "DEFECTIVE", "残次", "DEFECTIVE");
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locSh1, a, whSh, "SH-01", "上海一区", "STORAGE", true);
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locSh2, a, whSh, "SH-02", "上海二区", "STORAGE", true);
-      return null;
-    });
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-          leB, b, "LE-1", "主体一");
-      sql.execute(
-          "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuB, b, "SKU-B", "B 租户商品");
-      sql.execute(
-          "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-          whB, b, "WH-BJ", "北京仓", "CN", "Asia/Shanghai");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qSellableB, b, "SELLABLE", "可售", "SELLABLE");
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locB1, b, whB, "BJ-01", "北京一区", "STORAGE", true);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              leA,
+              a,
+              "LE-1",
+              "主体一");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuA,
+              a,
+              "SKU-1",
+              "库龄商品");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuA2,
+              a,
+              "SKU-2",
+              "非批次商品");
+          sql.execute(
+              "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+              whSh,
+              a,
+              "WH-SH",
+              "上海仓",
+              "CN",
+              "Asia/Shanghai");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qSellable,
+              a,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qDefective,
+              a,
+              "DEFECTIVE",
+              "残次",
+              "DEFECTIVE");
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locSh1,
+              a,
+              whSh,
+              "SH-01",
+              "上海一区",
+              "STORAGE",
+              true);
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locSh2,
+              a,
+              whSh,
+              "SH-02",
+              "上海二区",
+              "STORAGE",
+              true);
+          return null;
+        });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              leB,
+              b,
+              "LE-1",
+              "主体一");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuB,
+              b,
+              "SKU-B",
+              "B 租户商品");
+          sql.execute(
+              "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+              whB,
+              b,
+              "WH-BJ",
+              "北京仓",
+              "CN",
+              "Asia/Shanghai");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qSellableB,
+              b,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locB1,
+              b,
+              whB,
+              "BJ-01",
+              "北京一区",
+              "STORAGE",
+              true);
+          return null;
+        });
   }
 
   // ================================================================ 夹具
@@ -248,58 +307,71 @@ class InventoryAgingIntegrationTest {
       UUID quality,
       List<B> buckets) {
     var balanceId = UUID.randomUUID();
-    access.run(actor, "warehouse.inventory.read", () -> {
-      var onHand = BigDecimal.ZERO;
-      var reserved = BigDecimal.ZERO;
-      for (var x : buckets) {
-        onHand = onHand.add(new BigDecimal(x.onHand()));
-        reserved = reserved.add(new BigDecimal(x.reserved()));
-      }
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-          balanceId, tenant, sku, warehouse, legalEntity, quality, onHand, reserved);
-      for (var x : buckets) {
-        sql.execute(
-            "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
-                + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved)"
-                + " values(?,?,?,?,?,?,?,?,?,?,?)",
-            UUID.randomUUID(),
-            tenant,
-            legalEntity,
-            sku,
-            warehouse,
-            x.location(),
-            x.lotId(),
-            quality,
-            balanceId,
-            new BigDecimal(x.onHand()),
-            new BigDecimal(x.reserved()));
-      }
-      return null;
-    });
+    access.run(
+        actor,
+        "warehouse.inventory.read",
+        () -> {
+          var onHand = BigDecimal.ZERO;
+          var reserved = BigDecimal.ZERO;
+          for (var x : buckets) {
+            onHand = onHand.add(new BigDecimal(x.onHand()));
+            reserved = reserved.add(new BigDecimal(x.reserved()));
+          }
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
+              balanceId,
+              tenant,
+              sku,
+              warehouse,
+              legalEntity,
+              quality,
+              onHand,
+              reserved);
+          for (var x : buckets) {
+            sql.execute(
+                "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
+                    + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved)"
+                    + " values(?,?,?,?,?,?,?,?,?,?,?)",
+                UUID.randomUUID(),
+                tenant,
+                legalEntity,
+                sku,
+                warehouse,
+                x.location(),
+                x.lotId(),
+                quality,
+                balanceId,
+                new BigDecimal(x.onHand()),
+                new BigDecimal(x.reserved()));
+          }
+          return null;
+        });
     return balanceId;
   }
 
   /** 建批次。{@code receivedDaysAgo} 就是**库龄天数**，直接控制边界。 */
   UUID lot(String code, int receivedDaysAgo, LocalDate expiresOn, boolean withSupplier) {
     var id = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
-              + "origin,source_system,source_ref_id,source_ref_code,supplier_ref_id,supplier_name)"
-              + " values(?,?,?,?,?::date,?::date,'MANUAL','PURCHASE',?,'PO-AGING',?,?)",
-          id,
-          a,
-          skuA,
-          code,
-          expiresOn,
-          daysAgo(receivedDaysAgo),
-          UUID.randomUUID(),
-          withSupplier ? UUID.randomUUID() : null,
-          withSupplier ? "供应商甲" : "");
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
+                  + "origin,source_system,source_ref_id,source_ref_code,supplier_ref_id,supplier_name)"
+                  + " values(?,?,?,?,?::date,?::date,'MANUAL','PURCHASE',?,'PO-AGING',?,?)",
+              id,
+              a,
+              skuA,
+              code,
+              expiresOn,
+              daysAgo(receivedDaysAgo),
+              UUID.randomUUID(),
+              withSupplier ? UUID.randomUUID() : null,
+              withSupplier ? "供应商甲" : "");
+          return null;
+        });
     return id;
   }
 
@@ -338,9 +410,7 @@ class InventoryAgingIntegrationTest {
 
   /** 非批次管理品（无 lot_id）：库龄只能退回库位建档日。 */
   UUID lotlessBucket(String onHand) {
-    balance(
-        actorA, a, skuA2, whSh, leA, qSellable,
-        List.of(new B(null, locSh1, onHand, "0")));
+    balance(actorA, a, skuA2, whSh, leA, qSellable, List.of(new B(null, locSh1, onHand, "0")));
     return skuA2;
   }
 
@@ -353,16 +423,14 @@ class InventoryAgingIntegrationTest {
   }
 
   AgingBucketReport report() {
-    return asA(
-        () -> service.bucketReport(new AgingBucketQuery(null, null, null, null, null)));
+    return asA(() -> service.bucketReport(new AgingBucketQuery(null, null, null, null, null)));
   }
 
   SlowMovingPage list() {
     return asA(
         () ->
             service.slowMoving(
-                new SlowMovingQuery(
-                    null, null, null, null, null, null, null, 0, 50)));
+                new SlowMovingQuery(null, null, null, null, null, null, null, 0, 50)));
   }
 
   static AgingBucketRow bucket(AgingBucketReport r, String name) {
@@ -419,8 +487,7 @@ class InventoryAgingIntegrationTest {
     var page = list();
     assertThat(page.rows()).isNotEmpty();
     assertThat(page.rows()).allSatisfy(r -> assertThat(r.agingDays()).isNotNull());
-    var l91 =
-        page.rows().stream().filter(r -> "L91".equals(r.lotCode())).findFirst().orElseThrow();
+    var l91 = page.rows().stream().filter(r -> "L91".equals(r.lotCode())).findFirst().orElseThrow();
     assertThat(l91.agingDays()).isEqualTo(91);
     assertThat(l91.inboundDate()).isEqualTo(daysAgo(91));
   }
@@ -490,16 +557,20 @@ class InventoryAgingIntegrationTest {
     // 库位上的货今天又动过一次：若用 last_movement_at，它的库龄会变成 0 天。
     var l = lot("L-MOVED", 120, null, false);
     balance(actorA, a, skuA, whSh, leA, qSellable, List.of(new B(l, locSh1, "5", "0")));
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "update stock_bucket set last_movement_at=now(),version=version+1"
-              + " where lot_id=?",
-          l);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "update stock_bucket set last_movement_at=now(),version=version+1"
+                  + " where lot_id=?",
+              l);
+          return null;
+        });
 
     var page = list();
-    var row = page.rows().stream().filter(r -> "L-MOVED".equals(r.lotCode())).findFirst().orElseThrow();
+    var row =
+        page.rows().stream().filter(r -> "L-MOVED".equals(r.lotCode())).findFirst().orElseThrow();
     assertThat(row.agingDays()).isEqualTo(120);
     assertThat(row.slowMovingStatus()).isEqualTo("OBSOLETE");
   }
@@ -521,27 +592,27 @@ class InventoryAgingIntegrationTest {
     agingFixture();
     var page = list();
 
-    assertThat(page.rows()).extracting(SlowMovingRow::lotCode, SlowMovingRow::agingDays)
+    assertThat(page.rows())
+        .extracting(SlowMovingRow::lotCode, SlowMovingRow::agingDays)
         .containsExactly(
             org.assertj.core.groups.Tuple.tuple("L91", 91),
             org.assertj.core.groups.Tuple.tuple("L90", 90),
             org.assertj.core.groups.Tuple.tuple("L61", 61),
             org.assertj.core.groups.Tuple.tuple("L60", 60));
 
-    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingStatus)
+    assertThat(page.rows())
+        .extracting(SlowMovingRow::slowMovingStatus)
         .containsExactly("OBSOLETE", "OBSOLETE", "SLOW_MOVING", "SLOW_MOVING");
 
     // 未配策略时阈值来源必须标成 DEFAULT，而不是让用户以为有人配过
-    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingDaysSource)
-        .containsOnly("DEFAULT");
+    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingDaysSource).containsOnly("DEFAULT");
   }
 
   @Test
   void 呆滞判定_未达滞销线的不进清单() {
     agingFixture();
     var page = list();
-    assertThat(page.rows()).extracting(SlowMovingRow::lotCode)
-        .doesNotContain("L0", "L30", "L31");
+    assertThat(page.rows()).extracting(SlowMovingRow::lotCode).doesNotContain("L0", "L30", "L31");
     // 汇总只统计命中两档的行
     assertThat(page.summary().bucketCount()).isEqualTo(4L);
     assertThat(page.summary().obsoleteCount()).isEqualTo(2L);
@@ -556,14 +627,22 @@ class InventoryAgingIntegrationTest {
     var expired = lot("L-EXPIRED", 5, daysAgo(1), false);
     var expiring = lot("L-EXPIRING", 10, dbToday.plusDays(10), false);
     balance(
-        actorA, a, skuA, whSh, leA, qSellable,
+        actorA,
+        a,
+        skuA,
+        whSh,
+        leA,
+        qSellable,
         List.of(new B(expired, locSh1, "3", "0"), new B(expiring, locSh1, "4", "0")));
 
     var page = list();
     var expiredRow =
         page.rows().stream().filter(r -> "L-EXPIRED".equals(r.lotCode())).findFirst().orElseThrow();
     var expiringRow =
-        page.rows().stream().filter(r -> "L-EXPIRING".equals(r.lotCode())).findFirst().orElseThrow();
+        page.rows().stream()
+            .filter(r -> "L-EXPIRING".equals(r.lotCode()))
+            .findFirst()
+            .orElseThrow();
 
     // 过期货即使只躺了 5 天，也必须建议报废而不是促销
     assertThat(expiredRow.expiryStatus()).isEqualTo("EXPIRED");
@@ -582,14 +661,22 @@ class InventoryAgingIntegrationTest {
     var withSupplier = lot("L-DEF-SUP", 100, null, true);
     var noSupplier = lot("L-DEF-NOSUP", 100, null, false);
     balance(
-        actorA, a, skuA, whSh, leA, qDefective,
+        actorA,
+        a,
+        skuA,
+        whSh,
+        leA,
+        qDefective,
         List.of(new B(withSupplier, locSh1, "2", "0"), new B(noSupplier, locSh1, "6", "0")));
 
     var page = list();
     var sup =
         page.rows().stream().filter(r -> "L-DEF-SUP".equals(r.lotCode())).findFirst().orElseThrow();
     var nosup =
-        page.rows().stream().filter(r -> "L-DEF-NOSUP".equals(r.lotCode())).findFirst().orElseThrow();
+        page.rows().stream()
+            .filter(r -> "L-DEF-NOSUP".equals(r.lotCode()))
+            .findFirst()
+            .orElseThrow();
     assertThat(sup.qualityRole()).isEqualTo("DEFECTIVE");
     assertThat(sup.disposition()).isEqualTo("RETURN_TO_VENDOR");
     assertThat(nosup.disposition()).isEqualTo("SCRAP");
@@ -599,7 +686,8 @@ class InventoryAgingIntegrationTest {
   void 呆滞与滞销分别对应清仓与促销() {
     agingFixture();
     var page = list();
-    assertThat(page.rows()).extracting(SlowMovingRow::lotCode, SlowMovingRow::disposition)
+    assertThat(page.rows())
+        .extracting(SlowMovingRow::lotCode, SlowMovingRow::disposition)
         .containsExactly(
             org.assertj.core.groups.Tuple.tuple("L91", "CLEARANCE"),
             org.assertj.core.groups.Tuple.tuple("L90", "CLEARANCE"),
@@ -623,7 +711,8 @@ class InventoryAgingIntegrationTest {
                 service.slowMoving(
                     new SlowMovingQuery(
                         null, null, null, List.of("OBSOLETE"), null, null, null, 0, 50)));
-    assertThat(obsoleteOnly.rows()).extracting(SlowMovingRow::lotCode)
+    assertThat(obsoleteOnly.rows())
+        .extracting(SlowMovingRow::lotCode)
         .containsExactly("L91", "L90");
     assertThat(obsoleteOnly.total()).isEqualTo(2L);
     assertThat(obsoleteOnly.statusOptions()).hasSize(3);
@@ -632,9 +721,9 @@ class InventoryAgingIntegrationTest {
         asA(
             () ->
                 service.slowMoving(
-                    new SlowMovingQuery(
-                        null, null, null, null, "CLEARANCE", null, null, 0, 50)));
-    assertThat(clearanceOnly.rows()).extracting(SlowMovingRow::lotCode)
+                    new SlowMovingQuery(null, null, null, null, "CLEARANCE", null, null, 0, 50)));
+    assertThat(clearanceOnly.rows())
+        .extracting(SlowMovingRow::lotCode)
         .containsExactly("L91", "L90");
     assertThat(clearanceOnly.dispositionOptions()).isNotEmpty();
 
@@ -651,16 +740,17 @@ class InventoryAgingIntegrationTest {
     assertThat(page1.total()).isEqualTo(4L);
     assertThat(page1.rows()).hasSize(2);
     assertThat(page2.rows()).hasSize(2);
-    assertThat(page1.rows()).extracting(SlowMovingRow::lotCode)
-        .doesNotContainAnyElementsOf(
-            page2.rows().stream().map(SlowMovingRow::lotCode).toList());
+    assertThat(page1.rows())
+        .extracting(SlowMovingRow::lotCode)
+        .doesNotContainAnyElementsOf(page2.rows().stream().map(SlowMovingRow::lotCode).toList());
 
     var byAvailable =
         asA(
             () ->
                 service.slowMoving(
                     new SlowMovingQuery(null, null, null, null, null, null, "AVAILABLE", 0, 50)));
-    assertThat(byAvailable.rows()).extracting(SlowMovingRow::lotCode)
+    assertThat(byAvailable.rows())
+        .extracting(SlowMovingRow::lotCode)
         .containsExactly("L91", "L90", "L61", "L60");
 
     var keyword =
@@ -676,9 +766,13 @@ class InventoryAgingIntegrationTest {
                 service.slowMoving(
                     new SlowMovingQuery(null, whSh, null, null, null, null, null, 0, 50)));
     assertThat(byWarehouse.total()).isEqualTo(4L);
-    assertThat(asA(() -> service.slowMoving(
-            new SlowMovingQuery(null, UUID.randomUUID(), null, null, null, null, null, 0, 50)))
-        .total()).isZero();
+    assertThat(
+            asA(() ->
+                    service.slowMoving(
+                        new SlowMovingQuery(
+                            null, UUID.randomUUID(), null, null, null, null, null, 0, 50)))
+                .total())
+        .isZero();
   }
 
   @Test
@@ -730,10 +824,7 @@ class InventoryAgingIntegrationTest {
     agingFixture();
     // 把滞销线提到 10 天：原来只有 60/61/90/91 命中的四行会变成七行全部命中。
     var saved =
-        asA(
-            () ->
-                service.upsertPolicy(
-                    a, new AgingPolicyUpsertRequest(skuA, 10, 20, true, "快消品")));
+        asA(() -> service.upsertPolicy(a, new AgingPolicyUpsertRequest(skuA, 10, 20, true, "快消品")));
     assertThat(saved.configured()).isTrue();
     assertThat(saved.source()).isEqualTo("POLICY");
     assertThat(saved.slowMovingDays()).isEqualTo(10);
@@ -746,10 +837,8 @@ class InventoryAgingIntegrationTest {
     assertThat(page.rows()).extracting(SlowMovingRow::lotCode).doesNotContain("L0");
     // 呆滞线 20 天高于 L30/L31 的库龄，所以这 6 行**全部**是 OBSOLETE：
     // 档位判定先看呆滞线，「滞销」这一档只在库龄没过呆滞线时才可能命中。
-    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingStatus)
-        .containsOnly("OBSOLETE");
-    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingDaysSource)
-        .containsOnly("POLICY");
+    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingStatus).containsOnly("OBSOLETE");
+    assertThat(page.rows()).extracting(SlowMovingRow::slowMovingDaysSource).containsOnly("POLICY");
 
     // 重复配置走 upsert，不撞唯一键
     // 换成 30/40：L31/L30 落在滞销线与呆滞线之间，这一档才第一次被真正命中 ——
@@ -757,7 +846,8 @@ class InventoryAgingIntegrationTest {
     var again =
         asA(() -> service.upsertPolicy(a, new AgingPolicyUpsertRequest(skuA, 30, 40, true, null)));
     assertThat(again.slowMovingDays()).isEqualTo(30);
-    assertThat(list().rows()).extracting(SlowMovingRow::lotCode, SlowMovingRow::slowMovingStatus)
+    assertThat(list().rows())
+        .extracting(SlowMovingRow::lotCode, SlowMovingRow::slowMovingStatus)
         .containsExactly(
             org.assertj.core.groups.Tuple.tuple("L91", "OBSOLETE"),
             org.assertj.core.groups.Tuple.tuple("L90", "OBSOLETE"),
@@ -765,12 +855,15 @@ class InventoryAgingIntegrationTest {
             org.assertj.core.groups.Tuple.tuple("L60", "OBSOLETE"),
             org.assertj.core.groups.Tuple.tuple("L31", "SLOW_MOVING"),
             org.assertj.core.groups.Tuple.tuple("L30", "SLOW_MOVING"));
-    assertThat(asA(() -> service.policies(new AgingPolicyQuery(null, null, null, null, 0, 50))).total())
+    assertThat(
+            asA(() -> service.policies(new AgingPolicyQuery(null, null, null, null, 0, 50)))
+                .total())
         .isEqualTo(1L);
 
     // 关掉后退回默认值，而不是当成 0 天
     asA(() -> service.upsertPolicy(a, new AgingPolicyUpsertRequest(skuA, 30, 40, false, null)));
-    assertThat(list().rows()).extracting(SlowMovingRow::slowMovingDaysSource)
+    assertThat(list().rows())
+        .extracting(SlowMovingRow::slowMovingDaysSource)
         .containsOnly("DEFAULT");
     assertThat(list().rows()).hasSize(4);
   }
@@ -794,7 +887,11 @@ class InventoryAgingIntegrationTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("滞销线必须在");
     assertThatThrownBy(
-            () -> asA(() -> service.upsertPolicy(a, new AgingPolicyUpsertRequest(null, 1, 2, true, null))))
+            () ->
+                asA(
+                    () ->
+                        service.upsertPolicy(
+                            a, new AgingPolicyUpsertRequest(null, 1, 2, true, null))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须给出 skuId");
     assertThatThrownBy(
@@ -802,8 +899,7 @@ class InventoryAgingIntegrationTest {
                 asA(
                     () ->
                         service.upsertPolicy(
-                            a,
-                            new AgingPolicyUpsertRequest(UUID.randomUUID(), 1, 2, true, null))))
+                            a, new AgingPolicyUpsertRequest(UUID.randomUUID(), 1, 2, true, null))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("SKU 不存在");
   }
@@ -814,8 +910,8 @@ class InventoryAgingIntegrationTest {
   void 端点_分桶与清单可读且响应含资金占用说明() throws Exception {
     agingFixture();
 
-    http.perform(get("/warehouse/inventory/aging/buckets")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/aging/buckets").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.asOf").exists())
         .andExpect(jsonPath("$.buckets.length()").value(4))
@@ -825,8 +921,9 @@ class InventoryAgingIntegrationTest {
         .andExpect(jsonPath("$.capitalTie.available").value(false))
         .andExpect(jsonPath("$.capitalTie.occupiedAmount").doesNotExist());
 
-    http.perform(get("/warehouse/inventory/aging/slow-moving")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/aging/slow-moving")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(4))
         .andExpect(jsonPath("$.rows[0].lotCode").value("L91"))
@@ -836,12 +933,14 @@ class InventoryAgingIntegrationTest {
         .andExpect(jsonPath("$.rows[0].automatable").value(false))
         .andExpect(jsonPath("$.rows[0].basis").isNotEmpty());
 
-    http.perform(get("/warehouse/inventory/aging/policy/{sku}", "placeholder")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/aging/policy/{sku}", "placeholder")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isBadRequest());
 
-    http.perform(get("/warehouse/inventory/aging/policy/{sku}", skuA)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/aging/policy/{sku}", skuA)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.configured").value(false))
         .andExpect(jsonPath("$.source").value("DEFAULT"))
@@ -850,16 +949,18 @@ class InventoryAgingIntegrationTest {
 
   @Test
   void 端点_策略写入需要update权限() throws Exception {
-    http.perform(post("/warehouse/inventory/aging/policy")
-            .header("Authorization", "Bearer self-only")
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10,\"obsoleteDays\":20}"))
+    http.perform(
+            post("/warehouse/inventory/aging/policy")
+                .header("Authorization", "Bearer self-only")
+                .contentType("application/json")
+                .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10,\"obsoleteDays\":20}"))
         .andExpect(status().isForbidden());
 
-    http.perform(post("/warehouse/inventory/aging/policy")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10,\"obsoleteDays\":20}"))
+    http.perform(
+            post("/warehouse/inventory/aging/policy")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10,\"obsoleteDays\":20}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.configured").value(true));
 
@@ -875,31 +976,40 @@ class InventoryAgingIntegrationTest {
 
     // B 租户放一行躺在 120 天前的货
     var bLot = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
-              + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
-          bLot, b, skuB, "LOT-B-TENANT", dbToday.minusDays(120));
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
+                  + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
+              bLot,
+              b,
+              skuB,
+              "LOT-B-TENANT",
+              dbToday.minusDays(120));
+          return null;
+        });
     balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(bLot, locB1, "80", "0")));
 
     // A 只看得到自己那几行（阈值配到 10 天后 6 行命中，L0 库龄 0 天不算）
     assertThat(list().total()).isEqualTo(6L);
-    assertThat(list().rows()).extracting(SlowMovingRow::lotCode)
-        .doesNotContain("LOT-B-TENANT");
+    assertThat(list().rows()).extracting(SlowMovingRow::lotCode).doesNotContain("LOT-B-TENANT");
 
     // B 只看得到自己那一行
-    var pageB = asB(() -> service.slowMoving(
-        new SlowMovingQuery(null, null, null, null, null, null, null, 0, 50)));
+    var pageB =
+        asB(
+            () ->
+                service.slowMoving(
+                    new SlowMovingQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(pageB.total()).isEqualTo(1L);
     assertThat(pageB.rows()).extracting(SlowMovingRow::lotCode).containsExactly("LOT-B-TENANT");
 
     // 分桶报表同样隔离
     var reportA = report();
     assertThat(reportA.totals().available()).isEqualByComparingTo("70");
-    var reportB = asB(() -> service.bucketReport(
-        new AgingBucketQuery(null, null, null, null, null)));
+    var reportB =
+        asB(() -> service.bucketReport(new AgingBucketQuery(null, null, null, null, null)));
     assertThat(reportB.totals().available()).isEqualByComparingTo("80");
 
     // A 的 SKU 在 B 那里查不到策略 → 404，不泄露存在性
@@ -909,7 +1019,9 @@ class InventoryAgingIntegrationTest {
             e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
 
     // A 配的策略在 B 的策略列表里一条都没有
-    assertThat(asB(() -> service.policies(new AgingPolicyQuery(null, null, null, null, 0, 50))).total())
+    assertThat(
+            asB(() -> service.policies(new AgingPolicyQuery(null, null, null, null, 0, 50)))
+                .total())
         .isZero();
   }
 
@@ -917,53 +1029,65 @@ class InventoryAgingIntegrationTest {
   void 断言二_伪造租户头无效() throws Exception {
     agingFixture();
     var bLot = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
-              + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
-          bLot, b, skuB, "LOT-B-TENANT", dbToday.minusDays(120));
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
+                  + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
+              bLot,
+              b,
+              skuB,
+              "LOT-B-TENANT",
+              dbToday.minusDays(120));
+          return null;
+        });
     balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(bLot, locB1, "80", "0")));
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的货
-    http.perform(get("/warehouse/inventory/aging/slow-moving")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/aging/slow-moving")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].lotCode").value("LOT-B-TENANT"));
 
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/aging/slow-moving")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/aging/slow-moving")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(4));
 
     // 分桶报表同样不受伪造头影响
-    http.perform(get("/warehouse/inventory/aging/buckets")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/aging/buckets")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totals.available").value(80.0));
 
     // 策略写入不接受伪造头：只能写到身份自己的租户
-    http.perform(post("/warehouse/inventory/aging/policy")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + skuB + "\",\"slowMovingDays\":15,\"obsoleteDays\":45}"))
+    http.perform(
+            post("/warehouse/inventory/aging/policy")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content("{\"skuId\":\"" + skuB + "\",\"slowMovingDays\":15,\"obsoleteDays\":45}"))
         .andExpect(status().isOk());
     assertThat(asB(() -> service.policy(skuB)).slowMovingDays()).isEqualTo(15);
     assertThat(asA(() -> service.policy(skuA)).source()).isEqualTo("DEFAULT");
 
     // 未认证 401；只有 read 权限不能写策略
     http.perform(get("/warehouse/inventory/aging/buckets")).andExpect(status().isUnauthorized());
-    http.perform(post("/warehouse/inventory/aging/policy")
-            .header("Authorization", "Bearer self-only")
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10}"))
+    http.perform(
+            post("/warehouse/inventory/aging/policy")
+                .header("Authorization", "Bearer self-only")
+                .contentType("application/json")
+                .content("{\"skuId\":\"" + skuA + "\",\"slowMovingDays\":10}"))
         .andExpect(status().isForbidden());
   }
 
@@ -972,27 +1096,39 @@ class InventoryAgingIntegrationTest {
     agingFixture();
     asA(() -> service.upsertPolicy(a, new AgingPolicyUpsertRequest(skuA, 10, 20, true, null)));
     var bLot = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
-              + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
-          bLot, b, skuB, "LOT-B-TENANT", dbToday.minusDays(120));
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
+                  + "origin,source_system) values(?,?,?,?,null,?::date,'MANUAL','PURCHASE')",
+              bLot,
+              b,
+              skuB,
+              "LOT-B-TENANT",
+              dbToday.minusDays(120));
+          return null;
+        });
     balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(bLot, locB1, "80", "0")));
 
     // 池大小为 1，同一条连接被反复借还：交替访问两个租户 20 轮，
     // 每一轮都要同时校验分桶报表、呆滞清单、策略三条路径都不串租户。
     for (int i = 0; i < 20; i++) {
       assertThat(report().totals().available()).isEqualByComparingTo("70");
-      assertThat(asB(() -> service.bucketReport(
-              new AgingBucketQuery(null, null, null, null, null)))
-          .totals().available()).isEqualByComparingTo("80");
+      assertThat(
+              asB(() -> service.bucketReport(new AgingBucketQuery(null, null, null, null, null)))
+                  .totals()
+                  .available())
+          .isEqualByComparingTo("80");
 
       assertThat(list().total()).isEqualTo(6L);
-      assertThat(asB(() -> service.slowMoving(
-              new SlowMovingQuery(null, null, null, null, null, null, null, 0, 50)))
-          .total()).isEqualTo(1L);
+      assertThat(
+              asB(() ->
+                      service.slowMoving(
+                          new SlowMovingQuery(null, null, null, null, null, null, null, 0, 50)))
+                  .total())
+          .isEqualTo(1L);
 
       assertThat(asA(() -> service.policy(skuA)).slowMovingDays()).isEqualTo(10);
       assertThatThrownBy(() -> asB(() -> service.policy(skuA)))

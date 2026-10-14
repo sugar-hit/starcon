@@ -31,10 +31,9 @@ export default function ImportValidationReportPage() {
         <h1 className="text-copy-20 font-semibold">校验报告</h1>
         <p className="text-muted-foreground text-copy-13">
           按任务查看<strong>逐行逐列</strong>的校验结果：
-          <strong>必填缺失 / 格式错误 / 重复编码 / 引用不存在 / 唯一冲突</strong>。
-          区分<strong>可跳过</strong>（行照常落库）与<strong>必须修正</strong>（行永不落库），
-          并可导出<strong>带标注的错误文件</strong>或<strong>修正版模板</strong>，
-          改完后重新上传。
+          <strong>必填缺失 / 格式错误 / 重复编码 / 引用不存在 / 唯一冲突</strong>。 区分
+          <strong>可跳过</strong>（行照常落库）与<strong>必须修正</strong>（行永不落库）， 并可导出
+          <strong>带标注的错误文件</strong>或<strong>修正版模板</strong>， 改完后重新上传。
           报告是某一轮预校验结论的快照，预校验重跑后它会被标记为<strong>已过期</strong>。
         </p>
       </header>

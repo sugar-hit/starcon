@@ -11,10 +11,10 @@
    蓝图没写死，这里定死：有效规则集 = 沿 `product_category.path_ids` 从自己往根，
    对**每个属性**取第一条规则；这条规则 `enabled=false` 时该属性整体不进入有效集。
    停用最近那条 = 子节点显式豁免祖先要求。
-   *为什么选继承而不是「绑定到具体节点」*：分类树是运营手工维护的多级结构（服饰 / 上装 / T恤）。
+   _为什么选继承而不是「绑定到具体节点」_：分类树是运营手工维护的多级结构（服饰 / 上装 / T恤）。
    不继承的话每件 T恤 都要把上装配好的颜色、尺码原样再配一遍，配错一处就是静默漏填——
    那是数据质量问题，不是配置问题。
-   *代价（明确承认）*：祖先规则变更会影响全部子孙的有效规则集，所以读路径**按类目现算不缓存**，
+   _代价（明确承认）_：祖先规则变更会影响全部子孙的有效规则集，所以读路径**按类目现算不缓存**，
    且每条规则都要标出 `depth` / `sourceCategoryName`，否则运营无法自查。
 
 2. **停用必须作用在「最近的那条」，不能先过滤 enabled 再取最近。**
@@ -77,9 +77,11 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V15__category_attribute_requirements.sql`
 
 **后端**
+
 - `CategoryAttributeRequirementRules.java` — 词表、按数据类型分流的取值约束、条件求值（纯函数，可离线穷举）
 - `CategoryAttributeRequirementService.java` — 规则 CRUD、启停、继承解析（`distinct on` nearest-wins）
 - `CategoryAttributeRequirementForms.java` — 表单 schema 生成 + 保存前逐字段校验
@@ -88,10 +90,12 @@
 - `AttributeDictionaryService.java` — 唯一被改动的已交付文件（见上）
 
 **测试**
+
 - `CategoryAttributeRequirementRulesTest.java` — 11 例纯函数
 - `CategoryAttributeRequirementIntegrationTest.java` — 12 例，Testcontainers PG16 + 强制 RLS，含租户隔离三断言
 
 **前端**
+
 - `apps/web/src/app/products/categories/requirements/page.tsx`
 - `apps/web/src/components/catalog/category-requirements-workspace.tsx`
 - `apps/web/src/components/catalog/category-requirements-model.ts`

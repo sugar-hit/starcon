@@ -33,8 +33,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *   <li>连接池归还后不串租户。
  * </ol>
  *
- * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户 ——
- * 池大于 1 时每次可能拿到不同连接，「没串」可能只是碰巧换了条干净连接。
+ * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户 —— 池大于 1 时每次可能拿到不同连接，「没串」可能只是碰巧换了条干净连接。
  *
  * <p>本测试刻意不碰任何卷 09 业务形状：订单、分仓、履约请求都属于后续车道。
  */
@@ -93,7 +92,10 @@ class TradeTenancyIntegrationTest {
               "insert into trade_tenancy_probe(id,tenant_id,label,created_at)"
                   + " values (?,?,?,?::timestamptz)"
                   + " on conflict (id) do nothing",
-              id, tenant, label, OffsetDateTime.now(ZoneOffset.UTC));
+              id,
+              tenant,
+              label,
+              OffsetDateTime.now(ZoneOffset.UTC));
           return null;
         });
   }
@@ -121,17 +123,15 @@ class TradeTenancyIntegrationTest {
   /**
    * 当前连接上 {@code app.current_tenant} 的**原始**值。
    *
-   * <p>刻意用 {@code fetch(...).get(0, Class)} 而不是 {@code fetchValue(sql, Class)} ——
-   * 后者会匹配到 {@code (String, Object...)} 重载，把 Class 本身当成一个绑定值
-   * （与 channel OAuthAuthorizationService 里记下的是同一个坑）。
+   * <p>刻意用 {@code fetch(...).get(0, Class)} 而不是 {@code fetchValue(sql, Class)} —— 后者会匹配到 {@code
+   * (String, Object...)} 重载，把 Class 本身当成一个绑定值 （与 channel OAuthAuthorizationService 里记下的是同一个坑）。
    *
-   * <p>注意：事务局部 {@code set_config} 提交之后，PostgreSQL 会把自定义 GUC 复位成
-   * **空串**而不是「回到未设置」，所以这里可能拿到 {@code ""}、也可能拿到 {@code null}。
-   * 这正是 V1 策略里用 {@code nullif(current_setting(...),'')::uuid} 而不是直接 cast 的原因。
+   * <p>注意：事务局部 {@code set_config} 提交之后，PostgreSQL 会把自定义 GUC 复位成 **空串**而不是「回到未设置」，所以这里可能拿到 {@code
+   * ""}、也可能拿到 {@code null}。 这正是 V1 策略里用 {@code nullif(current_setting(...),'')::uuid} 而不是直接 cast
+   * 的原因。
    */
   String rawTenantSetting() {
-    return sql.fetch("select current_setting('app.current_tenant', true)")
-        .stream()
+    return sql.fetch("select current_setting('app.current_tenant', true)").stream()
         .findFirst()
         .map(r -> r.get(0, String.class))
         .orElse(null);
@@ -163,8 +163,7 @@ class TradeTenancyIntegrationTest {
     assertThat(row.get(1, Boolean.class)).as("只有 FORCE 才挡得住「运行角色被误授 owner」").isTrue();
     // 运行角色确实拿到了写权限 —— 否则「看不到别人的行」可能只是因为谁都读不了。
     assertThat(
-            sql.fetchOne(
-                    "select has_table_privilege('trade_app','trade_tenancy_probe','SELECT')")
+            sql.fetchOne("select has_table_privilege('trade_app','trade_tenancy_probe','SELECT')")
                 .get(0, Boolean.class))
         .as("trade_app 必须真的能读这张表")
         .isTrue();
@@ -180,11 +179,7 @@ class TradeTenancyIntegrationTest {
     // 更强的一格：A 明确按 ID 查 B 的行也拿不到（不只是列表过滤）。
     var byId =
         tenants.run(
-            a,
-            () ->
-                sql.fetch(
-                        "select label from trade_tenancy_probe where id = ?", rowB)
-                    .size());
+            a, () -> sql.fetch("select label from trade_tenancy_probe where id = ?", rowB).size());
     assertThat(byId).as("按主键直查也必须被 RLS 挡住").isZero();
   }
 
@@ -208,7 +203,8 @@ class TradeTenancyIntegrationTest {
             b,
             () -> {
               assertThat(effectiveTenant()).as("事务内只看得到本租户").isEqualTo(b);
-              assertThat(labelsUnderCurrentBinding()).as("事务内只看得到本租户")
+              assertThat(labelsUnderCurrentBinding())
+                  .as("事务内只看得到本租户")
                   .containsExactly("tenant-b-row");
               return rawTenantSetting();
             });
@@ -223,8 +219,11 @@ class TradeTenancyIntegrationTest {
     //     「带合法会话 + 伪造 X-Tenant-Id → 仍只看到会话租户的行」，
     //     与 warehouse InventoryAvailabilityIntegrationTest 同一句断言。
     http.perform(get("/trade/orders").header("X-Tenant-Id", a)).andExpect(status().isNotFound());
-    http.perform(post("/trade/orders").header("X-Tenant-Id", a).contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/trade/orders")
+                .header("X-Tenant-Id", a)
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isNotFound());
     assertThat(visibleWithoutTenant()).as("伪造请求头不得留下任何租户上下文").isZero();
   }

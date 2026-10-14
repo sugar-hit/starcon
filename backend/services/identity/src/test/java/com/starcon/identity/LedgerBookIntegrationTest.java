@@ -24,9 +24,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  *   <li><b>跨账簿不混记</b>：同一笔业务事实只能归属一本账，第二本账再登记被数据库拒掉。
  * </ol>
  *
- * <p>金额按 {@code BigDecimal} 往返断言（0.1 + 0.2 这类不能变成 0.30000000000000004），
- * 时间字段按值断言偏移不漂移 —— 用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz
- * 会静默偏 −28800 秒，这个坑本模块也踩不得。
+ * <p>金额按 {@code BigDecimal} 往返断言（0.1 + 0.2 这类不能变成 0.30000000000000004）， 时间字段按值断言偏移不漂移 —— 用 {@code
+ * Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800 秒，这个坑本模块也踩不得。
  */
 class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -92,10 +91,14 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "LBC_" + tag,
-            "name", "账簿子租户",
-            "ownerUsername", username,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "LBC_" + tag,
+            "name",
+            "账簿子租户",
+            "ownerUsername",
+            username,
+            "ownerPassword",
+            "test-member-password"),
         200);
     return loginUser(username);
   }
@@ -110,9 +113,8 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 发一次必然 409 的请求，返回业务错误文案。
    *
-   * <p>不能读响应体：identity 的业务错误按本模块惯例抛 {@code ResponseStatusException}
-   * （文案在 {@code getReason()} 上），MockMvc 不会把它渲染成 JSON body，读 body 只会拿到空串。
-   * 这条断言恰恰要验的就是那句文案，所以从异常上取。
+   * <p>不能读响应体：identity 的业务错误按本模块惯例抛 {@code ResponseStatusException} （文案在 {@code getReason()}
+   * 上），MockMvc 不会把它渲染成 JSON body，读 body 只会拿到空串。 这条断言恰恰要验的就是那句文案，所以从异常上取。
    */
   private String conflictReason(String token, String path, Object body) throws Exception {
     var response =
@@ -122,7 +124,9 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
                     .header("X-Tenant-Id", UUID.randomUUID())
                     .contentType("application/json")
                     .content(json.writeValueAsString(body)))
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isConflict())
+            .andExpect(
+                org.springframework.test.web.servlet.result.MockMvcResultMatchers.status()
+                    .isConflict())
             .andReturn();
     var thrown = response.getResolvedException();
     assertThat(thrown)
@@ -138,8 +142,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 蓝图的核心场景：一个法人同时用人民币业务账与美元海外账记账。
    *
-   * <p>同时校验 INHERIT 老纪律没被破坏——不声明 OWN 时本位币仍必须等于法人本位币，
-   * 否则"这个法人按哪个币记账"会重新出现两个答案。
+   * <p>同时校验 INHERIT 老纪律没被破坏——不声明 OWN 时本位币仍必须等于法人本位币， 否则"这个法人按哪个币记账"会重新出现两个答案。
    */
   @Test
   void oneLegalEntityKeepsBusinessCnyAndOverseasUsdBooks() throws Exception {
@@ -200,18 +203,14 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(groups.get("businessBooks")).hasSize(1);
     assertThat(groups.get("statutoryBooks")).hasSize(1);
     assertThat(groups.get("statutoryBooks").get(0).get("code").asText()).isEqualTo("TAX_" + tag);
-    assertThat(groups.get("statutoryBooks").get(0).get("chartOfAccountsSource").asText()).isEqualTo("LOCAL");
+    assertThat(groups.get("statutoryBooks").get(0).get("chartOfAccountsSource").asText())
+        .isEqualTo("LOCAL");
     assertThat(groups.get("hasDefault").asBoolean()).isFalse();
 
     // 分类非法 → 400，不静默兜底
     var bad = new java.util.LinkedHashMap<String, Object>(bookInput("BAD_" + tag, "CNY"));
     bad.put("bookCategory", "WHATEVER");
-    request(
-        token,
-        "POST",
-        "/identity/legal-entities/" + entityId + "/accounting-books",
-        bad,
-        400);
+    request(token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", bad, 400);
   }
 
   // ------------------------------------------------------------------
@@ -221,8 +220,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 没有默认账簿时显式 409。
    *
-   * <p>这是本条最容易被做漏的一条：静默挑一本会让同一笔业务在不同环境下落到不同的账上，
-   * 而且没人会发现 —— 所以宁可直接报错。
+   * <p>这是本条最容易被做漏的一条：静默挑一本会让同一笔业务在不同环境下落到不同的账上， 而且没人会发现 —— 所以宁可直接报错。
    */
   @Test
   void missingDefaultBookIsRejectedInsteadOfGuessed() throws Exception {
@@ -242,7 +240,8 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
         Map.of("bookId", bookId.toString()),
         200);
 
-    var resolved = request(token, "GET", "/identity/legal-entities/" + entityId + "/default-book", null, 200);
+    var resolved =
+        request(token, "GET", "/identity/legal-entities/" + entityId + "/default-book", null, 200);
     assertThat(resolved.get("bookId").asText()).isEqualTo(bookId.toString());
     assertThat(resolved.get("baseCurrency").asText()).isEqualTo("CNY");
     assertThat(resolved.get("hasDefault").asBoolean()).isTrue();
@@ -273,12 +272,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
         200);
 
     var books =
-        request(
-            token,
-            "GET",
-            "/identity/accounting-books?legalEntityId=" + entityId,
-            null,
-            200);
+        request(token, "GET", "/identity/accounting-books?legalEntityId=" + entityId, null, 200);
     long defaults =
         java.util.stream.StreamSupport.stream(books.spliterator(), false)
             .filter(b -> b.get("defaultBook").asBoolean())
@@ -317,8 +311,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 同一笔业务事实只能在归属账簿记一次 —— 蓝图标粗的那句硬约束。
    *
-   * <p>第一本账登记成功后，第二本账登记同一笔事实必须被数据库拒绝，且错误信息要指明
-   * 事实已经在哪本账上（调用方真正需要知道的是"我该找谁"）。解除归属后可以改记到另一本账，
+   * <p>第一本账登记成功后，第二本账登记同一笔事实必须被数据库拒绝，且错误信息要指明 事实已经在哪本账上（调用方真正需要知道的是"我该找谁"）。解除归属后可以改记到另一本账，
    * 这才是"可纠错"而不是变成死账。
    */
   @Test
@@ -332,11 +325,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     var withAmount = factInput("PURCHASE_ORDER", factRef);
     withAmount.put("amount", "1234.56");
     request(
-        token,
-        "POST",
-        "/identity/accounting-books/" + cny + "/fact-assignments",
-        withAmount,
-        200);
+        token, "POST", "/identity/accounting-books/" + cny + "/fact-assignments", withAmount, 200);
 
     // 第二本账登记同一笔事实 → 409，且消息指向原账簿
     var mixed =
@@ -366,8 +355,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
         409);
 
     // 解除归属后可改记到另一本账
-    UUID assignmentId =
-        UUID.fromString(assignments.get(0).get("id").asText());
+    UUID assignmentId = UUID.fromString(assignments.get(0).get("id").asText());
     request(
         token,
         "DELETE",
@@ -387,14 +375,20 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(moved.get(0).get("bookId").asText()).isEqualTo(usd.toString());
     assertThat(moved.get(0).get("currency").asText()).isEqualTo("USD");
     assertThat(
-            request(token, "GET", "/identity/accounting-books/" + cny + "/fact-assignments", null, 200)
+            request(
+                    token,
+                    "GET",
+                    "/identity/accounting-books/" + cny + "/fact-assignments",
+                    null,
+                    200)
                 .toString())
         .doesNotContain(factRef.toString());
 
     // 负金额与非法来源域 → 400，不静默接受
     var negative = factInput("PURCHASE_ORDER", UUID.randomUUID());
     negative.put("amount", "-1");
-    request(token, "POST", "/identity/accounting-books/" + usd + "/fact-assignments", negative, 400);
+    request(
+        token, "POST", "/identity/accounting-books/" + usd + "/fact-assignments", negative, 400);
     var lowercaseSource = factInput("purchase_order", UUID.randomUUID());
     request(
         token,
@@ -419,7 +413,8 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     request(token, "POST", "/identity/accounting-books/" + book + "/fact-assignments", input, 200);
 
     var row =
-        request(token, "GET", "/identity/accounting-books/" + book + "/fact-assignments", null, 200);
+        request(
+            token, "GET", "/identity/accounting-books/" + book + "/fact-assignments", null, 200);
     assertThat(row.get(0).get("currency").asText()).isEqualTo("JPY");
     // booked_at 是真 timestamptz：读出的**瞬时值**必须落在这个窗口内。
     // 判瞬时值而不是判偏移量——响应里的偏移取决于服务所在时区（本机 +08:00），
@@ -447,10 +442,14 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
                     "POST",
                     "/identity/roles",
                     Map.of(
-                        "code", "LBR_" + tag,
-                        "name", "账簿只读角色",
-                        "status", "ACTIVE",
-                        "permissions", List.of("identity.accounting_book.read")),
+                        "code",
+                        "LBR_" + tag,
+                        "name",
+                        "账簿只读角色",
+                        "status",
+                        "ACTIVE",
+                        "permissions",
+                        List.of("identity.accounting_book.read")),
                     200)
                 .asText());
     String username = "lb-member-" + tag;
@@ -485,8 +484,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 租户隔离三断言：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
    *
-   * <p>基类把连接池压到 1，所以每个请求必然复用同一条物理连接——租户设置泄漏到连接上，
-   * 第二个租户就会读到第一个租户的账簿与归属登记。
+   * <p>基类把连接池压到 1，所以每个请求必然复用同一条物理连接——租户设置泄漏到连接上， 第二个租户就会读到第一个租户的账簿与归属登记。
    */
   @Test
   void tenantIsolationHoldsAcrossConnectionReuse() throws Exception {
@@ -529,7 +527,12 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
       assertThat(find(childBooks, parentCode)).isNull();
 
       var parentFacts =
-          request(ownerToken, "GET", "/identity/accounting-books/" + parentBook + "/fact-assignments", null, 200);
+          request(
+              ownerToken,
+              "GET",
+              "/identity/accounting-books/" + parentBook + "/fact-assignments",
+              null,
+              200);
       assertThat(parentFacts).hasSize(1);
       assertThat(parentFacts.get(0).get("factRef").asText()).isEqualTo(parentFact.toString());
     }
@@ -541,7 +544,8 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
                         "/identity/accounting-books")
                     .header("Authorization", "Bearer " + ownerToken)
                     .header("X-Tenant-Id", childId.toString()))
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -549,26 +553,21 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 3) 连接归还后不串租户：直连表按当前租户设置过滤，池里只有一条连接
     var parentRows =
-        tx()
-            .run(
+        tx().run(
                 parentId,
-                () ->
-                    sql.fetch("select id from book_fact_assignment")
-                        .getValues("id", UUID.class));
+                () -> sql.fetch("select id from book_fact_assignment").getValues("id", UUID.class));
     var childRows =
-        tx()
-            .run(
+        tx().run(
                 childId,
-                () ->
-                    sql.fetch("select id from book_fact_assignment")
-                        .getValues("id", UUID.class));
+                () -> sql.fetch("select id from book_fact_assignment").getValues("id", UUID.class));
     assertThat(parentRows).isNotEmpty().doesNotContainAnyElementsOf(childRows);
     assertThat(childRows).isNotEmpty();
     // 没有 app.current_tenant 时一条都读不到：租户判定不在连接上残留
     assertThat(sql.fetch("select id from book_fact_assignment")).isEmpty();
 
     // 运行时角色绕不过 FORCE RLS
-    var runtime = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var runtime =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(runtime.get("rolsuper", Boolean.class)).isFalse();
     assertThat(runtime.get("rolbypassrls", Boolean.class)).isFalse();
     assertThat(

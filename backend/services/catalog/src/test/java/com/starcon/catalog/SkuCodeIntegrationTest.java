@@ -17,13 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.1.2.3 编码与条码：编码规则、三种编码方式（手工 / 规则生成 / 批量补齐）、
- * 外部条码 scheme+value 唯一性、**冲突拒绝清单**，以及租户隔离三断言。
+ * 3.1.2.3 编码与条码：编码规则、三种编码方式（手工 / 规则生成 / 批量补齐）、 外部条码 scheme+value 唯一性、**冲突拒绝清单**，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -146,10 +144,13 @@ class SkuCodeIntegrationTest {
 
   /** deleteIdentifier 返回 void，用这个包装版把它接进租户事务。 */
   void run(AccessService.Access who, String permission, Runnable work) {
-    access.run(who, permission, () -> {
-      work.run();
-      return null;
-    });
+    access.run(
+        who,
+        permission,
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   <T> T tx(AccessService.Access who, java.util.function.Supplier<T> work) {
@@ -206,11 +207,9 @@ class SkuCodeIntegrationTest {
   /**
    * 造一个「尚无编码」的 SKU。
    *
-   * <p>应用入口不允许空编码（{@code CatalogService.code} 要求 [A-Z0-9] 开头），所以这里直接
-   * 写库模拟**导入/历史遗留**数据。
+   * <p>应用入口不允许空编码（{@code CatalogService.code} 要求 [A-Z0-9] 开头），所以这里直接 写库模拟**导入/历史遗留**数据。
    *
-   * <p>注意 V1 的 {@code UNIQUE(tenant_id,code)}：一个租户里最多只能有一行空编码，
-   * 因此每个测试最多调用一次。
+   * <p>注意 V1 的 {@code UNIQUE(tenant_id,code)}：一个租户里最多只能有一行空编码， 因此每个测试最多调用一次。
    */
   UUID uncodedSku(UUID spuId) {
     return tx(
@@ -228,7 +227,8 @@ class SkuCodeIntegrationTest {
             return existing.get("id", UUID.class);
           }
           UUID tenantId =
-              sql.fetchOne("select tenant_id from spu where id=?", spuId).get("tenant_id", UUID.class);
+              sql.fetchOne("select tenant_id from spu where id=?", spuId)
+                  .get("tenant_id", UUID.class);
           UUID id = UUID.randomUUID();
           sql.execute(
               "insert into sku(id,tenant_id,spu_id,code,name,variant_signature)"
@@ -250,25 +250,29 @@ class SkuCodeIntegrationTest {
 
   /** 读 SKU 编码。必须在租户事务里读：RLS 在事务级 GUC 绑定，事务外读一律看不到行。 */
   String codeOf(UUID skuId) {
-    return tx(actor, () -> sql.fetchOne("select code from sku where id=?", skuId).get("code", String.class));
+    return tx(
+        actor,
+        () -> sql.fetchOne("select code from sku where id=?", skuId).get("code", String.class));
   }
 
   long versionOf(UUID skuId) {
-    return tx(actor, () -> sql.fetchOne("select version from sku where id=?", skuId).get("version", Long.class));
+    return tx(
+        actor,
+        () -> sql.fetchOne("select version from sku where id=?", skuId).get("version", Long.class));
   }
 
   String barcodeOf(UUID skuId) {
     return tx(
         actor,
-        () -> sql.fetchOne("select barcode from sku where id=?", skuId).get("barcode", String.class));
+        () ->
+            sql.fetchOne("select barcode from sku where id=?", skuId).get("barcode", String.class));
   }
 
   /**
    * 每个测试用**互不相同**的条码值。
    *
-   * <p>sku_identifier 的唯一性是租户级的，而同一批测试共享同一个租户与同一个 PostgreSQL
-   * 实例，复用固定条码会让「唯一性拒绝」用例会互相污染。真实 GTIN-13 由此算法生成：
-   * 取一个 12 位前缀再补上 mod-10 校验位。
+   * <p>sku_identifier 的唯一性是租户级的，而同一批测试共享同一个租户与同一个 PostgreSQL 实例，复用固定条码会让「唯一性拒绝」用例会互相污染。真实 GTIN-13
+   * 由此算法生成： 取一个 12 位前缀再补上 mod-10 校验位。
    */
   static String gtin13(String seed) {
     long n = Math.abs(seed.hashCode() % 100000000000L);
@@ -288,11 +292,15 @@ class SkuCodeIntegrationTest {
   }
 
   SkuCodeRuleInput rule(String code, String prefix, int width) {
-    return new SkuCodeRuleInput(code, "规则 " + code, "测试规则", "ALL", null, prefix, "", width, 1, true, 0);
+    return new SkuCodeRuleInput(
+        code, "规则 " + code, "测试规则", "ALL", null, prefix, "", width, 1, true, 0);
   }
 
   UUID saveRule(String code, String prefix, int width) {
-    return call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, rule(code, prefix, width)).id());
+    return call(
+        actor,
+        "catalog.sku.update",
+        () -> codes.saveRule(actor, null, rule(code, prefix, width)).id());
   }
 
   /** 限定到某个商品族的规则：批量类用例必须用它，否则 scope=ALL 会扫到别的用例建的 SKU。 */
@@ -301,10 +309,12 @@ class SkuCodeIntegrationTest {
         actor,
         "catalog.sku.update",
         () ->
-            codes.saveRule(
+            codes
+                .saveRule(
                     actor,
                     null,
-                    new SkuCodeRuleInput(code, "规则 " + code, "", "SPU", spuId, prefix, "", width, 1, true, 0))
+                    new SkuCodeRuleInput(
+                        code, "规则 " + code, "", "SPU", spuId, prefix, "", width, 1, true, 0))
                 .id());
   }
 
@@ -312,9 +322,14 @@ class SkuCodeIntegrationTest {
 
   @Test
   void ruleExposesNextSequenceAndSampleCodeBeforeAnyGeneration() {
-    var saved = call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, rule("R1", "SKU-", 6)));
+    var saved =
+        call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, rule("R1", "SKU-", 6)));
     assertThat(saved.sampleCode()).isEqualTo("SKU-000001");
-    var listed = tx(actor, codes::rules).stream().filter(r -> r.id().equals(saved.id())).findFirst().orElseThrow();
+    var listed =
+        tx(actor, codes::rules).stream()
+            .filter(r -> r.id().equals(saved.id()))
+            .findFirst()
+            .orElseThrow();
     assertThat(listed.nextValue()).isEqualTo(1);
     assertThat(listed.sampleCode()).isEqualTo("SKU-000001");
     assertThat(listed.scopeLabel()).isEqualTo("全部 SKU");
@@ -325,7 +340,8 @@ class SkuCodeIntegrationTest {
     var bad =
         new SkuCodeRuleInput(
             "TOOLONG", "超长", "", "ALL", null, "A".repeat(32), "B".repeat(32), 12, 1, true, 0);
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, bad)))
+    assertThatThrownBy(
+            () -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, bad)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("76")
         .hasMessageContaining("64");
@@ -333,15 +349,15 @@ class SkuCodeIntegrationTest {
 
   @Test
   void ruleRejectsIllegalPrefixAndScopeWithoutSpu() {
-    var badChars =
-        new SkuCodeRuleInput("BAD1", "非法", "", "ALL", null, "SKU 1", "", 4, 1, true, 0);
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, badChars)))
+    var badChars = new SkuCodeRuleInput("BAD1", "非法", "", "ALL", null, "SKU 1", "", 4, 1, true, 0);
+    assertThatThrownBy(
+            () -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, badChars)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("编码前缀");
 
-    var badScope =
-        new SkuCodeRuleInput("BAD2", "缺 SPU", "", "SPU", null, "S-", "", 4, 1, true, 0);
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, badScope)))
+    var badScope = new SkuCodeRuleInput("BAD2", "缺 SPU", "", "SPU", null, "S-", "", 4, 1, true, 0);
+    assertThatThrownBy(
+            () -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, badScope)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须指定 SPU");
   }
@@ -349,7 +365,12 @@ class SkuCodeIntegrationTest {
   @Test
   void ruleCodeIsUniquePerTenantAndScopeIsOnePerSpu() {
     saveRule("DUP", "A-", 4);
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, null, rule("DUP", "B-", 4))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () -> codes.saveRule(actor, null, rule("DUP", "B-", 4))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已存在");
 
@@ -357,7 +378,12 @@ class SkuCodeIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> codes.saveRule(actor, null, new SkuCodeRuleInput("SPU1", "族规则", "", "SPU", f.spuId(), "F-", "", 4, 1, true, 0)));
+        () ->
+            codes.saveRule(
+                actor,
+                null,
+                new SkuCodeRuleInput(
+                    "SPU1", "族规则", "", "SPU", f.spuId(), "F-", "", 4, 1, true, 0)));
     // 同一商品族只能有一条规则，否则生成的编码无法预期。
     assertThatThrownBy(
             () ->
@@ -366,22 +392,29 @@ class SkuCodeIntegrationTest {
                     "catalog.sku.update",
                     () ->
                         codes.saveRule(
-                            actor, null, new SkuCodeRuleInput("SPU2", "族规则 2", "", "SPU", f.spuId(), "G-", "", 4, 1, true, 0))))
+                            actor,
+                            null,
+                            new SkuCodeRuleInput(
+                                "SPU2", "族规则 2", "", "SPU", f.spuId(), "G-", "", 4, 1, true, 0))))
         .hasMessageContaining("一个商品族只能有一条规则");
   }
 
   @Test
   void ruleUpdateUsesOptimisticLock() {
     UUID id = saveRule("LOCK", "L-", 4);
-    var current = tx(actor, codes::rules).stream().filter(r -> r.id().equals(id)).findFirst().orElseThrow();
+    var current =
+        tx(actor, codes::rules).stream().filter(r -> r.id().equals(id)).findFirst().orElseThrow();
     var input =
-        new SkuCodeRuleInput("LOCK", "改名", "描述", "ALL", null, "L-", "", 4, 1, true, current.version());
+        new SkuCodeRuleInput(
+            "LOCK", "改名", "描述", "ALL", null, "L-", "", 4, 1, true, current.version());
     var saved = call(actor, "catalog.sku.update", () -> codes.saveRule(actor, id, input));
     assertThat(saved.version()).isEqualTo(current.version() + 1);
     // 用旧 version 再提交一次 → 409
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, id, input)))
+    assertThatThrownBy(
+            () -> call(actor, "catalog.sku.update", () -> codes.saveRule(actor, id, input)))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   // ------------------------------------------------------------ 手工输入
@@ -391,7 +424,11 @@ class SkuCodeIntegrationTest {
     var f = fixture("MANUAL");
     String codeBefore = codeOf(f.skuId());
     long before = versionOf(f.skuId());
-    var saved = call(actor, "catalog.sku.update", () -> codes.setCode(actor, f.skuId(), new SkuCodeInput("MANUAL-A", before)));
+    var saved =
+        call(
+            actor,
+            "catalog.sku.update",
+            () -> codes.setCode(actor, f.skuId(), new SkuCodeInput("MANUAL-A", before)));
     assertThat(saved.fromCode()).isEqualTo(codeBefore);
     assertThat(saved.toCode()).isEqualTo("MANUAL-A");
     assertThat(codeOf(f.skuId())).isEqualTo("MANUAL-A");
@@ -411,16 +448,32 @@ class SkuCodeIntegrationTest {
   void manualCodeInputRejectsDuplicateAndStaleVersion() {
     var f1 = fixture("DUP1");
     var f2 = fixture("DUP2");
-    call(actor, "catalog.sku.update", () -> codes.setCode(actor, f1.skuId(), new SkuCodeInput("TAKEN", versionOf(f1.skuId()))));
+    call(
+        actor,
+        "catalog.sku.update",
+        () -> codes.setCode(actor, f1.skuId(), new SkuCodeInput("TAKEN", versionOf(f1.skuId()))));
     // 租户内唯一：另一 SKU 抢同一个编码必须被拒
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.setCode(actor, f2.skuId(), new SkuCodeInput("TAKEN", versionOf(f2.skuId())))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        codes.setCode(
+                            actor, f2.skuId(), new SkuCodeInput("TAKEN", versionOf(f2.skuId())))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已被其他 SKU 使用");
     // 旧 version → 409（用 current+1 保证一定过期，而不是赌夹具的 version 恰好不是 0）
     long current = versionOf(f2.skuId());
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.setCode(actor, f2.skuId(), new SkuCodeInput("OTHER", current + 1))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () -> codes.setCode(actor, f2.skuId(), new SkuCodeInput("OTHER", current + 1))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
     assertThat(codeOf(f2.skuId())).isNotEqualTo("OTHER");
   }
 
@@ -436,7 +489,8 @@ class SkuCodeIntegrationTest {
             actor,
             "catalog.sku.update",
             () ->
-                codes.saveRule(
+                codes
+                    .saveRule(
                         actor,
                         null,
                         new SkuCodeRuleInput(
@@ -450,7 +504,8 @@ class SkuCodeIntegrationTest {
             () ->
                 codes.batch(
                     actor,
-                    new SkuCodeBatchInput("GENERATE", ruleId, List.of(coded.skuId(), blank), null, false)));
+                    new SkuCodeBatchInput(
+                        "GENERATE", ruleId, List.of(coded.skuId(), blank), null, false)));
     // 已有编码 → SKIPPED（不是错误，只是不属于它该动的范围）；空编码 → APPLIED
     assertThat(result.appliedCount()).isEqualTo(1);
     assertThat(result.skippedCount()).isEqualTo(1);
@@ -458,7 +513,11 @@ class SkuCodeIntegrationTest {
     assertThat(codeOf(blank)).isEqualTo("SKU-000001");
     assertThat(codeOf(coded.skuId())).isEqualTo(codedBefore);
 
-    var skipped = result.items().stream().filter(i -> i.outcome().equals("SKIPPED")).findFirst().orElseThrow();
+    var skipped =
+        result.items().stream()
+            .filter(i -> i.outcome().equals("SKIPPED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(skipped.reason()).contains("规则不覆盖手工编码").contains("批量补齐");
     assertThat(skipped.codeAfter()).isNull();
 
@@ -467,7 +526,9 @@ class SkuCodeIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
+            () ->
+                codes.batch(
+                    actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
     assertThat(again.skippedCount()).isEqualTo(1);
     assertThat(again.appliedCount()).isZero();
   }
@@ -486,10 +547,12 @@ class SkuCodeIntegrationTest {
             actor,
             "catalog.sku.update",
             () ->
-                codes.saveRule(
+                codes
+                    .saveRule(
                         actor,
                         null,
-                        new SkuCodeRuleInput("BF", "补齐规则", "", "SPU", spu, "BF-", "", 4, 1, true, 0))
+                        new SkuCodeRuleInput(
+                            "BF", "补齐规则", "", "SPU", spu, "BF-", "", 4, 1, true, 0))
                     .id());
 
     var preview =
@@ -535,7 +598,8 @@ class SkuCodeIntegrationTest {
             actor,
             "catalog.sku.update",
             () ->
-                codes.saveRule(
+                codes
+                    .saveRule(
                         actor,
                         null,
                         new SkuCodeRuleInput(
@@ -550,9 +614,15 @@ class SkuCodeIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
+            () ->
+                codes.batch(
+                    actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
     assertThat(result.rejectedCount()).isEqualTo(1);
-    var rejected = result.items().stream().filter(i -> i.outcome().equals("REJECTED")).findFirst().orElseThrow();
+    var rejected =
+        result.items().stream()
+            .filter(i -> i.outcome().equals("REJECTED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(rejected.reason()).contains("COL-001").contains("已被其他 SKU 使用");
     assertThat(codeOf(blank)).isEmpty();
   }
@@ -566,7 +636,8 @@ class SkuCodeIntegrationTest {
             actor,
             "catalog.sku.update",
             () ->
-                codes.saveRule(
+                codes
+                    .saveRule(
                         actor,
                         null,
                         new SkuCodeRuleInput(
@@ -576,7 +647,9 @@ class SkuCodeIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, true)));
+            () ->
+                codes.batch(
+                    actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, true)));
     assertThat(preview.dryRun()).isTrue();
     assertThat(preview.appliedCount()).isEqualTo(1);
     // 预览不写 sku.code
@@ -586,7 +659,9 @@ class SkuCodeIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
+            () ->
+                codes.batch(
+                    actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
     assertThat(codeOf(blank)).isEqualTo("PRE-0001");
     assertThat(real.appliedCount()).isEqualTo(1);
   }
@@ -600,7 +675,10 @@ class SkuCodeIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.update",
-                    () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(), null, false))))
+                    () ->
+                        codes.batch(
+                            actor,
+                            new SkuCodeBatchInput("GENERATE", ruleId, List.of(), null, false))))
         .hasMessageContaining("请先选择");
     assertThatThrownBy(
             () ->
@@ -618,7 +696,11 @@ class SkuCodeIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.update",
-                    () -> codes.batch(actor, new SkuCodeBatchInput("NOPE", ruleId, List.of(f.skuId()), null, false))))
+                    () ->
+                        codes.batch(
+                            actor,
+                            new SkuCodeBatchInput(
+                                "NOPE", ruleId, List.of(f.skuId()), null, false))))
         .hasMessageContaining("只能是 GENERATE 或 BACKFILL");
   }
 
@@ -644,9 +726,10 @@ class SkuCodeIntegrationTest {
                     4,
                     1,
                     false,
-                    tx(actor, () -> {
-                          for (var r : codes.rules())
-                            if (r.id().equals(ruleId)) return r.version();
+                    tx(
+                        actor,
+                        () -> {
+                          for (var r : codes.rules()) if (r.id().equals(ruleId)) return r.version();
                           return 0L;
                         }))));
     assertThatThrownBy(
@@ -654,7 +737,11 @@ class SkuCodeIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.update",
-                    () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(f.skuId()), null, false))))
+                    () ->
+                        codes.batch(
+                            actor,
+                            new SkuCodeBatchInput(
+                                "GENERATE", ruleId, List.of(f.skuId()), null, false))))
         .hasMessageContaining("已停用");
   }
 
@@ -669,7 +756,9 @@ class SkuCodeIntegrationTest {
       call(
           actor,
           "catalog.sku.update",
-          () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
+          () ->
+              codes.batch(
+                  actor, new SkuCodeBatchInput("GENERATE", ruleId, List.of(blank), null, false)));
       assertThat(seen.add(codeOf(blank))).as("第 %d 批编码不重复", i).isTrue();
     }
     // 同一规则的两批也不能重号
@@ -680,7 +769,9 @@ class SkuCodeIntegrationTest {
       call(
           actor,
           "catalog.sku.update",
-          () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", shared, List.of(blank), null, false)));
+          () ->
+              codes.batch(
+                  actor, new SkuCodeBatchInput("GENERATE", shared, List.of(blank), null, false)));
       assertThat(seen.add(codeOf(blank))).as("共享规则第 %d 批不重号", i).isTrue();
     }
   }
@@ -697,7 +788,9 @@ class SkuCodeIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> codes.addIdentifier(actor, f1.skuId(), new SkuIdentifierInput("EAN13", ean, true, null, "SCAN")));
+            () ->
+                codes.addIdentifier(
+                    actor, f1.skuId(), new SkuIdentifierInput("EAN13", ean, true, null, "SCAN")));
     assertThat(saved.isPrimary()).isTrue();
     assertThat(saved.scheme()).isEqualTo("EAN13");
     // sku.barcode 由触发器同步（条码不一致在拣货现场会真的打错货）
@@ -713,9 +806,14 @@ class SkuCodeIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.update",
-                    () -> codes.addIdentifier(actor, f2.skuId(), new SkuIdentifierInput("EAN13", ean, false, null, null))))
+                    () ->
+                        codes.addIdentifier(
+                            actor,
+                            f2.skuId(),
+                            new SkuIdentifierInput("EAN13", ean, false, null, null))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
     // 非 primary 的条码不写 sku.barcode：f2 保留夹具自带的条码，不被这次录入影响
     assertThat(barcodeOf(f2.skuId())).isEqualTo(f2Barcode);
   }
@@ -726,8 +824,18 @@ class SkuCodeIntegrationTest {
     var f2 = fixture("SC2");
     // 唯一性范围是 scheme+value，不是裸 value
     String ean = uniqueEan13();
-    call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f1.skuId(), new SkuIdentifierInput("EAN13", ean, false, null, null)));
-    call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f2.skuId(), new SkuIdentifierInput("CUSTOM", ean, false, null, null)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () ->
+            codes.addIdentifier(
+                actor, f1.skuId(), new SkuIdentifierInput("EAN13", ean, false, null, null)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () ->
+            codes.addIdentifier(
+                actor, f2.skuId(), new SkuIdentifierInput("CUSTOM", ean, false, null, null)));
     assertThat(tx(actor, () -> codes.panel(f1.skuId())).identifiers()).hasSize(1);
     assertThat(tx(actor, () -> codes.panel(f2.skuId())).identifiers()).hasSize(1);
   }
@@ -736,7 +844,13 @@ class SkuCodeIntegrationTest {
   void deletingPrimaryBarcodeClearsSkuBarcode() {
     var f = fixture("DEL");
     String ean = uniqueEan13();
-    var saved = call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("EAN13", ean, true, null, null)));
+    var saved =
+        call(
+            actor,
+            "catalog.sku.update",
+            () ->
+                codes.addIdentifier(
+                    actor, f.skuId(), new SkuIdentifierInput("EAN13", ean, true, null, null)));
     assertThat(barcodeOf(f.skuId())).isEqualTo(ean);
     run(actor, "catalog.sku.update", () -> codes.deleteIdentifier(actor, f.skuId(), saved.id()));
     assertThat(barcodeOf(f.skuId())).isEmpty();
@@ -746,13 +860,40 @@ class SkuCodeIntegrationTest {
   @Test
   void identifierRejectsBadSchemeAndBadCheckDigit() {
     var f = fixture("BADBAR");
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("GS1-128", "ABC", false, null, null))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        codes.addIdentifier(
+                            actor,
+                            f.skuId(),
+                            new SkuIdentifierInput("GS1-128", "ABC", false, null, null))))
         .hasMessageContaining("不支持的条码 scheme");
     String good = uniqueEan13();
     String wrongCheck = good.substring(0, 12) + (good.charAt(12) == '7' ? '8' : '7');
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("EAN13", wrongCheck, false, null, null))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        codes.addIdentifier(
+                            actor,
+                            f.skuId(),
+                            new SkuIdentifierInput("EAN13", wrongCheck, false, null, null))))
         .hasMessageContaining("校验位不正确");
-    assertThatThrownBy(() -> call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("SELLER_SKU", "PLATFORM-1", false, null, null))))
+    assertThatThrownBy(
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        codes.addIdentifier(
+                            actor,
+                            f.skuId(),
+                            new SkuIdentifierInput("SELLER_SKU", "PLATFORM-1", false, null, null))))
         .hasMessageContaining("不支持的条码 scheme");
   }
 
@@ -766,11 +907,15 @@ class SkuCodeIntegrationTest {
     String fresh = uniqueEan13();
     String upca = uniqueUpca();
     // 先占用一个条码，后续导入必须把它拒掉
-    call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, owner.skuId(), new SkuIdentifierInput("EAN13", taken, false, null, null)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () ->
+            codes.addIdentifier(
+                actor, owner.skuId(), new SkuIdentifierInput("EAN13", taken, false, null, null)));
     String wrongGtin14 = gtin14(UUID.randomUUID().toString());
     // 末位改掉一位 → 校验位错
-    wrongGtin14 =
-        wrongGtin14.substring(0, 13) + (wrongGtin14.charAt(13) == '5' ? '6' : '5');
+    wrongGtin14 = wrongGtin14.substring(0, 13) + (wrongGtin14.charAt(13) == '5' ? '6' : '5');
 
     var rows =
         List.of(
@@ -788,7 +933,11 @@ class SkuCodeIntegrationTest {
             // 6 SKU 不存在
             new SkuIdentifierRow(UUID.randomUUID(), "CUSTOM", "X-1", false, null));
 
-    var result = call(actor, "catalog.sku.update", () -> codes.importIdentifiers(actor, new SkuIdentifierImportInput(rows, null, false)));
+    var result =
+        call(
+            actor,
+            "catalog.sku.update",
+            () -> codes.importIdentifiers(actor, new SkuIdentifierImportInput(rows, null, false)));
     assertThat(result.requestedCount()).isEqualTo(7);
     // 第 1 行（新 EAN）与第 3 行（本批首个 UPC-A）本就应该成功，其余 5 行各有各的拒绝理由
     assertThat(result.appliedCount()).isEqualTo(2);
@@ -815,7 +964,12 @@ class SkuCodeIntegrationTest {
     var f = fixture("PRIM");
     String first = uniqueEan13();
     String second = uniqueEan13();
-    call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("EAN13", first, true, null, null)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () ->
+            codes.addIdentifier(
+                actor, f.skuId(), new SkuIdentifierInput("EAN13", first, true, null, null)));
     var result =
         call(
             actor,
@@ -824,7 +978,9 @@ class SkuCodeIntegrationTest {
                 codes.importIdentifiers(
                     actor,
                     new SkuIdentifierImportInput(
-                        List.of(new SkuIdentifierRow(f.skuId(), "EAN13", second, true, null)), null, false)));
+                        List.of(new SkuIdentifierRow(f.skuId(), "EAN13", second, true, null)),
+                        null,
+                        false)));
     assertThat(result.rejectedCount()).isEqualTo(1);
     assertThat(result.items().get(0).reason()).contains("已有主条码").contains(first);
     // 原主条码没被动过
@@ -842,7 +998,10 @@ class SkuCodeIntegrationTest {
                 codes.importIdentifiers(
                     actor,
                     new SkuIdentifierImportInput(
-                        List.of(new SkuIdentifierRow(f.skuId(), "EAN13", uniqueEan13(), false, null)), null, true)));
+                        List.of(
+                            new SkuIdentifierRow(f.skuId(), "EAN13", uniqueEan13(), false, null)),
+                        null,
+                        true)));
     assertThat(result.dryRun()).isTrue();
     assertThat(result.appliedCount()).isEqualTo(1);
     assertThat(tx(actor, () -> codes.panel(f.skuId())).identifiers()).isEmpty();
@@ -856,7 +1015,11 @@ class SkuCodeIntegrationTest {
             new SkuIdentifierRow(f.skuId(), "EAN13", uniqueEan13(), false, null),
             new SkuIdentifierRow(f.skuId(), "EAN13", "BAD", false, null),
             new SkuIdentifierRow(f.skuId(), "UPCA", uniqueUpca(), false, null));
-    var result = call(actor, "catalog.sku.update", () -> codes.importIdentifiers(actor, new SkuIdentifierImportInput(rows, null, false)));
+    var result =
+        call(
+            actor,
+            "catalog.sku.update",
+            () -> codes.importIdentifiers(actor, new SkuIdentifierImportInput(rows, null, false)));
     assertThat(result.appliedCount()).isEqualTo(2);
     assertThat(result.rejectedCount()).isEqualTo(1);
     assertThat(tx(actor, () -> codes.panel(f.skuId())).identifiers()).hasSize(2);
@@ -868,7 +1031,14 @@ class SkuCodeIntegrationTest {
   void overviewCountsUncodedSkusAndSchemeDistribution() {
     var f = fixture("OV");
     UUID blank = uncodedSku(f.spuId());
-    call(actor, "catalog.sku.update", () -> codes.addIdentifier(actor, f.skuId(), new SkuIdentifierInput("EAN13", uniqueEan13(), false, null, null)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () ->
+            codes.addIdentifier(
+                actor,
+                f.skuId(),
+                new SkuIdentifierInput("EAN13", uniqueEan13(), false, null, null)));
     var overview = tx(actor, codes::overview);
     assertThat(overview.uncodedSkus()).isGreaterThanOrEqualTo(1);
     assertThat(overview.identifierCount()).isGreaterThanOrEqualTo(1);
@@ -906,7 +1076,8 @@ class SkuCodeIntegrationTest {
     // B 租户看不到 A 租户的 SKU 面板
     assertThatThrownBy(() -> tx(actorB, () -> codes.panel(mine.skuId())))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 租户规则列表里没有 A 的规则
     assertThat(tx(actorB, codes::rules).stream().map(SkuCodeRule::id)).doesNotContain(mineRule);
     // B 租户拿 A 的 SKU id 去写条码 → 404，且 A 的条码数量不变
@@ -917,12 +1088,22 @@ class SkuCodeIntegrationTest {
                     actorB,
                     () ->
                         codes.addIdentifier(
-                            actorB, mine.skuId(), new SkuIdentifierInput("EAN13", uniqueEan13(), false, null, null))))
+                            actorB,
+                            mine.skuId(),
+                            new SkuIdentifierInput("EAN13", uniqueEan13(), false, null, null))))
         .isInstanceOf(ResponseStatusException.class);
     assertThat(tx(actor, () -> codes.panel(mine.skuId()).identifiers())).hasSize((int) beforeCount);
     // B 租户看不到 A 的批次明细
     UUID mineBatch =
-        call(actor, "catalog.sku.update", () -> codes.batch(actor, new SkuCodeBatchInput("GENERATE", mineRule, List.of(mineBlank), null, false))).batchId();
+        call(
+                actor,
+                "catalog.sku.update",
+                () ->
+                    codes.batch(
+                        actor,
+                        new SkuCodeBatchInput(
+                            "GENERATE", mineRule, List.of(mineBlank), null, false)))
+            .batchId();
     assertThatThrownBy(() -> tx(actorB, () -> codes.batchResult(mineBatch)))
         .isInstanceOf(ResponseStatusException.class);
 
@@ -959,7 +1140,14 @@ class SkuCodeIntegrationTest {
 
   @Test
   void everyNewTableHasForcedRlsAndTenantNotNull() {
-    var tables = List.of("sku_code_rule", "sku_code_rule_seq", "sku_identifier", "sku_code_assignment", "sku_code_batch", "sku_code_batch_item");
+    var tables =
+        List.of(
+            "sku_code_rule",
+            "sku_code_rule_seq",
+            "sku_identifier",
+            "sku_code_assignment",
+            "sku_code_batch",
+            "sku_code_batch_item");
     var weak =
         sql.fetch(
             "select relname from pg_class join pg_namespace n on n.oid=relnamespace"
@@ -967,7 +1155,8 @@ class SkuCodeIntegrationTest {
                 + " ('sku_code_rule','sku_code_rule_seq','sku_identifier','sku_code_assignment','sku_code_batch','sku_code_batch_item')"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    var role = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var role =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(role.get("rolsuper", Boolean.class)).isFalse();
     assertThat(role.get("rolbypassrls", Boolean.class)).isFalse();
     for (String table : tables) {
@@ -979,15 +1168,20 @@ class SkuCodeIntegrationTest {
       assertThat(column.get("is_nullable", String.class)).as(table).isEqualTo("NO");
     }
     // 序号必须是整数大类型，绝不能是浮点（浮点会漏号）。
-    var seqType = sql.fetchOne("select data_type from information_schema.columns where table_name='sku_code_rule_seq' and column_name='next_value'");
+    var seqType =
+        sql.fetchOne(
+            "select data_type from information_schema.columns where table_name='sku_code_rule_seq' and column_name='next_value'");
     assertThat(seqType.get("data_type", String.class)).isEqualTo("bigint");
   }
 
   @Test
   void skuIdentifierHasSchemeValueUniquenessInDatabase() {
-    var indexes = sql.fetch(
-        "select indexdef from pg_indexes where tablename='sku_identifier'");
-    assertThat(indexes).anyMatch(i -> i.get("indexdef", String.class).contains("UNIQUE") && i.get("indexdef", String.class).contains("scheme, value"));
+    var indexes = sql.fetch("select indexdef from pg_indexes where tablename='sku_identifier'");
+    assertThat(indexes)
+        .anyMatch(
+            i ->
+                i.get("indexdef", String.class).contains("UNIQUE")
+                    && i.get("indexdef", String.class).contains("scheme, value"));
   }
 
   // ------------------------------------------------------------ HTTP 契约
@@ -1026,12 +1220,18 @@ class SkuCodeIntegrationTest {
             post("/catalog/sku-code/batch")
                 .header("Authorization", "Bearer tenant-a")
                 .contentType("application/json")
-                .content("{\"action\":\"GENERATE\",\"ruleId\":\"" + id + "\",\"skuIds\":[\"" + blank + "\"],\"dryRun\":true}"))
+                .content(
+                    "{\"action\":\"GENERATE\",\"ruleId\":\""
+                        + id
+                        + "\",\"skuIds\":[\""
+                        + blank
+                        + "\"],\"dryRun\":true}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.dryRun").value(true))
         .andExpect(jsonPath("$.appliedCount").value(1));
 
-    http.perform(get("/catalog/sku-code/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/sku-code/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.identifiers").isArray());
 
@@ -1041,7 +1241,9 @@ class SkuCodeIntegrationTest {
                 .header("Authorization", "Bearer tenant-a")
                 .contentType("application/json")
                 .content(
-                    "{\"rows\":[{\"skuId\":\"" + f.skuId() + "\",\"scheme\":\"EAN13\",\"value\":\"123\",\"isPrimary\":false}]}"))
+                    "{\"rows\":[{\"skuId\":\""
+                        + f.skuId()
+                        + "\",\"scheme\":\"EAN13\",\"value\":\"123\",\"isPrimary\":false}]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rejectedCount").value(1))
         .andExpect(jsonPath("$.items[0].outcome").value("REJECTED"))
@@ -1051,7 +1253,8 @@ class SkuCodeIntegrationTest {
   @Test
   void writeEndpointsRequireUpdatePermission() throws Exception {
     var f = fixture("PERM");
-    http.perform(get("/catalog/sku-code/skus/" + f.skuId()).header("Authorization", "Bearer reader"))
+    http.perform(
+            get("/catalog/sku-code/skus/" + f.skuId()).header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
     http.perform(
             put("/catalog/sku-code/skus/" + f.skuId() + "/code")
@@ -1059,9 +1262,12 @@ class SkuCodeIntegrationTest {
                 .contentType("application/json")
                 .content("{\"code\":\"NOPE\",\"version\":0}"))
         .andExpect(status().isForbidden());
-    http.perform(post("/catalog/sku-code/rules").header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"code\":\"N\",\"name\":\"n\",\"description\":\"\",\"scope\":\"ALL\",\"spuId\":null,\"prefix\":\"N\",\"suffix\":\"\",\"seqWidth\":4,\"startFrom\":1,\"enabled\":true,\"version\":0}"))
+    http.perform(
+            post("/catalog/sku-code/rules")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(
+                    "{\"code\":\"N\",\"name\":\"n\",\"description\":\"\",\"scope\":\"ALL\",\"spuId\":null,\"prefix\":\"N\",\"suffix\":\"\",\"seqWidth\":4,\"startFrom\":1,\"enabled\":true,\"version\":0}"))
         .andExpect(status().isForbidden());
   }
 }

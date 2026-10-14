@@ -20,33 +20,27 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.1.2.1 库位树。
  *
- * <p>蓝图：「维护库位层级与属性（区 → 巷 → 排 → 架 → 层 → 格），支持容量、承重、类型
- * （存储/暂存/待检/残次/冻结）、是否可拣。输入：库位增删改与层级调整；防环校验。
- * 输出：库位树 + 占用情况。」以及关系段的红线：「**库位不能跨租户引用**，
- * 也不允许跨仓库。」
+ * <p>蓝图：「维护库位层级与属性（区 → 巷 → 排 → 架 → 层 → 格），支持容量、承重、类型 （存储/暂存/待检/残次/冻结）、是否可拣。输入：库位增删改与层级调整；防环校验。
+ * 输出：库位树 + 占用情况。」以及关系段的红线：「**库位不能跨租户引用**， 也不允许跨仓库。」
  *
- * <p><b>一个表、一个真相来源。</b>层级、容量、承重三列由 V105 补在 {@code warehouse_location}
- * 上 —— 不另建节点表，因为 stock_bucket 的复合外键指向的就是这张表，另建一张层级表会让
- * 「库位本身」与「库位的父子关系」分居两处，每条读库位的 SQL 都得记得 join。
+ * <p><b>一个表、一个真相来源。</b>层级、容量、承重三列由 V105 补在 {@code warehouse_location} 上 —— 不另建节点表，因为 stock_bucket
+ * 的复合外键指向的就是这张表，另建一张层级表会让 「库位本身」与「库位的父子关系」分居两处，每条读库位的 SQL 都得记得 join。
  *
  * <p><b>出树用递归 CTE，占用用一个标量子查询。</b>两处纪律：
  *
  * <ol>
- *   <li>递归 CTE 只做**结构**（id / parent_id / depth / path），占用不 join 进来。
- *       在递归项里 join {@code stock_bucket} 会让同一个库位的每一行随 bucket 数重复，
- *       祖先的汇总被放大 N 次。
- *   <li>占用是**一个**标量子查询（按 {@code location_id} 收口），不是 join 展开 ——
- *       与 8.1.1.1/8.1.1.2 同一理由：库位/批次维度 join 会成笛卡尔积。
+ *   <li>递归 CTE 只做**结构**（id / parent_id / depth / path），占用不 join 进来。 在递归项里 join {@code stock_bucket}
+ *       会让同一个库位的每一行随 bucket 数重复， 祖先的汇总被放大 N 次。
+ *   <li>占用是**一个**标量子查询（按 {@code location_id} 收口），不是 join 展开 —— 与 8.1.1.1/8.1.1.2 同一理由：库位/批次维度 join
+ *       会成笛卡尔积。
  * </ol>
  *
- * <p><b>防环与跨仓库挂父子由 DB 裁决，本类只负责把话说清楚。</b>V105 的
- * {@code guard_warehouse_location_tree} 触发器用递归 CTE 拒绝成环与超六层，
- * 复合外键 {@code warehouse_location_parent_fk} 拒绝跨租户与跨仓库的父子关系。
- * 应用层先查一次是为了给出可读的中文报错，**不是**权威判据 —— 绕过服务层直连 SQL
- * 也一样被拒。成环会让递归查询永不收敛，所以这一条必须是 DB 不变量而不是应用层 if。
+ * <p><b>防环与跨仓库挂父子由 DB 裁决，本类只负责把话说清楚。</b>V105 的 {@code guard_warehouse_location_tree} 触发器用递归 CTE
+ * 拒绝成环与超六层， 复合外键 {@code warehouse_location_parent_fk} 拒绝跨租户与跨仓库的父子关系。
+ * 应用层先查一次是为了给出可读的中文报错，**不是**权威判据 —— 绕过服务层直连 SQL 也一样被拒。成环会让递归查询永不收敛，所以这一条必须是 DB 不变量而不是应用层 if。
  *
- * <p><b>租户谓词每条查询都写。</b>RLS（{@code app.current_tenant}）是第一道防线，
- * 显式 {@code tenant_id=} 是第二道：忘了绑定上下文时第二道让查询当场返回空，而不是全表。
+ * <p><b>租户谓词每条查询都写。</b>RLS（{@code app.current_tenant}）是第一道防线， 显式 {@code tenant_id=}
+ * 是第二道：忘了绑定上下文时第二道让查询当场返回空，而不是全表。
  */
 @Service
 public class WarehouseLocationTreeService {
@@ -74,8 +68,7 @@ public class WarehouseLocationTreeService {
   /**
    * 库位树 + 占用情况。
    *
-   * <p>仓库不存在或不属于本租户一律 404 —— 两者的可观测结果必须相同，否则「猜 id」
-   * 就成了探测别的租户有没有仓库的侧信道（与 8.1.1.2 同一纪律）。
+   * <p>仓库不存在或不属于本租户一律 404 —— 两者的可观测结果必须相同，否则「猜 id」 就成了探测别的租户有没有仓库的侧信道（与 8.1.1.2 同一纪律）。
    */
   public LocationTree tree(UUID warehouseId) {
     requireWarehouse(warehouseId);
@@ -125,9 +118,7 @@ public class WarehouseLocationTreeService {
     // 先在 Java 侧按父子关系分组（rows 已按 path 排序：父先于子、同层按 code）。
     Map<UUID, List<org.jooq.Record>> byParent = new LinkedHashMap<>();
     for (org.jooq.Record r : rows) {
-      byParent
-          .computeIfAbsent(r.get("parent_id", UUID.class), k -> new ArrayList<>())
-          .add(r);
+      byParent.computeIfAbsent(r.get("parent_id", UUID.class), k -> new ArrayList<>()).add(r);
     }
 
     // 子树占用：自底向上累加。rows 按 path 排序（父在子之前），倒序遍历即自底向上。
@@ -160,14 +151,11 @@ public class WarehouseLocationTreeService {
   /**
    * 子树占用 = 本节点直接占用 + 各子节点子树占用（自底向上叠加一次得出）。
    *
-   * <p><b>容量利用率与超载在子树口径上恒为「无意义」，所以这里给 null / false。</b>
-   * 用子节点的手数除以**本节点**的容量算出的比例没有物理含义：格子的容量管的是它自己那
-   * 一格货，上层「排」的容量管的是整排。让界面显示一个没人能解释的百分比，比不给更糟。
-   * 逐节点的 {@code occupied.capacityUtilization} 才是真数。
+   * <p><b>容量利用率与超载在子树口径上恒为「无意义」，所以这里给 null / false。</b> 用子节点的手数除以**本节点**的容量算出的比例没有物理含义：格子的容量管的是它自己那
+   * 一格货，上层「排」的容量管的是整排。让界面显示一个没人能解释的百分比，比不给更糟。 逐节点的 {@code occupied.capacityUtilization} 才是真数。
    *
-   * <p>skuCount 这里也只加总而非去重：同一个 SKU 放在同一棵子树的两个格子里会被数两次。
-   * 去重要把整棵树的 SKU 集合摊平才做得到，代价是一条额外查询；本模块的 SKU 数用途是
-   * 「这个范围涉及几种商品」的量级参考，节点级 {@code occupied.skuCount} 是精确值。
+   * <p>skuCount 这里也只加总而非去重：同一个 SKU 放在同一棵子树的两个格子里会被数两次。 去重要把整棵树的 SKU 集合摊平才做得到，代价是一条额外查询；本模块的 SKU
+   * 数用途是 「这个范围涉及几种商品」的量级参考，节点级 {@code occupied.skuCount} 是精确值。
    */
   private static Occupancy add(Occupancy child, Occupancy acc) {
     return new Occupancy(
@@ -182,8 +170,7 @@ public class WarehouseLocationTreeService {
   /**
    * 单个库位的直接占用。
    *
-   * <p>利用率在<b>容量已量过</b>时才给值：把「没量过」折成 0 的话，界面上
-   * 「量过且空置」与「从没量过」会长得一样，两个都是 0%。
+   * <p>利用率在<b>容量已量过</b>时才给值：把「没量过」折成 0 的话，界面上 「量过且空置」与「从没量过」会长得一样，两个都是 0%。
    */
   private static Occupancy ownOccupancy(org.jooq.Record r) {
     BigDecimal onHand = decimal(r, "on_hand");
@@ -201,9 +188,8 @@ public class WarehouseLocationTreeService {
   /**
    * 容量利用率，四位小数。
    *
-   * <p>{@code null} 容量返回 {@code null}（没量过），而不是 0 —— 见 {@link Occupancy}。
-   * scale 定为 4 且 {@link RoundingMode#HALF_UP}：不给 scale 的话 {@code divide} 会
-   * 抛 ArithmeticException（无限小数），给了又必须定舍入方向。
+   * <p>{@code null} 容量返回 {@code null}（没量过），而不是 0 —— 见 {@link Occupancy}。 scale 定为 4 且 {@link
+   * RoundingMode#HALF_UP}：不给 scale 的话 {@code divide} 会 抛 ArithmeticException（无限小数），给了又必须定舍入方向。
    */
   private static BigDecimal utilization(BigDecimal onHand, BigDecimal capacity) {
     if (capacity == null) return null;
@@ -286,12 +272,12 @@ public class WarehouseLocationTreeService {
   /**
    * 本仓全部库位上涉及的 SKU（去重）。
    *
-   * <p>一条查询扫完，而不是每个节点各查一次（{@code skuCount} 逐节点已在树查询里算过，
-   * 这里只要去重后的全集）。逐节点求并集会让「整仓 SKU 数」随库位数线性放大查询次数。
+   * <p>一条查询扫完，而不是每个节点各查一次（{@code skuCount} 逐节点已在树查询里算过， 这里只要去重后的全集）。逐节点求并集会让「整仓 SKU 数」随库位数线性放大查询次数。
    */
   private List<UUID> distinctSkusInWarehouse(UUID warehouseId) {
     if (warehouseId == null) return List.of();
-    return sql.fetch(
+    return sql
+        .fetch(
             """
             select distinct k.sku_id from stock_bucket k
              where k.tenant_id = current_setting('app.current_tenant', true)::uuid
@@ -308,9 +294,8 @@ public class WarehouseLocationTreeService {
   /**
    * 能力声明。
    *
-   * <p>层级 / 容量 / 承重 / 占用四项由本模块交付；**自动分配（8.1.2.2）未交付**，
-   * 拣货路径（8.3.2.1）未交付 —— 如实标 {@code false} 并写明归属模块，
-   * 不给 0、不给空数组冒充「这个仓没有」。
+   * <p>层级 / 容量 / 承重 / 占用四项由本模块交付；**自动分配（8.1.2.2）未交付**， 拣货路径（8.3.2.1）未交付 —— 如实标 {@code false}
+   * 并写明归属模块， 不给 0、不给空数组冒充「这个仓没有」。
    */
   public LocationTreeCapabilities capabilities() {
     return new LocationTreeCapabilities(
@@ -323,8 +308,7 @@ public class WarehouseLocationTreeService {
         "8.3.2.1",
         List.of(LocationType.values()),
         MAX_DEPTH,
-        "层级、容量、承重与占用来自 warehouse_location 与 stock_bucket 的真实聚合；"
-            + "库位自动分配与拣货路径尚未交付，本服务不提供替代口径。");
+        "层级、容量、承重与占用来自 warehouse_location 与 stock_bucket 的真实聚合；" + "库位自动分配与拣货路径尚未交付，本服务不提供替代口径。");
   }
 
   // ================================================================ 写
@@ -358,11 +342,14 @@ public class WarehouseLocationTreeService {
         // 三个可空列必须带 SQL 类型：jOOQ 绑定一个无类型的 null 时无法推断参数类型，
         // 抛 "Type class java.lang.Class is not supported in dialect POSTGRES"。
         // 根节点（parent_id=null）是**最常见的形状**，所以这不是边角情况。
-        parentId == null ? org.jooq.impl.DSL.val((UUID) null, UUID.class)
+        parentId == null
+            ? org.jooq.impl.DSL.val((UUID) null, UUID.class)
             : org.jooq.impl.DSL.val(parentId, UUID.class),
-        capacity == null ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
+        capacity == null
+            ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
             : org.jooq.impl.DSL.val(capacity, BigDecimal.class),
-        weight == null ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
+        weight == null
+            ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
             : org.jooq.impl.DSL.val(weight, BigDecimal.class));
     return new LocationSaved(id, code, parentId, "CREATED", "库位已建，层级与占用随树重算。");
   }
@@ -370,25 +357,27 @@ public class WarehouseLocationTreeService {
   /**
    * 改库位属性与层级。
    *
-   * <p>层级调整（改 parent）走与新建同一条 DB 防线：跨仓库挂父子被复合外键拒、
-   * 成环与超六层被触发器拒。{@code parentProvided=false} 表示调用方没带 parent 字段，
-   * 保持原层级不动 —— 用 null 表达「升为根」会让「没带字段」与「升为根」变成同一件事。
+   * <p>层级调整（改 parent）走与新建同一条 DB 防线：跨仓库挂父子被复合外键拒、 成环与超六层被触发器拒。{@code parentProvided=false} 表示调用方没带
+   * parent 字段， 保持原层级不动 —— 用 null 表达「升为根」会让「没带字段」与「升为根」变成同一件事。
    */
   @Transactional
   public LocationSaved update(UUID warehouseId, UUID locationId, LocationUpdateInput input) {
     requireWarehouse(warehouseId);
-    var current = sql.fetchOne(
-        """
+    var current =
+        sql.fetchOne(
+            """
         select code, name, parent_id, type, status, pickable from warehouse_location
          where tenant_id = current_setting('app.current_tenant', true)::uuid
            and warehouse_id = ? and id = ?
         """,
-        warehouseId,
-        locationId);
+            warehouseId,
+            locationId);
     if (current == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "库位不存在");
 
-    String name = input.name() == null ? current.get("name", String.class)
-        : required(input.name(), NAME_MAX, "库位名称");
+    String name =
+        input.name() == null
+            ? current.get("name", String.class)
+            : required(input.name(), NAME_MAX, "库位名称");
     LocationType type =
         input.type() == null
             ? LocationType.of(current.get("type", String.class))
@@ -414,7 +403,7 @@ public class WarehouseLocationTreeService {
       }
     }
 
-        // pickable 与 capacity/weight 一样**没带就保持原值**：改个名字不该顺手把
+    // pickable 与 capacity/weight 一样**没带就保持原值**：改个名字不该顺手把
     // 「不可拣」重置成「可拣」（那是另一个决定）。需要显式开关时带 true / false。
     Object pickable =
         input.pickable() == null ? current.get("pickable", Boolean.class) : input.pickable();
@@ -448,10 +437,8 @@ public class WarehouseLocationTreeService {
   /**
    * 删库位。
    *
-   * <p>只允许删**叶子且空**的库位：有子节点会让子树从树上凭空消失，
-   * 压着库存的库位删掉会让 stock_bucket 的事实指向不存在的库位。
-   * 两道都是 DB 硬约束（parent_id 外键 NO ACTION + stock_bucket 复合外键），
-   * 这里先查一遍只为把 409 的话说清楚。
+   * <p>只允许删**叶子且空**的库位：有子节点会让子树从树上凭空消失， 压着库存的库位删掉会让 stock_bucket 的事实指向不存在的库位。 两道都是 DB 硬约束（parent_id
+   * 外键 NO ACTION + stock_bucket 复合外键）， 这里先查一遍只为把 409 的话说清楚。
    */
   @Transactional
   public void delete(UUID warehouseId, UUID locationId) {
@@ -474,12 +461,10 @@ public class WarehouseLocationTreeService {
             locationId);
     if (row == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "库位不存在");
     if (count(row, "children") > 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "库位下仍有子节点，请先移走或删除子节点");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "库位下仍有子节点，请先移走或删除子节点");
     }
     if (count(row, "buckets") > 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "库位上仍有库存，请先把货移走再删");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "库位上仍有库存，请先把货移走再删");
     }
     int deleted =
         sql.execute(
@@ -499,8 +484,7 @@ public class WarehouseLocationTreeService {
    * 防环：沿候选父节点的 parent 链上行，一旦走回自己就成环。
    *
    * <p><b>DB 的 {@code guard_warehouse_location_tree} 才是权威判据</b>，这里先查一次
-   * 只是为了给出「挂到自己子孙之下」这句中文提示，而不是让用户撞一个裸的
-   * check_violation（那在界面上只显示「数据与既有记录冲突」）。
+   * 只是为了给出「挂到自己子孙之下」这句中文提示，而不是让用户撞一个裸的 check_violation（那在界面上只显示「数据与既有记录冲突」）。
    * 两道都要：只做应用层检查的话，绕过服务的写入口照样能挂出环。
    */
   private void rejectCycle(UUID locationId, UUID candidateParentId) {
@@ -524,8 +508,7 @@ public class WarehouseLocationTreeService {
             locationId,
             locationId);
     if (reached != null && Boolean.TRUE.equals(reached.get(0, Boolean.class))) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "库位不能挂到它自己的子孙之下：那会让库位树成环、递归查询不再收敛");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "库位不能挂到它自己的子孙之下：那会让库位树成环、递归查询不再收敛");
     }
   }
 
@@ -544,9 +527,8 @@ public class WarehouseLocationTreeService {
   /**
    * 父库位必须落在同一个仓库。
    *
-   * <p>跨租户与跨仓库都由 V105 的复合外键 {@code warehouse_location_parent_fk} 在 DB 层
-   * 拒绝，这里先查是为了给出中文报错而不是裸 FK 违例。**两道都要**：
-   * 只做应用层检查的话，绕过服务的写入口（运维脚本、其它服务的直连）就能挂出跨仓父子。
+   * <p>跨租户与跨仓库都由 V105 的复合外键 {@code warehouse_location_parent_fk} 在 DB 层 拒绝，这里先查是为了给出中文报错而不是裸 FK
+   * 违例。**两道都要**： 只做应用层检查的话，绕过服务的写入口（运维脚本、其它服务的直连）就能挂出跨仓父子。
    */
   private void requireSameWarehouse(UUID parentId, UUID warehouseId, String what) {
     var parentRow =
@@ -561,8 +543,7 @@ public class WarehouseLocationTreeService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, what + "不存在");
     }
     if (!parentWarehouse.equals(warehouseId)) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, what + "必须属于同一个仓库：库位不允许跨仓库挂接");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, what + "必须属于同一个仓库：库位不允许跨仓库挂接");
     }
   }
 
@@ -592,13 +573,15 @@ public class WarehouseLocationTreeService {
 
   /** 可空 UUID 的带类型绑定（根节点与「清空层级」都是 null 形状）。 */
   private static Object typedUuid(UUID value) {
-    return value == null ? org.jooq.impl.DSL.val((UUID) null, UUID.class)
+    return value == null
+        ? org.jooq.impl.DSL.val((UUID) null, UUID.class)
         : org.jooq.impl.DSL.val(value, UUID.class);
   }
 
   /** 可空 NUMERIC 的带类型绑定。 */
   private static Object typedDecimal(BigDecimal value) {
-    return value == null ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
+    return value == null
+        ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
         : org.jooq.impl.DSL.val(value, BigDecimal.class);
   }
 

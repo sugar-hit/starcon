@@ -3,8 +3,6 @@ package com.starcon.catalog;
 import static com.starcon.catalog.ExportDataSource.*;
 import static com.starcon.catalog.ExportModels.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.starcon.tenancy.Ids;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -25,24 +23,19 @@ import org.springframework.stereotype.Service;
 /**
  * 3.8.2.1 导出的**异步执行器**：把「已受理」的导出任务真正跑完，产出文件。
  *
- * <p><b>大文件异步是蓝图原话</b>（「支持…大文件异步导出」），所以 POST 只推进任务状态就返回，
- * 文件由固定线程池在请求之外生成。前端**绝不能**在 POST 返回后显示「导出完成」——
- * 记录上的 row_count 与文件是同一次执行写出来的，不是这次响应的承诺。
+ * <p><b>大文件异步是蓝图原话</b>（「支持…大文件异步导出」），所以 POST 只推进任务状态就返回， 文件由固定线程池在请求之外生成。前端**绝不能**在 POST
+ * 返回后显示「导出完成」—— 记录上的 row_count 与文件是同一次执行写出来的，不是这次响应的承诺。
  *
- * <p><b>每批单独开租户事务</b>：租户上下文与数据范围都是**事务级 GUC**
- * （{@code app.current_tenant} / {@code app.actor} / {@code app.grants}），
- * 提交请求那个事务早就结束了。工作线程必须按 {@code AccessService.Access} 重开事务，
- * 而且必须是**带 Access 的重开**：导出的 SELECT 打在 spu / sku / party_contact 上，
- * 这三张表带 V3 的 {@code data_scope} RESTRICTIVE 策略，只绑 tenant_id 而不绑
- * grants 的话，SELF / DEPARTMENT 范围会被逐行拒绝，或者更糟——在没绑对的上下文里读出了不该读的行。
+ * <p><b>每批单独开租户事务</b>：租户上下文与数据范围都是**事务级 GUC** （{@code app.current_tenant} / {@code app.actor} /
+ * {@code app.grants}）， 提交请求那个事务早就结束了。工作线程必须按 {@code AccessService.Access} 重开事务， 而且必须是**带 Access
+ * 的重开**：导出的 SELECT 打在 spu / sku / party_contact 上， 这三张表带 V3 的 {@code data_scope} RESTRICTIVE 策略，只绑
+ * tenant_id 而不绑 grants 的话，SELF / DEPARTMENT 范围会被逐行拒绝，或者更糟——在没绑对的上下文里读出了不该读的行。
  *
- * <p><b>领取互斥由 DB 裁决</b>（{@code worker_claimed_at}）：与 V29 import_job 同一条经验，
- * 两个执行者各写各的局部 row_count，后写的会把前一个的进度抹掉，任务显示「导出 0 行」
- * 而文件里其实有 120 行。命中 0 行就说明别人已经在跑，本线程直接退出。
+ * <p><b>领取互斥由 DB 裁决</b>（{@code worker_claimed_at}）：与 V29 import_job 同一条经验， 两个执行者各写各的局部
+ * row_count，后写的会把前一个的进度抹掉，任务显示「导出 0 行」 而文件里其实有 120 行。命中 0 行就说明别人已经在跑，本线程直接退出。
  *
- * <p><b>CSV 增量拼装</b>：分批 append 进 {@link ByteArrayOutputStream}，写完一次性交给
- * {@link MediaStorage}。峰值内存与结果集大小同阶，但**不是**无界的 —— 超出行数上限在
- * 计数阶段就被拒（见 {@code ExportJobService}），所以这里的上界是已知的。
+ * <p><b>CSV 增量拼装</b>：分批 append 进 {@link ByteArrayOutputStream}，写完一次性交给 {@link
+ * MediaStorage}。峰值内存与结果集大小同阶，但**不是**无界的 —— 超出行数上限在 计数阶段就被拒（见 {@code ExportJobService}），所以这里的上界是已知的。
  */
 @Service
 public class ExportJobExecutor {
@@ -72,14 +65,17 @@ public class ExportJobExecutor {
     var seq = new AtomicInteger();
     // 并行度 2：与 3.8.1.1 导入向导同一档。导出是只读作业，两个并发足够把磁盘写满，
     // 再高只会让每个任务分到的批次更小、总时长更长。
-    this.pool = Executors.newFixedThreadPool(2, new ThreadFactory() {
-      @Override
-      public Thread newThread(Runnable r) {
-        Thread t = new Thread(r, "catalog-export-" + seq.incrementAndGet());
-        t.setDaemon(true);
-        return t;
-      }
-    });
+    this.pool =
+        Executors.newFixedThreadPool(
+            2,
+            new ThreadFactory() {
+              @Override
+              public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "catalog-export-" + seq.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+              }
+            });
   }
 
   /** 受理一次导出：推进到 RUNNING 并丢进线程池。本方法返回时文件通常还没生成。 */
@@ -107,7 +103,8 @@ public class ExportJobExecutor {
     try {
       // 读任务行本身也必须在租户事务里：export_job 开了 FORCE RLS，
       // 而工作线程此刻不在任何租户上下文里，裸查会取不到行（看起来像「任务不存在」）。
-      var job = access.run(actor, permission, () -> ExportJobService.load(sql, actor.tenantId(), jobId));
+      var job =
+          access.run(actor, permission, () -> ExportJobService.load(sql, actor.tenantId(), jobId));
       var source = sources.require(job.sourceKey());
       var columns = resolveColumns(source, job.selectedFields());
       var spec = job.filters();
@@ -122,8 +119,9 @@ public class ExportJobExecutor {
       // 写 U+FEFF 的整数会得到一个 0xFF 字节而不是三字节 BOM，Excel 就会按本地编码猜。
       var buffer = new ByteArrayOutputStream();
       buffer.write("﻿".getBytes(StandardCharsets.UTF_8));
-      buffer.write(String.join(",", job.fieldHeaders().stream().map(ExportJobService::csv).toList())
-          .getBytes(StandardCharsets.UTF_8));
+      buffer.write(
+          String.join(",", job.fieldHeaders().stream().map(ExportJobService::csv).toList())
+              .getBytes(StandardCharsets.UTF_8));
       buffer.write('\n');
 
       long written = 0;
@@ -144,8 +142,9 @@ public class ExportJobExecutor {
                 });
         if (batch.isEmpty()) break;
         for (String[] row : batch) {
-          buffer.write(String.join(",", java.util.Arrays.stream(row).map(ExportJobService::csv).toList())
-              .getBytes(StandardCharsets.UTF_8));
+          buffer.write(
+              String.join(",", java.util.Arrays.stream(row).map(ExportJobService::csv).toList())
+                  .getBytes(StandardCharsets.UTF_8));
           buffer.write('\n');
         }
         written += batch.size();
@@ -158,7 +157,9 @@ public class ExportJobExecutor {
           "catalog-"
               + source.key().toLowerCase(java.util.Locale.ROOT)
               + "-"
-              + String.format("%04d%02d%02d", requestedOn.getYear(), requestedOn.getMonthValue(), requestedOn.getDayOfMonth())
+              + String.format(
+                  "%04d%02d%02d",
+                  requestedOn.getYear(), requestedOn.getMonthValue(), requestedOn.getDayOfMonth())
               + "-"
               + job.id().toString().substring(0, 8)
               + ".csv";
@@ -196,7 +197,8 @@ public class ExportJobExecutor {
 
   /** 执行失败：把原因写进任务行，让任务详情页能显示而不是永远停在「导出中」。 */
   private void fail(AccessService.Access actor, String permission, UUID jobId, Exception cause) {
-    var message = cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
+    var message =
+        cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
     try {
       access.run(
           actor,
@@ -233,9 +235,7 @@ public class ExportJobExecutor {
   /**
    * 存储键：{@code exports/<tenant>/<uuid>.csv}。
    *
-   * <p>键里带租户段，所以一个租户算不出另一个租户的键；
-   * 实际隔离仍由 {@code export_job} 的 RLS 与查询里的 tenant_id 保证，
-   * 这里是第二道，不是唯一一道。
+   * <p>键里带租户段，所以一个租户算不出另一个租户的键； 实际隔离仍由 {@code export_job} 的 RLS 与查询里的 tenant_id 保证， 这里是第二道，不是唯一一道。
    */
   static String storageKey(UUID tenantId, UUID jobId) {
     return "exports/" + tenantId + "/" + jobId + ".csv";

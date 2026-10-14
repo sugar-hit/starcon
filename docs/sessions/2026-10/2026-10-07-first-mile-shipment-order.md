@@ -92,23 +92,23 @@ InventoryInTransitIntegrationTest.在途只有一个事实表_外部腿与调拨
 
 ## 未交付依赖（如实暴露，不假装有数据）
 
-| 维度 | 归属 | 状态 | 本模块处理 |
-| --- | --- | --- | --- |
-| 8.2.1.1 收货单 | 8.2.1.1 | 已交付（V70） | 真通：建单真校验来源收货单存在、每行的实收批次真属于那张收货单 |
-| 供应商采购来源 | 6.3.2.2 | **未交付**（6.1–6.6 共 36 个模块） | `available=false` + 原因 + href；建单**直接拒绝** |
-| 报关单与三单据 | 10.5.1.1 | 未交付 | 只承载发运时点必须定下的申报信息，不代做报关动作 |
-| HS 编码字典 | 3.7.1.1 | 未交付（台账记为阻塞） | `hs_code` 接受自由码，如实声明无字典校验 |
-| 海外仓连接 | 10.4.2.1 | 未交付 | 目的仓取自本租户 `warehouse` 表里的海外仓行，不是服务商账户 |
-| 在途跟踪看板 | 10.4.1.2 | 未交付 | 在途余量由 7.5.1.2 真实持有，本模块只如实指过去 |
-| 落地成本核算 | 12 财务 | 未交付 | 只存发运时点成本预估快照，不代算不回写 |
+| 维度           | 归属     | 状态                               | 本模块处理                                                     |
+| -------------- | -------- | ---------------------------------- | -------------------------------------------------------------- |
+| 8.2.1.1 收货单 | 8.2.1.1  | 已交付（V70）                      | 真通：建单真校验来源收货单存在、每行的实收批次真属于那张收货单 |
+| 供应商采购来源 | 6.3.2.2  | **未交付**（6.1–6.6 共 36 个模块） | `available=false` + 原因 + href；建单**直接拒绝**              |
+| 报关单与三单据 | 10.5.1.1 | 未交付                             | 只承载发运时点必须定下的申报信息，不代做报关动作               |
+| HS 编码字典    | 3.7.1.1  | 未交付（台账记为阻塞）             | `hs_code` 接受自由码，如实声明无字典校验                       |
+| 海外仓连接     | 10.4.2.1 | 未交付                             | 目的仓取自本租户 `warehouse` 表里的海外仓行，不是服务商账户    |
+| 在途跟踪看板   | 10.4.1.2 | 未交付                             | 在途余量由 7.5.1.2 真实持有，本模块只如实指过去                |
+| 落地成本核算   | 12 财务  | 未交付                             | 只存发运时点成本预估快照，不代算不回写                         |
 
 ## 四件套落地位置
 
-| 类别 | 位置 |
-| --- | --- |
-| 迁移 | `backend/services/warehouse/src/main/resources/db/migration/V80__warehouse_first_mile_shipment.sql` |
-| 后端 | `FirstMileShipmentModels.java` / `FirstMileShipmentService.java` / `FirstMileShipmentController.java`（`/warehouse/first-mile-shipments`，10 个端点） |
-| 页面 | `apps/web/src/app/logistics/first-mile/page.tsx` + `apps/web/src/components/logistics/first-mile-shipment.tsx` + `first-mile-shipment-model.ts` |
+| 类别 | 位置                                                                                                                                                     |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 迁移 | `backend/services/warehouse/src/main/resources/db/migration/V80__warehouse_first_mile_shipment.sql`                                                      |
+| 后端 | `FirstMileShipmentModels.java` / `FirstMileShipmentService.java` / `FirstMileShipmentController.java`（`/warehouse/first-mile-shipments`，10 个端点）    |
+| 页面 | `apps/web/src/app/logistics/first-mile/page.tsx` + `apps/web/src/components/logistics/first-mile-shipment.tsx` + `first-mile-shipment-model.ts`          |
 | 测试 | `FirstMileShipmentIntegrationTest.java`（29 例，Testcontainers PG16，连接池 1）+ `first-mile-shipment-model.test.ts`（28 例）+ `route.test.ts` 新增 2 例 |
 
 ## 验证（全部实跑）

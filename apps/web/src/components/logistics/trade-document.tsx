@@ -335,14 +335,13 @@ export function TradeDocumentWorkspace() {
           </li>
           <li>
             <strong className="text-foreground">「待业务确认」不是「校验通过」</strong>
-            ：完整性校验的结论分三档，单证齐备但优惠未确认时结论是「待业务确认」，
-            不计入通过 —— 混进去界面就会许诺一个还没人拍板的结论。
+            ：完整性校验的结论分三档，单证齐备但优惠未确认时结论是「待业务确认」， 不计入通过 ——
+            混进去界面就会许诺一个还没人拍板的结论。
           </li>
           <li>
             <strong className="text-foreground">目的国要求是数据不是常量</strong>
-            ：单证要求、单证模板与优惠规则都真实落库、租户可维护。
-            该目的国一条规则都没配时校验会<strong>报不通过</strong>并说清原因 ——
-            没有定义要求就无法断言齐不齐。
+            ：单证要求、单证模板与优惠规则都真实落库、租户可维护。 该目的国一条规则都没配时校验会
+            <strong>报不通过</strong>并说清原因 —— 没有定义要求就无法断言齐不齐。
           </li>
           {caps && (
             <>
@@ -598,9 +597,7 @@ export function TradeDocumentWorkspace() {
           certs={certs}
           params={certParams}
           form={certForm}
-          onPatch={(patch) =>
-            setCertParams((prev) => ({ ...prev, ...patch, page: 0 }))
-          }
+          onPatch={(patch) => setCertParams((prev) => ({ ...prev, ...patch, page: 0 }))}
           onForm={(patch) => setCertForm((f) => ({ ...f, ...patch }))}
           onCreate={async () => {
             setError(null);
@@ -776,7 +773,9 @@ function SetRow({ row, onOpen }: { row: TradeSetRow; onOpen: () => void }) {
       </td>
       {/* 提交痕迹是历史：被退回后仍然留着，因为「发出去过没有」是举证材料 */}
       <td className="text-muted-foreground px-4 py-3 text-xs">{moment(row.submittedAt)}</td>
-      <td className="px-4 py-3">{row.statusLabel || tradeSetStatusLabels[row.status] || row.status}</td>
+      <td className="px-4 py-3">
+        {row.statusLabel || tradeSetStatusLabels[row.status] || row.status}
+      </td>
       <td className="px-4 py-3 text-right">
         <Button variant="ghost" onClick={onOpen}>
           详情
@@ -1094,7 +1093,8 @@ function CertificationsTab({
           </div>
         </div>
         <p className="text-muted-foreground mt-3 text-xs">
-          来源会记成<strong>「租户自维护」</strong> —— 16 合规模块交付前，这里不冒充从 16 合规读来的数据。
+          来源会记成<strong>「租户自维护」</strong> —— 16 合规模块交付前，这里不冒充从 16
+          合规读来的数据。
           单证要求里勾了「要求附认证状态」的，校验会看这张表：缺失或已过期会报阻断/提示级提醒。
         </p>
       </SectionCard>
@@ -1308,7 +1308,9 @@ function PreferencesTab({
                 <td className="text-muted-foreground px-4 py-3 text-xs">
                   {r.substantiveChangeCriterion || '—'}
                 </td>
-                <td className="px-4 py-3">{r.requiresBusinessConfirmation ? '是' : '否（已显式关闭）'}</td>
+                <td className="px-4 py-3">
+                  {r.requiresBusinessConfirmation ? '是' : '否（已显式关闭）'}
+                </td>
                 <td className="text-muted-foreground px-4 py-3 text-xs">
                   {r.validFrom} ~ {r.validTo ?? '长期'}
                 </td>
@@ -1318,7 +1320,10 @@ function PreferencesTab({
         </table>
       </SectionCard>
 
-      <SectionCard title="优惠主张台账" description="谁主张了优惠、确认到哪一步、按哪一版规则确认的">
+      <SectionCard
+        title="优惠主张台账"
+        description="谁主张了优惠、确认到哪一步、按哪一版规则确认的"
+      >
         <table className="w-full text-sm">
           <thead className="text-muted-foreground border-b text-left">
             <tr>
@@ -1402,7 +1407,11 @@ function RemindersTab({
             rows={blockers}
             onResolve={onResolve}
           />
-          <ReminderGroup title={`提示级（${warnings.length}）`} rows={warnings} onResolve={onResolve} />
+          <ReminderGroup
+            title={`提示级（${warnings.length}）`}
+            rows={warnings}
+            onResolve={onResolve}
+          />
         </div>
       )}
     </SectionCard>
@@ -1474,7 +1483,8 @@ function ResolveButton({
             <ModalHeader>
               <ModalTitle>处理缺失提醒</ModalTitle>
               <ModalDescription>
-                {reminder.reminderTypeLabel || reminderTypeLabels[reminder.reminderType]}：{reminder.message}
+                {reminder.reminderTypeLabel || reminderTypeLabels[reminder.reminderType]}：
+                {reminder.message}
               </ModalDescription>
             </ModalHeader>
             <div className="space-y-2">
@@ -1663,9 +1673,7 @@ function SetDetailModal({
   );
 
   const blockers = detail ? submitBlockers(detail) : [];
-  const drafts = detail
-    ? documentsReady(detail.documents).drafts
-    : [];
+  const drafts = detail ? documentsReady(detail.documents).drafts : [];
 
   return (
     <Modal open onOpenChange={onClose}>
@@ -1872,7 +1880,9 @@ function SetDetailModal({
                 {detail.reminders.map((r) => (
                   <li
                     key={r.id}
-                    className={r.status === 'OPEN' && r.severity === 'BLOCKER' ? 'text-destructive' : ''}
+                    className={
+                      r.status === 'OPEN' && r.severity === 'BLOCKER' ? 'text-destructive' : ''
+                    }
                   >
                     [{r.severity === 'BLOCKER' ? '阻断' : '提示'}]{' '}
                     {r.reminderTypeLabel || reminderTypeLabels[r.reminderType]}：{r.message}
@@ -1928,7 +1938,11 @@ function PreferenceCell({ document }: { document: TradeDocumentRow }) {
     return <span className="text-muted-foreground">未主张</span>;
   }
   return (
-    <span className={substantiveChangeBlocking(document.substantiveChangeStatus) ? 'text-destructive' : ''}>
+    <span
+      className={
+        substantiveChangeBlocking(document.substantiveChangeStatus) ? 'text-destructive' : ''
+      }
+    >
       {document.ftaScheme} ·{' '}
       {document.substantiveChangeStatusLabel ??
         substantiveChangeLabels[document.substantiveChangeStatus] ??
@@ -1981,7 +1995,10 @@ function DocumentActions({
           variant="ghost"
           disabled={busy}
           onClick={() => {
-            const ref = promptOrNull('定稿需要写清来源定位（单证文件放在哪 / 出自哪个系统）', document.sourceReference || defaultRef);
+            const ref = promptOrNull(
+              '定稿需要写清来源定位（单证文件放在哪 / 出自哪个系统）',
+              document.sourceReference || defaultRef,
+            );
             if (ref) onFinalize(ref);
           }}
         >
@@ -2068,7 +2085,11 @@ function ActionBar({
     <div className="flex flex-wrap gap-2">
       {/* 跑校验是读侧动作，任何非终态都该能做 —— 它不改变状态机，只追加一条留档 */}
       {set.status !== 'ACKNOWLEDGED' && set.status !== 'CANCELLED' && (
-        <Button variant="ghost" disabled={busy} onClick={() => void onRun(() => runTradeCheck(set.id))}>
+        <Button
+          variant="ghost"
+          disabled={busy}
+          onClick={() => void onRun(() => runTradeCheck(set.id))}
+        >
           <FileCheck2 className="size-4" />
           跑完整性校验
         </Button>

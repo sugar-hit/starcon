@@ -176,13 +176,11 @@ export function toQuoteInput(form: QuoteForm): SupplierQuoteInput {
     // 与提交进去的顺序一致（规则 R5）。
     tiers: [...form.tiers]
       .sort((a, b) => Number(a.minQuantity) - Number(b.minQuantity))
-      .map(
-        (tier): SupplierQuotePriceTierInput => ({
-          minQuantity: Number(tier.minQuantity),
-          unitPrice: Number(tier.unitPrice),
-          note: tier.note.trim() === '' ? null : tier.note.trim(),
-        }),
-      ),
+      .map((tier): SupplierQuotePriceTierInput => ({
+        minQuantity: Number(tier.minQuantity),
+        unitPrice: Number(tier.unitPrice),
+        note: tier.note.trim() === '' ? null : tier.note.trim(),
+      })),
     note: form.note,
     version: form.version,
   };
@@ -305,10 +303,7 @@ export function updateQuote(id: string, input: SupplierQuoteInput) {
 }
 
 export function deleteQuote(id: string, version: number) {
-  return api<{ deleted: boolean }>(
-    `catalog/supplier-quotes/${id}?version=${version}`,
-    'DELETE',
-  );
+  return api<{ deleted: boolean }>(`catalog/supplier-quotes/${id}?version=${version}`, 'DELETE');
 }
 
 /**
@@ -335,9 +330,7 @@ export async function resolveEffectiveQuote(
   supplierId: string,
 ): Promise<SupplierQuoteEffectiveResult> {
   const params = new URLSearchParams({ skuId, supplierId });
-  return api<SupplierQuoteEffectiveResult>(
-    `catalog/supplier-quotes/effective/resolve?${params}`,
-  );
+  return api<SupplierQuoteEffectiveResult>(`catalog/supplier-quotes/effective/resolve?${params}`);
 }
 
 export type QuoteAmbiguityCandidate = {
@@ -424,10 +417,7 @@ export function tierLabel(tiers: SupplierQuotePriceTier[], index: number): strin
 }
 
 /** 按数量在阶梯里定位适用档（null = 低于最低档，没有适用价）。 */
-export function applicableTierIndex(
-  tiers: SupplierQuotePriceTier[],
-  quantity: number,
-): number {
+export function applicableTierIndex(tiers: SupplierQuotePriceTier[], quantity: number): number {
   let found = -1;
   let foundFrom = -Infinity;
   tiers.forEach((tier, index) => {

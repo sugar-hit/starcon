@@ -56,8 +56,10 @@ const WIDTH_CLASS: Record<DetailDrawerWidth, string> = {
   full: 'md:max-w-[calc(100vw-2rem)]',
 };
 
-export interface DetailDrawerContentProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'width'> {
+export interface DetailDrawerContentProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
+  'width'
+> {
   /** 抽屉宽度 — 根据内容多少决定,默认 md (640px) */
   width?: DetailDrawerWidth;
 }
@@ -73,7 +75,7 @@ const DetailDrawerContent = React.forwardRef<
       className={cn(
         // 移动端 (<md):全屏
         // 桌面端 (md+):右侧滑出,按 width 决定 max-w
-        'fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col border-l border-border bg-card shadow-elevated',
+        'border-border bg-card shadow-elevated fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col border-l',
         WIDTH_CLASS[width],
         'data-[state=open]:animate-slide-in-right data-[state=closed]:animate-fade-out',
         className,
@@ -113,10 +115,7 @@ function DetailDrawerHeader({
   );
 }
 
-function DetailDrawerTitle({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) {
+function DetailDrawerTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <DialogPrimitive.Title
       className={cn('text-h-20 text-foreground tracking-tight', className)}
@@ -137,22 +136,11 @@ function DetailDrawerDescription({
   );
 }
 
-function DetailDrawerBody({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-4', className)}
-      {...props}
-    />
-  );
+function DetailDrawerBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-4', className)} {...props} />;
 }
 
-function DetailDrawerFooter({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DetailDrawerFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(

@@ -18,6 +18,7 @@ import { WarehouseConfigWorkspace } from '@/components/warehouse/warehouse-confi
  * ownerModule + 原因）、变更留痕（真分页 + 按范围与班次筛选，逐字段「从什么 → 什么」），
  * 全部来自 PostgreSQL 16 上真实落库的数据。
  */
-export default function WarehouseConfigPage({ params }: { params: { id: string } }) {
-  return <WarehouseConfigWorkspace warehouseId={params.id} />;
+export default async function WarehouseConfigPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  return <WarehouseConfigWorkspace warehouseId={resolvedParams.id} />;
 }

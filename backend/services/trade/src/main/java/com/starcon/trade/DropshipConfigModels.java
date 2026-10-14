@@ -12,28 +12,23 @@ import java.util.UUID;
 /**
  * 9.6.1.1 代发模式配置的传输模型。
  *
- * <p>蓝图原话：「配置店铺/SKU 是否走代发（一件代发），以及代发供应商、结算方式
- * （下单/确认收货后结算、差价抽成）、可售校验规则；区分『自营发货』与『供应商直发』
- * 两种履约路径。纯代理代发不占用自有仓库存；其他直发模式的货权与结算规则须单独确认。」
- * 输出是「代发模式生效配置」与「代发可售标记（决定是否可售、是否可刊登）」——
- * 后者是硬输出，所以 {@link DropshipEvaluationRow} 里 {@code sellable} 与
- * {@code listable} **分成两列**，且都带原因码与原因说明。
+ * <p>蓝图原话：「配置店铺/SKU 是否走代发（一件代发），以及代发供应商、结算方式 （下单/确认收货后结算、差价抽成）、可售校验规则；区分『自营发货』与『供应商直发』
+ * 两种履约路径。纯代理代发不占用自有仓库存；其他直发模式的货权与结算规则须单独确认。」 输出是「代发模式生效配置」与「代发可售标记（决定是否可售、是否可刊登）」—— 后者是硬输出，所以
+ * {@link DropshipEvaluationRow} 里 {@code sellable} 与 {@code listable} **分成两列**，且都带原因码与原因说明。
  *
- * <p><b>命名纪律（硬要求，不是风格偏好）</b>：springdoc 用 record 的
- * <b>简单类名</b>做 {@code components.schemas} 的键，而本仓已有 {@code WarehouseRow}、
- * {@code AllocationRequest} 等同名 record，同名会互相覆盖。因此本文件所有 record 与
- * enum 一律以 {@code Dropship} 开头。
+ * <p><b>命名纪律（硬要求，不是风格偏好）</b>：springdoc 用 record 的 <b>简单类名</b>做 {@code components.schemas} 的键，而本仓已有
+ * {@code WarehouseRow}、 {@code AllocationRequest} 等同名 record，同名会互相覆盖。因此本文件所有 record 与 enum 一律以
+ * {@code Dropship} 开头。
  *
  * <p><b>三条建模纪律</b>：
  *
  * <ul>
- *   <li><b>物流与货权是两个字段，不是一个。</b>{@link DropshipFulfillmentPath}（谁发货）与
- *       {@link DropshipOwnershipMode}（货权在谁）互不推导；「不占自有仓库存」是两者
- *       <b>同时</b>成立才有的结论，由 DB 生成列 {@code counts_against_own_inventory} /
- *       {@code pure_agency_exempt} 钉死，见 V118 文件头第一节。</li>
- *   <li><b>差价抽成比例一律 BigDecimal</b>，前端拿到的也是 number，不在前端算抽佣。</li>
- *   <li><b>「没有观测」与「观测为 0」不是一回事</b>：{@code supplierAvailableQty}
- *       为 {@code null} 表示没人报过供应商库存，{@code 0} 表示供应商确实没货。</li>
+ *   <li><b>物流与货权是两个字段，不是一个。</b>{@link DropshipFulfillmentPath}（谁发货）与 {@link
+ *       DropshipOwnershipMode}（货权在谁）互不推导；「不占自有仓库存」是两者 <b>同时</b>成立才有的结论，由 DB 生成列 {@code
+ *       counts_against_own_inventory} / {@code pure_agency_exempt} 钉死，见 V118 文件头第一节。
+ *   <li><b>差价抽成比例一律 BigDecimal</b>，前端拿到的也是 number，不在前端算抽佣。
+ *   <li><b>「没有观测」与「观测为 0」不是一回事</b>：{@code supplierAvailableQty} 为 {@code null} 表示没人报过供应商库存，{@code
+ *       0} 表示供应商确实没货。
  * </ul>
  */
 public final class DropshipConfigModels {
@@ -77,9 +72,8 @@ public final class DropshipConfigModels {
   /**
    * 货权模式（**货权**维度：结算前货算谁的）。
    *
-   * <p>与 {@link DropshipFulfillmentPath} 刻意分开：蓝图加粗句「不经自有仓不代表不承担货权」。
-   * {@code SUPPLIER_DIRECT + OUR_ACCOUNT} 就是「供应商替我发货、但货权在我方」（VMI 型），
-   * 它<b>必须</b>占用我方库存口径，而且需要单独确认。
+   * <p>与 {@link DropshipFulfillmentPath} 刻意分开：蓝图加粗句「不经自有仓不代表不承担货权」。 {@code SUPPLIER_DIRECT +
+   * OUR_ACCOUNT} 就是「供应商替我发货、但货权在我方」（VMI 型）， 它<b>必须</b>占用我方库存口径，而且需要单独确认。
    */
   public enum DropshipOwnershipMode {
     PURE_AGENCY("纯代理（货权归供应商，不记我方库存）"),
@@ -312,7 +306,12 @@ public final class DropshipConfigModels {
   public record DropshipShopRefSaved(UUID id, String shopCode, boolean created) {}
 
   public record DropshipShopRefQuery(
-      String shopCode, String platformCode, Boolean activeOnly, String keyword, int page, int size) {}
+      String shopCode,
+      String platformCode,
+      Boolean activeOnly,
+      String keyword,
+      int page,
+      int size) {}
 
   public record DropshipShopRefPage(
       List<DropshipShopRefRow> items, long total, int page, int size) {}
@@ -362,8 +361,8 @@ public final class DropshipConfigModels {
   /**
    * 配置行读模型。
    *
-   * <p>{@code countsAgainstOwnInventory} 与 {@code pureAgencyExempt} 是 **DB 生成列**，
-   * 服务层只读不算 —— 见 V118 文件头第一节「物流路径 ≠ 货权」。
+   * <p>{@code countsAgainstOwnInventory} 与 {@code pureAgencyExempt} 是 **DB 生成列**， 服务层只读不算 —— 见 V118
+   * 文件头第一节「物流路径 ≠ 货权」。
    */
   public record DropshipConfigRow(
       UUID id,
@@ -404,10 +403,9 @@ public final class DropshipConfigModels {
   /**
    * 配置录入。
    *
-   * <p>{@code ownershipConfirmedAt} / {@code ownershipConfirmedByMembershipId} /
-   * {@code ownershipConfirmedNote} 三者在 {@code ownershipMode != PURE_AGENCY} 时
-   * **必填**（DB CHECK + 触发器两层强制）；{@code PURE_AGENCY} 时必须留空 ——
-   * 纯代理不需要「单独确认」，硬塞一个确认时间会让人误以为它也被复核过。
+   * <p>{@code ownershipConfirmedAt} / {@code ownershipConfirmedByMembershipId} / {@code
+   * ownershipConfirmedNote} 三者在 {@code ownershipMode != PURE_AGENCY} 时 **必填**（DB CHECK +
+   * 触发器两层强制）；{@code PURE_AGENCY} 时必须留空 —— 纯代理不需要「单独确认」，硬塞一个确认时间会让人误以为它也被复核过。
    */
   public record DropshipConfigInput(
       @NotBlank @Size(max = 32) String configCode,
@@ -515,9 +513,8 @@ public final class DropshipConfigModels {
   /**
    * 代发可售标记。
    *
-   * <p>{@code sellable} 与 {@code listable} 分开：不可售不必然要下架 ——
-   * {@code listingPolicy=ALWAYS_LIST} 时就是「卖不了但先挂着」。合成一列会让页面
-   * 分不清「没货了该补货」与「该下架换供应商」这两件不同的事。
+   * <p>{@code sellable} 与 {@code listable} 分开：不可售不必然要下架 —— {@code listingPolicy=ALWAYS_LIST}
+   * 时就是「卖不了但先挂着」。合成一列会让页面 分不清「没货了该补货」与「该下架换供应商」这两件不同的事。
    */
   public record DropshipEvaluationRow(
       UUID id,
@@ -539,9 +536,12 @@ public final class DropshipConfigModels {
       OffsetDateTime evaluatedAt) {}
 
   public record DropshipEvaluationRequest(
-      @NotNull UUID configId, @NotBlank @Size(max = 64) String skuRef, @NotNull BigDecimal requestedQty) {}
+      @NotNull UUID configId,
+      @NotBlank @Size(max = 64) String skuRef,
+      @NotNull BigDecimal requestedQty) {}
 
-  public record DropshipEvaluationSaved(UUID id, boolean sellable, boolean listable, String reasonCode) {}
+  public record DropshipEvaluationSaved(
+      UUID id, boolean sellable, boolean listable, String reasonCode) {}
 
   public record DropshipEvaluationQuery(
       UUID configId,

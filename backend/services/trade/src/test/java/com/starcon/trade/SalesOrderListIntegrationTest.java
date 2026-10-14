@@ -34,17 +34,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * <p>全部走 <b>HTTP 端点 + 真实 PostgreSQL 16 + 强制 RLS</b>，不使用任何内存替身。
  *
- * <p><b>夹具一律经 9.1.2.2 的真实写端点创建</b>（POST /trade/sales-orders），
- * 而不是在本测试里直接 INSERT —— 本模块是读投影，它读到的必须是<b>真正的写入者</b>
- * 写出来的数据。直接 INSERT 会让「读投影读到的形状」与「写入者实际写的形状」悄悄分叉，
- * 而这种分叉只有在对账时才会暴露。
+ * <p><b>夹具一律经 9.1.2.2 的真实写端点创建</b>（POST /trade/sales-orders）， 而不是在本测试里直接 INSERT ——
+ * 本模块是读投影，它读到的必须是<b>真正的写入者</b> 写出来的数据。直接 INSERT 会让「读投影读到的形状」与「写入者实际写的形状」悄悄分叉， 而这种分叉只有在对账时才会暴露。
  *
- * <p><b>本测试刻意证明三件「没有」的事</b>（蓝图要而本服务做不到的）：
- * 支付状态、履约状态、发货仓、平台状态、售后状态、平台店铺
- * <b>六个字段在响应里必须是 null 而不是 0 或假枚举</b>；
- * 「待处理数」必须为 null；四条批量操作必须 available=false。
- * 这类断言才是本模块真正在守的东西 —— 只断言「列表能返回数据」的话，
- * 哪天有人拿 payment_method 冒充 paymentStatus 也照样全绿。
+ * <p><b>本测试刻意证明三件「没有」的事</b>（蓝图要而本服务做不到的）： 支付状态、履约状态、发货仓、平台状态、售后状态、平台店铺 <b>六个字段在响应里必须是 null 而不是 0
+ * 或假枚举</b>； 「待处理数」必须为 null；四条批量操作必须 available=false。 这类断言才是本模块真正在守的东西 —— 只断言「列表能返回数据」的话， 哪天有人拿
+ * payment_method 冒充 paymentStatus 也照样全绿。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -110,8 +105,7 @@ class SalesOrderListIntegrationTest {
           "Bearer self-scope",
           actor(userB, a, List.of(grant("SELF", List.of("trade.orders.read")))));
       actors.put(
-          "Bearer read-only",
-          actor(user, a, List.of(grant("ALL", List.of("trade.orders.read")))));
+          "Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("trade.orders.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -223,17 +217,35 @@ class SalesOrderListIntegrationTest {
     m.put(
         "charges",
         List.of(
-            Map.of("chargeType", "SHIPPING", "label", "海运费", "amount", "8.00",
-                "chargeLevel", "ORDER", "note", ""),
-            Map.of("chargeType", "DISCOUNT", "label", "老客户折扣", "amount", "-3.00",
-                "chargeLevel", "ORDER", "note", "")));
+            Map.of(
+                "chargeType",
+                "SHIPPING",
+                "label",
+                "海运费",
+                "amount",
+                "8.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                ""),
+            Map.of(
+                "chargeType",
+                "DISCOUNT",
+                "label",
+                "老客户折扣",
+                "amount",
+                "-3.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                "")));
     return m;
   }
 
   SalesOrderListModels.SalesOrderListQuery q(String keyword, int page, int size) {
     return new SalesOrderListModels.SalesOrderListQuery(
-        null, null, null, null, null, null, null, null, null, null,
-        keyword, null, page, size, null, null);
+        null, null, null, null, null, null, null, null, null, null, keyword, null, page, size, null,
+        null);
   }
 
   SalesOrderListModels.SalesOrderListPage inA(SalesOrderListModels.SalesOrderListQuery query) {
@@ -249,8 +261,22 @@ class SalesOrderListIntegrationTest {
         () ->
             listService.list(
                 new SalesOrderListModels.SalesOrderListQuery(
-                    null, null, null, null, null, null, null, null, null, null,
-                    keyword, null, 0, 50, self.userId(), true)));
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    keyword,
+                    null,
+                    0,
+                    50,
+                    self.userId(),
+                    true)));
   }
 
   // ==========================================================================
@@ -349,8 +375,8 @@ class SalesOrderListIntegrationTest {
             () ->
                 listService.list(
                     new SalesOrderListModels.SalesOrderListQuery(
-                        null, null, null, null, null, sku, null, null, null, null,
-                        null, null, 0, 50, null, null)));
+                        null, null, null, null, null, sku, null, null, null, null, null, null, 0,
+                        50, null, null)));
     assertThat(bySku.rows()).extracting(r -> r.orderNo()).contains(no);
   }
 
@@ -368,35 +394,76 @@ class SalesOrderListIntegrationTest {
             "trade.orders.read",
             () ->
                 sql.execute(
-                        "update sales_order set created_at = ?::timestamptz where order_no = ?",
-                        past, no));
+                    "update sales_order set created_at = ?::timestamptz where order_no = ?",
+                    past,
+                    no));
     assertThat(changed).as("测试夹具必须真的改到那一行").isEqualTo(1);
     var hit =
         inA(
             new SalesOrderListModels.SalesOrderListQuery(
-                null, null, null, null, null, null, past.minusDays(1), past.plusDays(1),
-                null, null, null, null, 0, 50, null, null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                past.minusDays(1),
+                past.plusDays(1),
+                null,
+                null,
+                null,
+                null,
+                0,
+                50,
+                null,
+                null));
     assertThat(hit.rows()).extracting(r -> r.orderNo()).contains(no);
     // ⚠️ 时区往返断言：写进去的是 +08:00，读回来必须是**同一个瞬间**。
     // Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s，这里逐值断言。
     var byOffset =
         inA(
             new SalesOrderListModels.SalesOrderListQuery(
-                null, null, null, null, null, null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 past.toInstant().atOffset(ZoneOffset.ofHours(8)).minusDays(1),
                 past.toInstant().atOffset(ZoneOffset.ofHours(8)).plusDays(1),
-                null, null, null, null, 0, 50, null, null));
+                null,
+                null,
+                null,
+                null,
+                0,
+                50,
+                null,
+                null));
     assertThat(byOffset.rows()).extracting(r -> r.orderNo()).contains(no);
     // 读回的 created_at 必须与写入瞬间一致（不是偏 8 小时的另一个瞬间）。
-    var row = byOffset.rows().stream().filter(r -> r.orderNo().equals(no)).findFirst().orElseThrow();
+    var row =
+        byOffset.rows().stream().filter(r -> r.orderNo().equals(no)).findFirst().orElseThrow();
     assertThat(row.createdAt().toInstant()).isEqualTo(past.toInstant());
     // 区间不覆盖时必须筛不到。
     var miss =
         inA(
             new SalesOrderListModels.SalesOrderListQuery(
-                null, null, null, null, null, null,
-                past.plusDays(30), past.plusDays(31),
-                null, null, null, null, 0, 50, null, null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                past.plusDays(30),
+                past.plusDays(31),
+                null,
+                null,
+                null,
+                null,
+                0,
+                50,
+                null,
+                null));
     assertThat(miss.rows()).extracting(r -> r.orderNo()).doesNotContain(no);
   }
 
@@ -431,8 +498,8 @@ class SalesOrderListIntegrationTest {
             () ->
                 listService.list(
                     new SalesOrderListModels.SalesOrderListQuery(
-                        null, null, null, null, null, null, null, null, null, null,
-                        mine, null, 0, 50, null, null)));
+                        null, null, null, null, null, null, null, null, null, null, mine, null, 0,
+                        50, null, null)));
     assertThat(viaSelfActorUser.total()).as("SELF 收窄的是范围，不是数据本身").isPositive();
   }
 
@@ -444,8 +511,11 @@ class SalesOrderListIntegrationTest {
   void 六个拿不到的维度在响应里必须是null而不是0或假枚举() throws Exception {
     String no = uniqueNo();
     postOrder("Bearer tenant-a", no, Map.of());
-    var row = inA(q(no, 0, 50)).rows().stream().filter(r -> r.orderNo().equals(no))
-        .findFirst().orElseThrow();
+    var row =
+        inA(q(no, 0, 50)).rows().stream()
+            .filter(r -> r.orderNo().equals(no))
+            .findFirst()
+            .orElseThrow();
     // ⚠️ 绝不能拿 payment_method 冒充 paymentStatus：
     // 付款方式是「约定」（CREDIT_TERM / 预付 / 货到付），支付状态是「实收流水」。
     assertThat(row.paymentStatus()).as("paymentMethod 不是 paymentStatus").isNull();
@@ -463,19 +533,30 @@ class SalesOrderListIntegrationTest {
   void 能力声明逐条报出六个不可得维度的归属模块与原因() {
     var caps = access.run(actorA, "trade.orders.read", () -> listService.capabilities());
     var missing =
-        List.of("platformShop", "paymentStatus", "fulfillmentStatus",
-            "shippingWarehouse", "platformStatus", "aftersalesStatus");
+        List.of(
+            "platformShop",
+            "paymentStatus",
+            "fulfillmentStatus",
+            "shippingWarehouse",
+            "platformStatus",
+            "aftersalesStatus");
     assertThat(caps.unavailableDimensions()).hasSize(missing.size());
     for (String field : missing) {
-      var d = caps.unavailableDimensions().stream().filter(x -> x.field().equals(field))
-          .findFirst().orElseThrow(() -> new AssertionError("缺少维度声明：" + field));
+      var d =
+          caps.unavailableDimensions().stream()
+              .filter(x -> x.field().equals(field))
+              .findFirst()
+              .orElseThrow(() -> new AssertionError("缺少维度声明：" + field));
       assertThat(d.available()).as(field + " 必须 available=false").isFalse();
       assertThat(d.ownerModule()).as(field + " 必须带 ownerModule").isNotBlank();
       assertThat(d.reason()).as(field + " 必须带原因").isNotBlank();
     }
     // 拿不到支付状态的理由里必须点明 payment_method 的区别，否则有人会拿它顶替。
-    var pay = caps.unavailableDimensions().stream()
-        .filter(d -> d.field().equals("paymentStatus")).findFirst().orElseThrow();
+    var pay =
+        caps.unavailableDimensions().stream()
+            .filter(d -> d.field().equals("paymentStatus"))
+            .findFirst()
+            .orElseThrow();
     assertThat(pay.reason()).contains("payment_method").contains("约定");
   }
 
@@ -493,7 +574,8 @@ class SalesOrderListIntegrationTest {
     postOrder("Bearer tenant-a", uniqueNo(), Map.of("currency", "USD"));
     postOrder("Bearer tenant-a", uniqueNo(), Map.of("currency", "EUR"));
     var s = inA(q(null, 0, 1)).summary();
-    assertThat(s.amountsByCurrency()).extracting(SalesOrderListModels.SalesOrderListCurrencyAmount::currency)
+    assertThat(s.amountsByCurrency())
+        .extracting(SalesOrderListModels.SalesOrderListCurrencyAmount::currency)
         .contains("USD", "EUR");
     // 每种币种各自一个金额 —— 把 USD 与 EUR 加成一个数不是任何一个金额。
     assertThat(s.amountsByCurrency()).allSatisfy(c -> assertThat(c.amount()).isNotNull());
@@ -510,8 +592,11 @@ class SalesOrderListIntegrationTest {
       assertThat(op.reason()).as(op.code() + " 必须带原因").isNotBlank();
     }
     // 备注的归属必须是 sales_order.note 的写入所有者 9.1.2.2 —— 本模块是读投影不抢写。
-    var note = caps.bulkOperations().stream().filter(o -> o.code().equals("NOTE"))
-        .findFirst().orElseThrow();
+    var note =
+        caps.bulkOperations().stream()
+            .filter(o -> o.code().equals("NOTE"))
+            .findFirst()
+            .orElseThrow();
     assertThat(note.ownerModule()).contains("9.1.2.2");
     assertThat(note.reason()).contains("读投影");
   }
@@ -538,7 +623,8 @@ class SalesOrderListIntegrationTest {
     var opts = access.run(actorA, "trade.orders.read", () -> listService.filterOptions());
     assertThat(opts.orderSources()).contains("MANUAL");
     assertThat(opts.documentStatuses()).containsExactly("DRAFT", "SUBMITTED");
-    assertThat(opts.sorts()).extracting(SalesOrderListModels.SalesOrderListSortOption::code)
+    assertThat(opts.sorts())
+        .extracting(SalesOrderListModels.SalesOrderListSortOption::code)
         .contains("ORDERED_AT_DESC", "AMOUNT_ASC");
   }
 
@@ -552,9 +638,7 @@ class SalesOrderListIntegrationTest {
     postOrder("Bearer tenant-a", noA, Map.of());
     var pageB = access.run(actorB, "trade.orders.read", () -> listService.list(q(noA, 0, 50)));
     assertThat(pageB.total()).as("B 读不到 A 的单").isZero();
-    assertThat(inA(q(noA, 0, 50)).total())
-        .as("A 用自己的单号当然查得到 —— 否则上面可能只是搜索没命中")
-        .isPositive();
+    assertThat(inA(q(noA, 0, 50)).total()).as("A 用自己的单号当然查得到 —— 否则上面可能只是搜索没命中").isPositive();
   }
 
   @Test
@@ -615,8 +699,11 @@ class SalesOrderListIntegrationTest {
   void 预留路径trade_orders仍然是404() throws Exception {
     // TradeTenancyIntegrationTest 为别的车道预留了 /trade/orders，本模块不得占用。
     http.perform(get("/trade/orders").header("X-Tenant-Id", a)).andExpect(status().isNotFound());
-    http.perform(post("/trade/orders").header("X-Tenant-Id", a)
-            .contentType(MediaType.APPLICATION_JSON).content("{}"))
+    http.perform(
+            post("/trade/orders")
+                .header("X-Tenant-Id", a)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
         .andExpect(status().isNotFound());
   }
 
@@ -631,8 +718,8 @@ class SalesOrderListIntegrationTest {
         .andExpect(status().isOk());
     http.perform(get("/trade/sales-orders/list").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
-    http.perform(get("/trade/sales-orders/list/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/sales-orders/list/capabilities").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
     http.perform(get("/trade/sales-orders/list/filters").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
@@ -647,14 +734,14 @@ class SalesOrderListIntegrationTest {
 
   SalesOrderListModels.SalesOrderListQuery currencyQuery(String currency) {
     return new SalesOrderListModels.SalesOrderListQuery(
-        null, null, currency, null, null, null, null, null, null, null,
-        null, null, 0, 50, null, null);
+        null, null, currency, null, null, null, null, null, null, null, null, null, 0, 50, null,
+        null);
   }
 
   SalesOrderListModels.SalesOrderListQuery statusQuery(String status) {
     return new SalesOrderListModels.SalesOrderListQuery(
-        null, status, null, null, null, null, null, null, null, null,
-        null, null, 0, 50, null, null);
+        null, status, null, null, null, null, null, null, null, null, null, null, 0, 50, null,
+        null);
   }
 
   static List<String> ordersOf(List<SalesOrderListModels.SalesOrderListRow> rows) {

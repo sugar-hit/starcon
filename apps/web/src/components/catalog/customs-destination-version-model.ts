@@ -67,11 +67,9 @@ export function saveVersion(skuId: string, body: DestinationVersionInput) {
  * 混进保存会让「我只是想改个字」与「我把它发布成下游要用的那一份」无法区分。
  */
 export function publishVersion(versionId: string, version: number) {
-  return api<DestinationVersionRow>(
-    `${ROOT}/${encodeURIComponent(versionId)}/publish`,
-    'POST',
-    { version },
-  );
+  return api<DestinationVersionRow>(`${ROOT}/${encodeURIComponent(versionId)}/publish`, 'POST', {
+    version,
+  });
 }
 
 /**
@@ -81,9 +79,7 @@ export function publishVersion(versionId: string, version: number) {
  * 用 {@link isNoEffectiveVersion} 把它与其它错误分开，让页面能说出「该目的地还没维护」。
  */
 export function fetchEffective(skuId: string, destination: string, at?: string) {
-  return api<EffectiveDestinationVersion>(
-    `${ROOT}/effective${query({ skuId, destination, at })}`,
-  );
+  return api<EffectiveDestinationVersion>(`${ROOT}/effective${query({ skuId, destination, at })}`);
 }
 
 /** 认证要求清单（供 16 合规的认证台账）。同样在无生效版本时 409。 */
@@ -100,9 +96,7 @@ export function fetchRequirements(skuId: string, destination: string, at?: strin
  * 页面要把那句话原样带给运营。
  */
 export function fetchResolved(skuId: string, destination: string, at?: string) {
-  return api<ResolvedDeclaration>(
-    `${RESOLVE_ROOT}/resolve${query({ skuId, destination, at })}`,
-  );
+  return api<ResolvedDeclaration>(`${RESOLVE_ROOT}/resolve${query({ skuId, destination, at })}`);
 }
 
 /**
@@ -130,10 +124,11 @@ export function sourceLabel(source: string | null | undefined): string {
 }
 
 /** 一个字段的来源行：这一格来自哪一层。页面上紧挨着值显示。 */
-export function sourceLine(field: {
-  source?: string | null;
-  overridden?: boolean;
-}): { label: string; overridden: boolean; tone: 'neutral' | 'accent' } {
+export function sourceLine(field: { source?: string | null; overridden?: boolean }): {
+  label: string;
+  overridden: boolean;
+  tone: 'neutral' | 'accent';
+} {
   const overridden = field.overridden === true;
   return {
     label: sourceLabel(field.source),
@@ -231,10 +226,7 @@ export type VersionState = {
   next: string;
 };
 
-export function versionState(version: {
-  status: string;
-  effective: boolean;
-}): VersionState {
+export function versionState(version: { status: string; effective: boolean }): VersionState {
   if (version.status === 'DRAFT') {
     return {
       key: 'DRAFT',
@@ -425,7 +417,8 @@ export function validateDraft(draft: DestinationVersionDraft): string[] {
   const codes = draft.requirements.map((item) => item.requirementCode.trim().toUpperCase());
   draft.requirements.forEach((item, index) => {
     const at = `第 ${index + 1} 条认证要求`;
-    if (item.requirementCode.trim() === '') errors.push(`${at}：请填写认证代码（例：CE / FCC / RoHS）`);
+    if (item.requirementCode.trim() === '')
+      errors.push(`${at}：请填写认证代码（例：CE / FCC / RoHS）`);
     else if (item.requirementCode.trim().length > 64) errors.push(`${at}：认证代码最多 64 个字符`);
     if (item.requirementName.trim().length > 200) errors.push(`${at}：认证名称最多 200 字`);
     if (item.note.length > 500) errors.push(`${at}：认证备注最多 500 字`);
@@ -466,8 +459,7 @@ export function draftToPayload(draft: DestinationVersionDraft): DestinationVersi
     // 留空 = 「一直有效」，发的是 **null 而不是省略该键**：契约里 effectiveTo 是
     // `string | null`（键必在、值可空），与 V25 BomVersionInput / BundleVersionInput
     // 同一口径。省略键会被当成「没传这个字段」，而 null 才是 +∞（规则 R1）。
-    effectiveTo:
-      draft.effectiveTo.trim() === '' ? null : toIsoWithOffset(draft.effectiveTo.trim()),
+    effectiveTo: draft.effectiveTo.trim() === '' ? null : toIsoWithOffset(draft.effectiveTo.trim()),
     note: draft.note.trim(),
     requirements: draft.requirements.map((item) => ({
       requirementCode: item.requirementCode.trim().toUpperCase(),

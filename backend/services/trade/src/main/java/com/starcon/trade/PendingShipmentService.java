@@ -25,23 +25,17 @@ import org.springframework.web.server.ResponseStatusException;
  * <p><b>六条实现纪律</b>（照抄 9.6.1.2 的写法，不另起风格）：
  *
  * <ol>
- *   <li><b>数据来源只有一处</b>：8.3.3.2 的 warehouse 授权只读 API
- *       （{@link PackingQueryPort}）。跨库视图、跨服务 SQL、跨服务 FK 一律不做
- *       —— 见 V124 文件头第一节。取不到就 503，绝不返回空清单冒充「今天没有待发货」。</li>
- *   <li><b>分组是真的 GROUP BY</b>：仓库 / 承运渠道 / 承运商 / 发货时限四个维度
- *       各自一条 SQL 聚合，不是把一页数据在 Java 里数。蓝图那句「按承运商分组是
- *       大促期效率关键，混在一起会导致交接混乱」在 {@code shipment_batch_task}
- *       的「一次任务不许跨承运商」上被钉死。</li>
- *   <li><b>三个批量操作是真任务</b>：任务 + 逐条 item + 运单回执 + 事件流四张表，
- *       状态机 PENDING → RUNNING → SUCCEEDED/PARTIAL/FAILED。{@code PARTIAL} 与
- *       {@code SUCCEEDED} 分开，是因为「交接漏发」在界面上显示成「交接完成」
- *       是本模块最贵的失败方式。</li>
- *   <li><b>最远只到 HANDED_OVER</b>：本模块<b>不产生已发货</b>，已发货是下游 8.3.4.1
- *       在承运商揽收后确认的事实（9.4.1.2 发货记录的上游）。</li>
- *   <li><b>时限登记而不伪造</b>：上游没有平台 SLA 可读，所以要么登记（有主体、有时刻、
- *       有来源），要么落在 UNSET 桶 —— 「还不知道」不能混进「今天到期」。</li>
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上，
- *       全程 {@code OffsetDateTime}，不用 {@code Timestamp.valueOf(LocalDateTime)}。</li>
+ *   <li><b>数据来源只有一处</b>：8.3.3.2 的 warehouse 授权只读 API （{@link PackingQueryPort}）。跨库视图、跨服务 SQL、跨服务 FK
+ *       一律不做 —— 见 V124 文件头第一节。取不到就 503，绝不返回空清单冒充「今天没有待发货」。
+ *   <li><b>分组是真的 GROUP BY</b>：仓库 / 承运渠道 / 承运商 / 发货时限四个维度 各自一条 SQL 聚合，不是把一页数据在 Java 里数。蓝图那句「按承运商分组是
+ *       大促期效率关键，混在一起会导致交接混乱」在 {@code shipment_batch_task} 的「一次任务不许跨承运商」上被钉死。
+ *   <li><b>三个批量操作是真任务</b>：任务 + 逐条 item + 运单回执 + 事件流四张表， 状态机 PENDING → RUNNING →
+ *       SUCCEEDED/PARTIAL/FAILED。{@code PARTIAL} 与 {@code SUCCEEDED} 分开，是因为「交接漏发」在界面上显示成「交接完成」
+ *       是本模块最贵的失败方式。
+ *   <li><b>最远只到 HANDED_OVER</b>：本模块<b>不产生已发货</b>，已发货是下游 8.3.4.1 在承运商揽收后确认的事实（9.4.1.2 发货记录的上游）。
+ *   <li><b>时限登记而不伪造</b>：上游没有平台 SLA 可读，所以要么登记（有主体、有时刻、 有来源），要么落在 UNSET 桶 —— 「还不知道」不能混进「今天到期」。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上， 全程 {@code OffsetDateTime}，不用 {@code
+ *       Timestamp.valueOf(LocalDateTime)}。
  * </ol>
  */
 @Service
@@ -81,10 +75,8 @@ public class PendingShipmentService {
   /**
    * 时限分桶表达式。
    *
-   * <p>全部是 {@code timestamptz} 与 {@code now()} 的算术，<b>不引入任何本地时区换算</b>：
-   * 「今天到期」在跨时区运营的团队里必须是「距今 24 小时内」，写成
-   * {@code date_trunc('day', ...)} 会把 UTC 零点当成本地零点，
-   * 于是美西仓凌晨那一批会整批掉进错误的桶里。
+   * <p>全部是 {@code timestamptz} 与 {@code now()} 的算术，<b>不引入任何本地时区换算</b>： 「今天到期」在跨时区运营的团队里必须是「距今 24
+   * 小时内」，写成 {@code date_trunc('day', ...)} 会把 UTC 零点当成本地零点， 于是美西仓凌晨那一批会整批掉进错误的桶里。
    */
   private static final String SLA_BUCKET_SQL =
       "case when sla_deadline_at is null then 'UNSET'"
@@ -141,13 +133,11 @@ public class PendingShipmentService {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>本模块只有一处「拿不到却必须说」：<b>平台 SLA</b>。warehouse 的打包单没有它，
-   * trade 的 sales_order 也没有它（V99 文件头与 V122 文件头第二节都记过这件事），
-   * 2.5.1.1 平台回传未交付。所以 SLAA 维度 available=false，点名 ownerModule，
+   * <p>本模块只有一处「拿不到却必须说」：<b>平台 SLA</b>。warehouse 的打包单没有它， trade 的 sales_order 也没有它（V99 文件头与 V122
+   * 文件头第二节都记过这件事）， 2.5.1.1 平台回传未交付。所以 SLAA 维度 available=false，点名 ownerModule，
    * 并如实说明本模块的处理是「登记」而不是「读取」。
    *
-   * <p>同样要点名两处下游缺口：10 物流下单与 8.3.4.1 交接都<b>未交付</b>，
-   * 本模块只把单元推到 HANDED_OVER 就停住，不产生已发货、不产生轨迹。
+   * <p>同样要点名两处下游缺口：10 物流下单与 8.3.4.1 交接都<b>未交付</b>， 本模块只把单元推到 HANDED_OVER 就停住，不产生已发货、不产生轨迹。
    */
   public PendingShipmentCapabilities capabilities() {
     return new PendingShipmentCapabilities(
@@ -212,15 +202,13 @@ public class PendingShipmentService {
    *
    * <p>幂等：按 {@code source_packing_order_id} upsert，重复同步是更新而不是插第二行。
    *
-   * <p>刻意<b>不删</b>上游已经不在 COMPLETED 列表里的旧行：那些行可能已经带了
-   * 运单号、打单凭据与交接记录，删掉等于把一次已经发生的交接从台账上抹掉。
+   * <p>刻意<b>不删</b>上游已经不在 COMPLETED 列表里的旧行：那些行可能已经带了 运单号、打单凭据与交接记录，删掉等于把一次已经发生的交接从台账上抹掉。
    * 它们照常留在看板上（状态已推进），只在结果里如实报出数量。
    */
   @Transactional
   public PendingShipmentSyncResult sync(
       PendingShipmentSyncInput input, UUID membershipId, String bearer) {
-    int pageSize =
-        input.pageSize() > 0 ? Math.min(input.pageSize(), MAX_SYNC_PAGE) : MAX_SYNC_PAGE;
+    int pageSize = input.pageSize() > 0 ? Math.min(input.pageSize(), MAX_SYNC_PAGE) : MAX_SYNC_PAGE;
     ShipmentCarrierChannel channel =
         input.carrierChannel() == null || input.carrierChannel().isBlank()
             ? ShipmentCarrierChannel.PLATFORM_INTEGRATED
@@ -277,8 +265,7 @@ public class PendingShipmentService {
               .filter(w -> w != null)
               .reduce(ZERO_WEIGHT, BigDecimal::add);
 
-      String carrierCode =
-          carrierByOutbound.getOrDefault(view.outboundOrderId(), defaultCarrier);
+      String carrierCode = carrierByOutbound.getOrDefault(view.outboundOrderId(), defaultCarrier);
       String outboundNo =
           view.outboundOrderNo() != null && !view.outboundOrderNo().isBlank()
               ? view.outboundOrderNo()
@@ -288,7 +275,8 @@ public class PendingShipmentService {
       // 所以本模块**不编造**：留空并在 notes 里说明，而不是拿 outbound 单号冒充。
       boolean exists =
           sql.fetchOne(
-                  "select 1 from shipment_pending_unit where source_packing_order_id = ?", view.id())
+                  "select 1 from shipment_pending_unit where source_packing_order_id = ?",
+                  view.id())
               != null;
 
       if (exists) {
@@ -365,7 +353,12 @@ public class PendingShipmentService {
             now);
       }
 
-      writeEvent(unitId, null, "PROJECTED", "", "PENDING",
+      writeEvent(
+          unitId,
+          null,
+          "PROJECTED",
+          "",
+          "PENDING",
           "从 8.3.3.2 授权接口投影：打包单 " + view.id() + "（" + parcels.size() + " 个包裹）",
           membershipId);
     }
@@ -388,8 +381,7 @@ public class PendingShipmentService {
                 fetchedIds.toArray(UUID[]::new));
 
     notes.add(
-        "销售订单号、店铺与买家快照本版本留空：8.3.3.2 的只读契约里没有这三个字段，"
-            + "本模块不拿出库单号冒充销售订单号（9.1 订单侧补齐后由 trade 侧回填）");
+        "销售订单号、店铺与买家快照本版本留空：8.3.3.2 的只读契约里没有这三个字段，" + "本模块不拿出库单号冒充销售订单号（9.1 订单侧补齐后由 trade 侧回填）");
 
     return new PendingShipmentSyncResult(
         fetched.items().size(),
@@ -407,8 +399,7 @@ public class PendingShipmentService {
   /**
    * 分组看板 —— 蓝图点名的四个维度。
    *
-   * <p>真 {@code GROUP BY}，不是把一页数据在 Java 里数：分组值若来自分页内的行，
-   * 分组计数就会随翻页变化，而大促期正是靠这一屏决定先发哪个承运商。
+   * <p>真 {@code GROUP BY}，不是把一页数据在 Java 里数：分组值若来自分页内的行， 分组计数就会随翻页变化，而大促期正是靠这一屏决定先发哪个承运商。
    */
   public PendingShipmentBoard board(
       UUID warehouseId,
@@ -426,17 +417,25 @@ public class PendingShipmentService {
 
     List<PendingShipmentGroup> groups = new ArrayList<>();
     sql.fetch(
-            "select " + expression + " as g, count(*) as units,"
+            "select "
+                + expression
+                + " as g, count(*) as units,"
                 + " coalesce(sum(u.parcel_count),0) as parcels,"
                 + " coalesce(sum(u.total_weight_kg),0) as weight,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'OVERDUE' then 1 else 0 end),0) as overdue,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'DUE_TODAY' then 1 else 0 end),0) as due_today,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'UNSET' then 1 else 0 end),0) as unset_sla"
-                + " from shipment_pending_unit u" + where
-                + " group by " + expression + " order by units desc, g asc",
+                + " from shipment_pending_unit u"
+                + where
+                + " group by "
+                + expression
+                + " order by units desc, g asc",
             params.toArray())
         .forEach(
             r -> {
@@ -477,12 +476,20 @@ public class PendingShipmentService {
     Filters filters = filters(warehouseId, carrierChannel, carrierCode, status, keyword);
     String where = filters.clause.isEmpty() ? "" : " where " + filters.clause;
 
-    long total = countOf("select count(*) from shipment_pending_unit u" + where, filters.params.toArray());
+    long total =
+        countOf("select count(*) from shipment_pending_unit u" + where, filters.params.toArray());
 
     List<PendingShipmentUnitRow> items = new ArrayList<>();
     sql.fetch(
-            "select " + UNIT_COLUMNS + ", " + SLA_BUCKET_SQL + " as sla_bucket from"
-                + " shipment_pending_unit u" + where + " order by " + orderBy(sort)
+            "select "
+                + UNIT_COLUMNS
+                + ", "
+                + SLA_BUCKET_SQL
+                + " as sla_bucket from"
+                + " shipment_pending_unit u"
+                + where
+                + " order by "
+                + orderBy(sort)
                 + " limit ? offset ?",
             concat(filters.params, limit, (long) page * limit))
         .forEach(r -> items.add(unitRow(r)));
@@ -496,21 +503,29 @@ public class PendingShipmentService {
     UUID unitId = parseUuid(id, "待发货单元不存在：" + id);
     Record row =
         sql.fetchOne(
-            "select " + UNIT_COLUMNS + ", " + SLA_BUCKET_SQL + " as sla_bucket from"
+            "select "
+                + UNIT_COLUMNS
+                + ", "
+                + SLA_BUCKET_SQL
+                + " as sla_bucket from"
                 + " shipment_pending_unit u where u.id = ?",
             unitId);
     if (row == null) throw notFound("待发货单元不存在：" + id);
 
     List<PendingShipmentParcelRow> parcels = new ArrayList<>();
     sql.fetch(
-            "select " + PARCEL_COLUMNS + " from shipment_pending_parcel"
+            "select "
+                + PARCEL_COLUMNS
+                + " from shipment_pending_parcel"
                 + " where unit_id = ? order by parcel_no",
             unitId)
         .forEach(r -> parcels.add(parcelRow(r)));
 
     List<PendingShipmentWaybillRow> waybills = new ArrayList<>();
     sql.fetch(
-            "select " + WAYBILL_COLUMNS + " from shipment_waybill where unit_id = ?"
+            "select "
+                + WAYBILL_COLUMNS
+                + " from shipment_waybill where unit_id = ?"
                 + " order by requested_at desc",
             unitId)
         .forEach(r -> waybills.add(waybillRow(r)));
@@ -531,8 +546,7 @@ public class PendingShipmentService {
 
   /** 登记发货时限 —— 见 V124 文件头第二节：登记而不伪造。 */
   @Transactional
-  public PendingShipmentUnitRow registerSla(
-      String id, ShipmentSlaInput input, UUID membershipId) {
+  public PendingShipmentUnitRow registerSla(String id, ShipmentSlaInput input, UUID membershipId) {
     UUID unitId = parseUuid(id, "待发货单元不存在：" + id);
     OffsetDateTime now = OffsetDateTime.now();
     int updated =
@@ -548,8 +562,8 @@ public class PendingShipmentService {
             now,
             unitId);
     if (updated == 0) throw notFound("待发货单元不存在：" + id);
-    writeEvent(unitId, null, "SLA_REGISTERED", "", "", "发货时限登记为 " + input.deadlineAt(),
-        membershipId);
+    writeEvent(
+        unitId, null, "SLA_REGISTERED", "", "", "发货时限登记为 " + input.deadlineAt(), membershipId);
     return unit(unitId.toString()).unit();
   }
 
@@ -561,12 +575,10 @@ public class PendingShipmentService {
    * <p>三条硬约束：
    *
    * <ol>
-   *   <li><b>一次任务不许跨承运商</b>：蓝图那句「按承运商分组是大促期效率关键，
-   *       混在一起会导致交接混乱」。给定 {@code unitIds} 若混了多个承运商，直接 400
-   *       并把冲突的承运商列出来 —— 让人去拆任务，而不是替他猜该拆成几张。</li>
-   *   <li><b>交接必须知道交给谁</b>：承运商为空的单元不许建任何任务（DB CHECK 已钉
-   *       carrier_code NOT NULL，这里提前给出可读的原因）。</li>
-   *   <li>已作废 / 已交接的单元不进任务（再交接一次 = 同一批货发两次）。</li>
+   *   <li><b>一次任务不许跨承运商</b>：蓝图那句「按承运商分组是大促期效率关键， 混在一起会导致交接混乱」。给定 {@code unitIds} 若混了多个承运商，直接 400
+   *       并把冲突的承运商列出来 —— 让人去拆任务，而不是替他猜该拆成几张。
+   *   <li><b>交接必须知道交给谁</b>：承运商为空的单元不许建任何任务（DB CHECK 已钉 carrier_code NOT NULL，这里提前给出可读的原因）。
+   *   <li>已作废 / 已交接的单元不进任务（再交接一次 = 同一批货发两次）。
    * </ol>
    */
   @Transactional
@@ -583,7 +595,8 @@ public class PendingShipmentService {
     List<UUID> unitIds = input.unitIds();
     if (unitIds.isEmpty() && input.warehouseId() != null) {
       unitIds =
-          sql.fetch(
+          sql
+              .fetch(
                   "select id from shipment_pending_unit where warehouse_id = ?"
                       + " and status not in ('HANDED_OVER','CANCELLED') order by packed_at",
                   input.warehouseId())
@@ -598,7 +611,9 @@ public class PendingShipmentService {
     List<Record> rows =
         sql.fetch(
             "select id,carrier_code,carrier_channel,warehouse_id,status from shipment_pending_unit"
-                + " where id in (" + placeholders(unitIds.size()) + ")",
+                + " where id in ("
+                + placeholders(unitIds.size())
+                + ")",
             unitIds.toArray(UUID[]::new));
     if (rows.size() != unitIds.stream().distinct().count()) {
       throw notFound("选中的待发货单元里有不存在的 id");
@@ -628,15 +643,12 @@ public class PendingShipmentService {
     }
     if (carriers.size() > 1) {
       throw badRequest(
-          "一次批量任务不许跨承运商（蓝图：混在一起会导致交接混乱），本次选中的单元涉及 "
-              + String.join("、", carriers)
-              + "。请按承运商拆成多张任务");
+          "一次批量任务不许跨承运商（蓝图：混在一起会导致交接混乱），本次选中的单元涉及 " + String.join("、", carriers) + "。请按承运商拆成多张任务");
     }
     String effectiveCarrier = carriers.iterator().next();
     if (carrierCode.isEmpty()) carrierCode = effectiveCarrier;
     if (!carrierCode.equals(effectiveCarrier)) {
-      throw badRequest(
-          "请求指定的承运商 " + carrierCode + " 与选中单元的承运商 " + effectiveCarrier + " 不一致");
+      throw badRequest("请求指定的承运商 " + carrierCode + " 与选中单元的承运商 " + effectiveCarrier + " 不一致");
     }
 
     if (input.taskType() == ShipmentBatchTaskType.HANDOVER && warehouseId == null) {
@@ -696,13 +708,14 @@ public class PendingShipmentService {
     long itemCount =
         countOf("select count(*) from shipment_batch_task_item where task_id = ?", taskId);
     if (itemCount == 0L) {
-      throw badRequest(
-          "选中单元的包裹都已经打过单了，没有可加入批量打单任务的包裹（重复打单只会多一张废纸）");
+      throw badRequest("选中单元的包裹都已经打过单了，没有可加入批量打单任务的包裹（重复打单只会多一张废纸）");
     }
     // unit_count 记的是**逐条执行行数**：打单是逐包裹，其余是逐单元
     sql.execute(
         "update shipment_batch_task set unit_count = ?, updated_at = ?::timestamptz where id = ?",
-        (int) itemCount, now, taskId);
+        (int) itemCount,
+        now,
+        taskId);
 
     writeEvent(
         null,
@@ -739,8 +752,13 @@ public class PendingShipmentService {
 
     List<ShipmentBatchTaskRow> items = new ArrayList<>();
     sql.fetch(
-            "select " + TASK_COLUMNS + " from shipment_batch_task t" + where + " order by "
-                + taskOrderBy(sort) + " limit ? offset ?",
+            "select "
+                + TASK_COLUMNS
+                + " from shipment_batch_task t"
+                + where
+                + " order by "
+                + taskOrderBy(sort)
+                + " limit ? offset ?",
             concat(params, limit, (long) page * limit))
         .forEach(r -> items.add(taskRow(r)));
 
@@ -752,7 +770,8 @@ public class PendingShipmentService {
     long cancelled = countTask("t.status='CANCELLED'");
     long affected =
         countOf(
-            "select coalesce(sum(unit_count),0) from shipment_batch_task t" + where, params.toArray());
+            "select coalesce(sum(unit_count),0) from shipment_batch_task t" + where,
+            params.toArray());
 
     return new ShipmentBatchTaskPage(
         items,
@@ -761,20 +780,15 @@ public class PendingShipmentService {
         total,
         (int) Math.ceil((double) total / limit),
         new PendingShipmentBatchSummary(
-            total,
-            pending,
-            running,
-            succeeded,
-            partial,
-            failed,
-            cancelled,
-            affected));
+            total, pending, running, succeeded, partial, failed, cancelled, affected));
   }
 
   /** 任务详情：任务头 + 逐条结果 + 时间线。 */
   public ShipmentBatchTaskDetail task(String id) {
     UUID taskId = parseUuid(id, "批量任务不存在：" + id);
-    Record row = sql.fetchOne("select " + TASK_COLUMNS + " from shipment_batch_task t where t.id = ?", taskId);
+    Record row =
+        sql.fetchOne(
+            "select " + TASK_COLUMNS + " from shipment_batch_task t where t.id = ?", taskId);
     if (row == null) throw notFound("批量任务不存在：" + id);
 
     List<ShipmentBatchTaskItemRow> items = new ArrayList<>();
@@ -799,21 +813,20 @@ public class PendingShipmentService {
    * <p>逐条处理规则：
    *
    * <ul>
-   *   <li><b>申请运单号</b>：为每个单元落一条 {@code REQUESTED} 的运单行
-   *       （承运商与渠道来自任务头），单号由 {@code /waybill-acks} 登记承运商回执
-   *       补上 —— 本模块<b>不调用</b>承运商下单接口（属 10 物流，未交付）。</li>
-   *   <li><b>批量打单</b>：逐单元取未打单的包裹置已打单，并要求给出打印任务凭据
-   *       （8.3.4.2 未交付，所以凭据是运营录入的真实 jobRef，不是本模块渲染出来的）。</li>
-   *   <li><b>批量交接</b>：单元推到 HANDED_OVER（带承运商与仓号），这是本模块最远态。</li>
+   *   <li><b>申请运单号</b>：为每个单元落一条 {@code REQUESTED} 的运单行 （承运商与渠道来自任务头），单号由 {@code /waybill-acks}
+   *       登记承运商回执 补上 —— 本模块<b>不调用</b>承运商下单接口（属 10 物流，未交付）。
+   *   <li><b>批量打单</b>：逐单元取未打单的包裹置已打单，并要求给出打印任务凭据 （8.3.4.2 未交付，所以凭据是运营录入的真实 jobRef，不是本模块渲染出来的）。
+   *   <li><b>批量交接</b>：单元推到 HANDED_OVER（带承运商与仓号），这是本模块最远态。
    * </ul>
    *
-   * <p>任务最终状态由逐条结果算出，而不是由服务层直接指定：SUCCEEDED 要求零失败零跳过，
-   * 有跳过就是 PARTIAL —— 「跳过」与「失败」都要在界面上看得见。
+   * <p>任务最终状态由逐条结果算出，而不是由服务层直接指定：SUCCEEDED 要求零失败零跳过， 有跳过就是 PARTIAL —— 「跳过」与「失败」都要在界面上看得见。
    */
   @Transactional
   public ShipmentBatchTaskDetail executeTask(String id, UUID membershipId) {
     UUID taskId = parseUuid(id, "批量任务不存在：" + id);
-    Record task = sql.fetchOne("select " + TASK_COLUMNS + " from shipment_batch_task t where t.id = ?", taskId);
+    Record task =
+        sql.fetchOne(
+            "select " + TASK_COLUMNS + " from shipment_batch_task t where t.id = ?", taskId);
     if (task == null) throw notFound("批量任务不存在：" + id);
 
     // TASK_COLUMNS 的第 6 列才是 status（id,no,type,warehouse,channel,carrier,status）
@@ -826,7 +839,9 @@ public class PendingShipmentService {
     sql.execute(
         "update shipment_batch_task set status='RUNNING', started_at = ?::timestamptz,"
             + " updated_at = ?::timestamptz, version = version + 1 where id = ?",
-        now, now, taskId);
+        now,
+        now,
+        taskId);
 
     ShipmentBatchTaskType type = ShipmentBatchTaskType.valueOf(task.get(2, String.class));
     String carrierCode = task.get(5, String.class);
@@ -845,7 +860,8 @@ public class PendingShipmentService {
       UUID parcelId = item.get(2, UUID.class);
       try {
         switch (type) {
-          case WAYBILL_REQUEST -> requestWaybill(taskId, unitId, carrierCode, channel, membershipId);
+          case WAYBILL_REQUEST ->
+              requestWaybill(taskId, unitId, carrierCode, channel, membershipId);
           case LABEL_PRINT -> printLabels(taskId, itemId, parcelId, now);
           case HANDOVER -> handOver(unitId, carrierCode, warehouseId, membershipId);
         }
@@ -879,9 +895,7 @@ public class PendingShipmentService {
             ? ShipmentBatchStatus.SUCCEEDED
             : (succeeded == 0 ? ShipmentBatchStatus.FAILED : ShipmentBatchStatus.PARTIAL);
     String failureReason =
-        finalStatus == ShipmentBatchStatus.FAILED
-            ? "全部 " + total + " 条失败，逐条原因见本任务的执行结果"
-            : "";
+        finalStatus == ShipmentBatchStatus.FAILED ? "全部 " + total + " 条失败，逐条原因见本任务的执行结果" : "";
 
     sql.execute(
         "update shipment_batch_task set status = ?, succeeded_count = ?, failed_count = ?,"
@@ -895,8 +909,14 @@ public class PendingShipmentService {
         now,
         now,
         taskId);
-    writeEvent(null, taskId, "BATCH_TASK_FINISHED", "RUNNING", finalStatus.name(),
-        "成功 " + succeeded + " / 失败 " + failed + " / 跳过 " + skipped, membershipId);
+    writeEvent(
+        null,
+        taskId,
+        "BATCH_TASK_FINISHED",
+        "RUNNING",
+        finalStatus.name(),
+        "成功 " + succeeded + " / 失败 " + failed + " / 跳过 " + skipped,
+        membershipId);
     return task(taskId.toString());
   }
 
@@ -906,7 +926,9 @@ public class PendingShipmentService {
       String taskId, UUID unitId, ShipmentWaybillAckInput input, UUID membershipId) {
     UUID tid = parseUuid(taskId, "批量任务不存在：" + taskId);
     if (unitId == null) throw badRequest("必须指明这条回执属于哪个待发货单元（unitId）");
-    Record wb = sql.fetchOne("select * from shipment_waybill where task_id = ? and unit_id = ?", tid, unitId);
+    Record wb =
+        sql.fetchOne(
+            "select * from shipment_waybill where task_id = ? and unit_id = ?", tid, unitId);
     if (wb == null) throw notFound("这张任务里没有该单元的运单申请记录");
 
     OffsetDateTime now = OffsetDateTime.now();
@@ -914,20 +936,35 @@ public class PendingShipmentService {
       sql.execute(
           "update shipment_waybill set status='ISSUED', waybill_no = ?, request_ref = ?,"
               + " issued_at = ?::timestamptz, updated_at = ?::timestamptz where id = ?",
-          input.waybillNo(), input.requestRef(), now, now, wb.get("id", UUID.class));
+          input.waybillNo(),
+          input.requestRef(),
+          now,
+          now,
+          wb.get("id", UUID.class));
       sql.execute(
           "update shipment_pending_unit set waybill_no = ?, status = 'WAYBILL_REQUESTED',"
               + " version = version + 1, updated_at = ?::timestamptz where id = ?",
-          input.waybillNo(), now, unitId);
-      writeEvent(unitId, tid, "WAYBILL_ISSUED", "", "WAYBILL_REQUESTED",
-          "承运商签发运单号 " + input.waybillNo(), membershipId);
+          input.waybillNo(),
+          now,
+          unitId);
+      writeEvent(
+          unitId,
+          tid,
+          "WAYBILL_ISSUED",
+          "",
+          "WAYBILL_REQUESTED",
+          "承运商签发运单号 " + input.waybillNo(),
+          membershipId);
     } else if (input.status() == ShipmentWaybillStatus.FAILED) {
       sql.execute(
           "update shipment_waybill set status='FAILED', error_message = ?, request_ref = ?,"
               + " updated_at = ?::timestamptz where id = ?",
-          input.errorMessage(), input.requestRef(), now, wb.get("id", UUID.class));
-      writeEvent(unitId, tid, "WAYBILL_FAILED", "", "", "承运商拒单：" + input.errorMessage(),
-          membershipId);
+          input.errorMessage(),
+          input.requestRef(),
+          now,
+          wb.get("id", UUID.class));
+      writeEvent(
+          unitId, tid, "WAYBILL_FAILED", "", "", "承运商拒单：" + input.errorMessage(), membershipId);
     } else {
       throw badRequest("回执只接受 ISSUED（已签发）或 FAILED（被拒）；REQUESTED 是本模块的初始态");
     }
@@ -946,7 +983,11 @@ public class PendingShipmentService {
                 + " started_at = coalesce(started_at,?::timestamptz),"
                 + " finished_at = ?::timestamptz, updated_at = ?::timestamptz,"
                 + " version = version + 1 where id = ? and status in ('PENDING','RUNNING')",
-            input.reason(), now, now, now, taskId);
+            input.reason(),
+            now,
+            now,
+            now,
+            taskId);
     if (updated == 0) {
       throw badRequest("只有待执行 / 执行中的批量任务可以取消；终态是追责凭据，不可回退");
     }
@@ -965,7 +1006,9 @@ public class PendingShipmentService {
             "update shipment_pending_unit set status='CANCELLED', cancel_reason = ?,"
                 + " version = version + 1, updated_at = ?::timestamptz"
                 + " where id = ? and status not in ('HANDED_OVER','CANCELLED')",
-            input.reason(), now, unitId);
+            input.reason(),
+            now,
+            unitId);
     if (updated == 0) {
       throw badRequest("只有未交接的待发货单元可以作废；已交接的货要退必须走 11 售后");
     }
@@ -989,20 +1032,29 @@ public class PendingShipmentService {
         carrierCode,
         channel.name(),
         now);
-    writeEvent(unitId, taskId, "WAYBILL_REQUESTED", "", "",
-        "已提交承运商 " + carrierCode + " 申请运单号（回执待登记）", actor);
+    writeEvent(
+        unitId,
+        taskId,
+        "WAYBILL_REQUESTED",
+        "",
+        "",
+        "已提交承运商 " + carrierCode + " 申请运单号（回执待登记）",
+        actor);
   }
 
   /**
    * 回填一个包裹的面单打印凭据（8.3.4.2 渲染出来的 jobRef）。
    *
-   * <p>8.3.4.2 打印任务<b>未交付</b>，所以本模块<b>不渲染 ZPL</b>：只有拿到真实
-   * 渲染凭据的包裹才算「打过单」。没凭据就标已打印，等于给现场一张拿不出
+   * <p>8.3.4.2 打印任务<b>未交付</b>，所以本模块<b>不渲染 ZPL</b>：只有拿到真实 渲染凭据的包裹才算「打过单」。没凭据就标已打印，等于给现场一张拿不出
    * 出处的「已打印」，交接时才发现单子根本没出来。
    */
   @Transactional
   public ShipmentBatchTaskDetail recordLabelPrinted(
-      String taskId, UUID unitId, UUID parcelId, PendingShipmentLabelInput input, UUID membershipId) {
+      String taskId,
+      UUID unitId,
+      UUID parcelId,
+      PendingShipmentLabelInput input,
+      UUID membershipId) {
     UUID tid = parseUuid(taskId, "批量任务不存在：" + taskId);
     if (unitId == null || parcelId == null) {
       throw badRequest("必须同时指明 unitId 与 parcelId");
@@ -1015,11 +1067,23 @@ public class PendingShipmentService {
                 + " label_printed_at = ?::timestamptz, label_printed_by_membership_id = ?,"
                 + " label_job_ref = ?, printed_by_batch_task_id = ?, updated_at = ?::timestamptz"
                 + " where id = ? and unit_id = ?",
-            now, membershipId, input.jobRef(), tid, now, pid, unitId);
+            now,
+            membershipId,
+            input.jobRef(),
+            tid,
+            now,
+            pid,
+            unitId);
     if (updated == 0) throw notFound("这个包裹不属于该待发货单元：" + parcelId);
 
-    writeEvent(unitId, tid, "LABEL_PRINTED", "", "",
-        "包裹 " + pid + " 面单已打印，打印任务凭据 " + input.jobRef(), membershipId);
+    writeEvent(
+        unitId,
+        tid,
+        "LABEL_PRINTED",
+        "",
+        "",
+        "包裹 " + pid + " 面单已打印，打印任务凭据 " + input.jobRef(),
+        membershipId);
     return task(tid.toString());
   }
 
@@ -1037,13 +1101,13 @@ public class PendingShipmentService {
       return;
     }
     UUID unitId = parcel.get(0, UUID.class);
-    if (!parcel.get(1, Boolean.class) || parcel.get(2, String.class) == null
+    if (!parcel.get(1, Boolean.class)
+        || parcel.get(2, String.class) == null
         || parcel.get(2, String.class).isBlank()) {
       markItem(
           itemId,
           ShipmentTaskItemStatus.SKIPPED,
-          "8.3.4.2 打印任务未交付，这个包裹还没有渲染好的面单凭据；"
-              + "请先在 8.3.4.2 生成打印任务并回填 jobRef 再重跑",
+          "8.3.4.2 打印任务未交付，这个包裹还没有渲染好的面单凭据；" + "请先在 8.3.4.2 生成打印任务并回填 jobRef 再重跑",
           now);
       return;
     }
@@ -1059,7 +1123,8 @@ public class PendingShipmentService {
       sql.execute(
           "update shipment_pending_unit set status='LABEL_PRINTED', version = version + 1,"
               + " updated_at = ?::timestamptz where id = ? and status = 'PENDING'",
-          now, unitId);
+          now,
+          unitId);
     }
   }
 
@@ -1069,9 +1134,17 @@ public class PendingShipmentService {
         "update shipment_pending_unit set status='HANDED_OVER', handed_over_at = ?::timestamptz,"
             + " version = version + 1, updated_at = ?::timestamptz"
             + " where id = ? and status in ('PENDING','WAYBILL_REQUESTED','LABEL_PRINTED')",
-        now, now, unitId);
-    writeEvent(unitId, null, "HANDED_OVER", "", "HANDED_OVER",
-        "已交接给承运商 " + carrierCode + "（仓 " + warehouseId + "），交给下游 8.3.4.1", actor);
+        now,
+        now,
+        unitId);
+    writeEvent(
+        unitId,
+        null,
+        "HANDED_OVER",
+        "",
+        "HANDED_OVER",
+        "已交接给承运商 " + carrierCode + "（仓 " + warehouseId + "），交给下游 8.3.4.1",
+        actor);
   }
 
   // ================================================================ 内部装配
@@ -1126,13 +1199,17 @@ public class PendingShipmentService {
                 + " coalesce(sum(case when status='CANCELLED' then 1 else 0 end),0) as cancelled,"
                 + " coalesce(sum(parcel_count),0) as parcels,"
                 + " coalesce(sum(total_weight_kg),0) as weight,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'OVERDUE' then 1 else 0 end),0) as overdue,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'DUE_TODAY' then 1 else 0 end),0) as today,"
-                + " coalesce(sum(case when " + SLA_BUCKET_SQL
+                + " coalesce(sum(case when "
+                + SLA_BUCKET_SQL
                 + " = 'UNSET' then 1 else 0 end),0) as unset_sla"
-                + " from shipment_pending_unit u" + where,
+                + " from shipment_pending_unit u"
+                + where,
             filters.params.toArray());
     long openTasks =
         countOf("select count(*) from shipment_batch_task where status in ('PENDING','RUNNING')");
@@ -1198,10 +1275,10 @@ public class PendingShipmentService {
   private List<String> completionCriteria(Record unit, List<PendingShipmentParcelRow> parcels) {
     List<String> criteria = new ArrayList<>();
     criteria.add("包裹读数齐全：当前 " + parcels.size() + " 个（≥1）");
-    criteria.add("已选承运商："
-        + ("PENDING".equals(unit.get("status", String.class)) ? "按当前状态核对" : "已选"));
-    criteria.add("已登记发货时限："
-        + (unit.get("sla_deadline_at", OffsetDateTime.class) == null ? "未登记" : "已登记"));
+    criteria.add(
+        "已选承运商：" + ("PENDING".equals(unit.get("status", String.class)) ? "按当前状态核对" : "已选"));
+    criteria.add(
+        "已登记发货时限：" + (unit.get("sla_deadline_at", OffsetDateTime.class) == null ? "未登记" : "已登记"));
     criteria.add("已交接给 8.3.4.1：本模块最远态，**不是已发货**");
     return criteria;
   }
@@ -1251,9 +1328,9 @@ public class PendingShipmentService {
         r.get("warehouse_id", UUID.class) == null
             ? ""
             : textOf(
-                    "select coalesce(warehouse_ref,'') from shipment_pending_unit"
-                        + " where warehouse_id = ? limit 1",
-                    r.get("warehouse_id", UUID.class));
+                "select coalesce(warehouse_ref,'') from shipment_pending_unit"
+                    + " where warehouse_id = ? limit 1",
+                r.get("warehouse_id", UUID.class));
     return new ShipmentBatchTaskRow(
         r.get("id", UUID.class),
         r.get("task_no", String.class),
@@ -1321,13 +1398,7 @@ public class PendingShipmentService {
   }
 
   private void writeEvent(
-      UUID unitId,
-      UUID taskId,
-      String kind,
-      String from,
-      String to,
-      String detail,
-      UUID actor) {
+      UUID unitId, UUID taskId, String kind, String from, String to, String detail, UUID actor) {
     sql.execute(
         "insert into shipment_event (id,tenant_id,task_id,unit_id,event_kind,from_status,"
             + " to_status,detail,actor_membership_id) values (?,?,?,?,?,?,?,?,?)",
@@ -1369,17 +1440,15 @@ public class PendingShipmentService {
   /**
    * 标量读数统一走 {@code fetchOne + get(0, Type)}。
    *
-   * <p><b>不能</b>用 {@code fetchValue(sql, Class, args)}：本仓库的 jOOQ 版本会把
-   * 那个 {@code Class} 当成绑定值（warehouse 的 PickTaskService / WarehouseLocationTreeService
-   * 已在文件里记过同一件事与它的报错原文），所以这里一次性把标量读法收口，
-   * 不在每个调用点各踩一次。
+   * <p><b>不能</b>用 {@code fetchValue(sql, Class, args)}：本仓库的 jOOQ 版本会把 那个 {@code Class}
+   * 当成绑定值（warehouse 的 PickTaskService / WarehouseLocationTreeService
+   * 已在文件里记过同一件事与它的报错原文），所以这里一次性把标量读法收口， 不在每个调用点各踩一次。
    */
   /**
    * 造 N 个 {@code ?} 占位符。
    *
-   * <p>刻意<b>不</b>用 {@code = any(?)}：本仓库的 jOOQ 版本推不出数组参数的类型，
-   * 会在 prepare 阶段报 bad SQL grammar；N 个占位符没有这个问题，且仍然是参数化的
-   * （id 全是 UUID，不会有注入面）。
+   * <p>刻意<b>不</b>用 {@code = any(?)}：本仓库的 jOOQ 版本推不出数组参数的类型， 会在 prepare 阶段报 bad SQL grammar；N
+   * 个占位符没有这个问题，且仍然是参数化的 （id 全是 UUID，不会有注入面）。
    */
   private static String placeholders(int n) {
     return String.join(",", java.util.Collections.nCopies(n, "?"));
@@ -1409,8 +1478,7 @@ public class PendingShipmentService {
   }
 
   private String nextTaskNo(OffsetDateTime now) {
-    Long n =
-        sql.fetchOne("select nextval('shipment_batch_task_no_seq')").get(0, Long.class);
+    Long n = sql.fetchOne("select nextval('shipment_batch_task_no_seq')").get(0, Long.class);
     return String.format(
         Locale.ROOT, "SBT-%s%06d", now.toLocalDate().toString().replace("-", ""), n);
   }

@@ -82,9 +82,9 @@ describe('序列号逐件核对', () => {
   });
 
   it('漏件与多件的说法指向不同的下一步', () => {
-    expect(lineWarnings({ ...base, lineStatus: 'MISSING', scannedQuantity: '2' }).join('|')).toContain(
-      '少 1 件',
-    );
+    expect(
+      lineWarnings({ ...base, lineStatus: 'MISSING', scannedQuantity: '2' }).join('|'),
+    ).toContain('少 1 件');
     expect(lineWarnings({ ...base, lineStatus: 'OVER', scannedQuantity: '4' }).join('|')).toContain(
       '多 1 件',
     );

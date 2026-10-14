@@ -25,10 +25,10 @@
 
 V47 给 `role_assignment` 加了两道硬要求，V45 的 `onboard_member` 两条都没跟上：
 
-| | V47 的要求 | V45 的 `onboard_member` |
-|---|---|---|
-| 1 | `ALTER TABLE role_assignment ALTER COLUMN assigned_by SET NOT NULL`（V47:41） | `INSERT INTO role_assignment(tenant_id,membership_id,role_id,scope_mode)` —— **没有 assigned_by** |
-| 2 | 「有角色必有范围」延迟约束触发器：非 ALL/SELF 必须挂 `role_assignment_scope` | 只写 `scope_mode`，**从不写范围行** |
+|     | V47 的要求                                                                    | V45 的 `onboard_member`                                                                           |
+| --- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 1   | `ALTER TABLE role_assignment ALTER COLUMN assigned_by SET NOT NULL`（V47:41） | `INSERT INTO role_assignment(tenant_id,membership_id,role_id,scope_mode)` —— **没有 assigned_by** |
+| 2   | 「有角色必有范围」延迟约束触发器：非 ALL/SELF 必须挂 `role_assignment_scope`  | 只写 `scope_mode`，**从不写范围行**                                                               |
 
 我特意排除了两种「可能不炸」的掩护：
 

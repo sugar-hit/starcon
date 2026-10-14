@@ -32,11 +32,11 @@
 
 ### 3. 三条规则各有一个诚实的口径，全部写进 capabilities
 
-| 蓝图词 | 本服务实际口径 | 为什么不是字面值 |
-|---|---|---|
-| 同品类聚类 | `stock_bucket` 的**真实共置关系** | catalog 类目树 3.3.1.1 未开发，且 AGENTS.md 禁止把上游权威列复制成本地列（`sku_ref` 明文不存类目）。这是本服务内可得的真信号，但**不等同于 catalog 类目**，故 `catalogCategoryAvailable=false` |
-| 路径距离 | 库位树跳数（V105 的 `parent_id` 树） | 真巷道路径图归 8.3.2.1。距离 = depth(src)+depth(dst)−2×LCA，LCA 层号用**路径共有段数**求（库位编码仓内 UNIQUE） |
-| 容量与承重匹配 | 只核算**本模块未取消决策已承诺的量** | `capacity` 是体积单位而 `stock_bucket.on_hand` 是件数；本服务没有「每个 SKU 占多少体积」的真相来源，拿件数凑利用率是**单位错配**，故 `stockVolumeAvailable=false` |
+| 蓝图词         | 本服务实际口径                       | 为什么不是字面值                                                                                                                                                                               |
+| -------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 同品类聚类     | `stock_bucket` 的**真实共置关系**    | catalog 类目树 3.3.1.1 未开发，且 AGENTS.md 禁止把上游权威列复制成本地列（`sku_ref` 明文不存类目）。这是本服务内可得的真信号，但**不等同于 catalog 类目**，故 `catalogCategoryAvailable=false` |
+| 路径距离       | 库位树跳数（V105 的 `parent_id` 树） | 真巷道路径图归 8.3.2.1。距离 = depth(src)+depth(dst)−2×LCA，LCA 层号用**路径共有段数**求（库位编码仓内 UNIQUE）                                                                                |
+| 容量与承重匹配 | 只核算**本模块未取消决策已承诺的量** | `capacity` 是体积单位而 `stock_bucket.on_hand` 是件数；本服务没有「每个 SKU 占多少体积」的真相来源，拿件数凑利用率是**单位错配**，故 `stockVolumeAvailable=false`                              |
 
 另外三类库位（`RECEIVING` / `SHIPPING` / `FROZEN`）**刻意不是任何自动分配的目标**：
 前两个是货还没上架或拣完待发的中转位，冻结位是「这批货不许动」。
@@ -103,28 +103,28 @@ RAISE EXCEPTION '质量状态 % 在本租户不存在'
 
 ### 新增
 
-| 文件 | 说明 |
-|---|---|
+| 文件                                                                                                      | 说明                                                              |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `backend/services/warehouse/src/main/resources/db/migration/V106__warehouse_location_auto_allocation.sql` | 一张新表 + 三值映射函数 + 硬规则触发器 + 部分唯一索引 + RLS/GRANT |
-| `backend/.../warehouse/LocationAllocationModels.java` | 11 个契约类型，**全部带 `LocationAllocation` 前缀** |
-| `backend/.../warehouse/LocationAllocationService.java` | 推荐 / 确认 / 释放 / 撤销 / 清单，jOOQ 显式 SQL |
-| `backend/.../warehouse/LocationAllocationController.java` | 6 个端点 |
-| `backend/.../warehouse/LocationAllocationIntegrationTest.java` | 28 例，Testcontainers PG16 |
-| `apps/web/src/components/warehouse/warehouse-location-allocation-model.ts` | 前端模型（纯函数） |
-| `apps/web/src/components/warehouse/warehouse-location-allocation-workspace.tsx` | 真实工作区 |
-| `apps/web/src/components/warehouse/warehouse-location-allocation-model.test.ts` | 11 例 |
-| `apps/web/src/app/warehouse/location-allocations/page.tsx` | 路由 |
+| `backend/.../warehouse/LocationAllocationModels.java`                                                     | 11 个契约类型，**全部带 `LocationAllocation` 前缀**               |
+| `backend/.../warehouse/LocationAllocationService.java`                                                    | 推荐 / 确认 / 释放 / 撤销 / 清单，jOOQ 显式 SQL                   |
+| `backend/.../warehouse/LocationAllocationController.java`                                                 | 6 个端点                                                          |
+| `backend/.../warehouse/LocationAllocationIntegrationTest.java`                                            | 28 例，Testcontainers PG16                                        |
+| `apps/web/src/components/warehouse/warehouse-location-allocation-model.ts`                                | 前端模型（纯函数）                                                |
+| `apps/web/src/components/warehouse/warehouse-location-allocation-workspace.tsx`                           | 真实工作区                                                        |
+| `apps/web/src/components/warehouse/warehouse-location-allocation-model.test.ts`                           | 11 例                                                             |
+| `apps/web/src/app/warehouse/location-allocations/page.tsx`                                                | 路由                                                              |
 
 ### 修改
 
-| 文件 | 改动 |
-|---|---|
-| `apps/web/src/lib/api-proxy.ts` | **追加** `location-allocations` 七个形状（只加自己那一支，未重排整条正则） |
-| `apps/web/src/app/api/warehouse/[...path]/route.test.ts` | +2 例（放行 + 8 条反向拒绝）；修正一条过时注释 |
-| `packages/ui/src/lib/task-pages.ts` | 登记一条任务页 |
-| `packages/api-contracts/src/contracts/warehouse.ts` | codegen 产物，**+11/−0 纯新增** |
-| `packages/api-contracts/src/warehouse.openapi.json` | codegen 产物 |
-| `docs/product/capability-blueprint/module-progress.md` | 只改 8.1.2.2 那一行的「状态」「证据」 |
+| 文件                                                     | 改动                                                                       |
+| -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `apps/web/src/lib/api-proxy.ts`                          | **追加** `location-allocations` 七个形状（只加自己那一支，未重排整条正则） |
+| `apps/web/src/app/api/warehouse/[...path]/route.test.ts` | +2 例（放行 + 8 条反向拒绝）；修正一条过时注释                             |
+| `packages/ui/src/lib/task-pages.ts`                      | 登记一条任务页                                                             |
+| `packages/api-contracts/src/contracts/warehouse.ts`      | codegen 产物，**+11/−0 纯新增**                                            |
+| `packages/api-contracts/src/warehouse.openapi.json`      | codegen 产物                                                               |
+| `docs/product/capability-blueprint/module-progress.md`   | 只改 8.1.2.2 那一行的「状态」「证据」                                      |
 
 ### 声明的 record 名与重名扫描
 
@@ -144,13 +144,13 @@ RAISE EXCEPTION '质量状态 % 在本租户不存在'
 
 ## 验证
 
-| 闸 | 命令 | 结果 |
-|---|---|---|
-| L0 编译 | `./mvnw -q compile`（backend） | 通过 |
-| L0 类型 | `pnpm typecheck` | **3/3 成功** |
-| L1 模块 | `./mvnw -pl services/warehouse -am test` | **1069 例，0 失败 0 错误** |
-| 前端 | `pnpm vitest run`（本模块 + route） | **35 例通过**（11 + 24） |
-| 契约 | `catalog-contracts.py --spec-dir backend/target/openapi` | 1521 DTO，`warehouse.ts` **+11/−0** |
+| 闸      | 命令                                                     | 结果                                |
+| ------- | -------------------------------------------------------- | ----------------------------------- |
+| L0 编译 | `./mvnw -q compile`（backend）                           | 通过                                |
+| L0 类型 | `pnpm typecheck`                                         | **3/3 成功**                        |
+| L1 模块 | `./mvnw -pl services/warehouse -am test`                 | **1069 例，0 失败 0 错误**          |
+| 前端    | `pnpm vitest run`（本模块 + route）                      | **35 例通过**（11 + 24）            |
+| 契约    | `catalog-contracts.py --spec-dir backend/target/openapi` | 1521 DTO，`warehouse.ts` **+11/−0** |
 
 ## 后续待办
 

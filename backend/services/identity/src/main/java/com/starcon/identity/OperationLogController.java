@@ -21,23 +21,22 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 17.5.3.2 操作日志读侧与链路关联视图。
  *
- * <p>蓝图要求「记录系统操作日志用于运维排障：登录、API 调用摘要、任务执行、错误堆栈，
- * 支持按用户/时间/请求 ID 关联链路」，输出是「操作日志 + 链路关联视图」。这里给出四件事：
+ * <p>蓝图要求「记录系统操作日志用于运维排障：登录、API 调用摘要、任务执行、错误堆栈， 支持按用户/时间/请求 ID 关联链路」，输出是「操作日志 + 链路关联视图」。这里给出四件事：
  * 检索、按 ID 看详情、按请求 ID 的链路聚合、留存期清理。
  *
  * <p><b>与 {@link AuditController} 的分工</b>：审计回答「谁对什么做了什么、凭什么」，
- * 这里回答「这次调用发生了什么、慢在哪、错在哪」。所以本表没有变更前后值与授权上下文，
- * 审计表也没有登录流水、耗时与堆栈——两套字段、两种留存策略，不可互相替代。
+ * 这里回答「这次调用发生了什么、慢在哪、错在哪」。所以本表没有变更前后值与授权上下文， 审计表也没有登录流水、耗时与堆栈——两套字段、两种留存策略，不可互相替代。
  *
- * <p>租户隔离沿用 identity 既有纪律：租户来自 {@link IdentityController#resolve} 解析出的
- * 已认证成员关系（经 {@link TenantTransactions} 写入 {@code app.current_tenant}），
- * <b>不采信 {@code X-Tenant-Id} 头</b>；边界由 {@code operation_log} 的 FORCE RLS 兜底。
+ * <p>租户隔离沿用 identity 既有纪律：租户来自 {@link IdentityController#resolve} 解析出的 已认证成员关系（经 {@link
+ * TenantTransactions} 写入 {@code app.current_tenant}）， <b>不采信 {@code X-Tenant-Id} 头</b>；边界由 {@code
+ * operation_log} 的 FORCE RLS 兜底。
  */
 @RestController
 @RequestMapping("/identity/operation-log")
 public class OperationLogController {
   private static final String READ = "identity.operation_log.read";
   private static final String PURGE = "identity.operation_log.purge";
+
   /** 单页上限，防止一次把整段留存期的排障日志拉进内存。 */
   private static final int MAX_PAGE_SIZE = 200;
 
@@ -114,8 +113,7 @@ public class OperationLogController {
   /**
    * 链路关联视图。
    *
-   * <p>{@code entries} 是这一次请求产生的全部日志（真实时序，不是前端拼接）；
-   * {@code stats} 由数据库聚合得出，回答「这条链路一共几步、错了几步、总共慢多少」。
+   * <p>{@code entries} 是这一次请求产生的全部日志（真实时序，不是前端拼接）； {@code stats} 由数据库聚合得出，回答「这条链路一共几步、错了几步、总共慢多少」。
    */
   public record OperationLogTrace(
       String requestId,
@@ -148,7 +146,8 @@ public class OperationLogController {
         () -> {
           require(
               access.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               message);
           return work.apply(access);
         });
@@ -201,8 +200,10 @@ public class OperationLogController {
       condition.add("level = ?", query.level().trim());
     }
     // 显式 cast：jOOQ 在纯文本语句里无法为 OffsetDateTime 推断类型。
-    if (query.from() != null) condition.add("occurred_at >= ?::timestamptz", OperationLog.utc(query.from()));
-    if (query.to() != null) condition.add("occurred_at <= ?::timestamptz", OperationLog.utc(query.to()));
+    if (query.from() != null)
+      condition.add("occurred_at >= ?::timestamptz", OperationLog.utc(query.from()));
+    if (query.to() != null)
+      condition.add("occurred_at <= ?::timestamptz", OperationLog.utc(query.to()));
     return condition;
   }
 
@@ -216,8 +217,7 @@ public class OperationLogController {
     try {
       return Instant.parse(value.trim());
     } catch (DateTimeParseException e) {
-      throw IdentityController.error(
-          HttpStatus.BAD_REQUEST, "时间格式需为 ISO-8601，例如 " + Instant.EPOCH);
+      throw IdentityController.error(HttpStatus.BAD_REQUEST, "时间格式需为 ISO-8601，例如 " + Instant.EPOCH);
     }
   }
 
@@ -264,13 +264,15 @@ public class OperationLogController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int size) {
     var query =
-        new OperationLogQuery(actorId, eventType, level, requestId, instant(from), instant(to), page, size);
+        new OperationLogQuery(
+            actorId, eventType, level, requestId, instant(from), instant(to), page, size);
     return call(auth, access -> paged(query));
   }
 
   private OperationLogPage paged(OperationLogQuery query) {
     check(query.page() >= 0, "页码不能为负");
-    check(query.size() >= 1 && query.size() <= MAX_PAGE_SIZE, "每页条数需在 1 到 " + MAX_PAGE_SIZE + " 之间");
+    check(
+        query.size() >= 1 && query.size() <= MAX_PAGE_SIZE, "每页条数需在 1 到 " + MAX_PAGE_SIZE + " 之间");
     check(
         query.from() == null || query.to() == null || !query.from().isAfter(query.to()),
         "开始时间不能晚于结束时间");
@@ -280,7 +282,10 @@ public class OperationLogController {
             .get(0, Long.class);
     var records =
         sql.fetch(
-            "select " + LIST_COLUMNS + " from operation_log" + condition.sql()
+            "select "
+                + LIST_COLUMNS
+                + " from operation_log"
+                + condition.sql()
                 + " order by occurred_at desc,id desc limit ? offset ?",
             bindings(condition, query.size(), (long) query.page() * query.size()));
     return new OperationLogPage(records.map(this::view), total, query.page(), query.size());
@@ -289,8 +294,7 @@ public class OperationLogController {
   /**
    * 单条详情。
    *
-   * <p>跨租户访问在 RLS 下表现为「查不到」，因此返回 404 而不是 403：
-   * 403 会泄露「这条记录存在」，404 不泄露。
+   * <p>跨租户访问在 RLS 下表现为「查不到」，因此返回 404 而不是 403： 403 会泄露「这条记录存在」，404 不泄露。
    */
   @GetMapping("/{id}")
   public OperationLogDetail detail(
@@ -301,20 +305,34 @@ public class OperationLogController {
         access -> {
           var row =
               sql.fetchOne(
-                  "select " + LIST_COLUMNS
+                  "select "
+                      + LIST_COLUMNS
                       + ",error_message,stack_trace,expires_at,detail from operation_log where id=?",
                   id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "操作日志不存在或无权查看");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "操作日志不存在或无权查看");
           var base = view(row);
           var stack = row.get("stack_trace", String.class);
           return new OperationLogDetail(
-              base.id(), base.eventType(), base.level(), base.requestId(), base.traceId(),
-              base.actorId(), base.actorName(), base.summary(), base.httpMethod(), base.path(),
-              base.statusCode(), base.durationMs(), base.taskName(), base.taskStatus(),
-              base.errorClass(), row.get("error_message", String.class), stack,
+              base.id(),
+              base.eventType(),
+              base.level(),
+              base.requestId(),
+              base.traceId(),
+              base.actorId(),
+              base.actorName(),
+              base.summary(),
+              base.httpMethod(),
+              base.path(),
+              base.statusCode(),
+              base.durationMs(),
+              base.taskName(),
+              base.taskStatus(),
+              base.errorClass(),
+              row.get("error_message", String.class),
+              stack,
               stack != null && stack.endsWith(OperationLog.TRUNCATED),
-              base.occurredAt(), row.get("expires_at", Instant.class),
+              base.occurredAt(),
+              row.get("expires_at", Instant.class),
               OperationLog.parseDetail(row.get("detail", String.class)));
         });
   }
@@ -325,8 +343,7 @@ public class OperationLogController {
    * <p>这是本模块区别于审计日志的核心交付物。统计量由数据库聚合（{@code operation_trace}），
    * 不是前端把列表数一遍——所以「这条链路一共几步、错几步、慢多少」与服务端口径一致。
    *
-   * <p>请求 ID 不存在时返回空链路而不是 404：排障的人拿到的是「这个 ID 没记录」这一事实，
-   * 而不是「你调错了」。
+   * <p>请求 ID 不存在时返回空链路而不是 404：排障的人拿到的是「这个 ID 没记录」这一事实， 而不是「你调错了」。
    */
   @GetMapping("/trace/{requestId}")
   public OperationLogTrace trace(
@@ -340,14 +357,17 @@ public class OperationLogController {
           check(!wanted.isEmpty(), "请求 ID 不能为空");
           var entries =
               sql.fetch(
-                  "select " + LIST_COLUMNS + " from operation_log where request_id=?"
+                  "select "
+                      + LIST_COLUMNS
+                      + " from operation_log where request_id=?"
                       + " order by occurred_at,id",
                   wanted);
           var stats =
               sql.fetchOne(
                   "select request_id,entry_count,error_count,warning_count,total_duration_ms,"
                       + " span_ms,first_at,last_at from operation_trace(?,?)",
-                  IdentityController.hash(identity.token(auth)), wanted);
+                  IdentityController.hash(identity.token(auth)),
+                  wanted);
           if (stats == null)
             return new OperationLogTrace(
                 wanted, List.of(), 0, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO, null, null);
@@ -367,9 +387,8 @@ public class OperationLogController {
   /**
    * 留存期清理：删除已到期（{@code expires_at < before}）的本租户日志。
    *
-   * <p>与审计日志的硬性对照：审计不可删（V7 触发器挡住），操作日志必须能被清理——
-   * 蓝图说它「可短期留存」，那就得真的能到期删除，否则「短期」只是修辞。
-   * 权限由 {@code purge_operation_log} 在数据库层校验，必须是 Owner + ALL 范围。
+   * <p>与审计日志的硬性对照：审计不可删（V7 触发器挡住），操作日志必须能被清理—— 蓝图说它「可短期留存」，那就得真的能到期删除，否则「短期」只是修辞。 权限由 {@code
+   * purge_operation_log} 在数据库层校验，必须是 Owner + ALL 范围。
    */
   @PostMapping("/purge")
   public OperationLogPurge purge(
@@ -392,7 +411,8 @@ public class OperationLogController {
             removed =
                 sql.fetchOne(
                         "select purge_operation_log(?,?::timestamptz)",
-                        IdentityController.hash(identity.token(auth)), OperationLog.utc(effective))
+                        IdentityController.hash(identity.token(auth)),
+                        OperationLog.utc(effective))
                     .get(0, Long.class);
           } catch (Exception e) {
             failure = e;
@@ -406,9 +426,13 @@ public class OperationLogController {
                     .divide(BigDecimal.valueOf(1_000_000), 3, java.math.RoundingMode.HALF_UP);
             try {
               log.task(
-                  access.tenantId(), RequestTrace.requestId(), "操作日志留存期清理",
-                  failure == null ? "SUCCEEDED" : "FAILED", millis,
-                  Map.of("removed", removed, "cutoff", effective.toString()), failure);
+                  access.tenantId(),
+                  RequestTrace.requestId(),
+                  "操作日志留存期清理",
+                  failure == null ? "SUCCEEDED" : "FAILED",
+                  millis,
+                  Map.of("removed", removed, "cutoff", effective.toString()),
+                  failure);
             } catch (Exception ignored) {
               // 清理已生效与否由上面的返回值为准，日志失败不覆盖它。
             }
@@ -420,8 +444,7 @@ public class OperationLogController {
   /**
    * 导出 CSV。
    *
-   * <p>走与检索完全相同的条件拼装，所以导出的就是当前查到的那些行。
-   * 上限 {@value #MAX_EXPORT_ROWS} 行：排障日志量大且含技术细节，一次导出全部既慢又扩大泄露面，
+   * <p>走与检索完全相同的条件拼装，所以导出的就是当前查到的那些行。 上限 {@value #MAX_EXPORT_ROWS} 行：排障日志量大且含技术细节，一次导出全部既慢又扩大泄露面，
    * 超限明确报错让操作人收窄时间窗，而不是悄悄截断。
    */
   private static final int MAX_EXPORT_ROWS = 50_000;
@@ -439,16 +462,22 @@ public class OperationLogController {
         call(
             auth,
             access -> {
-              var query = new OperationLogQuery(actorId, eventType, level, requestId, instant(from), instant(to), 0, 1);
+              var query =
+                  new OperationLogQuery(
+                      actorId, eventType, level, requestId, instant(from), instant(to), 0, 1);
               var condition = where(query);
               long total =
                   sql.fetchOne(
-                          "select count(*) from operation_log" + condition.sql(), condition.values())
+                          "select count(*) from operation_log" + condition.sql(),
+                          condition.values())
                       .get(0, Long.class);
               check(total <= MAX_EXPORT_ROWS, "命中 " + total + " 条，超过单次导出上限，请收窄时间范围");
               var records =
                   sql.fetch(
-                      "select " + LIST_COLUMNS + " from operation_log" + condition.sql()
+                      "select "
+                          + LIST_COLUMNS
+                          + " from operation_log"
+                          + condition.sql()
                           + " order by occurred_at desc,id desc limit ?",
                       bindings(condition, MAX_EXPORT_ROWS, 0L));
               return csv(records);
@@ -457,7 +486,9 @@ public class OperationLogController {
         .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"identity-operation-log-" + Instant.now().toEpochMilli() + ".csv\"")
+            "attachment; filename=\"identity-operation-log-"
+                + Instant.now().toEpochMilli()
+                + ".csv\"")
         .body(bytes);
   }
 
@@ -468,8 +499,8 @@ public class OperationLogController {
         String.join(
             ",",
             List.of(
-                "发生时间", "事件类型", "级别", "请求ID", "链路ID", "操作人", "操作人ID", "摘要",
-                "方法", "路径", "状态码", "耗时毫秒", "任务名", "任务状态", "错误类型")));
+                "发生时间", "事件类型", "级别", "请求ID", "链路ID", "操作人", "操作人ID", "摘要", "方法", "路径", "状态码",
+                "耗时毫秒", "任务名", "任务状态", "错误类型")));
     out.append('\n');
     for (var row : records) {
       var cells = new ArrayList<String>();

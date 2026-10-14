@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
  * TikTok Shop 授权。
  *
  * <p>三个平台特有的点：
+ *
  * <ol>
  *   <li>scope 用<b>逗号</b>分隔（不是空格）；
  *   <li>换令牌是 <b>JSON</b> 请求；
- *   <li>账号接口的响应<b>套了两层壳</b>：店铺列表在 {@code data.shops} 下，账号字段在 {@code data} 上，
- *       直接按顶层字段读会全部读空。
+ *   <li>账号接口的响应<b>套了两层壳</b>：店铺列表在 {@code data.shops} 下，账号字段在 {@code data} 上， 直接按顶层字段读会全部读空。
  * </ol>
  */
 @Component
@@ -44,7 +44,8 @@ public class TiktokShopOAuthAdapter extends AbstractOAuthAdapter {
   public OAuthFailure translatePlatformError(String errorCode, String description) {
     return switch (errorCode == null ? "" : errorCode) {
       case "invalid_client" ->
-          new OAuthFailure("CREDENTIAL_REJECTED", "TikTok Shop 拒绝了应用凭据，请联系管理员检查 client_id / client_secret。");
+          new OAuthFailure(
+              "CREDENTIAL_REJECTED", "TikTok Shop 拒绝了应用凭据，请联系管理员检查 client_id / client_secret。");
       case "99991663", "99991661" ->
           new OAuthFailure("INSUFFICIENT_SCOPE", "该应用未被授权此权限范围，请在 TikTok Shop 开放平台调整后重试。");
       case "2" -> new OAuthFailure("PLATFORM_REJECTED", "你已取消授权。重新发起即可继续。");

@@ -15,12 +15,10 @@ import com.starcon.channel.vendor.PlatformException;
 import com.starcon.channel.vendor.PlatformOAuthAdapter;
 import com.starcon.channel.vendor.VendorRegistry;
 import com.starcon.tenancy.Ids;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ import org.springframework.web.server.ResponseStatusException;
  * 2.2.1.2 授权向导的后端实现。
  *
  * <p>六步各自落在哪：
+ *
  * <ol>
  *   <li>选平台 + 2.选账号 + 3.授权跳转 → {@link #start}（生成会话与 state，返回可直接跳转的 URL）
  *   <li>4.回调校验 → {@link #handleCallback}（换令牌、判租户、判绑定冲突、落 credential_ref）
@@ -48,9 +47,9 @@ import org.springframework.web.server.ResponseStatusException;
  *   <li>6.完成 → {@link #confirm}（建 channel_connection 与 shop）
  * </ol>
  *
- * <p><b>租户归属</b>：只有 {@link #handleCallback} 会脱离请求身份，其余端点都走正常的
- * {@code access.require} + RLS。回调的租户来自 {@code oauth_callback_bootstrap(state)}——
- * 即"授权发起时记录的 state → 会话"绑定关系，请求头（含伪造的 X-Tenant-Id）在这里完全不参与。
+ * <p><b>租户归属</b>：只有 {@link #handleCallback} 会脱离请求身份，其余端点都走正常的 {@code access.require} + RLS。回调的租户来自
+ * {@code oauth_callback_bootstrap(state)}—— 即"授权发起时记录的 state → 会话"绑定关系，请求头（含伪造的
+ * X-Tenant-Id）在这里完全不参与。
  */
 @Service
 public class OAuthAuthorizationService {
@@ -100,7 +99,8 @@ public class OAuthAuthorizationService {
           HttpStatus.BAD_REQUEST, "平台 " + platformCode + " 尚未接入授权向导，请先在平台注册表中登记授权端点");
     PlatformOAuthProperties.PlatformClient client = config.clientFor(platformCode);
     if (client == null)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, config.missingCredentialHint(platformCode));
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, config.missingCredentialHint(platformCode));
 
     String idempotencyKey = input.idempotencyKey().trim();
     Record existing =
@@ -123,24 +123,39 @@ public class OAuthAuthorizationService {
           existing.get("requested_scopes", String.class),
           existing.get("expires_at", Instant.class),
           existing.get("status", String.class));
-
     }
 
     String loginHint = input.loginHint() == null ? "" : input.loginHint().trim();
     List<String> scopes = requestedScopes(input.scopes(), profile);
     String state = randomToken(32);
-    String verifier = profile.codeChallengeMethod() == OAuthProtocol.CodeChallengeMethod.S256 ? randomToken(48) : null;
+    String verifier =
+        profile.codeChallengeMethod() == OAuthProtocol.CodeChallengeMethod.S256
+            ? randomToken(48)
+            : null;
     String challenge =
         verifier == null ? null : base64Url(sha256(verifier.getBytes(StandardCharsets.UTF_8)));
     String redirectUri = config.publicBaseUrl() + "/channel/oauth/callback";
     String requestScopes = adapter.joinScopes(scopes);
 
-    String reject = adapter.rejectAuthorize(profile, new AuthorizeRequest(
-        client.clientId(), redirectUri, state, loginHint, scopes, challenge, profile.codeChallengeMethod()));
+    String reject =
+        adapter.rejectAuthorize(
+            profile,
+            new AuthorizeRequest(
+                client.clientId(),
+                redirectUri,
+                state,
+                loginHint,
+                scopes,
+                challenge,
+                profile.codeChallengeMethod()));
     if (reject != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, reject);
 
-    Instant expiresAt = Instant.now().plus(config.stateTtl().isZero() || config.stateTtl().isNegative()
-        ? DEFAULT_TTL : config.stateTtl());
+    Instant expiresAt =
+        Instant.now()
+            .plus(
+                config.stateTtl().isZero() || config.stateTtl().isNegative()
+                    ? DEFAULT_TTL
+                    : config.stateTtl());
     UUID id = Ids.next();
     // 发起人快照：回调没有 bearer，租户与权限都要从这里恢复。
     // 存 grants 而不是"用户 id"是必要的——数据范围策略要靠 app.grants 判定，
@@ -165,18 +180,33 @@ public class OAuthAuthorizationService {
         Timestamps.at(expiresAt));
 
     audit(actor, id, "channel.oauth.start");
-    String authorizeUrl = adapter.authorizeUri(
-            profile,
-            new AuthorizeRequest(client.clientId(), redirectUri, state, loginHint, scopes, challenge, profile.codeChallengeMethod()))
-        .toString();
-    return new OAuthStartView(id, platformCode, platformName(platformId), authorizeUrl, requestScopes, expiresAt, "PENDING");
+    String authorizeUrl =
+        adapter
+            .authorizeUri(
+                profile,
+                new AuthorizeRequest(
+                    client.clientId(),
+                    redirectUri,
+                    state,
+                    loginHint,
+                    scopes,
+                    challenge,
+                    profile.codeChallengeMethod()))
+            .toString();
+    return new OAuthStartView(
+        id,
+        platformCode,
+        platformName(platformId),
+        authorizeUrl,
+        requestScopes,
+        expiresAt,
+        "PENDING");
   }
 
   /**
    * 用已存在的会话重建跳转地址。
    *
-   * <p>幂等重放时不重新签发 state：复用原 state 才能让平台跳回来时命中同一个会话，
-   * 换一个新 state 会让第一次授权作废、第二次回调落空。
+   * <p>幂等重放时不重新签发 state：复用原 state 才能让平台跳回来时命中同一个会话， 换一个新 state 会让第一次授权作废、第二次回调落空。
    */
   private String authorizeUrlFor(
       String platformCode,
@@ -188,12 +218,19 @@ public class OAuthAuthorizationService {
     UUID sessionId = session.get("id", UUID.class);
     String state = session.get("state_token", String.class);
     Record stored =
-        sql.fetchOne("select code_verifier,login_hint from oauth_authorization_session where id=?", sessionId);
+        sql.fetchOne(
+            "select code_verifier,login_hint from oauth_authorization_session where id=?",
+            sessionId);
     String verifier = stored.get("code_verifier", String.class);
-    String challenge = verifier == null ? null : base64Url(sha256(verifier.getBytes(StandardCharsets.UTF_8)));
-    String hint = loginHint == null || loginHint.isBlank() ? stored.get("login_hint", String.class) : loginHint.trim();
+    String challenge =
+        verifier == null ? null : base64Url(sha256(verifier.getBytes(StandardCharsets.UTF_8)));
+    String hint =
+        loginHint == null || loginHint.isBlank()
+            ? stored.get("login_hint", String.class)
+            : loginHint.trim();
     String redirectUri = config.publicBaseUrl() + session.get("redirect_path", String.class);
-    return adapter.authorizeUri(
+    return adapter
+        .authorizeUri(
             profile,
             new AuthorizeRequest(
                 client.clientId(),
@@ -213,14 +250,13 @@ public class OAuthAuthorizationService {
   /**
    * 2.2.1.2 平台回调。
    *
-   * <p>这是整个模块里唯一不接受客户端身份的地方。租户与权限都从 {@code state} 反查：
-   * {@code oauth_callback_bootstrap} 只对 PENDING 且未过期的 state 返回发起人快照，
-   * 拿不到就是无效请求——伪造的 {@code X-Tenant-Id} 在这条路径上根本没有读取它的代码。
+   * <p>这是整个模块里唯一不接受客户端身份的地方。租户与权限都从 {@code state} 反查： {@code oauth_callback_bootstrap} 只对 PENDING
+   * 且未过期的 state 返回发起人快照， 拿不到就是无效请求——伪造的 {@code X-Tenant-Id} 在这条路径上根本没有读取它的代码。
    *
-   * <p>state 一次性：进入本方法后立刻把状态从 PENDING 改掉，重放同一个回调只会得到
-   * "授权链接无效或已过期"，这就是 OAuth state 的 CSRF 防护。
+   * <p>state 一次性：进入本方法后立刻把状态从 PENDING 改掉，重放同一个回调只会得到 "授权链接无效或已过期"，这就是 OAuth state 的 CSRF 防护。
    */
-  public OAuthSessionView handleCallback(String code, String state, String error, String errorDescription) {
+  public OAuthSessionView handleCallback(
+      String code, String state, String error, String errorDescription) {
     if (state == null || state.isBlank())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "缺少 state，无法确定这次授权属于哪个租户");
     Bootstrap boot = bootstrap(state);
@@ -230,16 +266,31 @@ public class OAuthAuthorizationService {
     // 回到发起人的权限上下文：这是"授权由谁发起，就只能以谁的身份写入"的保证
     AccessService.Access initiator =
         new AccessService.Access(
-            boot.initiatedBy(), boot.tenantId(), "OAuth", null, boot.actorDepartmentId(), boot.permissions(), boot.grants());
-    return access.run(initiator, "channel.connection.create", () -> processCallback(boot, code, error, errorDescription));
+            boot.initiatedBy(),
+            boot.tenantId(),
+            "OAuth",
+            null,
+            boot.actorDepartmentId(),
+            boot.permissions(),
+            boot.grants());
+    return access.run(
+        initiator,
+        "channel.connection.create",
+        () -> processCallback(boot, code, error, errorDescription));
   }
 
-  private OAuthSessionView processCallback(Bootstrap boot, String code, String error, String errorDescription) {
-    UUID sessionId = one(UUID.class, "select id from oauth_authorization_session where state_token=?", boot.state());
-    Record session = sql.fetchOne(
-        "select id,platform_id,code_verifier,login_hint,redirect_path,requested_scopes"
-            + " from oauth_authorization_session where id=?",
-        sessionId);
+  private OAuthSessionView processCallback(
+      Bootstrap boot, String code, String error, String errorDescription) {
+    UUID sessionId =
+        one(
+            UUID.class,
+            "select id from oauth_authorization_session where state_token=?",
+            boot.state());
+    Record session =
+        sql.fetchOne(
+            "select id,platform_id,code_verifier,login_hint,redirect_path,requested_scopes"
+                + " from oauth_authorization_session where id=?",
+            sessionId);
     UUID platformId = session.get("platform_id", UUID.class);
     String platformCode = platformCode(platformId);
     OAuthProfile profile = requireProfile(platformCode);
@@ -259,12 +310,12 @@ public class OAuthAuthorizationService {
       return fail(sessionId, adapter.translatePlatformError(error, errorDescription));
     if (code == null || code.isBlank())
       return fail(
-          sessionId,
-          new OAuthProtocol.OAuthFailure("PLATFORM_REJECTED", "平台没有返回授权码，请重新发起授权"));
+          sessionId, new OAuthProtocol.OAuthFailure("PLATFORM_REJECTED", "平台没有返回授权码，请重新发起授权"));
     if (client == null)
       return fail(
           sessionId,
-          new OAuthProtocol.OAuthFailure("CREDENTIAL_REJECTED", config.missingCredentialHint(platformCode)));
+          new OAuthProtocol.OAuthFailure(
+              "CREDENTIAL_REJECTED", config.missingCredentialHint(platformCode)));
 
     Authorization authorization;
     try {
@@ -286,18 +337,18 @@ public class OAuthAuthorizationService {
       return fail(sessionId, e.failure());
     } catch (RuntimeException e) {
       return fail(
-          sessionId,
-          new OAuthProtocol.OAuthFailure("TOKEN_EXCHANGE_FAILED", "授权失败，请重新发起授权"));
+          sessionId, new OAuthProtocol.OAuthFailure("TOKEN_EXCHANGE_FAILED", "授权失败，请重新发起授权"));
     }
 
-    List<String> granted = normalizeScopes(authorization.grantedScopes(), session.get("requested_scopes", String.class));
+    List<String> granted =
+        normalizeScopes(
+            authorization.grantedScopes(), session.get("requested_scopes", String.class));
     String missing = missingScopes(adapter.minimumScopes(), granted);
     if (missing != null)
       return fail(
           sessionId,
           new OAuthProtocol.OAuthFailure(
-              "INSUFFICIENT_SCOPE",
-              "平台授予的权限范围缺少 " + missing + "，无法完成订单与商品同步。请在平台后台补齐权限后重新授权。"));
+              "INSUFFICIENT_SCOPE", "平台授予的权限范围缺少 " + missing + "，无法完成订单与商品同步。请在平台后台补齐权限后重新授权。"));
 
     String accountId = authorization.accountId().trim();
     // 同一平台账号只能绑定一个租户：这是蓝图 2.2.1.2「关系」段的硬要求。
@@ -307,21 +358,30 @@ public class OAuthAuthorizationService {
       return fail(
           sessionId,
           new OAuthProtocol.OAuthFailure(
-              "ACCOUNT_BOUND_BY_OTHER_TENANT",
-              "该平台商家账号已被其他租户绑定，无法重复绑定。请联系管理员解绑，或改用未被占用的商家账号。"));
+              "ACCOUNT_BOUND_BY_OTHER_TENANT", "该平台商家账号已被其他租户绑定，无法重复绑定。请联系管理员解绑，或改用未被占用的商家账号。"));
     if (accountId.equalsIgnoreCase(session.get("login_hint", String.class)) == false
         && adapter.requiresShopDomain())
       return fail(
           sessionId,
           new OAuthProtocol.OAuthFailure(
               "PLATFORM_REJECTED",
-              "平台返回的店铺（" + accountId + "）与指定的店铺域名（" + session.get("login_hint", String.class) + "）不一致，请确认没有授权错店铺。"));
+              "平台返回的店铺（"
+                  + accountId
+                  + "）与指定的店铺域名（"
+                  + session.get("login_hint", String.class)
+                  + "）不一致，请确认没有授权错店铺。"));
 
     // 令牌明文到此为止：先落密钥管理器，再把引用写进 credential_ref
     String secretPath =
-        "channel/" + boot.tenantId() + "/" + platformCode.toLowerCase(Locale.ROOT) + "/" + accountId;
+        "channel/"
+            + boot.tenantId()
+            + "/"
+            + platformCode.toLowerCase(Locale.ROOT)
+            + "/"
+            + accountId;
     String reference = secrets.write(secretPath, authorization.accessToken());
-    UUID credentialId = upsertCredential(boot.tenantId(), reference, granted, authorization.expiresAt());
+    UUID credentialId =
+        upsertCredential(boot.tenantId(), reference, granted, authorization.expiresAt());
 
     java.sql.Timestamp authorizedAt = Timestamps.at(Instant.now());
     java.sql.Timestamp expiresAt = Timestamps.at(authorization.expiresAt());
@@ -340,13 +400,18 @@ public class OAuthAuthorizationService {
         String.join(" ", granted),
         authorizedAt,
         expiresAt,
-        authorization.expiresAt() != null && authorization.expiresAt().isBefore(Instant.now()) ? "EXPIRED" : "ACTIVE",
+        authorization.expiresAt() != null && authorization.expiresAt().isBefore(Instant.now())
+            ? "EXPIRED"
+            : "ACTIVE",
         boot.tenantId(),
         credentialId);
 
     // 店铺候选：确认前不算业务事实
     int deleted =
-        sql.execute("delete from oauth_shop_candidate where tenant_id=? and session_id=?", boot.tenantId(), sessionId);
+        sql.execute(
+            "delete from oauth_shop_candidate where tenant_id=? and session_id=?",
+            boot.tenantId(),
+            sessionId);
     if (deleted < 0) throw new IllegalStateException("候选清理异常");
     for (var shop : authorization.shops()) {
       sql.execute(
@@ -372,10 +437,12 @@ public class OAuthAuthorizationService {
 
   public List<OAuthShopCandidateView> candidates(AccessService.Access actor, UUID sessionId) {
     requireSession(actor, sessionId);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,external_shop_id,shop_name,default_marketplace_code from oauth_shop_candidate"
                 + " where tenant_id=? and session_id=? order by shop_name,external_shop_id",
-            actor.tenantId(), sessionId)
+            actor.tenantId(),
+            sessionId)
         .stream()
         .map(
             r ->
@@ -395,16 +462,16 @@ public class OAuthAuthorizationService {
   /**
    * 2.2.1.2 确认店铺范围并完成授权。
    *
-   * <p>建 {@code channel_connection} + {@code shop}（+ 站点），把向导产物交给下游的 2.3.1 店铺档案。
-   * 幂等：重复提交同一个 {@code idempotency_key} 返回第一次的结果，不会建出第二组店铺。
+   * <p>建 {@code channel_connection} + {@code shop}（+ 站点），把向导产物交给下游的 2.3.1 店铺档案。 幂等：重复提交同一个 {@code
+   * idempotency_key} 返回第一次的结果，不会建出第二组店铺。
    */
-  public OAuthCompletedView confirm(AccessService.Access actor, UUID sessionId, OAuthConfirmInput input) {
+  public OAuthCompletedView confirm(
+      AccessService.Access actor, UUID sessionId, OAuthConfirmInput input) {
     Record session = requireSession(actor, sessionId);
     String status = session.get("status", String.class);
     if ("COMPLETED".equals(status)) return completedView(actor.tenantId(), sessionId);
     if (!"AUTHORIZED".equals(status))
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "该授权尚未完成平台回调（或已失败），请先完成授权再确认店铺范围");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "该授权尚未完成平台回调（或已失败），请先完成授权再确认店铺范围");
     String account = session.get("authorized_account", String.class);
     if (account == null || account.isBlank())
       throw new ResponseStatusException(HttpStatus.CONFLICT, "授权回调没有带回平台账号，无法完成连接");
@@ -417,8 +484,7 @@ public class OAuthAuthorizationService {
     // 判定归属要重新做一次：从授权发起到确认之间，账号可能刚被另一个租户绑走
     UUID owner = one(UUID.class, "select oauth_account_owner(?,?)", platformId, account);
     if (owner != null && !owner.equals(actor.tenantId()))
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "该平台商家账号已被其他租户绑定，无法重复绑定。请联系管理员解绑。");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "该平台商家账号已被其他租户绑定，无法重复绑定。请联系管理员解绑。");
 
     List<Record> chosen = selectedCandidates(actor.tenantId(), sessionId, input.shopIds());
     if (chosen.isEmpty())
@@ -438,17 +504,17 @@ public class OAuthAuthorizationService {
         displayName == null || displayName.isBlank() ? account : displayName,
         credentialStatus(session.get("credential_expires_at", Instant.class)));
 
-    String prefix = input.shopCodePrefix() == null || input.shopCodePrefix().isBlank()
-        ? platformCode.substring(0, Math.min(4, platformCode.length()))
-        : input.shopCodePrefix().trim();
+    String prefix =
+        input.shopCodePrefix() == null || input.shopCodePrefix().isBlank()
+            ? platformCode.substring(0, Math.min(4, platformCode.length()))
+            : input.shopCodePrefix().trim();
     List<UUID> shopIds = new ArrayList<>();
     for (Record candidate : chosen) {
       String externalId = candidate.get("external_shop_id", String.class);
       UUID shopOwner = one(UUID.class, "select oauth_shop_owner(?,?)", platformId, externalId);
       if (shopOwner != null && !shopOwner.equals(actor.tenantId()))
         throw new ResponseStatusException(
-            HttpStatus.CONFLICT,
-            "平台店铺 " + externalId + " 已被其他租户纳管，无法重复纳管。请取消该店铺或联系管理员解绑。");
+            HttpStatus.CONFLICT, "平台店铺 " + externalId + " 已被其他租户纳管，无法重复纳管。请取消该店铺或联系管理员解绑。");
       UUID shopId = Ids.next();
       String code = uniqueShopCode(actor.tenantId(), prefix, externalId);
       sql.execute(
@@ -463,7 +529,11 @@ public class OAuthAuthorizationService {
           externalId,
           // 2.3.2.1：全托管平台的经营模式是平台决定的硬约束，不让用户在这里选成自发货
           "TEMU".equals(platformCode) ? "FULL_CONSIGNMENT" : "SELF_FULFILLED");
-      linkMarketplace(actor.tenantId(), platformId, shopId, candidate.get("default_marketplace_code", String.class));
+      linkMarketplace(
+          actor.tenantId(),
+          platformId,
+          shopId,
+          candidate.get("default_marketplace_code", String.class));
       shopIds.add(shopId);
     }
     sql.execute(
@@ -473,7 +543,12 @@ public class OAuthAuthorizationService {
         sessionId);
     audit(actor, sessionId, "channel.oauth.complete");
     return new OAuthCompletedView(
-        sessionId, connectionId, credentialId, List.copyOf(shopIds), shopIds.size(), "/channels?section=shops");
+        sessionId,
+        connectionId,
+        credentialId,
+        List.copyOf(shopIds),
+        shopIds.size(),
+        "/channels?section=shops");
   }
 
   /** 2.2.1.2 放弃本次授权：state 立即作废，之后平台再回调也换不到租户。 */
@@ -485,17 +560,16 @@ public class OAuthAuthorizationService {
         sql.execute(
             "update oauth_authorization_session set status='CANCELLED',updated_at=now()"
                 + " where tenant_id=? and id=? and status='PENDING'",
-            actor.tenantId(), sessionId);
-    if (cancelled == 0)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "该授权已不在待授权状态，无需取消");
+            actor.tenantId(),
+            sessionId);
+    if (cancelled == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "该授权已不在待授权状态，无需取消");
     audit(actor, sessionId, "channel.oauth.cancel");
   }
 
   /**
    * 平台回调完成后回到前端的地址。
    *
-   * <p>只带 sessionId，不带任何凭据或令牌：前端拿到后自己去轮询会话状态，
-   * 那些请求仍然带着正常的登录态，走标准权限判定。
+   * <p>只带 sessionId，不带任何凭据或令牌：前端拿到后自己去轮询会话状态， 那些请求仍然带着正常的登录态，走标准权限判定。
    */
   public String uiReturnUrl(UUID sessionId, String status) {
     char sep = config.uiReturnUrl().contains("?") ? '&' : '?';
@@ -545,9 +619,14 @@ public class OAuthAuthorizationService {
     Record r =
         sql.fetchOne(
             "select connection_id,credential_id from oauth_authorization_session where tenant_id=? and id=?",
-            tenantId, sessionId);
+            tenantId,
+            sessionId);
     List<UUID> shopIds =
-        sql.fetch("select id from shop where tenant_id=? and connection_id=? order by created_at", tenantId, r.get("connection_id", UUID.class))
+        sql
+            .fetch(
+                "select id from shop where tenant_id=? and connection_id=? order by created_at",
+                tenantId,
+                r.get("connection_id", UUID.class))
             .stream()
             .map(x -> x.get("id", UUID.class))
             .toList();
@@ -574,8 +653,11 @@ public class OAuthAuthorizationService {
     try {
       Map<String, Object> row = json.readValue(raw, new TypeReference<Map<String, Object>>() {});
       return new Bootstrap(
-          state, uuid(row.get("tenantId")), uuid(row.get("initiatedBy")),
-          uuid(row.get("actorDepartmentId")), fromJson(row.get("actorGrants")));
+          state,
+          uuid(row.get("tenantId")),
+          uuid(row.get("initiatedBy")),
+          uuid(row.get("actorDepartmentId")),
+          fromJson(row.get("actorGrants")));
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new IllegalStateException("授权引导快照解析失败", e);
     }
@@ -584,15 +666,20 @@ public class OAuthAuthorizationService {
   /**
    * jsonb 里的 UUID 是 JSON 字符串，Jackson 反序列化成 String 而不是 UUID。
    *
-   * <p>直接强转会在回调最前面抛 ClassCastException，用户看到的是"服务出错了"而不是
-   * "授权成功"——所以这里显式转一次，也顺手兼容已经是 UUID 的情况。
+   * <p>直接强转会在回调最前面抛 ClassCastException，用户看到的是"服务出错了"而不是 "授权成功"——所以这里显式转一次，也顺手兼容已经是 UUID 的情况。
    */
   private static UUID uuid(Object value) {
-    return value == null ? null : (value instanceof UUID id ? id : UUID.fromString(value.toString()));
+    return value == null
+        ? null
+        : (value instanceof UUID id ? id : UUID.fromString(value.toString()));
   }
 
   private record Bootstrap(
-      String state, UUID tenantId, UUID initiatedBy, UUID actorDepartmentId, List<AccessService.Grant> grants) {
+      String state,
+      UUID tenantId,
+      UUID initiatedBy,
+      UUID actorDepartmentId,
+      List<AccessService.Grant> grants) {
     List<String> permissions() {
       return grants == null
           ? List.of()
@@ -604,7 +691,9 @@ public class OAuthAuthorizationService {
     sql.execute(
         "update oauth_authorization_session set status='FAILED',failure_code=?,failure_message=?,updated_at=now()"
             + " where id=?",
-        failure.code(), failure.message(), sessionId);
+        failure.code(),
+        failure.message(),
+        sessionId);
     return sessionView(sessionId);
   }
 
@@ -625,7 +714,8 @@ public class OAuthAuthorizationService {
     Object raw = r.get("extra_authorize_params");
     if (raw != null) {
       try {
-        Map<String, Object> parsed = json.readValue(raw.toString(), new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> parsed =
+            json.readValue(raw.toString(), new TypeReference<Map<String, Object>>() {});
         parsed.forEach((k, v) -> extra.put(k, v == null ? "" : v.toString()));
       } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
         throw new IllegalStateException("授权静态参数 JSON 解析失败", e);
@@ -682,7 +772,8 @@ public class OAuthAuthorizationService {
                 + "(select expires_at from credential_ref cr where cr.tenant_id=s.tenant_id and cr.id=s.credential_id)"
                 + " credential_expires_at"
                 + " from oauth_authorization_session s where tenant_id=? and id=?",
-            actor.tenantId(), sessionId);
+            actor.tenantId(),
+            sessionId);
     if (r == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "授权会话不存在");
     return r;
   }
@@ -691,51 +782,62 @@ public class OAuthAuthorizationService {
    * 选中的店铺候选。
    *
    * <p>{@code null}（请求里没带 shopIds）表示"全部候选"，对应用户没动过勾选；
-   * <b>显式传空数组</b>表示"一个都不选"，必须报错——授权成功却不纳管任何店铺会留下一条
-   * 永不参与同步的空连接，比直接失败难查得多。
+   * <b>显式传空数组</b>表示"一个都不选"，必须报错——授权成功却不纳管任何店铺会留下一条 永不参与同步的空连接，比直接失败难查得多。
    */
   private List<Record> selectedCandidates(UUID tenantId, UUID sessionId, List<UUID> shopIds) {
     if (shopIds == null)
       return sql.fetch(
           "select id,external_shop_id,shop_name,default_marketplace_code from oauth_shop_candidate"
               + " where tenant_id=? and session_id=? order by shop_name,external_shop_id",
-          tenantId, sessionId);
+          tenantId,
+          sessionId);
     if (shopIds.isEmpty()) return List.of();
     // 逐个占位符而不是 "= any(?::uuid[])"：数组参数要走 jOOQ 的 SQLArray 解析，
     // 一旦解析器猜错类型就会整条语句报 bad grammar。ID 数量有限，拼占位符更稳也更好读。
     // 空列表必须在这里短路：拼出来会是 "id in ()"，那是语法错误而不是"没选中"。
-    String placeholders = shopIds.stream().map(id -> "?").collect(java.util.stream.Collectors.joining(","));
+    String placeholders =
+        shopIds.stream().map(id -> "?").collect(java.util.stream.Collectors.joining(","));
     List<Object> binds = new ArrayList<>();
     binds.add(tenantId);
     binds.add(sessionId);
     binds.addAll(shopIds);
     return sql.fetch(
         "select id,external_shop_id,shop_name,default_marketplace_code from oauth_shop_candidate"
-            + " where tenant_id=? and session_id=? and id in (" + placeholders + ")"
+            + " where tenant_id=? and session_id=? and id in ("
+            + placeholders
+            + ")"
             + " order by shop_name,external_shop_id",
         binds.toArray());
   }
 
-  private void linkMarketplace(UUID tenantId, UUID platformId, UUID shopId, String marketplaceCode) {
+  private void linkMarketplace(
+      UUID tenantId, UUID platformId, UUID shopId, String marketplaceCode) {
     if (marketplaceCode == null || marketplaceCode.isBlank()) return;
     // 平台返回的站点标识未必等于注册表里的站点码（有的平台给的是站点 ID），
     // 对不上就留空：站点可以在 2.3.1.1 店铺详情里补，不该让整个授权流程失败。
     UUID mk =
-        one(UUID.class,
+        one(
+            UUID.class,
             "select id from marketplace where platform_id=? and (code=? or name=?)",
-            platformId, marketplaceCode, marketplaceCode);
+            platformId,
+            marketplaceCode,
+            marketplaceCode);
     if (mk == null) return;
     sql.execute(
         "insert into shop_marketplace(tenant_id,shop_id,marketplace_id,status) values (?,?,?,'ACTIVE')"
             + " on conflict (tenant_id,shop_id,marketplace_id) do update set status='ACTIVE'",
-        tenantId, shopId, mk);
+        tenantId,
+        shopId,
+        mk);
   }
 
   private String uniqueShopCode(UUID tenantId, String prefix, String externalId) {
     String base = (prefix + "-" + sanitize(externalId)).toUpperCase(Locale.ROOT);
     if (base.length() > 56) base = base.substring(0, 56);
     String code = base;
-    for (int i = 2; one(UUID.class, "select id from shop where tenant_id=? and code=?", tenantId, code) != null; i++) {
+    for (int i = 2;
+        one(UUID.class, "select id from shop where tenant_id=? and code=?", tenantId, code) != null;
+        i++) {
       code = base + "-" + i;
     }
     return code;
@@ -747,17 +849,28 @@ public class OAuthAuthorizationService {
     return cleaned.replaceAll("^-|-$", "");
   }
 
-  private UUID upsertCredential(UUID tenantId, String reference, List<String> scopes, Instant expiresAt) {
+  private UUID upsertCredential(
+      UUID tenantId, String reference, List<String> scopes, Instant expiresAt) {
     java.sql.Timestamp authorizedAt = Timestamps.at(Instant.now());
     java.sql.Timestamp expires = Timestamps.at(expiresAt);
     UUID existing =
-        one(UUID.class, "select id from credential_ref where tenant_id=? and external_ref=?", tenantId, reference);
+        one(
+            UUID.class,
+            "select id from credential_ref where tenant_id=? and external_ref=?",
+            tenantId,
+            reference);
     if (existing != null) return existing;
     UUID id = Ids.next();
     sql.execute(
         "insert into credential_ref(id,tenant_id,provider,external_ref,granted_scopes,authorized_at,expires_at)"
             + " values (?,?,?,?,?,?,?)",
-        id, tenantId, secrets.provider(), reference, String.join(" ", scopes), authorizedAt, expires);
+        id,
+        tenantId,
+        secrets.provider(),
+        reference,
+        String.join(" ", scopes),
+        authorizedAt,
+        expires);
     return id;
   }
 
@@ -774,7 +887,11 @@ public class OAuthAuthorizationService {
 
   private static List<String> splitScopes(String raw) {
     if (raw == null || raw.isBlank()) return List.of();
-    return Arrays.stream(raw.split("[ ,]+")).map(String::trim).filter(s -> !s.isEmpty()).distinct().toList();
+    return Arrays.stream(raw.split("[ ,]+"))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .distinct()
+        .toList();
   }
 
   /**
@@ -810,7 +927,11 @@ public class OAuthAuthorizationService {
   private void audit(UUID userId, UUID tenantId, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values (?,?,?,?,?)",
-        Ids.next(), tenantId, userId, resourceId, action);
+        Ids.next(),
+        tenantId,
+        userId,
+        resourceId,
+        action);
   }
 
   private <T> T one(Class<T> type, String query, Object... binds) {

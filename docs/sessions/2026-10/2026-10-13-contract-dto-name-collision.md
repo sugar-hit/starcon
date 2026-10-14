@@ -14,12 +14,12 @@ vitest 不做类型检查，只有 tsc 会炸。
 
 1. **只改「后来者」，不动「既有语义」。** 最终 4 个名字互不相同：
 
-   | 原名（文件:行） | 形状 | 处置 | 新名 |
-   | --- | --- | --- | --- |
-   | `DutyTaxModels.ScopeOption` (`:457`) | `(value, label)` | **保持不动** | `ScopeOption` |
-   | `ReservationModels.StatusOption` (`:262`) | `(code, label, terminal)` | **保持不动** | `StatusOption` |
-   | `WarehouseConfigModels.ScopeOption` (`:323`) | `(code, label)` | 改名 | `WarehouseConfigScopeOption` |
-   | `WarehouseFacilityModels.StatusOption` (`:258`) | `(code, label)` | 改名 | `WarehouseFacilityStatusOption` |
+   | 原名（文件:行）                                 | 形状                      | 处置         | 新名                            |
+   | ----------------------------------------------- | ------------------------- | ------------ | ------------------------------- |
+   | `DutyTaxModels.ScopeOption` (`:457`)            | `(value, label)`          | **保持不动** | `ScopeOption`                   |
+   | `ReservationModels.StatusOption` (`:262`)       | `(code, label, terminal)` | **保持不动** | `StatusOption`                  |
+   | `WarehouseConfigModels.ScopeOption` (`:323`)    | `(code, label)`           | 改名         | `WarehouseConfigScopeOption`    |
+   | `WarehouseFacilityModels.StatusOption` (`:258`) | `(code, label)`           | 改名         | `WarehouseFacilityStatusOption` |
 
 2. **为什么只改两个。** 改「后来者」而不是四个全改，可以让并入前的既有 schema 名与形状
    **原样存活**：`ScopeOption={value,label}`、`StatusOption={code,label,terminal}` 与 `363dc00`

@@ -26,25 +26,25 @@ import java.util.Map;
 /**
  * 各 vendor 适配器的共同实现。
  *
- * <p>把"所有平台的 OAuth 大致都长这样"的部分收在这里，把"这个平台特别不一样"的部分留给
- * 子类覆写。这样每个 vendor 包里只留下真正属于它的差异，审阅时能一眼看出该平台的协议形状。
+ * <p>把"所有平台的 OAuth 大致都长这样"的部分收在这里，把"这个平台特别不一样"的部分留给 子类覆写。这样每个 vendor
+ * 包里只留下真正属于它的差异，审阅时能一眼看出该平台的协议形状。
  *
- * <p>这里刻意没有 Spring 注解：适配器是纯协议逻辑，不碰数据库、不碰租户上下文，
- * 由 {@link VendorRegistry} 统一装配。
+ * <p>这里刻意没有 Spring 注解：适配器是纯协议逻辑，不碰数据库、不碰租户上下文， 由 {@link VendorRegistry} 统一装配。
  */
 public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
 
   protected static final ObjectMapper JSON = new ObjectMapper();
+
   /** 换令牌与查账号的出网超时；平台不可用时要尽快失败，让向导给出可重试的原因而不是挂住。 */
   protected static final Duration TIMEOUT = Duration.ofSeconds(10);
+
   protected static final HttpClient HTTP =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
   /**
    * 换令牌响应解析的中间结果。
    *
-   * <p>只在 {@link #authorize} 内部存在，出了这个方法就并进 {@link Authorization}，
-   * 不会成为一个可以单独传、单独打日志的对象。
+   * <p>只在 {@link #authorize} 内部存在，出了这个方法就并进 {@link Authorization}， 不会成为一个可以单独传、单独打日志的对象。
    */
   protected record TokenResult(
       String accessToken, String refreshToken, Instant expiresAt, List<String> grantedScopes) {}
@@ -77,7 +77,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
       params.put("code_challenge", request.codeChallenge());
     }
     String scopes = joinScopes(request.scopes());
-    if (!scopes.isBlank() && !profile.scopeParam().isBlank()) params.put(profile.scopeParam(), scopes);
+    if (!scopes.isBlank() && !profile.scopeParam().isBlank())
+      params.put(profile.scopeParam(), scopes);
     return params;
   }
 
@@ -125,7 +126,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
                           .getBytes(StandardCharsets.UTF_8)));
     HttpResponse<String> response;
     try {
-      response = HTTP.send(http.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+      response =
+          HTTP.send(http.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     } catch (java.io.IOException | InterruptedException e) {
       if (e instanceof InterruptedException) Thread.currentThread().interrupt();
       throw new PlatformException(
@@ -134,7 +136,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
     // 失败响应里常带 error / error_description，直接归一化成失败原因：
     // 凭据错、授权码过期、redirect_uri 不匹配在平台侧长得都一样，不翻译就只能说"失败"。
     if (response.statusCode() / 100 != 2)
-      throw new PlatformException(translateTokenError(profile, response.body(), response.statusCode()));
+      throw new PlatformException(
+          translateTokenError(profile, response.body(), response.statusCode()));
     String tokenBody = response.body();
     TokenResult token = readToken(profile, tokenBody);
     // 账号信息来源因平台而异：Shopify 随令牌响应一起给，其余平台要另调账号接口
@@ -152,7 +155,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
   }
 
   /** 把平台 token 端点的错误响应翻译成可执行原因。默认按 OAuth2 标准字段解析。 */
-  protected OAuthProtocol.OAuthFailure translateTokenError(OAuthProfile profile, String body, int status) {
+  protected OAuthProtocol.OAuthFailure translateTokenError(
+      OAuthProfile profile, String body, int status) {
     String code = "";
     String description = "";
     try {
@@ -189,7 +193,12 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
     }
     String scope = text(node, profile.tokenScopeField());
     List<String> scopes =
-        scope.isBlank() ? List.of() : Arrays.stream(scope.split("[ ,]+")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        scope.isBlank()
+            ? List.of()
+            : Arrays.stream(scope.split("[ ,]+"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     return new TokenResult(access, text(node, profile.tokenRefreshField()), expiresAt, scopes);
   }
 
@@ -215,7 +224,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
                 fallback(text(item, profile.shopNameField()), shopId),
                 text(item, profile.shopMarketplaceField())));
       }
-    return new AccountPayload(accountId, fallback(text(node, profile.accountNameField()), accountId), List.copyOf(shops));
+    return new AccountPayload(
+        accountId, fallback(text(node, profile.accountNameField()), accountId), List.copyOf(shops));
   }
 
   /** 平台没有独立的账号 ID 字段时，用它下面第一个店铺的 ID 作为账号标识。 */
@@ -257,7 +267,8 @@ public abstract class AbstractOAuthAdapter implements PlatformOAuthAdapter {
       case "access_denied" ->
           new OAuthProtocol.OAuthFailure("PLATFORM_REJECTED", "你已取消授权，未选择任何店铺。重新发起即可继续。");
       case "invalid_client" ->
-          new OAuthProtocol.OAuthFailure("CREDENTIAL_REJECTED", "平台拒绝了应用凭据（client_id / client_secret 不正确），请联系管理员检查配置。");
+          new OAuthProtocol.OAuthFailure(
+              "CREDENTIAL_REJECTED", "平台拒绝了应用凭据（client_id / client_secret 不正确），请联系管理员检查配置。");
       case "unauthorized_client" ->
           new OAuthProtocol.OAuthFailure("INSUFFICIENT_SCOPE", "该应用未被授权此权限范围，请在平台后台调整应用权限后重试。");
       case "invalid_scope" ->

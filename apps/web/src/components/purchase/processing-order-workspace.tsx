@@ -165,10 +165,12 @@ export function ProcessingOrderWorkspace() {
         actions={
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => void load()} disabled={loading}>
-              <RefreshCw className={loading ? 'animate-spin' : ''} />刷新
+              <RefreshCw className={loading ? 'animate-spin' : ''} />
+              刷新
             </Button>
             <Button onClick={() => setCreating(true)} disabled={busy}>
-              <Factory />新建加工单
+              <Factory />
+              新建加工单
             </Button>
           </div>
         }
@@ -196,7 +198,7 @@ export function ProcessingOrderWorkspace() {
                 className={
                   gap.available
                     ? 'rounded-md border px-2 py-1 text-xs'
-                    : 'rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground'
+                    : 'text-muted-foreground rounded-md border border-dashed px-2 py-1 text-xs'
                 }
               >
                 {gap.moduleId} {gap.moduleName}
@@ -204,7 +206,7 @@ export function ProcessingOrderWorkspace() {
               </span>
             ))}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">{caps.upstreamNote}</p>
+          <p className="text-muted-foreground mt-2 text-xs">{caps.upstreamNote}</p>
         </SectionCard>
       )}
 
@@ -255,9 +257,7 @@ export function ProcessingOrderWorkspace() {
             />
             只看逾期
           </label>
-          <Button
-            onClick={() => setParams(nextParams({ keyword, status, overdueOnly }))}
-          >
+          <Button onClick={() => setParams(nextParams({ keyword, status, overdueOnly }))}>
             查询
           </Button>
         </div>
@@ -270,7 +270,7 @@ export function ProcessingOrderWorkspace() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">正在加载加工单…</p>}
+      {loading && <p className="text-muted-foreground text-sm">正在加载加工单…</p>}
 
       {!loading && orders.length === 0 && !error && (
         <EmptyState
@@ -283,7 +283,7 @@ export function ProcessingOrderWorkspace() {
         <SectionCard title={`加工单（${data?.total ?? 0}）`}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground">
+              <thead className="text-muted-foreground text-left">
                 <tr>
                   <th className="px-2 py-1">单号</th>
                   <th className="px-2 py-1">加工厂</th>
@@ -314,12 +314,12 @@ export function ProcessingOrderWorkspace() {
                     </td>
                     <td className="px-2 py-1">
                       {dateOnly(order.dueOn)}
-                      {isOverdue(order) && (
-                        <span className="ml-1 text-red-600">逾期</span>
-                      )}
+                      {isOverdue(order) && <span className="ml-1 text-red-600">逾期</span>}
                     </td>
                     <td className="px-2 py-1">
-                      <Badge tone={statusToneBadge(order.status)}>{statusLabel(order.status)}</Badge>
+                      <Badge tone={statusToneBadge(order.status)}>
+                        {statusLabel(order.status)}
+                      </Badge>
                     </td>
                     <td className="px-2 py-1 text-right">
                       <Button variant="ghost" onClick={() => void openDetail(order.id)}>
@@ -483,7 +483,9 @@ function CreateOrderDialog({
   const [factoryId, setFactoryId] = useState('');
   const [bomVersionId, setBomVersionId] = useState('');
   const [planned, setPlanned] = useState('10');
-  const [dueOn, setDueOn] = useState(() => new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10));
+  const [dueOn, setDueOn] = useState(() =>
+    new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10),
+  );
   const [note, setNote] = useState('');
   const [preview, setPreview] = useState<RequirementPreview | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -501,9 +503,7 @@ function CreateOrderDialog({
     }
     setPreviewing(true);
     try {
-      setPreview(
-        await previewRequirement({ bomVersionId, outputQuantity: plannedValue }),
-      );
+      setPreview(await previewRequirement({ bomVersionId, outputQuantity: plannedValue }));
     } catch (e) {
       setPreview(null);
       onError(errorText(e));
@@ -518,14 +518,18 @@ function CreateOrderDialog({
         <ModalHeader>
           <ModalTitle>新建加工单</ModalTitle>
           <ModalDescription>
-            组件领用量由已发布的 BOM 版本按规则 R7 自动算出（单位用量 × 产量 ×
-            (1 + 损耗率/100)），页面只显示不重算。先试算确认料，再下单。
+            组件领用量由已发布的 BOM 版本按规则 R7 自动算出（单位用量 × 产量 × (1 +
+            损耗率/100)），页面只显示不重算。先试算确认料，再下单。
           </ModalDescription>
         </ModalHeader>
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">加工单号</span>
-            <Input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="PO-2026-0001" />
+            <Input
+              value={orderNo}
+              onChange={(e) => setOrderNo(e.target.value)}
+              placeholder="PO-2026-0001"
+            />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">加工厂</span>
@@ -570,22 +574,25 @@ function CreateOrderDialog({
 
           {preview && (
             <div className="rounded-md border p-3 text-sm">
-              <p className="mb-2 text-muted-foreground">
-                按 BOM 版本 {preview.bomVersionNo}（{preview.outputSkuCode}）生产 {fmt(preview.outputQuantity)}{' '}
-                件，需要：
+              <p className="text-muted-foreground mb-2">
+                按 BOM 版本 {preview.bomVersionNo}（{preview.outputSkuCode}）生产{' '}
+                {fmt(preview.outputQuantity)} 件，需要：
               </p>
               <ul className="flex flex-col gap-1">
                 {preview.components.map((line) => (
                   <li key={line.skuId} className="flex justify-between gap-2">
                     <span>{line.skuCode}</span>
                     <span className="text-muted-foreground">
-                      {fmt(line.unitQuantity)} × {fmt(preview.outputQuantity)} × (1+{fmt(line.scrapRate)}%) ={' '}
-                      <span className="font-medium text-foreground">{fmt(line.requiredQuantity)}</span>
+                      {fmt(line.unitQuantity)} × {fmt(preview.outputQuantity)} × (1+
+                      {fmt(line.scrapRate)}%) ={' '}
+                      <span className="text-foreground font-medium">
+                        {fmt(line.requiredQuantity)}
+                      </span>
                     </span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-muted-foreground">{preview.note}</p>
+              <p className="text-muted-foreground mt-2 text-xs">{preview.note}</p>
             </div>
           )}
         </div>
@@ -734,7 +741,7 @@ function IssueDialog({
         </ModalHeader>
         <div className="flex flex-col gap-3 text-sm">
           <p className="text-muted-foreground">
-            当前还有 <span className="font-medium text-foreground">{remaining}</span> 个组件未领满。
+            当前还有 <span className="text-foreground font-medium">{remaining}</span> 个组件未领满。
           </p>
           <label className="flex flex-col gap-1">
             <span className="text-muted-foreground">组件</span>
@@ -751,7 +758,7 @@ function IssueDialog({
             </select>
           </label>
           {selected && (
-            <p className="rounded-md border p-2 text-xs text-muted-foreground">
+            <p className="text-muted-foreground rounded-md border p-2 text-xs">
               单位用量 {fmt(selected.unitQuantity)} · 损耗率 {fmt(selected.scrapRate)}%（百分数）·{' '}
               {issueProgressText(selected)}
             </p>
@@ -819,7 +826,7 @@ function OrderDetailDialog({
 
         <div className="flex flex-col gap-4">
           {detail.boundaryNotes.length > 0 && (
-            <ul className="rounded-md border p-3 text-xs text-muted-foreground">
+            <ul className="text-muted-foreground rounded-md border p-3 text-xs">
               {detail.boundaryNotes.map((note) => (
                 <li key={note}>· {note}</li>
               ))}
@@ -829,10 +836,10 @@ function OrderDetailDialog({
           <section>
             <h3 className="mb-2 text-sm font-medium">组件领用记录</h3>
             {detail.components.length === 0 ? (
-              <p className="text-sm text-muted-foreground">这张加工单还没有组件领用记录。</p>
+              <p className="text-muted-foreground text-sm">这张加工单还没有组件领用记录。</p>
             ) : (
               <table className="w-full text-sm">
-                <thead className="text-left text-muted-foreground">
+                <thead className="text-muted-foreground text-left">
                   <tr>
                     <th className="px-2 py-1">组件</th>
                     <th className="px-2 py-1">单位用量</th>
@@ -870,7 +877,7 @@ function OrderDetailDialog({
           <section>
             <h3 className="mb-2 text-sm font-medium">入库需求通知</h3>
             {!detail.inboundRequest ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 尚未下达 —— 入库需求通知随「下达」一起生成。
               </p>
             ) : (
@@ -881,7 +888,7 @@ function OrderDetailDialog({
                   </Badge>
                   <span>{detail.inboundRequest.skuCode}</span>
                 </div>
-                <p className="mt-1 text-muted-foreground">
+                <p className="text-muted-foreground mt-1">
                   待入库 {fmt(detail.inboundRequest.requestedQuantity)} · 实收{' '}
                   {fmt(detail.inboundRequest.receivedQuantity)} · 登记于{' '}
                   {moment(detail.inboundRequest.requestedAt)}
@@ -898,7 +905,7 @@ function OrderDetailDialog({
             <ul className="flex flex-col gap-1 text-sm">
               {detail.events.map((event) => (
                 <li key={event.id} className="flex gap-2">
-                  <span className="w-36 shrink-0 text-muted-foreground">
+                  <span className="text-muted-foreground w-36 shrink-0">
                     {moment(event.occurredAt)}
                   </span>
                   <span>
@@ -931,7 +938,7 @@ function OrderDetailDialog({
             </Button>
           )}
           {actions.length === 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {statusLabel(detail.order.status)}是终态，没有可执行的动作。
             </span>
           )}

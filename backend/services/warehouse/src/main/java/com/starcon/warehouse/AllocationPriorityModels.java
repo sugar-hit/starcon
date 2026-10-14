@@ -1,7 +1,6 @@
 package com.starcon.warehouse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -17,8 +16,7 @@ import java.util.UUID;
  * 7.8.1.2 优先级与保底的传输模型。
  *
  * <p>蓝图原话：「在分摊冲突时按优先级裁决，并为高价值店铺设置保底可用量与安全垫，防止低优先级店铺长期断货影响其
- * 店铺绩效与平台考核。输入：店铺优先级；保底数量/比例；当前销售与绩效。输出：分摊结果（含被压低店铺的提示）；
- * 保底生效记录。」以及关系段的红线：「**保底是策略不是事实**，需可解释可调整。」
+ * 店铺绩效与平台考核。输入：店铺优先级；保底数量/比例；当前销售与绩效。输出：分摊结果（含被压低店铺的提示）； 保底生效记录。」以及关系段的红线：「**保底是策略不是事实**，需可解释可调整。」
  *
  * <p><b>两遍分配的算式（整个模块只有这一套口径）</b>：
  *
@@ -45,18 +43,15 @@ import java.util.UUID;
  *   ⇒ Σ最终分摊 ≤ allocatable（超卖由 V68 的 CHECK 与 V76 的延迟触发器各挡一次）
  * </pre>
  *
- * <p><b>为什么先保底再分余量，而不是先分余量再补差</b>：补差要判断「补到多少算够」，
- * 而那个判断依赖已经分出去的结果 —— 补完可能超过 allocatable，超出的部分又要从别人身上拿回来，
- * 拿回来又会让别人不够格 ……。先划池子则每一步的上界都是静态的，
- * 「谁先拿到」只取决于次序，而次序是**配置**出来的、可复现的。
+ * <p><b>为什么先保底再分余量，而不是先分余量再补差</b>：补差要判断「补到多少算够」， 而那个判断依赖已经分出去的结果 —— 补完可能超过
+ * allocatable，超出的部分又要从别人身上拿回来， 拿回来又会让别人不够格 ……。先划池子则每一步的上界都是静态的， 「谁先拿到」只取决于次序，而次序是**配置**出来的、可复现的。
  *
- * <p><b>为什么被压低这件事必须落库</b>：蓝图输出写的是「分摊结果（含被压低店铺的提示）」。
- * 只显示最终分摊额的话，运营看到的是「这家店今天只有 3 件」，
- * 但答不出「它是被谁挤下去的」—— 而这正是本模块存在的意义。
- * {@code baseAllocatedQty} 与 {@code allocatedQty} 的差就是那个答案，它必须是数据而不是注释。
+ * <p><b>为什么被压低这件事必须落库</b>：蓝图输出写的是「分摊结果（含被压低店铺的提示）」。 只显示最终分摊额的话，运营看到的是「这家店今天只有 3 件」，
+ * 但答不出「它是被谁挤下去的」—— 而这正是本模块存在的意义。 {@code baseAllocatedQty} 与 {@code allocatedQty}
+ * 的差就是那个答案，它必须是数据而不是注释。
  *
- * <p>数量与比例一律 {@link BigDecimal}（DB 侧 numeric），比较一律 {@code compareTo}
- * 而非 {@code equals}（后者把 0 与 0.0000 判成不等）。
+ * <p>数量与比例一律 {@link BigDecimal}（DB 侧 numeric），比较一律 {@code compareTo} 而非 {@code equals}（后者把 0 与
+ * 0.0000 判成不等）。
  */
 public final class AllocationPriorityModels {
 
@@ -67,8 +62,7 @@ public final class AllocationPriorityModels {
   /**
    * 保底口径。蓝图输入写的是「保底数量/比例」，两种都支持。
    *
-   * <p>刻意不给安全垫做比例口径：7.2.2.1 的 {@code buffer_ratio} 已经是比例口径，
-   * 再来一个比例口径的安全垫，界面上就会有两个都叫「比例」的百分比。
+   * <p>刻意不给安全垫做比例口径：7.2.2.1 的 {@code buffer_ratio} 已经是比例口径， 再来一个比例口径的安全垫，界面上就会有两个都叫「比例」的百分比。
    */
   public enum FloorMode {
     QUANTITY("按件数保底"),
@@ -85,9 +79,7 @@ public final class AllocationPriorityModels {
     }
   }
 
-  /**
-   * 保底兑现状态。{@code shortfallQty} 为 0 时恒为 {@code FULFILLED}（V76 的 CHECK 钉死）。
-   */
+  /** 保底兑现状态。{@code shortfallQty} 为 0 时恒为 {@code FULFILLED}（V76 的 CHECK 钉死）。 */
   public enum FloorStatus {
     FULFILLED("足额兑现"),
     PARTIAL("部分兑现"),
@@ -107,8 +99,7 @@ public final class AllocationPriorityModels {
   /**
    * 保底没给到的原因。
    *
-   * <p>枚举而不是自由文本：「没给到」如果只表现为最终分摊额变小，界面上就和
-   * 「它本来就不够格」长得一模一样，复盘时根本分不出是货不够还是没配保底。
+   * <p>枚举而不是自由文本：「没给到」如果只表现为最终分摊额变小，界面上就和 「它本来就不够格」长得一模一样，复盘时根本分不出是货不够还是没配保底。
    */
   public enum FloorShortfallReason {
     POOL_EXHAUSTED("保底池被前面的店分完"),
@@ -130,9 +121,8 @@ public final class AllocationPriorityModels {
   /**
    * 被压低的原因。
    *
-   * <p>{@code RESERVED_FOR_FLOOR} 是本模块最该被看见的一个值：它的意思是
-   * 「这台机器上原本没有你的事，是别家店的保底把你挤下去的」——
-   * 处置建议（调保底 / 调优先级）与「本来就轮不到它」完全不同。
+   * <p>{@code RESERVED_FOR_FLOOR} 是本模块最该被看见的一个值：它的意思是 「这台机器上原本没有你的事，是别家店的保底把你挤下去的」—— 处置建议（调保底 /
+   * 调优先级）与「本来就轮不到它」完全不同。
    */
   public enum SuppressionReason {
     RESERVED_FOR_FLOOR("被别家店的保底占用了货"),
@@ -171,8 +161,7 @@ public final class AllocationPriorityModels {
   /**
    * 一档保底。
    *
-   * <p>内容列写定后不可修改（V76 触发器钉死），改保底 = 收口旧档 + 开新档。
-   * {@code effectiveTo} 为 null 表示至今仍在生效。
+   * <p>内容列写定后不可修改（V76 触发器钉死），改保底 = 收口旧档 + 开新档。 {@code effectiveTo} 为 null 表示至今仍在生效。
    *
    * @param floorMode RATIO 时 {@code floorQuantity} 必须为 0，QUANTITY 时 {@code floorRatio} 必须为 0
    * @param safetyQuantity 保底之上的安全垫件数（只支持件数口径，理由见 {@link FloorMode}）
@@ -200,7 +189,8 @@ public final class AllocationPriorityModels {
   }
 
   /** 保底列表（真分页，total 不受分页影响）。 */
-  public record AllocationFloorPage(List<AllocationFloorRow> floors, long total, int page, int size) {}
+  public record AllocationFloorPage(
+      List<AllocationFloorRow> floors, long total, int page, int size) {}
 
   /** 新建 / 换版一档保底的输入。店铺必须已是该策略的启用成员（V76 触发器在 DB 层挡住）。 */
   public record AllocationFloorInput(
@@ -209,7 +199,8 @@ public final class AllocationPriorityModels {
       @NotNull UUID referenceId,
       @Size(max = 150) String referenceLabel,
       @NotBlank @Size(max = 8) String floorMode,
-      @Schema(nullable = true) @DecimalMin(value = "0") @DecimalMax(value = "1") BigDecimal floorRatio,
+      @Schema(nullable = true) @DecimalMin(value = "0") @DecimalMax(value = "1")
+          BigDecimal floorRatio,
       @Schema(nullable = true) @DecimalMin(value = "0") BigDecimal floorQuantity,
       @Schema(nullable = true) @DecimalMin(value = "0") BigDecimal safetyQuantity,
       @Schema(nullable = true) OffsetDateTime effectiveFrom,
@@ -236,10 +227,8 @@ public final class AllocationPriorityModels {
    *
    * <p>用 POST 而不是 GET：与 7.8.1.1 的 {@code /calculation} 同一理由（请求体放不进 URL）。
    *
-   * @param availableQuantity 当前可用量。<b>本模块必填</b>：7.2.2.1 的池容量口径
-   *     （合格可售可用量 + 含在途时发往该仓的在途）是 7.8.1.1 服务里的私有实现，
-   *     本模块复制一份只会得到一个迟早与它漂移的副本，所以要求调用方传入
-   *     7.2.2.1 已经算出的那个数。capabilities 会把这条讲清楚。
+   * @param availableQuantity 当前可用量。<b>本模块必填</b>：7.2.2.1 的池容量口径 （合格可售可用量 + 含在途时发往该仓的在途）是 7.8.1.1
+   *     服务里的私有实现， 本模块复制一份只会得到一个迟早与它漂移的副本，所以要求调用方传入 7.2.2.1 已经算出的那个数。capabilities 会把这条讲清楚。
    */
   public record PriorityAllocationRequest(
       @NotNull UUID skuId,
@@ -251,8 +240,7 @@ public final class AllocationPriorityModels {
    * 一个店铺在带保底的分摊里的结果。
    *
    * @param floorGranted 它从保底池拿到的件数
-   * @param floorOrder 它在保底仲裁次序里的名次（1 = 最先保住）。没配保底的店也有名次：
-   *     那一列回答的是「它本该排第几却没货保」
+   * @param floorOrder 它在保底仲裁次序里的名次（1 = 最先保住）。没配保底的店也有名次： 那一列回答的是「它本该排第几却没货保」
    * @param floorRequested 它应得的件数（轮到它时保底池还剩多少就是多少）
    * @param floorShortfall 差额；{@code floorStatus=UNFULFILLED} 时必为 {@code floorRequested}
    * @param residualQty 保底之外从余量池另外拿到的量
@@ -283,10 +271,9 @@ public final class AllocationPriorityModels {
   /**
    * 一次带保底的分摊的完整结果 —— 本模块真正的产出。
    *
-   * <p>守恒式与 7.8.1.1 完全同形：
-   * {@code availableQuantity = bufferQuantity + allocatableQuantity} 且
-   * {@code allocatableQuantity = allocatedTotal + unallocatedQuantity}。
-   * 另加本模块自己的一条：{@code floorPool + residualPool = allocatableQuantity}。
+   * <p>守恒式与 7.8.1.1 完全同形： {@code availableQuantity = bufferQuantity + allocatableQuantity} 且 {@code
+   * allocatableQuantity = allocatedTotal + unallocatedQuantity}。 另加本模块自己的一条：{@code floorPool +
+   * residualPool = allocatableQuantity}。
    */
   public record PriorityAllocationResult(
       @Schema(nullable = true) UUID policyId,
@@ -317,11 +304,9 @@ public final class AllocationPriorityModels {
   /**
    * 一条保底生效记录（事实，append-only）。
    *
-   * <p>{@code runId} 指向 7.8.1.1 写的 {@code allocation_run} —— 本模块**不另建分摊头**，
-   * 因为那会把「一次分摊」拆成两件事，而两个 run id 拼起来的记录迟早对不上。
-   * 一次带保底的分摊仍然只写一个 {@code allocation_run} + 若干
-   * {@code allocation_run_line}（7.8.1.1 的表与 CHECK 原样复用），
-   * 本模块额外写若干 {@code allocation_priority_resolution}。
+   * <p>{@code runId} 指向 7.8.1.1 写的 {@code allocation_run} —— 本模块**不另建分摊头**， 因为那会把「一次分摊」拆成两件事，而两个
+   * run id 拼起来的记录迟早对不上。 一次带保底的分摊仍然只写一个 {@code allocation_run} + 若干 {@code
+   * allocation_run_line}（7.8.1.1 的表与 CHECK 原样复用）， 本模块额外写若干 {@code allocation_priority_resolution}。
    */
   public record ResolutionRow(
       UUID runId,
@@ -356,8 +341,8 @@ public final class AllocationPriorityModels {
    * 保底能力清单 —— 前端据此渲染选项与提示，而不是把规则硬编码在界面上。
    *
    * @param performanceBasisAvailable 店铺绩效是否可自动派生。17 绩效域未交付，恒为 false
-   * @param availableQuantityRequired 可用量是否必须由调用方传入（恒为 true，理由见
-   *     {@link PriorityAllocationRequest#availableQuantity()}）
+   * @param availableQuantityRequired 可用量是否必须由调用方传入（恒为 true，理由见 {@link
+   *     PriorityAllocationRequest#availableQuantity()}）
    * @param poolNote 讲清本模块的保底池与 7.8.1.1 的分摊缓冲、7.2.2.1 的平台回写缓冲是三个不同的东西
    */
   public record PriorityCapabilities(

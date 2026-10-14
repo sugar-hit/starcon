@@ -37,7 +37,9 @@ import {
  * </ul>
  */
 
-function candidate(overrides: Partial<WarehouseAllocationCandidateRow> = {}): WarehouseAllocationCandidateRow {
+function candidate(
+  overrides: Partial<WarehouseAllocationCandidateRow> = {},
+): WarehouseAllocationCandidateRow {
   return {
     warehouseRef: 'WH-CN-SH',
     warehouseName: '上海仓',
@@ -136,7 +138,10 @@ describe('货权参与判定（蓝图加粗句）', () => {
 
   it('同法人或挂起（无发货仓）时不报警', () => {
     expect(
-      crossLegalEntityWarning({ chosenLegalEntityCode: 'CN-ENT-A', orderLegalEntityCode: 'CN-ENT-A' }),
+      crossLegalEntityWarning({
+        chosenLegalEntityCode: 'CN-ENT-A',
+        orderLegalEntityCode: 'CN-ENT-A',
+      }),
     ).toBeNull();
     expect(
       crossLegalEntityWarning({ chosenLegalEntityCode: null, orderLegalEntityCode: 'CN-ENT-A' }),

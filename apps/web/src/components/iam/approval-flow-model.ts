@@ -208,8 +208,7 @@ export function validateDraft(draft: FlowDraft, knownRoles: string[]): string[] 
       );
     if (n.approvalMode === 'SERIAL') serialStages.add(n.stageIndex);
     if (n.approvalMode === 'CONDITIONAL') {
-      if (!n.conditionExpression?.trim())
-        errors.push(`${label}：条件分支必须填写条件表达式`);
+      if (!n.conditionExpression?.trim()) errors.push(`${label}：条件分支必须填写条件表达式`);
     } else if (n.conditionExpression?.trim()) {
       errors.push(`${label}：只有条件分支节点能填条件表达式`);
     }
@@ -230,8 +229,7 @@ export function validateDraft(draft: FlowDraft, knownRoles: string[]): string[] 
     if (!min && !max) errors.push(`${label}：上下限不能都留空，全金额都走这里应当是默认路径`);
     if (min && !/^\d+(\.\d+)?$/.test(min)) errors.push(`${label}：金额下限必须是非负数字`);
     if (max && !/^\d+(\.\d+)?$/.test(max)) errors.push(`${label}：金额上限必须是非负数字`);
-    if (min && max && Number(max) <= Number(min))
-      errors.push(`${label}：上限必须大于下限`);
+    if (min && max && Number(max) <= Number(min)) errors.push(`${label}：上限必须大于下限`);
     if (!keys.has(b.targetNodeKey.trim()))
       errors.push(`${label}：指向的节点 ${b.targetNodeKey || '(空)'} 不在本流程内`);
   }
@@ -325,11 +323,15 @@ export function serialStageConflicts(nodes: NodeDraft[]): number[] {
  * <p>审批人已被停用时额外标注 —— 那种节点配得上、批不了，是配置页最需要看见的一类事实。
  */
 export function approverSummary(
-  node: Pick<
-    NodeDraft,
-    'approverType' | 'roleId' | 'positionId' | 'membershipId'
-  > & { approverLabel?: string | null; approverActive?: boolean | null },
-  lookup: { roleName?: (id: string | null) => string; positionName?: (id: string | null) => string; memberName?: (id: string | null) => string },
+  node: Pick<NodeDraft, 'approverType' | 'roleId' | 'positionId' | 'membershipId'> & {
+    approverLabel?: string | null;
+    approverActive?: boolean | null;
+  },
+  lookup: {
+    roleName?: (id: string | null) => string;
+    positionName?: (id: string | null) => string;
+    memberName?: (id: string | null) => string;
+  },
 ): string {
   let name: string;
   if (node.approverType === 'ROLE')
@@ -402,7 +404,8 @@ export function toRequestBody(draft: FlowDraft) {
       positionId: n.approverType === 'POSITION' ? n.positionId : null,
       membershipId: n.approverType === 'USER' ? n.membershipId : null,
       approvalMode: n.approvalMode,
-      conditionExpression: n.approvalMode === 'CONDITIONAL' ? blank(n.conditionExpression ?? '') : null,
+      conditionExpression:
+        n.approvalMode === 'CONDITIONAL' ? blank(n.conditionExpression ?? '') : null,
       description: n.description.trim(),
     })),
     branches: draft.branches.map((b) => ({

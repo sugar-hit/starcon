@@ -76,7 +76,12 @@ describe('17.4.1.2 审批规则前端校验', () => {
   });
 
   it('免审不得豁免四个高风险条件', () => {
-    for (const field of ['crossLegalEntity', 'crossDepartment', 'newVendor', 'highRiskProduct'] as const) {
+    for (const field of [
+      'crossLegalEntity',
+      'crossDepartment',
+      'newVendor',
+      'highRiskProduct',
+    ] as const) {
       const errors = validateDraft(draftOf([exemptRule({ [field]: 'REQUIRED' })]), KNOWN);
       expect(errors.join(), field).toContain('免审规则不能要求');
     }
@@ -117,7 +122,10 @@ describe('17.4.1.2 审批规则前端校验', () => {
 
   it('优先级必须唯一且非负', () => {
     expect(
-      validateDraft(draftOf([exemptRule({ priority: 1 }), submitRule({ priority: 1 })]), KNOWN).join(),
+      validateDraft(
+        draftOf([exemptRule({ priority: 1 }), submitRule({ priority: 1 })]),
+        KNOWN,
+      ).join(),
     ).toContain('优先级 1 重复');
     expect(validateDraft(draftOf([exemptRule({ priority: -1 })]), KNOWN).join()).toContain(
       '不小于 0 的整数',
@@ -125,9 +133,9 @@ describe('17.4.1.2 审批规则前端校验', () => {
   });
 
   it('金额区间必须配币种，且构成正区间', () => {
-    expect(validateDraft(draftOf([exemptRule({ amountCurrencyCode: '' })]), KNOWN).join()).toContain(
-      '填了金额区间就必须给币种',
-    );
+    expect(
+      validateDraft(draftOf([exemptRule({ amountCurrencyCode: '' })]), KNOWN).join(),
+    ).toContain('填了金额区间就必须给币种');
     expect(
       validateDraft(draftOf([exemptRule({ amountMinAmount: '600' })]), KNOWN).join(),
     ).toContain('上限必须大于下限');
@@ -141,7 +149,10 @@ describe('17.4.1.2 审批规则前端校验', () => {
       '至少要有一条规则',
     );
     expect(
-      validateDraft(draftOf([exemptRule()], { documentTypeCode: '', ruleSetName: '' }), KNOWN).join(),
+      validateDraft(
+        draftOf([exemptRule()], { documentTypeCode: '', ruleSetName: '' }),
+        KNOWN,
+      ).join(),
     ).toContain('请选择适用单据类型');
   });
 
@@ -165,10 +176,10 @@ describe('条件摘要与免审额度', () => {
 
   it('四维里非 ANY 的维度进入摘要，并带三态口径', () => {
     expect(
-      conditionSummary(
-        exemptRule({ crossLegalEntity: 'FORBIDDEN', highRiskProduct: 'REQUIRED' }),
-      ),
-    ).toBe(`USD 500 以内 · 跨法人·${DIMENSION_LABELS.FORBIDDEN} · 高风险商品·${DIMENSION_LABELS.REQUIRED}`);
+      conditionSummary(exemptRule({ crossLegalEntity: 'FORBIDDEN', highRiskProduct: 'REQUIRED' })),
+    ).toBe(
+      `USD 500 以内 · 跨法人·${DIMENSION_LABELS.FORBIDDEN} · 高风险商品·${DIMENSION_LABELS.REQUIRED}`,
+    );
   });
 
   it('什么都不约束时摘要就是「任何提交」', () => {

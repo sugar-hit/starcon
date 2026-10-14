@@ -24,20 +24,15 @@ import java.util.UUID;
  * <p>本模块必须自己讲清楚的四条口径（都随响应返回，不让界面上凭空猜）：
  *
  * <ol>
- *   <li><b>「实质性改变」是业务判断，系统只校验与留档</b>：蓝图关系段原文——
- *       「FTA 优惠原产地证能显著降低关税，其适用条件（尤其是"实质性改变"）需要业务确认，
- *       系统只负责按规则校验与留档」。所以本模块<b>没有任何</b>实质性改变判定逻辑：
- *       {@link SubstantiveChangeStatus} 记的是「有没有人确认过」，不是「法律上成不成立」；
- *       主张优惠而未确认的单证被 DB 闸门挡住提交，并被显式报成阻断级缺失提醒。
- *   <li><b>单证要求规则是数据不是常量</b>：目的地国家 × 单证类型 × 必备程度落在
- *       {@code trade_document_rule}，租户可维护。写死成 Java 常量或 CHECK 词表等于把
- *       海关要求抄成第二份且必然漂移。
+ *   <li><b>「实质性改变」是业务判断，系统只校验与留档</b>：蓝图关系段原文—— 「FTA 优惠原产地证能显著降低关税，其适用条件（尤其是"实质性改变"）需要业务确认，
+ *       系统只负责按规则校验与留档」。所以本模块<b>没有任何</b>实质性改变判定逻辑： {@link SubstantiveChangeStatus}
+ *       记的是「有没有人确认过」，不是「法律上成不成立」； 主张优惠而未确认的单证被 DB 闸门挡住提交，并被显式报成阻断级缺失提醒。
+ *   <li><b>单证要求规则是数据不是常量</b>：目的地国家 × 单证类型 × 必备程度落在 {@code trade_document_rule}，租户可维护。写死成 Java 常量或
+ *       CHECK 词表等于把 海关要求抄成第二份且必然漂移。
  *   <li><b>校验结论 append-only</b>：{@code trade_document_check} 一次校验一行、不改不删
- *       （结论是举证材料），改结论只能重跑一次；缺失提醒是**可逐条处理的工作项**，
- *       处理记录同样留痕。两者分表就是为了不互相打架。
- *   <li><b>16 合规上游未交付</b>：本仓库无 product_compliance 服务，所以认证状态来自
- *       <b>租户可维护</b>的 {@code trade_certification_status}，每行带
- *       {@code certificationSource} 如实标注「人登记的」还是「16 合规推来的」。
+ *       （结论是举证材料），改结论只能重跑一次；缺失提醒是**可逐条处理的工作项**， 处理记录同样留痕。两者分表就是为了不互相打架。
+ *   <li><b>16 合规上游未交付</b>：本仓库无 product_compliance 服务，所以认证状态来自 <b>租户可维护</b>的 {@code
+ *       trade_certification_status}，每行带 {@code certificationSource} 如实标注「人登记的」还是「16 合规推来的」。
  * </ol>
  */
 public final class TradeDocumentModels {
@@ -93,8 +88,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的单证包状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的单证包状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -144,8 +138,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的单证类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的单证类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -161,9 +154,8 @@ public final class TradeDocumentModels {
   /**
    * 单证要求级别。与 {@code trade_document_rule.requirement_level} 逐值对应。
    *
-   * <p>只有 {@link #MANDATORY} 缺了才阻断提交；{@link #CONDITIONAL} 的触发条件是
-   * <b>人读口径</b>（{@code condition_expression}），系统不执行它 —— 把条件做成可执行表达式
-   * 等于让运营在没有评审的情况下定义报关规则。
+   * <p>只有 {@link #MANDATORY} 缺了才阻断提交；{@link #CONDITIONAL} 的触发条件是 <b>人读口径</b>（{@code
+   * condition_expression}），系统不执行它 —— 把条件做成可执行表达式 等于让运营在没有评审的情况下定义报关规则。
    */
   public enum RequirementLevel {
     MANDATORY("必备"),
@@ -186,8 +178,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的单证要求级别：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的单证要求级别：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -200,12 +191,10 @@ public final class TradeDocumentModels {
    *
    * <p><b>这是本模块最容易被读错的一组取值，所以在这里写清楚它答什么、不答什么：</b>
    *
-   * <p>它回答的是「<b>有没有人确认过</b>」——谁、什么时候、按什么依据写下的。
-   * 它<b>不</b>回答「实质性改变在法律上<b>成不成立</b>」——那是业务/法务的判断，
+   * <p>它回答的是「<b>有没有人确认过</b>」——谁、什么时候、按什么依据写下的。 它<b>不</b>回答「实质性改变在法律上<b>成不成立</b>」——那是业务/法务的判断，
    * 蓝图关系段把它明确划给业务：系统只负责按规则校验与留档。
    *
-   * <p>所以 {@link #CONFIRMED} 的含义**不是**「系统判定成立」，而是「业务已留痕确认」。
-   * 本模块不存在（也不允许新增）任何自动把它置为 CONFIRMED 的代码路径。
+   * <p>所以 {@link #CONFIRMED} 的含义**不是**「系统判定成立」，而是「业务已留痕确认」。 本模块不存在（也不允许新增）任何自动把它置为 CONFIRMED 的代码路径。
    */
   public enum SubstantiveChangeStatus {
     /** 不适用：这张单证不是原产地证，或没主张优惠。 */
@@ -251,8 +240,7 @@ public final class TradeDocumentModels {
     /**
      * 待业务确认：单证齐备，但有优惠主张还没人确认。
      *
-     * <p><b>刻意不是 PASS</b>：把它混进 PASS 就等于让界面显示「校验通过」而实际上
-     * 这批货能不能享受优惠还没人拍板 —— 那正是蓝图关系段要避免的越界。
+     * <p><b>刻意不是 PASS</b>：把它混进 PASS 就等于让界面显示「校验通过」而实际上 这批货能不能享受优惠还没人拍板 —— 那正是蓝图关系段要避免的越界。
      */
     PENDING_BUSINESS_CONFIRMATION("待业务确认");
 
@@ -272,8 +260,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的校验结论：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的校验结论：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -305,8 +292,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的认证状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的认证状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -340,8 +326,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的缺失提醒类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的缺失提醒类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -370,8 +355,7 @@ public final class TradeDocumentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的提醒级别：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的提醒级别：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -384,11 +368,15 @@ public final class TradeDocumentModels {
   /**
    * 依赖/维度的可用性声明（与 10.5.1.1 的 {@code CustomsDimension} 同形，前端同一套渲染）。
    *
-   * <p>{@code available=false} 时前端显式渲染成「不可用 + 归属模块 + 原因」，
-   * 而不是给一个点下去没反应的选项。
+   * <p>{@code available=false} 时前端显式渲染成「不可用 + 归属模块 + 原因」， 而不是给一个点下去没反应的选项。
    */
   public record TradeDimension(
-      String value, String label, boolean available, String ownerModule, String href, String note) {}
+      String value,
+      String label,
+      boolean available,
+      String ownerModule,
+      String href,
+      String note) {}
 
   /** 状态机的合法转换，前端据此只给合法的按钮。 */
   public record TradeTransition(
@@ -408,10 +396,7 @@ public final class TradeDocumentModels {
 
   public record TradeReminderTypeOption(String value, String label) {}
 
-  /**
-   * 贸易单证能力清单：状态机、单证类型、要求级别、确认状态、校验结论、
-   * **未交付依赖逐条声明**与四条必须讲清的口径。
-   */
+  /** 贸易单证能力清单：状态机、单证类型、要求级别、确认状态、校验结论、 **未交付依赖逐条声明**与四条必须讲清的口径。 */
   public record TradeDocumentCapabilities(
       List<TradeDimension> dependencies,
       List<TradeTransition> transitions,
@@ -542,7 +527,12 @@ public final class TradeDocumentModels {
       String notes) {}
 
   public record TradeTemplateSaved(
-      UUID id, String templateCode, Integer templateVersion, String status, long version, String message) {}
+      UUID id,
+      String templateCode,
+      Integer templateVersion,
+      String status,
+      long version,
+      String message) {}
 
   // ---- 认证状态（16 合规未交付 → 租户可维护）----
 
@@ -734,13 +724,9 @@ public final class TradeDocumentModels {
       List<TradeTransition> allowedNext,
       List<TradeDocumentKindOption> documentKinds) {}
 
-  public record TradeSetCreateRequest(
-      UUID sourceDeclarationId,
-      UUID legalEntityId,
-      String notes) {}
+  public record TradeSetCreateRequest(UUID sourceDeclarationId, UUID legalEntityId, String notes) {}
 
-  public record TradeSetUpdateRequest(
-      Long expectedVersion, String submittedTo, String notes) {}
+  public record TradeSetUpdateRequest(Long expectedVersion, String submittedTo, String notes) {}
 
   public record TradeSetReviewRequest(String reviewNotes) {}
 
@@ -756,7 +742,8 @@ public final class TradeDocumentModels {
 
   public record TradeSetCancelRequest(String reason) {}
 
-  public record TradeSaved(UUID id, String setCode, String status, String statusLabel, long version, String message) {}
+  public record TradeSaved(
+      UUID id, String setCode, String status, String statusLabel, long version, String message) {}
 
   // ---- 单证 ----
 
@@ -818,8 +805,8 @@ public final class TradeDocumentModels {
   /**
    * 优惠主张 / 业务确认请求。
    *
-   * <p>{@code substantiveChangeNote} 是**人写的确认依据**，不是系统算出来的结论；
-   * {@code confirmed=false} 表示业务确认不成立（撤回优惠主张），而不是「否」这个法律判断。
+   * <p>{@code substantiveChangeNote} 是**人写的确认依据**，不是系统算出来的结论； {@code confirmed=false}
+   * 表示业务确认不成立（撤回优惠主张），而不是「否」这个法律判断。
    */
   public record TradePreferenceClaimRequest(
       String ftaScheme,
@@ -872,7 +859,12 @@ public final class TradeDocumentModels {
       OffsetDateTime createdAt) {}
 
   public record TradeCheckSummary(
-      long total, long pass, long fail, long pendingBusiness, long openBlockers, long openWarnings) {}
+      long total,
+      long pass,
+      long fail,
+      long pendingBusiness,
+      long openBlockers,
+      long openWarnings) {}
 
   public record TradeReminderRow(
       UUID id,

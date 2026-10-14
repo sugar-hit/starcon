@@ -22,20 +22,17 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>五条纪律贯穿本类：
  *
  * <ol>
- *   <li><b>只管租户级字典行（{@code spu_id IS NULL}）</b>。V11 把 {@code attribute_definition}
- *       提升成「字典 + SPU 级定义」同表，本类的每一条读写都带 {@code spu_id is null}。
- *       少写这一个条件就会让本页面把每个商品各自建的属性也列出来——那不是字典。
+ *   <li><b>只管租户级字典行（{@code spu_id IS NULL}）</b>。V11 把 {@code attribute_definition} 提升成「字典 + SPU
+ *       级定义」同表，本类的每一条读写都带 {@code spu_id is null}。 少写这一个条件就会让本页面把每个商品各自建的属性也列出来——那不是字典。
  *   <li><b>值源只有一处</b>。选项写在 {@code attribute_option}，也就是 3.1.3.1 规格轴共享的那个值源。
  *       不另建选项表，否则同一个「红色」会在两处各存一份，直接违反蓝图硬约束。
- *   <li><b>停用与删除分开</b>。被商品取用过的选项只能停用：历史 SKU 的属性值还要靠它解析。
- *       停用挡住的是「不许再新建取用」，既有取值照常可读。
- *   <li><b>编码与数据类型建后不可改</b>。编码是 SPU 级定义与规格轴按 code 对齐的锚点；
- *       改编码会让已存在的对齐关系在下次写入时突然报「不一致」。要改就新建一条字典。
+ *   <li><b>停用与删除分开</b>。被商品取用过的选项只能停用：历史 SKU 的属性值还要靠它解析。 停用挡住的是「不许再新建取用」，既有取值照常可读。
+ *   <li><b>编码与数据类型建后不可改</b>。编码是 SPU 级定义与规格轴按 code 对齐的锚点； 改编码会让已存在的对齐关系在下次写入时突然报「不一致」。要改就新建一条字典。
  *   <li><b>删除前先看引用</b>。仍被规格轴引用的字典条目删不动——那会让那些 SPU 的规格凭空消失。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}，
- * 与属性域保持一致（属性字典与 SPU 属性是同一个域）。
+ * <p>权限口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}， 与属性域保持一致（属性字典与 SPU
+ * 属性是同一个域）。
  */
 @Service
 public class AttributeDictionaryService {
@@ -45,8 +42,7 @@ public class AttributeDictionaryService {
   /** 单条字典的选项上限，与 SPU 级属性的 50 项上限同口径。 */
   private static final int MAX_OPTIONS = 50;
 
-  private static final String FROM =
-      " from attribute_definition d where d.spu_id is null";
+  private static final String FROM = " from attribute_definition d where d.spu_id is null";
 
   private final DSLContext sql;
   private final CategoryTreeService categories;
@@ -61,8 +57,8 @@ public class AttributeDictionaryService {
   /**
    * 字典列表（真实分页：先 count 再 limit/offset）。
    *
-   * <p>{@code enabledCount} 是**不受筛选条件影响的**启用字典总数：界面上把它放在筛选结果旁边，
-   * 用户才知道「筛出来的 2 条」之外还有没有停用的条目。0 与「没查过」含义不同，所以单独返回。
+   * <p>{@code enabledCount} 是**不受筛选条件影响的**启用字典总数：界面上把它放在筛选结果旁边， 用户才知道「筛出来的 2 条」之外还有没有停用的条目。0
+   * 与「没查过」含义不同，所以单独返回。
    */
   public AttributeDefinitionPage list(AttributeDefinitionQuery query) {
     int page = query.page();
@@ -75,15 +71,13 @@ public class AttributeDictionaryService {
 
     long total =
         sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
-    long enabledCount = sql.fetchOne("select count(*)" + FROM + " and d.enabled").get(0, Long.class);
+    long enabledCount =
+        sql.fetchOne("select count(*)" + FROM + " and d.enabled").get(0, Long.class);
 
     // 决胜列 id 恒定追加：position 相同的行也不会在翻页边界上错位。
     var rows =
         sql.fetch(
-            SELECT_COLUMNS
-                + FROM
-                + sqlWhere
-                + " order by d.position,d.code,d.id limit ? offset ?",
+            SELECT_COLUMNS + FROM + sqlWhere + " order by d.position,d.code,d.id limit ? offset ?",
             append(binds, size, (long) page * size).toArray());
     return new AttributeDefinitionPage(
         rows.stream().map(this::toRow).toList(), total, page, size, enabledCount);
@@ -104,8 +98,7 @@ public class AttributeDictionaryService {
           + "(select count(*) from attribute_definition u where u.tenant_id=d.tenant_id"
           + "  and u.spu_id is not null and u.code=d.code) as spu_usage_count";
 
-  private void conditions(
-      AttributeDefinitionQuery query, List<String> where, List<Object> binds) {
+  private void conditions(AttributeDefinitionQuery query, List<String> where, List<Object> binds) {
     if (query.keyword() != null && !query.keyword().isBlank()) {
       String escaped = query.keyword().replace("!", "!!").replace("%", "!%").replace("_", "!_");
       where.add("(d.code ilike ? escape '!' or d.name ilike ? escape '!')");
@@ -170,8 +163,8 @@ public class AttributeDictionaryService {
   /**
    * 字典概览：规模、选项、类目规则，以及几个治理缺口指标。
    *
-   * <p>{@code spuLevelDefinitionCount} 与 {@code dictionaryAttributeCount} 分开报：
-   * V11 之后两者同表，不分开就会把「本租户定义了几条字典」和「多少商品各自建了属性」混成一个数。
+   * <p>{@code spuLevelDefinitionCount} 与 {@code dictionaryAttributeCount} 分开报： V11
+   * 之后两者同表，不分开就会把「本租户定义了几条字典」和「多少商品各自建了属性」混成一个数。
    *
    * <p>{@code categoryWithoutRuleCount} 是缺口：已有商品的类目里，一个属性要求都没配的数量——
    * 这些类目的录入表单不会做必填校验，运营容易误以为「配过就等于全局生效」。
@@ -194,8 +187,7 @@ public class AttributeDictionaryService {
                     + " on d.tenant_id=o.tenant_id and d.id=o.attribute_id"
                     + " where d.spu_id is null and not o.enabled")
             .get(0, Long.class);
-    long rules =
-        sql.fetchOne("select count(*) from category_attribute_rule").get(0, Long.class);
+    long rules = sql.fetchOne("select count(*) from category_attribute_rule").get(0, Long.class);
     long spuLevel =
         sql.fetchOne("select count(*) from attribute_definition where spu_id is not null")
             .get(0, Long.class);
@@ -207,7 +199,8 @@ public class AttributeDictionaryService {
                     + " group by p.category) t")
             .get(0, Long.class);
     var top =
-        sql.fetch(
+        sql
+            .fetch(
                 "select d.id,d.code,d.name,"
                     + "(select count(*) from category_attribute_rule r"
                     + "  where r.tenant_id=d.tenant_id and r.attribute_id=d.id) as category_rule_count"
@@ -248,8 +241,7 @@ public class AttributeDictionaryService {
   /**
    * 新建或更新字典条目（id 为空即新建），走 version 乐观锁。
    *
-   * <p>更新**不接管选项集合**：选项有独立的子资源（增 / 改 / 停用 / 删除）。
-   * 把选项集合塞进 PUT 会让「保存定义」顺手删掉几个选项，而选项一旦被商品取用过就删不动——
+   * <p>更新**不接管选项集合**：选项有独立的子资源（增 / 改 / 停用 / 删除）。 把选项集合塞进 PUT 会让「保存定义」顺手删掉几个选项，而选项一旦被商品取用过就删不动——
    * 那种失败发生在用户以为只是改了个名字之后，是最难排查的一类。
    */
   public AttributeDefinitionSaved save(
@@ -280,8 +272,7 @@ public class AttributeDictionaryService {
 
     if (id == null) {
       if (sql.fetchOne("select id from attribute_definition where spu_id is null and code=?", code)
-          != null)
-        throw conflict("属性编码已存在：" + code);
+          != null) throw conflict("属性编码已存在：" + code);
       UUID newId = Ids.next();
       try {
         sql.execute(
@@ -314,16 +305,13 @@ public class AttributeDictionaryService {
     var row = dictionaryRow(id);
     CatalogService.check(
         row.get("code", String.class).equals(code),
-        "属性编码建后不可修改：商品的 SPU 级属性与规格轴都按同 code 对齐这个字典条目，"
-            + "改编码会让已有对齐在下一次写入时报「不一致」。要改请新建一条字典条目");
+        "属性编码建后不可修改：商品的 SPU 级属性与规格轴都按同 code 对齐这个字典条目，" + "改编码会让已有对齐在下一次写入时报「不一致」。要改请新建一条字典条目");
     CatalogService.check(
         row.get("data_type", String.class).equals(input.dataType()),
-        "属性数据类型建后不可修改：已存在的属性值与类目取值范围都是按这个类型解析的。"
-            + "要改请新建一条字典条目");
+        "属性数据类型建后不可修改：已存在的属性值与类目取值范围都是按这个类型解析的。" + "要改请新建一条字典条目");
     CatalogService.check(
         row.get("variant_axis", Boolean.class).equals(input.variantAxis()),
-        "是否规格轴建后不可修改：规格轴要满足「必填单选枚举 + 用途=规格」的固定形态，"
-            + "在已有属性值的条目上改这个开关会让取值模式自相矛盾");
+        "是否规格轴建后不可修改：规格轴要满足「必填单选枚举 + 用途=规格」的固定形态，" + "在已有属性值的条目上改这个开关会让取值模式自相矛盾");
     int updated;
     try {
       updated =
@@ -346,8 +334,7 @@ public class AttributeDictionaryService {
     } catch (DataAccessException e) {
       throw conflict("属性定义写入失败，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "属性定义已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "属性定义已被他人修改，请刷新后重试");
     long version =
         sql.fetchOne("select version from attribute_definition where id=?", id)
             .get("version", Long.class);
@@ -381,11 +368,9 @@ public class AttributeDictionaryService {
   /**
    * 删除字典条目。
    *
-   * <p>仍被规格轴引用的条目删不动：那会让那些 SPU 的规格凭空消失，而它们的 SKU 上还留着
-   * 按这条轴算出的 {@code variant_signature}。正确做法是停用。
+   * <p>仍被规格轴引用的条目删不动：那会让那些 SPU 的规格凭空消失，而它们的 SKU 上还留着 按这条轴算出的 {@code variant_signature}。正确做法是停用。
    *
-   * <p>类目规则会随条目一起删掉（级联）：规则是「这条属性的要求」，属性没了要求就没有意义，
-   * 留着会成为指向空处的死规则。
+   * <p>类目规则会随条目一起删掉（级联）：规则是「这条属性的要求」，属性没了要求就没有意义， 留着会成为指向空处的死规则。
    */
   public void delete(AccessService.Access actor, UUID id, long version) {
     var row = dictionaryRow(id);
@@ -397,17 +382,14 @@ public class AttributeDictionaryService {
             .get(0, Long.class);
     CatalogService.check(
         axes == 0,
-        "属性「" + code + "」仍被 " + axes + " 个商品的规格轴引用，不能删除；"
-            + "请改为停用，停用只挡住新建使用，已有的规格与取值仍可读");
+        "属性「" + code + "」仍被 " + axes + " 个商品的规格轴引用，不能删除；" + "请改为停用，停用只挡住新建使用，已有的规格与取值仍可读");
     long spuUsage =
         sql.fetchOne(
                 "select count(*) from attribute_definition where spu_id is not null and code=?",
                 code)
             .get(0, Long.class);
     CatalogService.check(
-        spuUsage == 0,
-        "属性「" + code + "」已被 " + spuUsage + " 个商品用在 SPU 级属性定义上，不能删除；"
-            + "请改为停用");
+        spuUsage == 0, "属性「" + code + "」已被 " + spuUsage + " 个商品用在 SPU 级属性定义上，不能删除；" + "请改为停用");
     sql.execute("delete from attribute_definition where id=? and spu_id is null", id);
     audit(actor, id, "AttributeDefinitionDeleted");
   }
@@ -417,12 +399,12 @@ public class AttributeDictionaryService {
   /**
    * 选项列表，每项带「被商品取用次数」与「被多少条类目规则列为可选值」。
    *
-   * <p>两个计数决定界面上给「删除」还是给「停用」，必须在删除前就能看见，
-   * 不能等点了删除才被拒绝。合成字段 {@code inUse} 给界面直接判断用。
+   * <p>两个计数决定界面上给「删除」还是给「停用」，必须在删除前就能看见， 不能等点了删除才被拒绝。合成字段 {@code inUse} 给界面直接判断用。
    */
   public List<AttributeOptionRow> options(UUID attributeId) {
     dictionaryRow(attributeId);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select o.value,o.position,o.enabled,o.created_at,"
                 + "(select count(*) from attribute_value_item i"
                 + "  where i.tenant_id=o.tenant_id and i.attribute_id=o.attribute_id"
@@ -454,8 +436,7 @@ public class AttributeDictionaryService {
       AccessService.Access actor, UUID attributeId, AttributeOptionInput input) {
     var definition = dictionaryRow(attributeId);
     CatalogService.check(
-        "OPTION".equals(definition.get("data_type", String.class)),
-        "只有枚举属性（OPTION）可以配置选项集合");
+        "OPTION".equals(definition.get("data_type", String.class)), "只有枚举属性（OPTION）可以配置选项集合");
     String value = input.value().trim();
     CatalogService.check(!value.isEmpty(), "选项值不能为空");
     CatalogService.check(value.length() <= 100, "选项值最多 100 个字符");
@@ -505,10 +486,9 @@ public class AttributeDictionaryService {
   }
 
   /**
- * 删除选项。
- *
-   * <p>两类引用都要先拦：已被商品取用过的不能删（历史商品需要它来解析，只能停用）；
-   * 已被类目规则列为可选值的也不能删——删掉会连带把那些规则改掉，而用户只是想删一个值。
+   * 删除选项。
+   *
+   * <p>两类引用都要先拦：已被商品取用过的不能删（历史商品需要它来解析，只能停用）； 已被类目规则列为可选值的也不能删——删掉会连带把那些规则改掉，而用户只是想删一个值。
    * 正确顺序是先改规则、再删选项。
    *
    * <p>「停用不删除」是蓝图对属性选项的硬要求：历史单据还要能展示那个值。
@@ -524,9 +504,7 @@ public class AttributeDictionaryService {
                 target)
             .get(0, Long.class);
     CatalogService.check(
-        used == 0,
-        "无法删除选项「" + target + "」：已有 " + used + " 处商品属性值取用了它。"
-            + "历史商品需要它来解析，请改为停用该选项");
+        used == 0, "无法删除选项「" + target + "」：已有 " + used + " 处商品属性值取用了它。" + "历史商品需要它来解析，请改为停用该选项");
     long referenced =
         sql.fetchOne(
                 "select count(*) from category_attribute_option"
@@ -536,8 +514,7 @@ public class AttributeDictionaryService {
             .get(0, Long.class);
     CatalogService.check(
         referenced == 0,
-        "无法删除选项「" + target + "」：有 " + referenced + " 条类目规则把它列为可选值。"
-            + "删掉会连带改掉那些规则，请先在类目规则里移除它");
+        "无法删除选项「" + target + "」：有 " + referenced + " 条类目规则把它列为可选值。" + "删掉会连带改掉那些规则，请先在类目规则里移除它");
     int deleted =
         sql.execute(
             "delete from attribute_option where attribute_id=? and value=?", attributeId, target);
@@ -625,9 +602,8 @@ public class AttributeDictionaryService {
   /**
    * 新增或更新一条类目属性规则（必填 + 可选范围）。
    *
-   * <p>范围形态按数据类型分流：枚举属性用 {@code allowedOptions} 收窄取值子集，
-   * 数值属性用 {@code minValue}/{@code maxValue}。两者互斥，规则里写错形态会表达出一个
-   * 永远匹配不上的范围，所以在这里拦住而不是留给下游。
+   * <p>范围形态按数据类型分流：枚举属性用 {@code allowedOptions} 收窄取值子集， 数值属性用 {@code minValue}/{@code
+   * maxValue}。两者互斥，规则里写错形态会表达出一个 永远匹配不上的范围，所以在这里拦住而不是留给下游。
    */
   public CategoryAttributeRuleSaved saveCategoryRule(
       AccessService.Access actor, UUID attributeId, CategoryAttributeRuleInput input) {
@@ -636,13 +612,14 @@ public class AttributeDictionaryService {
     String category = input.category().trim();
     CatalogService.check(!category.isBlank(), "类目不能为空");
     List<String> allowed =
-        input.allowedOptions() == null ? List.of() : input.allowedOptions().stream().map(String::trim).toList();
+        input.allowedOptions() == null
+            ? List.of()
+            : input.allowedOptions().stream().map(String::trim).toList();
 
     String rangeProblem = rangeProblem(dataType, input.minValue(), input.maxValue());
     CatalogService.check(rangeProblem == null, rangeProblem);
     CatalogService.check(
-        "OPTION".equals(dataType) || allowed.isEmpty(),
-        "可选值范围只对枚举属性（OPTION）有意义；数值属性请改用取值上下限");
+        "OPTION".equals(dataType) || allowed.isEmpty(), "可选值范围只对枚举属性（OPTION）有意义；数值属性请改用取值上下限");
     CatalogService.check(
         !("OPTION".equals(dataType)) || (input.minValue() == null && input.maxValue() == null),
         "枚举属性的可选值范围请用可选值子集表达，不要同时设置取值上下限");
@@ -653,12 +630,11 @@ public class AttributeDictionaryService {
     for (String option : allowed) {
       boolean exists =
           sql.fetchOne(
-                      "select 1 from attribute_option where attribute_id=? and value=?",
-                      attributeId,
-                      option)
-                  != null;
-      CatalogService.check(
-          exists, "可选值「" + option + "」不在该属性的选项集合里，请先在选项集合中登记它");
+                  "select 1 from attribute_option where attribute_id=? and value=?",
+                  attributeId,
+                  option)
+              != null;
+      CatalogService.check(exists, "可选值「" + option + "」不在该属性的选项集合里，请先在选项集合中登记它");
     }
 
     // V14 兑现点：category_id 是 NOT NULL 外键，而本方法的入参仍是类目**文本**（已交付 API 语义不变）。
@@ -719,8 +695,7 @@ public class AttributeDictionaryService {
   /**
    * 删除类目属性规则。
    *
-   * <p>删规则不改动任何商品已录入的属性值——规则是「新建录入时的准入条件」，
-   * 已经录入的数据本来就合法，被一条新规则连坐改掉会凭空改掉既有商品的事实。
+   * <p>删规则不改动任何商品已录入的属性值——规则是「新建录入时的准入条件」， 已经录入的数据本来就合法，被一条新规则连坐改掉会凭空改掉既有商品的事实。
    */
   public void deleteCategoryRule(AccessService.Access actor, UUID attributeId, String category) {
     dictionaryRow(attributeId);
@@ -745,7 +720,11 @@ public class AttributeDictionaryService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   private static String instant(OffsetDateTime value) {

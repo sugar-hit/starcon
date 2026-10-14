@@ -2,7 +2,6 @@ package com.starcon.catalog;
 
 import static com.starcon.catalog.CatalogModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -14,38 +13,33 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import org.jooq.DSLContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 4.2.2.2 描述模板：五段骨架 + 变量绑定 + 多语言 + 图片插入位 + 渲染后的描述 HTML，
- * 以及租户隔离三断言。
+ * 4.2.2.2 描述模板：五段骨架 + 变量绑定 + 多语言 + 图片插入位 + 渲染后的描述 HTML， 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS：描述模板、段落、插图位、渲染结果、逐段 HTML、
- * 图片落点与缺失报告全部真的落库，「HTML 里没有残留占位符」是从库里读出来的事实
+ * <p>真实 PostgreSQL 16 + 强制 RLS：描述模板、段落、插图位、渲染结果、逐段 HTML、 图片落点与缺失报告全部真的落库，「HTML 里没有残留占位符」是从库里读出来的事实
  * 而不是内存里的返回值。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本文件最重要的断言是 {@link #unboundVariablesAreReportedAndNeverLeakIntoHtml()}：</b>
- * 它逐条验证蓝图硬要求「变量未绑定必须显式提示，不允许把 {@code {{尺寸}}} 原样发到平台」——
- * 渲染出的 HTML 里不残留任何花括号、段落被标成缺变量、缺失逐条落到
- * {@code description_render_issue}，并且从 DB 层直接改状态也改不成「已填好」。
+ * 它逐条验证蓝图硬要求「变量未绑定必须显式提示，不允许把 {@code {{尺寸}}} 原样发到平台」—— 渲染出的 HTML 里不残留任何花括号、段落被标成缺变量、缺失逐条落到 {@code
+ * description_render_issue}，并且从 DB 层直接改状态也改不成「已填好」。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,8 +53,13 @@ class DescriptionTemplateIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -70,7 +69,8 @@ class DescriptionTemplateIntegrationTest {
   static {
     pg.start();
     try {
-      try (var conn = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var conn =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = conn.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role catalog_app login password 'test-only' nosuperuser nobypassrls");
@@ -85,7 +85,8 @@ class DescriptionTemplateIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -94,7 +95,8 @@ class DescriptionTemplateIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, null, List.of(grant("ALL", allPermissions()))));
       actors.put("Bearer tenant-b", actor(user, b, null, List.of(grant("ALL", allPermissions()))));
       actors.put(
-          "Bearer reader", actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
+          "Bearer reader",
+          actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -103,8 +105,10 @@ class DescriptionTemplateIntegrationTest {
 
   static List<String> allPermissions() {
     return java.util.stream.Stream.of("spu", "sku", "assets", "attribute")
-        .flatMap(p -> java.util.stream.Stream.of("read", "create", "update", "delete")
-            .map(op -> "catalog." + p + "." + op))
+        .flatMap(
+            p ->
+                java.util.stream.Stream.of("read", "create", "update", "delete")
+                    .map(op -> "catalog." + p + "." + op))
         .toList();
   }
 
@@ -153,20 +157,28 @@ class DescriptionTemplateIntegrationTest {
   }
 
   void writeVoid(AccessService.Access who, Runnable work) {
-    access.run(who, "catalog.spu.update", () -> { work.run(); return null; });
+    access.run(
+        who,
+        "catalog.spu.update",
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   // ------------------------------------------------------------ 夹具
 
   String unique(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   UUID spu(AccessService.Access who, String code, String brand, String category) {
     return write(
         who,
-        () -> catalog.saveSpu(
-            who, null, new SpuInput(code, "星云桌面音箱", "", brand, category, "DRAFT", 0)));
+        () ->
+            catalog.saveSpu(
+                who, null, new SpuInput(code, "星云桌面音箱", "", brand, category, "DRAFT", 0)));
   }
 
   UUID sku(AccessService.Access who, UUID spuId, String code, String name) {
@@ -174,10 +186,19 @@ class DescriptionTemplateIntegrationTest {
     // 所以这里必须读当前版本而不是写死 0。
     return write(
         who,
-        () -> catalog.saveSku(
-            who, spuId, null,
-            new SkuInput(code, name, unique("BC"), "PCS", "ACTIVE", List.of(),
-                catalog.detail(spuId).product().version())));
+        () ->
+            catalog.saveSku(
+                who,
+                spuId,
+                null,
+                new SkuInput(
+                    code,
+                    name,
+                    unique("BC"),
+                    "PCS",
+                    "ACTIVE",
+                    List.of(),
+                    catalog.detail(spuId).product().version())));
   }
 
   byte[] png(int width, int height, Color color) {
@@ -196,30 +217,34 @@ class DescriptionTemplateIntegrationTest {
   }
 
   /** 真传一张 PNG 进素材库（宽高从字节探测，不是调用方填的）。 */
-  UUID uploadImage(AccessService.Access who, String name, String purpose, int w, int h, Color color) {
+  UUID uploadImage(
+      AccessService.Access who, String name, String purpose, int w, int h, Color color) {
     return write(
         who,
         () ->
-            media.upload(
+            media
+                .upload(
                     who,
                     new MockMultipartFile("file", name + ".png", null, png(w, h, color)),
-                    new MediaUpload(name, "IMAGE", purpose, "描述模板用图", name + " 的替代文本", List.of(), true))
+                    new MediaUpload(
+                        name, "IMAGE", purpose, "描述模板用图", name + " 的替代文本", List.of(), true))
                 .id());
   }
 
   /**
-   * 短语库是租户级的，同一句卖点只能有一条（V21 的 UNIQUE(tenant_id,phrase_type,text)
-   * 是刻意的产品约束）。所有用例共用同一个容器，所以这里是幂等的。
+   * 短语库是租户级的，同一句卖点只能有一条（V21 的 UNIQUE(tenant_id,phrase_type,text) 是刻意的产品约束）。所有用例共用同一个容器，所以这里是幂等的。
    */
   ContentPhraseRow phrase(AccessService.Access who, String code, String text, String type) {
     String typeUpper = type.toUpperCase(Locale.ROOT);
     var page =
         tx(who, () -> descriptions.phrases(new ContentPhraseQuery(null, typeUpper, null, 0, 200)));
     if (page.items() != null)
-      for (var row : page.items())
-        if (row.phrase().text().equals(text)) return row.phrase();
-    return write(who, () -> descriptions.savePhrase(who, null,
-        new ContentPhraseInput(code, text, typeUpper, true, 0)));
+      for (var row : page.items()) if (row.phrase().text().equals(text)) return row.phrase();
+    return write(
+        who,
+        () ->
+            descriptions.savePhrase(
+                who, null, new ContentPhraseInput(code, text, typeUpper, true, 0)));
   }
 
   /** 铺一套短语池，让 PHRASE_* 变量绑得上。幂等（同一租户内）。 */
@@ -245,53 +270,76 @@ class DescriptionTemplateIntegrationTest {
                 variable("category", "SPU_CATEGORY"),
                 variable("selling", "PHRASE_SELLING")),
             withSlot
-                ? List.of(
-                    new DescriptionImageSlotInput("SKU_PRIMARY", "主图", null, true, 0))
+                ? List.of(new DescriptionImageSlotInput("SKU_PRIMARY", "主图", null, true, 0))
                 : List.of(),
             true,
             null),
         new DescriptionSectionInput(
-            "SCENE", "适用于 {scene} 等场景。",
-            List.of(variable("scene", "PHRASE_SCENE")), List.of(), true, null),
+            "SCENE",
+            "适用于 {scene} 等场景。",
+            List.of(variable("scene", "PHRASE_SCENE")),
+            List.of(),
+            true,
+            null),
         new DescriptionSectionInput(
-            "SPEC", "型号 {skuName}（编码 {skuCode}），规格见下表。",
+            "SPEC",
+            "型号 {skuName}（编码 {skuCode}），规格见下表。",
             List.of(variable("skuName", "SKU_NAME"), variable("skuCode", "SKU_CODE")),
-            List.of(), true, null),
+            List.of(),
+            true,
+            null),
         new DescriptionSectionInput(
-            "CAUTION", "{caution}。",
-            List.of(variable("caution", "PHRASE_CAUTION")), List.of(), true, null),
+            "CAUTION",
+            "{caution}。",
+            List.of(variable("caution", "PHRASE_CAUTION")),
+            List.of(),
+            true,
+            null),
         new DescriptionSectionInput(
-            "SERVICE_PROMISE", "本店提供 7 天无理由退换与一年质保。",
-            List.of(), List.of(), true, null));
+            "SERVICE_PROMISE", "本店提供 7 天无理由退换与一年质保。", List.of(), List.of(), true, null));
   }
 
   DescriptionTemplateSaved template(AccessService.Access who, String code, boolean withSlot) {
-    return write(who, () -> templates.saveTemplate(who, null,
-        new DescriptionTemplateInput(code, "描述模板 " + code, "", "zh-CN",
-            standardSections(withSlot), true, 0)));
+    return write(
+        who,
+        () ->
+            templates.saveTemplate(
+                who,
+                null,
+                new DescriptionTemplateInput(
+                    code, "描述模板 " + code, "", "zh-CN", standardSections(withSlot), true, 0)));
   }
 
   /**
    * 只有产品介绍一段，且品牌那个变量绑的是这个 SPU 上的空字段（专供「变量缺失」用例）。
    *
-   * <p>刻意<b>不</b>写未声明绑定的占位符：保存期就被
-   * {@code DescriptionRules.variableBindingProblem} 挡掉了（见
-   * {@link #placeholderWithoutBindingIsRejectedAtSaveTime()}）。
-   * 也就是说 UNBOUND_PLACEHOLDER 这条 issue_kind 在正常路径上是**不可达**的，
-   * 它是给「模板改版与翻译不同步」那类漂移留的兜底。
+   * <p>刻意<b>不</b>写未声明绑定的占位符：保存期就被 {@code DescriptionRules.variableBindingProblem} 挡掉了（见 {@link
+   * #placeholderWithoutBindingIsRejectedAtSaveTime()}）。 也就是说 UNBOUND_PLACEHOLDER 这条 issue_kind
+   * 在正常路径上是**不可达**的， 它是给「模板改版与翻译不同步」那类漂移留的兜底。
    */
   DescriptionTemplateSaved thinTemplate(AccessService.Access who, String code) {
-    return write(who, () -> templates.saveTemplate(who, null,
-        new DescriptionTemplateInput(code, "薄模板 " + code, "", "zh-CN",
-            List.of(
-                new DescriptionSectionInput(
-                    "INTRO",
-                    "{brand} 的 {spuName}。",
-                    List.of(variable("brand", "SPU_BRAND"), variable("spuName", "SPU_NAME")),
-                    List.of(),
+    return write(
+        who,
+        () ->
+            templates.saveTemplate(
+                who,
+                null,
+                new DescriptionTemplateInput(
+                    code,
+                    "薄模板 " + code,
+                    "",
+                    "zh-CN",
+                    List.of(
+                        new DescriptionSectionInput(
+                            "INTRO",
+                            "{brand} 的 {spuName}。",
+                            List.of(
+                                variable("brand", "SPU_BRAND"), variable("spuName", "SPU_NAME")),
+                            List.of(),
+                            true,
+                            null)),
                     true,
-                    null)),
-            true, 0)));
+                    0)));
   }
 
   // ============================================================ 五段骨架
@@ -299,11 +347,9 @@ class DescriptionTemplateIntegrationTest {
   /**
    * 五段骨架真的落库，且段落背后的内容模板与变量**复用 3.4.2.2 的表**。
    *
-   * <p>这个用例是 V96 文件头那个取舍判断的回归护栏：
-   * 「变量与多语言复用 V21」不是文档里的一句话，而是
-   * {@code description_template_section.content_template_id} 真的指向 content_template，
-   * 且 {@code content_template_variable} 里查得到那些变量。
-   * 哪天有人在本模块另起一张变量表，这里会红。
+   * <p>这个用例是 V96 文件头那个取舍判断的回归护栏： 「变量与多语言复用 V21」不是文档里的一句话，而是 {@code
+   * description_template_section.content_template_id} 真的指向 content_template， 且 {@code
+   * content_template_variable} 里查得到那些变量。 哪天有人在本模块另起一张变量表，这里会红。
    */
   @Test
   void fiveSectionSkeletonPersistsAndReusesV21Tables() {
@@ -314,26 +360,34 @@ class DescriptionTemplateIntegrationTest {
     assertThat(saved.imageSlotCount()).isEqualTo(1);
 
     var row = tx(actor, () -> templates.template(saved.id()));
-    assertThat(row.sections()).extracting(DescriptionSectionSummary::sectionType)
+    assertThat(row.sections())
+        .extracting(DescriptionSectionSummary::sectionType)
         .containsExactly("INTRO", "SCENE", "SPEC", "CAUTION", "SERVICE_PROMISE");
-    assertThat(row.sections()).extracting(DescriptionSectionSummary::sortOrder)
+    assertThat(row.sections())
+        .extracting(DescriptionSectionSummary::sortOrder)
         .containsExactly(0, 1, 2, 3, 4);
     // 五类显式建模，不是糊成一个正文大字符串。
-    assertThat(row.sections()).extracting(DescriptionSectionSummary::sectionTypeLabel)
+    assertThat(row.sections())
+        .extracting(DescriptionSectionSummary::sectionTypeLabel)
         .containsExactly("产品介绍", "使用场景", "规格参数", "注意事项", "售后承诺");
     assertThat(row.sections().get(0).variableCount()).isEqualTo(4);
     assertThat(row.sections().get(4).variableCount()).isZero();
 
     // 段落背后的 content_template_id 指向 V21 的表，不是本模块另建的表。
     var sectionRows =
-        tx(actor, () -> sql.fetch(
-            "select s.section_type,s.content_template_id,c.code,c.content_type"
-                + " from description_template_section s"
-                + " join content_template c on c.tenant_id=s.tenant_id and c.id=s.content_template_id"
-                + " where s.tenant_id=? and s.template_id=? order by s.sort_order",
-            templates.currentTenantId(), saved.id()));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select s.section_type,s.content_template_id,c.code,c.content_type"
+                        + " from description_template_section s"
+                        + " join content_template c on c.tenant_id=s.tenant_id and c.id=s.content_template_id"
+                        + " where s.tenant_id=? and s.template_id=? order by s.sort_order",
+                    templates.currentTenantId(),
+                    saved.id()));
     assertThat(sectionRows).hasSize(5);
-    for (var r : sectionRows) assertThat(r.get("content_type", String.class)).isEqualTo("DESCRIPTION");
+    for (var r : sectionRows)
+      assertThat(r.get("content_type", String.class)).isEqualTo("DESCRIPTION");
     // 段落编码由模板编码 + 段落类型派生（长度截到 32）。
     for (var r : sectionRows)
       assertThat(r.get("code", String.class)).startsWith(code).hasSizeLessThanOrEqualTo(32);
@@ -341,22 +395,30 @@ class DescriptionTemplateIntegrationTest {
     // 变量落在 V21 的 content_template_variable 上：{{尺寸}} 的绑定源全仓只有一个答案。
     UUID introContentTemplate = sectionRows.get(0).get("content_template_id", UUID.class);
     var variables =
-        tx(actor, () -> sql.fetch(
-            "select variable_name,source from content_template_variable where template_id=?"
-                + " order by slot_no",
-            introContentTemplate));
-    assertThat(variables).extracting(r -> r.get("variable_name", String.class))
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select variable_name,source from content_template_variable where template_id=?"
+                        + " order by slot_no",
+                    introContentTemplate));
+    assertThat(variables)
+        .extracting(r -> r.get("variable_name", String.class))
         .containsExactly("spuName", "brand", "category", "selling");
-    assertThat(variables).extracting(r -> r.get("source", String.class))
+    assertThat(variables)
+        .extracting(r -> r.get("source", String.class))
         .containsExactly("SPU_NAME", "SPU_BRAND", "SPU_CATEGORY", "PHRASE_SELLING");
 
     // 插图位也在库里。
     var slots =
-        tx(actor, () -> sql.fetch(
-            "select i.slot_no,i.bind_source,i.required from description_image_slot i"
-                + " join description_template_section d"
-                + " on d.tenant_id=i.tenant_id and d.id=i.section_id where d.template_id=?",
-            saved.id()));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select i.slot_no,i.bind_source,i.required from description_image_slot i"
+                        + " join description_template_section d"
+                        + " on d.tenant_id=i.tenant_id and d.id=i.section_id where d.template_id=?",
+                    saved.id()));
     assertThat(slots).hasSize(1);
     assertThat(slots.get(0).get("bind_source", String.class)).isEqualTo("SKU_PRIMARY");
     assertThat(slots.get(0).get("required", Boolean.class)).isTrue();
@@ -372,12 +434,26 @@ class DescriptionTemplateIntegrationTest {
   /** 段落重复类型被拒：同一模板里两段「产品介绍」会让渲染出两个同名 section。 */
   @Test
   void duplicateSectionTypeIsRejected() {
-    assertThatThrownBy(() -> write(actor, () -> templates.saveTemplate(actor, null,
-        new DescriptionTemplateInput(unique("DUP"), "重复段落", "", "zh-CN",
-            List.of(
-                new DescriptionSectionInput("INTRO", "第一段", List.of(), List.of(), true, null),
-                new DescriptionSectionInput("INTRO", "第二段", List.of(), List.of(), true, null)),
-            true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        templates.saveTemplate(
+                            actor,
+                            null,
+                            new DescriptionTemplateInput(
+                                unique("DUP"),
+                                "重复段落",
+                                "",
+                                "zh-CN",
+                                List.of(
+                                    new DescriptionSectionInput(
+                                        "INTRO", "第一段", List.of(), List.of(), true, null),
+                                    new DescriptionSectionInput(
+                                        "INTRO", "第二段", List.of(), List.of(), true, null)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("重复");
   }
@@ -386,15 +462,33 @@ class DescriptionTemplateIntegrationTest {
   @Test
   void imageSlotNumberingMustBeContiguous() {
     seedPools(actor);
-    assertThatThrownBy(() -> write(actor, () -> templates.saveTemplate(actor, null,
-        new DescriptionTemplateInput(unique("SLOT"), "位号不连续", "", "zh-CN",
-            List.of(new DescriptionSectionInput(
-                "INTRO", "正文", List.of(),
-                List.of(
-                    new DescriptionImageSlotInput("RENDER_INPUT", "第一张", null, false, 0),
-                    new DescriptionImageSlotInput("RENDER_INPUT", "第三张", null, false, 2)),
-                true, null)),
-            true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        templates.saveTemplate(
+                            actor,
+                            null,
+                            new DescriptionTemplateInput(
+                                unique("SLOT"),
+                                "位号不连续",
+                                "",
+                                "zh-CN",
+                                List.of(
+                                    new DescriptionSectionInput(
+                                        "INTRO",
+                                        "正文",
+                                        List.of(),
+                                        List.of(
+                                            new DescriptionImageSlotInput(
+                                                "RENDER_INPUT", "第一张", null, false, 0),
+                                            new DescriptionImageSlotInput(
+                                                "RENDER_INPUT", "第三张", null, false, 2)),
+                                        true,
+                                        null)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("连续递增");
   }
@@ -402,9 +496,7 @@ class DescriptionTemplateIntegrationTest {
   // ============================================================ 渲染后的描述 HTML
 
   /**
-   * 渲染产出的**是真 HTML**，不是模板字符串：
-   * 五个 {@code <section data-section-type="…">} 按顺序串起来，
-   * 每段一个小标题，变量已替换成真实值。
+   * 渲染产出的**是真 HTML**，不是模板字符串： 五个 {@code <section data-section-type="…">} 按顺序串起来， 每段一个小标题，变量已替换成真实值。
    */
   @Test
   void renderProducesRealHtmlWithFiveTypedSections() {
@@ -412,13 +504,21 @@ class DescriptionTemplateIntegrationTest {
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
 
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     assertThat(product.status()).isEqualTo("SUCCEEDED");
     String html = product.html();
     assertThat(html).startsWith("<div class=\"description-template\"");
-    assertThat(html).contains("data-template-code=\"" + tx(actor, () -> templates.template(saved.id())).code() + "\"");
+    assertThat(html)
+        .contains(
+            "data-template-code=\""
+                + tx(actor, () -> templates.template(saved.id())).code()
+                + "\"");
     assertThat(html).contains("data-locale=\"zh-CN\"");
     // 五段按类型、按顺序出现。
     assertThat(html.indexOf("data-section-type=\"INTRO\""))
@@ -430,8 +530,9 @@ class DescriptionTemplateIntegrationTest {
     assertThat(html.indexOf("data-section-type=\"CAUTION\""))
         .isLessThan(html.indexOf("data-section-type=\"SERVICE_PROMISE\""));
     // 小标题按段落类型落成 <h3>。
-    assertThat(html).contains("<h3>产品介绍</h3>", "<h3>使用场景</h3>", "<h3>规格参数</h3>",
-        "<h3>注意事项</h3>", "<h3>售后承诺</h3>");
+    assertThat(html)
+        .contains(
+            "<h3>产品介绍</h3>", "<h3>使用场景</h3>", "<h3>规格参数</h3>", "<h3>注意事项</h3>", "<h3>售后承诺</h3>");
     // 变量已替换成真实值（品牌、分类、卖点短语都进了正文）。
     assertThat(html).contains("星云").contains("音频").contains("双单元立体声");
     // 模板字符串不是产物：花括号一个都不剩。
@@ -448,22 +549,34 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     var stored =
-        tx(actor, () -> sql.fetchOne(
-            "select html,status,locale from description_render where id=?", product.renderId()));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select html,status,locale from description_render where id=?",
+                    product.renderId()));
     assertThat(stored.get("html", String.class)).isEqualTo(product.html());
     assertThat(stored.get("status", String.class)).isEqualTo("SUCCEEDED");
     assertThat(stored.get("locale", String.class)).isEqualTo("zh-CN");
 
     // 逐段 HTML 也落库了，五行。
     var sectionRows =
-        tx(actor, () -> sql.fetch(
-            "select section_type,sort_order,html,status from description_render_section"
-                + " where tenant_id=? and render_id=? order by sort_order",
-            templates.currentTenantId(), product.renderId()));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select section_type,sort_order,html,status from description_render_section"
+                        + " where tenant_id=? and render_id=? order by sort_order",
+                    templates.currentTenantId(),
+                    product.renderId()));
     assertThat(sectionRows).hasSize(5);
     for (var r : sectionRows) {
       assertThat(r.get("status", String.class)).isEqualTo("COMPLETE");
@@ -482,13 +595,20 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     OffsetDateTime stored =
-        tx(actor, () -> sql.fetchOne(
-                "select created_at from description_render where id=?", product.renderId())
-            .get("created_at", OffsetDateTime.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select created_at from description_render where id=?", product.renderId())
+                    .get("created_at", OffsetDateTime.class));
     assertThat(stored).isNotNull();
     // 写回值必须与库里读出来的是同一瞬间（时区无关的 Instant 口径）。
     assertThat(stored.toInstant()).isEqualTo(OffsetDateTime.parse(product.createdAt()).toInstant());
@@ -518,8 +638,12 @@ class DescriptionTemplateIntegrationTest {
     UUID target = sku(actor, spu(actor, unique("SPU"), "", "音频"), unique("SKU"), "桌面款");
     var saved = thinTemplate(actor, unique("THIN"));
 
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     // 1) HTML 里没有占位符残留：一个花括号都没有。
     assertThat(product.html()).doesNotContain("{").doesNotContain("}");
@@ -530,17 +654,24 @@ class DescriptionTemplateIntegrationTest {
     // 2) 缺失逐条落库，可枚举、可查，而不是一句话。
     assertThat(product.issueCount()).isPositive();
     var issues =
-        tx(actor, () -> sql.fetch(
-            "select variable_name,issue_kind,detail from description_render_issue"
-                + " where tenant_id=? and render_id=? order by variable_name",
-            templates.currentTenantId(), product.renderId()));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select variable_name,issue_kind,detail from description_render_issue"
+                        + " where tenant_id=? and render_id=? order by variable_name",
+                    templates.currentTenantId(),
+                    product.renderId()));
     assertThat(issues).isNotEmpty();
     assertThat(issues).extracting(r -> r.get("variable_name", String.class)).contains("brand");
     assertThat(issues).extracting(r -> r.get("issue_kind", String.class)).contains("EMPTY_FACT");
     for (var r : issues) assertThat(r.get("detail", String.class)).contains("品牌");
     // 明细在端点上也有，且带可读标签。
-    assertThat(product.issues()).extracting(DescriptionRenderIssueRow::variableName).contains("brand");
-    assertThat(product.issues()).extracting(DescriptionRenderIssueRow::issueKindLabel)
+    assertThat(product.issues())
+        .extracting(DescriptionRenderIssueRow::variableName)
+        .contains("brand");
+    assertThat(product.issues())
+        .extracting(DescriptionRenderIssueRow::issueKindLabel)
         .contains("商品字段为空");
 
     // 3) 受影响段落标成 INCOMPLETE，批次不是 SUCCEEDED（这个模板只有一段且没填好 → FAILED）。
@@ -549,41 +680,68 @@ class DescriptionTemplateIntegrationTest {
     assertThat(product.note()).contains("不能直接发到平台");
 
     // 库里也是同样的结论。
-    assertThat(tx(actor, () -> sql.fetchOne(
-            "select status from description_render where id=?", product.renderId()))
-        .get("status", String.class)).isEqualTo("FAILED");
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                            "select status from description_render where id=?", product.renderId()))
+                .get("status", String.class))
+        .isEqualTo("FAILED");
 
     // 4) DB 层：缺变量的段落不能被直接改成「已填好」。
     UUID sectionRenderId = product.sections().get(0).id();
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "update description_render_section set status='COMPLETE' where id=?", sectionRenderId)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update description_render_section set status='COMPLETE' where id=?",
+                            sectionRenderId)))
         .hasMessageContaining("不能直接标记为已填好");
 
     // 5) DB 层：手工插一行带占位符的 HTML 会被 CHECK 与触发器双重拒收。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "insert into description_render_section(id,tenant_id,render_id,section_id,section_type,"
-            + "sort_order,locale,heading,html,image_count,status)"
-            + " values(?,?,?,?,?,?,?,?,?,?, 'COMPLETE')",
-        UUID.randomUUID(), templates.currentTenantId(), product.renderId(),
-        product.sections().get(0).id(), "SPEC", 99, "zh-CN", "规格参数",
-        "<p>把 {{尺寸}} 原样发出去了</p>", 0)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into description_render_section(id,tenant_id,render_id,section_id,section_type,"
+                                + "sort_order,locale,heading,html,image_count,status)"
+                                + " values(?,?,?,?,?,?,?,?,?,?, 'COMPLETE')",
+                            UUID.randomUUID(),
+                            templates.currentTenantId(),
+                            product.renderId(),
+                            product.sections().get(0).id(),
+                            "SPEC",
+                            99,
+                            "zh-CN",
+                            "规格参数",
+                            "<p>把 {{尺寸}} 原样发出去了</p>",
+                            0)))
         .hasMessageContaining("占位符");
 
     // 而「有缺失」也不能被直接改成 SUCCEEDED：HTML 里已经没有占位符了
     // （缺变量的位置早被剥掉），所以这条靠的是计数那道闸——
     // 否则把 PARTIAL 改成 SUCCEEDED 就能让 4.2.1.1 照单上传一份「brand 没填上」的描述。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "update description_render set status='SUCCEEDED' where id=?", product.renderId())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update description_render set status='SUCCEEDED' where id=?",
+                            product.renderId())))
         .hasMessageContaining("description_render_succeeded_has_no_gap");
   }
 
   /**
    * 同系列型号清单（{@code SKU_SIBLING_LIST}）这个绑定源单独覆盖。
    *
-   * <p>它是唯一一个「取值来源不是某个字段，而是「别的行」的绑定源：
-   * SPU 下只有它自己时取不到值，3.4.2.2 的取值代码会报
-   * 「这个 SKU 所在 SPU 下只有它自己，没有可列的同系列型号」——
-   * 而不是笼统的「商品字段为空」，因为这两种的修法完全不同。
+   * <p>它是唯一一个「取值来源不是某个字段，而是「别的行」的绑定源： SPU 下只有它自己时取不到值，3.4.2.2 的取值代码会报 「这个 SKU 所在 SPU
+   * 下只有它自己，没有可列的同系列型号」—— 而不是笼统的「商品字段为空」，因为这两种的修法完全不同。
    */
   @Test
   void siblingListBindingIsReportedWithItsOwnActionableReason() {
@@ -591,29 +749,32 @@ class DescriptionTemplateIntegrationTest {
     var saved =
         write(
             actor,
-            () -> templates.saveTemplate(
-                actor,
-                null,
-                new DescriptionTemplateInput(
-                    unique("SIB"),
-                    "同系列型号",
-                    "",
-                    "zh-CN",
-                    List.of(
-                        new DescriptionSectionInput(
-                            "SPEC",
-                            "适配型号：{siblings}。",
-                            List.of(variable("siblings", "SKU_SIBLING_LIST")),
-                            List.of(),
-                            true,
-                            null)),
-                    true,
-                    0)));
+            () ->
+                templates.saveTemplate(
+                    actor,
+                    null,
+                    new DescriptionTemplateInput(
+                        unique("SIB"),
+                        "同系列型号",
+                        "",
+                        "zh-CN",
+                        List.of(
+                            new DescriptionSectionInput(
+                                "SPEC",
+                                "适配型号：{siblings}。",
+                                List.of(variable("siblings", "SKU_SIBLING_LIST")),
+                                List.of(),
+                                true,
+                                null)),
+                        true,
+                        0)));
 
     var product =
         write(
             actor,
-            () -> renders.render(actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     // 只有一段且它没填好 → 一段可用段落都没产出，所以是 FAILED 而不是 PARTIAL。
     assertThat(product.status()).isEqualTo("FAILED");
@@ -623,14 +784,32 @@ class DescriptionTemplateIntegrationTest {
     assertThat(product.issues().get(0).detail()).contains("同系列型号").contains("再加几个 SKU");
   }
 
-  /** 占位符与变量声明对不上时在保存期就拒（配置期的缺失比渲染期的更早暴露）。 */  @Test
+  /** 占位符与变量声明对不上时在保存期就拒（配置期的缺失比渲染期的更早暴露）。 */
+  @Test
   void placeholderWithoutBindingIsRejectedAtSaveTime() {
-    assertThatThrownBy(() -> write(actor, () -> templates.saveTemplate(actor, null,
-        new DescriptionTemplateInput(unique("BAD"), "占位符没绑定", "", "zh-CN",
-            List.of(new DescriptionSectionInput(
-                "INTRO", "尺寸是 {size}，重量是 {weight}。",
-                List.of(variable("size", "SKU_SPEC")), List.of(), true, null)),
-            true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        templates.saveTemplate(
+                            actor,
+                            null,
+                            new DescriptionTemplateInput(
+                                unique("BAD"),
+                                "占位符没绑定",
+                                "",
+                                "zh-CN",
+                                List.of(
+                                    new DescriptionSectionInput(
+                                        "INTRO",
+                                        "尺寸是 {size}，重量是 {weight}。",
+                                        List.of(variable("size", "SKU_SPEC")),
+                                        List.of(),
+                                        true,
+                                        null)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("weight")
         .hasMessageContaining("没有声明绑定源");
@@ -643,8 +822,12 @@ class DescriptionTemplateIntegrationTest {
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
 
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "en-US", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "en-US", List.of())));
 
     assertThat(product.status()).isEqualTo("FAILED");
     assertThat(product.html()).doesNotContain("星云").doesNotContain("{");
@@ -660,30 +843,59 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     var saved = template(actor, unique("DTPL"), false);
     UUID introContentTemplate =
-        tx(actor, () -> sql.fetchOne(
-                "select content_template_id from description_template_section"
-                    + " where template_id=? and section_type='INTRO'",
-                saved.id())
-            .get("content_template_id", UUID.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select content_template_id from description_template_section"
+                            + " where template_id=? and section_type='INTRO'",
+                        saved.id())
+                    .get("content_template_id", UUID.class));
 
-    assertThatThrownBy(() -> write(actor, () -> descriptions.saveTranslation(
-        actor, introContentTemplate, null,
-        new ContentTranslationInput("en-US", "Intro EN", "{spuName} is made by {brand}. {selling}",
-            "AI", "DRAFT", 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        descriptions.saveTranslation(
+                            actor,
+                            introContentTemplate,
+                            null,
+                            new ContentTranslationInput(
+                                "en-US",
+                                "Intro EN",
+                                "{spuName} is made by {brand}. {selling}",
+                                "AI",
+                                "DRAFT",
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("占位符");
 
     // 占位符集合一致时可以存，而且渲染时真的用上了译文。
-    var translation = write(actor, () -> descriptions.saveTranslation(
-        actor, introContentTemplate, null,
-        new ContentTranslationInput("en-US", "Intro EN",
-            "{spuName} is a {category} product by {brand}. {selling}. {brand} {category} {spuName} {selling}.",
-            "AI", "DRAFT", 0)));
+    var translation =
+        write(
+            actor,
+            () ->
+                descriptions.saveTranslation(
+                    actor,
+                    introContentTemplate,
+                    null,
+                    new ContentTranslationInput(
+                        "en-US",
+                        "Intro EN",
+                        "{spuName} is a {category} product by {brand}. {selling}. {brand} {category} {spuName} {selling}.",
+                        "AI",
+                        "DRAFT",
+                        0)));
     assertThat(translation.locale()).isEqualTo("en-US");
 
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "en-US", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "en-US", List.of())));
     assertThat(product.sections().get(0).html()).contains("is a").contains("星云");
   }
 
@@ -700,13 +912,19 @@ class DescriptionTemplateIntegrationTest {
   void imageSlotBecomesRealImgTagWithResolvablePosition() {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
-    UUID assetId = uploadImage(actor, "主图-" + unique("IMG"), "PRIMARY", 120, 80, new Color(10, 20, 30));
-    writeVoid(actor, () -> media.addReference(actor, assetId,
-        new MediaReferenceInput("SKU", null, target, "")));
+    UUID assetId =
+        uploadImage(actor, "主图-" + unique("IMG"), "PRIMARY", 120, 80, new Color(10, 20, 30));
+    writeVoid(
+        actor,
+        () -> media.addReference(actor, assetId, new MediaReferenceInput("SKU", null, target, "")));
 
     var saved = template(actor, unique("DTPL"), true);
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     assertThat(product.status()).isEqualTo("SUCCEEDED");
     assertThat(product.imageCount()).isEqualTo(1);
@@ -723,11 +941,15 @@ class DescriptionTemplateIntegrationTest {
 
     // 图片落点也落库了，position 存在且可查。
     var stored =
-        tx(actor, () -> sql.fetch(
-            "select position,slot_no,asset_id,src,alt,width_px,height_px"
-                + " from description_render_image where tenant_id=? and render_id=?"
-                + " order by position",
-            templates.currentTenantId(), product.renderId()));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select position,slot_no,asset_id,src,alt,width_px,height_px"
+                        + " from description_render_image where tenant_id=? and render_id=?"
+                        + " order by position",
+                    templates.currentTenantId(),
+                    product.renderId()));
     assertThat(stored).hasSize(1);
     assertThat(stored.get(0).get("position", Integer.class)).isZero();
     assertThat(stored.get(0).get("slot_no", Integer.class)).isZero();
@@ -746,22 +968,32 @@ class DescriptionTemplateIntegrationTest {
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     // 没有给这个 SKU 挂任何素材 → SKU_PRIMARY 取不到图。
     var saved = template(actor, unique("DTPL"), true);
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     assertThat(product.status()).isEqualTo("PARTIAL");
     assertThat(product.imageCount()).isZero();
     assertThat(product.html()).doesNotContain("<img").doesNotContain("{");
     assertThat(product.sections().get(0).status()).isEqualTo("INCOMPLETE");
-    assertThat(product.issues()).extracting(DescriptionRenderIssueRow::issueKind)
+    assertThat(product.issues())
+        .extracting(DescriptionRenderIssueRow::issueKind)
         .contains("IMAGE_UNBOUND");
-    assertThat(product.issues()).extracting(DescriptionRenderIssueRow::issueKindLabel)
+    assertThat(product.issues())
+        .extracting(DescriptionRenderIssueRow::issueKindLabel)
         .contains("必填插图位没有图");
     assertThat(
-            tx(actor, () -> sql.fetchOne(
-                    "select count(*) from description_render_issue where tenant_id=? and render_id=?"
-                        + " and issue_kind='IMAGE_UNBOUND'",
-                    templates.currentTenantId(), product.renderId()))
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                            "select count(*) from description_render_issue where tenant_id=? and render_id=?"
+                                + " and issue_kind='IMAGE_UNBOUND'",
+                            templates.currentTenantId(),
+                            product.renderId()))
                 .get(0, Long.class))
         .isEqualTo(1L);
   }
@@ -771,9 +1003,20 @@ class DescriptionTemplateIntegrationTest {
   void callerSuppliedImageUrlMustBeHttpOrHttps() {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
-    assertThatThrownBy(() -> write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(savedForSlot(target), target, "zh-CN",
-            List.of(new DescriptionRenderInputImage(0, "javascript:alert(1)", "", null, null, null))))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        renders.render(
+                            actor,
+                            new DescriptionRenderInput(
+                                savedForSlot(target),
+                                target,
+                                "zh-CN",
+                                List.of(
+                                    new DescriptionRenderInputImage(
+                                        0, "javascript:alert(1)", "", null, null, null))))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("http://");
   }
@@ -787,20 +1030,51 @@ class DescriptionTemplateIntegrationTest {
   void callerSuppliedImageBecomesImgTag() {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
-    UUID assetId = uploadImage(actor, "详情图-" + unique("IMG"), "DETAIL", 640, 480, new Color(1, 2, 3));
-    var saved = write(actor, () -> templates.saveTemplate(actor, null,
-        new DescriptionTemplateInput(unique("DTPL"), "编辑器给图", "", "zh-CN",
-            List.of(new DescriptionSectionInput(
-                "INTRO", "产品介绍正文。", List.of(),
-                List.of(new DescriptionImageSlotInput("RENDER_INPUT", "", assetId, true, 0)),
-                true, null)),
-            true, 0)));
+    UUID assetId =
+        uploadImage(actor, "详情图-" + unique("IMG"), "DETAIL", 640, 480, new Color(1, 2, 3));
+    var saved =
+        write(
+            actor,
+            () ->
+                templates.saveTemplate(
+                    actor,
+                    null,
+                    new DescriptionTemplateInput(
+                        unique("DTPL"),
+                        "编辑器给图",
+                        "",
+                        "zh-CN",
+                        List.of(
+                            new DescriptionSectionInput(
+                                "INTRO",
+                                "产品介绍正文。",
+                                List.of(),
+                                List.of(
+                                    new DescriptionImageSlotInput(
+                                        "RENDER_INPUT", "", assetId, true, 0)),
+                                true,
+                                null)),
+                        true,
+                        0)));
 
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN",
-            List.of(new DescriptionRenderInputImage(
-                0, "https://cdn.example.com/detail.png", "详情图",
-                assetId, new java.math.BigDecimal("640"), new java.math.BigDecimal("480"))))));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor,
+                    new DescriptionRenderInput(
+                        saved.id(),
+                        target,
+                        "zh-CN",
+                        List.of(
+                            new DescriptionRenderInputImage(
+                                0,
+                                "https://cdn.example.com/detail.png",
+                                "详情图",
+                                assetId,
+                                new java.math.BigDecimal("640"),
+                                new java.math.BigDecimal("480"))))));
 
     assertThat(product.status()).isEqualTo("SUCCEEDED");
     assertThat(product.html())
@@ -818,44 +1092,57 @@ class DescriptionTemplateIntegrationTest {
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
 
-    http.perform(get("/catalog/description-templates/overview")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/description-templates/overview")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.templateCount").isNumber());
-    http.perform(get("/catalog/description-templates/options")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/description-templates/options")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sectionTypes.length()").value(5))
         .andExpect(jsonPath("$.imageBindSources.length()").value(3))
         .andExpect(jsonPath("$.issueKinds.length()").value(5))
         .andExpect(jsonPath("$.variableSources.length()").value(11));
-    http.perform(get("/catalog/description-templates/templates")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/description-templates/templates")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
-    http.perform(get("/catalog/description-templates/templates/{id}/sections", saved.id())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/description-templates/templates/{id}/sections", saved.id())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(5));
 
     var body =
-        http.perform(post("/catalog/description-templates/renders")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"templateId\":\"" + saved.id() + "\",\"skuId\":\"" + target
-                    + "\",\"locale\":\"zh-CN\"}"))
+        http.perform(
+                post("/catalog/description-templates/renders")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"templateId\":\""
+                            + saved.id()
+                            + "\",\"skuId\":\""
+                            + target
+                            + "\",\"locale\":\"zh-CN\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("SUCCEEDED"))
             .andExpect(jsonPath("$.html").isString())
-            .andReturn().getResponse().getContentAsString();
-    String renderId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body)
-        .get("renderId").asText();
-    http.perform(get("/catalog/description-templates/renders/{id}", renderId)
-            .header("Authorization", "Bearer tenant-a"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String renderId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(body).get("renderId").asText();
+    http.perform(
+            get("/catalog/description-templates/renders/{id}", renderId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sections.length()").value(5));
-    http.perform(get("/catalog/description-templates/renders")
-            .header("Authorization", "Bearer tenant-a")
-            .param("status", "SUCCEEDED"))
+    http.perform(
+            get("/catalog/description-templates/renders")
+                .header("Authorization", "Bearer tenant-a")
+                .param("status", "SUCCEEDED"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items.length()").isNumber())
         .andExpect(jsonPath("$.items[0].html").doesNotExist());
@@ -867,12 +1154,22 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
-    var product = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    var product =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
 
     write(actor, () -> templates.setEnabled(actor, saved.id(), false));
-    assertThatThrownBy(() -> write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        renders.render(
+                            actor,
+                            new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已停用");
     assertThat(tx(actor, () -> renders.product(product.renderId())).html()).isNotEmpty();
@@ -884,11 +1181,15 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     UUID target = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "桌面款");
     var saved = template(actor, unique("DTPL"), false);
-    write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
+    write(
+        actor,
+        () ->
+            renders.render(
+                actor, new DescriptionRenderInput(saved.id(), target, "zh-CN", List.of())));
     long version = tx(actor, () -> templates.template(saved.id())).version();
 
-    assertThatThrownBy(() -> writeVoid(actor, () -> templates.deleteTemplate(actor, saved.id(), version)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> templates.deleteTemplate(actor, saved.id(), version)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已被")
         .hasMessageContaining("不可删除");
@@ -900,21 +1201,34 @@ class DescriptionTemplateIntegrationTest {
     seedPools(actor);
     var saved = template(actor, unique("DTPL"), false);
     List<UUID> contentTemplateIds =
-        tx(actor, () -> sql.fetch(
-            "select content_template_id from description_template_section where tenant_id=?"
-                + " and template_id=?",
-            templates.currentTenantId(), saved.id()))
-            .stream().map(r -> r.get("content_template_id", UUID.class)).toList();
+        tx(
+                actor,
+                () ->
+                    sql.fetch(
+                        "select content_template_id from description_template_section where tenant_id=?"
+                            + " and template_id=?",
+                        templates.currentTenantId(),
+                        saved.id()))
+            .stream()
+            .map(r -> r.get("content_template_id", UUID.class))
+            .toList();
     assertThat(contentTemplateIds).hasSize(5);
     long version = tx(actor, () -> templates.template(saved.id())).version();
 
     writeVoid(actor, () -> templates.deleteTemplate(actor, saved.id(), version));
 
-    assertThat(tx(actor, () -> sql.fetch(
-            "select id from description_template_section where template_id=?", saved.id())))
+    assertThat(
+            tx(
+                actor,
+                () ->
+                    sql.fetch(
+                        "select id from description_template_section where template_id=?",
+                        saved.id())))
         .isEmpty();
-    assertThat(tx(actor, () -> sql.fetchOne(
-            "select id from description_template where id=?", saved.id())))
+    assertThat(
+            tx(
+                actor,
+                () -> sql.fetchOne("select id from description_template where id=?", saved.id())))
         .isNull();
     for (UUID id : contentTemplateIds)
       assertThat(tx(actor, () -> sql.fetchOne("select id from content_template where id=?", id)))
@@ -942,10 +1256,19 @@ class DescriptionTemplateIntegrationTest {
     var templateB = template(actorB, codeB, false);
     UUID mine = sku(actor, spu(actor, unique("SPU"), "星云", "音频"), unique("SKU"), "我的");
     UUID theirs = sku(actorB, spu(actorB, unique("SPU"), "极光", "台灯"), unique("SKU"), "他们的");
-    var renderA = write(actor, () -> renders.render(actor,
-        new DescriptionRenderInput(templateA.id(), mine, "zh-CN", List.of())));
-    var renderB = write(actorB, () -> renders.render(actorB,
-        new DescriptionRenderInput(templateB.id(), theirs, "zh-CN", List.of())));
+    var renderA =
+        write(
+            actor,
+            () ->
+                renders.render(
+                    actor, new DescriptionRenderInput(templateA.id(), mine, "zh-CN", List.of())));
+    var renderB =
+        write(
+            actorB,
+            () ->
+                renders.render(
+                    actorB,
+                    new DescriptionRenderInput(templateB.id(), theirs, "zh-CN", List.of())));
 
     // 1) 两租户互不可见
     assertThat(templateCodes(actor)).contains(codeA).doesNotContain(codeB);
@@ -960,37 +1283,67 @@ class DescriptionTemplateIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     assertThatThrownBy(() -> tx(actorB, () -> renders.product(renderA.renderId())))
         .isInstanceOf(ResponseStatusException.class);
-    assertThat(tx(actor, () -> renders.listRenders(new DescriptionRenderQuery(null, null, theirs, 0, 20)))
-        .items()).isEmpty();
-    assertThat(tx(actor, () -> renders.listRenders(new DescriptionRenderQuery(null, null, mine, 0, 20)))
-        .items()).isNotEmpty();
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        renders.listRenders(new DescriptionRenderQuery(null, null, theirs, 0, 20)))
+                .items())
+        .isEmpty();
+    assertThat(
+            tx(
+                    actor,
+                    () -> renders.listRenders(new DescriptionRenderQuery(null, null, mine, 0, 20)))
+                .items())
+        .isNotEmpty();
     // 插图位也不串。
     assertThat(tx(actor, () -> sectionIdsOf(templateA.id()))).isNotEmpty();
     assertThat(tx(actor, () -> sectionIdsOf(templateB.id()))).isEmpty();
 
     // B 租户不能删 A 的模板，也不能拿 A 的模板渲染自己的 SKU。
     long versionA = tx(actor, () -> templates.template(templateA.id())).version();
-    assertThatThrownBy(() -> writeVoid(actorB,
-        () -> templates.deleteTemplate(actorB, templateA.id(), versionA)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(actorB, () -> templates.deleteTemplate(actorB, templateA.id(), versionA)))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(() -> write(actorB, () -> renders.render(actorB,
-        new DescriptionRenderInput(templateA.id(), theirs, "zh-CN", List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        renders.render(
+                            actorB,
+                            new DescriptionRenderInput(
+                                templateA.id(), theirs, "zh-CN", List.of()))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(get("/catalog/description-templates/renders/{id}", renderA.renderId())
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/description-templates/renders/{id}", renderA.renderId())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     var submitted =
-        http.perform(post("/catalog/description-templates/renders")
-                .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a)
-                .contentType("application/json")
-                .content("{\"templateId\":\"" + templateB.id() + "\",\"skuId\":\"" + theirs
-                    + "\",\"locale\":\"zh-CN\"}"))
+        http.perform(
+                post("/catalog/description-templates/renders")
+                    .header("Authorization", "Bearer tenant-b")
+                    .header("X-Tenant-Id", a)
+                    .contentType("application/json")
+                    .content(
+                        "{\"templateId\":\""
+                            + templateB.id()
+                            + "\",\"skuId\":\""
+                            + theirs
+                            + "\",\"locale\":\"zh-CN\"}"))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
-    String forgedId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted)
-        .get("renderId").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String forgedId =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(submitted)
+            .get("renderId")
+            .asText();
     // 伪造头写入的渲染进的是 B 租户（凭据说的那个），A 租户用同一个 id 查不到它。
     assertThatThrownBy(() -> tx(actor, () -> renders.product(UUID.fromString(forgedId))))
         .isInstanceOf(ResponseStatusException.class);
@@ -999,8 +1352,10 @@ class DescriptionTemplateIntegrationTest {
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(tx(actor, () -> renders.product(renderA.renderId())).renderId()).isEqualTo(renderA.renderId());
-      assertThat(tx(actorB, () -> renders.product(renderB.renderId())).renderId()).isEqualTo(renderB.renderId());
+      assertThat(tx(actor, () -> renders.product(renderA.renderId())).renderId())
+          .isEqualTo(renderA.renderId());
+      assertThat(tx(actorB, () -> renders.product(renderB.renderId())).renderId())
+          .isEqualTo(renderB.renderId());
       assertThatThrownBy(() -> tx(actorB, () -> renders.product(renderA.renderId())))
           .isInstanceOf(ResponseStatusException.class);
       assertThat(templateCodes(actor)).contains(codeA).doesNotContain(codeB);
@@ -1017,8 +1372,10 @@ class DescriptionTemplateIntegrationTest {
   }
 
   List<UUID> sectionIdsOf(UUID templateId) {
-    return sql.fetch(
-            "select id from description_template_section where template_id=?", templateId)
-        .stream().map(r -> r.get("id", UUID.class)).toList();
+    return sql
+        .fetch("select id from description_template_section where template_id=?", templateId)
+        .stream()
+        .map(r -> r.get("id", UUID.class))
+        .toList();
   }
 }

@@ -154,7 +154,9 @@ export function fetchDecision(decisionId: string): Promise<RoutingDecisionDetail
   return api<RoutingDecisionDetail>(`${base}/decisions/${decisionId}`);
 }
 
-export function createRoutingDecision(input: RoutingDecisionRequest): Promise<RoutingDecisionSaved> {
+export function createRoutingDecision(
+  input: RoutingDecisionRequest,
+): Promise<RoutingDecisionSaved> {
   return api<RoutingDecisionSaved>(`${base}/decisions`, 'POST', input);
 }
 
@@ -268,9 +270,11 @@ export function timeText(value: string | null | undefined): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())}`
-    + ` ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())}`
-    + ` ${value.endsWith('Z') ? 'UTC' : value.slice(-6)}`;
+  return (
+    `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())}` +
+    ` ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())}` +
+    ` ${value.endsWith('Z') ? 'UTC' : value.slice(-6)}`
+  );
 }
 
 /** 候选是否被选中。契约里 chosen 是布尔，null（理论上不该出现）按未选中处理。 */

@@ -52,7 +52,9 @@ it('跨法人调拨的全部调用点被放行且转发到 warehouse 服务', as
     `warehouse/inventory/cross-entity-transfers/${id}/close`,
     `warehouse/inventory/cross-entity-transfers/${id}/cancel`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -63,23 +65,17 @@ it('跨法人调拨的全部调用点被放行且转发到 warehouse 服务', as
   }
 
   // 全部写动作都是 POST。逐个钉住：动作端点漏登记的表现是「点一下就没反应」。
-  for (const suffix of [
-    'source-confirm',
-    'target-confirm',
-    'ship',
-    'receive',
-    'close',
-    'cancel',
-  ]) {
+  for (const suffix of ['source-confirm', 'target-confirm', 'ship', 'receive', 'close', 'cancel']) {
     const path = `warehouse/inventory/cross-entity-transfers/${id}/${suffix}`;
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
   expect(
     (
       await POST(request('warehouse/inventory/cross-entity-transfers', 'POST'), {
-        params: { path: ['warehouse', 'inventory', 'cross-entity-transfers'] },
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'cross-entity-transfers'] }),
       })
     ).status,
   ).toBe(200);
@@ -100,7 +96,7 @@ it('跨法人调拨不因本模块而放行未交付模块或不存在的子路�
     'warehouse/inventory/cross-entity-transfers/settlement',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);
   }
   // 刻意**不**在这里断言 DELETE 被代理拒绝：代理只按路径形状放行、不看方法，

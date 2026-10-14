@@ -17,48 +17,38 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 9.1.1.2 订单详情（控制塔读投影）。
  *
- * <p><b>本类是读投影，不是写入者。</b>{@code sales_order} 及其六张子表的写入所有权属于
- * 9.1.2.2（手工订单）与将来的 9.1.2.1（平台同步）；本类只读，一行 INSERT / UPDATE /
- * DELETE 都没有，迁移 V101 也只加了一条索引、不改任何既有表的结构。
+ * <p><b>本类是读投影，不是写入者。</b>{@code sales_order} 及其六张子表的写入所有权属于 9.1.2.2（手工订单）与将来的 9.1.2.1（平台同步）；本类只读，一行
+ * INSERT / UPDATE / DELETE 都没有，迁移 V101 也只加了一条索引、不改任何既有表的结构。
  *
- * <p><b>蓝图十一个分区里，只有四个真的有数据。</b>照 8.3.1.2 出库单详情、
- * 9.1.1.1 订单列表已建立的仓库约定：
+ * <p><b>蓝图十一个分区里，只有四个真的有数据。</b>照 8.3.1.2 出库单详情、 9.1.1.1 订单列表已建立的仓库约定：
  *
  * <ul>
- *   <li>有的照常返回，内容真实（买家/地址、商品行、费用构成、状态历史）；</li>
- *   <li>没有的在 {@link #capabilities()} 里逐条 {@code available=false} +
- *       {@code ownerModule} + 原因，响应里对应字段是 <b>null</b>；</li>
- *   <li><b>不建占位表、不返回空集冒充成功。</b></li>
+ *   <li>有的照常返回，内容真实（买家/地址、商品行、费用构成、状态历史）；
+ *   <li>没有的在 {@link #capabilities()} 里逐条 {@code available=false} + {@code ownerModule} +
+ *       原因，响应里对应字段是 <b>null</b>；
+ *   <li><b>不建占位表、不返回空集冒充成功。</b>
  * </ul>
  *
- * <p><b>本类显式拒绝的三种造假</b>（这是「控制塔」唯一诚实的前提 ——
- * 客服、采购、财务都从这一个页面理解这笔订单为什么长这样，
+ * <p><b>本类显式拒绝的三种造假</b>（这是「控制塔」唯一诚实的前提 —— 客服、采购、财务都从这一个页面理解这笔订单为什么长这样，
  * 而「为什么长这样」要求每一段要么是真数据，要么明说它没接上）：
  *
  * <ol>
- *   <li><b>费用分摊</b>：{@code order_charge} 的行是<b>费用构成</b>
- *       （这笔单一共收了哪些钱），不是<b>分摊</b>（整单费用按什么比例摊到哪几行）。
- *       {@code order_charge_allocation} 表不存在，V99 第 320-323 行明令
- *       「别拿 charge_kind 当分摊记号」。所以 {@code chargeAllocations} 恒为 null，
- *       <b>绝不拿 chargeTotals 冒充分摊</b>。</li>
- *   <li><b>组件展开</b>：{@code order_line_component} 表在 V99 里根本没建
- *       （实体目录 db/schemas/v2/README.md 第 107 行列了它，是 9.1.2.2 的交付缺口）。
- *       展开是<b>建单那一刻</b>算出来的历史快照，读侧造不出也不该造。</li>
+ *   <li><b>费用分摊</b>：{@code order_charge} 的行是<b>费用构成</b> （这笔单一共收了哪些钱），不是<b>分摊</b>（整单费用按什么比例摊到哪几行）。
+ *       {@code order_charge_allocation} 表不存在，V99 第 320-323 行明令 「别拿 charge_kind 当分摊记号」。所以 {@code
+ *       chargeAllocations} 恒为 null， <b>绝不拿 chargeTotals 冒充分摊</b>。
+ *   <li><b>组件展开</b>：{@code order_line_component} 表在 V99 里根本没建 （实体目录 db/schemas/v2/README.md 第 107
+ *       行列了它，是 9.1.2.2 的交付缺口）。 展开是<b>建单那一刻</b>算出来的历史快照，读侧造不出也不该造。
  *   <li><b>用 documentStatus 冒充履约状态</b>：{@code status} 的 CHECK 只有
- *       ('DRAFT','SUBMITTED')，语义是「有没有进审单队列」，完全没有履约概念。
- *       状态时间线照 {@code sales_order_status_history} <b>真实返回</b>，
- *       但那条表<b>只记录单据维度的状态变化</b>（event_type 只有 CREATED / SUBMITTED），
- *       <b>没有支付或履约事件</b>。所以时间线是真的，而
- *       「支付/履约维度的时间线」另外报 null + ownerModule ——
- *       <b>不拿 documentStatus 冒充</b>。</li>
+ *       ('DRAFT','SUBMITTED')，语义是「有没有进审单队列」，完全没有履约概念。 状态时间线照 {@code sales_order_status_history}
+ *       <b>真实返回</b>， 但那条表<b>只记录单据维度的状态变化</b>（event_type 只有 CREATED / SUBMITTED），
+ *       <b>没有支付或履约事件</b>。所以时间线是真的，而 「支付/履约维度的时间线」另外报 null + ownerModule —— <b>不拿 documentStatus
+ *       冒充</b>。
  * </ol>
  *
- * <p><b>时间绑定</b>：一律 {@code ?::timestamptz} + {@link java.time.OffsetDateTime}。
- * {@code Timestamp.valueOf(LocalDateTime)} 在本项目所在时区静默偏 −28800s，
- * 状态时间线的先后次序会整个错位。
+ * <p><b>时间绑定</b>：一律 {@code ?::timestamptz} + {@link java.time.OffsetDateTime}。 {@code
+ * Timestamp.valueOf(LocalDateTime)} 在本项目所在时区静默偏 −28800s， 状态时间线的先后次序会整个错位。
  *
- * <p><b>跨租户与不存在返回同一个 404</b>：让 A 拿 B 的 id 探测存在性本身就是泄露面。
- * RLS 已经保证跨租户查不到，本类只负责让「查不到」和「不存在」走同一条出口。
+ * <p><b>跨租户与不存在返回同一个 404</b>：让 A 拿 B 的 id 探测存在性本身就是泄露面。 RLS 已经保证跨租户查不到，本类只负责让「查不到」和「不存在」走同一条出口。
  */
 @Service
 public class SalesOrderOverviewService {
@@ -74,20 +64,17 @@ public class SalesOrderOverviewService {
   /**
    * 11 个分区逐段报可得性。
    *
-   * <p>存在的理由与 8.3.1.2 / 9.1.1.1 一致：把「哪一段真有数据」「哪一段还没接上、
-   * 归谁」显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
+   * <p>存在的理由与 8.3.1.2 / 9.1.1.1 一致：把「哪一段真有数据」「哪一段还没接上、 归谁」显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
    */
   public SalesOrderOverviewCapabilities capabilities() {
     return new SalesOrderOverviewCapabilities(
         List.of(
             "买家 sales_order_party_snapshot（一单一客户，改名改级别都不改写历史）",
             "地址快照 order_address_snapshot（收货 / 账单各一行，已提交后由触发器冻结）",
-            "商品行 sales_order_line（SKU / 规格 / 单价 / 数量 / 行税，**全是快照列**，"
-                + "不回查 catalog）",
+            "商品行 sales_order_line（SKU / 规格 / 单价 / 数量 / 行税，**全是快照列**，" + "不回查 catalog）",
             "订单行属性快照 order_line_attribute_snapshot（名称 / 值 / 单位 / 来源版本，append-only）",
             "费用构成 order_charge（一行一笔费用，**不是分摊**）",
-            "状态历史 sales_order_status_history（**只有单据维度的 CREATED / SUBMITTED**，"
-                + "没有支付或履约事件）"),
+            "状态历史 sales_order_status_history（**只有单据维度的 CREATED / SUBMITTED**，" + "没有支付或履约事件）"),
         List.of(
             new SalesOrderOverviewSection(
                 "chargeAllocations",
@@ -142,23 +129,16 @@ public class SalesOrderOverviewService {
                 false,
                 "9.3.3.1 履约请求",
                 "/orders/fulfillment",
-                "9.3.3.1 未交付。sales_order 簇里没有任何指向履约请求的列，"
-                    + "订单与履约批次之间**尚无关联**。"),
+                "9.3.3.1 未交付。sales_order 簇里没有任何指向履约请求的列，" + "订单与履约批次之间**尚无关联**。"),
             new SalesOrderOverviewSection(
                 "packages",
                 "包裹",
                 false,
                 "8.3.4.1 发货与包裹",
                 null,
-                "8.3.4.1 未交付。**刻意不返回空数组**：空的包裹列表会被读成"
-                    + "「这单没有包裹」而不是「这段能力还没接入」——两者对作业的含义相反。"),
+                "8.3.4.1 未交付。**刻意不返回空数组**：空的包裹列表会被读成" + "「这单没有包裹」而不是「这段能力还没接入」——两者对作业的含义相反。"),
             new SalesOrderOverviewSection(
-                "logisticsTrace",
-                "物流轨迹",
-                false,
-                "10 物流与轨迹",
-                null,
-                "10 未交付，本服务没有任何轨迹落库表。"),
+                "logisticsTrace", "物流轨迹", false, "10 物流与轨迹", null, "10 未交付，本服务没有任何轨迹落库表。"),
             new SalesOrderOverviewSection(
                 "aftersalesRefs",
                 "售后关联",
@@ -194,8 +174,7 @@ public class SalesOrderOverviewService {
                 false,
                 "9.2 审单与异常（9.2.1.1 待审队列 / 9.2.1.2 审单规则）",
                 "9.2 交付待审队列与审单规则后，通过 / 驳回才有判定依据",
-                "审单未交付：订单只能提交到 SUBMITTED（待审），"
-                    + "队列展示与通过 / 驳回都还没有出口。本模块是读投影，不抢审单的动作。"),
+                "审单未交付：订单只能提交到 SUBMITTED（待审），" + "队列展示与通过 / 驳回都还没有出口。本模块是读投影，不抢审单的动作。"),
             new SalesOrderOverviewAction(
                 "NOTE",
                 "备注",
@@ -220,8 +199,7 @@ public class SalesOrderOverviewService {
                 false,
                 "15 客户与客服",
                 "15 客服侧交付催付渠道与话术模板",
-                "15 客服侧未交付。发催付是**对外发消息**的动作（邮件 / 站内信 / 平台消息），"
-                    + "需要话术模板与发送渠道记录，两者都不在本模块。")),
+                "15 客服侧未交付。发催付是**对外发消息**的动作（邮件 / 站内信 / 平台消息），" + "需要话术模板与发送渠道记录，两者都不在本模块。")),
         "GET /trade/sales-orders/detail/fulfillment-reference"
             + "?orderNo=...&orderSource=MANUAL —— 给 warehouse（8.3.1.2 出库单详情）"
             + "调用的授权 API，返回关联销售订单与买家地址。"
@@ -242,8 +220,7 @@ public class SalesOrderOverviewService {
   /**
    * 订单全景详情。跨租户在 RLS 下查不到 → 与「不存在」同一个 404。
    *
-   * @param selfOnly 数据范围 SELF 时收窄到本人经手过的订单（本人身份来自已认证身份，
-   *     <b>不接受请求参数传入</b>，否则「只看我自己的单」会变成一个能越权的开关）
+   * @param selfOnly 数据范围 SELF 时收窄到本人经手过的订单（本人身份来自已认证身份， <b>不接受请求参数传入</b>，否则「只看我自己的单」会变成一个能越权的开关）
    */
   public SalesOrderOverview overview(UUID orderId, UUID actorId, boolean selfOnly) {
     Record head = headerRow(orderId, actorId, selfOnly);
@@ -313,9 +290,8 @@ public class SalesOrderOverviewService {
   /**
    * 订单头 + 数据范围 SELF 收窄。
    *
-   * <p>跨租户在 RLS 下查不到 → 与「不存在」返回同一个 404。
-   * SELF 范围用 {@code exists (sales_order_status_history.actor_id = 本人)} 判定
-   * 「本人经手过」，与 9.1.1.1 列表页同一口径、同一张表。
+   * <p>跨租户在 RLS 下查不到 → 与「不存在」返回同一个 404。 SELF 范围用 {@code exists (sales_order_status_history.actor_id
+   * = 本人)} 判定 「本人经手过」，与 9.1.1.1 列表页同一口径、同一张表。
    */
   private Record headerRow(UUID orderId, UUID actorId, boolean selfOnly) {
     StringBuilder sqlText = new StringBuilder();
@@ -411,8 +387,7 @@ public class SalesOrderOverviewService {
   /**
    * 行属性快照按 line_id 分组。
    *
-   * <p>键用 {@code String}（uuid 的字符串形式）而不是 {@link UUID}：
-   * 响应要序列化成 JSON map，而 JSON 对象的键只能是字符串。
+   * <p>键用 {@code String}（uuid 的字符串形式）而不是 {@link UUID}： 响应要序列化成 JSON map，而 JSON 对象的键只能是字符串。
    */
   private Map<String, List<SalesOrderOverviewLineAttribute>> attributesByLine(UUID orderId) {
     Map<String, List<SalesOrderOverviewLineAttribute>> byLine = new LinkedHashMap<>();
@@ -455,14 +430,12 @@ public class SalesOrderOverviewService {
   /**
    * 状态时间线：照 {@code sales_order_status_history} <b>真实返回</b>。
    *
-   * <p><b>刻意按 (occurred_at, id) 升序</b>：id 兜底是必要的 ——
-   * 同一毫秒发生的事件光看 {@code occurred_at} 顺序不确定，
+   * <p><b>刻意按 (occurred_at, id) 升序</b>：id 兜底是必要的 —— 同一毫秒发生的事件光看 {@code occurred_at} 顺序不确定，
    * 界面上会随机跳行。
    *
    * <p><b>但它只是「单据时间线」。</b>该表 {@code event_type} 的 CHECK 只有
-   * ('CREATED','SUBMITTED')，<b>没有支付事件也没有履约事件</b>；
-   * 那些维度另外报 null + ownerModule，见 capabilities()
-   * 的 {@code fulfillmentStatus} 段。
+   * ('CREATED','SUBMITTED')，<b>没有支付事件也没有履约事件</b>； 那些维度另外报 null + ownerModule，见 capabilities() 的
+   * {@code fulfillmentStatus} 段。
    */
   private List<SalesOrderOverviewStatusEvent> timeline(UUID orderId) {
     return sql.fetch(
@@ -485,10 +458,8 @@ public class SalesOrderOverviewService {
   /**
    * 费用<b>构成</b>汇总 —— <b>不是分摊</b>。
    *
-   * <p>逐项对齐订单头上的汇总。V99 的 {@code guard_sales_order_totals}
-   * 延迟约束触发器保证头与明细永远相等，所以这里对不上就是读错了，
-   * 不是「有业务差额」。刻意保留订单头的那一份作为真值返回，
-   * 同时报出 charge 行数让界面能对上「N 笔费用」。
+   * <p>逐项对齐订单头上的汇总。V99 的 {@code guard_sales_order_totals} 延迟约束触发器保证头与明细永远相等，所以这里对不上就是读错了，
+   * 不是「有业务差额」。刻意保留订单头的那一份作为真值返回， 同时报出 charge 行数让界面能对上「N 笔费用」。
    */
   private SalesOrderOverviewTotals totals(Record head, List<SalesOrderOverviewCharge> charges) {
     return new SalesOrderOverviewTotals(
@@ -515,33 +486,28 @@ public class SalesOrderOverviewService {
   /**
    * 给 warehouse 调用的履约引用：关联销售订单 + 买家地址 + 行。
    *
-   * <p><b>为什么按 order_no 查而不是按 uuid</b>：warehouse 的
-   * {@code outbound_order.source_type='SALES'} 时，
-   * {@code source_external_ref} 存的就是销售订单<b>号</b>字符串
-   * （V72 第 114 行原文：「外部单号：9 销售订单号」，且刻意是 varchar 而不是 uuid
-   * —— 跨服务不猜对方 id 形态，更重要的是它让「一个订单多张出库单」
-   * （分仓 / 分批）在数据上成立）。warehouse 手上只有这个字符串，
-   * 没有 trade 的 uuid，所以查询键就是 order_no + order_source。
+   * <p><b>为什么按 order_no 查而不是按 uuid</b>：warehouse 的 {@code outbound_order.source_type='SALES'} 时，
+   * {@code source_external_ref} 存的就是销售订单<b>号</b>字符串 （V72 第 114 行原文：「外部单号：9 销售订单号」，且刻意是 varchar 而不是
+   * uuid —— 跨服务不猜对方 id 形态，更重要的是它让「一个订单多张出库单」 （分仓 / 分批）在数据上成立）。warehouse 手上只有这个字符串， 没有 trade 的
+   * uuid，所以查询键就是 order_no + order_source。
    *
-   * <p><b>order_source 必填且必校验</b>：同一串号码在 MANUAL 与将来的 PLATFORM 下
-   * 是两件不相干的事，只按订单号查会把不同来源的同号订单混进一次响应
-   * （与 V99 第 539 行 {@code sales_order_external_no_unique} 同一纪律）。
+   * <p><b>order_source 必填且必校验</b>：同一串号码在 MANUAL 与将来的 PLATFORM 下 是两件不相干的事，只按订单号查会把不同来源的同号订单混进一次响应 （与
+   * V99 第 539 行 {@code sales_order_external_no_unique} 同一纪律）。
    *
-   * <p><b>地址原样返回订单侧冻结的那一份快照</b>：warehouse <b>不</b>抄第二份 ——
-   * 抄了以后地址改过两份会分叉，而作业员分不清哪份是对的。
-   * 要留寄件快照应由 8.3.4.1 在寄出那一刻自己冻结（与 8.3.1.2 的立场一致）。
+   * <p><b>地址原样返回订单侧冻结的那一份快照</b>：warehouse <b>不</b>抄第二份 —— 抄了以后地址改过两份会分叉，而作业员分不清哪份是对的。 要留寄件快照应由
+   * 8.3.4.1 在寄出那一刻自己冻结（与 8.3.1.2 的立场一致）。
    *
    * <p>跨租户与不存在<b>返回同一个 404</b>。
    */
   public SalesOrderOverviewFulfillmentReference fulfillmentReference(
       String orderNo, String orderSource) {
     if (orderNo == null || orderNo.isBlank()) {
-      throw new IllegalArgumentException("订单号不能为空：warehouse 按 outbound_order.source_external_ref 查");
+      throw new IllegalArgumentException(
+          "订单号不能为空：warehouse 按 outbound_order.source_external_ref 查");
     }
     if (orderSource == null || orderSource.isBlank()) {
       throw new IllegalArgumentException(
-          "订单来源不能为空：同一串订单号在不同来源下是两件不相干的事，"
-              + "只按订单号查会把 MANUAL 与将来的 PLATFORM 的同号订单混进一次响应");
+          "订单来源不能为空：同一串订单号在不同来源下是两件不相干的事，" + "只按订单号查会把 MANUAL 与将来的 PLATFORM 的同号订单混进一次响应");
     }
     Record head =
         sql.fetchOne(
@@ -553,8 +519,7 @@ public class SalesOrderOverviewService {
     if (head == null) {
       // 与详情端点**同一个 404 文案形状**：不区分「不存在」与「不是你的」。
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          "销售订单 " + orderNo + "（来源 " + orderSource + "）不存在或无权查看");
+          HttpStatus.NOT_FOUND, "销售订单 " + orderNo + "（来源 " + orderSource + "）不存在或无权查看");
     }
     UUID id = head.get("id", UUID.class);
     SalesOrderOverviewAddress shipTo = addressByRole(id, "SHIPPING");
@@ -590,8 +555,7 @@ public class SalesOrderOverviewService {
   private static ResponseStatusException notFound(UUID orderId) {
     // 跨租户在 RLS 下查不到 → 与「不存在」走**同一个出口**：
     // 让 A 拿 B 的 id 探测存在性本身就是泄露面。
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "订单 " + orderId + " 不存在或无权查看");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "订单 " + orderId + " 不存在或无权查看");
   }
 
   /** 空串一律折成 null：V99 的若干列是 {@code NOT NULL DEFAULT ''}，空串不是「有值」。 */

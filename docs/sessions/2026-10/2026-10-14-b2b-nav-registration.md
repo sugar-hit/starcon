@@ -30,10 +30,10 @@ children: IMPLEMENTED_TASK_PAGES.filter(
 
 ## 改法
 
-| 文件 | 改动 |
-|---|---|
+| 文件                                | 改动                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `packages/ui/src/lib/nav-config.ts` | 删掉 9.7.1.1 加的那 6 行 `href: '/orders/b2b'` 顶层项，其余一字未动（与 `6b5e3fea^` 逐字节一致） |
-| `packages/ui/src/lib/task-pages.ts` | 在 `/orders` 与 `/orders/review` 之间按 href 排序新增一条任务页 |
+| `packages/ui/src/lib/task-pages.ts` | 在 `/orders` 与 `/orders/review` 之间按 href 排序新增一条任务页                                  |
 
 新登记条目：`domain: 'orders'`（域级，与 `/orders`、`/orders/review` 一致）、
 `implemented: true`（页面 `apps/web/src/app/orders/b2b/page.tsx` 真实存在，
@@ -62,14 +62,14 @@ children: IMPLEMENTED_TASK_PAGES.filter(
 
 ## 验证
 
-| 检查 | 结果 |
-|---|---|
-| 改前 `nav-routes.test.ts` + `task-pages.test.ts` | `2 failed \| 15 passed (17)` |
-| 改后 同上 | `2 passed \| 17 passed (17)` |
-| `pnpm test:unit packages/ui` | `6 passed (6)` 文件 / `45 passed (45)` |
-| `pnpm typecheck` | `3 successful, 3 total` |
-| `pnpm lint` | `3 successful, 3 total`（`@starcon/web` 的 react-hooks 告警为既有） |
-| `prettier --check task-pages.ts` | 通过 |
+| 检查                                             | 结果                                                                |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| 改前 `nav-routes.test.ts` + `task-pages.test.ts` | `2 failed \| 15 passed (17)`                                        |
+| 改后 同上                                        | `2 passed \| 17 passed (17)`                                        |
+| `pnpm test:unit packages/ui`                     | `6 passed (6)` 文件 / `45 passed (45)`                              |
+| `pnpm typecheck`                                 | `3 successful, 3 total`                                             |
+| `pnpm lint`                                      | `3 successful, 3 total`（`@starcon/web` 的 react-hooks 告警为既有） |
+| `prettier --check task-pages.ts`                 | 通过                                                                |
 
 **核心验收点：`/orders/b2b` 真的进了 `NAV_DESTINATIONS`**（不只是测试变绿）。
 一次性脚本 `.tmp/verify-b2b-nav.ts`（gitignored）导入 `NAV_DESTINATIONS` 打印：

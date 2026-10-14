@@ -32,10 +32,7 @@ class DescriptionRendererTest {
 
   private static PhrasePools pools() {
     return new PhrasePools(
-        List.of("双单元立体声", "高保真音质"),
-        List.of("IP67 防水"),
-        List.of("露营 / 泳池"),
-        List.of("请勿在充电时拆解"));
+        List.of("双单元立体声", "高保真音质"), List.of("IP67 防水"), List.of("露营 / 泳池"), List.of("请勿在充电时拆解"));
   }
 
   private static PhrasePools emptyPools() {
@@ -70,10 +67,7 @@ class DescriptionRendererTest {
   /** 同一个变量被提及多次时，快照里只记一次。 */
   @Test
   void repeatedPlaceholderKeepsOneBindingAndOneSnapshot() {
-    var spec =
-        spec(
-            "{selling}，而且 {selling}。",
-            new VariableSpec("selling", "PHRASE_SELLING", 0));
+    var spec = spec("{selling}，而且 {selling}。", new VariableSpec("selling", "PHRASE_SELLING", 0));
     var rendered = DescriptionRenderer.render(spec, facts(), pools(), 0);
 
     assertThat(rendered.complete()).isTrue();
@@ -86,14 +80,16 @@ class DescriptionRendererTest {
   /**
    * 蓝图硬要求的主用例：商品字段为空 → 变量被报告，**占位符不留在正文里**。
    *
-   * <p>这是本模块最关键的一条：正文里不能出现 {@code {brand}} 字面量，
-   * 而缺的是什么、为什么缺、怎么修，都必须出现在 issues 上。
+   * <p>这是本模块最关键的一条：正文里不能出现 {@code {brand}} 字面量， 而缺的是什么、为什么缺、怎么修，都必须出现在 issues 上。
    */
   @Test
   void missingFactIsReportedAndPlaceholderIsStrippedFromText() {
     var noBrand = new SkuFacts(SKU, "SPK-001", "桌面款", "蓝牙音箱", "", "音频", "黑色", List.of());
-    var spec = spec("{brand} 音箱，{selling}。", new VariableSpec("brand", "SPU_BRAND", 0),
-        new VariableSpec("selling", "PHRASE_SELLING", 1));
+    var spec =
+        spec(
+            "{brand} 音箱，{selling}。",
+            new VariableSpec("brand", "SPU_BRAND", 0),
+            new VariableSpec("selling", "PHRASE_SELLING", 1));
 
     var rendered = DescriptionRenderer.render(spec, noBrand, pools(), 0);
 
@@ -138,25 +134,24 @@ class DescriptionRendererTest {
     var rendered = DescriptionRenderer.render(spec, bare, pools(), 0);
 
     assertThat(rendered.complete()).isFalse();
-    assertThat(rendered.issues()).extracting(Issue::variableName)
+    assertThat(rendered.issues())
+        .extracting(Issue::variableName)
         .containsExactly("brand", "category", "sku_name");
-    assertThat(rendered.issues()).allSatisfy(
-        i -> assertThat(i.issueKind()).isIn("EMPTY_FACT", "EMPTY_PHRASE_POOL"));
+    assertThat(rendered.issues())
+        .allSatisfy(i -> assertThat(i.issueKind()).isIn("EMPTY_FACT", "EMPTY_PHRASE_POOL"));
     assertThat(rendered.text()).doesNotContain("{").doesNotContain("}");
   }
 
   /**
    * 同一个缺失变量在一段正文里出现多次，只报一条。
    *
-   * <p>否则「brand 在这段里出现 3 次」会变成 3 条一模一样的原因，
-   * 而 UNIQUE(tenant_id,section_id,variable_name) 也会直接撞约束。
+   * <p>否则「brand 在这段里出现 3 次」会变成 3 条一模一样的原因， 而 UNIQUE(tenant_id,section_id,variable_name) 也会直接撞约束。
    */
   @Test
   void repeatedMissingVariableIsReportedOnlyOnce() {
     var noBrand = new SkuFacts(SKU, "SPK-001", "桌面款", "蓝牙音箱", "", "音频", "", List.of());
     var spec =
-        spec("{brand} 音箱，{brand} 值得信赖，{brand} 品质可靠。",
-            new VariableSpec("brand", "SPU_BRAND", 0));
+        spec("{brand} 音箱，{brand} 值得信赖，{brand} 品质可靠。", new VariableSpec("brand", "SPU_BRAND", 0));
 
     var rendered = DescriptionRenderer.render(spec, noBrand, pools(), 0);
 
@@ -169,8 +164,7 @@ class DescriptionRendererTest {
   @Test
   void siblingListIsReportedWhenSpuHasNoOtherSku() {
     var alone = new SkuFacts(SKU, "SPK-001", "桌面款", "蓝牙音箱", "星云", "音频", "", List.of());
-    var spec =
-        spec("适配型号：{siblings}。", new VariableSpec("siblings", "SKU_SIBLING_LIST", 0));
+    var spec = spec("适配型号：{siblings}。", new VariableSpec("siblings", "SKU_SIBLING_LIST", 0));
 
     var rendered = DescriptionRenderer.render(spec, alone, pools(), 0);
 
@@ -180,7 +174,8 @@ class DescriptionRendererTest {
     assertThat(rendered.text()).isEqualTo("适配型号：。");
 
     // 有兄弟 SKU 时正常填充，按 code 排序拼接。
-    var withSiblings = new SkuFacts(SKU, "SPK-001", "", "", "星云", "", "", List.of("SPK-002", "SPK-003"));
+    var withSiblings =
+        new SkuFacts(SKU, "SPK-001", "", "", "星云", "", "", List.of("SPK-002", "SPK-003"));
     assertThat(DescriptionRenderer.render(spec, withSiblings, pools(), 0).text())
         .isEqualTo("适配型号：SPK-002 / SPK-003。");
   }
@@ -188,8 +183,8 @@ class DescriptionRendererTest {
   /**
    * 正文里有占位符但模板没声明绑定源 —— 报告它，不静默。
    *
-   * <p>保存模板时 {@code variableBindingProblem} 已拒，所以这只能由「模板改过而译文没跟上」
-   * 造成；引擎仍然必须守住最后一道，否则 {@code {color}} 会原样进正文。
+   * <p>保存模板时 {@code variableBindingProblem} 已拒，所以这只能由「模板改过而译文没跟上」 造成；引擎仍然必须守住最后一道，否则 {@code
+   * {color}} 会原样进正文。
    */
   @Test
   void unboundPlaceholderIsReportedInsteadOfLeakingIntoText() {
@@ -208,7 +203,8 @@ class DescriptionRendererTest {
   void incompleteSectionStillHasReadableTextWithoutPlaceholders() {
     var noBrand = new SkuFacts(SKU, "SPK-001", "桌面款", "蓝牙音箱", "", "音频", "", List.of());
     var spec =
-        spec("【{brand}】{category}，{selling}，适用于 {siblings}。",
+        spec(
+            "【{brand}】{category}，{selling}，适用于 {siblings}。",
             new VariableSpec("brand", "SPU_BRAND", 0),
             new VariableSpec("category", "SPU_CATEGORY", 1),
             new VariableSpec("selling", "PHRASE_SELLING", 2),
@@ -237,22 +233,17 @@ class DescriptionRendererTest {
     assertThat(again.usedPhrases()).isEqualTo(first.usedPhrases());
 
     // 不同 SKU 序号拿到不同短语：一批描述读起来有变化，但完全可复现。
-    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 0).text())
-        .isEqualTo("双单元立体声");
-    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 1).text())
-        .isEqualTo("高保真音质");
-    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 2).text())
-        .isEqualTo("双单元立体声");
+    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 0).text()).isEqualTo("双单元立体声");
+    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 1).text()).isEqualTo("高保真音质");
+    assertThat(DescriptionRenderer.render(spec, facts(), pools(), 2).text()).isEqualTo("双单元立体声");
     // 负数序号也不该抛（Math.floorMod 的语义）。
-    assertThat(DescriptionRenderer.render(spec, facts(), pools(), -1).text())
-        .isEqualTo("高保真音质");
+    assertThat(DescriptionRenderer.render(spec, facts(), pools(), -1).text()).isEqualTo("高保真音质");
   }
 
   /**
    * 批量填充不提前退出：前面缺变量时后面的 SKU 照样要填。
    *
-   * <p>否则「第 3 个 SKU 有问题」会掩盖第 47 个也缺变量的事实，
-   * 而运营恰恰要知道整批缺了什么才能一次性修完。
+   * <p>否则「第 3 个 SKU 有问题」会掩盖第 47 个也缺变量的事实， 而运营恰恰要知道整批缺了什么才能一次性修完。
    */
   @Test
   void renderAllDoesNotStopAtTheFirstMissingVariable() {
@@ -280,8 +271,7 @@ class DescriptionRendererTest {
 
     var rendered = DescriptionRenderer.renderAll(spec, skus, pools());
 
-    assertThat(rendered).extracting(Rendered::text)
-        .containsExactly("双单元立体声", "高保真音质", "双单元立体声");
+    assertThat(rendered).extracting(Rendered::text).containsExactly("双单元立体声", "高保真音质", "双单元立体声");
   }
 
   // ------------------------------------------------------------ 固定文本与不变量
@@ -289,8 +279,7 @@ class DescriptionRendererTest {
   /** 无变量的注意事项原样通过（不要求至少一个占位符）。 */
   @Test
   void fixedTextWithoutVariablesPassesThroughUntouched() {
-    var rendered =
-        DescriptionRenderer.render(spec("请勿在充电时拆解本机。"), facts(), emptyPools(), 0);
+    var rendered = DescriptionRenderer.render(spec("请勿在充电时拆解本机。"), facts(), emptyPools(), 0);
 
     assertThat(rendered.complete()).isTrue();
     assertThat(rendered.issues()).isEmpty();
@@ -305,7 +294,8 @@ class DescriptionRendererTest {
 
     assertThat(rendered.complete()).isFalse();
     assertThat(rendered.text()).doesNotContain("{").doesNotContain("}");
-    assertThat(rendered.issues()).extracting(Issue::variableName)
+    assertThat(rendered.issues())
+        .extracting(Issue::variableName)
         .containsExactlyInAnyOrder("brand", "selling");
   }
 
@@ -322,8 +312,11 @@ class DescriptionRendererTest {
   /** 模板结构与模板管理器共用同一套规范化，标题里多个空格不会变成多个空洞。 */
   @Test
   void whitespaceIsNormalizedBeforeSubstitution() {
-    var spec = spec("  {brand}\n\n  音箱  {selling}  ", new VariableSpec("brand", "SPU_BRAND", 0),
-        new VariableSpec("selling", "PHRASE_SELLING", 1));
+    var spec =
+        spec(
+            "  {brand}\n\n  音箱  {selling}  ",
+            new VariableSpec("brand", "SPU_BRAND", 0),
+            new VariableSpec("selling", "PHRASE_SELLING", 1));
     var rendered = DescriptionRenderer.render(spec, facts(), pools(), 0);
 
     assertThat(rendered.complete()).isTrue();

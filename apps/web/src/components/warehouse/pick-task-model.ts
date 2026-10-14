@@ -55,7 +55,8 @@ const base = 'warehouse/pick-tasks';
 
 export type PickTaskStatus = PickTaskRow['status'];
 export type PickTaskLineStatus = 'PENDING' | 'PICKED' | 'SHORT';
-export type PickTaskExceptionKind = 'SHORTAGE' | 'DAMAGED' | 'MISSING_SERIAL' | 'WRONG_LOCATION' | 'OTHER';
+export type PickTaskExceptionKind =
+  'SHORTAGE' | 'DAMAGED' | 'MISSING_SERIAL' | 'WRONG_LOCATION' | 'OTHER';
 
 export interface PickTaskParams {
   warehouseId?: string;
@@ -71,7 +72,8 @@ export function pickTaskQuery(params: PickTaskParams): string {
   const parts: string[] = [];
   if (params.warehouseId) parts.push(`warehouseId=${encodeURIComponent(params.warehouseId)}`);
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
-  if (params.assigneeUserId) parts.push(`assigneeUserId=${encodeURIComponent(params.assigneeUserId)}`);
+  if (params.assigneeUserId)
+    parts.push(`assigneeUserId=${encodeURIComponent(params.assigneeUserId)}`);
   if (params.keyword) parts.push(`keyword=${encodeURIComponent(params.keyword)}`);
   if (params.sort) parts.push(`sort=${encodeURIComponent(params.sort)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
@@ -295,13 +297,18 @@ export function lineWarnings(line: {
 }): string[] {
   const out: string[] = [];
   if (!line.sourceHasStock) out.push('无可分配库存：这一行拣不了，请先补货或改单');
-  if (line.nonPickableSource) out.push('只能从不可拣库位取货（对应 8.5.2.1「高频货在不可拣库位」）');
-  if (line.skuLocationCount > 1) out.push(`该 SKU 散在 ${line.skuLocationCount} 个库位（对应 8.5.2.1「SKU 散在多库位」）`);
+  if (line.nonPickableSource)
+    out.push('只能从不可拣库位取货（对应 8.5.2.1「高频货在不可拣库位」）');
+  if (line.skuLocationCount > 1)
+    out.push(`该 SKU 散在 ${line.skuLocationCount} 个库位（对应 8.5.2.1「SKU 散在多库位」）`);
   return out;
 }
 
 /** 实拣库位与计划不一致时要说出来 —— 这是分配错了还是现场换了个地方，两种都要有人知道。 */
-export function locationDrifted(line: { sourceLocationId: string }, pick: { locationId: string }): boolean {
+export function locationDrifted(
+  line: { sourceLocationId: string },
+  pick: { locationId: string },
+): boolean {
   return line.sourceLocationId !== pick.locationId;
 }
 

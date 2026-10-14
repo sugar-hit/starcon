@@ -23,9 +23,10 @@ V57 补的列：`produced_on`、`origin`、`source_system`、`source_ref_id`、`
 ### 2. 本迁移刻意不写 RLS、不写 GRANT
 
 `inventory_lot` 的隔离与授权在 V2 已坐实（ENABLE/FORCE ROW LEVEL SECURITY + `isolation` policy
-+ `GRANT ... TO warehouse_app` + `REVOKE ALL FROM starcon_app`）。
-本迁移没有新建任何表，`ALTER TABLE ADD COLUMN` 不会让既有策略失效，新增列自动落在同一条
-`USING/WITH CHECK` 里。这是结论不是遗漏，由集成测试的三条断言实跑证明，不靠推断。
+
+- `GRANT ... TO warehouse_app` + `REVOKE ALL FROM starcon_app`）。
+  本迁移没有新建任何表，`ALTER TABLE ADD COLUMN` 不会让既有策略失效，新增列自动落在同一条
+  `USING/WITH CHECK` 里。这是结论不是遗漏，由集成测试的三条断言实跑证明，不靠推断。
 
 ### 3. 关键 trade-off：出入库历史是「批次相关流水」，不是批次精确流水
 
@@ -38,6 +39,7 @@ balance 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，**批次
 后果：一条分录**无法被精确归属到某个批次** —— 同一 balance 行下可能同时挂着本批次与其它批次的货。
 
 处理方式：
+
 - 「批次出入库历史」**复用 7.1.2.1 台账**（按任务要求，不另写一套流水查询），
   实现为 `InventoryLedgerService.page(query, lotId)` 的**重载**。
 - 响应里带 `attribution = BALANCE_GRANULAR` 与 `attributionNote`，前端**必须显示**这个口径。
@@ -84,11 +86,12 @@ balance 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，**批次
    而这恰恰是最该显示的字段。
 
 另有一处前端 bug 被自己写的测试抓到：`sourceText` 没 trim `sourceRefCode`，
-只填空格时会拼出悬空的「收货单   」。
+只填空格时会拼出悬空的「收货单 」。
 
 ## 文件清单
 
 ### 后端（新增）
+
 - `backend/services/warehouse/src/main/resources/db/migration/V57__warehouse_inventory_lot_archive.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryLotModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryLotService.java`
@@ -96,6 +99,7 @@ balance 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，**批次
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryLotIntegrationTest.java`
 
 ### 后端（改动，均为纯加法或最小可见性调整）
+
 - `InventoryLedgerService.java` — 新增 `page(query, lotId)` 重载，批次条件加在
   `dimensionConditions` 内（用 `exists` 而非 `join`：一个 balance 可能挂多个批次，
   join 会把同一条分录复制成多行，计数与求和都会翻倍）。既有方法签名、行为、调用方全部不变。
@@ -104,26 +108,28 @@ balance 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，**批次
   而「只看我自己的流水」一旦漂移就是越权。
 
 ### 前端（新增）
+
 - `apps/web/src/components/inventory/inventory-lot-model.ts`
 - `apps/web/src/components/inventory/inventory-lot.tsx`
 - `apps/web/src/components/inventory/inventory-lot-model.test.ts`
 - `apps/web/src/app/inventory/lots/page.tsx`
 
 ### 契约与台账
+
 - `packages/api-contracts/src/warehouse.openapi.json`、`catalog.ts` — codegen 产物，新增 11 个类型、4 条路径
 - `packages/api-contracts/src/identity.openapi.json` — **顺带刷新的既有漂移**，见下
 - `docs/product/capability-blueprint/module-progress.md` — 只改 7.3.1.1 那一行的状态与证据
 
 ## 端点
 
-| 方法 | 路径 | 权限 |
-| --- | --- | --- |
-| GET | `/warehouse/inventory/lots` | `warehouse.inventory.read` |
-| GET | `/warehouse/inventory/lots/{lotId}` | `warehouse.inventory.read` |
-| GET | `/warehouse/inventory/lots/{lotId}/distribution` | `warehouse.inventory.read` |
-| GET | `/warehouse/inventory/lots/{lotId}/movements` | `warehouse.inventory.read` |
-| POST | `/warehouse/inventory/lots` | `warehouse.inventory.update` |
-| PUT | `/warehouse/inventory/lots/{lotId}` | `warehouse.inventory.update` |
+| 方法 | 路径                                             | 权限                         |
+| ---- | ------------------------------------------------ | ---------------------------- |
+| GET  | `/warehouse/inventory/lots`                      | `warehouse.inventory.read`   |
+| GET  | `/warehouse/inventory/lots/{lotId}`              | `warehouse.inventory.read`   |
+| GET  | `/warehouse/inventory/lots/{lotId}/distribution` | `warehouse.inventory.read`   |
+| GET  | `/warehouse/inventory/lots/{lotId}/movements`    | `warehouse.inventory.read`   |
+| POST | `/warehouse/inventory/lots`                      | `warehouse.inventory.update` |
+| PUT  | `/warehouse/inventory/lots/{lotId}`              | `warehouse.inventory.update` |
 
 命名空间刻意用 `/warehouse/inventory/lots` 而不是 `/warehouse/lots` ——
 后者是 7.1.1.2 明细页的批次下拉（`InventoryController.lots`），一个只读精简列表，

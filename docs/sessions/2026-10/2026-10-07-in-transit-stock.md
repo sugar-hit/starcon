@@ -32,10 +32,10 @@ V1 建的 `inventory_transfer` 已经是全服务在途的唯一事实，`Invent
 
 ### 4. 外部腿落账分两段
 
-| 类型 | 登记时 | 到货时 |
-| --- | --- | --- |
-| FBA 发货 | **立刻扣减发货仓在手** + 写 `SHIPMENT` 分录（货真的离仓了） | 只了结在途，**不入库**（平台仓库存属 7.1.1.2 外部仓观测，未交付） |
-| 头程 / 采购 | **不动在手**（货还没进我方账） | 入库目的仓 + 写 `RECEIPT` 分录 |
+| 类型        | 登记时                                                      | 到货时                                                            |
+| ----------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| FBA 发货    | **立刻扣减发货仓在手** + 写 `SHIPMENT` 分录（货真的离仓了） | 只了结在途，**不入库**（平台仓库存属 7.1.1.2 外部仓观测，未交付） |
+| 头程 / 采购 | **不动在手**（货还没进我方账）                              | 入库目的仓 + 写 `RECEIPT` 分录                                    |
 
 FBA 登记不扣就是在途与在手双向虚增；头程登记就入库等于货到之前凭空多出库存。
 
@@ -68,6 +68,7 @@ NOT NULL —— 硬塞一个本租户仓进去就是在编造事实。两站至�
 ## 文件清单
 
 新增：
+
 - `backend/services/warehouse/src/main/resources/db/migration/V63__warehouse_in_transit_leg.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryInTransitModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryInTransitService.java`
@@ -75,6 +76,7 @@ NOT NULL —— 硬塞一个本租户仓进去就是在编造事实。两站至�
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryInTransitIntegrationTest.java`
 
 改动：
+
 - `docs/product/capability-blueprint/module-progress.md`（仅 7.5.1.2 一行的状态与证据两格）
 
 ## 验证

@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 8.3.2.2 波次与合并拣货入口。
  *
- * <p>命名空间 {@code /warehouse/pick-waves}，<b>顶层分支、刻意不挂在 {@code outbound-orders}
- * 之下</b> —— 与 8.3.2.1 的 {@code pick-tasks} 同一理由：波次是<b>跨订单的排班</b>，
- * 一个波次底下挂着多张出库单的拣货任务，它在契约上从来不属于任何一张出库单；
- * 挂成 {@code outbound-orders/{id}/waves} 那种子资源形状会让「波次」看起来像
- * 某一张单的附属品，而实际上八张单的排班聚成一波时，任取一张都代表不了这一波。
+ * <p>命名空间 {@code /warehouse/pick-waves}，<b>顶层分支、刻意不挂在 {@code outbound-orders} 之下</b> —— 与 8.3.2.1 的
+ * {@code pick-tasks} 同一理由：波次是<b>跨订单的排班</b>， 一个波次底下挂着多张出库单的拣货任务，它在契约上从来不属于任何一张出库单； 挂成 {@code
+ * outbound-orders/{id}/waves} 那种子资源形状会让「波次」看起来像 某一张单的附属品，而实际上八张单的排班聚成一波时，任取一张都代表不了这一波。
  *
  * <p>十四个形状，刻意逐个列出、不做通配：
  *
@@ -40,13 +38,11 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{waveId}/tasks/{pickTaskId}/detach} 移出一张成员工单
  * </ul>
  *
- * <p>刻意<b>没有</b> PUT / DELETE：成员归属是排班事实（移出走 detach 并留流水），
- * 已完成的波次是交给复核的凭据。要更正就「移出 + 重新排波」，要放弃就取消留原因。
+ * <p>刻意<b>没有</b> PUT / DELETE：成员归属是排班事实（移出走 detach 并留流水）， 已完成的波次是交给复核的凭据。要更正就「移出 + 重新排波」，要放弃就取消留原因。
  *
- * <p><b>权限码复用 {@code warehouse.inventory.read} / {@code warehouse.inventory.update}</b>，
- * 不新起 {@code warehouse.picking.*}：identity 只注册了 warehouse 的两个页面资源
- * （inventory / facilities），用一个没注册的码会让连 OWNER 都 403 ——
- * 页面全绿而所有人点不动，是最难现场发现的一种配置错误。
+ * <p><b>权限码复用 {@code warehouse.inventory.read} / {@code warehouse.inventory.update}</b>， 不新起 {@code
+ * warehouse.picking.*}：identity 只注册了 warehouse 的两个页面资源 （inventory / facilities），用一个没注册的码会让连 OWNER 都
+ * 403 —— 页面全绿而所有人点不动，是最难现场发现的一种配置错误。
  */
 @RestController
 @RequestMapping("/warehouse/pick-waves")
@@ -66,10 +62,7 @@ public class PickWaveController {
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
   }
 
-  /**
-   * 能力声明：三个合并维度各自的真伪、库区怎么推导、时段按谁的时区、
-   * 「合并不改订单粒度」这一条，以及库存边界（<b>本模块一动库存都不动</b>）。
-   */
+  /** 能力声明：三个合并维度各自的真伪、库区怎么推导、时段按谁的时区、 「合并不改订单粒度」这一条，以及库存边界（<b>本模块一动库存都不动</b>）。 */
   @GetMapping("/capabilities")
   public PickWaveCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -101,10 +94,7 @@ public class PickWaveController {
     return call(auth, "inventory.update", a -> pickWaves.retireRule(ruleId, input, a.userId()));
   }
 
-  /**
-   * 合并预览：按合并键（承运渠道 × 库区）分组，每组带三个计数
-   * —— 现在就能并 / 得等上一波收工 / 没有规则认领。
-   */
+  /** 合并预览：按合并键（承运渠道 × 库区）分组，每组带三个计数 —— 现在就能并 / 得等上一波收工 / 没有规则认领。 */
   @GetMapping("/candidates")
   public PickWaveCandidatePage candidates(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -135,9 +125,7 @@ public class PickWaveController {
     return call(
         auth,
         "inventory.read",
-        a ->
-            pickWaves.page(
-                warehouseId, status, carrierCode, zoneId, keyword, sort, page, size));
+        a -> pickWaves.page(warehouseId, status, carrierCode, zoneId, keyword, sort, page, size));
   }
 
   /** 详情：单头 + 成员（按位置）+ 流水 + 合并报告。 */

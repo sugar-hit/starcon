@@ -25,14 +25,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.6.2.1 库存健康：指标可算性、**不可用指标如实标记**、准确率红线、
- * 负库存在结构上不可能（实跑 DB 约束证明），以及租户隔离三断言。
+ * 7.6.2.1 库存健康：指标可算性、**不可用指标如实标记**、准确率红线、 负库存在结构上不可能（实跑 DB 约束证明），以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -57,7 +55,8 @@ class InventoryHealthIntegrationTest {
   static final UUID locSh1 = idFor(a, 8);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-health-test-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-health-test-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(
@@ -163,22 +162,41 @@ class InventoryHealthIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
                     + " values(?,?,?,?,?,'STORAGE',true)",
-                idFor(tenant, 8), tenant, idFor(tenant, 4), "SH-A-01", "库位 SH-A-01");
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 4),
+                "SH-A-01",
+                "库位 SH-A-01");
             return null;
           });
     }
@@ -236,7 +254,8 @@ class InventoryHealthIntegrationTest {
    *
    * <p>刻意只写结论不写 finding：本模块只需要「核了多少行、对不上多少行」这一个口径。
    */
-  void seedReconciliation(UUID tenant, UUID warehouse, long checked, long discrepancies, OffsetDateTime at) {
+  void seedReconciliation(
+      UUID tenant, UUID warehouse, long checked, long discrepancies, OffsetDateTime at) {
     access.run(
         actorFor(tenant),
         "warehouse.inventory.read",
@@ -270,10 +289,10 @@ class InventoryHealthIntegrationTest {
   /**
    * 建一张盘点单并录一行实盘数。
    *
-   * <p>{@code countedQty} 与账面数一致则该行「准确」，不一致则产生差异。
-   * V59 的冻结触发器只挡改列，不挡 INSERT，所以可以一次把行建到位。
+   * <p>{@code countedQty} 与账面数一致则该行「准确」，不一致则产生差异。 V59 的冻结触发器只挡改列，不挡 INSERT，所以可以一次把行建到位。
    */
-  void seedStocktake(UUID tenant, String code, String book, String counted, OffsetDateTime frozenAt) {
+  void seedStocktake(
+      UUID tenant, String code, String book, String counted, OffsetDateTime frozenAt) {
     access.run(
         actorFor(tenant),
         "warehouse.inventory.read",
@@ -285,12 +304,22 @@ class InventoryHealthIntegrationTest {
               "insert into stocktake_sheet(id,tenant_id,code,scope_type,scope_key,scope_label,"
                   + "task_unit,frozen_at,status,note,created_by_user_id)"
                   + " values (?,?,?,'WAREHOUSE',?,?,'BY_LOCATION',?::timestamptz,'COUNTED','',?)",
-              sheetId, tenant, code, idFor(tenant, 4), "上海仓", when, user);
+              sheetId,
+              tenant,
+              code,
+              idFor(tenant, 4),
+              "上海仓",
+              when,
+              user);
           var taskId = UUID.randomUUID();
           sql.execute(
               "insert into stocktake_task(id,tenant_id,sheet_id,task_unit,task_key,task_code,task_name)"
                   + " values(?,?,?,'BY_LOCATION',?,?,'库位 SH-A-01')",
-              taskId, tenant, sheetId, idFor(tenant, 8), "SH-A-01");
+              taskId,
+              tenant,
+              sheetId,
+              idFor(tenant, 8),
+              "SH-A-01");
           sql.execute(
               "insert into stocktake_line(id,tenant_id,sheet_id,bucket_id,legal_entity_id,sku_id,"
                   + "warehouse_id,location_id,lot_id,quality_status_id,sku_code,sku_name,"
@@ -318,10 +347,7 @@ class InventoryHealthIntegrationTest {
   }
 
   InventoryHealthMetric metric(InventoryHealthScorecard card, HealthMetricType type) {
-    return card.metrics().stream()
-        .filter(m -> m.metricType() == type)
-        .findFirst()
-        .orElseThrow();
+    return card.metrics().stream().filter(m -> m.metricType() == type).findFirst().orElseThrow();
   }
 
   // ================================================================ 准确率：核对口径
@@ -331,8 +357,7 @@ class InventoryHealthIntegrationTest {
     seedBalance(a, "100");
     seedReconciliation(a, null, 100, 5, OffsetDateTime.now(ZoneOffset.ofHours(8)));
 
-    var result = asA(
-        () -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
     var accuracy = metric(result.tenant(), HealthMetricType.ACCURACY);
 
     assertThat(accuracy.availability()).isEqualTo(MetricAvailability.AVAILABLE);
@@ -356,8 +381,7 @@ class InventoryHealthIntegrationTest {
     seedBalance(a, "100");
     seedReconciliation(a, null, 1000, 2, OffsetDateTime.now(ZoneOffset.ofHours(8)));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     assertThat(metric(result.tenant(), HealthMetricType.ACCURACY).value())
         .isEqualByComparingTo("0.998000");
@@ -375,8 +399,7 @@ class InventoryHealthIntegrationTest {
     seedReconciliation(a, null, 100, 50, base.minusDays(5));
     seedReconciliation(a, null, 100, 0, base.minusDays(1));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     assertThat(metric(result.tenant(), HealthMetricType.ACCURACY).value())
         .isEqualByComparingTo("1.000000");
@@ -390,8 +413,7 @@ class InventoryHealthIntegrationTest {
     seedStocktake(a, "PD-1", "100", "100", OffsetDateTime.now(ZoneOffset.ofHours(8)));
     seedStocktake(a, "PD-2", "100", "90", OffsetDateTime.now(ZoneOffset.ofHours(8)).minusDays(1));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
     var accuracy = metric(result.tenant(), HealthMetricType.ACCURACY);
 
     // 2 行已录实盘，1 行一致 → 0.5
@@ -407,8 +429,7 @@ class InventoryHealthIntegrationTest {
     seedBalance(a, "100");
     seedStocktake(a, "PD-1", "100", null, OffsetDateTime.now(ZoneOffset.ofHours(8)));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     // 没有任何已录实盘行 → 没有样本，不是「准确率 0」
     assertThat(metric(result.tenant(), HealthMetricType.ACCURACY).availability())
@@ -422,8 +443,7 @@ class InventoryHealthIntegrationTest {
     seedBalance(a, "100");
     seedReconciliation(a, null, 100, 0, OffsetDateTime.now(ZoneOffset.ofHours(8)));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     // 六个指标行恒定存在
     assertThat(result.tenant().metrics()).hasSize(HealthMetricType.all().size());
@@ -436,14 +456,13 @@ class InventoryHealthIntegrationTest {
             HealthMetricType.OVERSTOCK_RATE,
             HealthMetricType.STAGNANT_SHARE)) {
       var m = metric(result.tenant(), type);
-      assertThat(m.availability())
-          .as("%s 应标记不可用", type)
-          .isEqualTo(MetricAvailability.UNAVAILABLE);
+      assertThat(m.availability()).as("%s 应标记不可用", type).isEqualTo(MetricAvailability.UNAVAILABLE);
       assertThat(m.value()).as("%s 不可用时不得带值", type).isNull();
       assertThat(m.blockedByModule()).as("%s 必须记下阻塞模块", type).isNotBlank();
       assertThat(m.basis()).as("%s 必须给出原因", type).isNotBlank();
     }
-    assertThat(metric(result.tenant(), HealthMetricType.TURNOVER).blockedByModule()).isEqualTo("13");
+    assertThat(metric(result.tenant(), HealthMetricType.TURNOVER).blockedByModule())
+        .isEqualTo("13");
     assertThat(metric(result.tenant(), HealthMetricType.STAGNANT_SHARE).blockedByModule())
         .isEqualTo("7.6.1");
 
@@ -495,8 +514,7 @@ class InventoryHealthIntegrationTest {
     seedBalance(a, "100");
     seedReconciliation(a, null, 100, 0, OffsetDateTime.now(ZoneOffset.ofHours(8)));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
     var negative = metric(result.tenant(), HealthMetricType.NEGATIVE_STOCK);
 
     assertThat(negative.availability()).isEqualTo(MetricAvailability.AVAILABLE);
@@ -540,8 +558,7 @@ class InventoryHealthIntegrationTest {
   void 无任何核对证据时不得报健康() {
     seedBalance(a, "100");
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
     var card = result.tenant();
 
     // 负库存恒为 0 会白送满分 —— 若照常评级就会得到「没核过账但显示健康」
@@ -561,8 +578,7 @@ class InventoryHealthIntegrationTest {
     seedReconciliation(a, null, 100, 0, base.minusDays(2));
     seedReconciliation(a, whSh, 100, 50, base.minusDays(1));
 
-    var result =
-        asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
+    var result = asA(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     var warehouseCard =
         result.warehouses().stream()
@@ -611,7 +627,8 @@ class InventoryHealthIntegrationTest {
                 asA(
                     () ->
                         service.assess(
-                            new InventoryHealthQuery(null, null, null, new BigDecimal("1.5")), user)))
+                            new InventoryHealthQuery(null, null, null, new BigDecimal("1.5")),
+                            user)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("0..1");
   }
@@ -658,7 +675,8 @@ class InventoryHealthIntegrationTest {
 
     var trend = asA(() -> service.trend(new InventoryHealthQuery(null, null, null, null)));
 
-    assertThat(trend.points()).extracting(InventoryHealthTrendPoint::source)
+    assertThat(trend.points())
+        .extracting(InventoryHealthTrendPoint::source)
         .containsExactly("RECONCILIATION", "RECONCILIATION", "STOCKTAKE");
     assertThat(trend.points().get(0).accuracy()).isEqualByComparingTo("0.900000");
     assertThat(trend.points().get(1).accuracy()).isEqualByComparingTo("1.000000");
@@ -697,10 +715,11 @@ class InventoryHealthIntegrationTest {
   void 端点返回六项指标与红线判定() throws Exception {
     seedBalance(a, "100");
     seedReconciliation(a, null, 100, 5, OffsetDateTime.now(ZoneOffset.ofHours(8)));
-    http.perform(post("/warehouse/inventory/health/assess")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/health/assess")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.tenant.totalMetricCount").value(6))
         .andExpect(jsonPath("$.tenant.availableMetricCount").value(2))
@@ -717,11 +736,13 @@ class InventoryHealthIntegrationTest {
         .andExpect(jsonPath("$.blocked").value(true))
         .andExpect(jsonPath("$.accuracyState").value("AVAILABLE"));
 
-    http.perform(get("/warehouse/inventory/health/trend").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/health/trend").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.points.length()").value(1));
 
-    http.perform(get("/warehouse/inventory/health/issues").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/health/issues").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(org.hamcrest.Matchers.greaterThan(0)));
   }
@@ -770,33 +791,37 @@ class InventoryHealthIntegrationTest {
     asB(() -> service.assess(new InventoryHealthQuery(null, null, null, null), user));
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的（准确率 0.6，阻断）
-    http.perform(get("/warehouse/inventory/health")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/health")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.scorecards[0].blocked").value(true));
 
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据（未阻断）
-    http.perform(get("/warehouse/inventory/health")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/health")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.scorecards[0].blocked").value(false));
 
     // 红线端点同样不受伪造头影响
-    http.perform(get("/warehouse/inventory/health/gate")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/health/gate")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.accuracyRate").value(0.6));
 
     // 未认证 401
     http.perform(get("/warehouse/inventory/health")).andExpect(status().isUnauthorized());
     // 触发评估要 update 权限：只有 read 的角色不能落结论
-    http.perform(post("/warehouse/inventory/health/assess")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/health/assess")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isForbidden());
   }
 
@@ -812,10 +837,8 @@ class InventoryHealthIntegrationTest {
     // 池大小为 1，同一条连接被反复借还：交替访问两个租户 20 轮，
     // 每一轮都校验评分卡、红线与问题清单三条路径都不串租户。
     for (int i = 0; i < 20; i++) {
-      var ga =
-          asA(() -> service.gate(new InventoryHealthQuery(null, null, null, null)));
-      var gb =
-          asB(() -> service.gate(new InventoryHealthQuery(null, null, null, null)));
+      var ga = asA(() -> service.gate(new InventoryHealthQuery(null, null, null, null)));
+      var gb = asB(() -> service.gate(new InventoryHealthQuery(null, null, null, null)));
 
       assertThat(ga.blocked()).as("A 轮 %d：账全对不该被阻断", i).isFalse();
       assertThat(ga.accuracyRate()).as("A 轮 %d", i).isEqualByComparingTo("1.000000");

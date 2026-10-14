@@ -18,15 +18,16 @@ import org.springframework.web.server.ResponseStatusException;
  * 3.1.2.2 SKU 详情：把单个 SKU 的完整档案按分区聚合成一次读取。
  *
  * <p>分区与「谁的数字」严格对齐：
+ *
  * <ul>
  *   <li>编码规格、属性有效值、包装尺寸重量、单位换算、条码 —— catalog 自有，走 jOOQ 读本库；
- *   <li>库存分布、成本与售价、平台 listing、各单据引用 —— 各自是别的服务的事实源，
- *       走 {@link SkuDetailProjectionPort}，未接入就标「未接入」，绝不回 0；
+ *   <li>库存分布、成本与售价、平台 listing、各单据引用 —— 各自是别的服务的事实源， 走 {@link
+ *       SkuDetailProjectionPort}，未接入就标「未接入」，绝不回 0；
  *   <li>媒体 —— 只读 {@code product_asset} 现有的列，并如实说明这张表缺文件键。
  * </ul>
  *
- * <p>属性区展示的是 {@link EffectiveValues} 解析出来的**有效值**（SPU 公共值经 SKU 覆写/清空后的
- * 结果），不是原始存的两行值——运营要看到的是"这个 SKU 实际是什么参数"。
+ * <p>属性区展示的是 {@link EffectiveValues} 解析出来的**有效值**（SPU 公共值经 SKU 覆写/清空后的 结果），不是原始存的两行值——运营要看到的是"这个
+ * SKU 实际是什么参数"。
  */
 @Service
 public class SkuDetailService {
@@ -49,13 +50,12 @@ public class SkuDetailService {
   /**
    * 读取详情。
    *
-   * <p>属性有效值用一条 SQL 把定义 + 公共赋值 + SKU 赋值一次性取齐（见
-   * {@link #effectiveAttributes}），不在循环里逐个属性查库——一个 SKU 上百个属性时那是 N+1。
+   * <p>属性有效值用一条 SQL 把定义 + 公共赋值 + SKU 赋值一次性取齐（见 {@link #effectiveAttributes}），不在循环里逐个属性查库——一个 SKU
+   * 上百个属性时那是 N+1。
    *
-   * <p>媒体区跨了权限边界：{@code product_asset} 的 data_scope 策略要求
-   * {@code app.permission} 形如 {@code catalog.assets.%}（V3），而详情接口跑在
-   * {@code catalog.sku.read} 下。因此媒体单独开一段 {@code catalog.assets.read} 事务去读；
-   * 没有这个权限就整区标成不可用，而不是读到空数组冒充"这个 SKU 没有素材"。
+   * <p>媒体区跨了权限边界：{@code product_asset} 的 data_scope 策略要求 {@code app.permission} 形如 {@code
+   * catalog.assets.%}（V3），而详情接口跑在 {@code catalog.sku.read} 下。因此媒体单独开一段 {@code catalog.assets.read}
+   * 事务去读； 没有这个权限就整区标成不可用，而不是读到空数组冒充"这个 SKU 没有素材"。
    */
   public SkuDetail detail(AccessService.Access actor, UUID skuId) {
     var row =
@@ -127,14 +127,14 @@ public class SkuDetailService {
   /**
    * 一次性取齐「定义 + 公共赋值 + SKU 赋值」，再交给 {@link EffectiveValues} 解析。
    *
-   * <p>公共侧是 {@code sku_id is null} 的那一行，SKU 侧是 {@code sku_id = 该 SKU} 的那一行。
-   * V1 的 {@code UNIQUE NULLS NOT DISTINCT(tenant_id,attribute_id,sku_id)} 保证两侧各自唯一，
-   * 所以这里用两个 LEFT JOIN 不会放大行数。
+   * <p>公共侧是 {@code sku_id is null} 的那一行，SKU 侧是 {@code sku_id = 该 SKU} 的那一行。 V1 的 {@code UNIQUE
+   * NULLS NOT DISTINCT(tenant_id,attribute_id,sku_id)} 保证两侧各自唯一， 所以这里用两个 LEFT JOIN 不会放大行数。
    *
    * <p>取值明细用标量子查询聚成数组，避免把每个属性的每个取值都拉成一行后在内存里重组。
    */
   private List<SkuEffectiveAttribute> effectiveAttributes(UUID spuId, UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select d.id,d.code,d.name,d.data_type,d.value_mode,d.multiple,d.required,d.variant_axis,"
                 + "d.unit,d.group_name,d.position,"
                 + "cv.state as common_state,"
@@ -167,7 +167,8 @@ public class SkuDetailService {
                       mode,
                       new EffectiveValues.Raw(
                           r.get("common_state", String.class), strings(r, "common_values")),
-                      new EffectiveValues.Raw(r.get("sku_state", String.class), strings(r, "sku_values")),
+                      new EffectiveValues.Raw(
+                          r.get("sku_state", String.class), strings(r, "sku_values")),
                       required);
               return new SkuEffectiveAttribute(
                   attributeId,
@@ -207,10 +208,19 @@ public class SkuDetailService {
   private SkuAttributeSummary summary(List<SkuEffectiveAttribute> attributes) {
     return new SkuAttributeSummary(
         attributes.size(),
-        (int) attributes.stream().filter(a -> a.source().equals(EffectiveValues.Source.SKU_OVERRIDE.code())).count(),
-        (int) attributes.stream().filter(a -> a.source().equals(EffectiveValues.Source.SKU_CLEARED.code())).count(),
+        (int)
+            attributes.stream()
+                .filter(a -> a.source().equals(EffectiveValues.Source.SKU_OVERRIDE.code()))
+                .count(),
+        (int)
+            attributes.stream()
+                .filter(a -> a.source().equals(EffectiveValues.Source.SKU_CLEARED.code()))
+                .count(),
         (int) attributes.stream().filter(a -> a.inherited()).count(),
-        (int) attributes.stream().filter(a -> a.source().equals(EffectiveValues.Source.UNSET.code())).count(),
+        (int)
+            attributes.stream()
+                .filter(a -> a.source().equals(EffectiveValues.Source.UNSET.code()))
+                .count(),
         (int) attributes.stream().filter(SkuEffectiveAttribute::variantAxis).count(),
         (int) attributes.stream().filter(SkuEffectiveAttribute::missingRequired).count());
   }
@@ -266,12 +276,12 @@ public class SkuDetailService {
   /**
    * 单位换算：只把**当前生效**的版本标成 current，历史版本仍然显示出来。
    *
-   * <p>今天之前的版本 effective_to 已经闭合，今天之后才生效的还没开始——两者都不是"当前"，
-   * 但都必须看得见，否则改比例之后就再也查不到单据当时冻结的是哪一版。
+   * <p>今天之前的版本 effective_to 已经闭合，今天之后才生效的还没开始——两者都不是"当前"， 但都必须看得见，否则改比例之后就再也查不到单据当时冻结的是哪一版。
    */
   private List<SkuUnitConversion> conversions(UUID skuId, String baseUnit) {
     LocalDate today = LocalDate.now(java.time.ZoneOffset.UTC);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select unit_code,role,quantity_per_base,effective_from,effective_to from sku_unit_conversion"
                 + " where sku_id=? order by unit_code,role,effective_from desc,effective_to desc nulls last",
             skuId)
@@ -319,10 +329,9 @@ public class SkuDetailService {
   /**
    * 媒体区：只读 {@code product_asset} 现有可能的列。
    *
-   * <p>这张表是 {@code LIKE product_research INCLUDING ALL} 的同构复制，缺陷有三处，直接影响本区：
-   * 没有文件键（存不了对象存储的 key，因此画不出缩略图）、没有 {@code sku_id}（只能落到 SPU 级）、
-   * 没有任何媒体类型/尺寸/格式列。因此本区**只**给出资料元数据行，并把缺陷写进 limitation 返回，
-   * 不去给这张错表加字段——修表是 3.4.1.1 的专门任务。
+   * <p>这张表是 {@code LIKE product_research INCLUDING ALL} 的同构复制，缺陷有三处，直接影响本区： 没有文件键（存不了对象存储的
+   * key，因此画不出缩略图）、没有 {@code sku_id}（只能落到 SPU 级）、 没有任何媒体类型/尺寸/格式列。因此本区**只**给出资料元数据行，并把缺陷写进
+   * limitation 返回， 不去给这张错表加字段——修表是 3.4.1.1 的专门任务。
    */
   private MediaResult media(AccessService.Access actor, UUID spuId) {
     String limitation =
@@ -331,9 +340,7 @@ public class SkuDetailService {
             + "该表结构缺陷由 3.4.1.1 媒体库的专门修表任务解决，本模块不往这张错表上加字段。";
     if (!actor.permissions().contains("catalog.assets.read"))
       return new MediaResult(
-          false,
-          List.of(),
-          "当前角色没有素材查看权限（catalog.assets.read），媒体区未加载。" + limitation);
+          false, List.of(), "当前角色没有素材查看权限（catalog.assets.read），媒体区未加载。" + limitation);
     // product_asset 的 data_scope 策略要求 app.permission 形如 catalog.assets.%（V3），
     // 而详情接口跑在 catalog.sku.read 下，所以这里用**同一个访问者**单独开一段
     // catalog.assets.read 的租户事务去读：租户上下文是事务级 GUC，换连接就丢；
@@ -343,7 +350,8 @@ public class SkuDetailService {
             actor,
             "catalog.assets.read",
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select id,title,notes,reference,status,locale,target_country,expires_on,updated_at"
                             + " from product_asset where spu_id=? order by updated_at desc,id desc limit 100",
                         spuId)
@@ -369,7 +377,8 @@ public class SkuDetailService {
   // ------------------------------------------------------------ 状态历史
 
   private List<SkuStatusChange> history(UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,from_status,to_status,reason,source,actor_id,occurred_at,created_at"
                 + " from sku_status_event where sku_id=?"
                 + " order by occurred_at desc,id desc limit 50",
@@ -394,11 +403,9 @@ public class SkuDetailService {
   /**
    * 编辑入口：名称、条码、基础单位、包装尺寸重量，全部走 {@code version} 乐观锁。
    *
-   * <p>属性覆写、编码规则与外部条码、单位版本维护分别属 3.2.2.2 / 3.1.2.3 / 3.1.2.4，
-   * 都不在这里代劳——详情页的编辑按钮只打开本模块真正拥有的字段。
+   * <p>属性覆写、编码规则与外部条码、单位版本维护分别属 3.2.2.2 / 3.1.2.3 / 3.1.2.4， 都不在这里代劳——详情页的编辑按钮只打开本模块真正拥有的字段。
    *
-   * <p>包装是可选分区：四个尺寸/重量字段与包装方式全空就删掉这一行，
-   * 让"没有维护包装"在数据上是真的没有，而不是留一行全 null 装作维护过。
+   * <p>包装是可选分区：四个尺寸/重量字段与包装方式全空就删掉这一行， 让"没有维护包装"在数据上是真的没有，而不是留一行全 null 装作维护过。
    */
   public SkuDetailSaved update(AccessService.Access actor, UUID skuId, SkuDetailInput input) {
     var row = sql.fetchOne("select tenant_id,spu_id,status,version from sku where id=?", skuId);
@@ -414,8 +421,7 @@ public class SkuDetailService {
             input.baseUnit().trim(),
             skuId,
             input.version());
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "SKU 已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "SKU 已被他人修改，请刷新后重试");
 
     boolean packagingChanged = writePackaging(actor, skuId, input);
     long version =
@@ -442,8 +448,7 @@ public class SkuDetailService {
   /**
    * 写包装行；全空则删除。
    *
-   * <p>净重/毛重与长宽高都用 NUMERIC（禁浮点），正负与"毛重不小于净重"由 V6 的 CHECK 兜底，
-   * 这里先给出可读的中文错误，省掉一次必然失败的往返。
+   * <p>净重/毛重与长宽高都用 NUMERIC（禁浮点），正负与"毛重不小于净重"由 V6 的 CHECK 兜底， 这里先给出可读的中文错误，省掉一次必然失败的往返。
    */
   private boolean writePackaging(AccessService.Access actor, UUID skuId, SkuDetailInput input) {
     String type = input.packagingType() == null ? "" : input.packagingType().trim();
@@ -452,8 +457,7 @@ public class SkuDetailService {
     var height = mm(input.heightMm(), "高");
     var net = weight(input.netWeightG(), "净重");
     var gross = weight(input.grossWeightG(), "毛重");
-    CatalogService.check(
-        net == null || gross == null || gross.compareTo(net) >= 0, "毛重不能小于净重");
+    CatalogService.check(net == null || gross == null || gross.compareTo(net) >= 0, "毛重不能小于净重");
     boolean empty =
         type.isEmpty()
             && length == null

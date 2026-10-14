@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { DropshipConfigRow, DropshipEvaluationRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  DropshipConfigRow,
+  DropshipEvaluationRow,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   configFormError,
   configStatusLabel,
@@ -104,14 +107,14 @@ describe('物流路径与货权分开判断', () => {
       exemptFromOwnInventory(config({ ownershipMode: 'OUR_ACCOUNT', pureAgencyExempt: false })),
     ).toBe(false);
     expect(
-      exemptFromOwnInventory(config({ fulfillmentPath: 'SELF_FULFILLED', pureAgencyExempt: false })),
+      exemptFromOwnInventory(
+        config({ fulfillmentPath: 'SELF_FULFILLED', pureAgencyExempt: false }),
+      ),
     ).toBe(false);
   });
 
   it('「供应商直发 + 我方货权」被识别为需要显式警告的那一格', () => {
-    expect(
-      isSupplierDirectButOurOwnership(config({ ownershipMode: 'OUR_ACCOUNT' })),
-    ).toBe(true);
+    expect(isSupplierDirectButOurOwnership(config({ ownershipMode: 'OUR_ACCOUNT' }))).toBe(true);
     expect(isSupplierDirectButOurOwnership(config())).toBe(false);
     expect(
       isSupplierDirectButOurOwnership(
@@ -214,7 +217,11 @@ describe('录入表单自校验（省得白跑一趟后端）', () => {
   it('我方货权必须确认时间、依据与联合评审对象', () => {
     expect(configFormError({ ...base, ownershipMode: 'OUR_ACCOUNT' })).toContain('确认时间');
     expect(
-      configFormError({ ...base, ownershipMode: 'OUR_ACCOUNT', ownershipConfirmedAt: '2026-10-01' }),
+      configFormError({
+        ...base,
+        ownershipMode: 'OUR_ACCOUNT',
+        ownershipConfirmedAt: '2026-10-01',
+      }),
     ).toContain('确认依据');
     expect(
       configFormError({
@@ -227,9 +234,9 @@ describe('录入表单自校验（省得白跑一趟后端）', () => {
   });
 
   it('纯代理不得携带确认字段', () => {
-    expect(
-      configFormError({ ...base, ownershipConfirmedAt: '2026-10-01' }),
-    ).toContain('不需要「单独确认」');
+    expect(configFormError({ ...base, ownershipConfirmedAt: '2026-10-01' })).toContain(
+      '不需要「单独确认」',
+    );
   });
 
   it('抽成比例与安全余量必须与结算方式 / 校验方式配套', () => {
@@ -237,9 +244,9 @@ describe('录入表单自校验（省得白跑一趟后端）', () => {
     expect(
       configFormError({ ...base, settlementBasis: 'FLAT_COST', marginShareRate: '0.2' }),
     ).toContain('不该带抽成比例');
-    expect(
-      configFormError({ ...base, availabilityCheckMode: 'SUPPLIER_STOCK' }),
-    ).toContain('安全余量');
+    expect(configFormError({ ...base, availabilityCheckMode: 'SUPPLIER_STOCK' })).toContain(
+      '安全余量',
+    );
     expect(
       configFormError({ ...base, availabilityCheckMode: 'SKIP', minSupplierStockBuffer: '5' }),
     ).toContain('必须留空');

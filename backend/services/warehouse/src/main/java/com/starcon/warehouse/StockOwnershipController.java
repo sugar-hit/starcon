@@ -19,16 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.7.1.1 货主与所有权。
  *
- * <p>命名空间 {@code /warehouse/inventory/ownership}：与总览、明细、台账、核对、批次、效期同一前缀，
- * 浏览器只经 /api/warehouse 代理访问。
+ * <p>命名空间 {@code /warehouse/inventory/ownership}：与总览、明细、台账、核对、批次、效期同一前缀， 浏览器只经 /api/warehouse 代理访问。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 写入（建货主、配货权、货权转移）用 {@code warehouse.inventory.update} ——
- * 配货权与转移货权直接改变资产归属，不是读权限能带过去的动作。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 写入（建货主、配货权、货权转移）用 {@code
+ * warehouse.inventory.update} —— 配货权与转移货权直接改变资产归属，不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/warehouse/inventory/ownership")
@@ -53,8 +50,8 @@ public class StockOwnershipController {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>存在的理由：货值口径**不可用**这件事必须由接口自己说，而不是让调用方从一个空数组里
-   * 去猜是哪一环没通（warehouse 与 catalog 全库都没有库存成本列，见 capabilities 的说明）。
+   * <p>存在的理由：货值口径**不可用**这件事必须由接口自己说，而不是让调用方从一个空数组里 去猜是哪一环没通（warehouse 与 catalog 全库都没有库存成本列，见
+   * capabilities 的说明）。
    */
   @GetMapping("/capabilities")
   public StockOwnershipCapabilities capabilities(
@@ -80,7 +77,8 @@ public class StockOwnershipController {
         "inventory.read",
         a ->
             ownership.pageOwners(
-                new StockOwnerQuery(ownerKind, status, ownerRefId, ownedAssetOnly, keyword, page, size)));
+                new StockOwnerQuery(
+                    ownerKind, status, ownerRefId, ownedAssetOnly, keyword, page, size)));
   }
 
   /** 单个货主。跨租户在 RLS 下查不到 → 404。 */
@@ -94,8 +92,8 @@ public class StockOwnershipController {
   /**
    * 新建货主。
    *
-   * <p>{@code ownerRefType=LEGAL_ENTITY} 时 {@code ownerRefId} 必须是本租户已登记的法人；
-   * {@code SUPPLIER} 是 catalog 的跨服务逻辑 ID（只存 ID + 名称快照，不建外键不联查）。
+   * <p>{@code ownerRefType=LEGAL_ENTITY} 时 {@code ownerRefId} 必须是本租户已登记的法人； {@code SUPPLIER} 是
+   * catalog 的跨服务逻辑 ID（只存 ID + 名称快照，不建外键不联查）。
    */
   @PostMapping("/owners")
   public StockOwnerSaved createOwner(
@@ -110,7 +108,8 @@ public class StockOwnershipController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID ownerId,
       @Valid @RequestBody StockOwnerInput input) {
-    return call(auth, "inventory.update", a -> ownership.updateOwner(ownerId, input, a.membershipId()));
+    return call(
+        auth, "inventory.update", a -> ownership.updateOwner(ownerId, input, a.membershipId()));
   }
 
   /** 货主停用 / 启用。刻意没有 DELETE：货权是审计凭据，删掉之后历史货权无人能答。 */
@@ -143,8 +142,15 @@ public class StockOwnershipController {
         a ->
             ownership.pageRules(
                 new OwnershipRuleQuery(
-                    scopeType, ownerId, warehouseId, legalEntityId, skuId,
-                    effectiveOnly, keyword, page, size)));
+                    scopeType,
+                    ownerId,
+                    warehouseId,
+                    legalEntityId,
+                    skuId,
+                    effectiveOnly,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /** 单档货权配置。 */
@@ -158,8 +164,8 @@ public class StockOwnershipController {
   /**
    * 新建一档货权配置。
    *
-   * <p><b>只对生效之后写入的库位明细生效</b>：货权档带生效区间，存量 bucket 不会被自动改判。
-   * 要让存量跟着改，走 {@code POST /rules/{ruleId}/apply}。
+   * <p><b>只对生效之后写入的库位明细生效</b>：货权档带生效区间，存量 bucket 不会被自动改判。 要让存量跟着改，走 {@code POST
+   * /rules/{ruleId}/apply}。
    */
   @PostMapping("/rules")
   public OwnershipRuleSaved createRule(
@@ -191,8 +197,8 @@ public class StockOwnershipController {
   /**
    * 解析某一组维度在某一时刻真正生效的货主。
    *
-   * <p>优先级 SKU &gt; LEGAL_ENTITY &gt; WAREHOUSE &gt; DEFAULT。四档全未命中时回落到默认货主，
-   * 并把 {@code usedFallback} 标成 true —— 调用方必须能区分「查到一条真实配置」与「没配过」。
+   * <p>优先级 SKU &gt; LEGAL_ENTITY &gt; WAREHOUSE &gt; DEFAULT。四档全未命中时回落到默认货主， 并把 {@code
+   * usedFallback} 标成 true —— 调用方必须能区分「查到一条真实配置」与「没配过」。
    *
    * <p>时刻不传取当前时刻；传了也只是用于回看历史某一刻的判定，不接受客户端指定租户。
    */
@@ -203,14 +209,14 @@ public class StockOwnershipController {
       @RequestParam(required = false) UUID legalEntityId,
       @RequestParam(required = false) UUID skuId,
       @RequestParam(required = false) OffsetDateTime at) {
-    return call(auth, "inventory.read", a -> ownership.resolve(warehouseId, legalEntityId, skuId, at));
+    return call(
+        auth, "inventory.read", a -> ownership.resolve(warehouseId, legalEntityId, skuId, at));
   }
 
   /**
    * 按货主拆分的库存报表（真实从 stock_bucket 聚合）。
    *
-   * <p>{@code amountBasisAvailable} 恒为 false：本仓库没有库存成本列，货值口径不可用。
-   * 宁可显式报不可用，也不给一个用采购报价冒充出来的假金额。
+   * <p>{@code amountBasisAvailable} 恒为 false：本仓库没有库存成本列，货值口径不可用。 宁可显式报不可用，也不给一个用采购报价冒充出来的假金额。
    */
   @GetMapping("/report")
   public OwnerInventoryReport report(
@@ -218,14 +224,14 @@ public class StockOwnershipController {
       @RequestParam(required = false) UUID warehouseId,
       @RequestParam(required = false) UUID legalEntityId,
       @RequestParam(required = false) UUID skuId) {
-    return call(auth, "inventory.read", a -> ownership.report(warehouseId, legalEntityId, skuId, null));
+    return call(
+        auth, "inventory.read", a -> ownership.report(warehouseId, legalEntityId, skuId, null));
   }
 
   /**
    * 货权漂移清单：库位明细上的货主 ≠ 当前生效档应给的货主。
    *
-   * <p>这类行是有意的：货权档只对生效之后写入的 bucket 赋权。把它们列出来，
-   * 是为了让「这批货要不要跟着改」成为一个可回答的问题。
+   * <p>这类行是有意的：货权档只对生效之后写入的 bucket 赋权。把它们列出来， 是为了让「这批货要不要跟着改」成为一个可回答的问题。
    */
   @GetMapping("/drift")
   public OwnershipDriftReport drift(
@@ -248,8 +254,7 @@ public class StockOwnershipController {
   /**
    * 货权转移：把某一范围内属于 {@code fromOwnerId} 的库位明细改判给 {@code toOwnerId}。
    *
-   * <p><b>数量、预占、库存余额与流水都不变</b> —— 货权是账上的归属，不是货物流动。
-   * 这是本模块唯一批量改动既有库存事实行的入口，权限走 update。
+   * <p><b>数量、预占、库存余额与流水都不变</b> —— 货权是账上的归属，不是货物流动。 这是本模块唯一批量改动既有库存事实行的入口，权限走 update。
    */
   @PostMapping("/reassign")
   public OwnershipReassignResult reassign(

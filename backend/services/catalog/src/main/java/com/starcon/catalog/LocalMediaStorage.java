@@ -12,17 +12,13 @@ import org.springframework.stereotype.Component;
 /**
  * {@link MediaStorage} 的本地文件系统实现。
  *
- * <p>开发与测试环境用它；上生产换对象存储实现类即可（见 {@link MediaStorage} 头部）。
- * 它是**真的**写盘、真读回，不做内存替身：失效检测要能验出「文件确实不在了」，
+ * <p>开发与测试环境用它；上生产换对象存储实现类即可（见 {@link MediaStorage} 头部）。 它是**真的**写盘、真读回，不做内存替身：失效检测要能验出「文件确实不在了」，
  * 用内存 Map 存就永远验不出 MISSING，那样这条能力等于没做。
  *
- * <p>根目录来自 {@code MEDIA_STORAGE_ROOT}，**不给绝对路径默认值**：
- * 给死一个项目外的绝对路径会让开发机与容器的行为不一致（容器里那个目录不存在，
- * 于是每次上传都在别的机器上悄悄成功、当前机器上失败）。
- * 相对路径按进程工作目录解析，部署时由 env 指到挂载卷。
+ * <p>根目录来自 {@code MEDIA_STORAGE_ROOT}，**不给绝对路径默认值**： 给死一个项目外的绝对路径会让开发机与容器的行为不一致（容器里那个目录不存在，
+ * 于是每次上传都在别的机器上悄悄成功、当前机器上失败）。 相对路径按进程工作目录解析，部署时由 env 指到挂载卷。
  *
- * <p>路径穿越防护：键先做归一化，再校验解析结果确实落在根目录内。
- * 少了这一步，{@code media/<tenant>/../../etc/passwd} 这种键能把文件写到根目录之外——
+ * <p>路径穿越防护：键先做归一化，再校验解析结果确实落在根目录内。 少了这一步，{@code media/<tenant>/../../etc/passwd} 这种键能把文件写到根目录之外——
  * 键是调用方给的，而键来自上传请求。
  */
 @Component
@@ -89,13 +85,12 @@ public class LocalMediaStorage implements MediaStorage {
   /**
    * 把键解析成根目录下的真实路径，并拒绝任何越出根目录的结果。
    *
-   * <p>{@code normalize()} 之后 {@code startsWith(root)} 才是有意义的比较：
-   * 不先归一化的话 {@code media/a/../b} 这种键能通过前缀检查却写到别处。
+   * <p>{@code normalize()} 之后 {@code startsWith(root)} 才是有意义的比较： 不先归一化的话 {@code media/a/../b}
+   * 这种键能通过前缀检查却写到别处。
    */
   private Path resolve(String key) {
     Path target = root.resolve(key).normalize();
-    if (!target.startsWith(root))
-      throw new IllegalArgumentException("非法的媒体存储键：" + key);
+    if (!target.startsWith(root)) throw new IllegalArgumentException("非法的媒体存储键：" + key);
     return target;
   }
 }

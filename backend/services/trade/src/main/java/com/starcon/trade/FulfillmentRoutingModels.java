@@ -12,19 +12,16 @@ import java.util.UUID;
 /**
  * 9.3.2.2 FBA 与自发货选择的传输模型。
  *
- * <p>蓝图原话：「在平台仓（FBA/MFN）与自有/第三方仓之间选择履约路径：优先用平台仓（买家体验好）、
- * 平台仓缺货时切自发货（需符合平台的多渠道配送要求）、或按成本优先。」输出是
- * 「履约路径决策 + 缺货时切换记录」—— 后者是硬输出，所以模型里
- * {@link RoutingDecisionDetail} 永远把切换记录一起带出来。
+ * <p>蓝图原话：「在平台仓（FBA/MFN）与自有/第三方仓之间选择履约路径：优先用平台仓（买家体验好）、 平台仓缺货时切自发货（需符合平台的多渠道配送要求）、或按成本优先。」输出是
+ * 「履约路径决策 + 缺货时切换记录」—— 后者是硬输出，所以模型里 {@link RoutingDecisionDetail} 永远把切换记录一起带出来。
  *
  * <p><b>三条建模纪律</b>：
  *
  * <ul>
- *   <li><b>路径与数量/成本口径只有一个来源</b>：{@link PathKind} 与
- *       {@link SwitchTriggerReason} 一字不改地对应 DB 的 CHECK 词表，
- *       Java 侧不维护第二份可写别的取值的枚举。
- *   <li><b>「不可用」必须带原因</b>：{@link RoutingCandidate} 的
- *       {@code infeasibleReasonCode} 与 DB CHECK 配对，界面上「没选它」永远能答出为什么。
+ *   <li><b>路径与数量/成本口径只有一个来源</b>：{@link PathKind} 与 {@link SwitchTriggerReason} 一字不改地对应 DB 的 CHECK
+ *       词表， Java 侧不维护第二份可写别的取值的枚举。
+ *   <li><b>「不可用」必须带原因</b>：{@link RoutingCandidate} 的 {@code infeasibleReasonCode} 与 DB CHECK
+ *       配对，界面上「没选它」永远能答出为什么。
  *   <li><b>金额全程 BigDecimal</b>，结算口径 HALF_UP 到分（与 10.5.1.3 同一约定）。
  * </ul>
  */
@@ -146,18 +143,12 @@ public final class FulfillmentRoutingModels {
 
   /** MCF 资质列表查询。 */
   public record McfQuery(
-      String platformCode,
-      String shopCode,
-      String status,
-      String keyword,
-      int page,
-      int size) {}
+      String platformCode, String shopCode, String status, String keyword, int page, int size) {}
 
   /**
    * 一个店铺在一个平台上的多渠道配送资质。
    *
-   * @param expired 已过期（{@code expiresAt <= now}）。与服务层状态分列，
-   *     因为「有资质但昨天过期了」与「从没核验」在决策上答案不同：前者仍不许切自发货。
+   * @param expired 已过期（{@code expiresAt <= now}）。与服务层状态分列， 因为「有资质但昨天过期了」与「从没核验」在决策上答案不同：前者仍不许切自发货。
    */
   public record McfAuthorizationRow(
       UUID id,
@@ -180,8 +171,8 @@ public final class FulfillmentRoutingModels {
   /**
    * 登记 / 更新 MCF 资质。
    *
-   * <p>{@code status=AUTHORIZED} 时 {@code verifiedAt} 与 {@code sourceReference}
-   * 或 {@code note} 必填 —— 没有出处的「已授权」会让缺货自动切自发货失去合规依据。
+   * <p>{@code status=AUTHORIZED} 时 {@code verifiedAt} 与 {@code sourceReference} 或 {@code note} 必填
+   * —— 没有出处的「已授权」会让缺货自动切自发货失去合规依据。
    */
   public record McfAuthorizationInput(
       @NotBlank @Size(max = 32) String platformCode,
@@ -193,7 +184,8 @@ public final class FulfillmentRoutingModels {
       @Size(max = 400) String note) {}
 
   /** MCF 资质写入结果。 */
-  public record McfSaved(UUID id, String platformCode, String shopCode, McfStatus status, String message) {}
+  public record McfSaved(
+      UUID id, String platformCode, String shopCode, McfStatus status, String message) {}
 
   // ------------------------------------------------------------ 成本与时效参数
 
@@ -293,9 +285,8 @@ public final class FulfillmentRoutingModels {
   /**
    * 路径评估请求：给一组输入，问「应该走哪条路、为什么」。
    *
-   * <p>刻意**不落库**：评估是只读试算，页面用它做「如果按现状会怎么判」的预演；
-   * 真正下决策走 {@link RoutingDecisionRequest}（会写决策 + 候选 + 切换记录）。
-   * 把两者合成一个端点会导致「看一眼」也在库里留下决策行。
+   * <p>刻意**不落库**：评估是只读试算，页面用它做「如果按现状会怎么判」的预演； 真正下决策走 {@link RoutingDecisionRequest}（会写决策 + 候选 +
+   * 切换记录）。 把两者合成一个端点会导致「看一眼」也在库里留下决策行。
    */
   public record RoutingEvaluationRequest(
       @NotBlank @Size(max = 64) String orderRef,
@@ -335,10 +326,8 @@ public final class FulfillmentRoutingModels {
   /**
    * 路径评估结果（只读，不落库）。
    *
-   * @param mcfStatus 该店铺当前资质 —— {@code UNKNOWN} 时任何自发货路径都不可行，
-   *     这是蓝图「必须先验证该店铺的多渠道配送资质」的落点。
-   * @param mcfUsable 资质**此刻**是否真的可用（AUTHORIZED 且未过期），
-   *     与 {@code mcfStatus} 分列：「有资质但已过期」两列答案不同。
+   * @param mcfStatus 该店铺当前资质 —— {@code UNKNOWN} 时任何自发货路径都不可行， 这是蓝图「必须先验证该店铺的多渠道配送资质」的落点。
+   * @param mcfUsable 资质**此刻**是否真的可用（AUTHORIZED 且未过期）， 与 {@code mcfStatus} 分列：「有资质但已过期」两列答案不同。
    */
   public record RoutingEvaluation(
       String platformCode,
@@ -475,11 +464,10 @@ public final class FulfillmentRoutingModels {
   /**
    * 本模块的能力与上游可用性声明。
    *
-   * <p>存在的理由与 7.7.1.1 一致：把「哪些输入真有依据」显式报出来，
-   * 而不是让调用方从一个 404 或空数组里去猜是哪一环没通。
+   * <p>存在的理由与 7.7.1.1 一致：把「哪些输入真有依据」显式报出来， 而不是让调用方从一个 404 或空数组里去猜是哪一环没通。
    *
-   * @param upstreamNote 上游依赖实查结论的对外说明（7.1.3.1 / 2.1.1.2 已交付但跨服务，
-   *     本模块自维护快照与资质登记；10 运费试算未开发，成本口径由租户维护）
+   * @param upstreamNote 上游依赖实查结论的对外说明（7.1.3.1 / 2.1.1.2 已交付但跨服务， 本模块自维护快照与资质登记；10
+   *     运费试算未开发，成本口径由租户维护）
    */
   public record FulfillmentRoutingCapabilities(
       List<Dimension> dimensions,

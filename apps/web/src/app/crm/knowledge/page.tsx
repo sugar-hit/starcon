@@ -33,10 +33,10 @@ export default function CrmKnowledgePage() {
         <h1 className="text-copy-20 font-semibold">客服知识库</h1>
         <p className="text-muted-foreground text-copy-13">
           维护常见问题标准答法、平台政策说明、产品使用指导与退换货规则，
-          <strong>按店铺 / 类目 / 语言组织</strong>，支持版本与生效日期。
-          每条知识都标注<strong>适用平台</strong>与<strong>生效时间</strong>：
-          平台政策改版时，一次查询就能列出内容仍停留在旧口径、还没人改过的条目。
-          生效区间是<strong>半开区间 [from, to)</strong> —— 终点那一刻旧版本就失效，
+          <strong>按店铺 / 类目 / 语言组织</strong>，支持版本与生效日期。 每条知识都标注
+          <strong>适用平台</strong>与<strong>生效时间</strong>：
+          平台政策改版时，一次查询就能列出内容仍停留在旧口径、还没人改过的条目。 生效区间是
+          <strong>半开区间 [from, to)</strong> —— 终点那一刻旧版本就失效，
           重叠一律拒绝不做自动裁决，已发布版本只能向前关闭。
         </p>
       </header>

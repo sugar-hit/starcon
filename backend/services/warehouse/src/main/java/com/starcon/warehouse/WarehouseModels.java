@@ -9,13 +9,10 @@ import java.util.UUID;
 /**
  * 7.1.1.1 库存总览的传输模型。
  *
- * <p>行级返回的形状刻意与 7.1.1.2 库存明细将来要消费的形状一致：
- * **法人货权 × SKU × 仓库 × 质量状态** 就是总览行，一行同时是"一个 bucket 的最粗粒度"。
- * 总览不另造一套只有自己能用的私有结构，否则 7.1.1.2 落地时必须重写一遍映射，
- * 而重写映射的地方正是最容易把口径改错的地方（在手与可用差一个在途）。
+ * <p>行级返回的形状刻意与 7.1.1.2 库存明细将来要消费的形状一致： **法人货权 × SKU × 仓库 × 质量状态** 就是总览行，一行同时是"一个 bucket 的最粗粒度"。
+ * 总览不另造一套只有自己能用的私有结构，否则 7.1.1.2 落地时必须重写一遍映射， 而重写映射的地方正是最容易把口径改错的地方（在手与可用差一个在途）。
  *
- * <p>口径全部来自 V1 迁移文件头的定义，不在 Java 侧二次推导：
- * available 由 {@code inventory_balance} 的生成列聚合而来，Java 只做求和。
+ * <p>口径全部来自 V1 迁移文件头的定义，不在 Java 侧二次推导： available 由 {@code inventory_balance} 的生成列聚合而来，Java 只做求和。
  */
 public final class WarehouseModels {
 
@@ -114,8 +111,8 @@ public final class WarehouseModels {
    * @param rowCount 参与统计的行数
    * @param zeroStockRowCount 零库存行数（available &lt;= 0）
    * @param overstockRowCount 超储行数（已设阈值且在手超过阈值）
-   * @param thresholdUnsetRowCount **未设阈值**的行数：0 与"没查过"含义不同，
-   *     界面上必须与 overstockRowCount 分开显示（与 catalog unregisteredSkus 同一口径）
+   * @param thresholdUnsetRowCount **未设阈值**的行数：0 与"没查过"含义不同， 界面上必须与 overstockRowCount 分开显示（与 catalog
+   *     unregisteredSkus 同一口径）
    * @param balanceCheck 守恒式复核结果
    */
   public record OverviewSummary(
@@ -144,13 +141,12 @@ public final class WarehouseModels {
   /**
    * 总览行 = 法人货权 × SKU × 仓库 × 质量状态。
    *
-   * <p>这正是 7.1.1.2 明细的 bucket 形状（库位与批次维度属 7.1.1.2，届时在下方追加字段，
-   * 不改本行的既有字段语义）。
+   * <p>这正是 7.1.1.2 明细的 bucket 形状（库位与批次维度属 7.1.1.2，届时在下方追加字段， 不改本行的既有字段语义）。
    *
    * @param inTransit 该行的在途量：在途按**收货仓**归属本行，所以"这批货到哪个仓"看得见
    * @param zeroStock 零库存行：available &le; 0
-   * @param thresholdConfigured 是否已配置阈值。false 时 {@code maxOnHand} 为 null、
-   *     {@code overstock} 恒为 false，两者含义不同：一个是"没查过"，一个是"查过没超"
+   * @param thresholdConfigured 是否已配置阈值。false 时 {@code maxOnHand} 为 null、 {@code overstock} 恒为
+   *     false，两者含义不同：一个是"没查过"，一个是"查过没超"
    * @param detailHref 指向 7.1.1.2 明细的路由契约（带全筛选参数）
    */
   public record OverviewRow(
@@ -207,8 +203,7 @@ public final class WarehouseModels {
   /**
    * 跨服务筛选维度的接入情况。
    *
-   * @param available 是否已接入。false 时前端**禁用**该筛选项并说明归哪个服务，
-   *     而不是发一个必然返回 422 的请求
+   * @param available 是否已接入。false 时前端**禁用**该筛选项并说明归哪个服务， 而不是发一个必然返回 422 的请求
    */
   public record DimensionCapability(
       String dimension, String label, String owner, boolean available, String note) {}
@@ -256,13 +251,11 @@ public final class WarehouseModels {
   /**
    * 可用量批量查询条件。
    *
-   * <p>本端点是 catalog 的 3.5.2.2 BOM 展开**唯一**的库存数据入口 —— catalog
-   * 既不直连本库也不建跨库视图（AGENTS.md「模块边界纪律」）。
+   * <p>本端点是 catalog 的 3.5.2.2 BOM 展开**唯一**的库存数据入口 —— catalog 既不直连本库也不建跨库视图（AGENTS.md「模块边界纪律」）。
    *
    * @param skuIds 要查的 SKU 集合（一次批量查整棵展开树上的全部组件，避免逐个来回）
-   * @param warehouseId 仓库过滤；null = 全仓合计。in_transit 按
-   *     {@code to_warehouse_id} 一并过滤：只按收货仓过滤可用量却把别仓发来的在途
-   *     一起抵扣，会出现「这仓的缺口被另一仓的货填掉」，而那批货根本不会进这仓。
+   * @param warehouseId 仓库过滤；null = 全仓合计。in_transit 按 {@code to_warehouse_id}
+   *     一并过滤：只按收货仓过滤可用量却把别仓发来的在途 一起抵扣，会出现「这仓的缺口被另一仓的货填掉」，而那批货根本不会进这仓。
    */
   public record AvailabilityQuery(List<UUID> skuIds, @Schema(nullable = true) UUID warehouseId) {}
 
@@ -282,9 +275,8 @@ public final class WarehouseModels {
   /**
    * 可用量批量查询结果。
    *
-   * @param requestedCount 请求了几个 SKU，{@code items.size()} 可能小于它 ——
-   *     没有任何库存行的 SKU 返回 available=0 而不是缺席，
-   *     否则「这个 SKU 没库存」与「这个 SKU 不属于你」在调用方眼里分不开
+   * @param requestedCount 请求了几个 SKU，{@code items.size()} 可能小于它 —— 没有任何库存行的 SKU 返回 available=0
+   *     而不是缺席， 否则「这个 SKU 没库存」与「这个 SKU 不属于你」在调用方眼里分不开
    */
   public record AvailabilityView(
       @Schema(nullable = true) UUID warehouseId,
@@ -294,14 +286,11 @@ public final class WarehouseModels {
 
   /** 阈值录入。 */
   public record InventoryPolicyInput(
-      @jakarta.validation.constraints.NotBlank
-          @jakarta.validation.constraints.Size(max = 16)
+      @jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Size(max = 16)
           String scopeType,
       @jakarta.validation.constraints.Size(max = 100) String scopeKey,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.DecimalMin(value = "0")
+      @Schema(nullable = true) @jakarta.validation.constraints.DecimalMin(value = "0")
           BigDecimal maxOnHand,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.DecimalMin(value = "0")
+      @Schema(nullable = true) @jakarta.validation.constraints.DecimalMin(value = "0")
           BigDecimal minOnHand) {}
 }

@@ -89,9 +89,7 @@ describe('还差量用后端口径，不在前端自算', () => {
   });
 
   it('缺失值给 0', () => {
-    expect(
-      receivable({ outstandingQuantity: undefined as unknown as number }),
-    ).toBe(0);
+    expect(receivable({ outstandingQuantity: undefined as unknown as number })).toBe(0);
   });
 });
 
@@ -154,9 +152,9 @@ describe('未交付来源的展示', () => {
   });
 
   it('未交付来源带上归属模块，界面上直接禁用而不是点下去没反应', () => {
-    expect(
-      sourceCaption({ label: '采购单', available: false, ownerModule: '6.3.2.2' }),
-    ).toBe('采购单（6.3.2.2 未交付）');
+    expect(sourceCaption({ label: '采购单', available: false, ownerModule: '6.3.2.2' })).toBe(
+      '采购单（6.3.2.2 未交付）',
+    );
   });
 });
 

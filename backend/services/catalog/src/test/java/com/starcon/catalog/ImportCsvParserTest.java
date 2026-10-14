@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
  * 3.8.1.1 CSV 解析与生成的纯单元测试。
  *
  * <p>这些用例钉的是<b>运营真实会交上来的文件形态</b>：Excel 另存的 CSV 带 BOM、CRLF、
- * 尾随逗号、全角引号。任何一个没处理，表现都是「第一列永远映射不上」或「行号对不上」，
- * 而这种故障在演示数据上永远不会出现。
+ * 尾随逗号、全角引号。任何一个没处理，表现都是「第一列永远映射不上」或「行号对不上」， 而这种故障在演示数据上永远不会出现。
  */
 class ImportCsvParserTest {
 
@@ -87,7 +86,10 @@ class ImportCsvParserTest {
   void 空文件与超限文件被拒() {
     assertThatThrownBy(() -> ImportCsvParser.parse(new byte[0]))
         .isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> ImportCsvParser.parse(bytes("a\r\n" + "1\r\n".repeat(ImportCsvParser.MAX_ROWS + 1))))
+    assertThatThrownBy(
+            () ->
+                ImportCsvParser.parse(
+                    bytes("a\r\n" + "1\r\n".repeat(ImportCsvParser.MAX_ROWS + 1))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("上限");
   }
@@ -105,14 +107,15 @@ class ImportCsvParserTest {
   void 无法解码的字节被拒而不是替换成乱码() {
     // 替换字符混进商品名称之后没人看得出来，所以宁可报错。
     var bad = new byte[] {(byte) 0xC3, (byte) 0x28, (byte) 0xA0, (byte) 0xA1};
-    assertThatThrownBy(() -> ImportCsvParser.parse(bad)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> ImportCsvParser.parse(bad))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void 写出模板时含逗号引号换行的字段被正确转义() {
-    var out = ImportCsvParser.write(
-        List.of("a", "b"),
-        List.of(List.of("含,逗号", "他说\"好\""), List.of("普通", "  前后空白  ")));
+    var out =
+        ImportCsvParser.write(
+            List.of("a", "b"), List.of(List.of("含,逗号", "他说\"好\""), List.of("普通", "  前后空白  ")));
     var text = new String(out, StandardCharsets.UTF_8);
     assertThat(text).startsWith("﻿");
     // 回读能还原即说明转义正确。

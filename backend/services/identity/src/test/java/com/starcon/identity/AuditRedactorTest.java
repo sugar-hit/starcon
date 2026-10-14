@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 17.5.3.1 脱敏单元测试。
  *
- * <p>蓝图的硬要求是「审计不记录密码与完整客户地址；变更详情必须脱敏」。这里逐项证明
- * 写入侧产出的值里不再含明文——集成测试再从数据库侧证明明文从未落库。
+ * <p>蓝图的硬要求是「审计不记录密码与完整客户地址；变更详情必须脱敏」。这里逐项证明 写入侧产出的值里不再含明文——集成测试再从数据库侧证明明文从未落库。
  */
 class AuditRedactorTest {
 
@@ -18,11 +17,14 @@ class AuditRedactorTest {
   void credentialFieldsAreReplacedWholesale() {
     // 凭证类：整值替换。连长度信息都不保留（bcrypt 前缀本身会泄露哈希强度）。
     assertThat(AuditRedactor.redact("password", "hunter2-correct-horse")).isEqualTo("***");
-    assertThat(AuditRedactor.redact("passwordHash", "$2a$10$abcdefghijklmnopqrstuv")).isEqualTo("***");
+    assertThat(AuditRedactor.redact("passwordHash", "$2a$10$abcdefghijklmnopqrstuv"))
+        .isEqualTo("***");
     assertThat(AuditRedactor.redact("apiKey", "sk-live-9f8e7d6c5b4a")).isEqualTo("***");
-    assertThat(AuditRedactor.redact("accessToken", "eyJhbGciOiJIUzI1NiJ9.body.sig")).isEqualTo("***");
+    assertThat(AuditRedactor.redact("accessToken", "eyJhbGciOiJIUzI1NiJ9.body.sig"))
+        .isEqualTo("***");
     assertThat(AuditRedactor.redact("clientSecret", "s3cr3t")).isEqualTo("***");
-    assertThat(AuditRedactor.redact("privateKey", "-----BEGIN RSA PRIVATE KEY-----")).isEqualTo("***");
+    assertThat(AuditRedactor.redact("privateKey", "-----BEGIN RSA PRIVATE KEY-----"))
+        .isEqualTo("***");
   }
 
   @Test
@@ -77,7 +79,8 @@ class AuditRedactorTest {
     // 否则前端做数值比较与排序时会静默出错。
     assertThat(AuditRedactor.redact("amountScale", 2)).isEqualTo(2);
     assertThat(AuditRedactor.redact("owner", true)).isEqualTo(true);
-    assertThat(AuditRedactor.redact("permissions", "identity.role.update")).isEqualTo("identity.role.update");
+    assertThat(AuditRedactor.redact("permissions", "identity.role.update"))
+        .isEqualTo("identity.role.update");
     assertThat(AuditRedactor.redact("baseCurrency", "USD")).isEqualTo("USD");
     assertThat(AuditRedactor.redact("code", null)).isNull();
   }

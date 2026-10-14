@@ -198,7 +198,10 @@ export function OutboundOrderWorkspace() {
     setNotice('');
     setFailures([]);
     try {
-      const result: OutboundCancelResult = await cancelOutboundOrders(selected, cancelReason.trim());
+      const result: OutboundCancelResult = await cancelOutboundOrders(
+        selected,
+        cancelReason.trim(),
+      );
       setNotice(`已取消 ${result.cancelledCount} 张出库单。`);
       setFailures(failureList(result.failures));
       reset();
@@ -276,12 +279,22 @@ export function OutboundOrderWorkspace() {
         </SectionCard>
       )}
 
-      <SectionCard title="筛选" description="仓库 / 来源 / 状态 / 时间四个维度都是真的后端筛选，不是前端过滤。">
+      <SectionCard
+        title="筛选"
+        description="仓库 / 来源 / 状态 / 时间四个维度都是真的后端筛选，不是前端过滤。"
+      >
         <div className="grid gap-4 md:grid-cols-5">
           <FormField id="ob-warehouse" label="发货仓（仓库编码，逗号分隔）">
             <Input
               value={warehouses.join(',')}
-              onChange={(e) => setWarehouses(e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
+              onChange={(e) =>
+                setWarehouses(
+                  e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                )
+              }
               placeholder="全部仓库"
             />
           </FormField>
@@ -321,7 +334,11 @@ export function OutboundOrderWorkspace() {
           </FormField>
         </div>
         <div className="mt-4 flex flex-wrap items-end gap-3">
-          <FormField id="ob-keyword" label="关键字" hint="单号 / 外部单号 / 调拨单号 / 仓库 / 承运渠道">
+          <FormField
+            id="ob-keyword"
+            label="关键字"
+            hint="单号 / 外部单号 / 调拨单号 / 仓库 / 承运渠道"
+          >
             <Input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
@@ -356,15 +373,28 @@ export function OutboundOrderWorkspace() {
               <PackageCheck className="mr-1.5 h-4 w-4" />
               生成拣货任务
             </Button>
-            <Button variant="secondary" onClick={() => void runPrint('PICK_LIST')} disabled={!readable || busy !== ''}>
+            <Button
+              variant="secondary"
+              onClick={() => void runPrint('PICK_LIST')}
+              disabled={!readable || busy !== ''}
+            >
               <Printer className="mr-1.5 h-4 w-4" />
               打印拣货单
             </Button>
-            <Button variant="secondary" onClick={() => void runPrint('OUTBOUND_ORDER')} disabled={!readable || busy !== ''}>
+            <Button
+              variant="secondary"
+              onClick={() => void runPrint('OUTBOUND_ORDER')}
+              disabled={!readable || busy !== ''}
+            >
               <Printer className="mr-1.5 h-4 w-4" />
               打印出库单
             </Button>
-            <FormField id="ob-cancel-reason" label="取消原因" required hint="取消是留痕操作，原因必填。">
+            <FormField
+              id="ob-cancel-reason"
+              label="取消原因"
+              required
+              hint="取消是留痕操作，原因必填。"
+            >
               <Input
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
@@ -372,7 +402,11 @@ export function OutboundOrderWorkspace() {
                 className="min-w-64"
               />
             </FormField>
-            <Button variant="destructive" onClick={() => void runCancel()} disabled={!writable || busy !== ''}>
+            <Button
+              variant="destructive"
+              onClick={() => void runCancel()}
+              disabled={!writable || busy !== ''}
+            >
               <XCircle className="mr-1.5 h-4 w-4" />
               取消出库单
             </Button>
@@ -381,7 +415,10 @@ export function OutboundOrderWorkspace() {
       )}
 
       {printed && (
-        <SectionCard title={`打印预览 · ${printed.documentLabel}`} description={`生成于 ${printed.generatedAt}`}>
+        <SectionCard
+          title={`打印预览 · ${printed.documentLabel}`}
+          description={`生成于 ${printed.generatedAt}`}
+        >
           <div className="space-y-4">
             {printed.orders.map((order) => (
               <div key={order.orderId} className="border-border rounded-md border p-3">
@@ -404,7 +441,10 @@ export function OutboundOrderWorkspace() {
                   </thead>
                   <tbody>
                     {order.lines.map((line) => (
-                      <tr key={`${order.orderId}-${line.lineNo}`} className="border-control-border border-t">
+                      <tr
+                        key={`${order.orderId}-${line.lineNo}`}
+                        className="border-control-border border-t"
+                      >
                         <td className="py-1">{line.lineNo}</td>
                         <td className="py-1">{line.skuCode}</td>
                         <td className="py-1">{line.skuName}</td>
@@ -424,7 +464,9 @@ export function OutboundOrderWorkspace() {
         description={page ? pageSummary(page) : undefined}
         extra={page && page.total > 0 ? <Badge tone="info">{page.total} 张</Badge> : undefined}
       >
-        {loading && <p className="text-copy-13 text-muted-foreground py-6 text-center">正在加载出库单…</p>}
+        {loading && (
+          <p className="text-copy-13 text-muted-foreground py-6 text-center">正在加载出库单…</p>
+        )}
 
         {!loading && orders.length === 0 && (
           <EmptyState
@@ -476,8 +518,8 @@ export function OutboundOrderWorkspace() {
                       {order.sourceExternalRef && order.sourceType !== 'TRANSFER' && (
                         <div className="text-copy-12 text-muted-foreground">
                           外部单号 {order.sourceExternalRef}
-                          {orders.filter((o) => o.sourceExternalRef === order.sourceExternalRef).length >
-                          1 && '（同一订单已分多张出库单）'}
+                          {orders.filter((o) => o.sourceExternalRef === order.sourceExternalRef)
+                            .length > 1 && '（同一订单已分多张出库单）'}
                         </div>
                       )}
                     </td>
@@ -487,7 +529,9 @@ export function OutboundOrderWorkspace() {
                     </td>
                     <td className="py-2 text-right">{volumeText(order)}</td>
                     <td className="py-2">
-                      <Badge tone={isTerminal(order) ? 'neutral' : 'info'}>{order.statusLabel}</Badge>
+                      <Badge tone={isTerminal(order) ? 'neutral' : 'info'}>
+                        {order.statusLabel}
+                      </Badge>
                       {order.pickRequested && order.status === 'PENDING_PICKING' && (
                         <div className="text-copy-12 text-warning mt-1">已交接拣货</div>
                       )}
@@ -499,7 +543,9 @@ export function OutboundOrderWorkspace() {
                     </td>
                     <td className="py-2">
                       <div>{order.warehouseCode}</div>
-                      <div className="text-copy-12 text-muted-foreground">{order.warehouseName}</div>
+                      <div className="text-copy-12 text-muted-foreground">
+                        {order.warehouseName}
+                      </div>
                     </td>
                     <td className="py-2">
                       {order.carrierCode ? (
@@ -511,7 +557,9 @@ export function OutboundOrderWorkspace() {
                         <span className="text-copy-12 text-muted-foreground">未指定</span>
                       )}
                       {carrierWarning(order) && (
-                        <div className="text-copy-12 text-warning mt-1">{carrierWarning(order)}</div>
+                        <div className="text-copy-12 text-warning mt-1">
+                          {carrierWarning(order)}
+                        </div>
                       )}
                     </td>
                     <td className="py-2 text-right">
@@ -532,8 +580,14 @@ export function OutboundOrderWorkspace() {
                             key={`${t.from}-${t.to}`}
                             size="sm"
                             variant="ghost"
-                            disabled={!writable || busy !== '' || reasonRequired(capabilities, t.from, t.to)}
-                            title={reasonRequired(capabilities, t.from, t.to) ? '该跃迁必须填写说明，请在批量操作里带说明' : t.note}
+                            disabled={
+                              !writable || busy !== '' || reasonRequired(capabilities, t.from, t.to)
+                            }
+                            title={
+                              reasonRequired(capabilities, t.from, t.to)
+                                ? '该跃迁必须填写说明，请在批量操作里带说明'
+                                : t.note
+                            }
                             onClick={() => void runTransition(order, t.to, t.note)}
                           >
                             {t.toLabel}
@@ -550,7 +604,11 @@ export function OutboundOrderWorkspace() {
 
         {page && page.total > page.size && (
           <div className="mt-4 flex items-center justify-between">
-            <Button variant="secondary" disabled={pageNo === 0} onClick={() => setPageNo((p) => p - 1)}>
+            <Button
+              variant="secondary"
+              disabled={pageNo === 0}
+              onClick={() => setPageNo((p) => p - 1)}
+            >
               上一页
             </Button>
             <span className="text-copy-12 text-muted-foreground">第 {pageNo + 1} 页</span>
@@ -567,7 +625,8 @@ export function OutboundOrderWorkspace() {
 
       {terminalCount > 0 && (
         <p className="text-copy-12 text-muted-foreground">
-          当前页有 {terminalCount} 张终态单（已发货 / 已取消）：终态行的来源、发货仓与承运渠道在数据库层被冻结，不能再改。
+          当前页有 {terminalCount} 张终态单（已发货 /
+          已取消）：终态行的来源、发货仓与承运渠道在数据库层被冻结，不能再改。
         </p>
       )}
     </div>

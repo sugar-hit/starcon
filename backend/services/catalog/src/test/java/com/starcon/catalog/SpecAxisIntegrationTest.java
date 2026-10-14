@@ -21,8 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.1.3.1 规格轴定义：轴字典 CRUD、SPU 绑定、规格选项与属性选项**同一个值源**的硬约束、
- * 类目允许规则、矩阵行数，以及租户隔离三断言。
+ * 3.1.3.1 规格轴定义：轴字典 CRUD、SPU 绑定、规格选项与属性选项**同一个值源**的硬约束、 类目允许规则、矩阵行数，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -164,15 +163,13 @@ class SpecAxisIntegrationTest {
 
   UUID saveAxis(String code, String name) {
     return write(
-            actor,
-            () -> specAxis.saveAxis(actor, null, new SpecAxisInput(code, name, true, 0)))
+            actor, () -> specAxis.saveAxis(actor, null, new SpecAxisInput(code, name, true, 0)))
         .id();
   }
 
   UUID saveAxisB(String code, String name) {
     return write(
-            actorB,
-            () -> specAxis.saveAxis(actorB, null, new SpecAxisInput(code, name, true, 0)))
+            actorB, () -> specAxis.saveAxis(actorB, null, new SpecAxisInput(code, name, true, 0)))
         .id();
   }
 
@@ -180,19 +177,19 @@ class SpecAxisIntegrationTest {
   UUID spu(String category) {
     UUID id =
         write(
-                actor,
-                () ->
-                    catalog.saveSpu(
-                        actor,
-                        null,
-                        new SpuInput(
-                            "AX-" + UUID.randomUUID().toString().substring(0, 8),
-                            "规格轴测试商品",
-                            "描述",
-                            "品牌",
-                            category,
-                            "DRAFT",
-                            0)));
+            actor,
+            () ->
+                catalog.saveSpu(
+                    actor,
+                    null,
+                    new SpuInput(
+                        "AX-" + UUID.randomUUID().toString().substring(0, 8),
+                        "规格轴测试商品",
+                        "描述",
+                        "品牌",
+                        category,
+                        "DRAFT",
+                        0)));
     return id;
   }
 
@@ -205,14 +202,14 @@ class SpecAxisIntegrationTest {
     var saved =
         write(
             actor,
-            () ->
-                specAxis.bindAxis(
-                    actor, spuId, new SpecAxisBindingInput(axisId, 0, true, code)));
+            () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(axisId, 0, true, code)));
     return new Bound(spuId, axisId, saved.attributeDefinitionId());
   }
 
   SpecAxisOptionSaved option(UUID axisId, String value, int position) {
-    return write(actor, () -> specAxis.addOption(actor, axisId, new SpecAxisOptionInput(value, position, true)));
+    return write(
+        actor,
+        () -> specAxis.addOption(actor, axisId, new SpecAxisOptionInput(value, position, true)));
   }
 
   // ------------------------------------------------------------ 规格轴字典
@@ -224,7 +221,10 @@ class SpecAxisIntegrationTest {
         write(actor, () -> specAxis.saveAxis(actor, null, new SpecAxisInput(code, "颜色", true, 0)));
     assertThat(saved.version()).isZero();
 
-    var listed = tx(actor, () -> specAxis.axes()).stream().filter(x -> x.id().equals(saved.id())).findFirst();
+    var listed =
+        tx(actor, () -> specAxis.axes()).stream()
+            .filter(x -> x.id().equals(saved.id()))
+            .findFirst();
     assertThat(listed).isPresent();
     assertThat(listed.get().code()).isEqualTo(code);
     assertThat(listed.get().optionCount()).isZero();
@@ -234,9 +234,7 @@ class SpecAxisIntegrationTest {
     var updated =
         write(
             actor,
-            () ->
-                specAxis.saveAxis(
-                    actor, saved.id(), new SpecAxisInput(code, "颜色维度", false, 0)));
+            () -> specAxis.saveAxis(actor, saved.id(), new SpecAxisInput(code, "颜色维度", false, 0)));
     assertThat(updated.version()).isEqualTo(1);
     // 旧 version 再提交 → 冲突。
     assertThatThrownBy(
@@ -248,8 +246,7 @@ class SpecAxisIntegrationTest {
                             actor, saved.id(), new SpecAxisInput(code, "再改一次", true, 0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -259,8 +256,7 @@ class SpecAxisIntegrationTest {
     assertThatThrownBy(() -> saveAxis(code, "尺码重复"))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -275,8 +271,7 @@ class SpecAxisIntegrationTest {
                             actor, axisId, new SpecAxisInput("RENAMED", "容量", true, 0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
   }
 
   @Test
@@ -287,15 +282,20 @@ class SpecAxisIntegrationTest {
     assertThatThrownBy(() -> write(actor, () -> specAxis.deleteAxis(actor, mine.axisId(), 0)))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
     // 停用可以：挡住新建，历史照常可读。
-    var axis = tx(actor, () -> specAxis.axes()).stream().filter(x -> x.id().equals(mine.axisId())).findFirst().orElseThrow();
+    var axis =
+        tx(actor, () -> specAxis.axes()).stream()
+            .filter(x -> x.id().equals(mine.axisId()))
+            .findFirst()
+            .orElseThrow();
     write(
         actor,
         () ->
             specAxis.saveAxis(
-                actor, mine.axisId(), new SpecAxisInput(axis.code(), axis.name(), false, axis.version())));
+                actor,
+                mine.axisId(),
+                new SpecAxisInput(axis.code(), axis.name(), false, axis.version())));
     assertThat(
             tx(actor, () -> specAxis.axes()).stream()
                 .filter(x -> x.id().equals(mine.axisId()))
@@ -369,8 +369,7 @@ class SpecAxisIntegrationTest {
                             new SpecAxisBindingInput(mine.axisId(), 1, true, null))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -401,8 +400,8 @@ class SpecAxisIntegrationTest {
     assertThat(inSource.get(0, Long.class)).isEqualTo(1);
     // 选项带回它的承载属性：界面上要能把"它同时是属性选项"讲出来。
     assertThat(axisOptions.getFirst().sourceAttributeId()).isEqualTo(mine.attributeId());
-    assertThat(axisOptions.getFirst().sourceAttributeCode()).isEqualTo(
-        tx(actor, () -> specAxis.panel(mine.spuId())).axes().getFirst().attributeCode());
+    assertThat(axisOptions.getFirst().sourceAttributeCode())
+        .isEqualTo(tx(actor, () -> specAxis.panel(mine.spuId())).axes().getFirst().attributeCode());
   }
 
   @Test
@@ -413,21 +412,27 @@ class SpecAxisIntegrationTest {
     UUID axisId = saveAxis(code, "共享颜色");
     UUID spu1 = spu("服饰");
     UUID spu2 = spu("服饰");
-    var bind1 = write(actor, () -> specAxis.bindAxis(actor, spu1, new SpecAxisBindingInput(axisId, 0, true, code)));
-    var bind2 = write(actor, () -> specAxis.bindAxis(actor, spu2, new SpecAxisBindingInput(axisId, 0, true, code)));
+    var bind1 =
+        write(
+            actor,
+            () -> specAxis.bindAxis(actor, spu1, new SpecAxisBindingInput(axisId, 0, true, code)));
+    var bind2 =
+        write(
+            actor,
+            () -> specAxis.bindAxis(actor, spu2, new SpecAxisBindingInput(axisId, 0, true, code)));
 
     option(axisId, "米白", 0);
 
     // 值源里两个承载属性各一行，值相同。
     long rows =
         tx(
-                actor,
-                () ->
-                    sql.fetchOne(
-                            "select count(*) from attribute_option where attribute_id in (?,?) and value='米白'",
-                            bind1.attributeDefinitionId(), bind2.attributeDefinitionId())
-                        .get(0, Long.class))
-            ;
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from attribute_option where attribute_id in (?,?) and value='米白'",
+                        bind1.attributeDefinitionId(),
+                        bind2.attributeDefinitionId())
+                    .get(0, Long.class));
     assertThat(rows).isEqualTo(2);
     // 规格轴侧只有一条选项：值本身只有一个，不是每 SPU 一份。
     assertThat(tx(actor, () -> specAxis.options(axisId))).hasSize(1);
@@ -503,12 +508,12 @@ class SpecAxisIntegrationTest {
     assertThat(tx(actor, () -> specAxis.options(mine.axisId()))).isEmpty();
     long left =
         tx(
-                actor,
-                () ->
-                    sql.fetchOne(
-                            "select count(*) from attribute_option where attribute_id=? and value='军绿'",
-                            mine.attributeId())
-                        .get(0, Long.class));
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from attribute_option where attribute_id=? and value='军绿'",
+                        mine.attributeId())
+                    .get(0, Long.class));
     assertThat(left).isZero();
   }
 
@@ -531,8 +536,15 @@ class SpecAxisIntegrationTest {
     UUID colorAxis = saveAxis(colorCode, "颜色");
     UUID sizeAxis = saveAxis(sizeCode, "尺码");
     UUID spuId = spu("服饰");
-    write(actor, () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(colorAxis, 0, true, colorCode)));
-    write(actor, () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(sizeAxis, 1, true, sizeCode)));
+    write(
+        actor,
+        () ->
+            specAxis.bindAxis(
+                actor, spuId, new SpecAxisBindingInput(colorAxis, 0, true, colorCode)));
+    write(
+        actor,
+        () ->
+            specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(sizeAxis, 1, true, sizeCode)));
     option(colorAxis, "红", 0);
     option(colorAxis, "蓝", 1);
     option(sizeAxis, "S", 0);
@@ -543,11 +555,7 @@ class SpecAxisIntegrationTest {
     assertThat(tx(actor, () -> specAxis.panel(spuId)).matrixRowCount()).isEqualTo(6);
 
     // 停用一个选项后矩阵收缩到 4：停用只挡新建，历史仍可读。
-    write(
-        actor,
-        () ->
-            specAxis.addOption(
-                actor, sizeAxis, new SpecAxisOptionInput("L", 2, false)));
+    write(actor, () -> specAxis.addOption(actor, sizeAxis, new SpecAxisOptionInput("L", 2, false)));
     assertThat(tx(actor, () -> specAxis.panel(spuId)).matrixRowCount()).isEqualTo(4);
     assertThat(tx(actor, () -> specAxis.options(sizeAxis))).hasSize(3);
   }
@@ -564,7 +572,11 @@ class SpecAxisIntegrationTest {
                 actor, new CategorySpecAxisInput("受限类目", false, 0), allowedAxis));
 
     UUID spuId = spu("受限类目");
-    write(actor, () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(allowedAxis, 0, true, allowed)));
+    write(
+        actor,
+        () ->
+            specAxis.bindAxis(
+                actor, spuId, new SpecAxisBindingInput(allowedAxis, 0, true, allowed)));
     // 名单外的轴：DB 触发器拒。
     assertThatThrownBy(
             () ->
@@ -576,7 +588,11 @@ class SpecAxisIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     // 没配规则的类目不受限制。
     UUID otherSpu = spu("自由类目");
-    write(actor, () -> specAxis.bindAxis(actor, otherSpu, new SpecAxisBindingInput(deniedAxis, 0, true, denied)));
+    write(
+        actor,
+        () ->
+            specAxis.bindAxis(
+                actor, otherSpu, new SpecAxisBindingInput(deniedAxis, 0, true, denied)));
     assertThat(tx(actor, () -> specAxis.panel(otherSpu)).axes()).hasSize(1);
   }
 
@@ -585,15 +601,27 @@ class SpecAxisIntegrationTest {
     String required = uniqueCode("REQ"), optional = uniqueCode("OPT");
     UUID requiredAxis = saveAxis(required, "必绑颜色");
     UUID optionalAxis = saveAxis(optional, "可选尺码");
-    write(actor, () -> specAxis.saveCategoryRule(actor, new CategorySpecAxisInput("必绑类目", true, 0), requiredAxis));
-    write(actor, () -> specAxis.saveCategoryRule(actor, new CategorySpecAxisInput("必绑类目", false, 1), optionalAxis));
+    write(
+        actor,
+        () ->
+            specAxis.saveCategoryRule(
+                actor, new CategorySpecAxisInput("必绑类目", true, 0), requiredAxis));
+    write(
+        actor,
+        () ->
+            specAxis.saveCategoryRule(
+                actor, new CategorySpecAxisInput("必绑类目", false, 1), optionalAxis));
 
     UUID spuId = spu("必绑类目");
     var empty = tx(actor, () -> specAxis.panel(spuId));
     assertThat(empty.missingRequiredAxisCount()).isEqualTo(1);
     assertThat(empty.requiredAxisNotes()).anyMatch(n -> n.contains("尚未绑定"));
 
-    write(actor, () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(requiredAxis, 0, true, required)));
+    write(
+        actor,
+        () ->
+            specAxis.bindAxis(
+                actor, spuId, new SpecAxisBindingInput(requiredAxis, 0, true, required)));
     var filled = tx(actor, () -> specAxis.panel(spuId));
     assertThat(filled.missingRequiredAxisCount()).isZero();
     assertThat(filled.requiredAxisNotes()).anyMatch(n -> n.contains("已绑定"));
@@ -604,8 +632,13 @@ class SpecAxisIntegrationTest {
     String code = uniqueCode("RUL");
     UUID axisId = saveAxis(code, "规则轴");
     UUID spuId = spu("规则类目");
-    write(actor, () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(axisId, 0, true, code)));
-    write(actor, () -> specAxis.saveCategoryRule(actor, new CategorySpecAxisInput("规则类目", false, 0), axisId));
+    write(
+        actor,
+        () -> specAxis.bindAxis(actor, spuId, new SpecAxisBindingInput(axisId, 0, true, code)));
+    write(
+        actor,
+        () ->
+            specAxis.saveCategoryRule(actor, new CategorySpecAxisInput("规则类目", false, 0), axisId));
 
     var rules = tx(actor, () -> specAxis.categoryRules("规则类目"));
     assertThat(rules).hasSize(1);
@@ -687,16 +720,16 @@ class SpecAxisIntegrationTest {
         () -> {
           UUID spuId =
               catalog.saveSpu(
-                      actorB,
-                      null,
-                      new SpuInput(
-                          "ISO-B-" + UUID.randomUUID().toString().substring(0, 8),
-                          "B 租户商品",
-                          "",
-                          "品牌",
-                          "服饰",
-                          "DRAFT",
-                          0));
+                  actorB,
+                  null,
+                  new SpuInput(
+                      "ISO-B-" + UUID.randomUUID().toString().substring(0, 8),
+                      "B 租户商品",
+                      "",
+                      "品牌",
+                      "服饰",
+                      "DRAFT",
+                      0));
           theirSpu[0] = spuId;
           return null;
         });
@@ -705,26 +738,34 @@ class SpecAxisIntegrationTest {
         actorB,
         "catalog.attribute.update",
         () -> {
-          specAxis.bindAxis(actorB, theirSpuId, new SpecAxisBindingInput(theirAxisId, 0, true, myCode));
+          specAxis.bindAxis(
+              actorB, theirSpuId, new SpecAxisBindingInput(theirAxisId, 0, true, myCode));
           specAxis.addOption(actorB, theirAxisId, new SpecAxisOptionInput("B 的颜色", 0, true));
           return null;
         });
 
     // 1) 两租户互不可见
-    assertThat(tx(actorB, () -> specAxis.axes()).stream().map(SpecAxis::id)).doesNotContain(myAxisId);
-    assertThat(tx(actor, () -> specAxis.axes()).stream().map(SpecAxis::id)).doesNotContain(theirAxisId);
+    assertThat(tx(actorB, () -> specAxis.axes()).stream().map(SpecAxis::id))
+        .doesNotContain(myAxisId);
+    assertThat(tx(actor, () -> specAxis.axes()).stream().map(SpecAxis::id))
+        .doesNotContain(theirAxisId);
     // B 的选项读不到 A 的，反之亦然。
-    assertThat(tx(actor, () -> specAxis.options(myAxisId))).extracting(SpecAxisOption::value)
+    assertThat(tx(actor, () -> specAxis.options(myAxisId)))
+        .extracting(SpecAxisOption::value)
         .containsExactly("我租户的颜色");
     // B 拿 A 的 SPU 取面板 → 404
     assertThatThrownBy(() -> tx(actorB, () -> specAxis.panel(mine.spuId())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 往 A 的轴上加选项 → 404（写路径同样过 RLS）
     assertThatThrownBy(
-            () -> write(actorB, () -> specAxis.addOption(actorB, myAxisId, new SpecAxisOptionInput("越权写入", 9, true))))
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        specAxis.addOption(
+                            actorB, myAxisId, new SpecAxisOptionInput("越权写入", 9, true))))
         .isInstanceOf(ResponseStatusException.class);
     // B 改 A 的轴名 → 404
     assertThatThrownBy(
@@ -760,9 +801,11 @@ class SpecAxisIntegrationTest {
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(tx(actor, () -> specAxis.options(myAxisId))).extracting(SpecAxisOption::value)
+      assertThat(tx(actor, () -> specAxis.options(myAxisId)))
+          .extracting(SpecAxisOption::value)
           .containsExactly("我租户的颜色");
-      assertThat(tx(actorB, () -> specAxis.options(theirAxisId))).extracting(SpecAxisOption::value)
+      assertThat(tx(actorB, () -> specAxis.options(theirAxisId)))
+          .extracting(SpecAxisOption::value)
           .containsExactly("B 的颜色");
       assertThatThrownBy(() -> tx(actorB, () -> specAxis.panel(mine.spuId())))
           .isInstanceOf(ResponseStatusException.class);
@@ -799,7 +842,9 @@ class SpecAxisIntegrationTest {
             .getResponse()
             .getContentAsString();
     String id = between(created, "\"id\":\"", "\"");
-    http.perform(get("/catalog/spec-axis/axes/" + id + "/options").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/spec-axis/axes/" + id + "/options")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
     // 未认证 → 不能是 200（身份服务拒绝或不可达都算）。
     int anonymous =
@@ -827,7 +872,8 @@ class SpecAxisIntegrationTest {
                 + " and relname in ('spec_axis','spec_axis_option','spu_spec_axis','category_spec_axis')"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    for (String table : List.of("spec_axis", "spec_axis_option", "spu_spec_axis", "category_spec_axis")) {
+    for (String table :
+        List.of("spec_axis", "spec_axis_option", "spu_spec_axis", "category_spec_axis")) {
       var nullable =
           sql.fetchOne(
               "select is_nullable from information_schema.columns where table_name=? and column_name='tenant_id'",

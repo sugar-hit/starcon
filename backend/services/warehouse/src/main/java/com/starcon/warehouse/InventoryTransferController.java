@@ -20,20 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.5.1.1 调拨单。
  *
- * <p>命名空间 {@code /warehouse/inventory/transfers}：与总览、明细、台账、核对同一前缀，
- * 浏览器只经 /api/warehouse 代理访问。刻意**不挂在 {@code /warehouse/lots}** 那类下拉参照形状上 ——
- * 那是只读精简清单，与本模块的单据生命周期不是同一个东西。
+ * <p>命名空间 {@code /warehouse/inventory/transfers}：与总览、明细、台账、核对同一前缀， 浏览器只经 /api/warehouse
+ * 代理访问。刻意**不挂在 {@code /warehouse/lots}** 那类下拉参照形状上 —— 那是只读精简清单，与本模块的单据生命周期不是同一个东西。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 全部写动作（确认 / 发出 / 收货 / 结案）挂 {@code warehouse.inventory.update} ——
- * 调走的是真实库存，比维护一条阈值危险得多。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 全部写动作（确认 / 发出 / 收货 / 结案）挂 {@code
+ * warehouse.inventory.update} —— 调走的是真实库存，比维护一条阈值危险得多。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。
  *
  * <p>动作端点是 **POST**（{@code /confirm}、{@code /ship}、{@code /receive}、{@code /close}）：
- * 它们都是「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，
- * 而实际发生的是库存移动 + 分录落库。
+ * 它们都是「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」， 而实际发生的是库存移动 + 分录落库。
  */
 @RestController
 @RequestMapping("/warehouse/inventory/transfers")
@@ -59,8 +56,7 @@ public class InventoryTransferController {
   /**
    * 调拨单列表 + 全量汇总（**合计不受分页影响**）+ 状态与仓库下拉。
    *
-   * <p>行上的五个数量列对应守恒式 {@code 已发出 = 已实收 + 已确认差异 + 仍在途}，
-   * 未发出量（请求 − 已发出）不是差异：货从没离开源仓。
+   * <p>行上的五个数量列对应守恒式 {@code 已发出 = 已实收 + 已确认差异 + 仍在途}， 未发出量（请求 − 已发出）不是差异：货从没离开源仓。
    */
   @GetMapping
   public TransferOrderPage page(
@@ -97,9 +93,7 @@ public class InventoryTransferController {
   /**
    * 本单的库存分录 —— **复用 7.1.2.1 台账**，不另写一套流水查询。
    *
-   * <p>归属口径与局限随响应返回，让调用方不必猜这个数怎么来的。
-   * 先确认单据在本租户可见：不存在直接 404，否则一张不存在的单会返回「空流水」，
-   * 与「存在但没动过」长得一样。
+   * <p>归属口径与局限随响应返回，让调用方不必猜这个数怎么来的。 先确认单据在本租户可见：不存在直接 404，否则一张不存在的单会返回「空流水」， 与「存在但没动过」长得一样。
    */
   @GetMapping("/{orderId}/movements")
   public TransferMovements movements(

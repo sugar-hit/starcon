@@ -31,20 +31,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.3.2.1 分仓规则。
  *
- * <p>本测试是 <b>V116 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是只直连数据库，
+ * <p>本测试是 <b>V116 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是只直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>三条最要紧的断言各自单列一节</b>：
+ *
  * <ol>
- *   <li><b>货权参与判定</b>：法人不符的仓**在写入路径上**选不中（绕过服务层写 SQL 也被挡），
- *       且跨法人必须显式兜底并被标记；</li>
- *   <li><b>挂起是硬输出</b>：无法分配时逐条列出排除原因，没有挂起记录提交不了，
- *       挂起态与选中候选互斥（绝不静默兜底）；</li>
- *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。</li>
+ *   <li><b>货权参与判定</b>：法人不符的仓**在写入路径上**选不中（绕过服务层写 SQL 也被挡）， 且跨法人必须显式兜底并被标记；
+ *   <li><b>挂起是硬输出</b>：无法分配时逐条列出排除原因，没有挂起记录提交不了， 挂起态与选中候选互斥（绝不静默兜底）；
+ *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
  */
 @SpringBootTest
@@ -54,7 +51,8 @@ class WarehouseAllocationIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("fulfillment")
           .flatMap(
@@ -166,11 +164,9 @@ class WarehouseAllocationIntegrationTest {
   }
 
   /**
-   * 每个租户一整套夹具：三个仓（两个属本租户货权法人 A、一个属法人 B）、各仓可用量、
-   * 发往 US 的运费与时效估算，以及一条默认规则。
+   * 每个租户一整套夹具：三个仓（两个属本租户货权法人 A、一个属法人 B）、各仓可用量、 发往 US 的运费与时效估算，以及一条默认规则。
    *
-   * <p>三个仓的**定价刻意让法人 B 的仓最便宜** —— 只有这样，「为什么没选更便宜的仓」
-   * 才真的验证了货权参与判定，而不是碰巧选中了最便宜的。
+   * <p>三个仓的**定价刻意让法人 B 的仓最便宜** —— 只有这样，「为什么没选更便宜的仓」 才真的验证了货权参与判定，而不是碰巧选中了最便宜的。
    */
   @BeforeEach
   void seed() throws Exception {
@@ -236,7 +232,14 @@ class WarehouseAllocationIntegrationTest {
             + "(id,tenant_id,warehouse_ref,warehouse_name,legal_entity_code,region_code,"
             + "default_priority,active,created_by_membership_id)"
             + " values (?,?,?,?,?,?,?,true,?)",
-        idFor(tenant, ord), tenant, ref, name, entity, region, priority, user);
+        idFor(tenant, ord),
+        tenant,
+        ref,
+        name,
+        entity,
+        region,
+        priority,
+        user);
   }
 
   void stock(UUID tenant, int ord, String ref, String qty) {
@@ -245,7 +248,13 @@ class WarehouseAllocationIntegrationTest {
             + "(id,tenant_id,warehouse_ref,sku_ref,available_qty,collected_at,stock_source,"
             + "source_reference,created_by_membership_id)"
             + " values (?,?,?,'SKU-1',?,?::timestamptz,'TENANT_MAINTAINED',?,?)",
-        idFor(tenant, ord), tenant, ref, new BigDecimal(qty), at(-1), ref, user);
+        idFor(tenant, ord),
+        tenant,
+        ref,
+        new BigDecimal(qty),
+        at(-1),
+        ref,
+        user);
   }
 
   void shipping(UUID tenant, int ord, String ref, String cost, String lead) {
@@ -256,7 +265,13 @@ class WarehouseAllocationIntegrationTest {
             + "created_by_membership_id)"
             + " values (?,?,?,'SKU-1','US',?,?,'USD','TENANT_MAINTAINED',?,"
             + "?::timestamptz,?)",
-        idFor(tenant, ord), tenant, ref, new BigDecimal(cost), new BigDecimal(lead), ref, at(-30),
+        idFor(tenant, ord),
+        tenant,
+        ref,
+        new BigDecimal(cost),
+        new BigDecimal(lead),
+        ref,
+        at(-30),
         user);
   }
 
@@ -283,10 +298,23 @@ class WarehouseAllocationIntegrationTest {
             + "require_legal_entity_match,legal_entity_policy,preferred_legal_entity_code,"
             + "currency_code,excluded_warehouse_refs,effective_from,created_by_membership_id)"
             + " values (?,?,?,?,?,'*','*',?,?,?,?,?,?,?,?,?,?,'USD','',?::timestamptz,?)",
-        idFor(tenant, ord), tenant, code, code, priority, selection, fallback,
-        new BigDecimal(wStock), new BigDecimal(wCost), new BigDecimal(wLead),
-        new BigDecimal(wLegal), new BigDecimal(wRegion), requireMatch, legalPolicy, preferred,
-        at(-30), user);
+        idFor(tenant, ord),
+        tenant,
+        code,
+        code,
+        priority,
+        selection,
+        fallback,
+        new BigDecimal(wStock),
+        new BigDecimal(wCost),
+        new BigDecimal(wLead),
+        new BigDecimal(wLegal),
+        new BigDecimal(wRegion),
+        requireMatch,
+        legalPolicy,
+        preferred,
+        at(-30),
+        user);
   }
 
   static OffsetDateTime at(int daysFromNow) {
@@ -299,8 +327,7 @@ class WarehouseAllocationIntegrationTest {
   /**
    * 沿 cause 链找最里面那条 SQLException —— DB 约束拒绝的**原文**在那里。
    *
-   * <p>为什么不用外层异常：jOOQ 会把消息换成「bad SQL grammar [原 SQL]」，
-   * Spring 再包一层。真正说明「为什么被拒」的是最里面的 SQLException，
+   * <p>为什么不用外层异常：jOOQ 会把消息换成「bad SQL grammar [原 SQL]」， Spring 再包一层。真正说明「为什么被拒」的是最里面的 SQLException，
    * 断言外层消息等于断言一句与真实原因无关的话。
    */
   static java.sql.SQLException rootSqlException(Throwable error) {
@@ -319,11 +346,12 @@ class WarehouseAllocationIntegrationTest {
    * 断言一段工作被 DB 拒绝。
    *
    * @param acceptableStates 可接受的 SQLState（23514 = 触发器/check 约束，42501 = 权限不足）
-   * @param expectedFragment 拒绝理由里应当出现的片段；仅当走的是 23514 时断言
-   *     （权限不足那条是 PostgreSQL 自己发的，没有自定义文案）
+   * @param expectedFragment 拒绝理由里应当出现的片段；仅当走的是 23514 时断言 （权限不足那条是 PostgreSQL 自己发的，没有自定义文案）
    */
-  static void assertDbRefused(org.assertj.core.api.ThrowableAssert.ThrowingCallable work,
-      String expectedFragment, String... acceptableStates) {
+  static void assertDbRefused(
+      org.assertj.core.api.ThrowableAssert.ThrowingCallable work,
+      String expectedFragment,
+      String... acceptableStates) {
     var error = catchThrowable(work);
     var sql = rootSqlException(error);
     assertThat(sql.getSQLState())
@@ -343,10 +371,8 @@ class WarehouseAllocationIntegrationTest {
   /**
    * 以**表所有者**（迁移用户）身份直连执行一条 SQL。
    *
-   * <p>存在的理由：append-only 有两层 —— 对运行角色 REVOKE 权限（42501），
-   * 以及 BEFORE 触发器（23514）。只测前者的话触发器就成了永远跑不到的死代码；
-   * 要证明它真的有效，必须绕开权限、以 owner 身份再撞一次。
-   * FORCE RLS 对 owner 同样生效，所以这里仍要显式绑定 app.current_tenant。
+   * <p>存在的理由：append-only 有两层 —— 对运行角色 REVOKE 权限（42501）， 以及 BEFORE 触发器（23514）。只测前者的话触发器就成了永远跑不到的死代码；
+   * 要证明它真的有效，必须绕开权限、以 owner 身份再撞一次。 FORCE RLS 对 owner 同样生效，所以这里仍要显式绑定 app.current_tenant。
    */
   static OwnerSql asTableOwner(String sql) {
     return () -> {
@@ -364,15 +390,32 @@ class WarehouseAllocationIntegrationTest {
   // ==========================================================================
   WarehouseAllocationSimulationRequest simulation(String orderRef, String qty, String orderEntity) {
     return new WarehouseAllocationSimulationRequest(
-        orderRef, "L-1", "AMAZON", "SKU-1", new BigDecimal(qty), "US", "CN-EAST", orderEntity,
-        null, null);
+        orderRef,
+        "L-1",
+        "AMAZON",
+        "SKU-1",
+        new BigDecimal(qty),
+        "US",
+        "CN-EAST",
+        orderEntity,
+        null,
+        null);
   }
 
   WarehouseAllocationDecisionRequest decision(
       String orderRef, String qty, String orderEntity, String ruleCode) {
     return new WarehouseAllocationDecisionRequest(
-        orderRef, "L-1", "AMAZON", "SKU-1", new BigDecimal(qty), "US", "CN-EAST", orderEntity,
-        ruleCode, null, null);
+        orderRef,
+        "L-1",
+        "AMAZON",
+        "SKU-1",
+        new BigDecimal(qty),
+        "US",
+        "CN-EAST",
+        orderEntity,
+        ruleCode,
+        null,
+        null);
   }
 
   // ==========================================================================
@@ -390,7 +433,9 @@ class WarehouseAllocationIntegrationTest {
             "fulfillment_warehouse_allocation_candidate",
             "fulfillment_warehouse_allocation_hold",
             "fulfillment_warehouse_allocation_event")) {
-      var row = sql.fetchOne("select relrowsecurity,relforcerowsecurity from pg_class where relname = ?", table);
+      var row =
+          sql.fetchOne(
+              "select relrowsecurity,relforcerowsecurity from pg_class where relname = ?", table);
       assertThat(row).as("V116 必须建出 " + table).isNotNull();
       assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
       assertThat(row.get(1, Boolean.class)).as(table + " 只有 FORCE 才挡得住运行角色被误授 owner").isTrue();
@@ -423,11 +468,11 @@ class WarehouseAllocationIntegrationTest {
     // 不限定 relkind 会把兄弟车道自己的索引误判成「新表」。
     assertThat(
             sql.fetch(
-                    "select relname from pg_class where relname like 'fulfillment_routing_%'"
-                        + " and relkind = 'r'"
-                        + " and relname not in ('fulfillment_routing_decision',"
-                        + "'fulfillment_routing_candidate','fulfillment_routing_switch',"
-                        + "'fulfillment_routing_event')"))
+                "select relname from pg_class where relname like 'fulfillment_routing_%'"
+                    + " and relkind = 'r'"
+                    + " and relname not in ('fulfillment_routing_decision',"
+                    + "'fulfillment_routing_candidate','fulfillment_routing_switch',"
+                    + "'fulfillment_routing_event')"))
         .as("不得在兄弟车道的命名空间里新增表")
         .isEmpty();
   }
@@ -437,8 +482,14 @@ class WarehouseAllocationIntegrationTest {
     var caps = service.capabilities();
     assertThat(caps.crossServiceReadAvailable()).isFalse();
     assertThat(caps.reservesUpstreamStock()).isFalse();
-    assertThat(caps.dimensions()).extracting(WarehouseAllocationCapabilities.WarehouseAllocationDimension::code)
-        .contains("WAREHOUSE_STOCK", "SHIPPING_COST", "LEGAL_ENTITY", "ORDER_DESTINATION", "OUTBOUND_HANDOFF");
+    assertThat(caps.dimensions())
+        .extracting(WarehouseAllocationCapabilities.WarehouseAllocationDimension::code)
+        .contains(
+            "WAREHOUSE_STOCK",
+            "SHIPPING_COST",
+            "LEGAL_ENTITY",
+            "ORDER_DESTINATION",
+            "OUTBOUND_HANDOFF");
     var orderDimension =
         caps.dimensions().stream()
             .filter(d -> d.code().equals("ORDER_DESTINATION"))
@@ -484,14 +535,38 @@ class WarehouseAllocationIntegrationTest {
     // 关掉硬闸、把权重压到成本上：这时「更便宜」应该赢。
     asA(
         () -> {
-          rule(a, 32, "RULE-COST-HEAVY", 5, "HIGHEST_SCORE", "SUSPEND", "0.1000", "0.6000",
-              "0.1000", "0.1000", "0.1000", false, "ORDER_OWNER_FIRST", "");
+          rule(
+              a,
+              32,
+              "RULE-COST-HEAVY",
+              5,
+              "HIGHEST_SCORE",
+              "SUSPEND",
+              "0.1000",
+              "0.6000",
+              "0.1000",
+              "0.1000",
+              "0.1000",
+              false,
+              "ORDER_OWNER_FIRST",
+              "");
           return null;
         });
     var costHeavy =
-        asA(() -> service.simulate(new WarehouseAllocationSimulationRequest(
-            "SO-W-COST", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST", ENT_A,
-            "RULE-COST-HEAVY", null)));
+        asA(
+            () ->
+                service.simulate(
+                    new WarehouseAllocationSimulationRequest(
+                        "SO-W-COST",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        "RULE-COST-HEAVY",
+                        null)));
     assertThat(costHeavy.chosenWarehouseRef())
         .as("成本权重 0.6 > 货权权重 0.1 时应选更便宜的 LAX 仓")
         .isEqualTo("WH-US-LAX");
@@ -499,14 +574,38 @@ class WarehouseAllocationIntegrationTest {
     // 换成货权权重压倒成本：同一份数据，结论必须反过来。
     asA(
         () -> {
-          rule(a, 33, "RULE-LEGAL-HEAVY", 4, "HIGHEST_SCORE", "SUSPEND", "0.1000", "0.1000",
-              "0.1000", "0.6000", "0.1000", false, "ORDER_OWNER_FIRST", "");
+          rule(
+              a,
+              33,
+              "RULE-LEGAL-HEAVY",
+              4,
+              "HIGHEST_SCORE",
+              "SUSPEND",
+              "0.1000",
+              "0.1000",
+              "0.1000",
+              "0.6000",
+              "0.1000",
+              false,
+              "ORDER_OWNER_FIRST",
+              "");
           return null;
         });
     var legalHeavy =
-        asA(() -> service.simulate(new WarehouseAllocationSimulationRequest(
-            "SO-W-LEGAL", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST", ENT_A,
-            "RULE-LEGAL-HEAVY", null)));
+        asA(
+            () ->
+                service.simulate(
+                    new WarehouseAllocationSimulationRequest(
+                        "SO-W-LEGAL",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        "RULE-LEGAL-HEAVY",
+                        null)));
     assertThat(legalHeavy.chosenWarehouseRef())
         .as("货权权重 0.6 时应选与订单主体同法人的仓，即使它更贵")
         .isEqualTo("WH-CN-SH");
@@ -528,11 +627,7 @@ class WarehouseAllocationIntegrationTest {
   @Test
   void 指定法人优先策略要求给出目标法人() {
     assertThatThrownBy(
-            () ->
-                asA(
-                    () ->
-                        service.saveRule(
-                            ruleInput("RULE-NO-PREF", 20, "PREFERRED_FIRST", ""))))
+            () -> asA(() -> service.saveRule(ruleInput("RULE-NO-PREF", 20, "PREFERRED_FIRST", ""))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须给出目标法人");
   }
@@ -541,8 +636,21 @@ class WarehouseAllocationIntegrationTest {
   void 跨法人必须显式兜底且被如实标记() {
     asA(
         () -> {
-          rule(a, 34, "RULE-CROSS", 3, "LOWEST_COST", "CROSS_LEGAL_ENTITY", "0.2000", "0.5000",
-              "0.2000", "0.0000", "0.1000", false, "NEUTRAL", "");
+          rule(
+              a,
+              34,
+              "RULE-CROSS",
+              3,
+              "LOWEST_COST",
+              "CROSS_LEGAL_ENTITY",
+              "0.2000",
+              "0.5000",
+              "0.2000",
+              "0.0000",
+              "0.1000",
+              false,
+              "NEUTRAL",
+              "");
           return null;
         });
     var saved =
@@ -550,8 +658,17 @@ class WarehouseAllocationIntegrationTest {
             () ->
                 service.allocate(
                     new WarehouseAllocationDecisionRequest(
-                        "SO-CROSS", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST",
-                        ENT_A, "RULE-CROSS", null, null),
+                        "SO-CROSS",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        "RULE-CROSS",
+                        null,
+                        null),
                     user));
     assertThat(saved.crossLegalEntity()).as("跨法人必须被标记").isTrue();
     assertThat(saved.chosenLegalEntityCode()).isEqualTo(ENT_B);
@@ -579,7 +696,13 @@ class WarehouseAllocationIntegrationTest {
                               + " ?::uuid,'HIGHEST_SCORE','SUSPEND','ORDER_OWNER_FIRST',true,'US',"
                               + "'CN-EAST',?,'ALLOCATED','WH-US-LAX',?,false,50,'USD',"
                               + "'SCORE_BASED','绕过服务层',?::timestamptz,?)",
-                          UUID.randomUUID(), a, idFor(a, 31), ENT_A, ENT_B, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          idFor(a, 31),
+                          ENT_A,
+                          ENT_B,
+                          at(0),
+                          user);
                       // 货权法人 B ≠ 订单主体 A，且规则未放开 CROSS_LEGAL_ENTITY。
                       sql.execute(
                           "insert into fulfillment_warehouse_allocation_candidate"
@@ -589,7 +712,9 @@ class WarehouseAllocationIntegrationTest {
                               + " values (?::uuid,?,(select id from"
                               + " fulfillment_warehouse_allocation_decision where order_ref='SO-SQL-BYPASS'),"
                               + "'WH-US-LAX',?,'US-WEST',30,500,false,true,1.0,true)",
-                          UUID.randomUUID(), a, ENT_B);
+                          UUID.randomUUID(),
+                          a,
+                          ENT_B);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -597,9 +722,10 @@ class WarehouseAllocationIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.pageDecisions(
-                        new WarehouseAllocationDecisionQuery(
-                            "SO-SQL-BYPASS", null, null, null, null, null, null, null, 0, 10))
+                    service
+                        .pageDecisions(
+                            new WarehouseAllocationDecisionQuery(
+                                "SO-SQL-BYPASS", null, null, null, null, null, null, null, 0, 10))
                         .total()))
         .as("整笔事务必须回滚，不得留下半条分配")
         .isZero();
@@ -625,13 +751,17 @@ class WarehouseAllocationIntegrationTest {
     assertThat(hold.excludedWarehouseCount()).isEqualTo(3);
     // 逐条列举：每个仓一句，不是「无可行仓」四个字。
     assertThat(hold.exclusionDetail())
-        .contains("WH-CN-SH=").contains("WH-CN-BJ=").contains("WH-US-LAX=");
+        .contains("WH-CN-SH=")
+        .contains("WH-CN-BJ=")
+        .contains("WH-US-LAX=");
     assertThat(hold.exclusionDetail()).contains("收入记在");
     // 一条选中候选都没有 —— 这才是「没有悄悄回落」的证明。
     assertThat(detail.candidates()).noneMatch(WarehouseAllocationCandidateRow::chosen);
     assertThat(detail.candidates()).allMatch(c -> !c.feasible());
     assertThat(detail.candidates()).allMatch(c -> !c.infeasibleReasonCode().isBlank());
-    assertThat(detail.events()).extracting(WarehouseAllocationEventRow::eventKind).contains("SUSPENDED");
+    assertThat(detail.events())
+        .extracting(WarehouseAllocationEventRow::eventKind)
+        .contains("SUSPENDED");
   }
 
   @Test
@@ -642,7 +772,8 @@ class WarehouseAllocationIntegrationTest {
         asA(
             () ->
                 service.pageHolds(
-                    new WarehouseAllocationHoldQuery(null, null, "BLOCKED_BY_LEGAL_ENTITY", null, 0, 50)));
+                    new WarehouseAllocationHoldQuery(
+                        null, null, "BLOCKED_BY_LEGAL_ENTITY", null, 0, 50)));
     assertThat(page.total()).isEqualTo(2);
     var search =
         asA(
@@ -672,7 +803,11 @@ class WarehouseAllocationIntegrationTest {
                               + "'HIGHEST_SCORE','SUSPEND','ORDER_OWNER_FIRST',true,'US','CN-EAST',"
                               + "?, 'SUSPENDED',false,'USD','NO_ELIGIBLE_WAREHOUSE','手动挂起',"
                               + "?::timestamptz,?)",
-                          UUID.randomUUID(), a, ENT_A, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          ENT_A,
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -698,7 +833,11 @@ class WarehouseAllocationIntegrationTest {
                               + "'HIGHEST_SCORE','SUSPEND','ORDER_OWNER_FIRST',true,'US','CN-EAST',"
                               + "?, 'SUSPENDED',false,'USD','NO_ELIGIBLE_WAREHOUSE','手动挂起',"
                               + "?::timestamptz,?)",
-                          UUID.randomUUID(), a, ENT_A, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          ENT_A,
+                          at(0),
+                          user);
                       sql.execute(
                           "insert into fulfillment_warehouse_allocation_hold"
                               + "(id,tenant_id,decision_id,hold_reason,reason,exclusion_detail,"
@@ -707,7 +846,10 @@ class WarehouseAllocationIntegrationTest {
                               + " fulfillment_warehouse_allocation_decision where order_ref='SO-HOLD-PICK'),"
                               + "'NO_ELIGIBLE_WAREHOUSE','手动挂起','WH-CN-SH=手工编造',1,"
                               + "?::timestamptz,?)",
-                          UUID.randomUUID(), a, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          at(0),
+                          user);
                       // 挂起了却偷偷选了一个仓 —— 必须被挡。
                       sql.execute(
                           "insert into fulfillment_warehouse_allocation_candidate"
@@ -717,7 +859,9 @@ class WarehouseAllocationIntegrationTest {
                               + " values (?::uuid,?,(select id from"
                               + " fulfillment_warehouse_allocation_decision where order_ref='SO-HOLD-PICK'),"
                               + "'WH-CN-SH',?,'CN-EAST',10,200,true,true,1.0,true)",
-                          UUID.randomUUID(), a, ENT_A);
+                          UUID.randomUUID(),
+                          a,
+                          ENT_A);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -744,7 +888,12 @@ class WarehouseAllocationIntegrationTest {
                               + "'HIGHEST_SCORE','SUSPEND','ORDER_OWNER_FIRST',true,'US','CN-EAST',"
                               + "?, 'ALLOCATED','WH-CN-SH',?,false,50,'USD','SCORE_BASED',"
                               + "'凭空写的分配',?::timestamptz,?)",
-                          UUID.randomUUID(), a, ENT_A, ENT_A, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          ENT_A,
+                          ENT_A,
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -777,7 +926,9 @@ class WarehouseAllocationIntegrationTest {
     assertThat(saved.holdId()).isNotNull();
     var detail = asA(() -> service.decision(saved.decisionId()));
     assertThat(detail.holds().get(0).exclusionDetail())
-        .contains("WH-CN-SH=").contains("WH-CN-BJ=").contains("WH-US-LAX=");
+        .contains("WH-CN-SH=")
+        .contains("WH-CN-BJ=")
+        .contains("WH-US-LAX=");
     assertThat(detail.candidates()).noneMatch(WarehouseAllocationCandidateRow::chosen);
   }
 
@@ -785,8 +936,21 @@ class WarehouseAllocationIntegrationTest {
   void 部分分配兜底把差额挂起而不是显示成已全部分配() {
     asA(
         () -> {
-          rule(a, 35, "RULE-PARTIAL", 2, "HIGHEST_SCORE", "ALLOW_PARTIAL", "0.2500", "0.2500",
-              "0.1500", "0.2500", "0.1000", true, "ORDER_OWNER_FIRST", "");
+          rule(
+              a,
+              35,
+              "RULE-PARTIAL",
+              2,
+              "HIGHEST_SCORE",
+              "ALLOW_PARTIAL",
+              "0.2500",
+              "0.2500",
+              "0.1500",
+              "0.2500",
+              "0.1000",
+              true,
+              "ORDER_OWNER_FIRST",
+              "");
           sql.execute(
               "update fulfillment_warehouse_allocation_stock_estimate set available_qty = 30"
                   + " where warehouse_ref = 'WH-CN-SH'");
@@ -800,8 +964,17 @@ class WarehouseAllocationIntegrationTest {
             () ->
                 service.allocate(
                     new WarehouseAllocationDecisionRequest(
-                        "SO-PARTIAL", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US",
-                        "CN-EAST", ENT_A, "RULE-PARTIAL", null, null),
+                        "SO-PARTIAL",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        "RULE-PARTIAL",
+                        null,
+                        null),
                     user));
     assertThat(saved.status()).isEqualTo(WarehouseAllocationStatus.PARTIAL);
     assertThat(saved.allocatedQty()).isEqualByComparingTo("30.000000");
@@ -811,9 +984,7 @@ class WarehouseAllocationIntegrationTest {
     var detail = asA(() -> service.decision(saved.decisionId()));
     assertThat(detail.holds()).hasSize(1);
     assertThat(detail.holds().get(0).shortfallQty()).isEqualByComparingTo("20.000000");
-    assertThat(detail.holds().get(0).holdCandidateId())
-        .as("差额要指回选中候选，便于从缺口跳到依据")
-        .isNotNull();
+    assertThat(detail.holds().get(0).holdCandidateId()).as("差额要指回选中候选，便于从缺口跳到依据").isNotNull();
   }
 
   // ==========================================================================
@@ -849,17 +1020,19 @@ class WarehouseAllocationIntegrationTest {
     var before =
         asA(
             () ->
-                service.pageDecisions(
-                    new WarehouseAllocationDecisionQuery(
-                        "SO-SIM-ONLY", null, null, null, null, null, null, null, 0, 10))
+                service
+                    .pageDecisions(
+                        new WarehouseAllocationDecisionQuery(
+                            "SO-SIM-ONLY", null, null, null, null, null, null, null, 0, 10))
                     .total());
     asA(() -> service.simulate(simulation("SO-SIM-ONLY", "50", ENT_A)));
     var after =
         asA(
             () ->
-                service.pageDecisions(
-                    new WarehouseAllocationDecisionQuery(
-                        "SO-SIM-ONLY", null, null, null, null, null, null, null, 0, 10))
+                service
+                    .pageDecisions(
+                        new WarehouseAllocationDecisionQuery(
+                            "SO-SIM-ONLY", null, null, null, null, null, null, null, 0, 10))
                     .total());
     assertThat(after).as("试算是只读预演，不能留下决策行").isEqualTo(before).isZero();
   }
@@ -876,9 +1049,21 @@ class WarehouseAllocationIntegrationTest {
                   + " set available_qty = 1234.5 where warehouse_ref = 'WH-CN-SH'");
           return null;
         });
-    var sim = asA(() -> service.simulate(new WarehouseAllocationSimulationRequest(
-        "SO-SCALE", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST", ENT_A,
-        null, null)));
+    var sim =
+        asA(
+            () ->
+                service.simulate(
+                    new WarehouseAllocationSimulationRequest(
+                        "SO-SCALE",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        null,
+                        null)));
     assertThat(sim.unitShippingCost()).as("结算口径 HALF_UP 到分").isEqualByComparingTo("12.35");
     assertThat(sim.unitShippingCost().scale()).isEqualTo(2);
 
@@ -887,8 +1072,17 @@ class WarehouseAllocationIntegrationTest {
             () ->
                 service.allocate(
                     new WarehouseAllocationDecisionRequest(
-                        "SO-SCALE", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST",
-                        ENT_A, null, null, null),
+                        "SO-SCALE",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        null,
+                        null,
+                        null),
                     user));
     var candidate =
         asA(() -> service.decision(saved.decisionId())).candidates().stream()
@@ -909,15 +1103,23 @@ class WarehouseAllocationIntegrationTest {
             () ->
                 service.allocate(
                     new WarehouseAllocationDecisionRequest(
-                        "SO-TIME", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US", "CN-EAST",
-                        ENT_A, null, null, decided),
+                        "SO-TIME",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        null,
+                        null,
+                        decided),
                     user));
     var readBack = asA(() -> service.decision(saved.decisionId())).decision().decidedAt();
     // 写成 +08:00 的时刻，读回来必须是**同一个瞬间**：
     // 若用 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s，这里断言的就是这一点。
     assertThat(readBack.toInstant()).isEqualTo(decided.toInstant());
-    var eventTime =
-        asA(() -> service.decision(saved.decisionId())).events().get(0).occurredAt();
+    var eventTime = asA(() -> service.decision(saved.decisionId())).events().get(0).occurredAt();
     assertThat(eventTime.toInstant()).isEqualTo(decided.toInstant());
   }
 
@@ -951,9 +1153,7 @@ class WarehouseAllocationIntegrationTest {
                     new WarehouseAllocationStatusInput("RELEASED", "MODULE_9_3_3_1"),
                     user));
     assertThat(released.status()).isEqualTo(WarehouseAllocationStatus.RELEASED);
-    assertThat(
-            asA(() -> service.decision(saved.decisionId())).decision().releasedAt())
-        .isNotNull();
+    assertThat(asA(() -> service.decision(saved.decisionId())).decision().releasedAt()).isNotNull();
     // 已下发是终态
     assertThatThrownBy(
             () ->
@@ -995,7 +1195,8 @@ class WarehouseAllocationIntegrationTest {
 
   @Test
   void 挂起是终态不允许改状态() {
-    var saved = asA(() -> service.allocate(decision("SO-HOLD-TERM", "50", "CN-ENT-ZZZ", null), user));
+    var saved =
+        asA(() -> service.allocate(decision("SO-HOLD-TERM", "50", "CN-ENT-ZZZ", null), user));
     assertThatThrownBy(
             () ->
                 asA(
@@ -1024,52 +1225,52 @@ class WarehouseAllocationIntegrationTest {
     var candidateId = candidateRow.get(0, UUID.class);
     // 第 1 层：运行角色 trade_app 已被 REVOKE UPDATE/DELETE —— 权限不足直接拒绝。
     assertDbRefused(
-            () ->
-                asA(
-                    () ->
-                        sql.execute(
-                            "update fulfillment_warehouse_allocation_candidate"
-                                + " set feasible = false where id = ?",
-                            candidateId)),
-            "不可改写",
-            "42501",
-            "23514");
+        () ->
+            asA(
+                () ->
+                    sql.execute(
+                        "update fulfillment_warehouse_allocation_candidate"
+                            + " set feasible = false where id = ?",
+                        candidateId)),
+        "不可改写",
+        "42501",
+        "23514");
     // 决策表用的是「举证凭据」那条触发器（另有状态流转开窗），与留痕表的措辞不同，
     // 所以这里断言的是它自己的那句 —— 两类表的提示语本来就该不一样。
     assertDbRefused(
-            () ->
-                asA(
-                    () ->
-                        sql.execute(
-                            "delete from fulfillment_warehouse_allocation_decision where id = ?",
-                            saved.decisionId())),
-            "不允许改写或删除",
-            "42501",
-            "23514");
+        () ->
+            asA(
+                () ->
+                    sql.execute(
+                        "delete from fulfillment_warehouse_allocation_decision where id = ?",
+                        saved.decisionId())),
+        "不允许改写或删除",
+        "42501",
+        "23514");
     assertDbRefused(
-            () ->
-                asA(
-                    () ->
-                        sql.execute(
-                            "update fulfillment_warehouse_allocation_decision"
-                                + " set reason = '改得好看一点' where id = ?",
-                            saved.decisionId())),
-            "举证凭据",
-            "42501",
-            "23514");
+        () ->
+            asA(
+                () ->
+                    sql.execute(
+                        "update fulfillment_warehouse_allocation_decision"
+                            + " set reason = '改得好看一点' where id = ?",
+                        saved.decisionId())),
+        "举证凭据",
+        "42501",
+        "23514");
 
     // 第 2 层：绕开权限，以**表所有者**身份再撞一次 —— 证明触发器不是死代码。
     // 这一格若拿掉，append-only 就只剩「运行角色没权限」这一句，触发器可以整段删掉。
     assertDbRefused(
-            () ->
-                asTableOwner(
-                        "update fulfillment_warehouse_allocation_candidate"
-                            + " set feasible = false where id = '"
-                            + candidateId
-                            + "'")
-                    .run(),
-            "不可改写",
-            "23514");
+        () ->
+            asTableOwner(
+                    "update fulfillment_warehouse_allocation_candidate"
+                        + " set feasible = false where id = '"
+                        + candidateId
+                        + "'")
+                .run(),
+        "不可改写",
+        "23514");
   }
 
   // ==========================================================================
@@ -1079,9 +1280,26 @@ class WarehouseAllocationIntegrationTest {
   void 权重合计必须为1() {
     var bad =
         new WarehouseAllocationRuleInput(
-            "RULE-BAD-SUM", "权重合计不对", 40, "*", "US", "HIGHEST_SCORE", "SUSPEND",
-            new BigDecimal("0.5"), new BigDecimal("0.5"), new BigDecimal("0.5"), BigDecimal.ZERO,
-            BigDecimal.ZERO, true, "NEUTRAL", null, null, null, null, null, null);
+            "RULE-BAD-SUM",
+            "权重合计不对",
+            40,
+            "*",
+            "US",
+            "HIGHEST_SCORE",
+            "SUSPEND",
+            new BigDecimal("0.5"),
+            new BigDecimal("0.5"),
+            new BigDecimal("0.5"),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            true,
+            "NEUTRAL",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
     assertThatThrownBy(() -> asA(() -> service.saveRule(bad)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("合计必须等于 1.0000");
@@ -1091,10 +1309,26 @@ class WarehouseAllocationIntegrationTest {
   void 规则优先级不可重复() {
     var dup =
         new WarehouseAllocationRuleInput(
-            "RULE-DUP-PRIORITY", "优先级撞了", 10, "*", "US", "HIGHEST_SCORE", "SUSPEND",
-            new BigDecimal("0.25"), new BigDecimal("0.25"), new BigDecimal("0.15"),
-            new BigDecimal("0.25"), new BigDecimal("0.10"), true, "NEUTRAL", null, null, null,
-            null, null, null);
+            "RULE-DUP-PRIORITY",
+            "优先级撞了",
+            10,
+            "*",
+            "US",
+            "HIGHEST_SCORE",
+            "SUSPEND",
+            new BigDecimal("0.25"),
+            new BigDecimal("0.25"),
+            new BigDecimal("0.15"),
+            new BigDecimal("0.25"),
+            new BigDecimal("0.10"),
+            true,
+            "NEUTRAL",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
     assertThatThrownBy(() -> asA(() -> service.saveRule(dup)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("优先级");
@@ -1104,8 +1338,21 @@ class WarehouseAllocationIntegrationTest {
   void 规则按优先级自动命中() {
     asA(
         () -> {
-          rule(a, 36, "RULE-HIGH-PRIO", 1, "LOWEST_COST", "SUSPEND", "0.2500", "0.2500",
-              "0.1500", "0.2500", "0.1000", true, "ORDER_OWNER_FIRST", "");
+          rule(
+              a,
+              36,
+              "RULE-HIGH-PRIO",
+              1,
+              "LOWEST_COST",
+              "SUSPEND",
+              "0.2500",
+              "0.2500",
+              "0.1500",
+              "0.2500",
+              "0.1000",
+              true,
+              "ORDER_OWNER_FIRST",
+              "");
           return null;
         });
     var sim = asA(() -> service.simulate(simulation("SO-RULE-HIT", "50", ENT_A)));
@@ -1119,8 +1366,21 @@ class WarehouseAllocationIntegrationTest {
   void 规则显式指定时不受优先级影响() {
     asA(
         () -> {
-          rule(a, 37, "RULE-EXPLICIT", 50, "CLOSEST_LEAD_TIME", "SUSPEND", "0.2500", "0.2500",
-              "0.1500", "0.2500", "0.1000", true, "ORDER_OWNER_FIRST", "");
+          rule(
+              a,
+              37,
+              "RULE-EXPLICIT",
+              50,
+              "CLOSEST_LEAD_TIME",
+              "SUSPEND",
+              "0.2500",
+              "0.2500",
+              "0.1500",
+              "0.2500",
+              "0.1000",
+              true,
+              "ORDER_OWNER_FIRST",
+              "");
           return null;
         });
     var sim =
@@ -1128,19 +1388,44 @@ class WarehouseAllocationIntegrationTest {
             () ->
                 service.simulate(
                     new WarehouseAllocationSimulationRequest(
-                        "SO-RULE-EXPLICIT", "L-1", "AMAZON", "SKU-1", new BigDecimal("50"), "US",
-                        "CN-EAST", ENT_A, "RULE-EXPLICIT", null)));
+                        "SO-RULE-EXPLICIT",
+                        "L-1",
+                        "AMAZON",
+                        "SKU-1",
+                        new BigDecimal("50"),
+                        "US",
+                        "CN-EAST",
+                        ENT_A,
+                        "RULE-EXPLICIT",
+                        null)));
     assertThat(sim.ruleCode()).isEqualTo("RULE-EXPLICIT");
     assertThat(sim.reasonCode()).isEqualTo(WarehouseAllocationReasonCode.CLOSEST_LEAD_TIME);
     assertThat(sim.chosenWarehouseRef()).isEqualTo("WH-CN-BJ");
   }
 
-  WarehouseAllocationRuleInput ruleInput(String code, int priority, String legalPolicy,
-      String preferred) {
+  WarehouseAllocationRuleInput ruleInput(
+      String code, int priority, String legalPolicy, String preferred) {
     return new WarehouseAllocationRuleInput(
-        code, code, priority, "*", "US", "HIGHEST_SCORE", "SUSPEND", new BigDecimal("0.25"),
-        new BigDecimal("0.25"), new BigDecimal("0.15"), new BigDecimal("0.25"),
-        new BigDecimal("0.10"), true, legalPolicy, preferred, null, null, null, null, null);
+        code,
+        code,
+        priority,
+        "*",
+        "US",
+        "HIGHEST_SCORE",
+        "SUSPEND",
+        new BigDecimal("0.25"),
+        new BigDecimal("0.25"),
+        new BigDecimal("0.15"),
+        new BigDecimal("0.25"),
+        new BigDecimal("0.10"),
+        true,
+        legalPolicy,
+        preferred,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   // ==========================================================================
@@ -1168,7 +1453,12 @@ class WarehouseAllocationIntegrationTest {
                     () ->
                         service.saveStockEstimate(
                             new WarehouseAllocationStockInput(
-                                "WH-NOT-EXIST", "SKU-1", new BigDecimal("10"), at(-1), null, null,
+                                "WH-NOT-EXIST",
+                                "SKU-1",
+                                new BigDecimal("10"),
+                                at(-1),
+                                null,
+                                null,
                                 null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
@@ -1179,8 +1469,13 @@ class WarehouseAllocationIntegrationTest {
                 () ->
                     service.saveStockEstimate(
                         new WarehouseAllocationStockInput(
-                            "WH-CN-SH", "SKU-2", new BigDecimal("10"), at(-1), "MODULE_7_1_1_3",
-                            "MODULE-REF-1", null),
+                            "WH-CN-SH",
+                            "SKU-2",
+                            new BigDecimal("10"),
+                            at(-1),
+                            "MODULE_7_1_1_3",
+                            "MODULE-REF-1",
+                            null),
                         user)))
         .as("有出处单号的模块来源应当被接受")
         .isNotNull();
@@ -1190,8 +1485,16 @@ class WarehouseAllocationIntegrationTest {
                     () ->
                         service.saveShippingEstimate(
                             new WarehouseAllocationShippingInput(
-                                "WH-CN-SH", "SKU-2", "US", new BigDecimal("1.0"), null,
-                                "MODULE_10_1_2_1", "", null, null, null),
+                                "WH-CN-SH",
+                                "SKU-2",
+                                "US",
+                                new BigDecimal("1.0"),
+                                null,
+                                "MODULE_10_1_2_1",
+                                "",
+                                null,
+                                null,
+                                null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("出处单号");
@@ -1205,7 +1508,13 @@ class WarehouseAllocationIntegrationTest {
                     () ->
                         service.saveStockEstimate(
                             new WarehouseAllocationStockInput(
-                                "WH-CN-SH", "SKU-3", new BigDecimal("-1"), at(-1), null, null, null),
+                                "WH-CN-SH",
+                                "SKU-3",
+                                new BigDecimal("-1"),
+                                at(-1),
+                                null,
+                                null,
+                                null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能为负");
@@ -1215,15 +1524,29 @@ class WarehouseAllocationIntegrationTest {
                     () ->
                         service.saveRule(
                             new WarehouseAllocationRuleInput(
-                                "RULE-BAD-POLICY", "非法策略", 60, "*", "US", "NOT_A_POLICY", null,
-                                new BigDecimal("0.25"), new BigDecimal("0.25"),
-                                new BigDecimal("0.15"), new BigDecimal("0.25"),
-                                new BigDecimal("0.10"), true, "NEUTRAL", null, null, null, null,
-                                null, null))))
+                                "RULE-BAD-POLICY",
+                                "非法策略",
+                                60,
+                                "*",
+                                "US",
+                                "NOT_A_POLICY",
+                                null,
+                                new BigDecimal("0.25"),
+                                new BigDecimal("0.25"),
+                                new BigDecimal("0.15"),
+                                new BigDecimal("0.25"),
+                                new BigDecimal("0.10"),
+                                true,
+                                "NEUTRAL",
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("未知的选仓策略");
-    assertThatThrownBy(
-            () -> asA(() -> service.allocate(decision("SO-Q0", "0", ENT_A, null), user)))
+    assertThatThrownBy(() -> asA(() -> service.allocate(decision("SO-Q0", "0", ENT_A, null), user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须大于 0");
   }
@@ -1336,7 +1659,8 @@ class WarehouseAllocationIntegrationTest {
     // 按发货仓筛：先从详情取出实际选中的仓，再拿它回筛，结果必须自洽。
     var decidedWarehouse =
         asA(() -> service.decision(allDecisions(0, 50).items().get(0).id()))
-            .decision().chosenWarehouseRef();
+            .decision()
+            .chosenWarehouseRef();
     var byWarehouse =
         asA(
             () ->
@@ -1365,8 +1689,9 @@ class WarehouseAllocationIntegrationTest {
   // ==========================================================================
   @Test
   void 端点经http可达且权限受控() throws Exception {
-    http.perform(get("/trade/fulfillment/allocation/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/allocation/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.crossServiceReadAvailable").value(false))
         .andExpect(jsonPath("$.reservesUpstreamStock").value(false))
@@ -1380,7 +1705,8 @@ class WarehouseAllocationIntegrationTest {
             post("/trade/fulfillment/allocation/allocations")
                 .header("Authorization", "Bearer read-only")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-RO","platformCode":"AMAZON","skuRef":"SKU-1","requestedQty":50,
                      "destinationCountryCode":"US","destinationRegionCode":"CN-EAST",
                      "orderLegalEntityCode":"CN-ENT-A"}"""))
@@ -1393,7 +1719,8 @@ class WarehouseAllocationIntegrationTest {
             post("/trade/fulfillment/allocation/simulations")
                 .header("Authorization", "Bearer tenant-a")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-HTTP-SIM","platformCode":"AMAZON","skuRef":"SKU-1",
                      "requestedQty":50,"destinationCountryCode":"US",
                      "destinationRegionCode":"CN-EAST","orderLegalEntityCode":"CN-ENT-A"}"""))
@@ -1406,7 +1733,8 @@ class WarehouseAllocationIntegrationTest {
             post("/trade/fulfillment/allocation/allocations")
                 .header("Authorization", "Bearer tenant-a")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-HTTP-HOLD","platformCode":"AMAZON","skuRef":"SKU-1",
                      "requestedQty":50,"destinationCountryCode":"US",
                      "destinationRegionCode":"CN-EAST","orderLegalEntityCode":"CN-ENT-ZZZ"}"""))
@@ -1431,10 +1759,14 @@ class WarehouseAllocationIntegrationTest {
                 service.pageDecisions(
                     new WarehouseAllocationDecisionQuery(
                         null, null, null, null, null, null, null, null, 0, 50)));
-    assertThat(pageA.items()).extracting(WarehouseAllocationDecisionRow::orderRef)
-        .contains("SO-A-ONLY").doesNotContain("SO-B-ONLY");
-    assertThat(pageB.items()).extracting(WarehouseAllocationDecisionRow::orderRef)
-        .contains("SO-B-ONLY").doesNotContain("SO-A-ONLY");
+    assertThat(pageA.items())
+        .extracting(WarehouseAllocationDecisionRow::orderRef)
+        .contains("SO-A-ONLY")
+        .doesNotContain("SO-B-ONLY");
+    assertThat(pageB.items())
+        .extracting(WarehouseAllocationDecisionRow::orderRef)
+        .contains("SO-B-ONLY")
+        .doesNotContain("SO-A-ONLY");
 
     // 更强的一格：按 id 直查对方的分配也拿不到（不只是列表过滤）
     assertThatThrownBy(() -> asA(() -> service.decision(savedB.decisionId())))
@@ -1448,13 +1780,11 @@ class WarehouseAllocationIntegrationTest {
     var holdsA =
         asA(
             () ->
-                service.pageHolds(
-                    new WarehouseAllocationHoldQuery(null, null, null, null, 0, 50)));
+                service.pageHolds(new WarehouseAllocationHoldQuery(null, null, null, null, 0, 50)));
     var holdsB =
         asB(
             () ->
-                service.pageHolds(
-                    new WarehouseAllocationHoldQuery(null, null, null, null, 0, 50)));
+                service.pageHolds(new WarehouseAllocationHoldQuery(null, null, null, null, 0, 50)));
     assertThat(holdsA.total()).isEqualTo(1);
     assertThat(holdsB.total()).isZero();
 
@@ -1517,7 +1847,8 @@ class WarehouseAllocationIntegrationTest {
                 .header("Authorization", "Bearer tenant-b")
                 .header("X-Tenant-Id", a)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-FAKE-WRITE","platformCode":"AMAZON","skuRef":"SKU-1",
                      "requestedQty":50,"destinationCountryCode":"US",
                      "destinationRegionCode":"CN-EAST","orderLegalEntityCode":"CN-ENT-A"}"""))
@@ -1538,7 +1869,8 @@ class WarehouseAllocationIntegrationTest {
     assertThat(inB.total()).isEqualTo(1);
 
     // (2) 提交后租户上下文必须已清空。
-    assertThat(sql.fetch("select id from fulfillment_warehouse_allocation_decision").size()).isZero();
+    assertThat(sql.fetch("select id from fulfillment_warehouse_allocation_decision").size())
+        .isZero();
   }
 
   // ==========================================================================
@@ -1557,8 +1889,10 @@ class WarehouseAllocationIntegrationTest {
                   service.pageDecisions(
                       new WarehouseAllocationDecisionQuery(
                           null, null, null, null, null, null, null, null, 0, 50)));
-      assertThat(pageA.items()).extracting(WarehouseAllocationDecisionRow::orderRef)
-          .as("第 %d 轮 A", i).containsExactly("SO-POOL");
+      assertThat(pageA.items())
+          .extracting(WarehouseAllocationDecisionRow::orderRef)
+          .as("第 %d 轮 A", i)
+          .containsExactly("SO-POOL");
       assertThat(pageB.total()).as("第 %d 轮 B", i).isZero();
       assertThat(sql.fetch("select id from fulfillment_warehouse_allocation_decision").size())
           .as("第 %d 轮事务外", i)
@@ -1566,11 +1900,10 @@ class WarehouseAllocationIntegrationTest {
     }
     // 归还后再单独借一次，仍然干净。
     assertThat(
-            asB(
-                    () ->
-                        service.pageDecisions(
-                            new WarehouseAllocationDecisionQuery(
-                                null, null, null, null, null, null, null, null, 0, 50)))
+            asB(() ->
+                    service.pageDecisions(
+                        new WarehouseAllocationDecisionQuery(
+                            null, null, null, null, null, null, null, null, 0, 50)))
                 .total())
         .isZero();
     assertThat(allDecisions(0, 50).total()).isEqualTo(1);

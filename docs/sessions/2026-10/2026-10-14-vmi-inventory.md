@@ -113,14 +113,14 @@ SKU×仓×法人×质量只有一行余额，货主差异落在 bucket 上。这
 
 ## 验证
 
-| 闸 | 命令 | 结果 |
-| --- | --- | --- |
-| L0 编译 | `cd backend && ./mvnw -q compile` | 绿 |
-| L1 模块 | `cd backend && ./mvnw -pl services/warehouse -am test` | **1308 例全绿**（含 VMI 27 例） |
-| 类型 | `pnpm typecheck` | 绿 |
-| Lint | `pnpm lint` | 绿 |
-| 前端 | `pnpm vitest run <vmi-model.test.ts> <warehouse route.test.ts>` | 54 例绿（23 + 31） |
-| 台账 | `node tools/module-progress/sync.mjs --check` | 通过 |
+| 闸      | 命令                                                            | 结果                            |
+| ------- | --------------------------------------------------------------- | ------------------------------- |
+| L0 编译 | `cd backend && ./mvnw -q compile`                               | 绿                              |
+| L1 模块 | `cd backend && ./mvnw -pl services/warehouse -am test`          | **1308 例全绿**（含 VMI 27 例） |
+| 类型    | `pnpm typecheck`                                                | 绿                              |
+| Lint    | `pnpm lint`                                                     | 绿                              |
+| 前端    | `pnpm vitest run <vmi-model.test.ts> <warehouse route.test.ts>` | 54 例绿（23 + 31）              |
+| 台账    | `node tools/module-progress/sync.mjs --check`                   | 通过                            |
 
 契约 codegen：warehouse **+23 路径 / +32 schema / 消失 0 / 既有 schema 内容变化 0**，
 identity/catalog/channel/trade/crm 五份快照零漂移。

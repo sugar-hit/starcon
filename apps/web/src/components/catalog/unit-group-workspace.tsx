@@ -124,9 +124,10 @@ export function UnitGroupWorkspace() {
   const [detailError, setDetailError] = useState('');
   const [editing, setEditing] = useState<GroupDraft | 'new' | null>(null);
   const [conversionDraft, setConversionDraft] = useState<GroupConversionDraft | null>(null);
-  const [unitEditing, setUnitEditing] = useState<
-    { id: string | null; draft: Partial<UnitOfMeasure> & { code: string; name: string } } | null
-  >(null);
+  const [unitEditing, setUnitEditing] = useState<{
+    id: string | null;
+    draft: Partial<UnitOfMeasure> & { code: string; name: string };
+  } | null>(null);
 
   const [convert, setConvert] = useState<ConvertDraft>(emptyConvertDraft());
   const [convertResult, setConvertResult] = useState<UnitGroupConvertResult | null>(null);
@@ -169,7 +170,9 @@ export function UnitGroupWorkspace() {
       setDetail(await fetchGroup(groupId, ''));
     } catch (e) {
       // 404 是"这条被别人删了"而不是页面坏了，单独说，别让整页变成"加载失败"。
-      setDetailError(isNotFound(e) ? '这个单位组已被删除，请刷新列表。' : errorText(e, '单位组加载失败'));
+      setDetailError(
+        isNotFound(e) ? '这个单位组已被删除，请刷新列表。' : errorText(e, '单位组加载失败'),
+      );
     } finally {
       setDetailLoading(false);
     }
@@ -213,7 +216,10 @@ export function UnitGroupWorkspace() {
   const rows = page?.items ?? [];
   const lastPage = Math.max(0, Math.ceil((page?.total ?? 0) / PAGE_SIZE) - 1);
   const selectable = useMemo(
-    () => units.filter((unit) => unit.enabled).sort((l, r) => l.dimension.localeCompare(r.dimension) || l.code.localeCompare(r.code)),
+    () =>
+      units
+        .filter((unit) => unit.enabled)
+        .sort((l, r) => l.dimension.localeCompare(r.dimension) || l.code.localeCompare(r.code)),
     [units],
   );
   // 编辑时的候选成员：只列**同量纲且启用**的单位。
@@ -254,7 +260,11 @@ export function UnitGroupWorkspace() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="单位总数" value={overview?.unitCount ?? 0} icon={<Scale className="h-4 w-4" />} />
+        <StatCard
+          label="单位总数"
+          value={overview?.unitCount ?? 0}
+          icon={<Scale className="h-4 w-4" />}
+        />
         <StatCard
           label="单位组"
           value={overview?.groupCount ?? 0}
@@ -357,7 +367,10 @@ export function UnitGroupWorkspace() {
             description="没有任何单位时，单位组无从建立（组内成员必须是已登记的单位）。先新建至少一个单位，例如「克」。"
             action={
               unitWritable ? (
-                <Button size="sm" onClick={() => setUnitEditing({ id: null, draft: { code: '', name: '' } })}>
+                <Button
+                  size="sm"
+                  onClick={() => setUnitEditing({ id: null, draft: { code: '', name: '' } })}
+                >
                   新建第一个单位
                 </Button>
               ) : undefined
@@ -449,8 +462,8 @@ export function UnitGroupWorkspace() {
               </tbody>
             </table>
             <p className="text-muted-foreground text-xs">
-              停用的单位不再出现在新建换算的候选里，但已配置的组内换算版本与 3.1.2.4 的单据快照照常可读——
-              停用是「不许再新建」，不是「抹掉过去」。
+              停用的单位不再出现在新建换算的候选里，但已配置的组内换算版本与 3.1.2.4
+              的单据快照照常可读—— 停用是「不许再新建」，不是「抹掉过去」。
             </p>
           </div>
         )}
@@ -547,7 +560,9 @@ export function UnitGroupWorkspace() {
                       <td className="py-2">
                         <div className="font-medium">{row.name}</div>
                         <div className="text-muted-foreground text-xs">{row.code}</div>
-                        {row.note && <div className="text-muted-foreground text-xs">{row.note}</div>}
+                        {row.note && (
+                          <div className="text-muted-foreground text-xs">{row.note}</div>
+                        )}
                       </td>
                       <td className="py-2">
                         <Badge tone="neutral">{row.dimensionLabel}</Badge>
@@ -601,7 +616,13 @@ export function UnitGroupWorkspace() {
                                 variant="ghost"
                                 size="sm"
                                 disabled={busy}
-                                onClick={() => void run(() => deleteGroup(row.id, row.version), '删除失败', '单位组已删除')}
+                                onClick={() =>
+                                  void run(
+                                    () => deleteGroup(row.id, row.version),
+                                    '删除失败',
+                                    '单位组已删除',
+                                  )
+                                }
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -615,7 +636,8 @@ export function UnitGroupWorkspace() {
               </table>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  第 {index + 1} / {lastPage + 1} 页，共 {page?.total ?? 0} 个组（启用 {page?.enabledCount ?? 0}）
+                  第 {index + 1} / {lastPage + 1} 页，共 {page?.total ?? 0} 个组（启用{' '}
+                  {page?.enabledCount ?? 0}）
                 </span>
                 <div className="flex gap-2">
                   <Button
@@ -664,7 +686,9 @@ export function UnitGroupWorkspace() {
           busy={busy}
           onClose={() => setDetail(null)}
           onEdit={() => setEditing(groupDraft(detail))}
-          onAddConversion={() => setConversionDraft(emptyGroupConversionDraft(detail.group.baseUnitCode))}
+          onAddConversion={() =>
+            setConversionDraft(emptyGroupConversionDraft(detail.group.baseUnitCode))
+          }
           onDeleteConversion={(id) =>
             void run(
               () => deleteConversion(detail.group.id, id),
@@ -807,9 +831,7 @@ export function UnitGroupWorkspace() {
                   enabled: input.enabled,
                   version: input.version ?? 0,
                 };
-                return unitEditing.id
-                  ? updateUnit(unitEditing.id, body)
-                  : createUnit(body);
+                return unitEditing.id ? updateUnit(unitEditing.id, body) : createUnit(body);
               },
               '单位保存失败',
               unitEditing.id ? '单位已保存' : '单位已创建',
@@ -853,8 +875,8 @@ function ConvertResultPanel({ result }: { result: UnitGroupConvertResult }) {
       </p>
       <p className="text-muted-foreground text-xs">{result.note}</p>
       <p className="text-muted-foreground text-xs">
-        基准日 {result.asOf}；基准单位 {result.baseUnitCode}；源比例 {result.fromQuantityPerBase}，目标比例{' '}
-        {result.toQuantityPerBase}
+        基准日 {result.asOf}；基准单位 {result.baseUnitCode}；源比例 {result.fromQuantityPerBase}
+        ，目标比例 {result.toQuantityPerBase}
       </p>
     </div>
   );
@@ -1026,8 +1048,7 @@ function GroupEditor({
       return {
         ...current,
         members: members.map((member, index) => ({ ...member, position: index })),
-        baseUnitCode:
-          exists && current.baseUnitCode === unitCode ? '' : current.baseUnitCode,
+        baseUnitCode: exists && current.baseUnitCode === unitCode ? '' : current.baseUnitCode,
       };
     });
   }
@@ -1104,18 +1125,13 @@ function GroupEditor({
             )}
             {/* 已选但被停用 / 量纲不符的单位仍要显示，否则编辑时它们会凭空消失。 */}
             {draft.members
-              .filter(
-                (member) =>
-                  !candidates.some((unit) => unit.code === member.unitCode),
-              )
+              .filter((member) => !candidates.some((unit) => unit.code === member.unitCode))
               .map((member) => (
                 <label key={member.unitCode} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked
-                    onChange={() => toggleUnit(member.unitCode)}
-                  />
-                  <span className="text-muted-foreground">{member.unitCode}（已停用或不属于本量纲）</span>
+                  <input type="checkbox" checked onChange={() => toggleUnit(member.unitCode)} />
+                  <span className="text-muted-foreground">
+                    {member.unitCode}（已停用或不属于本量纲）
+                  </span>
                 </label>
               ))}
           </div>
@@ -1215,7 +1231,10 @@ function GroupConversionEditor({
                 ))}
             </select>
           </Field>
-          <Field label="比例" hint="1 个该单位 = 多少个组基础单位（组基础单位为克时，1 千克 → 1000）">
+          <Field
+            label="比例"
+            hint="1 个该单位 = 多少个组基础单位（组基础单位为克时，1 千克 → 1000）"
+          >
             <input
               className={control}
               value={draft.quantityPerBase}
@@ -1259,11 +1278,7 @@ function GroupConversionEditor({
           <Button variant="outline" size="sm" onClick={close}>
             取消
           </Button>
-          <Button
-            size="sm"
-            disabled={busy || problems.length > 0}
-            onClick={() => void save(draft)}
-          >
+          <Button size="sm" disabled={busy || problems.length > 0} onClick={() => void save(draft)}>
             <Save className="h-4 w-4" />
             保存
           </Button>
@@ -1308,7 +1323,10 @@ function UnitEditor({
   });
   const isNew = unit.id === null;
   const problems: string[] = [];
-  if (isNew && !/^[\p{Script=Han}A-Za-z0-9][\p{Script=Han}A-Za-z0-9_-]{0,31}$/u.test(draft.code.trim()))
+  if (
+    isNew &&
+    !/^[\p{Script=Han}A-Za-z0-9][\p{Script=Han}A-Za-z0-9_-]{0,31}$/u.test(draft.code.trim())
+  )
     problems.push('单位编码只能使用中文、英文字母、数字、下划线或短横线，长度 1~32 位');
   if (!draft.name.trim()) problems.push('单位名称不能为空');
   const scaleNumber = Number(draft.scale);

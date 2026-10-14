@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 6.4.1.1 加工单的仓库侧消费入口（组件出库 + 成品入库）。
  *
- * <p>命名空间 {@code /warehouse/processing-orders}：卷 06 的前端路由是
- * {@code /purchase/processing}，但**后端路径按服务命名空间走**
- * （与 8.2.1.2 收货差异走 {@code /warehouse/goods-receipt-discrepancies} 同一纪律）。
+ * <p>命名空间 {@code /warehouse/processing-orders}：卷 06 的前端路由是 {@code
+ * /purchase/processing}，但**后端路径按服务命名空间走** （与 8.2.1.2 收货差异走 {@code
+ * /warehouse/goods-receipt-discrepancies} 同一纪律）。
  *
- * <p><b>为什么入库动作在 warehouse 而不是 trade</b>：蓝图 6.4.1.1 关系段写死
- * 「加工是『消耗组件产生成品』的库存动作，必须在 warehouse 本地事务完成，
- * 不能由 trade 直接改库存」。trade 拥有加工单据（V97），
- * 库存动作归本服务 —— 两个服务各有独立数据库，不跨库读写。
+ * <p><b>为什么入库动作在 warehouse 而不是 trade</b>：蓝图 6.4.1.1 关系段写死 「加工是『消耗组件产生成品』的库存动作，必须在 warehouse 本地事务完成，
+ * 不能由 trade 直接改库存」。trade 拥有加工单据（V97）， 库存动作归本服务 —— 两个服务各有独立数据库，不跨库读写。
  *
  * <p>权限码用 {@code warehouse.processing.read} / {@code warehouse.processing.update}：
  * 这个动作会真的扣掉组件库存并增加成品库存，不是读权限能带过去的。
@@ -49,8 +47,7 @@ public class ProcessingOrderController {
   /**
    * 能力声明：库存动作归属、上游可用性与未交付下游。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来，
-   * 而不是让调用方从 404 或空数组里猜。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来， 而不是让调用方从 404 或空数组里猜。
    */
   @GetMapping("/capabilities")
   public ProcessingStockCapabilities capabilities(
@@ -68,9 +65,8 @@ public class ProcessingOrderController {
   /**
    * 执行加工单：组件出库 + 成品入库，**一个本地事务**。
    *
-   * <p>任一环节失败（组件不足 / 库位不存在 / 重复投递）整体回滚，
-   * 不会留下「组件扣了成品没进」或反之的半截状态。
-   * 同一张加工单重复投递靠 {@code UNIQUE(tenant_id,ref_type,ref_id)} 去重（409）。
+   * <p>任一环节失败（组件不足 / 库位不存在 / 重复投递）整体回滚， 不会留下「组件扣了成品没进」或反之的半截状态。 同一张加工单重复投递靠 {@code
+   * UNIQUE(tenant_id,ref_type,ref_id)} 去重（409）。
    */
   @PostMapping("/issues")
   public ProcessingOrderIssueSaved issue(
@@ -82,8 +78,7 @@ public class ProcessingOrderController {
   /**
    * 加工单在仓库的执行记录（真分页 + 全量汇总）。
    *
-   * <p>这是「组件出库与成品入库到底记在哪」的查询出口：
-   * 一次执行 = 一条 {@code inventory_transaction} + N 条带符号分录。
+   * <p>这是「组件出库与成品入库到底记在哪」的查询出口： 一次执行 = 一条 {@code inventory_transaction} + N 条带符号分录。
    */
   @GetMapping("/executions")
   public ProcessingStockPage executions(
@@ -92,8 +87,6 @@ public class ProcessingOrderController {
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
     return call(
-        auth,
-        "processing.read",
-        a -> processing.pageExecutions(processingOrderId, page, size));
+        auth, "processing.read", a -> processing.pageExecutions(processingOrderId, page, size));
   }
 }

@@ -77,6 +77,7 @@ V29 的触发器是 `prevalidated_at IS NULL` 才写那列，重跑预校验不�
 ## 文件清单
 
 后端（新增）
+
 - `backend/services/catalog/src/main/resources/db/migration/V34__import_validation_report.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ImportValidationRules.java`（纯函数）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ImportValidationModels.java`
@@ -86,16 +87,19 @@ V29 的触发器是 `prevalidated_at IS NULL` 才写那列，重跑预校验不�
 - `backend/services/catalog/src/test/java/com/starcon/catalog/ImportValidationReportIntegrationTest.java`
 
 前端（新增）
+
 - `apps/web/src/components/catalog/validation-report-model.ts`
 - `apps/web/src/components/catalog/validation-report-model.test.ts`
 - `apps/web/src/components/catalog/validation-report-workspace.tsx`
 - `apps/web/src/app/products/import/report/page.tsx`
 
 前端（改动）
+
 - `apps/web/src/lib/api-proxy.ts`（仅 `import-jobs/{id}/` 段加 `report` 子段 + 注释）
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（追加三组断言）
 
 生成物 / 台账
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`（codegen，未手改）
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.8.1.2 那一行的状态与证据）
 

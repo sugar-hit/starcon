@@ -19,46 +19,38 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.7.2.1 VMI 供应商管理库存：VMI 协议 → 水位监控 → 补货信号 → 售出事实 → 结算对账单。
  *
- * <p>蓝图原话：「支持供应商管理库存（VMI）：货权属供应商、我方享有可销售权，按约定补货或由系统触发
- * 供应商备货；记录安全水位与补货信号，售出后与供应商对账结算。」
+ * <p>蓝图原话：「支持供应商管理库存（VMI）：货权属供应商、我方享有可销售权，按约定补货或由系统触发 供应商备货；记录安全水位与补货信号，售出后与供应商对账结算。」
  *
- * <p><b>本模块唯一不可让步的口径：可售 ≠ 自有。</b>蓝图把它写成加粗约束
- * （「可售量要计入可售额，货值不能计入自有资产，两者必须分开统计」），
- * 07-inventory.md:24 也把它列为硬约束。它写在 V115 的四道数据库不变量里，不是这里的自觉：
+ * <p><b>本模块唯一不可让步的口径：可售 ≠ 自有。</b>蓝图把它写成加粗约束 （「可售量要计入可售额，货值不能计入自有资产，两者必须分开统计」）， 07-inventory.md:24
+ * 也把它列为硬约束。它写在 V115 的四道数据库不变量里，不是这里的自觉：
  *
  * <ol>
  *   <li>{@code vmi_agreement_line.counts_as_owned_asset} 恒 false（CHECK 写死）；
- *   <li>协议行引用的 {@code stock_owner_id}（7.7.1.1 的货主档案）**不许**是
- *       {@code counts_as_owned_asset=true} 的那一种 —— 触发器 {@code vmi_line_owner_not_owned} 拒绝，
- *       反向的 {@code vmi_line_owner_still_not_owned} 也挡住「事后把货主改成 SELF」；
+ *   <li>协议行引用的 {@code stock_owner_id}（7.7.1.1 的货主档案）**不许**是 {@code counts_as_owned_asset=true} 的那一种
+ *       —— 触发器 {@code vmi_line_owner_not_owned} 拒绝， 反向的 {@code vmi_line_owner_still_not_owned}
+ *       也挡住「事后把货主改成 SELF」；
  *   <li>明细表里**没有第二个金额列**，能算出来的只有「可售额」；
- *   <li>{@code ownedAssetValue} 恒为 {@code null}：数据库里就不存在「VMI 自有货值」这个数。
- *       如实报 null 而不是 0 —— 给 0 会被读成「这些货值 0 元」，那是谎报。
+ *   <li>{@code ownedAssetValue} 恒为 {@code null}：数据库里就不存在「VMI 自有货值」这个数。 如实报 null 而不是 0 —— 给 0
+ *       会被读成「这些货值 0 元」，那是谎报。
  * </ol>
  *
- * <p><b>「可售」这一侧是真的</b>：VMI 货在 {@code stock_bucket} 里占着真实在手与可用量，
- * 按 7.1.1.3 的口径（SELLABLE 质量状态）参与可售额统计。取数顺序是
- * <b>先查我方账本（WAREHOUSE_BUCKET），账本没有再回落租户登记的观测</b> ——
- * VMI 货常常物理上就在供应商自己的仓，那种情况下我方压根没有桶，
- * 这不是数据缺失而是一种真实经营形态，所以才有 {@code vmi_stock_snapshot} 且来源必填。
- * 每行都带 {@code stockSource}，前端照实显示「这行是系统算的还是租户报上来的」。
+ * <p><b>「可售」这一侧是真的</b>：VMI 货在 {@code stock_bucket} 里占着真实在手与可用量， 按 7.1.1.3 的口径（SELLABLE
+ * 质量状态）参与可售额统计。取数顺序是 <b>先查我方账本（WAREHOUSE_BUCKET），账本没有再回落租户登记的观测</b> —— VMI
+ * 货常常物理上就在供应商自己的仓，那种情况下我方压根没有桶， 这不是数据缺失而是一种真实经营形态，所以才有 {@code vmi_stock_snapshot} 且来源必填。 每行都带
+ * {@code stockSource}，前端照实显示「这行是系统算的还是租户报上来的」。
  *
- * <p><b>货权复用 7.7.1.1（V67）已交付的 {@code stock_owner}</b>，本模块不 ALTER
- * {@code stock_bucket} / {@code inventory_balance}，也不复制货主权威列。
+ * <p><b>货权复用 7.7.1.1（V67）已交付的 {@code stock_owner}</b>，本模块不 ALTER {@code stock_bucket} / {@code
+ * inventory_balance}，也不复制货主权威列。
  *
- * <p><b>上游缺口显式报出而不是猜</b>：13 销量 / 9 订单未交付 → 售出事实自落地 {@code vmi_sale}
- * （以 {@code (协议行, saleRef)} 幂等并标 {@code sourceSystem}）；
- * 6 采购 / 12 结算未交付 → 补货信号与对账单只出本服务内单据并留
- * {@code source_system + reference_id} 定位键，不跨库写、不建跨服务 FK、不查对方表。
- * 未接入的每一环都在 {@code /capabilities} 的 {@code unavailable} 里点名模块与原因。
+ * <p><b>上游缺口显式报出而不是猜</b>：13 销量 / 9 订单未交付 → 售出事实自落地 {@code vmi_sale} （以 {@code (协议行, saleRef)} 幂等并标
+ * {@code sourceSystem}）； 6 采购 / 12 结算未交付 → 补货信号与对账单只出本服务内单据并留 {@code source_system + reference_id}
+ * 定位键，不跨库写、不建跨服务 FK、不查对方表。 未接入的每一环都在 {@code /capabilities} 的 {@code unavailable} 里点名模块与原因。
  *
- * <p><b>结算口径</b>：数量 numeric(19,6)、结算价 numeric(19,4)、明细金额 numeric(24,4)
- * 生成列；**单据级应付 HALF_UP 到分 numeric(24,2)**，由 DB 触发器按
- * {@code round(Σ明细金额, 2)} 重算，与服务层 {@code setScale(2, HALF_UP)} 同口径。
+ * <p><b>结算口径</b>：数量 numeric(19,6)、结算价 numeric(19,4)、明细金额 numeric(24,4) 生成列；**单据级应付 HALF_UP 到分
+ * numeric(24,2)**，由 DB 触发器按 {@code round(Σ明细金额, 2)} 重算，与服务层 {@code setScale(2, HALF_UP)} 同口径。
  *
- * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里，
- * 后面全是普通绑定，cast 永远不在绑定序列末位。写入用 {@link OffsetDateTime} 绑定，
- * 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
+ * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里， 后面全是普通绑定，cast 永远不在绑定序列末位。写入用
+ * {@link OffsetDateTime} 绑定， 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
  */
 @Service
 public class VmiService {
@@ -125,15 +117,13 @@ public class VmiService {
               "13 销售分析（实时销量）",
               "13.1.1.1",
               "analytics",
-              "尚未交付。本模块的销量口径只来自本服务自落地的 vmi_sale 售出事实，"
-                  + "不是完整的多平台销量；日均销量口径因此只在自落地事实覆盖的范围内成立。",
+              "尚未交付。本模块的销量口径只来自本服务自落地的 vmi_sale 售出事实，" + "不是完整的多平台销量；日均销量口径因此只在自落地事实覆盖的范围内成立。",
               "两者交付后由 13 推 vmi_sale，或由本模块改读 13 的授权 API"),
           new VmiUnavailableCapability(
               "6.2.1.2 采购备货",
               "6.2.1.2",
               "trade",
-              "尚未交付。补货信号只在本服务内出单并写 source_system + reference_id 交接键，"
-                  + "不代 6 采购建备货单。",
+              "尚未交付。补货信号只在本服务内出单并写 source_system + reference_id 交接键，" + "不代 6 采购建备货单。",
               "6 采购交付后按 (source_system, reference_id) 读回信号单"),
           new VmiUnavailableCapability(
               "12 结算 / 应付",
@@ -165,21 +155,26 @@ public class VmiService {
 
   /** VMI 能力说明：前端据此渲染选项与提示，并把未接入的环节讲清楚。 */
   public VmiCapabilities capabilities() {
-    var modes = List.of(VmiReplenishmentMode.values()).stream()
-        .map(m -> new VmiOption(m.name(), m.label(), m.description()))
-        .toList();
-    var targets = List.of(VmiSignalTarget.values()).stream()
-        .map(t -> new VmiOption(t.name(), t.label(), t.description()))
-        .toList();
-    var cycles = List.of(VmiSettlementCycle.values()).stream()
-        .map(c -> new VmiOption(c.name(), c.label(), c.description()))
-        .toList();
-    var reasons = List.of(VmiSignalTriggerReason.values()).stream()
-        .map(r -> new VmiOption(r.name(), r.label(), r.description()))
-        .toList();
-    var sources = List.of(VmiStockSource.values()).stream()
-        .map(s -> new VmiOption(s.name(), s.label(), s.description()))
-        .toList();
+    var modes =
+        List.of(VmiReplenishmentMode.values()).stream()
+            .map(m -> new VmiOption(m.name(), m.label(), m.description()))
+            .toList();
+    var targets =
+        List.of(VmiSignalTarget.values()).stream()
+            .map(t -> new VmiOption(t.name(), t.label(), t.description()))
+            .toList();
+    var cycles =
+        List.of(VmiSettlementCycle.values()).stream()
+            .map(c -> new VmiOption(c.name(), c.label(), c.description()))
+            .toList();
+    var reasons =
+        List.of(VmiSignalTriggerReason.values()).stream()
+            .map(r -> new VmiOption(r.name(), r.label(), r.description()))
+            .toList();
+    var sources =
+        List.of(VmiStockSource.values()).stream()
+            .map(s -> new VmiOption(s.name(), s.label(), s.description()))
+            .toList();
     return new VmiCapabilities(
         modes,
         targets,
@@ -211,12 +206,13 @@ public class VmiService {
     }
     String cycle = requireEnum(input.settlementCycle(), VmiSettlementCycle.class, "结算周期");
     String mode = requireEnum(input.replenishmentMode(), VmiReplenishmentMode.class, "补货模式");
-    String target = "VENDOR_OWN".equals(mode)
-        ? "SUPPLIER"
-        : requireEnum(
-            input.signalTarget() == null ? "SUPPLIER" : input.signalTarget(),
-            VmiSignalTarget.class,
-            "信号去向");
+    String target =
+        "VENDOR_OWN".equals(mode)
+            ? "SUPPLIER"
+            : requireEnum(
+                input.signalTarget() == null ? "SUPPLIER" : input.signalTarget(),
+                VmiSignalTarget.class,
+                "信号去向");
     String currency = requireCurrency(input.currency());
     if (input.supplierPartyId() == null) {
       throw bad("必须指定 VMI 货的货主（供应商）supplierPartyId：VMI 的货属供应商，不是本租户。");
@@ -237,9 +233,21 @@ public class VmiService {
             + "supplier_name,legal_entity_id,currency,settlement_cycle,replenishment_mode,"
             + "signal_target,start_date,end_date,status,note,created_by_user_id) "
             + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,'DRAFT',?,?)",
-        id, tenant, nextCode("VMI"), input.supplierPartyId(), input.supplierCode().trim(),
-        input.supplierName().trim(), input.legalEntityId(), currency, cycle, mode, target,
-        input.startDate(), input.endDate(), nz(input.note()), actorId);
+        id,
+        tenant,
+        nextCode("VMI"),
+        input.supplierPartyId(),
+        input.supplierCode().trim(),
+        input.supplierName().trim(),
+        input.legalEntityId(),
+        currency,
+        cycle,
+        mode,
+        target,
+        input.startDate(),
+        input.endDate(),
+        nz(input.note()),
+        actorId);
 
     for (var line : input.lines()) {
       insertLine(tenant, id, line);
@@ -266,7 +274,8 @@ public class VmiService {
       binds.add(replenishmentMode.trim().toUpperCase(Locale.ROOT));
     }
     if (notBlank(keyword)) {
-      where.add("(a.agreement_code ilike ? or a.supplier_code ilike ? or a.supplier_name ilike ? or a.note ilike ?)");
+      where.add(
+          "(a.agreement_code ilike ? or a.supplier_code ilike ? or a.supplier_name ilike ? or a.note ilike ?)");
       String k = "%" + keyword.trim() + "%";
       binds.add(k);
       binds.add(k);
@@ -279,7 +288,10 @@ public class VmiService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + sqlWhere
+            AGREEMENT_COLUMNS
+                + " from "
+                + AGREEMENT_FROM
+                + sqlWhere
                 + " order by a.created_at desc, a.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new VmiAgreementPage(
@@ -297,14 +309,22 @@ public class VmiService {
     var tenant = tenant();
     var head = requireHead(tenant, agreementId);
     if (!"DRAFT".equals(head.get("status", String.class))) {
-      throw conflict("只有草稿协议能加行；当前状态 " + head.get("status", String.class)
-          + "。已在跑的协议要改水位或结算价请新建协议，否则中途改价会让已出对账单与协议对不上。");
+      throw conflict(
+          "只有草稿协议能加行；当前状态 "
+              + head.get("status", String.class)
+              + "。已在跑的协议要改水位或结算价请新建协议，否则中途改价会让已出对账单与协议对不上。");
     }
     insertLine(
-        tenant, agreementId,
+        tenant,
+        agreementId,
         new VmiLineInput(
-            input.skuId(), input.warehouseId(), input.stockOwnerId(), input.safetyLevel(),
-            input.replenishmentMultiple(), input.settlementPrice(), input.suppliedQuantity(),
+            input.skuId(),
+            input.warehouseId(),
+            input.stockOwnerId(),
+            input.safetyLevel(),
+            input.replenishmentMultiple(),
+            input.settlementPrice(),
+            input.suppliedQuantity(),
             input.onHandQuantity()));
     audit(tenant, agreementId, "LINE_ADDED", "新增 VMI 明细行", actorId);
     return detail(agreementId);
@@ -333,7 +353,12 @@ public class VmiService {
             "update vmi_agreement set status='CLOSED', closed_at=?::timestamptz,"
                 + " closed_by_user_id=?, note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
                 + " where tenant_id=? and id=? and status in ('ACTIVE','SUSPENDED')",
-            now, actorId, note(input), now, tenant, agreementId);
+            now,
+            actorId,
+            note(input),
+            now,
+            tenant,
+            agreementId);
     if (changed == 0) {
       throw conflict("只有生效中或已暂停的协议能关闭（草稿请直接删掉重建）。");
     }
@@ -352,7 +377,14 @@ public class VmiService {
             + " activated_by_user_id=coalesce(activated_by_user_id,?::uuid),"
             + " note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status=?",
-        to, now, actorId, note(input), now, tenant, agreementId, from);
+        to,
+        now,
+        actorId,
+        note(input),
+        now,
+        tenant,
+        agreementId,
+        from);
     audit(tenant, agreementId, event, "协议状态 " + from + " → " + to, actorId);
     return single(agreementId);
   }
@@ -360,8 +392,10 @@ public class VmiService {
   private VmiAgreement single(UUID agreementId) {
     var tenant = tenant();
     var row =
-        sql.fetchOne(AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
-            tenant, agreementId);
+        sql.fetchOne(
+            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
+            tenant,
+            agreementId);
     if (row == null) {
       throw notFound("VMI 协议", agreementId);
     }
@@ -373,9 +407,8 @@ public class VmiService {
   /**
    * VMI 水位监控（蓝图输出「VMI 水位监控与补货信号」的前半句）。
    *
-   * <p>两段口径**并排返回、绝不相加**：{@code ownershipSplit} 是 VMI 货（可售额计入、
-   * 自有货值恒 null），{@code selfOwnedSplit} 是同一批 SKU 在我方自有货主下的量。
-   * 「分开统计」要能被人验证，只报 VMI 的数，读者无从判断我们有没有把 VMI 的量混进自有。
+   * <p>两段口径**并排返回、绝不相加**：{@code ownershipSplit} 是 VMI 货（可售额计入、 自有货值恒 null），{@code selfOwnedSplit}
+   * 是同一批 SKU 在我方自有货主下的量。 「分开统计」要能被人验证，只报 VMI 的数，读者无从判断我们有没有把 VMI 的量混进自有。
    */
   public VmiWaterLevelMonitor waterLevelMonitor(UUID agreementId) {
     var tenant = tenant();
@@ -402,10 +435,11 @@ public class VmiService {
     }
     var openSignals =
         sql.fetchOne(
-            "select count(*) from vmi_replenishment_signal s"
-                + " join vmi_agreement_line l on l.tenant_id = s.tenant_id and l.id = s.agreement_line_id"
-                + " where l.agreement_id = ? and s.tenant_id = ? and s.status in ('OPEN','ACKNOWLEDGED','DISPATCHED')",
-            agreementId, tenant)
+                "select count(*) from vmi_replenishment_signal s"
+                    + " join vmi_agreement_line l on l.tenant_id = s.tenant_id and l.id = s.agreement_line_id"
+                    + " where l.agreement_id = ? and s.tenant_id = ? and s.status in ('OPEN','ACKNOWLEDGED','DISPATCHED')",
+                agreementId,
+                tenant)
             .get(0, Long.class);
     var unsettled =
         sql.fetchOne(
@@ -416,7 +450,8 @@ public class VmiService {
                 + " where li.agreement_id = ? and sa.tenant_id = ?"
                 + " and not exists (select 1 from vmi_settlement_line sl"
                 + "                 where sl.tenant_id = sa.tenant_id and sl.sale_id = sa.id)",
-            agreementId, tenant);
+            agreementId,
+            tenant);
 
     var selfOwned = selfOwnedSplit(tenant, lines);
     BigDecimal sellableValue = ZERO;
@@ -449,8 +484,13 @@ public class VmiService {
         scale6(projected),
         openSignals,
         new VmiOwnershipSplit(
-            scale6(current), price(sellableValue), ZERO, null, false,
-            OWNED_ASSET_NOTE, SEPARATION_NOTE),
+            scale6(current),
+            price(sellableValue),
+            ZERO,
+            null,
+            false,
+            OWNED_ASSET_NOTE,
+            SEPARATION_NOTE),
         selfOwned,
         lines.stream().map(l -> line(tenant, l, true)).toList());
   }
@@ -458,8 +498,7 @@ public class VmiService {
   /**
    * 我方自有货的对照口径：同一批 SKU×仓 在 SELF 货主下的可售量。
    *
-   * <p>只统计 SELLABLE 质量状态的 bucket 可用量 —— 与 VMI 侧取的是同一个口径，
-   * 否则「并排对比」会因为口径不同而看起来 VMI 更少。
+   * <p>只统计 SELLABLE 质量状态的 bucket 可用量 —— 与 VMI 侧取的是同一个口径， 否则「并排对比」会因为口径不同而看起来 VMI 更少。
    */
   private VmiSelfOwnedSplit selfOwnedSplit(UUID tenant, List<org.jooq.Record> lines) {
     if (lines.isEmpty()) {
@@ -483,13 +522,14 @@ public class VmiService {
                 + "   and q.id = k.quality_status_id and q.role = 'SELLABLE'"
                 + " join stock_owner o on o.tenant_id = k.tenant_id and o.id = k.stock_owner_id"
                 + " where k.tenant_id = ? and o.owner_kind = 'SELF'"
-                + " and (" + String.join(" or ", ors) + ")",
+                + " and ("
+                + String.join(" or ", ors)
+                + ")",
             binds.toArray());
     return new VmiSelfOwnedSplit(
         scale6(row.get("qty", BigDecimal.class)),
         row.get("cnt", Long.class),
-        "同一批 SKU×仓 在我方自有货主（SELF）下的可售量，与 VMI 的可售量**并排展示、绝不相加**："
-            + "两者的货主不同，相加就等于把供应商的货算成我们的资产。");
+        "同一批 SKU×仓 在我方自有货主（SELF）下的可售量，与 VMI 的可售量**并排展示、绝不相加**：" + "两者的货主不同，相加就等于把供应商的货算成我们的资产。");
   }
 
   // ============================================================ 补货信号
@@ -497,12 +537,12 @@ public class VmiService {
   /**
    * 按协议批量出补货信号（蓝图输出「补货信号（推给供应商或 6.2.1.2 备货）」）。
    *
-   * <p>每行的去留都在结果里说清楚（{@code skippedReasons}）：已有一条未了结信号、水位健康、
-   * 协议是「供应商自行补货」三种情况都会跳过并给出原因 —— 跳过原因不报出来的话，
-   * 「我出了 0 张信号」会被读成「系统没发现问题」。
+   * <p>每行的去留都在结果里说清楚（{@code skippedReasons}）：已有一条未了结信号、水位健康、 协议是「供应商自行补货」三种情况都会跳过并给出原因 ——
+   * 跳过原因不报出来的话， 「我出了 0 张信号」会被读成「系统没发现问题」。
    */
   @Transactional
-  public VmiSignalBatchResult generateSignals(UUID agreementId, VmiSignalInput input, UUID actorId) {
+  public VmiSignalBatchResult generateSignals(
+      UUID agreementId, VmiSignalInput input, UUID actorId) {
     var tenant = tenant();
     var head = requireHead(tenant, agreementId);
     if (!"ACTIVE".equals(head.get("status", String.class))) {
@@ -524,9 +564,7 @@ public class VmiService {
         continue;
       }
       if ("VENDOR_OWN".equals(mode)) {
-        reasons.add(
-            "SKU " + l.get("sku_code", String.class)
-                + "：协议是「供应商自行补货」，本系统只监控水位、不出信号。");
+        reasons.add("SKU " + l.get("sku_code", String.class) + "：协议是「供应商自行补货」，本系统只监控水位、不出信号。");
         continue;
       }
       var open =
@@ -534,12 +572,16 @@ public class VmiService {
               "select signal_code from vmi_replenishment_signal"
                   + " where tenant_id=? and agreement_line_id=?"
                   + " and status in ('OPEN','ACKNOWLEDGED','DISPATCHED')",
-              tenant, l.get("id", UUID.class));
+              tenant,
+              l.get("id", UUID.class));
       if (open != null) {
         skippedOpen++;
         reasons.add(
-            "SKU " + l.get("sku_code", String.class) + "：已有一条未了结的信号 "
-                + open.get("signal_code", String.class) + "，不重复出单。");
+            "SKU "
+                + l.get("sku_code", String.class)
+                + "：已有一条未了结的信号 "
+                + open.get("signal_code", String.class)
+                + "，不重复出单。");
         continue;
       }
       var stock = currentStock(tenant, l);
@@ -547,9 +589,13 @@ public class VmiService {
       if (calc.status().equals("HEALTHY")) {
         skippedHealthy++;
         reasons.add(
-            "SKU " + l.get("sku_code", String.class) + "：水位健康（当前 "
-                + scale6(stock.quantity()).toPlainString() + " ≥ 缓冲线 "
-                + calc.bufferLine().toPlainString() + "），无需补货。");
+            "SKU "
+                + l.get("sku_code", String.class)
+                + "：水位健康（当前 "
+                + scale6(stock.quantity()).toPlainString()
+                + " ≥ 缓冲线 "
+                + calc.bufferLine().toPlainString()
+                + "），无需补货。");
         continue;
       }
       UUID id = UUID.randomUUID();
@@ -558,23 +604,49 @@ public class VmiService {
               + "trigger_reason,current_sellable_quantity,safety_level,replenishment_multiple,"
               + "suggested_quantity,signal_target,status,source_system,note,created_by_user_id)"
               + " values(?,?,?,?,?,?,?,?,?,?,'OPEN','WAREHOUSE',?,?)",
-          id, tenant, nextCode("VRS"), l.get("id", UUID.class), calc.status(),
-          scale6(stock.quantity()), scale6(l.get("safety_level", BigDecimal.class)),
-          scale6(l.get("replenishment_multiple", BigDecimal.class)), calc.projected(), target,
-          nz(input == null ? null : input.note()), actorId);
+          id,
+          tenant,
+          nextCode("VRS"),
+          l.get("id", UUID.class),
+          calc.status(),
+          scale6(stock.quantity()),
+          scale6(l.get("safety_level", BigDecimal.class)),
+          scale6(l.get("replenishment_multiple", BigDecimal.class)),
+          calc.projected(),
+          target,
+          nz(input == null ? null : input.note()),
+          actorId);
       created.add(signal(tenant, id));
-      audit(tenant, agreementId, "SIGNAL_GENERATED",
-          "出补货信号 " + calc.status() + "（当前 " + scale6(stock.quantity()).toPlainString()
-              + "，水位 " + scale6(l.get("safety_level", BigDecimal.class)).toPlainString()
-              + "，建议 " + calc.projected().toPlainString() + "）",
+      audit(
+          tenant,
+          agreementId,
+          "SIGNAL_GENERATED",
+          "出补货信号 "
+              + calc.status()
+              + "（当前 "
+              + scale6(stock.quantity()).toPlainString()
+              + "，水位 "
+              + scale6(l.get("safety_level", BigDecimal.class)).toPlainString()
+              + "，建议 "
+              + calc.projected().toPlainString()
+              + "）",
           actorId);
     }
-    long skippedVendorOwn = lines.stream()
-        .filter(l -> wanted == null || wanted.contains(l.get("id", UUID.class)))
-        .count() - created.size() - skippedOpen - skippedHealthy;
+    long skippedVendorOwn =
+        lines.stream()
+                .filter(l -> wanted == null || wanted.contains(l.get("id", UUID.class)))
+                .count()
+            - created.size()
+            - skippedOpen
+            - skippedHealthy;
     return new VmiSignalBatchResult(
-        agreementId, created.size(), skippedOpen, skippedHealthy, Math.max(0, skippedVendorOwn),
-        created, reasons);
+        agreementId,
+        created.size(),
+        skippedOpen,
+        skippedHealthy,
+        Math.max(0, skippedVendorOwn),
+        created,
+        reasons);
   }
 
   /** 信号受理确认：OPEN → ACKNOWLEDGED。 */
@@ -595,17 +667,21 @@ public class VmiService {
             + " reference_id=coalesce(nullif(reference_id,''),?), source_system=?::varchar,"
             + " note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status='ACKNOWLEDGED'",
-        now, signalId.toString(), "WAREHOUSE", note(input), now, tenant, signalId);
-    audit(tenant, agreementIdOfSignal(tenant, signalId), "SIGNAL_DISPATCHED",
-        "补货信号已下发", actorId);
+        now,
+        signalId.toString(),
+        "WAREHOUSE",
+        note(input),
+        now,
+        tenant,
+        signalId);
+    audit(tenant, agreementIdOfSignal(tenant, signalId), "SIGNAL_DISPATCHED", "补货信号已下发", actorId);
     return signal(tenant, signalId);
   }
 
   /**
    * 信号登记到货：DISPATCHED → FULFILLED，并把到货数累加进协议行的累计供货。
    *
-   * <p>这一步才真正改变「供应商送来了多少」—— 也只有它能让累计供货追上已售，
-   * 否则「已售 > 累计供货」的守恒 CHECK 会挡住继续售出。
+   * <p>这一步才真正改变「供应商送来了多少」—— 也只有它能让累计供货追上已售， 否则「已售 > 累计供货」的守恒 CHECK 会挡住继续售出。
    */
   @Transactional
   public VmiSignal fulfilSignal(UUID signalId, VmiSignalFulfilInput input, UUID actorId) {
@@ -617,14 +693,26 @@ public class VmiService {
     sql.execute(
         "update vmi_agreement_line set supplied_quantity = supplied_quantity + ?,"
             + " version = version + 1, updated_at = ?::timestamptz where tenant_id=? and id=?",
-        qty, now, tenant, lineId);
+        qty,
+        now,
+        tenant,
+        lineId);
     sql.execute(
         "update vmi_replenishment_signal set status='FULFILLED', fulfilled_at=?::timestamptz,"
             + " fulfilled_quantity=?, note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status='DISPATCHED'",
-        now, qty, note(input), now, tenant, signalId);
-    audit(tenant, agreementIdOfSignal(tenant, signalId), "SIGNAL_FULFILLED",
-        "补货到货 " + qty.toPlainString(), actorId);
+        now,
+        qty,
+        note(input),
+        now,
+        tenant,
+        signalId);
+    audit(
+        tenant,
+        agreementIdOfSignal(tenant, signalId),
+        "SIGNAL_FULFILLED",
+        "补货到货 " + qty.toPlainString(),
+        actorId);
     return signal(tenant, signalId);
   }
 
@@ -646,12 +734,19 @@ public class VmiService {
                 + " note=coalesce(nullif(?,''),note),"
                 + " cancelled_at=case when ?='CANCELLED' then ?::timestamptz else cancelled_at end,"
                 + " updated_at=?::timestamptz"
-                + " where tenant_id=? and id=?" + (from == null ? "" : " and status='" + from + "'"),
-            to, to, now, nz(input == null ? null : input.note()), to, now, now, tenant, signalId);
+                + " where tenant_id=? and id=?"
+                + (from == null ? "" : " and status='" + from + "'"),
+            to,
+            to,
+            now,
+            nz(input == null ? null : input.note()),
+            to,
+            now,
+            now,
+            tenant,
+            signalId);
     if (changed == 0) {
-      throw conflict(
-          "信号当前状态不允许这个流转" + (from == null ? "" : "（要求 " + from + "）")
-              + "，可能已被处理或已到货。");
+      throw conflict("信号当前状态不允许这个流转" + (from == null ? "" : "（要求 " + from + "）") + "，可能已被处理或已到货。");
     }
     audit(tenant, agreementIdOfSignal(tenant, signalId), event, "信号状态 → " + to, actorId);
     return signal(tenant, signalId);
@@ -667,8 +762,9 @@ public class VmiService {
     where.add("s.tenant_id = ?");
     binds.add(tenant());
     if (agreementId != null) {
-      where.add("s.agreement_line_id in (select id from vmi_agreement_line"
-          + " where tenant_id = ? and agreement_id = ?)");
+      where.add(
+          "s.agreement_line_id in (select id from vmi_agreement_line"
+              + " where tenant_id = ? and agreement_id = ?)");
       binds.add(tenant());
       binds.add(agreementId);
     }
@@ -686,7 +782,10 @@ public class VmiService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            SIGNAL_COLUMNS + " from " + SIGNAL_FROM + sqlWhere
+            SIGNAL_COLUMNS
+                + " from "
+                + SIGNAL_FROM
+                + sqlWhere
                 + " order by s.created_at desc, s.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new VmiSignalPage(
@@ -698,18 +797,14 @@ public class VmiService {
   /**
    * 登记在库观测 —— VMI 货物理上在供应商自己仓、我方账本没有桶时，**唯一**的落点。
    *
-   * <p>来源（{@code stockSource}）必填且受数据库词表约束，观测时刻也必填：
-   * 「这个数是什么时候的、哪来的」是水位判断的前提，
-   * 缺了它就会把租户报上来的数当成系统算出来的数。
+   * <p>来源（{@code stockSource}）必填且受数据库词表约束，观测时刻也必填： 「这个数是什么时候的、哪来的」是水位判断的前提， 缺了它就会把租户报上来的数当成系统算出来的数。
    */
   @Transactional
-  public VmiSnapshot recordSnapshot(
-      UUID agreementId, VmiSnapshotInput input, UUID actorId) {
+  public VmiSnapshot recordSnapshot(UUID agreementId, VmiSnapshotInput input, UUID actorId) {
     var tenant = tenant();
     requireHead(tenant, agreementId);
     var line = requireLine(tenant, agreementId, input.agreementLineId());
-    String source =
-        requireEnum(input.stockSource(), VmiStockSource.class, "在库量来源 stockSource");
+    String source = requireEnum(input.stockSource(), VmiStockSource.class, "在库量来源 stockSource");
     if ("WAREHOUSE_BUCKET".equals(source)) {
       throw bad(
           "WAREHOUSE_BUCKET 是系统从 7.1.1.3 账本算出来的口径，不接受手工登记："
@@ -720,7 +815,9 @@ public class VmiService {
     }
     BigDecimal qty = scale6(requireNonNegative(input.observedQuantity(), "观测在库量"));
     BigDecimal coverage =
-        input.coverageDays() == null ? null : scale6(requireNonNegative(input.coverageDays(), "可售天数"));
+        input.coverageDays() == null
+            ? null
+            : scale6(requireNonNegative(input.coverageDays(), "可售天数"));
     UUID id = UUID.randomUUID();
     // t CTE 让 ?::timestamptz 成为第 1 个绑定，cast 不落在绑定序列末位。
     sql.execute(
@@ -728,16 +825,30 @@ public class VmiService {
             + "insert into vmi_stock_snapshot(id,tenant_id,agreement_line_id,stock_source,"
             + "source_system,observed_at,observed_quantity,coverage_days,note,recorded_by_user_id)"
             + " select ?,?,?,?,?,t.at,?,?,?,? from t",
-        input.observedAt(), id, tenant, line.get("id", UUID.class), source,
+        input.observedAt(),
+        id,
+        tenant,
+        line.get("id", UUID.class),
+        source,
         notBlank(input.sourceSystem()) ? input.sourceSystem().trim() : "MANUAL",
-        qty, coverage, nz(input.note()), actorId);
+        qty,
+        coverage,
+        nz(input.note()),
+        actorId);
     // 观测同时更新协议行的「在库量」：它是 WATERHOUSE_BUCKET 缺失时的口径来源。
     sql.execute(
         "update vmi_agreement_line set on_hand_quantity = ?,"
             + " version = version + 1, updated_at = ?::timestamptz where tenant_id=? and id=?",
-        qty, OffsetDateTime.now(), tenant, line.get("id", UUID.class));
-    audit(tenant, agreementId, "SNAPSHOT_RECORDED",
-        "登记在库观测 " + qty.toPlainString() + "（来源 " + source + "）", actorId);
+        qty,
+        OffsetDateTime.now(),
+        tenant,
+        line.get("id", UUID.class));
+    audit(
+        tenant,
+        agreementId,
+        "SNAPSHOT_RECORDED",
+        "登记在库观测 " + qty.toPlainString() + "（来源 " + source + "）",
+        actorId);
     return snapshot(tenant, id);
   }
 
@@ -749,8 +860,9 @@ public class VmiService {
     int offset = Math.max(0, pageNo) * limit;
     var where = new ArrayList<String>();
     var binds = new ArrayList<Object>();
-    where.add("n.tenant_id = ? and n.agreement_line_id in"
-        + " (select id from vmi_agreement_line where tenant_id = ? and agreement_id = ?)");
+    where.add(
+        "n.tenant_id = ? and n.agreement_line_id in"
+            + " (select id from vmi_agreement_line where tenant_id = ? and agreement_id = ?)");
     binds.add(tenant);
     binds.add(tenant);
     binds.add(agreementId);
@@ -769,7 +881,8 @@ public class VmiService {
                 + " k.code as sku_code, k.name as sku_name"
                 + " from vmi_stock_snapshot n"
                 + " join vmi_agreement_line l on l.tenant_id = n.tenant_id and l.id = n.agreement_line_id"
-                + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id" + sqlWhere
+                + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id"
+                + sqlWhere
                 + " order by n.observed_at desc, n.id desc limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new VmiSnapshotPage(
@@ -785,8 +898,8 @@ public class VmiService {
    *
    * <ol>
    *   <li>协议必须已启用（ACTIVE）：草稿/暂停/关闭的协议不产生销售；
-   *   <li>本次售出量不得超过累计供货：数据库 {@code CHECK(sold <= supplied)} 之外再挡一次，
-   *       好让人看得懂 —— 在卖供应商没送到的货之前不能先记销售，那会凭空生成一笔应付；
+   *   <li>本次售出量不得超过累计供货：数据库 {@code CHECK(sold <= supplied)} 之外再挡一次， 好让人看得懂 ——
+   *       在卖供应商没送到的货之前不能先记销售，那会凭空生成一笔应付；
    *   <li>{@code (agreement_line_id, sale_ref)} 唯一：同一外部订单行重复推送撞 409。
    * </ol>
    */
@@ -809,9 +922,13 @@ public class VmiService {
     String currency = head.get("currency", String.class);
     BigDecimal supplied = line.get("supplied_quantity", BigDecimal.class);
     if (qty.compareTo(supplied) > 0) {
-      throw conflict("本次售出 " + qty.toPlainString() + " 超过该行累计供货 "
-          + supplied.toPlainString() + "，已拒绝。VMI 货主是供应商：在供应商还没把货送过来之前"
-          + "不能先记销售 —— 那会凭空生成一笔应付。");
+      throw conflict(
+          "本次售出 "
+              + qty.toPlainString()
+              + " 超过该行累计供货 "
+              + supplied.toPlainString()
+              + "，已拒绝。VMI 货主是供应商：在供应商还没把货送过来之前"
+              + "不能先记销售 —— 那会凭空生成一笔应付。");
     }
     UUID id = UUID.randomUUID();
     String source = notBlank(input.sourceSystem()) ? input.sourceSystem().trim() : "MANUAL";
@@ -823,27 +940,43 @@ public class VmiService {
               + "insert into vmi_sale(id,tenant_id,agreement_line_id,sold_quantity,sale_ref,"
               + "source_system,sale_price,currency,occurred_at,recorded_by_user_id,created_at) "
               + "select ?,?,?,?,?,?,?,?,t.at,?,t.at from t",
-          input.occurredAt(), id, tenant, lineId, qty, input.saleRef().trim(), source,
-          price, currency, actorId);
+          input.occurredAt(),
+          id,
+          tenant,
+          lineId,
+          qty,
+          input.saleRef().trim(),
+          source,
+          price,
+          currency,
+          actorId);
     } catch (org.springframework.dao.DataAccessException e) {
-      throw conflict("这条销售事实已经记过（同一协议行 + saleRef=" + input.saleRef().trim()
-          + " 唯一）。重复推送不会重复对账。");
+      throw conflict("这条销售事实已经记过（同一协议行 + saleRef=" + input.saleRef().trim() + " 唯一）。重复推送不会重复对账。");
     }
     try {
       sql.execute(
           "update vmi_agreement_line set sold_quantity = sold_quantity + ?,"
               + " version = version + 1, updated_at = ?::timestamptz where tenant_id = ? and id = ?",
-          qty, OffsetDateTime.now(), tenant, lineId);
+          qty,
+          OffsetDateTime.now(),
+          tenant,
+          lineId);
     } catch (org.springframework.dao.DataAccessException e) {
       // 上面的服务层比较只看**本次增量**，累计口径由数据库的 CHECK 兜底
       // （sold_quantity <= supplied_quantity）。这里把数据库的拒绝翻成人话，
       // 否则调用方只会看到一个 500，而真正的原因是货还没送到。
-      throw conflict("累计已售超过该行累计供货 " + supplied.toPlainString()
-          + "，已拒绝。VMI 货主是供应商：在供应商还没把货送过来之前不能先记销售 —— "
-          + "那会凭空生成一笔应付。");
+      throw conflict(
+          "累计已售超过该行累计供货 "
+              + supplied.toPlainString()
+              + "，已拒绝。VMI 货主是供应商：在供应商还没把货送过来之前不能先记销售 —— "
+              + "那会凭空生成一笔应付。");
     }
-    audit(tenant, agreementId, "SALE_RECORDED",
-        "记录售出 " + qty.toPlainString() + "（ref " + input.saleRef().trim() + "）", actorId);
+    audit(
+        tenant,
+        agreementId,
+        "SALE_RECORDED",
+        "记录售出 " + qty.toPlainString() + "（ref " + input.saleRef().trim() + "）",
+        actorId);
     return sale(tenant, id);
   }
 
@@ -860,15 +993,20 @@ public class VmiService {
     where.add("l.tenant_id = ?");
     binds.add(tenant);
     if (Boolean.TRUE.equals(unsettleableOnly)) {
-      where.add("not exists (select 1 from vmi_settlement_line sl"
-          + " where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)");
+      where.add(
+          "not exists (select 1 from vmi_settlement_line sl"
+              + " where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)");
     }
     String sqlWhere = " where " + String.join(" and ", where);
-    long total = sql.fetchOne("select count(*) from" + SALE_FROM + sqlWhere, binds.toArray())
-        .get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from" + SALE_FROM + sqlWhere, binds.toArray())
+            .get(0, Long.class);
     var rows =
         sql.fetch(
-            SALE_COLUMNS + " from" + SALE_FROM + sqlWhere
+            SALE_COLUMNS
+                + " from"
+                + SALE_FROM
+                + sqlWhere
                 + " order by s.occurred_at desc, s.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new VmiSalePage(
@@ -906,15 +1044,14 @@ public class VmiService {
       default -> end = today.plusDays(1);
     }
     LocalDate todayValue = today;
-    return new VmiSettlementWindow(agreementId, cycle, label(VmiSettlementCycle.values(), cycle),
-        start, end, todayValue);
+    return new VmiSettlementWindow(
+        agreementId, cycle, label(VmiSettlementCycle.values(), cycle), start, end, todayValue);
   }
 
   /**
    * 出 VMI 结算对账单：把区间内**已售但还没进任何对账单**的售出事实收成一张交给 12。
    *
-   * <p>区间内没有未对账售出事实时显式拒绝 —— 没有售出就没有应付，
-   * 不该靠一张空单来「显得处理过了」。
+   * <p>区间内没有未对账售出事实时显式拒绝 —— 没有售出就没有应付， 不该靠一张空单来「显得处理过了」。
    */
   @Transactional
   public VmiSettlementDetail createSettlement(
@@ -942,14 +1079,16 @@ public class VmiService {
                 + " and not exists (select 1 from vmi_settlement_line sl"
                 + "                 where sl.tenant_id = sa.tenant_id and sl.sale_id = sa.id)"
                 + " order by sa.occurred_at, sa.id limit ?",
-            agreementId, tenant, input.periodStart(), input.periodEnd(), MAX_SETTLEMENT_LINES + 1);
+            agreementId,
+            tenant,
+            input.periodStart(),
+            input.periodEnd(),
+            MAX_SETTLEMENT_LINES + 1);
     if (pending.isEmpty()) {
-      throw conflict("该区间内没有已售出但尚未对账的销售事实，不生成对账单。"
-          + "VMI 是售出才与供应商结算：没卖出去就没有应付，出一张空单会让双方对账时多一份噪音。");
+      throw conflict("该区间内没有已售出但尚未对账的销售事实，不生成对账单。" + "VMI 是售出才与供应商结算：没卖出去就没有应付，出一张空单会让双方对账时多一份噪音。");
     }
     if (pending.size() > MAX_SETTLEMENT_LINES) {
-      throw conflict("该区间待对账的售出事实超过单张上限 " + MAX_SETTLEMENT_LINES
-          + " 条，请缩小区间后分批出单。");
+      throw conflict("该区间待对账的售出事实超过单张上限 " + MAX_SETTLEMENT_LINES + " 条，请缩小区间后分批出单。");
     }
     UUID id = UUID.randomUUID();
     String currency = head.get("currency", String.class);
@@ -957,19 +1096,34 @@ public class VmiService {
         "insert into vmi_settlement(id,tenant_id,settlement_code,agreement_id,period_start,"
             + "period_end,currency,status,note,created_by_user_id) "
             + "values(?,?,?,?,?,?,?,'OPEN',?,?)",
-        id, tenant, nextCode("VST"), agreementId, input.periodStart(), input.periodEnd(),
-        currency, nz(input.note()), actorId);
+        id,
+        tenant,
+        nextCode("VST"),
+        agreementId,
+        input.periodStart(),
+        input.periodEnd(),
+        currency,
+        nz(input.note()),
+        actorId);
     for (var r : pending) {
       // 结算价快照取协议行的 numeric(19,4)：协议价后来改了，已出对账单的金额也不能跟着变。
       sql.execute(
           "insert into vmi_settlement_line(id,tenant_id,settlement_id,agreement_line_id,sale_id,"
               + "quantity,unit_price) values(?,?,?,?,?,?,?)",
-          UUID.randomUUID(), tenant, id, r.get("agreement_line_id", UUID.class),
-          r.get("id", UUID.class), r.get("sold_quantity", BigDecimal.class),
+          UUID.randomUUID(),
+          tenant,
+          id,
+          r.get("agreement_line_id", UUID.class),
+          r.get("id", UUID.class),
+          r.get("sold_quantity", BigDecimal.class),
           r.get("settlement_price", BigDecimal.class));
     }
-    audit(tenant, agreementId, "SETTLEMENT_CREATED",
-        "出 VMI 对账单，收 " + pending.size() + " 条售出事实", actorId);
+    audit(
+        tenant,
+        agreementId,
+        "SETTLEMENT_CREATED",
+        "出 VMI 对账单，收 " + pending.size() + " 条售出事实",
+        actorId);
     return settlementDetail(id);
   }
 
@@ -995,7 +1149,10 @@ public class VmiService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            SETTLEMENT_COLUMNS + " from " + SETTLEMENT_FROM + sqlWhere
+            SETTLEMENT_COLUMNS
+                + " from "
+                + SETTLEMENT_FROM
+                + sqlWhere
                 + " order by s.created_at desc, s.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new VmiSettlementPage(
@@ -1008,7 +1165,8 @@ public class VmiService {
     var head =
         sql.fetchOne(
             SETTLEMENT_COLUMNS + " from " + SETTLEMENT_FROM + " where s.tenant_id=? and s.id=?",
-            tenant, settlementId);
+            tenant,
+            settlementId);
     if (head == null) {
       throw notFound("VMI 对账单", settlementId);
     }
@@ -1022,7 +1180,8 @@ public class VmiService {
                 + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id"
                 + " join vmi_sale sa on sa.tenant_id = sl.tenant_id and sa.id = sl.sale_id"
                 + " where sl.tenant_id = ? and sl.settlement_id = ? order by sa.occurred_at, sl.id",
-            tenant, settlementId);
+            tenant,
+            settlementId);
     return new VmiSettlementDetail(
         settlement(head),
         lines.stream()
@@ -1047,8 +1206,11 @@ public class VmiService {
   public VmiSettlement confirmSettlement(UUID settlementId, VmiNoteInput input, UUID actorId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne("select agreement_id, settlement_code, status, line_count from vmi_settlement"
-            + " where tenant_id=? and id=?", tenant, settlementId);
+        sql.fetchOne(
+            "select agreement_id, settlement_code, status, line_count from vmi_settlement"
+                + " where tenant_id=? and id=?",
+            tenant,
+            settlementId);
     if (head == null) {
       throw notFound("VMI 对账单", settlementId);
     }
@@ -1056,8 +1218,8 @@ public class VmiService {
       throw conflict("对账单当前状态 " + head.get("status", String.class) + "，只有待确认的单据能确认。");
     }
     if (head.get("line_count", Integer.class) == 0) {
-      throw conflict("对账单 " + head.get("settlement_code", String.class)
-          + " 没有任何明细，不允许确认：没有售出就没有应付。");
+      throw conflict(
+          "对账单 " + head.get("settlement_code", String.class) + " 没有任何明细，不允许确认：没有售出就没有应付。");
     }
     OffsetDateTime now = OffsetDateTime.now();
     sql.execute(
@@ -1065,9 +1227,19 @@ public class VmiService {
             + " confirmed_by_user_id=?, reference_id=coalesce(nullif(reference_id,''),?),"
             + " source_system='WAREHOUSE', note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status='OPEN'",
-        now, actorId, settlementId.toString(), note(input), now, tenant, settlementId);
-    audit(tenant, head.get("agreement_id", UUID.class), "SETTLEMENT_CONFIRMED",
-        "确认对账单 " + head.get("settlement_code", String.class) + "，应付交 12 结算", actorId);
+        now,
+        actorId,
+        settlementId.toString(),
+        note(input),
+        now,
+        tenant,
+        settlementId);
+    audit(
+        tenant,
+        head.get("agreement_id", UUID.class),
+        "SETTLEMENT_CONFIRMED",
+        "确认对账单 " + head.get("settlement_code", String.class) + "，应付交 12 结算",
+        actorId);
     return settlementDetail(settlementId).settlement();
   }
 
@@ -1078,10 +1250,13 @@ public class VmiService {
     var tenant = tenant();
     requireHead(tenant, agreementId);
     int n = Math.min(MAX_AUDIT_ROWS, Math.max(1, limit == null || limit <= 0 ? 200 : limit));
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id, event_type, detail, actor_user_id, occurred_at from vmi_audit"
                 + " where tenant_id = ? and agreement_id = ? order by occurred_at desc, id desc limit ?",
-            tenant, agreementId, n)
+            tenant,
+            agreementId,
+            n)
         .stream()
         .map(
             r ->
@@ -1099,19 +1274,26 @@ public class VmiService {
   private VmiAgreementDetail detail(UUID agreementId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne(AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
-            tenant, agreementId);
+        sql.fetchOne(
+            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
+            tenant,
+            agreementId);
     if (head == null) {
       throw notFound("VMI 协议", agreementId);
     }
-    var lines =
-        lineRows(tenant, agreementId).stream().map(l -> line(tenant, l, true)).toList();
+    var lines = lineRows(tenant, agreementId).stream().map(l -> line(tenant, l, true)).toList();
     return new VmiAgreementDetail(agreement(head), lines, auditTrail(agreementId, 100));
   }
 
   private List<org.jooq.Record> lineRows(UUID tenant, UUID agreementId) {
-    return sql.fetch(LINE_COLUMNS + " from " + LINE_FROM + " where l.tenant_id=? and l.agreement_id=?"
-        + " order by k.code, l.id", tenant, agreementId);
+    return sql.fetch(
+        LINE_COLUMNS
+            + " from "
+            + LINE_FROM
+            + " where l.tenant_id=? and l.agreement_id=?"
+            + " order by k.code, l.id",
+        tenant,
+        agreementId);
   }
 
   private void insertLine(UUID tenant, UUID agreementId, VmiLineInput line) {
@@ -1119,8 +1301,7 @@ public class VmiService {
       throw bad("明细行必须同时指定 skuId 与 warehouseId。");
     }
     if (line.stockOwnerId() == null) {
-      throw bad("必须指定明细行的货主 stockOwnerId：VMI 的货权属供应商，"
-          + "货主档案是「可售≠自有」这条口径的落点（7.7.1.1 货主与所有权）。");
+      throw bad("必须指定明细行的货主 stockOwnerId：VMI 的货权属供应商，" + "货主档案是「可售≠自有」这条口径的落点（7.7.1.1 货主与所有权）。");
     }
     BigDecimal safety = scale6(requireNonNegative(line.safetyLevel(), "安全水位 safetyLevel"));
     BigDecimal multiple =
@@ -1132,9 +1313,11 @@ public class VmiService {
     BigDecimal supplied = scale6(requireNonNegative(line.suppliedQuantity(), "累计供货数量"));
     BigDecimal onHand = scale6(requireNonNegative(line.onHandQuantity(), "在库数量"));
     if (supplied.signum() == 0 && onHand.signum() > 0) {
-      throw bad("在库数量 " + onHand.toPlainString()
-          + " 不能大于累计供货 0：货主是供应商，在供应商还没供货之前不能有在库量 —— "
-          + "那会凭空造出一批不属于任何人的货。");
+      throw bad(
+          "在库数量 "
+              + onHand.toPlainString()
+              + " 不能大于累计供货 0：货主是供应商，在供应商还没供货之前不能有在库量 —— "
+              + "那会凭空造出一批不属于任何人的货。");
     }
     try {
       sql.execute(
@@ -1142,8 +1325,17 @@ public class VmiService {
               + "stock_owner_id,safety_level,replenishment_multiple,settlement_price,"
               + "stock_owner_type,counts_as_owned_asset,supplied_quantity,on_hand_quantity)"
               + " values(?,?,?,?,?,?,?,?,?,'SUPPLIER',false,?,?)",
-          UUID.randomUUID(), tenant, agreementId, line.skuId(), line.warehouseId(),
-          line.stockOwnerId(), safety, multiple, price, supplied, onHand);
+          UUID.randomUUID(),
+          tenant,
+          agreementId,
+          line.skuId(),
+          line.warehouseId(),
+          line.stockOwnerId(),
+          safety,
+          multiple,
+          price,
+          supplied,
+          onHand);
     } catch (org.springframework.dao.DataAccessException e) {
       throw conflict(dbMessage(e, "货主、SKU 或仓库无效"));
     }
@@ -1153,14 +1345,22 @@ public class VmiService {
     sql.execute(
         "insert into vmi_audit(id,tenant_id,agreement_id,event_type,detail,actor_user_id)"
             + " values(?,?,?,?,?,?)",
-        UUID.randomUUID(), tenant, agreementId, event, detail, actorId);
+        UUID.randomUUID(),
+        tenant,
+        agreementId,
+        event,
+        detail,
+        actorId);
   }
 
   private org.jooq.Record requireHead(UUID tenant, UUID agreementId) {
     var head =
-        sql.fetchOne("select id, agreement_code, status, currency, supplier_name, legal_entity_id,"
-            + " settlement_cycle, replenishment_mode, signal_target"
-            + " from vmi_agreement where tenant_id=? and id=?", tenant, agreementId);
+        sql.fetchOne(
+            "select id, agreement_code, status, currency, supplier_name, legal_entity_id,"
+                + " settlement_cycle, replenishment_mode, signal_target"
+                + " from vmi_agreement where tenant_id=? and id=?",
+            tenant,
+            agreementId);
     if (head == null) {
       throw notFound("VMI 协议", agreementId);
     }
@@ -1172,7 +1372,9 @@ public class VmiService {
         sql.fetchOne(
             "select id, supplied_quantity from vmi_agreement_line"
                 + " where tenant_id=? and agreement_id=? and id=?",
-            tenant, agreementId, lineId);
+            tenant,
+            agreementId,
+            lineId);
     if (line == null) {
       throw notFound("VMI 协议明细行", lineId);
     }
@@ -1181,8 +1383,11 @@ public class VmiService {
 
   private org.jooq.Record requireSignal(UUID tenant, UUID signalId) {
     var row =
-        sql.fetchOne("select id, agreement_line_id, status, signal_code from vmi_replenishment_signal"
-            + " where tenant_id=? and id=?", tenant, signalId);
+        sql.fetchOne(
+            "select id, agreement_line_id, status, signal_code from vmi_replenishment_signal"
+                + " where tenant_id=? and id=?",
+            tenant,
+            signalId);
     if (row == null) {
       throw notFound("VMI 补货信号", signalId);
     }
@@ -1193,7 +1398,9 @@ public class VmiService {
     return sql.fetchOne(
             "select l.agreement_id from vmi_replenishment_signal s"
                 + " join vmi_agreement_line l on l.tenant_id = s.tenant_id and l.id = s.agreement_line_id"
-                + " where s.tenant_id=? and s.id=?", tenant, signalId)
+                + " where s.tenant_id=? and s.id=?",
+            tenant,
+            signalId)
         .get("agreement_id", UUID.class);
   }
 
@@ -1205,9 +1412,8 @@ public class VmiService {
   /**
    * 取一行的当前可售量。
    *
-   * <p>顺序是硬编码的且不可调换：<b>先查我方账本</b>（7.1.1.3 的 stock_bucket 按货主聚合
-   * SELLABLE 可用量 —— 同服务同库，不是跨服务读），账本里没有这个 SKU×仓 的桶时
-   * <b>才回落</b>租户登记的观测。VMI 货常常物理上在供应商自己的仓，
+   * <p>顺序是硬编码的且不可调换：<b>先查我方账本</b>（7.1.1.3 的 stock_bucket 按货主聚合 SELLABLE 可用量 ——
+   * 同服务同库，不是跨服务读），账本里没有这个 SKU×仓 的桶时 <b>才回落</b>租户登记的观测。VMI 货常常物理上在供应商自己的仓，
    * 那种情况下我方压根没有桶，这是真实经营形态而不是数据缺失。
    */
   private StockReading currentStock(UUID tenant, org.jooq.Record line) {
@@ -1222,7 +1428,10 @@ public class VmiService {
                 + " join inventory_quality_status q on q.tenant_id = k.tenant_id"
                 + "   and q.id = k.quality_status_id and q.role = 'SELLABLE'"
                 + " where k.tenant_id = ? and k.stock_owner_id = ? and k.sku_id = ? and k.warehouse_id = ?",
-            tenant, ownerId, skuId, warehouseId);
+            tenant,
+            ownerId,
+            skuId,
+            warehouseId);
     long bucketCount = row.get("cnt", Long.class);
     if (bucketCount > 0) {
       return new StockReading(scale6(row.get("qty", BigDecimal.class)), "WAREHOUSE_BUCKET", null);
@@ -1232,7 +1441,8 @@ public class VmiService {
             "select observed_quantity, stock_source, observed_at from vmi_stock_snapshot"
                 + " where tenant_id=? and agreement_line_id=?"
                 + " order by observed_at desc, id desc limit 1",
-            tenant, line.get("id", UUID.class));
+            tenant,
+            line.get("id", UUID.class));
     if (snap != null) {
       return new StockReading(
           scale6(snap.get("observed_quantity", BigDecimal.class)),
@@ -1245,14 +1455,16 @@ public class VmiService {
 
   /** 水位判定结果。{@code triggerReason == null} 表示水位健康、无需补货。 */
   private record WaterCalc(
-      String status, BigDecimal safetyGap, BigDecimal bufferLine, BigDecimal projected,
+      String status,
+      BigDecimal safetyGap,
+      BigDecimal bufferLine,
+      BigDecimal projected,
       String triggerReason) {}
 
   /**
    * 水位判定与建议补货量。
    *
-   * <p>缓冲线 = 安全水位 ×（1 + 补货倍数）：倍数是「一次补多少份」，所以水位之上还留
-   * 同样比例的余量。四档状态分开而不是笼统的「库存低」——
+   * <p>缓冲线 = 安全水位 ×（1 + 补货倍数）：倍数是「一次补多少份」，所以水位之上还留 同样比例的余量。四档状态分开而不是笼统的「库存低」——
    * 断货、要跌破水位、余量不足三者的紧急度与处置完全不同。
    */
   private WaterCalc waterLevel(org.jooq.Record line, BigDecimal current) {
@@ -1262,8 +1474,7 @@ public class VmiService {
     BigDecimal gap = scale6(safety.subtract(current));
     // 建议补货量 = ceil(max(0, 水位 − 当前可售) × 倍数)，向上取整到最小计量单位。
     BigDecimal shortfall = gap.max(BigDecimal.ZERO);
-    BigDecimal projected =
-        shortfall.multiply(multiple).setScale(6, RoundingMode.CEILING);
+    BigDecimal projected = shortfall.multiply(multiple).setScale(6, RoundingMode.CEILING);
     String status;
     if (current.signum() <= 0) {
       status = "STOCKOUT";
@@ -1276,7 +1487,11 @@ public class VmiService {
     }
     // 倍数为 0 时「补到水位」的建议量是 0，但水位不足本身仍要报出来 —— 只是不出信号。
     BigDecimal signalQty = projected.max(new BigDecimal("0.000001"));
-    return new WaterCalc(status, gap, buffer, "HEALTHY".equals(status) ? ZERO : signalQty,
+    return new WaterCalc(
+        status,
+        gap,
+        buffer,
+        "HEALTHY".equals(status) ? ZERO : signalQty,
         "HEALTHY".equals(status) ? null : status);
   }
 
@@ -1287,10 +1502,12 @@ public class VmiService {
     BigDecimal sold30d = soldInWindow(tenant, lineId, COVERAGE_WINDOW_DAYS);
     BigDecimal coverageDays = null;
     if (sold30d.signum() > 0) {
-      BigDecimal perDay = sold30d.divide(BigDecimal.valueOf(COVERAGE_WINDOW_DAYS), 6, RoundingMode.HALF_UP);
+      BigDecimal perDay =
+          sold30d.divide(BigDecimal.valueOf(COVERAGE_WINDOW_DAYS), 6, RoundingMode.HALF_UP);
       if (perDay.signum() > 0) {
         // 覆盖率到「天」取整；没有销量时留 null（没销量 ≠ 0 天覆盖）。
-        coverageDays = stock.quantity().divide(perDay, 0, RoundingMode.FLOOR).setScale(0, RoundingMode.FLOOR);
+        coverageDays =
+            stock.quantity().divide(perDay, 0, RoundingMode.FLOOR).setScale(0, RoundingMode.FLOOR);
       }
     }
     var unsettled =
@@ -1303,15 +1520,18 @@ public class VmiService {
                 + " where li.id = ? and sa.tenant_id = ?"
                 + " and not exists (select 1 from vmi_settlement_line sl"
                 + "                 where sl.tenant_id = sa.tenant_id and sl.sale_id = sa.id)",
-            lineId, tenant);
+            lineId,
+            tenant);
     var openSignal =
         sql.fetchOne(
             "select signal_code from vmi_replenishment_signal"
                 + " where tenant_id=? and agreement_line_id=?"
                 + " and status in ('OPEN','ACKNOWLEDGED','DISPATCHED') limit 1",
-            tenant, lineId);
+            tenant,
+            lineId);
     BigDecimal sellableValue =
-        price(scale6(stock.quantity()).multiply(price(l.get("settlement_price", BigDecimal.class))));
+        price(
+            scale6(stock.quantity()).multiply(price(l.get("settlement_price", BigDecimal.class))));
     String source = stock.source();
     return new VmiLine(
         lineId,
@@ -1346,8 +1566,13 @@ public class VmiService {
         price(unsettled.get("amt", BigDecimal.class)),
         openSignal == null ? null : openSignal.get("signal_code", String.class),
         new VmiOwnershipSplit(
-            scale6(stock.quantity()), sellableValue, ZERO, null, false,
-            OWNED_ASSET_NOTE, SEPARATION_NOTE));
+            scale6(stock.quantity()),
+            sellableValue,
+            ZERO,
+            null,
+            false,
+            OWNED_ASSET_NOTE,
+            SEPARATION_NOTE));
   }
 
   private BigDecimal soldInWindow(UUID tenant, UUID lineId, int days) {
@@ -1356,7 +1581,9 @@ public class VmiService {
                 "select coalesce(sum(sold_quantity),0) as qty from vmi_sale"
                     + " where tenant_id=? and agreement_line_id=?"
                     + " and occurred_at >= now() - make_interval(days => ?)",
-                tenant, lineId, days)
+                tenant,
+                lineId,
+                days)
             .get("qty", BigDecimal.class));
   }
 
@@ -1492,7 +1719,8 @@ public class VmiService {
     return signalRow(
         sql.fetchOne(
             SIGNAL_COLUMNS + " from " + SIGNAL_FROM + " where s.tenant_id=? and s.id=?",
-            tenant, signalId));
+            tenant,
+            signalId));
   }
 
   private static VmiSignal signalRow(org.jooq.Record r) {
@@ -1535,8 +1763,10 @@ public class VmiService {
 
   private VmiSale sale(UUID tenant, UUID saleId) {
     return saleRow(
-        sql.fetchOne(SALE_COLUMNS + " from" + SALE_FROM + " where s.tenant_id=? and s.id=?",
-            tenant, saleId));
+        sql.fetchOne(
+            SALE_COLUMNS + " from" + SALE_FROM + " where s.tenant_id=? and s.id=?",
+            tenant,
+            saleId));
   }
 
   private static VmiSale saleRow(org.jooq.Record r) {
@@ -1570,7 +1800,8 @@ public class VmiService {
                 + " join vmi_agreement_line l on l.tenant_id = n.tenant_id and l.id = n.agreement_line_id"
                 + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id"
                 + " where n.tenant_id = ? and n.id = ?",
-            tenant, snapshotId));
+            tenant,
+            snapshotId));
   }
 
   private static VmiSnapshot snapshotRow(org.jooq.Record r) {
@@ -1622,18 +1853,17 @@ public class VmiService {
   // ============================================================ 工具
 
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 
-  /**
-   * 单号 = 前缀-当天日期-六位序号。序号与日期分两步取，不在一条 SQL 里拼：
-   * 纯文本语句里的 {@code ::text} 这类表达式 jOOQ 解析器吃不准，拆开就没有歧义。
-   */
+  /** 单号 = 前缀-当天日期-六位序号。序号与日期分两步取，不在一条 SQL 里拼： 纯文本语句里的 {@code ::text} 这类表达式 jOOQ 解析器吃不准，拆开就没有歧义。 */
   private String nextCode(String prefix) {
     long seq =
         switch (prefix) {
           case "VMI" -> sql.fetchOne("select nextval('vmi_agreement_code_seq')").get(0, Long.class);
-          case "VST" -> sql.fetchOne("select nextval('vmi_settlement_code_seq')").get(0, Long.class);
+          case "VST" ->
+              sql.fetchOne("select nextval('vmi_settlement_code_seq')").get(0, Long.class);
           default -> sql.fetchOne("select nextval('vmi_signal_code_seq')").get(0, Long.class);
         };
     var today = sql.fetchOne("select current_date").get(0, LocalDate.class);
@@ -1726,8 +1956,7 @@ public class VmiService {
   private static String requireCurrency(String value) {
     String v = notBlank(value) ? value.trim().toUpperCase(Locale.ROOT) : "";
     if (!v.matches("^[A-Z]{3}$")) {
-      throw bad("币种必须是三位大写字母（如 USD / CNY），收到：" + value
-          + "。结算价没有币种就是一个无意义的数字。");
+      throw bad("币种必须是三位大写字母（如 USD / CNY），收到：" + value + "。结算价没有币种就是一个无意义的数字。");
     }
     return v;
   }
@@ -1739,8 +1968,7 @@ public class VmiService {
       if (m == null) continue;
       if (m.contains("vmi_line_owner_not_owned")) return "货主不允许：VMI 的货主不能是「计入自有资产」的那一类。";
       if (m.contains("counts_as_owned_asset")) return "货主不允许：VMI 货属供应商，不能计入自有资产。";
-      if (m.contains("vmi_agreement_line_agreement_line_id_key")
-          || m.contains("duplicate key")) {
+      if (m.contains("vmi_agreement_line_agreement_line_id_key") || m.contains("duplicate key")) {
         return "同一协议下该 SKU 与仓库已存在一行（水位与建议补货量只应有一个口径）。";
       }
       if (m.contains("stock_owner")) return "货主档案不存在或已停用。";

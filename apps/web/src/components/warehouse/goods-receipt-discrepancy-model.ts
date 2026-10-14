@@ -78,11 +78,9 @@ export function fetchDiscrepancyDetail(handlingId: string) {
 
 /** 接手一条 8.2.1.1 记录下来的差异事实。 */
 export function intakeDiscrepancy(discrepancyId: string) {
-  return api<DiscrepancyHandlingSaved>(
-    'warehouse/goods-receipt-discrepancies',
-    'POST',
-    { discrepancyId } satisfies DiscrepancyHandlingIntakeRequest,
-  );
+  return api<DiscrepancyHandlingSaved>('warehouse/goods-receipt-discrepancies', 'POST', {
+    discrepancyId,
+  } satisfies DiscrepancyHandlingIntakeRequest);
 }
 
 /** 拍照留证：凭证本体真落库，前端传 base64 而不是「将来会有的」外链。 */
@@ -132,7 +130,10 @@ export function withdrawDiscrepancyClaim(
   );
 }
 
-export function closeDiscrepancyHandling(handlingId: string, input: DiscrepancyHandlingCloseRequest) {
+export function closeDiscrepancyHandling(
+  handlingId: string,
+  input: DiscrepancyHandlingCloseRequest,
+) {
   return api<DiscrepancyHandlingSaved>(
     `warehouse/goods-receipt-discrepancies/${encodeURIComponent(handlingId)}/close`,
     'POST',
@@ -235,9 +236,7 @@ export function allowedDispositions(
   available: Array<{ value: string; allowedForRiskTypes: boolean }>,
 ): string[] {
   const risk = isRiskType(discrepancyType);
-  return available
-    .filter((o) => (risk ? o.allowedForRiskTypes : true))
-    .map((o) => o.value);
+  return available.filter((o) => (risk ? o.allowedForRiskTypes : true)).map((o) => o.value);
 }
 
 /**

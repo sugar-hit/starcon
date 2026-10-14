@@ -92,9 +92,11 @@ UTF-8 严格模式 + GBK 兜底、剥 BOM、CRLF/LF/CR 三种行尾、字段内�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V29__import_wizard.sql`
 
 **后端**（`backend/services/catalog/src/main/java/com/starcon/catalog/`）
+
 - `ImportWizardModels.java` `ImportWizardController.java`
 - `ImportTemplateService.java`（模板字典 + 可复用映射配置）
 - `ImportJobService.java`（上传 / 映射 / 触发 / 查询）
@@ -102,10 +104,12 @@ UTF-8 严格模式 + GBK 兜底、剥 BOM、CRLF/LF/CR 三种行尾、字段内�
 - `ImportRules.java`（纯函数校验规则）`ImportCsvParser.java`（RFC 4180）
 
 **测试**（`backend/services/catalog/src/test/java/com/starcon/catalog/`）
+
 - `ImportWizardIntegrationTest.java`（19 例）`ImportCsvParserTest.java`（16 例）
 - `ImportRulesTest.java`（24 例）
 
 **前端**
+
 - `apps/web/src/app/products/import/page.tsx`
 - `apps/web/src/components/catalog/import-wizard-workspace.tsx`
 - `apps/web/src/components/catalog/import-model.ts` + `import-model.test.ts`（25 例）
@@ -113,6 +117,7 @@ UTF-8 严格模式 + GBK 兜底、剥 BOM、CRLF/LF/CR 三种行尾、字段内�
 - `packages/api-contracts/src/catalog.ts`（codegen 产物，未手改）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.8.1.1 那一行）
 
 ## 验证

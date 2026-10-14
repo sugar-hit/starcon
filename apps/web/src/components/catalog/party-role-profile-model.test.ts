@@ -153,7 +153,11 @@ describe('三态槽位', () => {
 
 describe('R1 结算方式与账期', () => {
   it('账期结算必须大于零天', () => {
-    const form: SupplierProfileForm = { ...emptySupplierForm(), settlementMethod: 'CREDIT', paymentTermsDays: '0' };
+    const form: SupplierProfileForm = {
+      ...emptySupplierForm(),
+      settlementMethod: 'CREDIT',
+      paymentTermsDays: '0',
+    };
     expect(supplierFormProblem(form)).toContain('账期必须大于 0');
     expect(supplierFormProblem({ ...form, paymentTermsDays: '30' })).toBeNull();
   });
@@ -162,7 +166,9 @@ describe('R1 结算方式与账期', () => {
     for (const method of ['PREPAID', 'ON_DELIVERY', 'LETTER_OF_CREDIT']) {
       const base: SupplierProfileForm = { ...emptySupplierForm(), settlementMethod: method };
       expect(supplierFormProblem(base), method).toBeNull();
-      expect(supplierFormProblem({ ...base, paymentTermsDays: '90' }), method).toContain('不占用账期');
+      expect(supplierFormProblem({ ...base, paymentTermsDays: '90' }), method).toContain(
+        '不占用账期',
+      );
     }
   });
 
@@ -185,7 +191,9 @@ describe('MOQ 数量与单位成对', () => {
 
   it('MOQ 为 0 不合法（不设请留空），超过 6 位小数不合法', () => {
     const base: SupplierProfileForm = { ...emptySupplierForm() };
-    expect(supplierFormProblem({ ...base, moqQuantity: '0', moqUnitCode: 'PCS' })).toContain('大于 0');
+    expect(supplierFormProblem({ ...base, moqQuantity: '0', moqUnitCode: 'PCS' })).toContain(
+      '大于 0',
+    );
     expect(
       supplierFormProblem({ ...base, moqQuantity: '1.1234567', moqUnitCode: 'PCS' }),
     ).toContain('6 位小数');
@@ -261,14 +269,16 @@ describe('R2 信用额度与币种', () => {
 
 describe('承运商档案', () => {
   it('账号必填（没有账号的档案在 10 物流里用不了）', () => {
-    expect(carrierFormProblem({ ...emptyCarrierForm(), accountRef: '  ' })).toContain('账号标识不能为空');
+    expect(carrierFormProblem({ ...emptyCarrierForm(), accountRef: '  ' })).toContain(
+      '账号标识不能为空',
+    );
     expect(carrierFormProblem({ ...emptyCarrierForm(), accountRef: 'UPS-1' })).toBeNull();
   });
 
   it('账号超长被拒', () => {
-    expect(
-      carrierFormProblem({ ...emptyCarrierForm(), accountRef: 'X'.repeat(129) }),
-    ).toContain('128');
+    expect(carrierFormProblem({ ...emptyCarrierForm(), accountRef: 'X'.repeat(129) })).toContain(
+      '128',
+    );
   });
 
   it('能力选择可增删，往返保持已选集合', () => {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
  * 2.2.1.2 平台应用凭据的运行时配置。
  *
  * <p>AGENTS.md 规定任何 secret 都不入仓库，因此 client_id / client_secret 只在这里从环境变量读：
+ *
  * <pre>
  * CHANNEL_OAUTH_SHOPIFY_CLIENT_ID / CHANNEL_OAUTH_SHOPIFY_CLIENT_SECRET
  * CHANNEL_OAUTH_AMAZON_CLIENT_ID  / CHANNEL_OAUTH_AMAZON_CLIENT_SECRET
@@ -46,7 +47,8 @@ public class PlatformOAuthProperties {
       String code = key.substring("CHANNEL_OAUTH_".length(), key.length() - "_CLIENT_ID".length());
       String secret = env.getProperty("CHANNEL_OAUTH_" + code + "_CLIENT_SECRET");
       if (secret != null && !secret.isBlank())
-        clients.put(code.toUpperCase(Locale.ROOT), new PlatformClient(env.getProperty(key), secret));
+        clients.put(
+            code.toUpperCase(Locale.ROOT), new PlatformClient(env.getProperty(key), secret));
     }
   }
 
@@ -92,9 +94,8 @@ public class PlatformOAuthProperties {
   /**
    * 平台回调完成后把浏览器送回的前端地址。
    *
-   * <p>平台的 redirect_uri 只能指向后端（应用注册时就固定了），所以用户从授权页回来时先落在
-   * 后端；后端处理完再 302 回这个地址并带上 sessionId，向导据此继续第 4 步。
-   * 直接把用户停在后端 JSON 上不是可用的交互。
+   * <p>平台的 redirect_uri 只能指向后端（应用注册时就固定了），所以用户从授权页回来时先落在 后端；后端处理完再 302 回这个地址并带上 sessionId，向导据此继续第 4
+   * 步。 直接把用户停在后端 JSON 上不是可用的交互。
    */
   public String uiReturnUrl() {
     return uiReturnUrl;

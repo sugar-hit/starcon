@@ -16,7 +16,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "references",
+        "operationId": "get_crm_knowledge_versions_versionId_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -57,7 +57,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "recordReference",
+        "operationId": "post_crm_knowledge_versions_versionId_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -107,7 +107,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "publish",
+        "operationId": "post_crm_knowledge_versions_versionId_publish",
         "parameters": [
           {
             "name": "Authorization",
@@ -156,7 +156,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "close",
+        "operationId": "post_crm_knowledge_versions_versionId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -206,7 +206,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entries",
+        "operationId": "get_crm_knowledge_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -297,7 +297,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "createEntry",
+        "operationId": "post_crm_knowledge_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -338,7 +338,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "versions",
+        "operationId": "get_crm_knowledge_entries_entryId_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -379,7 +379,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "createVersion",
+        "operationId": "post_crm_knowledge_entries_entryId_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -429,7 +429,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "scopes",
+        "operationId": "get_crm_knowledge_scopes",
         "parameters": [
           {
             "name": "Authorization",
@@ -463,7 +463,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "reviewDue",
+        "operationId": "get_crm_knowledge_review_due",
         "parameters": [
           {
             "name": "Authorization",
@@ -510,7 +510,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entry",
+        "operationId": "get_crm_knowledge_entries_entryId",
         "parameters": [
           {
             "name": "Authorization",
@@ -550,7 +550,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entryReferences",
+        "operationId": "get_crm_knowledge_entries_entryId_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -593,7 +593,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "effectiveEntries",
+        "operationId": "get_crm_knowledge_entries_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -661,7 +661,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "get_crm_knowledge_capabilities",
         "parameters": [
           {
             "name": "Authorization",

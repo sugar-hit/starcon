@@ -22,28 +22,21 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.1.1.3 仓库配置。
  *
- * <p>蓝图原文：「配置仓库行为参数：是否支持批次/序列号、拣货策略（按订单/按波次/按库位）、
- * 默认复核比例、是否允许拆零发货、工作时段与班次。」以及关系段的红线：
+ * <p>蓝图原文：「配置仓库行为参数：是否支持批次/序列号、拣货策略（按订单/按波次/按库位）、 默认复核比例、是否允许拆零发货、工作时段与班次。」以及关系段的红线：
  * 「**配置影响作业方式**，不是纯展示项，修改需记录变更。」
  *
- * <p>本类是 8.1.1 三个兄弟里**第一个写数据**的（8.1.1.1 与 8.1.1.2 都是纯聚合视图），
- * 所以三条纪律在这里成立得最重：
+ * <p>本类是 8.1.1 三个兄弟里**第一个写数据**的（8.1.1.1 与 8.1.1.2 都是纯聚合视图）， 所以三条纪律在这里成立得最重：
  *
  * <ul>
- *   <li><b>档案与行为是两组字段。</b>本端点只改行为参数（批次/序列号、拣货策略、
- *       复核比例、拆零、班次），碰不到名称、地址、时区与状态 —— 那属 8.1.1.2。
+ *   <li><b>档案与行为是两组字段。</b>本端点只改行为参数（批次/序列号、拣货策略、 复核比例、拆零、班次），碰不到名称、地址、时区与状态 —— 那属 8.1.1.2。
  *       「改配置」这个动作不应该有能力顺手改到地址去。
- *   <li><b>改了就必须留痕。</b>蓝图那句「修改需记录变更」是硬要求，所以每次写入都在
- *       同一事务里逐字段写 {@code warehouse_config_change}。留痕与写入原子：
- *       事务回滚时两边一起消失，不会出现「配置没改成但留痕说改了」。
- *   <li><b>归档是终态。</b>归档的仓不允许再改配置（与 8.1.1.2 同一纪律），
- *       归档前留下的配置与班次**原样保留** —— 归档的是仓库不是它的作业参数。
+ *   <li><b>改了就必须留痕。</b>蓝图那句「修改需记录变更」是硬要求，所以每次写入都在 同一事务里逐字段写 {@code
+ *       warehouse_config_change}。留痕与写入原子： 事务回滚时两边一起消失，不会出现「配置没改成但留痕说改了」。
+ *   <li><b>归档是终态。</b>归档的仓不允许再改配置（与 8.1.1.2 同一纪律）， 归档前留下的配置与班次**原样保留** —— 归档的是仓库不是它的作业参数。
  * </ul>
  *
- * <p>租户谓词在每条 SQL 上显式出现两次防线：第一道是 RLS 策略
- * （{@code app.current_tenant}，V1 与本迁移 §4 建立），第二道是服务层的
- * {@code tenant_id = current_setting(...)}。忘了绑定上下文时第二道让查询当场返回空
- * 而不是全表（与 8.1.1.1 同一理由）。
+ * <p>租户谓词在每条 SQL 上显式出现两次防线：第一道是 RLS 策略 （{@code app.current_tenant}，V1 与本迁移 §4 建立），第二道是服务层的 {@code
+ * tenant_id = current_setting(...)}。忘了绑定上下文时第二道让查询当场返回空 而不是全表（与 8.1.1.1 同一理由）。
  */
 @Service
 public class WarehouseConfigService {
@@ -57,7 +50,8 @@ public class WarehouseConfigService {
   /** 留痕里时间的固定格式。值本身是规范化文本，这样排序与比对有确定语义。 */
   private static final DateTimeFormatter VALUE_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-  private static final String TENANT = "tenant_id = current_setting('app.current_tenant', true)::uuid";
+  private static final String TENANT =
+      "tenant_id = current_setting('app.current_tenant', true)::uuid";
 
   private final DSLContext sql;
 
@@ -68,11 +62,9 @@ public class WarehouseConfigService {
   // ================================================================ 配置全貌
 
   /**
-   * 配置页一次取全：仓库标识（给班次标时区用）+ 当前配置 + 班次清单 + 最近一页变更历史
-   * + 下游影响声明。
+   * 配置页一次取全：仓库标识（给班次标时区用）+ 当前配置 + 班次清单 + 最近一页变更历史 + 下游影响声明。
    *
-   * <p>「一次返回」而不是四个端点：这是一个**编辑页**，四个请求会让页面在
-   * 数据版本不一致时把「班次是改过的、配置是没改过的」拼在一起显示。
+   * <p>「一次返回」而不是四个端点：这是一个**编辑页**，四个请求会让页面在 数据版本不一致时把「班次是改过的、配置是没改过的」拼在一起显示。
    */
   public ConfigOverview overview(UUID warehouseId, ChangeQuery query) {
     WarehouseIdentity identity = requireWarehouse(warehouseId);
@@ -92,12 +84,13 @@ public class WarehouseConfigService {
         impacts(),
         "配置影响下游作业方式而不是界面显示；每次修改都会逐字段写入变更历史"
             + "（append-only，运行角色与表 owner 都改不掉）。班次存的是当地墙上时刻，"
-            + "本仓时区 " + identity.timezone() + "。");
+            + "本仓时区 "
+            + identity.timezone()
+            + "。");
   }
 
   /** 仓库本身的档案字段。只读三条，与 8.1.1.2 的修改逻辑无关。 */
-  private record WarehouseIdentity(
-      String code, String name, String timezone, String status) {
+  private record WarehouseIdentity(String code, String name, String timezone, String status) {
     boolean archived() {
       return "ARCHIVED".equals(status);
     }
@@ -123,10 +116,8 @@ public class WarehouseConfigService {
   /**
    * 当前生效配置。
    *
-   * <p>**没有配置行时返回默认值，并如实说 {@code unconfigured=true}** ——
-   * 不自动建行。自动建行会让「这个仓的复核比例是 0」与「这个仓还没配过复核比例」
-   * 在界面上分不开，而这两件事对运营是完全不同的：后者意味着作业可能正按
-   * 拣货策略的默认值在跑。
+   * <p>**没有配置行时返回默认值，并如实说 {@code unconfigured=true}** —— 不自动建行。自动建行会让「这个仓的复核比例是 0」与「这个仓还没配过复核比例」
+   * 在界面上分不开，而这两件事对运营是完全不同的：后者意味着作业可能正按 拣货策略的默认值在跑。
    */
   public WarehouseConfig config(UUID warehouseId) {
     // 仓库不存在与不属于本租户都 404（与 8.1.1.2 同一纪律）：
@@ -177,19 +168,16 @@ public class WarehouseConfigService {
   /**
    * 修改仓库行为参数。
    *
-   * <p>应用层校验给出可读错误，DB 层仍有 CHECK 与外键兜底 —— 两层都要在，各挡各的：
-   * 前者挡用户，后者和别的车道一样挡 SQL。
+   * <p>应用层校验给出可读错误，DB 层仍有 CHECK 与外键兜底 —— 两层都要在，各挡各的： 前者挡用户，后者和别的车道一样挡 SQL。
    *
-   * <p>留痕与写入在**同一个事务**里（{@code AccessService.run} 已开事务），
-   * 所以「配置改了但留痕没写」与「留痕写了但配置没改」都不会发生。
+   * <p>留痕与写入在**同一个事务**里（{@code AccessService.run} 已开事务）， 所以「配置改了但留痕没写」与「留痕写了但配置没改」都不会发生。
    *
-   * @param actorId 已认证成员 id —— 取自 {@code AccessService.Access.userId()}，
-   *     **不接受请求参数传入**：调用方传 id 等于允许把变更记到别人头上
+   * @param actorId 已认证成员 id —— 取自 {@code AccessService.Access.userId()}， **不接受请求参数传入**：调用方传 id
+   *     等于允许把变更记到别人头上
    */
   public WarehouseConfigSaved update(UUID warehouseId, WarehouseConfigInput input, UUID actorId) {
     WarehouseIdentity identity = requireWarehouse(warehouseId);
-    if (identity.archived())
-      throw new IllegalArgumentException("仓库已归档，不能再修改配置：归档是终态，没有回退动作");
+    if (identity.archived()) throw new IllegalArgumentException("仓库已归档，不能再修改配置：归档是终态，没有回退动作");
 
     PickingStrategy strategy = strategy(input.pickingStrategy());
     BigDecimal ratio = reviewRatio(input.defaultReviewRatio());
@@ -216,15 +204,32 @@ public class WarehouseConfigService {
                updated_by_membership_id=excluded.updated_by_membership_id,
                updated_at=now()
         """,
-        warehouseId, lot, serial, strategy.name(), ratio, split, note, actorId);
+        warehouseId,
+        lot,
+        serial,
+        strategy.name(),
+        ratio,
+        split,
+        note,
+        actorId);
 
     // 逐字段留痕。真的是「变了」才写 —— new == old 的一行不是变更，是噪声，
     // 它会让「这个仓改过几次」变成一个被无意义提交灌水的数字。
     List<ConfigChange> written =
         new ArrayList<>(
             recordChanges(
-                warehouseId, "CONFIG", null, null, before, lot, serial, strategy, ratio, split,
-                note, actorId));
+                warehouseId,
+                "CONFIG",
+                null,
+                null,
+                before,
+                lot,
+                serial,
+                strategy,
+                ratio,
+                split,
+                note,
+                actorId));
 
     WarehouseConfig after = config(warehouseId);
     return new WarehouseConfigSaved(after, written.size(), written);
@@ -233,8 +238,7 @@ public class WarehouseConfigService {
   /**
    * 逐字段比较并写留痕。
    *
-   * <p>值统一**规范化文本**：布尔 {@code "true"/"false"}、比例固定 6 位小数、
-   * 策略用枚举名、备注原样（空白归一成空串，否则「备注是空」与「备注是空格」
+   * <p>值统一**规范化文本**：布尔 {@code "true"/"false"}、比例固定 6 位小数、 策略用枚举名、备注原样（空白归一成空串，否则「备注是空」与「备注是空格」
    * 会在留痕里永远不相等）。
    */
   private List<ConfigChange> recordChanges(
@@ -257,28 +261,71 @@ public class WarehouseConfigService {
     boolean existed = !before.unconfigured();
 
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "lotTrackingEnabled",
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "lotTrackingEnabled",
             existed ? Boolean.toString(before.lotTrackingEnabled()) : null,
-            Boolean.toString(lot), changeNote, actorId));
+            Boolean.toString(lot),
+            changeNote,
+            actorId));
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "serialTrackingEnabled",
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "serialTrackingEnabled",
             existed ? Boolean.toString(before.serialTrackingEnabled()) : null,
-            Boolean.toString(serial), changeNote, actorId));
+            Boolean.toString(serial),
+            changeNote,
+            actorId));
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "pickingStrategy",
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "pickingStrategy",
             existed ? before.pickingStrategy().name() : null,
-            strategy.name(), changeNote, actorId));
+            strategy.name(),
+            changeNote,
+            actorId));
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "defaultReviewRatio",
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "defaultReviewRatio",
             existed ? ratioText(before.defaultReviewRatio()) : null,
-            ratioText(ratio), changeNote, actorId));
+            ratioText(ratio),
+            changeNote,
+            actorId));
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "allowSplitShipment",
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "allowSplitShipment",
             existed ? Boolean.toString(before.allowSplitShipment()) : null,
-            Boolean.toString(split), changeNote, actorId));
+            Boolean.toString(split),
+            changeNote,
+            actorId));
     written.addAll(
-        field(warehouseId, scope, shiftId, shiftCode, "note",
-            existed ? before.note() : null, note, changeNote, actorId));
+        field(
+            warehouseId,
+            scope,
+            shiftId,
+            shiftCode,
+            "note",
+            existed ? before.note() : null,
+            note,
+            changeNote,
+            actorId));
     return written;
   }
 
@@ -287,8 +334,7 @@ public class WarehouseConfigService {
   /**
    * 班次清单。
    *
-   * <p>按 {@code enabled} 倒序 + 编码排序：启用中的排前面（那是要排的班），
-   * 停用的沉底但**仍然列出来** —— 「停用的班次」与「这个仓从没有夜班」
+   * <p>按 {@code enabled} 倒序 + 编码排序：启用中的排前面（那是要排的班）， 停用的沉底但**仍然列出来** —— 「停用的班次」与「这个仓从没有夜班」
    * 在界面上必须能分开，否则排班的人会以为夜班从来没排过。
    */
   public List<ShiftRow> shifts(UUID warehouseId) {
@@ -308,13 +354,11 @@ public class WarehouseConfigService {
   /**
    * 新建班次。
    *
-   * <p>跨夜由服务端按墙上时刻算出，**不接受调用方传入** —— 调用方自己判断会出现
-   * 「22:00-06:00 被算成不跨夜」，而那会让时长算成负数。
+   * <p>跨夜由服务端按墙上时刻算出，**不接受调用方传入** —— 调用方自己判断会出现 「22:00-06:00 被算成不跨夜」，而那会让时长算成负数。
    */
   public ShiftSaved createShift(UUID warehouseId, ShiftInput input, UUID actorId) {
     WarehouseIdentity identity = requireWarehouse(warehouseId);
-    if (identity.archived())
-      throw new IllegalArgumentException("仓库已归档，不能再修改班次：归档是终态，没有回退动作");
+    if (identity.archived()) throw new IllegalArgumentException("仓库已归档，不能再修改班次：归档是终态，没有回退动作");
 
     String code = input.code().trim().toUpperCase(Locale.ROOT);
     String name = input.name().trim();
@@ -324,8 +368,7 @@ public class WarehouseConfigService {
     LocalTime start = localTime(input.startLocal(), "上班时刻");
     LocalTime end = localTime(input.endLocal(), "下班时刻");
     if (start.equals(end))
-      throw new IllegalArgumentException(
-          "上班与下班时刻不能相同：相同会被当成一个跨夜 24 小时的班，那几乎肯定是录错了");
+      throw new IllegalArgumentException("上班与下班时刻不能相同：相同会被当成一个跨夜 24 小时的班，那几乎肯定是录错了");
     boolean crosses = start.isAfter(end);
     boolean enabled = input.enabled() == null || input.enabled();
     String note = input.note() == null ? "" : input.note().trim();
@@ -338,7 +381,16 @@ public class WarehouseConfigService {
               crosses_midnight,enabled,note,created_by_membership_id)
           values(current_setting('app.current_tenant', true)::uuid,?,?,?,?,?,?,?,?,?,?)
           """,
-          warehouseId, id, code, name, start, end, crosses, enabled, note, actorId);
+          warehouseId,
+          id,
+          code,
+          name,
+          start,
+          end,
+          crosses,
+          enabled,
+          note,
+          actorId);
     } catch (org.springframework.dao.DuplicateKeyException e) {
       // Spring 的 DefaultExceptionTranslatorExecuteListener 把 jOOQ 异常翻成
       // org.springframework.dao.*（与 8.1.1.1 同一手法，接错类型的表现是 catch 永不执行）。
@@ -346,25 +398,50 @@ public class WarehouseConfigService {
     }
 
     List<ConfigChange> written =
-        new ArrayList<>(
-            field(warehouseId, "SHIFT", id, code, "code", null, code, note, actorId));
+        new ArrayList<>(field(warehouseId, "SHIFT", id, code, "code", null, code, note, actorId));
     written.addAll(field(warehouseId, "SHIFT", id, code, "name", null, name, note, actorId));
     written.addAll(
-        field(warehouseId, "SHIFT", id, code, "startLocal", null, VALUE_TIME.format(start), note, actorId));
+        field(
+            warehouseId,
+            "SHIFT",
+            id,
+            code,
+            "startLocal",
+            null,
+            VALUE_TIME.format(start),
+            note,
+            actorId));
     written.addAll(
-        field(warehouseId, "SHIFT", id, code, "endLocal", null, VALUE_TIME.format(end), note, actorId));
+        field(
+            warehouseId,
+            "SHIFT",
+            id,
+            code,
+            "endLocal",
+            null,
+            VALUE_TIME.format(end),
+            note,
+            actorId));
     written.addAll(
-        field(warehouseId, "SHIFT_SCHEDULE", id, code, "enabled",
-            null, Boolean.toString(enabled), note, actorId));
+        field(
+            warehouseId,
+            "SHIFT_SCHEDULE",
+            id,
+            code,
+            "enabled",
+            null,
+            Boolean.toString(enabled),
+            note,
+            actorId));
 
     return new ShiftSaved(shift(id, warehouseId), written.size(), written);
   }
 
   /** 改班次（整份替换，含启用状态）。 */
-  public ShiftSaved updateShift(UUID warehouseId, UUID shiftId, ShiftUpdateInput input, UUID actorId) {
+  public ShiftSaved updateShift(
+      UUID warehouseId, UUID shiftId, ShiftUpdateInput input, UUID actorId) {
     WarehouseIdentity identity = requireWarehouse(warehouseId);
-    if (identity.archived())
-      throw new IllegalArgumentException("仓库已归档，不能再修改班次：归档是终态，没有回退动作");
+    if (identity.archived()) throw new IllegalArgumentException("仓库已归档，不能再修改班次：归档是终态，没有回退动作");
 
     var current = requireShift(warehouseId, shiftId);
     String name = input.name().trim();
@@ -372,8 +449,7 @@ public class WarehouseConfigService {
     LocalTime start = localTime(input.startLocal(), "上班时刻");
     LocalTime end = localTime(input.endLocal(), "下班时刻");
     if (start.equals(end))
-      throw new IllegalArgumentException(
-          "上班与下班时刻不能相同：相同会被当成一个跨夜 24 小时的班，那几乎肯定是录错了");
+      throw new IllegalArgumentException("上班与下班时刻不能相同：相同会被当成一个跨夜 24 小时的班，那几乎肯定是录错了");
     boolean crosses = start.isAfter(end);
     boolean enabled = Boolean.TRUE.equals(input.enabled());
     String note = input.note() == null ? "" : input.note().trim();
@@ -386,44 +462,85 @@ public class WarehouseConfigService {
          where %s and warehouse_id=? and id=?
         """
             .formatted(TENANT),
-        name, start, end, crosses, enabled, note, warehouseId, shiftId);
+        name,
+        start,
+        end,
+        crosses,
+        enabled,
+        note,
+        warehouseId,
+        shiftId);
 
     String code = current.get("code", String.class);
     String fieldNote = note;
     List<ConfigChange> written =
         new ArrayList<>(
-            field(warehouseId, "SHIFT", shiftId, code, "name",
-                current.get("name", String.class), name, fieldNote, actorId));
+            field(
+                warehouseId,
+                "SHIFT",
+                shiftId,
+                code,
+                "name",
+                current.get("name", String.class),
+                name,
+                fieldNote,
+                actorId));
     written.addAll(
-        field(warehouseId, "SHIFT", shiftId, code, "startLocal",
+        field(
+            warehouseId,
+            "SHIFT",
+            shiftId,
+            code,
+            "startLocal",
             VALUE_TIME.format(current.get("start_local", LocalTime.class)),
-            VALUE_TIME.format(start), fieldNote, actorId));
+            VALUE_TIME.format(start),
+            fieldNote,
+            actorId));
     written.addAll(
-        field(warehouseId, "SHIFT", shiftId, code, "endLocal",
+        field(
+            warehouseId,
+            "SHIFT",
+            shiftId,
+            code,
+            "endLocal",
             VALUE_TIME.format(current.get("end_local", LocalTime.class)),
-            VALUE_TIME.format(end), fieldNote, actorId));
+            VALUE_TIME.format(end),
+            fieldNote,
+            actorId));
     // 启用状态单列一条（scope=SHIFT_SCHEDULE）：停用一个班次与改动它的上下班时刻
     // 是两种不同的作业影响，混在一条里会让复盘分不清。
     written.addAll(
-        field(warehouseId, "SHIFT_SCHEDULE", shiftId, code, "enabled",
+        field(
+            warehouseId,
+            "SHIFT_SCHEDULE",
+            shiftId,
+            code,
+            "enabled",
             Boolean.toString(Boolean.TRUE.equals(current.get("enabled", Boolean.class))),
-            Boolean.toString(enabled), fieldNote, actorId));
+            Boolean.toString(enabled),
+            fieldNote,
+            actorId));
     written.addAll(
-        field(warehouseId, "SHIFT", shiftId, code, "note",
-            current.get("note", String.class), note, fieldNote, actorId));
+        field(
+            warehouseId,
+            "SHIFT",
+            shiftId,
+            code,
+            "note",
+            current.get("note", String.class),
+            note,
+            fieldNote,
+            actorId));
 
     return new ShiftSaved(shift(shiftId, warehouseId), written.size(), written);
   }
 
-  /**
-   * 班次行映射。时长由起止时刻算出，跨夜班会算出大于 1440 的值 ——
-   * 界面上不该让用户自己算减法。
-   */
+  /** 班次行映射。时长由起止时刻算出，跨夜班会算出大于 1440 的值 —— 界面上不该让用户自己算减法。 */
   private static ShiftRow shiftRow(org.jooq.Record r) {
     LocalTime start = r.get("start_local", LocalTime.class);
     LocalTime end = r.get("end_local", LocalTime.class);
     long minutes = ChronoUnit.MINUTES.between(start, end);
-    if (minutes <= 0) minutes += 24 * 60;   // 跨夜班：加上一天
+    if (minutes <= 0) minutes += 24 * 60; // 跨夜班：加上一天
     return new ShiftRow(
         r.get("id", UUID.class),
         r.get("code", String.class),
@@ -466,8 +583,7 @@ public class WarehouseConfigService {
   /**
    * 变更历史。真分页 + 筛选（范围 / 班次）+ 确定次序。
    *
-   * <p>排序是 {@code changed_at desc, id}：只按时间排会在同毫秒内不确定，
-   * 而没有确定次序的分页会漏行或重复。
+   * <p>排序是 {@code changed_at desc, id}：只按时间排会在同毫秒内不确定， 而没有确定次序的分页会漏行或重复。
    */
   public ChangePage changes(UUID warehouseId, ChangeQuery query) {
     requireWarehouse(warehouseId);
@@ -494,8 +610,7 @@ public class WarehouseConfigService {
     String clause = " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne(
-                "select count(*) from warehouse_config_change c" + clause, binds.toArray())
+        sql.fetchOne("select count(*) from warehouse_config_change c" + clause, binds.toArray())
             .get(0, Long.class);
 
     var rows =
@@ -535,8 +650,7 @@ public class WarehouseConfigService {
   /**
    * 写一条留痕。
    *
-   * <p>old == new 时**不写**：那种行不是变更，是噪声。返回空列表让调用方
-   * 自然地少一条 —— 「本次变更 N 条」这个数才有意义。
+   * <p>old == new 时**不写**：那种行不是变更，是噪声。返回空列表让调用方 自然地少一条 —— 「本次变更 N 条」这个数才有意义。
    */
   private List<ConfigChange> field(
       UUID warehouseId,
@@ -556,7 +670,15 @@ public class WarehouseConfigService {
             field_name,old_value,new_value,note,changed_by_membership_id)
         values(current_setting('app.current_tenant', true)::uuid,?,?,?,?,?,?,?,?,?)
         """,
-        warehouseId, id, scope, shiftId, fieldName, oldValue, newValue, note, actorId);
+        warehouseId,
+        id,
+        scope,
+        shiftId,
+        fieldName,
+        oldValue,
+        newValue,
+        note,
+        actorId);
     return List.of(
         new ConfigChange(
             id,
@@ -582,36 +704,43 @@ public class WarehouseConfigService {
   /**
    * 配置对下游作业的影响。
    *
-   * <p>蓝图说「影响 8.3 作业行为」，但 8.3.2 拣货与 8.3.3 复核**尚未交付**
-   * （本服务还没有拣货任务表与复核任务表）。这里逐条说清哪一项现在真的会生效、
-   * 哪一项要等下游接上 —— 而不是笼统写一句「影响 8.3」，
-   * 那会让人以为拣货已经按这个策略在跑。
+   * <p>蓝图说「影响 8.3 作业行为」，但 8.3.2 拣货与 8.3.3 复核**尚未交付** （本服务还没有拣货任务表与复核任务表）。这里逐条说清哪一项现在真的会生效、
+   * 哪一项要等下游接上 —— 而不是笼统写一句「影响 8.3」， 那会让人以为拣货已经按这个策略在跑。
    */
   public List<ConfigImpact> impacts() {
     return List.of(
         new ConfigImpact(
-            "BATCH_TRACKING", "批次追溯", false, "8.2.1.1",
-            "收货单（8.2.1.1，V70）已交付但**没有批次字段**：它不读本配置。"
-                + "批次追溯要等收货录入侧接上开关后才会生效。"),
+            "BATCH_TRACKING",
+            "批次追溯",
+            false,
+            "8.2.1.1",
+            "收货单（8.2.1.1，V70）已交付但**没有批次字段**：它不读本配置。" + "批次追溯要等收货录入侧接上开关后才会生效。"),
         new ConfigImpact(
-            "SERIAL_TRACKING", "序列号追溯", false, "7.1.1.2",
-            "inventory_serial（V58）已建表但**没有 warehouse_id**："
-                + "序列号在数据层就还没有归属到仓，本配置给不了它归属。"),
+            "SERIAL_TRACKING",
+            "序列号追溯",
+            false,
+            "7.1.1.2",
+            "inventory_serial（V58）已建表但**没有 warehouse_id**：" + "序列号在数据层就还没有归属到仓，本配置给不了它归属。"),
         new ConfigImpact(
-            "PICKING_STRATEGY", "拣货策略", false, "8.3.2",
-            "拣货任务表不存在，本服务还没有按策略分派任务的地方。"
-                + "配置已落库并留痕，8.3.2 落地后直接读当前态。"),
+            "PICKING_STRATEGY",
+            "拣货策略",
+            false,
+            "8.3.2",
+            "拣货任务表不存在，本服务还没有按策略分派任务的地方。" + "配置已落库并留痕，8.3.2 落地后直接读当前态。"),
         new ConfigImpact(
-            "REVIEW_RATIO", "默认复核比例", false, "8.3.3",
-            "复核任务表不存在。比例已落库并钉在 [0,1]，8.3.3 落地后读当前态。"),
+            "REVIEW_RATIO", "默认复核比例", false, "8.3.3", "复核任务表不存在。比例已落库并钉在 [0,1]，8.3.3 落地后读当前态。"),
         new ConfigImpact(
-            "SPLIT_SHIPMENT", "拆零发货", false, "8.3.4",
-            "发货交接（8.3.4）尚未交付，拆零在下游没有落点。"
-                + "开关已落库，允许拆零前请确认下游已支持。"),
+            "SPLIT_SHIPMENT",
+            "拆零发货",
+            false,
+            "8.3.4",
+            "发货交接（8.3.4）尚未交付，拆零在下游没有落点。" + "开关已落库，允许拆零前请确认下游已支持。"),
         new ConfigImpact(
-            "SHIFT_SCHEDULE", "工作时段与班次", true, "8.1.1.3",
-            "本模块自身已交付：班次可增改、时长与跨夜由服务端算、可停用，"
-                + "每次改动逐字段留痕。"));
+            "SHIFT_SCHEDULE",
+            "工作时段与班次",
+            true,
+            "8.1.1.3",
+            "本模块自身已交付：班次可增改、时长与跨夜由服务端算、可停用，" + "每次改动逐字段留痕。"));
   }
 
   /** 筛选与录入下拉项。 */
@@ -628,12 +757,9 @@ public class WarehouseConfigService {
             new WarehouseConfigScopeOption("CONFIG", "作业参数"),
             new WarehouseConfigScopeOption("SHIFT", "班次字段"),
             new WarehouseConfigScopeOption("SHIFT_SCHEDULE", "班次启用状态")),
-        "默认复核比例是 0~1 的比例值：0 = 不复核，1 = 全量复核。"
-            + "它是**默认**——单次作业可以覆盖它，但「这个仓默认复核几成」是仓自己的属性。",
-        "拆零发货默认关闭。拆零会破掉「一单一包裹」这个下游默认假设"
-            + "（面单、装箱、运费都按整单算），所以要拆零必须显式打开。",
-        "班次存的是**当地墙上时刻**，具体某天的实际时刻按本仓时区推算。"
-            + "上班时刻晚于下班时刻表示跨夜班（如 22:00 → 06:00），时长会跨到次日。");
+        "默认复核比例是 0~1 的比例值：0 = 不复核，1 = 全量复核。" + "它是**默认**——单次作业可以覆盖它，但「这个仓默认复核几成」是仓自己的属性。",
+        "拆零发货默认关闭。拆零会破掉「一单一包裹」这个下游默认假设" + "（面单、装箱、运费都按整单算），所以要拆零必须显式打开。",
+        "班次存的是**当地墙上时刻**，具体某天的实际时刻按本仓时区推算。" + "上班时刻晚于下班时刻表示跨夜班（如 22:00 → 06:00），时长会跨到次日。");
   }
 
   // ================================================================ 校验辅助
@@ -643,17 +769,15 @@ public class WarehouseConfigService {
     try {
       return PickingStrategy.valueOf(raw.trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(
-          "不支持的拣货策略：" + raw + "（应为 ORDER / WAVE / LOCATION 三选一）");
+      throw new IllegalArgumentException("不支持的拣货策略：" + raw + "（应为 ORDER / WAVE / LOCATION 三选一）");
     }
   }
 
   /**
    * 默认复核比例。
    *
-   * <p>区间在这里**再**校验一遍而不是只靠 V104 的 CHECK：CHECK 报出来的是
-   * SQLSTATE 23514，被 ApiErrorHandler 翻成一句「数据与既有记录冲突」，
-   * 用户看不出是自己填了 1.5。
+   * <p>区间在这里**再**校验一遍而不是只靠 V104 的 CHECK：CHECK 报出来的是 SQLSTATE 23514，被 ApiErrorHandler
+   * 翻成一句「数据与既有记录冲突」， 用户看不出是自己填了 1.5。
    */
   static BigDecimal reviewRatio(BigDecimal raw) {
     if (raw == null) throw new IllegalArgumentException("默认复核比例不能为空");
@@ -668,8 +792,7 @@ public class WarehouseConfigService {
   /**
    * 解析班次时刻（{@code HH:mm} 或 {@code HH:mm:ss}）。
    *
-   * <p>解析不了给可读错误。刻意**不**兜底成「现在几点」或某个默认值 ——
-   * 悄悄改掉用户填的时刻等于让排班表上出现一个谁都没填过的班次。
+   * <p>解析不了给可读错误。刻意**不**兜底成「现在几点」或某个默认值 —— 悄悄改掉用户填的时刻等于让排班表上出现一个谁都没填过的班次。
    */
   static LocalTime localTime(String raw, String field) {
     String text = raw == null ? "" : raw.trim();

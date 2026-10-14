@@ -2,7 +2,6 @@ package com.starcon.warehouse;
 
 import static com.starcon.warehouse.LabelPrintModels.*;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,19 +17,16 @@ import java.util.Map;
  * <p>蓝图的输出是「打印任务记录 + 打印内容（PDF/指令流）」。这里不做「写死一个文件返回 200」：
  *
  * <ul>
- *   <li><b>ZPL</b>（标签类：面单 / SKU 条码 / 库位标签）—— 真正的热敏打印机指令流，
- *       {@code ^XA … ^XZ} 包边，条码用 {@code ^BC}（Code 128）交给打印机编码，
- *       二维码用 {@code ^BQ}。现场机器可以直接吃这串指令。
- *   <li><b>HTML</b>（单据类：装箱单 / 箱唛）—— 自带内联样式的打印视图，
- *       {@code @page} 尺寸取自模板纸张，带 {@code print-color-adjust} 保证条码黑白可打。
+ *   <li><b>ZPL</b>（标签类：面单 / SKU 条码 / 库位标签）—— 真正的热敏打印机指令流， {@code ^XA … ^XZ} 包边，条码用 {@code ^BC}（Code
+ *       128）交给打印机编码， 二维码用 {@code ^BQ}。现场机器可以直接吃这串指令。
+ *   <li><b>HTML</b>（单据类：装箱单 / 箱唛）—— 自带内联样式的打印视图， {@code @page} 尺寸取自模板纸张，带 {@code
+ *       print-color-adjust} 保证条码黑白可打。
  * </ul>
  *
- * <p><b>条码是真码，不是装饰</b>：{@link Code128} 按 Code 128 Set B 的编码表把文本转成
- * 模块宽度序列（含校验位），HTML 侧再把它画成 SVG 条纹。校验位算错会在扫码枪上直接读不出，
- * 所以这里老老实实按规范算。
+ * <p><b>条码是真码，不是装饰</b>：{@link Code128} 按 Code 128 Set B 的编码表把文本转成 模块宽度序列（含校验位），HTML 侧再把它画成 SVG
+ * 条纹。校验位算错会在扫码枪上直接读不出， 所以这里老老实实按规范算。
  *
- * <p>渲染只读快照，不查库、不回读打印次数：打印次数由服务层在事务里单独累加
- * （{@code LabelPrintingService}），两者分开是为了让「渲染失败不会连带把次数加了」。
+ * <p>渲染只读快照，不查库、不回读打印次数：打印次数由服务层在事务里单独累加 （{@code LabelPrintingService}），两者分开是为了让「渲染失败不会连带把次数加了」。
  */
 final class LabelRenderService {
 
@@ -72,8 +68,7 @@ final class LabelRenderService {
   /**
    * 快照取值表：模板字段布局里的 {@code key} 按这张表取值。
    *
-   * <p>刻意做成「快照的显式投影」而不是反射式取值：新增快照列时这里必须显式决定
-   * 哪个 key 能拿到它，否则就可能把某个不该上标签的字段悄悄带出去。
+   * <p>刻意做成「快照的显式投影」而不是反射式取值：新增快照列时这里必须显式决定 哪个 key 能拿到它，否则就可能把某个不该上标签的字段悄悄带出去。
    */
   private static Map<String, String> snapshotValues(LabelPrintTarget t) {
     Map<String, String> values = new LinkedHashMap<>();
@@ -89,7 +84,12 @@ final class LabelRenderService {
     put(values, "locationCode", t.locationCode());
     put(values, "cartonCode", t.cartonCode());
     if (t.packageCount() != null) put(values, "packageCount", String.valueOf(t.packageCount()));
-    put(values, "weightKg", t.weightKg() == null ? null : t.weightKg().setScale(3, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());
+    put(
+        values,
+        "weightKg",
+        t.weightKg() == null
+            ? null
+            : t.weightKg().setScale(3, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());
     put(values, "remark", t.remark());
     put(values, "printCount", String.valueOf(t.printCount()));
     // 平台码与运单号是面单条码的原料：没有运单号就没有条码，这是上游未交付的真实后果
@@ -128,11 +128,13 @@ final class LabelRenderService {
   /**
    * ZPL 指令流。
    *
-   * <p>结构：{@code ^XA}（开始）→ 尺寸 → 文本块 → 条码块 → {@code ^XZ}（结束）。
-   * 坐标用 {@code ^FO x,y}（dots，203dpi 下 1 dot ≈ 0.125mm），缩放用 {@code ^A0N,h,w}。
+   * <p>结构：{@code ^XA}（开始）→ 尺寸 → 文本块 → 条码块 → {@code ^XZ}（结束）。 坐标用 {@code ^FO x,y}（dots，203dpi 下 1
+   * dot ≈ 0.125mm），缩放用 {@code ^A0N,h,w}。
    */
-  private static String zpl(LabelPrintTarget t, LabelPrintTemplate template, Map<String, String> v) {
-    var paper = Paper.of(template.paperSize(), defaultFormatFor(t.objectType()) == PrintContentFormat.ZPL);
+  private static String zpl(
+      LabelPrintTarget t, LabelPrintTemplate template, Map<String, String> v) {
+    var paper =
+        Paper.of(template.paperSize(), defaultFormatFor(t.objectType()) == PrintContentFormat.ZPL);
     var widthDots = Math.round(paper.widthMm() * 203 / 25.4f);
     var heightDots = Math.round(paper.heightMm() * 203 / 25.4f);
     boolean landscape = "LANDSCAPE".equalsIgnoreCase(template.orientation());
@@ -161,24 +163,33 @@ final class LabelRenderService {
         y += 92;
         continue;
       }
-      var text = (block.label() == null || block.label().isBlank())
-          ? value
-          : block.label() + "：" + value;
+      var text =
+          (block.label() == null || block.label().isBlank()) ? value : block.label() + "：" + value;
       // 中文按两个字符宽估算，避免长字段冲出标签右边
       int width = text.codePointCount(0, text.length());
       while (width > paper.maxCharsPerLine()) {
         text = text.substring(0, Math.max(1, text.length() / 2)) + "…";
         width = text.codePointCount(0, text.length());
       }
-      out.append("^FO32,").append(y).append("^A0N,").append(block.scale()).append(',').append(block.scale())
-          .append("^FD").append(zplEscape(text)).append("^FS\n");
+      out.append("^FO32,")
+          .append(y)
+          .append("^A0N,")
+          .append(block.scale())
+          .append(',')
+          .append(block.scale())
+          .append("^FD")
+          .append(zplEscape(text))
+          .append("^FS\n");
       y += block.scale() + 8;
       if (y > heightDots - 40) break;
     }
 
     // 打印次数打在页脚：现场重打时纸上就能看出这是第几张，省得回系统查
-    out.append("^FO32,").append(Math.max(y, heightDots - 40))
-        .append("^A0N,24,24^FD").append(zplEscape("打印次数 " + t.printCount())).append("^FS\n");
+    out.append("^FO32,")
+        .append(Math.max(y, heightDots - 40))
+        .append("^A0N,24,24^FD")
+        .append(zplEscape("打印次数 " + t.printCount()))
+        .append("^FS\n");
     out.append("^XZ\n");
     return out.toString();
   }
@@ -191,18 +202,29 @@ final class LabelRenderService {
   // ================================================================ HTML 打印视图
 
   /** 自带内联样式的打印视图：{@code @page} 尺寸取自模板，浏览器直接排版打印。 */
-  private static String html(LabelPrintTarget t, LabelPrintTemplate template, Map<String, String> v) {
+  private static String html(
+      LabelPrintTarget t, LabelPrintTemplate template, Map<String, String> v) {
     var paper = Paper.of(template.paperSize(), false);
-    var orientation = "LANDSCAPE".equalsIgnoreCase(template.orientation()) ? "landscape" : "portrait";
+    var orientation =
+        "LANDSCAPE".equalsIgnoreCase(template.orientation()) ? "landscape" : "portrait";
     var out = new StringBuilder(4096);
     out.append("<!doctype html>\n<html lang=\"zh-CN\"><head><meta charset=\"utf-8\">\n");
-    out.append("<title>").append(escapeHtml(t.objectType().label())).append(' ')
-        .append(escapeHtml(t.externalRef())).append("</title>\n<style>\n");
-    out.append("@page{size:").append(paper.widthMm()).append("mm ")
-        .append(paper.heightMm()).append("mm ").append(orientation).append(";margin:6mm;}\n");
+    out.append("<title>")
+        .append(escapeHtml(t.objectType().label()))
+        .append(' ')
+        .append(escapeHtml(t.externalRef()))
+        .append("</title>\n<style>\n");
+    out.append("@page{size:")
+        .append(paper.widthMm())
+        .append("mm ")
+        .append(paper.heightMm())
+        .append("mm ")
+        .append(orientation)
+        .append(";margin:6mm;}\n");
     // 打印时条码必须保留黑白：关掉颜色调整会把条码打成一团灰
     out.append("*{print-color-adjust:exact;-webkit-print-color-adjust:exact;}\n");
-    out.append("body{font-family:\"PingFang SC\",\"Microsoft YaHei\",sans-serif;font-size:11pt;margin:0;color:#000;}\n");
+    out.append(
+        "body{font-family:\"PingFang SC\",\"Microsoft YaHei\",sans-serif;font-size:11pt;margin:0;color:#000;}\n");
     out.append("h1{font-size:14pt;margin:0 0 6px;}\n");
     out.append(".ref{font-size:9pt;color:#555;margin-bottom:10px;}\n");
     out.append("table{width:100%;border-collapse:collapse;}\n");
@@ -231,11 +253,15 @@ final class LabelRenderService {
       }
       var value = v.get(block.key());
       if (value == null || value.isBlank()) continue;
-      out.append("<tr><th>").append(escapeHtml(block.label() == null ? block.key() : block.label()))
-          .append("</th><td>").append(escapeHtml(value)).append("</td></tr>\n");
+      out.append("<tr><th>")
+          .append(escapeHtml(block.label() == null ? block.key() : block.label()))
+          .append("</th><td>")
+          .append(escapeHtml(value))
+          .append("</td></tr>\n");
     }
     out.append("</table>\n");
-    out.append("<div class=\"foot\">打印次数：").append(t.printCount())
+    out.append("<div class=\"foot\">打印次数：")
+        .append(t.printCount())
         .append(" 次 · 本视图由服务端按模板与快照现算，")
         .append("内容校验和已随打印日志落库</div>\n");
     out.append("</body></html>\n");
@@ -243,7 +269,11 @@ final class LabelRenderService {
   }
 
   private static String escapeHtml(String value) {
-    return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    return value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;");
   }
 
   // ================================================================ Code 128
@@ -251,8 +281,8 @@ final class LabelRenderService {
   /**
    * Code 128 Set B 编码器（ symbology 取自 GS1 标准条码集）。
    *
-   * <p>按规范算校验位：{@code checksum = (start + Σ valueᵢ × i) mod 103}，
-   * 再拼停止符 106。少算或算错校验位，扫码枪会直接拒读 —— 这不是能糊弄的地方。
+   * <p>按规范算校验位：{@code checksum = (start + Σ valueᵢ × i) mod 103}， 再拼停止符 106。少算或算错校验位，扫码枪会直接拒读 ——
+   * 这不是能糊弄的地方。
    */
   static final class Code128 {
 
@@ -303,10 +333,17 @@ final class LabelRenderService {
       for (var code : codes) x += appendBars(bars, code, moduleWidth, height, x);
 
       var out = new StringBuilder(4096);
-      out.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").append(modules * moduleWidth)
-          .append("\" height=\"").append(height).append("\" viewBox=\"0 0 ")
-          .append(modules * moduleWidth).append(' ').append(height)
-          .append("\" role=\"img\" aria-label=\"条码 ").append(escapeHtml(text)).append("\">");
+      out.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"")
+          .append(modules * moduleWidth)
+          .append("\" height=\"")
+          .append(height)
+          .append("\" viewBox=\"0 0 ")
+          .append(modules * moduleWidth)
+          .append(' ')
+          .append(height)
+          .append("\" role=\"img\" aria-label=\"条码 ")
+          .append(escapeHtml(text))
+          .append("\">");
       out.append("<rect width=\"100%\" height=\"100%\" fill=\"#fff\"/>");
       for (var bar : bars) out.append(bar);
       out.append("</svg>");
@@ -327,13 +364,20 @@ final class LabelRenderService {
      *
      * <p>Code 128 每个图形是 6 段（停止符 7 段）bar/space 交替，宽表第 0 位是 bar。
      */
-    private static int appendBars(List<String> out, int pattern, int moduleWidth, int barHeight, int startX) {
+    private static int appendBars(
+        List<String> out, int pattern, int moduleWidth, int barHeight, int startX) {
       var digits = PATTERNS[pattern];
       int x = startX;
       for (int i = 0; i < digits.length(); i += 2) {
         int barWidth = (digits.charAt(i) - '0') * moduleWidth;
-        out.add("<rect x=\"" + x + "\" y=\"0\" width=\"" + barWidth + "\" height=\"" + barHeight
-            + "\" fill=\"#000\"/>");
+        out.add(
+            "<rect x=\""
+                + x
+                + "\" y=\"0\" width=\""
+                + barWidth
+                + "\" height=\""
+                + barHeight
+                + "\" fill=\"#000\"/>");
         x += barWidth;
         if (i + 1 < digits.length()) x += (digits.charAt(i + 1) - '0') * moduleWidth;
       }
@@ -346,9 +390,8 @@ final class LabelRenderService {
   /**
    * 模板字段布局的解析结果。
    *
-   * <p>布局 JSON 形如 {@code {"blocks":[{"key","label","scale","required"}]}}。
-   * 解析刻意容错（坏 JSON 退化成默认布局），理由是模板不该让整条打印链路挂掉 ——
-   * 现场宁可打出一张版式粗略的标签，也不能什么都打不出来。
+   * <p>布局 JSON 形如 {@code {"blocks":[{"key","label","scale","required"}]}}。 解析刻意容错（坏 JSON
+   * 退化成默认布局），理由是模板不该让整条打印链路挂掉 —— 现场宁可打出一张版式粗略的标签，也不能什么都打不出来。
    */
   record FieldBlock(String key, String label, int scale, boolean required) {}
 
@@ -362,36 +405,41 @@ final class LabelRenderService {
     /** 每种对象类型的默认布局：没配模板时至少能打出一张有内容的标签。 */
     static List<FieldBlock> defaultsFor(PrintObjectType type) {
       return switch (type) {
-        case SHIPPING_LABEL -> List.of(
-            block("barcodeText", null, 64, true),
-            block("waybillNo", "运单号", 28, true),
-            block("carrierCode", "承运商", 24, false),
-            block("shipToName", "收件人", 24, false),
-            block("shipToAddress", "收件地址", 24, false),
-            block("platformCode", "平台", 20, false),
-            block("packageCount", "件数", 20, false),
-            block("weightKg", "重量(kg)", 20, false));
-        case PACKING_SLIP -> List.of(
-            block("externalRef", "单号", 24, true),
-            block("shipToName", "收件人", 22, false),
-            block("shipToAddress", "收件地址", 22, false),
-            block("packageCount", "件数", 20, false),
-            block("weightKg", "重量(kg)", 20, false),
-            block("remark", "备注", 20, false));
-        case SKU_BARCODE -> List.of(
-            block("barcodeText", null, 64, true),
-            block("skuCode", "SKU 编码", 24, true),
-            block("skuName", "品名", 22, false));
-        case LOCATION_LABEL -> List.of(
-            block("barcodeText", null, 64, true),
-            block("locationCode", "库位编码", 28, true),
-            block("remark", "备注", 20, false));
-        case CARTON_MARK -> List.of(
-            block("barcodeText", null, 64, true),
-            block("cartonCode", "箱号", 26, true),
-            block("externalRef", "关联单号", 20, false),
-            block("packageCount", "件数", 20, false),
-            block("weightKg", "重量(kg)", 20, false));
+        case SHIPPING_LABEL ->
+            List.of(
+                block("barcodeText", null, 64, true),
+                block("waybillNo", "运单号", 28, true),
+                block("carrierCode", "承运商", 24, false),
+                block("shipToName", "收件人", 24, false),
+                block("shipToAddress", "收件地址", 24, false),
+                block("platformCode", "平台", 20, false),
+                block("packageCount", "件数", 20, false),
+                block("weightKg", "重量(kg)", 20, false));
+        case PACKING_SLIP ->
+            List.of(
+                block("externalRef", "单号", 24, true),
+                block("shipToName", "收件人", 22, false),
+                block("shipToAddress", "收件地址", 22, false),
+                block("packageCount", "件数", 20, false),
+                block("weightKg", "重量(kg)", 20, false),
+                block("remark", "备注", 20, false));
+        case SKU_BARCODE ->
+            List.of(
+                block("barcodeText", null, 64, true),
+                block("skuCode", "SKU 编码", 24, true),
+                block("skuName", "品名", 22, false));
+        case LOCATION_LABEL ->
+            List.of(
+                block("barcodeText", null, 64, true),
+                block("locationCode", "库位编码", 28, true),
+                block("remark", "备注", 20, false));
+        case CARTON_MARK ->
+            List.of(
+                block("barcodeText", null, 64, true),
+                block("cartonCode", "箱号", 26, true),
+                block("externalRef", "关联单号", 20, false),
+                block("packageCount", "件数", 20, false),
+                block("weightKg", "重量(kg)", 20, false));
       };
     }
 
@@ -412,11 +460,12 @@ final class LabelRenderService {
           var key = node.path("key").asText("").trim();
           if (key.isEmpty()) continue;
           int scale = node.path("scale").asInt(24);
-          out.add(new FieldBlock(
-              key,
-              node.path("label").asText(null),
-              scale >= 10 && scale <= 96 ? scale : 24,
-              node.path("required").asBoolean(false)));
+          out.add(
+              new FieldBlock(
+                  key,
+                  node.path("label").asText(null),
+                  scale >= 10 && scale <= 96 ? scale : 24,
+                  node.path("required").asBoolean(false)));
         }
         return out.isEmpty() ? fallback : out;
       } catch (Exception e) {

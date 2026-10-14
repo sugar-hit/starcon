@@ -15,34 +15,27 @@ import org.springframework.stereotype.Service;
 /**
  * 3.2.1.2 属性选项管理：跨属性的选项总览、启用/停用生命周期、批量重排。
  *
- * <p>与 3.2.1.1（{@link AttributeDictionaryService}）的分工是「单属性 vs 跨属性」，
- * 不是「谁比谁新」：
+ * <p>与 3.2.1.1（{@link AttributeDictionaryService}）的分工是「单属性 vs 跨属性」， 不是「谁比谁新」：
  *
  * <ul>
  *   <li>3.2.1.1 管**一条字典定义**：它的选项集合、它的类目规则、它的增删改。
- *   <li>本类管**租户级选项面**：把所有枚举属性的选项拍平成一张表，回答
- *       「哪些选项被引用了」「哪些属性一个取值都没有」「这个选项还能删吗」。
+ *   <li>本类管**租户级选项面**：把所有枚举属性的选项拍平成一张表，回答 「哪些选项被引用了」「哪些属性一个取值都没有」「这个选项还能删吗」。
  * </ul>
  *
  * <p>五条纪律：
  *
  * <ol>
- *   <li><b>引用计数是输入，不是输出</b>。蓝图把「该选项被多少商品使用」列为输入，
- *       所以 {@code deletable} 必须在**删除之前**就算出来给到界面，
+ *   <li><b>引用计数是输入，不是输出</b>。蓝图把「该选项被多少商品使用」列为输入， 所以 {@code deletable} 必须在**删除之前**就算出来给到界面，
  *       而不是点了删除才被拒绝。
- *   <li><b>不伪造计数</b>。{@code productValueCount} 现在恒为 0，因为
- *       {@code attribute_value} 的复合外键仍锁在 SPU 作用域（V11 结尾已注明）。
- *       那是数据库现状，界面照实呈现；{@code categoryRuleCount} 则是真实的。
- *   <li><b>停用 ≠ 删除</b>。有引用的选项只能停用：历史单据还要靠它解析那个值。
- *       停用挡住的是「不许再新建取用」，既有取值照常可读。
- *   <li><b>排序是覆盖式的</b>。批量重排在事务里逐条校验后统一写入，
- *       半套顺序比整批失败更难排查。
- *   <li><b>租户边界一次也不越</b>。所有读写都在 {@code AccessService.run} 打开的
- *       租户上下文里跑，跨租户的行由 RLS 挡掉，服务层再按 attributeId 做一次归属校验。
+ *   <li><b>不伪造计数</b>。{@code productValueCount} 现在恒为 0，因为 {@code attribute_value} 的复合外键仍锁在 SPU
+ *       作用域（V11 结尾已注明）。 那是数据库现状，界面照实呈现；{@code categoryRuleCount} 则是真实的。
+ *   <li><b>停用 ≠ 删除</b>。有引用的选项只能停用：历史单据还要靠它解析那个值。 停用挡住的是「不许再新建取用」，既有取值照常可读。
+ *   <li><b>排序是覆盖式的</b>。批量重排在事务里逐条校验后统一写入， 半套顺序比整批失败更难排查。
+ *   <li><b>租户边界一次也不越</b>。所有读写都在 {@code AccessService.run} 打开的 租户上下文里跑，跨租户的行由 RLS 挡掉，服务层再按
+ *       attributeId 做一次归属校验。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}，
- * 与属性域保持一致。
+ * <p>权限口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}， 与属性域保持一致。
  */
 @Service
 public class AttributeOptionService {
@@ -55,8 +48,7 @@ public class AttributeOptionService {
   /**
    * 排序白名单。
    *
-   * <p>排序片段直接拼进 SQL，所以只允许命中这张表的固定值——任意列名出库就是注入面。
-   * 每个片段都以 {@code o.attribute_id,o.value} 收尾作决胜列：
+   * <p>排序片段直接拼进 SQL，所以只允许命中这张表的固定值——任意列名出库就是注入面。 每个片段都以 {@code o.attribute_id,o.value} 收尾作决胜列：
    * position 相同的行也不会在翻页边界上错位或重复。
    */
   private static final Map<String, String> ORDER_BY =
@@ -73,9 +65,8 @@ public class AttributeOptionService {
   /**
    * 引用总数（两个计数的合成）表达式。
    *
-   * <p>它是 {@code productValueCount + categoryRuleCount} 的内联形式，因此
-   * **主查询与 count 子查询都能用同一个片段**——排序与筛选都依赖它，
-   * 两处各写一遍必然会出现「能筛不能排」这种对不上的情况。
+   * <p>它是 {@code productValueCount + categoryRuleCount} 的内联形式，因此 **主查询与 count
+   * 子查询都能用同一个片段**——排序与筛选都依赖它， 两处各写一遍必然会出现「能筛不能排」这种对不上的情况。
    */
   private static final String REFERENCE_TOTAL =
       "(select count(*) from attribute_value_item i"
@@ -88,8 +79,8 @@ public class AttributeOptionService {
   /**
    * 聚合视图的列。
    *
-   * <p>两个引用计数都按 {@code tenant_id + attribute_id + option_value} 反查，
-   * 各自命中 V12 新建的索引；引用来源与 3.2.1.1 完全一致，不另立口径。
+   * <p>两个引用计数都按 {@code tenant_id + attribute_id + option_value} 反查， 各自命中 V12 新建的索引；引用来源与 3.2.1.1
+   * 完全一致，不另立口径。
    */
   private static final String SELECT_COLUMNS =
       "select o.attribute_id,d.code,d.name,o.value,o.position,o.enabled,o.created_at,"
@@ -150,32 +141,28 @@ public class AttributeOptionService {
                 + " limit ? offset ?",
             append(binds, size, (long) page * size).toArray());
     return new AttributeOptionPage(
-        rows.stream().map(this::toRow).toList(),
-        total,
-        page,
-        size,
-        enabledCount,
-        inUseCount,
-        NOTE);
+        rows.stream().map(this::toRow).toList(), total, page, size, enabledCount, inUseCount, NOTE);
   }
 
   /**
    * 总数与两个「不受筛选影响」的计数共用同一段条件。
    *
-   * <p>count 子查询必须显式带上 {@link #REFERENCE_TOTAL}：引用筛选条件写在 where 里，
-   * 不投影这个表达式的话 PostgreSQL 会报「列 reference_total 不存在」。
+   * <p>count 子查询必须显式带上 {@link #REFERENCE_TOTAL}：引用筛选条件写在 where 里， 不投影这个表达式的话 PostgreSQL 会报「列
+   * reference_total 不存在」。
    */
   private long count(String where, List<Object> binds) {
     return sql.fetchOne(
-            "select count(*) from (select " + REFERENCE_TOTAL + " as reference_total" + FROM_OPTIONS
+            "select count(*) from (select "
+                + REFERENCE_TOTAL
+                + " as reference_total"
+                + FROM_OPTIONS
                 + (where.isEmpty() ? "" : " and " + where)
                 + ") t",
             binds.toArray())
         .get(0, Long.class);
   }
 
-  private void conditions(
-      AttributeOptionQuery query, List<String> where, List<Object> binds) {
+  private void conditions(AttributeOptionQuery query, List<String> where, List<Object> binds) {
     if (query.keyword() != null && !query.keyword().isBlank()) {
       String escaped = query.keyword().replace("!", "!!").replace("%", "!%").replace("_", "!_");
       // 同时匹配选项值与归属属性：用户常常只记得「那个蓝色的选项」或「颜色那个属性」。
@@ -204,7 +191,8 @@ public class AttributeOptionService {
   /** 未命中的排序值退回默认档，而不是把用户输入原样拼进 SQL。 */
   private static String orderBy(String sort) {
     if (sort == null) return ORDER_BY.get(DEFAULT_SORT);
-    return ORDER_BY.getOrDefault(sort.trim().toUpperCase(java.util.Locale.ROOT), ORDER_BY.get(DEFAULT_SORT));
+    return ORDER_BY.getOrDefault(
+        sort.trim().toUpperCase(java.util.Locale.ROOT), ORDER_BY.get(DEFAULT_SORT));
   }
 
   private AttributeOptionOverviewRow toRow(org.jooq.Record r) {
@@ -236,14 +224,15 @@ public class AttributeOptionService {
   /**
    * 切换单个选项的启用状态。
    *
-   * <p>停用永远允许：它只挡住「不许再新建取用」，既有取值照常可读。
-   * 启用也不校验引用——被引用过的选项重新启用是正常的（运营误停用后要能改回来）。
+   * <p>停用永远允许：它只挡住「不许再新建取用」，既有取值照常可读。 启用也不校验引用——被引用过的选项重新启用是正常的（运营误停用后要能改回来）。
    *
-   * <p>启用时额外校验父属性是启用的：一个停用属性底下的「启用选项」在界面上永远选不到，
-   * 留着这个状态只会让人以为取值可选。它是**可读拒绝**而不是静默纠正。
+   * <p>启用时额外校验父属性是启用的：一个停用属性底下的「启用选项」在界面上永远选不到， 留着这个状态只会让人以为取值可选。它是**可读拒绝**而不是静默纠正。
    */
   public AttributeOptionToggled toggle(
-      AccessService.Access actor, UUID attributeId, String value, AttributeOptionToggleInput input) {
+      AccessService.Access actor,
+      UUID attributeId,
+      String value,
+      AttributeOptionToggleInput input) {
     assertDictionaryAttribute(attributeId);
     String target = value == null ? "" : value.trim();
     CatalogService.check(!target.isEmpty(), "选项值不能为空");
@@ -275,8 +264,7 @@ public class AttributeOptionService {
     audit(actor, attributeId, "AttributeOptionToggled");
     var counts = referenceCounts(attributeId, target);
     boolean inUse = counts.productValueCount() + counts.categoryRuleCount() > 0;
-    return new AttributeOptionToggled(
-        attributeId, target, input.enabled(), inUse, !inUse);
+    return new AttributeOptionToggled(attributeId, target, input.enabled(), inUse, !inUse);
   }
 
   // ============================================================ 批量重排
@@ -292,10 +280,10 @@ public class AttributeOptionService {
    *   <li>每个 value 都真实属于该属性：否则会静默改到别人的选项上。
    * </ol>
    *
-   * <p>整批在一个事务里写入（{@code AccessService.run} 已经开了事务），
-   * 中途失败不会留下半套顺序。
+   * <p>整批在一个事务里写入（{@code AccessService.run} 已经开了事务）， 中途失败不会留下半套顺序。
    */
-  public AttributeOptionOrderSaved reorder(AccessService.Access actor, AttributeOptionOrderInput input) {
+  public AttributeOptionOrderSaved reorder(
+      AccessService.Access actor, AttributeOptionOrderInput input) {
     assertDictionaryAttribute(input.attributeId());
     List<AttributeOptionOrderItem> items = input.items();
     CatalogService.check(
@@ -307,8 +295,7 @@ public class AttributeOptionService {
       CatalogService.check(!normalized.isEmpty(), "选项值不能为空");
       distinct.add(normalized);
     }
-    CatalogService.check(
-        distinct.size() == items.size(), "同一次重排里出现了重复的选项值，请检查提交内容");
+    CatalogService.check(distinct.size() == items.size(), "同一次重排里出现了重复的选项值，请检查提交内容");
 
     for (AttributeOptionOrderItem item : items) {
       String normalized = item.value().trim();
@@ -320,9 +307,7 @@ public class AttributeOptionService {
                   input.attributeId(),
                   normalized)
               != null;
-      CatalogService.check(
-          exists,
-          "选项「" + normalized + "」不属于该属性，请刷新后重试（它可能已被删除或停用后改名）");
+      CatalogService.check(exists, "选项「" + normalized + "」不属于该属性，请刷新后重试（它可能已被删除或停用后改名）");
     }
 
     int applied = 0;
@@ -345,12 +330,12 @@ public class AttributeOptionService {
    * 确认 attributeId 指向**本租户的字典条目**。
    *
    * <p>与 3.2.1.1 的 {@code dictionaryRow} 同一口径：SPU 级定义（spu_id 有值）与别的租户的行
-   * 都表现为「不存在或没有访问权限」，不区分两者——区分开等于告诉调用方「这个属性存在，
-   * 只是你没权限」，那是信息泄露。
+   * 都表现为「不存在或没有访问权限」，不区分两者——区分开等于告诉调用方「这个属性存在， 只是你没权限」，那是信息泄露。
    */
   private void assertDictionaryAttribute(UUID attributeId) {
     boolean exists =
-        sql.fetchOne("select 1 from attribute_definition where id=? and spu_id is null", attributeId)
+        sql.fetchOne(
+                "select 1 from attribute_definition where id=? and spu_id is null", attributeId)
             != null;
     if (!exists) throw CatalogService.missing();
   }
@@ -379,7 +364,11 @@ public class AttributeOptionService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   private static String instant(OffsetDateTime value) {

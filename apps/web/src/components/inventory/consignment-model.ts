@@ -85,11 +85,8 @@ export const fetchConsignmentSales = (
   params: { unsettleableOnly?: boolean; page?: number; size?: number } = {},
 ) => api<ConsignmentSalePage>(`${base}/${agreementId}/sales${query(params)}`);
 
-export const recordConsignmentSale = (
-  agreementId: string,
-  lineId: string,
-  body: unknown,
-) => api<ConsignmentSale>(`${base}/${agreementId}/lines/${lineId}/sales`, 'POST', body);
+export const recordConsignmentSale = (agreementId: string, lineId: string, body: unknown) =>
+  api<ConsignmentSale>(`${base}/${agreementId}/lines/${lineId}/sales`, 'POST', body);
 
 export const fetchSettlementWindow = (agreementId: string) =>
   api<SettlementWindow>(`${base}/${agreementId}/settlement-window`);
@@ -157,7 +154,9 @@ export function formatAmount(
 }
 
 /** 售罄率 = 已售 ÷ 寄售量。分母为 0 返回 null（不是 0 —— 那会被读成「一件没卖出去」）。 */
-export function soldRate(line: Pick<ConsignmentLine, 'soldQuantity' | 'consignedQuantity'>): number | null {
+export function soldRate(
+  line: Pick<ConsignmentLine, 'soldQuantity' | 'consignedQuantity'>,
+): number | null {
   const consigned = Number(line.consignedQuantity);
   const sold = Number(line.soldQuantity);
   if (!Number.isFinite(consigned) || consigned === 0) return null;

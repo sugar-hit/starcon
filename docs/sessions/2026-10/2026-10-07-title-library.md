@@ -76,9 +76,11 @@ eBay 80 / 亚马逊 200 / Shopify 255 口径不同，而批量会同时发给多
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V20__title_library.sql` — 七张新表 + 四个触发器 + 索引 + RLS/GRANT
 
 **后端（`backend/services/catalog/src/main/java/com/starcon/catalog/`）**
+
 - `TitleRules.java` — 纯规则层：相似度算法、分词、码点裁剪、词表与校验
 - `TitleGenerator.java` — 纯函数生成引擎：渲染 + 词序轮转 + 重复度闸门
 - `TitleService.java` — jOOQ 显式 SQL、模板/词根/批次/候选、选用与 CSV 导出
@@ -86,11 +88,13 @@ eBay 80 / 亚马逊 200 / Shopify 255 口径不同，而批量会同时发给多
 - `CatalogModels.java` — 21 个新 DTO（`Title*`）
 
 **后端测试（`backend/services/catalog/src/test/java/com/starcon/catalog/`）**
+
 - `TitleRulesTest.java` — 23 例
 - `TitleGeneratorTest.java` — 14 例
 - `TitleLibraryIntegrationTest.java` — 12 例（含租户隔离三断言 + 末尾实测缺陷台账）
 
 **前端**
+
 - `apps/web/src/app/products/content/page.tsx` — 路由页
 - `apps/web/src/components/catalog/title-workspace.tsx` — 工作区（加载·空·错误三态）
 - `apps/web/src/components/catalog/title-model.ts` — 前端模型与校验（**不重算相似度**）
@@ -98,9 +102,11 @@ eBay 80 / 亚马逊 200 / Shopify 255 口径不同，而批量会同时发给多
 - `apps/web/src/lib/api-proxy.ts` — `titles` 白名单放行（34 条路径正反断言）
 
 **契约**
+
 - `packages/api-contracts/src/catalog.ts` / `catalog.openapi.json` — `pnpm contracts:generate` 重新生成（316 DTO，新增 21 类型）
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md` — 3.4.2.1 → 已交付
 - `docs/sessions/2026-10/2026-10-07-title-library.md` — 本文件
 

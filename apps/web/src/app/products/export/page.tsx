@@ -28,11 +28,11 @@ export default function ExportPage() {
         <h1 className="text-copy-20 font-semibold">导出</h1>
         <p className="text-muted-foreground text-copy-13">
           按列表页当前的筛选条件导出结果数据，支持<strong>字段选择</strong>与
-          <strong>排序还原</strong>，大文件走<strong>异步任务</strong>。
-          导出记录保留<strong>条件、字段、行数、时间与操作人</strong>，可追溯到人；
-          文件带<strong>下载有效期</strong>，过期由后端清理。
-          含联系方式等<strong>敏感字段的导出需显式授权</strong>并填写用途留档。
-          导出<strong>服从数据范围</strong>：导出的就是你当前看得见的那些行。
+          <strong>排序还原</strong>，大文件走<strong>异步任务</strong>。 导出记录保留
+          <strong>条件、字段、行数、时间与操作人</strong>，可追溯到人； 文件带
+          <strong>下载有效期</strong>，过期由后端清理。 含联系方式等
+          <strong>敏感字段的导出需显式授权</strong>并填写用途留档。 导出
+          <strong>服从数据范围</strong>：导出的就是你当前看得见的那些行。
         </p>
       </header>
 

@@ -229,11 +229,7 @@ describe('3.4.3.1 多语言内容 · 批量操作', () => {
 
 describe('3.4.3.1 多语言内容 · 词表与服务端一致', () => {
   it('词表逐字对齐 V22 的 CHECK', () => {
-    expect(TRANSLATION_STATUSES.map((s) => s.value)).toEqual([
-      'PENDING',
-      'TRANSLATED',
-      'REVIEWED',
-    ]);
+    expect(TRANSLATION_STATUSES.map((s) => s.value)).toEqual(['PENDING', 'TRANSLATED', 'REVIEWED']);
     expect(TRANSLATION_ORIGINS.map((o) => o.value)).toEqual(['MANUAL', 'AI', 'IMPORTED']);
     expect(SUGGESTION_STATUSES.map((s) => s.value)).toEqual(['PENDING', 'ADOPTED', 'REJECTED']);
     expect(LOCALE_SOURCES.map((s) => s.value)).toEqual(['MANUAL', 'SHOP_SITE']);

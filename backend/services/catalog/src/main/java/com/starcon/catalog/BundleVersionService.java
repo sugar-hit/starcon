@@ -23,31 +23,24 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.5.1.1 套装版本管理：组合套装（多个 SKU 按数量捆绑销售）的版本。
  *
- * <p>蓝图原文：「职责：管理组合套装（多个 SKU 按数量捆绑销售）的版本：创建版本、设置生效区间、发布后不可变。」
- * 「输入：套装名称、组件清单、版本号、生效区间；发布操作。」
- * 「输出：套装版本记录（草稿/已发布）；供 04 刊登为独立商品、供 09 订单展开组件。」
- * 「下游 = 3.1.2.2（套装作为可售 SKU）、09 订单（组件展开）。**虚拟套装不持有独立库存**，扣的是组件库存。」
+ * <p>蓝图原文：「职责：管理组合套装（多个 SKU 按数量捆绑销售）的版本：创建版本、设置生效区间、发布后不可变。」 「输入：套装名称、组件清单、版本号、生效区间；发布操作。」
+ * 「输出：套装版本记录（草稿/已发布）；供 04 刊登为独立商品、供 09 订单展开组件。」 「下游 = 3.1.2.2（套装作为可售 SKU）、09
+ * 订单（组件展开）。**虚拟套装不持有独立库存**，扣的是组件库存。」
  *
  * <p>本类的纪律（与 V23 文件头同源）：
  *
  * <ol>
  *   <li><b>生效区间是半开区间</b> {@code [from, to)}，判定全走 {@link BundleRules#overlaps}。
- *       「当前生效版本」是一个纯时刻查询（{@link BundleRules#covers}），不是「取最新一版」——
- *       后者会在区间有缝或重叠时报出错误答案。
- *   <li><b>重叠一律拒绝，不做裁决</b>。发布冲突时把与哪一版（版本号 + 区间）撞了写进报错，
- *       让运营能自己决定是调本版还是调接替版，而不是让系统挑一个生效。
- *   <li><b>发布后不可变由 DB 触发器兜底</b>，服务层先给可执行的中文原因；两层都在，
- *       因为触发器拦得住绕过应用层的写入但给不出人话原因。
- *   <li><b>唯一的例外是「向前关闭生效区间」</b>（{@link #closeVersion}）。若连这一条都禁掉，
- *       第一个开放区间的版本发布后就永远无法被接替。
+ *       「当前生效版本」是一个纯时刻查询（{@link BundleRules#covers}），不是「取最新一版」—— 后者会在区间有缝或重叠时报出错误答案。
+ *   <li><b>重叠一律拒绝，不做裁决</b>。发布冲突时把与哪一版（版本号 + 区间）撞了写进报错， 让运营能自己决定是调本版还是调接替版，而不是让系统挑一个生效。
+ *   <li><b>发布后不可变由 DB 触发器兜底</b>，服务层先给可执行的中文原因；两层都在， 因为触发器拦得住绕过应用层的写入但给不出人话原因。
+ *   <li><b>唯一的例外是「向前关闭生效区间」</b>（{@link #closeVersion}）。若连这一条都禁掉， 第一个开放区间的版本发布后就永远无法被接替。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 套装挂在商品域下（下游是 3.1.2.2 的可售 SKU 与 07/09 的组件展开），
- * 所以沿用已有词表而不新造 —— 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 套装挂在商品域下（下游是 3.1.2.2 的可售 SKU 与
+ * 07/09 的组件展开）， 所以沿用已有词表而不新造 —— 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
  *
- * <p>边界：组件的<b>循环引用检测</b>与独立组件工作台归 3.5.1.2；本模块交付的是
- * 「随草稿版本编辑组件清单 + 发布时校验组件齐备」，因为组件清单是蓝图写在本模块输入里的。
+ * <p>边界：组件的<b>循环引用检测</b>与独立组件工作台归 3.5.1.2；本模块交付的是 「随草稿版本编辑组件清单 + 发布时校验组件齐备」，因为组件清单是蓝图写在本模块输入里的。
  */
 @Service
 public class BundleVersionService {
@@ -189,14 +182,18 @@ public class BundleVersionService {
                 + "    and v.effective_from<=?::timestamptz and (v.effective_to is null or ?::timestamptz <v.effective_to)"
                 + "  limit 1) e on true"
                 + " where b.tenant_id=? and b.id=?",
-            utcNow(), utcNow(), tenantId, id);
+            utcNow(),
+            utcNow(),
+            tenantId,
+            id);
     if (b == null) throw notFound("套装不存在");
     var versions =
         sql.fetch(
             VERSION_SELECT
                 + " where v.tenant_id=? and v.bundle_id=?"
                 + " order by v.effective_from desc, v.version_no",
-            tenantId, id);
+            tenantId,
+            id);
     var effective = effectiveVersionRow(tenantId, id, Instant.now());
     List<BundleVersionSummary> summaries = new ArrayList<>(versions.size());
     for (Record r : versions) {
@@ -220,8 +217,7 @@ public class BundleVersionService {
         effective == null ? null : effective.get("id", UUID.class),
         effective == null ? null : effective.get("version_no", String.class),
         effective == null
-            ? "这个套装此刻没有生效版本：可能只有草稿，或已发布版本的区间都还没到。"
-                + "刊登与订单展开都取不到版本，所以现在不能卖这个套装"
+            ? "这个套装此刻没有生效版本：可能只有草稿，或已发布版本的区间都还没到。" + "刊登与订单展开都取不到版本，所以现在不能卖这个套装"
             : "此刻生效的是「"
                 + effective.get("version_no", String.class)
                 + "」。生效区间是左闭右开的 [起点, 终点)：终点那一瞬间归下一个版本，"
@@ -242,14 +238,13 @@ public class BundleVersionService {
       try {
         sql.execute(
             "insert into bundle(id,tenant_id,code,note,version) values(?,?,?,?,0)",
-            newId, tenantId, code, note);
+            newId,
+            tenantId,
+            code,
+            note);
       } catch (DataAccessException e) {
         throw conflict(
-            "套装编码「"
-                + code
-                + "」已经存在（"
-                + rootMessage(e)
-                + "）：同一租户同一编码只能有一个套装，两条时「刊登里的这个套装指哪个」无法回答");
+            "套装编码「" + code + "」已经存在（" + rootMessage(e) + "）：同一租户同一编码只能有一个套装，两条时「刊登里的这个套装指哪个」无法回答");
       }
       audit(actor, newId, "BundleCreated");
       return bundle(newId).bundle();
@@ -261,14 +256,15 @@ public class BundleVersionService {
     String currentCode = current.get("code", String.class);
     check(
         currentCode.equals(code),
-        "套装编码建后不可改：它是刊登与订单里的稳定引用，改编码等于让"
-            + currentCode
-            + "的历史归属失效，而且这个套装已经发布的版本都会被引用过旧编码");
+        "套装编码建后不可改：它是刊登与订单里的稳定引用，改编码等于让" + currentCode + "的历史归属失效，而且这个套装已经发布的版本都会被引用过旧编码");
     int affected =
         sql.execute(
             "update bundle set note=?,version=version+1,updated_at=now()"
                 + " where tenant_id=? and id=? and version=?",
-            note, tenantId, id, input.version());
+            note,
+            tenantId,
+            id,
+            input.version());
     check(affected == 1, "这条套装刚被别人改过（版本不是 " + input.version() + "），请刷新后重试");
     audit(actor, id, "BundleUpdated");
     return bundle(id).bundle();
@@ -286,7 +282,9 @@ public class BundleVersionService {
     int affected =
         sql.execute(
             "update bundle set status=?,version=version+1,updated_at=now() where tenant_id=? and id=?",
-            normalized, actor.tenantId(), id);
+            normalized,
+            actor.tenantId(),
+            id);
     if (affected == 0) throw notFound("套装不存在");
     audit(actor, id, "ARCHIVED".equals(normalized) ? "BundleArchived" : "BundleActivated");
     return bundle(id).bundle();
@@ -295,18 +293,19 @@ public class BundleVersionService {
   /**
    * 删除套装。
    *
-   * <p>含任何版本时拒绝：已发布版本更会被 V23 的触发器直接挡下（删版本等于让「这单当时按哪一版
-   * 展开的」无从查证）。所以本方法只在「只有草稿」时真的会删。
+   * <p>含任何版本时拒绝：已发布版本更会被 V23 的触发器直接挡下（删版本等于让「这单当时按哪一版 展开的」无从查证）。所以本方法只在「只有草稿」时真的会删。
    */
   public void deleteBundle(AccessService.Access actor, UUID id, long version) {
     UUID tenantId = actor.tenantId();
-    var current = sql.fetchOne("select version from bundle where tenant_id=? and id=?", tenantId, id);
+    var current =
+        sql.fetchOne("select version from bundle where tenant_id=? and id=?", tenantId, id);
     if (current == null) throw notFound("套装不存在");
     checkVersion(current.get("version", Long.class), version);
     long published =
         sql.fetchOne(
                 "select count(*) from bundle_version where tenant_id=? and bundle_id=? and status='PUBLISHED'",
-                tenantId, id)
+                tenantId,
+                id)
             .get(0, Long.class);
     check(
         published == 0,
@@ -317,14 +316,15 @@ public class BundleVersionService {
     long drafts =
         sql.fetchOne(
                 "select count(*) from bundle_version where tenant_id=? and bundle_id=? and status='DRAFT'",
-                tenantId, id)
+                tenantId,
+                id)
             .get(0, Long.class);
     check(
         drafts == 0,
-        "这个套装还有 " + drafts + " 个草稿版本，请先删掉草稿再建新的：草稿是待办不是历史，"
-            + "但连它一起删掉会让「这个套装当时规划过哪些版本」无从查证");
+        "这个套装还有 " + drafts + " 个草稿版本，请先删掉草稿再建新的：草稿是待办不是历史，" + "但连它一起删掉会让「这个套装当时规划过哪些版本」无从查证");
     try {
-      sql.execute("delete from bundle where tenant_id=? and id=? and version=?", tenantId, id, version);
+      sql.execute(
+          "delete from bundle where tenant_id=? and id=? and version=?", tenantId, id, version);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
@@ -360,8 +360,9 @@ public class BundleVersionService {
     binds.add(currentTenantId());
     String keyword = BundleRules.normalize(query.keyword());
     if (!keyword.isEmpty()) {
-      where.append(" and (lower(v.version_no) like ? escape '!' or lower(v.name) like ? escape '!'"
-          + " or lower(b.code) like ? escape '!')");
+      where.append(
+          " and (lower(v.version_no) like ? escape '!' or lower(v.name) like ? escape '!'"
+              + " or lower(b.code) like ? escape '!')");
       String like = escapeLike(keyword.toLowerCase(Locale.ROOT));
       binds.add(like);
       binds.add(like);
@@ -391,10 +392,16 @@ public class BundleVersionService {
     pageBinds.add((long) page * size);
     var rows =
         sql.fetch(
-            VERSION_SELECT + where + " order by v.effective_from desc, v.version_no limit ? offset ?",
+            VERSION_SELECT
+                + where
+                + " order by v.effective_from desc, v.version_no limit ? offset ?",
             pageBinds.toArray());
     return new BundleVersionPage(
-        versionRows(rows, Instant.now()), page, size, total, (int) Math.ceil(total / (double) size));
+        versionRows(rows, Instant.now()),
+        page,
+        size,
+        total,
+        (int) Math.ceil(total / (double) size));
   }
 
   /** 版本详情：版本 + 组件清单 + 现在能不能改以及为什么。 */
@@ -422,14 +429,15 @@ public class BundleVersionService {
   }
 
   /** 建草稿版本。 */
-  public BundleVersionRow createVersion(AccessService.Access actor, UUID bundleId, BundleVersionInput input) {
+  public BundleVersionRow createVersion(
+      AccessService.Access actor, UUID bundleId, BundleVersionInput input) {
     UUID tenantId = actor.tenantId();
     requireBundle(tenantId, bundleId);
-    var current = sql.fetchOne("select status from bundle where tenant_id=? and id=?", tenantId, bundleId);
+    var current =
+        sql.fetchOne("select status from bundle where tenant_id=? and id=?", tenantId, bundleId);
     check(
         !"ARCHIVED".equals(current.get("status", String.class)),
-        "这个套装已归档，不能新建版本：归档表示「不再新增」，历史版本仍可读。"
-            + "要先建版本请把套装改回启用");
+        "这个套装已归档，不能新建版本：归档表示「不再新增」，历史版本仍可读。" + "要先建版本请把套装改回启用");
     String versionNo = BundleRules.normalizeVersionNo(input.versionNo());
     String name = BundleRules.normalize(input.name());
     String note = BundleRules.normalize(input.note());
@@ -456,25 +464,26 @@ public class BundleVersionService {
           note);
     } catch (DataAccessException e) {
       String message = rootMessage(e);
-      throw "同套装同版本号".equals(message) || message.contains("bundle_version_tenant_id_bundle_id_version_no_key")
+      throw "同套装同版本号".equals(message)
+              || message.contains("bundle_version_tenant_id_bundle_id_version_no_key")
           ? conflict(
-              "这个套装下已经有版本「"
-                  + versionNo
-                  + "」：同套装同版本号只能有一条，两条时「v2 是哪一个」无法回答，"
-                  + "而生效区间判定会两边都算数")
+              "这个套装下已经有版本「" + versionNo + "」：同套装同版本号只能有一条，两条时「v2 是哪一个」无法回答，" + "而生效区间判定会两边都算数")
           : conflict(message);
     }
     audit(actor, newId, "BundleVersionCreated");
-    return versionRow(sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, newId));
+    return versionRow(
+        sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, newId));
   }
 
   /** 改草稿版本。已发布版本一律拒绝（服务层给原因，DB 触发器兜底）。 */
-  public BundleVersionRow updateVersion(AccessService.Access actor, UUID id, BundleVersionInput input) {
+  public BundleVersionRow updateVersion(
+      AccessService.Access actor, UUID id, BundleVersionInput input) {
     UUID tenantId = actor.tenantId();
     var current =
         sql.fetchOne(
             "select version_no,status,effective_to,version from bundle_version where tenant_id=? and id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("套装版本不存在");
     checkEditable(current.get("status", String.class), current.get("version_no", String.class));
     checkVersion(current.get("version", Long.class), input.version());
@@ -506,7 +515,8 @@ public class BundleVersionService {
       throw conflict(rootMessage(e));
     }
     audit(actor, id, "BundleVersionUpdated");
-    return versionRow(sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
+    return versionRow(
+        sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
   }
 
   /**
@@ -515,10 +525,8 @@ public class BundleVersionService {
    * <p>三道关，按「先说最根本的那条」排序：
    *
    * <ol>
-   *   <li><b>组件齐备</b>：至少一个组件，数量都大于 0。没有组件的套装在 04 刊登里是一个
-   *       「能买的商品」，展开到订单里却什么都不是。
-   *   <li><b>区间不与已发布版本重叠</b>（规则 R2）：这里先查一遍是为了把「与哪一版撞了」
-   *       说清楚，DB 触发器在事务里兜最后一道。
+   *   <li><b>组件齐备</b>：至少一个组件，数量都大于 0。没有组件的套装在 04 刊登里是一个 「能买的商品」，展开到订单里却什么都不是。
+   *   <li><b>区间不与已发布版本重叠</b>（规则 R2）：这里先查一遍是为了把「与哪一版撞了」 说清楚，DB 触发器在事务里兜最后一道。
    *   <li><b>发布留痕</b>：记发布人与发布时刻（V23 的 CHECK 会兜）。
    * </ol>
    */
@@ -528,7 +536,8 @@ public class BundleVersionService {
         sql.fetchOne(
             "select bundle_id,version_no,status,effective_from,effective_to,version"
                 + " from bundle_version where tenant_id=? and id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("套装版本不存在");
     String versionNo = current.get("version_no", String.class);
     check(
@@ -540,7 +549,8 @@ public class BundleVersionService {
     long componentCount =
         sql.fetchOne(
                 "select count(*) from bundle_component where tenant_id=? and version_id=?",
-                tenantId, id)
+                tenantId,
+                id)
             .get(0, Long.class);
     checkRule(BundleRules.componentCountProblem((int) componentCount));
     Instant from = toInstant(current.get("effective_from", OffsetDateTime.class));
@@ -551,26 +561,30 @@ public class BundleVersionService {
       sql.execute(
           "update bundle_version set status='PUBLISHED',published_by=?,published_at=?::timestamptz,"
               + "version=version+1,updated_at=now() where tenant_id=? and id=?",
-          actor.userId(), utcNow(), tenantId, id);
+          actor.userId(),
+          utcNow(),
+          tenantId,
+          id);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
     audit(actor, id, "BundleVersionPublished");
-    return versionRow(sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
+    return versionRow(
+        sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
   }
 
   /**
    * 向前关闭生效区间（规则 R5）：把已发布版本的终点收紧到某个仍在未来的时刻。
    *
-   * <p>这是已发布版本上<b>唯一</b>合法的写操作，也是唯一让版本机制能运转的操作 ——
-   * 若连它都禁掉，第一个开放区间的版本发布后就永远无法被接替。
+   * <p>这是已发布版本上<b>唯一</b>合法的写操作，也是唯一让版本机制能运转的操作 —— 若连它都禁掉，第一个开放区间的版本发布后就永远无法被接替。
    */
   public BundleVersionRow closeVersion(AccessService.Access actor, UUID id, String effectiveTo) {
     UUID tenantId = actor.tenantId();
     var current =
         sql.fetchOne(
             "select version_no,status,effective_to,version from bundle_version where tenant_id=? and id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("套装版本不存在");
     String versionNo = current.get("version_no", String.class);
     check(
@@ -584,25 +598,33 @@ public class BundleVersionService {
       sql.execute(
           "update bundle_version set effective_to=?::timestamptz,version=version+1,updated_at=now()"
               + " where tenant_id=? and id=?",
-          utcOf(newTo), tenantId, id);
+          utcOf(newTo),
+          tenantId,
+          id);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
     audit(actor, id, "BundleVersionClosed");
-    return versionRow(sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
+    return versionRow(
+        sql.fetchOne(VERSION_SELECT + " where v.tenant_id=? and v.id=?", tenantId, id));
   }
 
   /** 删草稿版本。已发布版本由 V23 触发器拒绝（并说明为什么）。 */
   public void deleteVersion(AccessService.Access actor, UUID id, long version) {
     UUID tenantId = actor.tenantId();
     var current =
-        sql.fetchOne("select version_no,status,version from bundle_version where tenant_id=? and id=?",
-            tenantId, id);
+        sql.fetchOne(
+            "select version_no,status,version from bundle_version where tenant_id=? and id=?",
+            tenantId,
+            id);
     if (current == null) throw notFound("套装版本不存在");
     checkEditable(current.get("status", String.class), current.get("version_no", String.class));
     try {
       sql.execute(
-          "delete from bundle_version where tenant_id=? and id=? and version=?", tenantId, id, version);
+          "delete from bundle_version where tenant_id=? and id=? and version=?",
+          tenantId,
+          id,
+          version);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
@@ -635,8 +657,8 @@ public class BundleVersionService {
           "在 "
               + moment
               + " 这一刻这个套装没有生效版本：可能只有草稿，或已发布版本的区间都还没到。"
-                  + "刊登与订单展开都取不到版本，所以这一刻不能卖这个套装。"
-                  + "这不是「查不到」而是真实状态 —— 用不带 at 的请求查「此刻」是最常用的一种情况");
+              + "刊登与订单展开都取不到版本，所以这一刻不能卖这个套装。"
+              + "这不是「查不到」而是真实状态 —— 用不带 at 的请求查「此刻」是最常用的一种情况");
     }
     UUID versionId = row.get("id", UUID.class);
     return new BundleEffectiveView(
@@ -664,7 +686,10 @@ public class BundleVersionService {
         "select * from bundle_version where tenant_id=? and bundle_id=? and status='PUBLISHED'"
             + " and effective_from<=?::timestamptz and (effective_to is null or ?::timestamptz <effective_to)"
             + " order by effective_from desc limit 1",
-        tenantId, bundleId, utcOf(at), utcOf(at));
+        tenantId,
+        bundleId,
+        utcOf(at),
+        utcOf(at));
   }
 
   /** 发布前的重叠预检，把「与哪一版撞了」说清楚（R2）。 */
@@ -705,13 +730,13 @@ public class BundleVersionService {
   /**
    * 某个版本的组件清单。
    *
-   * <p>版本不存在时返回 404 而不是空列表：空列表会被读成「这个套装没有组件」，
-   * 而真相是「这个套装你看不到」。与 {@link #version} 同一口径。
+   * <p>版本不存在时返回 404 而不是空列表：空列表会被读成「这个套装没有组件」， 而真相是「这个套装你看不到」。与 {@link #version} 同一口径。
    */
   public List<BundleComponentRow> components(UUID versionId) {
     UUID tenantId = currentTenantId();
     var exists =
-        sql.fetchOne("select id from bundle_version where tenant_id=? and id=?", tenantId, versionId);
+        sql.fetchOne(
+            "select id from bundle_version where tenant_id=? and id=?", tenantId, versionId);
     if (exists == null) throw notFound("套装版本不存在");
     return components(tenantId, versionId);
   }
@@ -722,7 +747,8 @@ public class BundleVersionService {
             "select c.id,c.version_id,c.sku_id,c.quantity,c.role,c.note,s.code as sku_code,s.name as sku_name"
                 + " from bundle_component c join sku s on s.tenant_id=c.tenant_id and s.id=c.sku_id"
                 + " where c.tenant_id=? and c.version_id=? order by s.code",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     List<BundleComponentRow> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(componentRow(r));
     return items;
@@ -731,8 +757,7 @@ public class BundleVersionService {
   /**
    * 整体替换组件清单。
    *
-   * <p>整体替换而不是增删式：清单有「同版本内一个 SKU 只有一行」的约束，增删式提交时
-   * 前端必须自己算出最终集合，漏对账的表现是页面上剩一条幽灵组件。
+   * <p>整体替换而不是增删式：清单有「同版本内一个 SKU 只有一行」的约束，增删式提交时 前端必须自己算出最终集合，漏对账的表现是页面上剩一条幽灵组件。
    *
    * <p>校验分三层，缺一不可：
    *
@@ -744,12 +769,14 @@ public class BundleVersionService {
    *
    * <p>已发布版本的组件由 V23 触发器拒绝（这里先给一句人话）。
    */
-  public BundleVersionDetail replaceComponents(AccessService.Access actor, UUID versionId, BundleComponentsInput input) {
+  public BundleVersionDetail replaceComponents(
+      AccessService.Access actor, UUID versionId, BundleComponentsInput input) {
     UUID tenantId = actor.tenantId();
     var current =
         sql.fetchOne(
             "select version_no,status,version from bundle_version where tenant_id=? and id=?",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     if (current == null) throw notFound("套装版本不存在");
     checkEditable(current.get("status", String.class), current.get("version_no", String.class));
     checkVersion(current.get("version", Long.class), input.version());
@@ -761,15 +788,17 @@ public class BundleVersionService {
       checkRule(BundleRules.quantityProblem(c.quantity()));
       check(
           seen.add(c.skuId()),
-          "同一个 SKU 在这份组件清单里出现了两次：每个组件「每件套装要几件」只能有一个答案，"
-              + "两行时订单展开只能取其中一条，而扣库存会按取到的那条走");
+          "同一个 SKU 在这份组件清单里出现了两次：每个组件「每件套装要几件」只能有一个答案，" + "两行时订单展开只能取其中一条，而扣库存会按取到的那条走");
     }
     // 一次问齐，别逐条查（组件最多 50 个，逐条查就是 50 次往返）。
     var known =
-        sql.fetch(
+        sql
+            .fetch(
                 "select id,code from sku where tenant_id=? and id in "
                     + placeholders(components.size()),
-                concat(List.of(tenantId), components.stream().map(BundleComponentInput::skuId).toList())
+                concat(
+                        List.of(tenantId),
+                        components.stream().map(BundleComponentInput::skuId).toList())
                     .toArray())
             .stream()
             .map(r -> r.get("id", UUID.class))
@@ -780,10 +809,10 @@ public class BundleVersionService {
     }
     check(
         missing.isEmpty(),
-        "这些组件 SKU 在本租户不存在：" + String.join("、", missing)
-            + "。套装组件必须指向真实存在的 SKU，否则扣组件库存时扣的是一个不存在的东西");
+        "这些组件 SKU 在本租户不存在：" + String.join("、", missing) + "。套装组件必须指向真实存在的 SKU，否则扣组件库存时扣的是一个不存在的东西");
 
-    sql.execute("delete from bundle_component where tenant_id=? and version_id=?", tenantId, versionId);
+    sql.execute(
+        "delete from bundle_component where tenant_id=? and version_id=?", tenantId, versionId);
     for (BundleComponentInput c : components) {
       sql.execute(
           "insert into bundle_component(id,tenant_id,version_id,sku_id,quantity,role,note)"
@@ -920,10 +949,9 @@ public class BundleVersionService {
   /**
    * {@code IN} 列表的占位符，每个都带 {@code ::uuid}。
    *
-   * <p>jOOQ 的 {@code fetch(String, Object...)} 把 UUID 按 varchar 送过去，
-   * 而 {@code id in (?)} 这种单元素列表让 PG 无法从上下文反推参数类型，
-   * 于是报 {@code operator does not exist: uuid = character varying}。
-   * 显式 cast 掉这个问题（{@code =} 之所以没事是因为 PG 能从等号另一侧反推）。
+   * <p>jOOQ 的 {@code fetch(String, Object...)} 把 UUID 按 varchar 送过去， 而 {@code id in (?)} 这种单元素列表让
+   * PG 无法从上下文反推参数类型， 于是报 {@code operator does not exist: uuid = character varying}。 显式 cast
+   * 掉这个问题（{@code =} 之所以没事是因为 PG 能从等号另一侧反推）。
    */
   private static String placeholders(int n) {
     return "(" + String.join(",", java.util.Collections.nCopies(n, "?::uuid")) + ")";
@@ -944,9 +972,7 @@ public class BundleVersionService {
   }
 
   private static void checkVersion(long current, long submitted) {
-    check(
-        current == submitted,
-        "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
+    check(current == submitted, "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
   }
 
   /** 当前 UTC 时刻。写 timestamptz 列一律配 {@code ?::timestamptz}，不经过 Timestamp.valueOf。 */
@@ -984,6 +1010,10 @@ public class BundleVersionService {
   void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 }

@@ -28,30 +28,25 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.2.1 拣货任务。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住十件「错了会误导人」的事：
  *
  * <ul>
- *   <li><b>路径是真的路径，不是按 id 排。</b>库位树里 A 段下有 A-1/A-2，B 段下有 B-1，
- *       拣货序号必须父先于子（A-1 在 B-1 之前），哪怕 uuid 顺序完全相反。
- *   <li><b>同一 SKU 收敛到尽量少的库位</b>（8.5.2.1「SKU 散在多库位」的落地）：
- *       一个库位够拣时就不拆段；不够时才拆，且 {@code skuLocationCount} 是
- *       <b>真实跨库位计数</b>（不是写死的 1）。
- *   <li><b>不可拣库位是最后退路，且必须被标出来</b>（8.5.2.1「高频货在不可拣库位」的
- *       落地）：有可拣来源就绝不碰待检位；实在没有才退，且 {@code nonPickableSource=true}。
- *   <li><b>拣货搬库位、balance 不动、预占不释放。</b>同一 balance 的两侧 bucket 一增一减，
- *       {@code inventory_balance} 与 {@code inventory_entry} 一个字都不改 ——
- *       「拣货完不等于已发货」在这一层是数据事实。
- *   <li><b>实际库位允许与计划不同</b>（分配是建议、现场是事实），但「那个库位没有这件货」
- *       与「拣超过计划」必须当场拒。
+ *   <li><b>路径是真的路径，不是按 id 排。</b>库位树里 A 段下有 A-1/A-2，B 段下有 B-1， 拣货序号必须父先于子（A-1 在 B-1 之前），哪怕 uuid
+ *       顺序完全相反。
+ *   <li><b>同一 SKU 收敛到尽量少的库位</b>（8.5.2.1「SKU 散在多库位」的落地）： 一个库位够拣时就不拆段；不够时才拆，且 {@code
+ *       skuLocationCount} 是 <b>真实跨库位计数</b>（不是写死的 1）。
+ *   <li><b>不可拣库位是最后退路，且必须被标出来</b>（8.5.2.1「高频货在不可拣库位」的 落地）：有可拣来源就绝不碰待检位；实在没有才退，且 {@code
+ *       nonPickableSource=true}。
+ *   <li><b>拣货搬库位、balance 不动、预占不释放。</b>同一 balance 的两侧 bucket 一增一减， {@code inventory_balance} 与
+ *       {@code inventory_entry} 一个字都不改 —— 「拣货完不等于已发货」在这一层是数据事实。
+ *   <li><b>实际库位允许与计划不同</b>（分配是建议、现场是事实），但「那个库位没有这件货」 与「拣超过计划」必须当场拒。
  *   <li><b>序列号三校验</b>：不在库 / SKU 不符 / 不在本次实拣的库位上，全部拒。
  *   <li><b>缺货必须写缺几件</b>，其余四类不许写数量；处置只能写一次。
- *   <li><b>完成拣货 ≠ 已发货</b>：出库单只到「待复核」，SHIPPED 由 8.3.4.1 写。
- *       没拣齐又没报缺货的段，完成时当场拒（不提供「强制完成」）。
- *   <li><b>DB 级不变量</b>：终态任务明细不可改、状态非法跃迁、实拣记录 append-only、
- *       非法流水号被 23514 拒 —— 全部用<b>超级用户直连 SQL</b>证明绕开服务层也过不去。
+ *   <li><b>完成拣货 ≠ 已发货</b>：出库单只到「待复核」，SHIPPED 由 8.3.4.1 写。 没拣齐又没报缺货的段，完成时当场拒（不提供「强制完成」）。
+ *   <li><b>DB 级不变量</b>：终态任务明细不可改、状态非法跃迁、实拣记录 append-only、 非法流水号被 23514 拒 —— 全部用<b>超级用户直连
+ *       SQL</b>证明绕开服务层也过不去。
  *   <li><b>租户隔离三断言</b>实跑 + 六张表逐张断言 FORCE RLS + 时刻写回精确到瞬时。
  * </ul>
  */
@@ -72,8 +67,13 @@ class PickTaskIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -83,7 +83,8 @@ class PickTaskIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -98,7 +99,8 @@ class PickTaskIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -107,7 +109,8 @@ class PickTaskIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
       actors.put(
-          "Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+          "Bearer read-only",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
       actors.put(
           "Bearer no-permission",
           actor(user, a, List.of(grant("ALL", List.of("warehouse.other.read")))));
@@ -167,23 +170,43 @@ class PickTaskIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 8; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 10), tenant, "PENDING", "待检", "PENDING_INSPECTION");
+                idFor(tenant, 10),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", "Asia/Shanghai", idFor(tenant, 1),
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                "Asia/Shanghai",
+                idFor(tenant, 1),
                 "ACTIVE");
             return null;
           });
@@ -194,9 +217,17 @@ class PickTaskIntegrationTest {
     return tenant.equals(a) ? actorA : actorB;
   }
 
-  UUID wh(UUID tenant) { return idFor(tenant, 11); }
-  UUID sku(UUID tenant, int n) { return idFor(tenant, 1 + n); }
-  UUID sellable(UUID tenant) { return idFor(tenant, 9); }
+  UUID wh(UUID tenant) {
+    return idFor(tenant, 11);
+  }
+
+  UUID sku(UUID tenant, int n) {
+    return idFor(tenant, 1 + n);
+  }
+
+  UUID sellable(UUID tenant) {
+    return idFor(tenant, 9);
+  }
 
   <T> T as(UUID tenant, java.util.function.Supplier<T> work) {
     return access.run(actorFor(tenant), "warehouse.inventory.read", work);
@@ -212,7 +243,14 @@ class PickTaskIntegrationTest {
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable,parent_id) values(?,?,?,?,?,?,'ACTIVE',?,?)",
-              id, tenant, wh(tenant), code, code + " 位", type, pickable, parent);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type,
+              pickable,
+              parent);
           return id;
         });
   }
@@ -227,7 +265,8 @@ class PickTaskIntegrationTest {
                   "select id from inventory_balance where tenant_id"
                       + " = current_setting('app.current_tenant', true)::uuid"
                       + " and sku_id = ? and warehouse_id = ?",
-                  skuId, wh(tenant));
+                  skuId,
+                  wh(tenant));
           if (found != null) {
             balance = found.get("id", UUID.class);
             // 复用既有 balance 时把在手与预占一起累加，保持 V2 §4.4 的延迟守恒式
@@ -237,15 +276,23 @@ class PickTaskIntegrationTest {
                     + " reserved=reserved+cast(? as numeric)"
                     + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                     + " and id = ?",
-                onHand, reserved, balance);
+                onHand,
+                reserved,
+                balance);
           } else {
             balance = UUID.randomUUID();
             sql.execute(
                 "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                     + "quality_status_id,on_hand,reserved)"
                     + " values(?,?,?,?,?,?,cast(? as numeric),cast(? as numeric))",
-                balance, tenant, skuId, wh(tenant), idFor(tenant, 1), sellable(tenant),
-                onHand, reserved);
+                balance,
+                tenant,
+                skuId,
+                wh(tenant),
+                idFor(tenant, 1),
+                sellable(tenant),
+                onHand,
+                reserved);
           }
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
@@ -253,8 +300,17 @@ class PickTaskIntegrationTest {
                   + "last_movement_at)"
                   + " values(?,?,?,?,?,?,null,?,?,cast(? as numeric),cast(? as numeric),"
                   + "?::timestamptz)",
-              UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), loc,
-              sellable(tenant), balance, onHand, reserved, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              loc,
+              sellable(tenant),
+              balance,
+              onHand,
+              reserved,
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -267,7 +323,11 @@ class PickTaskIntegrationTest {
           sql.execute(
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,status,"
                   + "current_location_id) values(?,?,?,?,'IN_STOCK',?)",
-              id, tenant, number, skuId, loc);
+              id,
+              tenant,
+              number,
+              skuId,
+              loc);
           return id;
         });
   }
@@ -285,7 +345,12 @@ class PickTaskIntegrationTest {
           sql.execute(
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,status,created_by_user_id) values(?,?,?,'SALES',?,?,'PENDING_PICKING',?)",
-              orderId, tenant, code, "SO-" + code, wh(tenant), user);
+              orderId,
+              tenant,
+              code,
+              "SO-" + code,
+              wh(tenant),
+              user);
           BigDecimal total = BigDecimal.ZERO;
           int lineNo = 0;
           for (UUID skuId : skuIds) {
@@ -293,20 +358,31 @@ class PickTaskIntegrationTest {
             sql.execute(
                 "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                     + "sku_name,quantity) values(?,?,?,?,?,?,?,'10')",
-                UUID.randomUUID(), tenant, orderId, lineNo, skuId,
-                codes.get(skuId), "商品" + lineNo);
+                UUID.randomUUID(),
+                tenant,
+                orderId,
+                lineNo,
+                skuId,
+                codes.get(skuId),
+                "商品" + lineNo);
             total = total.add(new BigDecimal("10"));
           }
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at)"
                   + " values(?,?,?,?,?,?,?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, skuIds.length, total, user,
+              UUID.randomUUID(),
+              tenant,
+              orderId,
+              skuIds.length,
+              total,
+              user,
               OffsetDateTime.now());
           // V72 的状态机允许 待拣 → 拣货中，触发器不会拦（与 8.3.1.1 走的是同一条边）。
           sql.execute(
               "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return orderId;
         });
   }
@@ -356,7 +432,8 @@ class PickTaskIntegrationTest {
                   "select coalesce(sum(on_hand),0) as oh from stock_bucket"
                       + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                       + " and location_id = ? and sku_id = ?",
-                  loc, skuId);
+                  loc,
+                  skuId);
           return r.get("oh", BigDecimal.class);
         });
   }
@@ -370,7 +447,8 @@ class PickTaskIntegrationTest {
                   "select coalesce(sum(reserved),0) as rs from stock_bucket"
                       + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                       + " and location_id = ? and sku_id = ?",
-                  loc, skuId);
+                  loc,
+                  skuId);
           return r.get("rs", BigDecimal.class);
         });
   }
@@ -383,7 +461,8 @@ class PickTaskIntegrationTest {
                     "select on_hand from inventory_balance"
                         + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                         + " and sku_id = ? and warehouse_id = ?",
-                    skuId, wh(tenant))
+                    skuId,
+                    wh(tenant))
                 .get("on_hand", BigDecimal.class));
   }
 
@@ -477,12 +556,13 @@ class PickTaskIntegrationTest {
     var created = generate(a, order);
     var lines = linesOf(a, created.id());
     assertThat(lines).hasSize(2);
-    assertThat(lines).extracting(PickTaskLine::sourceLocationId)
-        .containsExactly(l.a1(), l.b1());
+    assertThat(lines).extracting(PickTaskLine::sourceLocationId).containsExactly(l.a1(), l.b1());
     // 先拣够的那一段 = min(4, 10)，剩下 6 段在 B-1：路径顺序决定谁先，不是谁多谁先。
-    assertThat(lines).extracting(PickTaskLine::plannedQuantity)
+    assertThat(lines)
+        .extracting(PickTaskLine::plannedQuantity)
         .satisfiesExactly(
-            v -> assertThat(v).isEqualByComparingTo("4"), v -> assertThat(v).isEqualByComparingTo("6"));
+            v -> assertThat(v).isEqualByComparingTo("4"),
+            v -> assertThat(v).isEqualByComparingTo("6"));
     var report = report(a, created.id());
     assertThat(report.stops()).hasSize(2);
     assertThat(report.dispersionSkuCount()).isEqualTo(2);
@@ -525,8 +605,7 @@ class PickTaskIntegrationTest {
     UUID order = outbound(a, "OB-6", sku(a, 1), sku(a, 2));
 
     var lines = linesOf(a, generate(a, order).id());
-    var unallocated =
-        lines.stream().filter(line -> !line.sourceHasStock()).toList();
+    var unallocated = lines.stream().filter(line -> !line.sourceHasStock()).toList();
     assertThat(unallocated).hasSize(1);
     assertThat(unallocated.get(0).skuCode()).isEqualTo("SKU-2");
     // 计划量仍然是 10：作业台要看见「这一行要 10 件但没货」，而不是这一行消失。
@@ -547,14 +626,23 @@ class PickTaskIntegrationTest {
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,status,created_by_user_id)"
                   + " values(?,?,?,'SALES',?,?,'PICKING',?)",
-              orderId, a, "OB-X", "SO-X", wh(a), user);
+              orderId,
+              a,
+              "OB-X",
+              "SO-X",
+              wh(a),
+              user);
           return orderId;
         });
-    var noRequest = as(a, () -> sql.fetchOne(
-        "select id from outbound_order where tenant_id = current_setting('app.current_tenant', true)"
-            + "::uuid and order_code='OB-X'")).get("id", UUID.class);
-    assertThat(catchThrowable(() -> generate(a, noRequest)))
-        .hasMessageContaining("还没有拣货交接请求");
+    var noRequest =
+        as(
+                a,
+                () ->
+                    sql.fetchOne(
+                        "select id from outbound_order where tenant_id = current_setting('app.current_tenant', true)"
+                            + "::uuid and order_code='OB-X'"))
+            .get("id", UUID.class);
+    assertThat(catchThrowable(() -> generate(a, noRequest))).hasMessageContaining("还没有拣货交接请求");
 
     // 有交接请求但没有发货暂存位当打包区
     as(
@@ -564,8 +652,7 @@ class PickTaskIntegrationTest {
           return null;
         });
     UUID order = outbound(a, "OB-Y", sku(a, 1));
-    assertThat(catchThrowable(() -> generate(a, order)))
-        .hasMessageContaining("没有启用的发货暂存库位");
+    assertThat(catchThrowable(() -> generate(a, order))).hasMessageContaining("没有启用的发货暂存库位");
   }
 
   @Test
@@ -574,8 +661,7 @@ class PickTaskIntegrationTest {
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     location(a, "OUT-2", "SHIPPING", true, null);
     UUID order = outbound(a, "OB-7", sku(a, 1));
-    assertThat(catchThrowable(() -> generate(a, order)))
-        .hasMessageContaining("不猜哪个是打包区");
+    assertThat(catchThrowable(() -> generate(a, order))).hasMessageContaining("不猜哪个是打包区");
   }
 
   @Test
@@ -584,8 +670,7 @@ class PickTaskIntegrationTest {
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     UUID order = outbound(a, "OB-8", sku(a, 1));
     var created = generate(a, order);
-    assertThat(catchThrowable(() -> generate(a, order)))
-        .hasMessageContaining("一张出库单只生成一次拣货任务");
+    assertThat(catchThrowable(() -> generate(a, order))).hasMessageContaining("一张出库单只生成一次拣货任务");
     assertThat(created.taskCode()).startsWith("PT-");
   }
 
@@ -597,16 +682,28 @@ class PickTaskIntegrationTest {
     bucket(a, l.a1(), sku(a, 1), "10", "4");
     UUID order = outbound(a, "OB-9", sku(a, 1));
     var created = generate(a, order);
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, "PDA 接单"), user));
+    asWriteValue(
+        a, () -> service.assign(created.id(), new PickTaskAssignInput(user, "PDA 接单"), user));
 
     BigDecimal balanceBefore = balanceOnHand(a, sku(a, 1));
     long entriesBefore = inventoryEntryCount(a);
     assertThat(balanceBefore).isEqualByComparingTo("10");
 
-    var pick = asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(linesOf(a, created.id()).get(0).id(), l.a1(), null,
-            new BigDecimal("6"), List.of(), "2026-10-14T09:30:00+08:00", "先拣 6 件"), user));
+    var pick =
+        asWriteValue(
+            a,
+            () ->
+                service.recordPick(
+                    created.id(),
+                    new PickTaskPickInput(
+                        linesOf(a, created.id()).get(0).id(),
+                        l.a1(),
+                        null,
+                        new BigDecimal("6"),
+                        List.of(),
+                        "2026-10-14T09:30:00+08:00",
+                        "先拣 6 件"),
+                    user));
 
     assertThat(pick.quantity()).isEqualByComparingTo("6");
     assertThat(pick.locationId()).isEqualTo(l.a1());
@@ -626,11 +723,22 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-10", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
-    var pick = asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(linesOf(a, created.id()).get(0).id(), l.a1(), null,
-            new BigDecimal("1"), List.of(), "2026-10-14T09:30:00+08:00", null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
+    var pick =
+        asWriteValue(
+            a,
+            () ->
+                service.recordPick(
+                    created.id(),
+                    new PickTaskPickInput(
+                        linesOf(a, created.id()).get(0).id(),
+                        l.a1(),
+                        null,
+                        new BigDecimal("1"),
+                        List.of(),
+                        "2026-10-14T09:30:00+08:00",
+                        null),
+                    user));
 
     // 写回的值：东八区 09:30 存进来必须是同一瞬时，不是 01:30（那是 -28800s 的经典坑）。
     assertThat(pick.pickedAt().toInstant())
@@ -643,12 +751,25 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-11", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     // B-1 上没有这件货：现场情况与分配不符也不能凭空拣。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(linesOf(a, created.id()).get(0).id(), l.b1(), null,
-            new BigDecimal("1"), List.of(), null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    linesOf(a, created.id()).get(0).id(),
+                                    l.b1(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("没有这件货的库存行");
   }
 
@@ -657,24 +778,53 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-12", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("8"), List.of(), null, null),
-        user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    line.id(), l.a1(), null, new BigDecimal("8"), List.of(), null, null),
+                user));
     // 计划 10、已拣 8，再拣 3 就超了。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("3"), List.of(), null, null),
-        user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.a1(),
+                                    null,
+                                    new BigDecimal("3"),
+                                    List.of(),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("超拣");
 
     // 绕开服务层直连 SQL：V110 的 guard_pick_task_pick_fn 照样拒。
-    assertThat(catchThrowable(() -> superuserSql(
-            "insert into pick_task_pick(id,tenant_id,task_id,line_id,location_id,quantity,"
-                + "picked_by,picked_at) values(gen_random_uuid(),'" + a + "','" + created.id()
-                + "','" + line.id() + "','" + l.a1() + "',5,'" + user
-                + "',now())")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "insert into pick_task_pick(id,tenant_id,task_id,line_id,location_id,quantity,"
+                            + "picked_by,picked_at) values(gen_random_uuid(),'"
+                            + a
+                            + "','"
+                            + created.id()
+                            + "','"
+                            + line.id()
+                            + "','"
+                            + l.a1()
+                            + "',5,'"
+                            + user
+                            + "',now())")))
         .hasMessageContaining("超拣");
   }
 
@@ -683,12 +833,25 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-13", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.staging(), null, new BigDecimal("1"), List.of(), null,
-            null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.staging(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("没有这件货的库存行");
   }
 
@@ -702,15 +865,27 @@ class PickTaskIntegrationTest {
     UUID otherSkuSerial = serial(a, sku(a, 2), "SN-9", l.a1());
 
     var created = generate(a, outbound(a, "OB-14", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
 
-    var pick = asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("2"), List.of(s1, s2),
-            null, "逐件核对"), user));
+    var pick =
+        asWriteValue(
+            a,
+            () ->
+                service.recordPick(
+                    created.id(),
+                    new PickTaskPickInput(
+                        line.id(),
+                        l.a1(),
+                        null,
+                        new BigDecimal("2"),
+                        List.of(s1, s2),
+                        null,
+                        "逐件核对"),
+                    user));
     assertThat(pick.serialCount()).isEqualTo(2);
-    assertThat(pick.serials()).extracting(PickTaskSerialRow::serialNumber)
+    assertThat(pick.serials())
+        .extracting(PickTaskSerialRow::serialNumber)
         .containsExactly("SN-1", "SN-2");
     assertThat(serialLocation(a, s1)).isEqualTo(l.staging());
     assertThat(serialLocation(a, s2)).isEqualTo(l.staging());
@@ -719,34 +894,91 @@ class PickTaskIntegrationTest {
 
     // 序列号条数与数量对不上（逐件核对的含义就是「一件一号」）。
     bucket(a, l.b1(), sku(a, 1), "5", "0");
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("1"),
-            List.of(elsewhere, otherSkuSerial), null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.a1(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(elsewhere, otherSkuSerial),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("序列号条数");
 
     // 不在本次实拣库位上的号：号挂在 B-1，我们却从 A-1 把它记成被拿走了。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("1"), List.of(elsewhere),
-            null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.a1(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(elsewhere),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("不在本次实拣的库位上");
 
     // 绑定的 SKU 与拣货行不符（序列号与 SKU 的绑定是永久的）。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("1"),
-            List.of(otherSkuSerial), null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.a1(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(otherSkuSerial),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("绑定的 SKU 与拣货行不符");
 
     // 不是「在库」的号也拣不走：把 SN-1 置为已售（V58 要求同时清空位置）。
     as(
         a,
         () -> {
-          sql.execute("update inventory_serial set status='SOLD', current_location_id=null"
-              + " where id=?", s1);
+          sql.execute(
+              "update inventory_serial set status='SOLD', current_location_id=null" + " where id=?",
+              s1);
           return null;
         });
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("1"), List.of(s1), null,
-            null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.recordPick(
+                                created.id(),
+                                new PickTaskPickInput(
+                                    line.id(),
+                                    l.a1(),
+                                    null,
+                                    new BigDecimal("1"),
+                                    List.of(s1),
+                                    null,
+                                    null),
+                                user))))
         .hasMessageContaining("只有「在库」的号能被拣走");
   }
 
@@ -757,27 +989,56 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-15", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
 
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("SHORTAGE", line.id(), null, l.a1(), "库里只有 6 件", null),
-        user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.reportException(
+                                created.id(),
+                                new PickTaskExceptionInput(
+                                    "SHORTAGE", line.id(), null, l.a1(), "库里只有 6 件", null),
+                                user))))
         .hasMessageContaining("缺货数量不能为空");
     // 非缺货类不许填数量：两个地方各记一遍会与实拣/计划之差对不上。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("DAMAGED", line.id(), new BigDecimal("2"), l.a1(), "压坏",
-            null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.reportException(
+                                created.id(),
+                                new PickTaskExceptionInput(
+                                    "DAMAGED", line.id(), new BigDecimal("2"), l.a1(), "压坏", null),
+                                user))))
         .hasMessageContaining("只有缺货");
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("SHORTAGE", line.id(), new BigDecimal("2"), l.a1(), " ", null),
-        user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.reportException(
+                                created.id(),
+                                new PickTaskExceptionInput(
+                                    "SHORTAGE", line.id(), new BigDecimal("2"), l.a1(), " ", null),
+                                user))))
         .hasMessageContaining("必须写 detail");
 
-    var row = asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("SHORTAGE", line.id(), new BigDecimal("4"), l.a1(),
-            "A-1 只剩 6 件", null), user));
+    var row =
+        asWriteValue(
+            a,
+            () ->
+                service.reportException(
+                    created.id(),
+                    new PickTaskExceptionInput(
+                        "SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "A-1 只剩 6 件", null),
+                    user));
     assertThat(row.shortageQuantity()).isEqualByComparingTo("4");
     assertThat(row.resolved()).isFalse();
     assertThat(row.detail()).isEqualTo("A-1 只剩 6 件");
@@ -788,29 +1049,60 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-16", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
     var ex =
-        asWriteValue(a, () -> service.reportException(created.id(),
-            new PickTaskExceptionInput("SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "缺 4 件",
-                null), user));
+        asWriteValue(
+            a,
+            () ->
+                service.reportException(
+                    created.id(),
+                    new PickTaskExceptionInput(
+                        "SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "缺 4 件", null),
+                    user));
 
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.resolveException(created.id(),
-        ex.id(), new PickTaskResolveInput("REPLACED", " "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.resolveException(
+                                created.id(),
+                                ex.id(),
+                                new PickTaskResolveInput("REPLACED", " "),
+                                user))))
         .hasMessageContaining("必须写 note");
-    var resolved = asWriteValue(a, () -> service.resolveException(created.id(), ex.id(),
-        new PickTaskResolveInput("REPLACED", "从 B-1 补齐"), user));
+    var resolved =
+        asWriteValue(
+            a,
+            () ->
+                service.resolveException(
+                    created.id(), ex.id(), new PickTaskResolveInput("REPLACED", "从 B-1 补齐"), user));
     assertThat(resolved.resolved()).isTrue();
     assertThat(resolved.resolution()).isEqualTo("REPLACED");
     assertThat(resolved.resolveNote()).isEqualTo("从 B-1 补齐");
 
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.resolveException(created.id(),
-        ex.id(), new PickTaskResolveInput("IGNORED", "算了"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.resolveException(
+                                created.id(),
+                                ex.id(),
+                                new PickTaskResolveInput("IGNORED", "算了"),
+                                user))))
         .hasMessageContaining("已经处理过");
     // DB 层同样只让写一次（23514）。
-    assertThat(catchThrowable(() -> superuserSql(
-            "update pick_task_exception set resolved_at=now() where id='" + ex.id() + "'")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "update pick_task_exception set resolved_at=now() where id='"
+                            + ex.id()
+                            + "'")))
         .hasMessageContaining("处理结论不可再改");
   }
 
@@ -821,20 +1113,29 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-17", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("6"), List.of(), null, null),
-        user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    line.id(), l.a1(), null, new BigDecimal("6"), List.of(), null, null),
+                user));
 
     // 6/10，既没拣齐也没报缺货 —— 不提供「强制完成」。
     assertThat(catchThrowable(() -> asWriteValue(a, () -> service.complete(created.id(), user))))
         .hasMessageContaining("没拣齐、也没按缺货登记异常");
 
-    asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "只有 6 件",
-            null), user));
+    asWriteValue(
+        a,
+        () ->
+            service.reportException(
+                created.id(),
+                new PickTaskExceptionInput(
+                    "SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "只有 6 件", null),
+                user));
     var detail = asWriteValue(a, () -> service.complete(created.id(), user));
     assertThat(detail.task().status()).isEqualTo("COMPLETED");
     // 拣货完 ≠ 已发货：出库单只到「待复核」。
@@ -848,12 +1149,16 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-18", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("10"), List.of(), null, null),
-        user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    line.id(), l.a1(), null, new BigDecimal("10"), List.of(), null, null),
+                user));
 
     var detail = asWriteValue(a, () -> service.complete(created.id(), user));
     assertThat(detail.task().status()).isEqualTo("COMPLETED");
@@ -861,7 +1166,8 @@ class PickTaskIntegrationTest {
     assertThat(detail.task().pickedQuantity()).isEqualByComparingTo("10");
     assertThat(detail.task().progress()).isEqualByComparingTo("1");
     assertThat(detail.lines().get(0).lineStatus()).isEqualTo(PickTaskLineStatus.PICKED);
-    assertThat(detail.events()).extracting(PickTaskEventRow::eventType)
+    assertThat(detail.events())
+        .extracting(PickTaskEventRow::eventType)
         .containsExactly("GENERATED", "ASSIGNED", "PICKED", "COMPLETED");
   }
 
@@ -870,16 +1176,24 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "0.300000", "0");
     var created = generate(a, outbound(a, "OB-19", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(linesOf(a, created.id()).get(0).id(), l.a1(), null,
-            new BigDecimal("0.1"), List.of(), null, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    linesOf(a, created.id()).get(0).id(),
+                    l.a1(),
+                    null,
+                    new BigDecimal("0.1"),
+                    List.of(),
+                    null,
+                    null),
+                user));
     // 0.1 读回必须是 0.1，不能是 0.1000000000000000055511151231257827…（浮点的老毛病）。
-    assertThat(onHand(a, l.a1(), sku(a, 1)).stripTrailingZeros())
-        .isEqualByComparingTo("0.2");
-    assertThat(onHand(a, l.staging(), sku(a, 1)).stripTrailingZeros())
-        .isEqualByComparingTo("0.1");
+    assertThat(onHand(a, l.a1(), sku(a, 1)).stripTrailingZeros()).isEqualByComparingTo("0.2");
+    assertThat(onHand(a, l.staging(), sku(a, 1)).stripTrailingZeros()).isEqualByComparingTo("0.1");
   }
 
   // ================================================================ 取消与重开
@@ -889,11 +1203,14 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "2");
     var created = generate(a, outbound(a, "OB-20", sku(a, 1)));
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.cancel(created.id(),
-        new PickTaskCancelInput(" "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a, () -> service.cancel(created.id(), new PickTaskCancelInput(" "), user))))
         .hasMessageContaining("取消必须写原因");
-    var row = asWriteValue(a, () -> service.cancel(created.id(),
-        new PickTaskCancelInput("单据已取消"), user));
+    var row =
+        asWriteValue(a, () -> service.cancel(created.id(), new PickTaskCancelInput("单据已取消"), user));
     assertThat(row.status()).isEqualTo("CANCELLED");
     // 取消不动库存：货仍在原库位，预占不变。
     assertThat(onHand(a, l.a1(), sku(a, 1))).isEqualByComparingTo("10");
@@ -906,35 +1223,59 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "20", "0");
     var created = generate(a, outbound(a, "OB-21", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
     // 拣 6 件、按缺货报 4 件才允许提交复核（没有「强制完成」）。
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("6"), List.of(), null, null),
-        user));
-    asWriteValue(a, () -> service.reportException(created.id(),
-        new PickTaskExceptionInput("SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "库里只有 6 件",
-            null), user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    line.id(), l.a1(), null, new BigDecimal("6"), List.of(), null, null),
+                user));
+    asWriteValue(
+        a,
+        () ->
+            service.reportException(
+                created.id(),
+                new PickTaskExceptionInput(
+                    "SHORTAGE", line.id(), new BigDecimal("4"), l.a1(), "库里只有 6 件", null),
+                user));
     asWriteValue(a, () -> service.complete(created.id(), user));
 
     // 出库单还没被复核退回 → 重开不成立。
-    assertThat(catchThrowable(() -> asWriteValue(a, () -> service.reopen(created.id(),
-        new PickTaskReopenInput("复核退回", null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWriteValue(
+                        a,
+                        () ->
+                            service.reopen(
+                                created.id(), new PickTaskReopenInput("复核退回", null), user))))
         .hasMessageContaining("不是「拣货中」");
     // 空原因不收。
-    assertThat(catchThrowable(() -> {
-      as(a, () -> {
-        sql.execute(
-            "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-            a, orderOf(a, created.id()));
-        return null;
-      });
-      asWriteValue(a, () -> service.reopen(created.id(), new PickTaskReopenInput(" ", null), user));
-    })).hasMessageContaining("重开必须写原因");
+    assertThat(
+            catchThrowable(
+                () -> {
+                  as(
+                      a,
+                      () -> {
+                        sql.execute(
+                            "update outbound_order set status='PICKING' where tenant_id=? and id=?",
+                            a,
+                            orderOf(a, created.id()));
+                        return null;
+                      });
+                  asWriteValue(
+                      a,
+                      () -> service.reopen(created.id(), new PickTaskReopenInput(" ", null), user));
+                }))
+        .hasMessageContaining("重开必须写原因");
 
-    var row = asWriteValue(a, () -> service.reopen(created.id(),
-        new PickTaskReopenInput("复核发现拣错一件", user), user));
+    var row =
+        asWriteValue(
+            a, () -> service.reopen(created.id(), new PickTaskReopenInput("复核发现拣错一件", user), user));
     assertThat(row.status()).isEqualTo("IN_PROGRESS");
     assertThat(row.reopenCount()).isEqualTo(1);
     // 实拣量**累加**：第一次拣的 6 件仍然在账上（重开不是清零重来 ——
@@ -942,9 +1283,14 @@ class PickTaskIntegrationTest {
     assertThat(row.pickedQuantity()).isEqualByComparingTo("6");
     assertThat(row.assigneeUserId()).isEqualTo(user);
 
-    asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("4"), List.of(), null, null),
-        user));
+    asWriteValue(
+        a,
+        () ->
+            service.recordPick(
+                created.id(),
+                new PickTaskPickInput(
+                    line.id(), l.a1(), null, new BigDecimal("4"), List.of(), null, null),
+                user));
     var line2 = linesOf(a, created.id()).get(0);
     assertThat(line2.pickedQuantity()).isEqualByComparingTo("10");
     assertThat(line2.lineStatus()).isEqualTo(PickTaskLineStatus.PICKED);
@@ -960,8 +1306,11 @@ class PickTaskIntegrationTest {
     asWriteValue(a, () -> service.cancel(created.id(), new PickTaskCancelInput("放弃"), user));
     var lineId = linesOf(a, created.id()).get(0).id();
     // 超级用户直连：FORCE RLS 与行级守卫都绕不开。
-    assertThat(catchThrowable(() -> superuserSql(
-            "update pick_task_line set planned_quantity=99 where id='" + lineId + "'")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "update pick_task_line set planned_quantity=99 where id='" + lineId + "'")))
         .hasMessageContaining("拣货明细不可再改");
   }
 
@@ -971,9 +1320,13 @@ class PickTaskIntegrationTest {
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-23", sku(a, 1)));
     // 已生成 → 已完成：V110 的状态机里没有这条边。
-    assertThat(catchThrowable(() -> superuserSql(
-            "update pick_task set status='COMPLETED', completed_at=now() where id='"
-                + created.id() + "'")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "update pick_task set status='COMPLETED', completed_at=now() where id='"
+                            + created.id()
+                            + "'")))
         .hasMessageContaining("状态非法跃迁");
   }
 
@@ -982,9 +1335,15 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-24", sku(a, 1)));
-    assertThat(catchThrowable(() -> superuserSql(
-            "update pick_task set staging_location_id='" + l.a1() + "' where id='" + created.id()
-                + "'")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "update pick_task set staging_location_id='"
+                            + l.a1()
+                            + "' where id='"
+                            + created.id()
+                            + "'")))
         .hasMessageContaining("打包区必须是发货暂存库位");
   }
 
@@ -993,25 +1352,41 @@ class PickTaskIntegrationTest {
     Layout l = layout(a);
     bucket(a, l.a1(), sku(a, 1), "10", "0");
     var created = generate(a, outbound(a, "OB-25", sku(a, 1)));
-    asWriteValue(a, () -> service.assign(created.id(),
-        new PickTaskAssignInput(user, null), user));
+    asWriteValue(a, () -> service.assign(created.id(), new PickTaskAssignInput(user, null), user));
     var line = linesOf(a, created.id()).get(0);
-    var pick = asWriteValue(a, () -> service.recordPick(created.id(),
-        new PickTaskPickInput(line.id(), l.a1(), null, new BigDecimal("1"), List.of(), null, null),
-        user));
-    assertThat(catchThrowable(() -> superuserSql(
-            "update pick_task_pick set quantity=99 where id='" + pick.id() + "'")))
+    var pick =
+        asWriteValue(
+            a,
+            () ->
+                service.recordPick(
+                    created.id(),
+                    new PickTaskPickInput(
+                        line.id(), l.a1(), null, new BigDecimal("1"), List.of(), null, null),
+                    user));
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "update pick_task_pick set quantity=99 where id='" + pick.id() + "'")))
         .hasMessageContaining("不允许 UPDATE");
-    assertThat(catchThrowable(() -> superuserSql(
-            "delete from pick_task_event where task_id='" + created.id() + "'")))
+    assertThat(
+            catchThrowable(
+                () ->
+                    superuserSql(
+                        "delete from pick_task_event where task_id='" + created.id() + "'")))
         .hasMessageContaining("append-only");
   }
 
   @Test
   void allSixTablesForceRowLevelSecurity() {
     for (String table :
-        List.of("pick_task", "pick_task_line", "pick_task_pick", "pick_task_serial",
-            "pick_task_exception", "pick_task_event")) {
+        List.of(
+            "pick_task",
+            "pick_task_line",
+            "pick_task_pick",
+            "pick_task_serial",
+            "pick_task_exception",
+            "pick_task_event")) {
       var row =
           as(
               a,
@@ -1020,10 +1395,10 @@ class PickTaskIntegrationTest {
                       "select relrowsecurity, relforcerowsecurity from pg_class"
                           + " where relname = ?",
                       table));
-      assertThat(row.get("relforcerowsecurity", Boolean.class)).as(table + " 必须 FORCE RLS")
+      assertThat(row.get("relforcerowsecurity", Boolean.class))
+          .as(table + " 必须 FORCE RLS")
           .isTrue();
-      assertThat(row.get("relrowsecurity", Boolean.class)).as(table + " 必须 ENABLE RLS")
-          .isTrue();
+      assertThat(row.get("relrowsecurity", Boolean.class)).as(table + " 必须 ENABLE RLS").isTrue();
     }
   }
 
@@ -1067,7 +1442,8 @@ class PickTaskIntegrationTest {
         .isEqualTo(1);
 
     // 排序白名单：非法键当场 400，不接受任意列。
-    assertThat(catchThrowable(() -> as(a, () -> service.page(wh(a), null, null, null, "drop", 0, 50))))
+    assertThat(
+            catchThrowable(() -> as(a, () -> service.page(wh(a), null, null, null, "drop", 0, 50))))
         .hasMessageContaining("排序只能是");
     // B 租户看不到 A 租户的任务，也搜不到 A 的出库单号。
     assertThat(as(b, () -> service.page(wh(b), null, null, "OB-26", "CREATED_AT", 0, 50)).total())
@@ -1091,8 +1467,14 @@ class PickTaskIntegrationTest {
     // B 用 A 的任务 id 取详情 → 404（A 的出库单 id 在 B 的租户里也不存在）。
     assertThat(catchThrowable(() -> as(b, () -> service.detail(taskA.id()))))
         .hasMessageContaining("不存在");
-    assertThat(catchThrowable(() -> as(b, () -> service.generate(
-        new PickTaskGenerateInput(taskA.id(), null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(
+                        b,
+                        () ->
+                            service.generate(
+                                new PickTaskGenerateInput(taskA.id(), null, null), user))))
         .hasMessageContaining("不存在");
     // B 的仓库里看不到 A 的任务。
     assertThat(as(b, () -> service.page(wh(b), null, null, null, "CREATED_AT", 0, 50)).total())
@@ -1119,13 +1501,13 @@ class PickTaskIntegrationTest {
 
     // 带上真实身份但伪造租户头：看到的仍然只有 A 自己的那一行。
     http.perform(
-                get("/warehouse/pick-tasks")
-                    .header("Authorization", "Bearer tenant-a")
-                    .header("X-Tenant-Id", b.toString()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.total").value(1))
-            .andExpect(jsonPath("$.items[0].taskCode").value(task.taskCode()))
-            .andExpect(jsonPath("$.items[0].outboundOrderCode").value("OB-31"));
+            get("/warehouse/pick-tasks")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.total").value(1))
+        .andExpect(jsonPath("$.items[0].taskCode").value(task.taskCode()))
+        .andExpect(jsonPath("$.items[0].outboundOrderCode").value("OB-31"));
   }
 
   @Test
@@ -1141,13 +1523,19 @@ class PickTaskIntegrationTest {
     for (int round = 0; round < 3; round++) {
       assertThat(as(a, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50)).total())
           .isEqualTo(1);
-      assertThat(as(a, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50)).items().get(0)
-              .taskCode())
+      assertThat(
+              as(a, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50))
+                  .items()
+                  .get(0)
+                  .taskCode())
           .isEqualTo(taskA.taskCode());
       assertThat(as(b, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50)).total())
           .isEqualTo(1);
-      assertThat(as(b, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50)).items().get(0)
-              .taskCode())
+      assertThat(
+              as(b, () -> service.page(null, null, null, null, "CREATED_AT", 0, 50))
+                  .items()
+                  .get(0)
+                  .taskCode())
           .isEqualTo(taskB.taskCode());
     }
   }
@@ -1160,13 +1548,13 @@ class PickTaskIntegrationTest {
     bucket(a, la.a1(), sku(a, 1), "10", "0");
     var order = outbound(a, "OB-34", sku(a, 1));
 
-    http.perform(get("/warehouse/pick-tasks/capabilities"))
-        .andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/pick-tasks/capabilities").header("Authorization",
-            "Bearer no-permission"))
+    http.perform(get("/warehouse/pick-tasks/capabilities")).andExpect(status().isUnauthorized());
+    http.perform(
+            get("/warehouse/pick-tasks/capabilities")
+                .header("Authorization", "Bearer no-permission"))
         .andExpect(status().isForbidden());
-    http.perform(get("/warehouse/pick-tasks/capabilities")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/pick-tasks/capabilities").header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.refType").value("PICK_TASK"))
         .andExpect(jsonPath("$.balanceUnchangedByPicking").value(true))
@@ -1174,8 +1562,8 @@ class PickTaskIntegrationTest {
         .andExpect(jsonPath("$.pathBasis").isNotEmpty());
 
     var created = generate(a, order);
-    http.perform(get("/warehouse/pick-tasks/" + created.id())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/pick-tasks/" + created.id()).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.task.status").value("CREATED"))
         .andExpect(jsonPath("$.lines[0].sequenceNo").value(1))
@@ -1189,7 +1577,10 @@ class PickTaskIntegrationTest {
                 .header("Authorization", "Bearer read-only")
                 .contentType("application/json")
                 .content(
-                    "{\"lineId\":\"" + lineId + "\",\"locationId\":\"" + la.a1()
+                    "{\"lineId\":\""
+                        + lineId
+                        + "\",\"locationId\":\""
+                        + la.a1()
                         + "\",\"quantity\":1}"))
         .andExpect(status().isForbidden());
   }

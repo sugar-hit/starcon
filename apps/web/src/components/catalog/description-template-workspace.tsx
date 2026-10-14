@@ -145,24 +145,21 @@ export function DescriptionTemplateWorkspace() {
       .catch(() => setOptions(null));
   }, []);
 
-  const loadRenders = useCallback(
-    async (page: number, status: string) => {
-      try {
-        const result = await fetchDescriptionRenders({
-          keyword: null,
-          status: status || null,
-          skuId: null,
-          page,
-          size: PAGE_SIZE,
-        });
-        setRenders(result.items ?? []);
-        setRenderTotal(result.total);
-      } catch (error) {
-        setNotice(errorText(error));
-      }
-    },
-    [],
-  );
+  const loadRenders = useCallback(async (page: number, status: string) => {
+    try {
+      const result = await fetchDescriptionRenders({
+        keyword: null,
+        status: status || null,
+        skuId: null,
+        page,
+        size: PAGE_SIZE,
+      });
+      setRenders(result.items ?? []);
+      setRenderTotal(result.total);
+    } catch (error) {
+      setNotice(errorText(error));
+    }
+  }, []);
 
   useEffect(() => {
     void loadRenders(renderPage, renderStatus);
@@ -214,13 +211,16 @@ export function DescriptionTemplateWorkspace() {
     try {
       // 编辑已有模板时用 id 寻址；id 从 contentTemplateId 反查不到，所以用版本号定位。
       const target = editingSections
-        ? templates.find((row) => row.sections.length === editing.sections?.length &&
-            row.code === editing.code)
+        ? templates.find(
+            (row) => row.sections.length === editing.sections?.length && row.code === editing.code,
+          )
         : null;
       const saved = await saveDescriptionTemplate(target?.id ?? null, editing);
       setEditing(null);
       setEditingSections(null);
-      setNotice(`已保存「${saved.code}」，共 ${saved.sectionCount} 段、${saved.imageSlotCount} 个插图位`);
+      setNotice(
+        `已保存「${saved.code}」，共 ${saved.sectionCount} 段、${saved.imageSlotCount} 个插图位`,
+      );
       await load();
     } catch (error) {
       setNotice(errorText(error));
@@ -278,7 +278,11 @@ export function DescriptionTemplateWorkspace() {
               comparisonLabel: `启用中 ${overview.enabledTemplateCount}`,
             },
             { label: '段落', value: overview.sectionCount, comparisonLabel: '五类段落骨架' },
-            { label: '图片插入位', value: overview.imageSlotCount, comparisonLabel: '渲染时落成 img 标签' },
+            {
+              label: '图片插入位',
+              value: overview.imageSlotCount,
+              comparisonLabel: '渲染时落成 img 标签',
+            },
             {
               label: '缺段落模板',
               value: overview.missingSectionTypeCount,
@@ -318,9 +322,7 @@ export function DescriptionTemplateWorkspace() {
         ))}
       </div>
 
-      {overview && (
-        <p className="text-muted-foreground text-xs leading-relaxed">{overview.note}</p>
-      )}
+      {overview && <p className="text-muted-foreground text-xs leading-relaxed">{overview.note}</p>}
 
       <SectionCard
         title="描述模板"
@@ -338,9 +340,7 @@ export function DescriptionTemplateWorkspace() {
           </>
         }
       >
-        {loadError && (
-          <p className="text-destructive text-sm">读取失败：{loadError}</p>
-        )}
+        {loadError && <p className="text-destructive text-sm">读取失败：{loadError}</p>}
         {!loadError && loading && (
           <p className="text-muted-foreground flex items-center gap-2 text-sm">
             <Loader2 className="animate-spin" /> 正在加载描述模板…
@@ -365,7 +365,7 @@ export function DescriptionTemplateWorkspace() {
                       {row.enabled ? '启用' : '停用'}
                     </Badge>
                     {missing.length > 0 && (
-                      <span className="text-amber-600 text-xs">缺 {missing.join(' / ')}</span>
+                      <span className="text-xs text-amber-600">缺 {missing.join(' / ')}</span>
                     )}
                     <span className="ml-auto flex items-center gap-2">
                       {writable && (
@@ -398,7 +398,8 @@ export function DescriptionTemplateWorkspace() {
                     </span>
                   </div>
                   <p className="text-muted-foreground mt-1 text-xs">
-                    源语言 {row.sourceLocale} · 已配 {row.localeCount} 种语言 · 渲染 {row.renderCount} 次
+                    源语言 {row.sourceLocale} · 已配 {row.localeCount} 种语言 · 渲染{' '}
+                    {row.renderCount} 次
                   </p>
                   <p className="text-muted-foreground mt-1 text-xs">{templateSummary(row)}</p>
                 </li>
@@ -417,9 +418,7 @@ export function DescriptionTemplateWorkspace() {
             <select
               className={control}
               value={renderForm.templateId}
-              onChange={(event) =>
-                setRenderForm({ ...renderForm, templateId: event.target.value })
-              }
+              onChange={(event) => setRenderForm({ ...renderForm, templateId: event.target.value })}
             >
               <option value="">请选择</option>
               {templates
@@ -580,7 +579,9 @@ export function DescriptionTemplateWorkspace() {
 
           <div className="mt-3 grid gap-2 text-xs md:grid-cols-4">
             <span>段落 {detail.sections.length}</span>
-            <span>图片 {detail.imageCount} 个（HTML 里 &lt;img&gt; {countImgTags(detail.html)} 个）</span>
+            <span>
+              图片 {detail.imageCount} 个（HTML 里 &lt;img&gt; {countImgTags(detail.html)} 个）
+            </span>
             <span>缺失报告 {detail.issueCount} 条</span>
             <span>{detail.createdAt ?? ''}</span>
           </div>
@@ -590,7 +591,10 @@ export function DescriptionTemplateWorkspace() {
               <h4 className="text-sm font-medium">缺什么、怎么修</h4>
               <ul className="space-y-1">
                 {detail.issues.map((issue) => (
-                  <li key={issue.id} className="border-control-border rounded-md border px-3 py-2 text-xs">
+                  <li
+                    key={issue.id}
+                    className="border-control-border rounded-md border px-3 py-2 text-xs"
+                  >
                     <span className="font-medium">{issue.variableName}</span>
                     <span className="text-muted-foreground">
                       （{issue.issueKindLabel || issueKindLabel(issue.issueKind)}）
@@ -620,12 +624,16 @@ export function DescriptionTemplateWorkspace() {
                     </span>
                   )}
                 </div>
-                <pre className="text-muted-foreground mt-2 overflow-x-auto text-xs whitespace-pre-wrap">
+                <pre className="text-muted-foreground mt-2 overflow-x-auto whitespace-pre-wrap text-xs">
                   {htmlToReadable(section.html)}
                 </pre>
                 <details className="mt-1">
-                  <summary className="text-muted-foreground cursor-pointer text-xs">看原始 HTML</summary>
-                  <pre className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap">{section.html}</pre>
+                  <summary className="text-muted-foreground cursor-pointer text-xs">
+                    看原始 HTML
+                  </summary>
+                  <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
+                    {section.html}
+                  </pre>
                 </details>
               </div>
             ))}
@@ -635,7 +643,7 @@ export function DescriptionTemplateWorkspace() {
             <summary className="text-muted-foreground cursor-pointer text-xs">
               整份 HTML（data-position / data-section-type 可解析）
             </summary>
-            <pre className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap">{detail.html}</pre>
+            <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">{detail.html}</pre>
           </details>
         </SectionCard>
       )}

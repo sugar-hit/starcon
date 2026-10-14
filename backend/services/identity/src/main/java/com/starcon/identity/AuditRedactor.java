@@ -7,16 +7,15 @@ import java.util.regex.Pattern;
 /**
  * 17.5.3.1 变更详情脱敏。
  *
- * <p>蓝图原文：**审计不记录密码与完整客户地址；变更详情必须脱敏**。这里的取舍是脱敏发生在
- * <b>写入侧</b>，而不是读取时过滤——库里存的就已经是脱敏后的值，这样导出 CSV、直连 SQL
- * 排查、其他服务订阅审计事件时都不可能再拿到明文。只在读取时过滤等于把明文留在库里，
- * 换一个读取方（运维、BI、误配置的 SQL 台）就漏一次。
+ * <p>蓝图原文：**审计不记录密码与完整客户地址；变更详情必须脱敏**。这里的取舍是脱敏发生在 <b>写入侧</b>，而不是读取时过滤——库里存的就已经是脱敏后的值，这样导出 CSV、直连
+ * SQL 排查、其他服务订阅审计事件时都不可能再拿到明文。只在读取时过滤等于把明文留在库里， 换一个读取方（运维、BI、误配置的 SQL 台）就漏一次。
  *
  * <p>两条互补规则：
+ *
  * <ul>
  *   <li><b>按键判定</b>：字段名命中敏感词（password / token / 证件号 / 银行卡 …）就整值替换。
- *   <li><b>按值判定</b>：值本身长得像邮箱、手机号、银行卡或身份证就局部打码——因为业务代码
- *       完全可能把收件地址塞进一个叫 {@code remark} 的字段，按键判定挡不住这种情况。
+ *   <li><b>按值判定</b>：值本身长得像邮箱、手机号、银行卡或身份证就局部打码——因为业务代码 完全可能把收件地址塞进一个叫 {@code remark}
+ *       的字段，按键判定挡不住这种情况。
  * </ul>
  *
  * <p>本类无状态、可静态调用，所有写入点共用同一份口径，避免各处各写一套正则导致漏网。
@@ -30,26 +29,50 @@ public final class AuditRedactor {
   /**
    * 凭证类字段名：命中即<b>整值替换</b>。
    *
-   * <p>这些字段不保留任何原文片段——连长度信息都可能泄露（bcrypt 的 {@code $2a$10$} 前缀
-   * 直接暴露哈希强度），所以不用「保留头尾」那套。
+   * <p>这些字段不保留任何原文片段——连长度信息都可能泄露（bcrypt 的 {@code $2a$10$} 前缀 直接暴露哈希强度），所以不用「保留头尾」那套。
    *
-   * <p>用 {@code code} 点分小写做匹配，所以 {@code passwordHash}、{@code PASSWORD}、
-   * {@code api_key} 都会被归一化后命中。
+   * <p>用 {@code code} 点分小写做匹配，所以 {@code passwordHash}、{@code PASSWORD}、 {@code api_key} 都会被归一化后命中。
    */
   private static final String[] CREDENTIAL_KEYS = {
-    "password", "passwd", "pwd", "token", "secret", "apikey", "accesskey", "privatekey",
-    "credential", "authorization", "cookie", "session", "signature", "salt", "hash"
+    "password",
+    "passwd",
+    "pwd",
+    "token",
+    "secret",
+    "apikey",
+    "accesskey",
+    "privatekey",
+    "credential",
+    "authorization",
+    "cookie",
+    "session",
+    "signature",
+    "salt",
+    "hash"
   };
 
   /**
    * 身份与联系信息类字段名：命中后<b>保留头尾</b>打码。
    *
-   * <p>与凭证类的区别：审计要能看出「这个证件号改成了另一个」而不是只知道「某个字段变了」。
-   * 保留前 3 后 2（如身份证）足以区分两次不同输入，又不足以还原原文。
+   * <p>与凭证类的区别：审计要能看出「这个证件号改成了另一个」而不是只知道「某个字段变了」。 保留前 3 后 2（如身份证）足以区分两次不同输入，又不足以还原原文。
    */
   private static final String[] IDENTITY_KEYS = {
-    "idcard", "idno", "identityno", "passport", "bankcard", "cardno", "iban", "cvv", "taxno",
-    "phone", "mobile", "tel", "email", "address", "consignee", "receiver"
+    "idcard",
+    "idno",
+    "identityno",
+    "passport",
+    "bankcard",
+    "cardno",
+    "iban",
+    "cvv",
+    "taxno",
+    "phone",
+    "mobile",
+    "tel",
+    "email",
+    "address",
+    "consignee",
+    "receiver"
   };
 
   /** 中文列名（业务表里很常见），归一化会剥掉非 ASCII，所以单独按原名匹配。 */
@@ -128,9 +151,8 @@ public final class AuditRedactor {
   /**
    * 邮箱打码：本地部分只留首字符，域名完整保留。
    *
-   * <p>保留域名是为了让审计仍能回答「这批变更都发往同一个公司邮箱」，
-   * 而真正承载个人身份的本地部分只留一个首字符——够区分不同值，不足以还原原文。
-   * 这里不能用 {@link #keepEnds}：域名的长度会参与阈值计算，短域名邮箱会被整值抹掉。
+   * <p>保留域名是为了让审计仍能回答「这批变更都发往同一个公司邮箱」， 而真正承载个人身份的本地部分只留一个首字符——够区分不同值，不足以还原原文。 这里不能用 {@link
+   * #keepEnds}：域名的长度会参与阈值计算，短域名邮箱会被整值抹掉。
    */
   private static String maskEmail(String matched) {
     int at = matched.indexOf('@');
@@ -141,8 +163,8 @@ public final class AuditRedactor {
   /**
    * 对「命名无害」的字段值做形态打码：值里藏了邮箱/手机/卡号/证件号就替换。
    *
-   * <p>与 {@link #maskKnown} 的区别是这里在整串里扫描（可能只是其中一个片段敏感），
-   * 而不是要求整串就是那一种形态——{@code remark} 里写「联系我 13800138000」要能挡住。
+   * <p>与 {@link #maskKnown} 的区别是这里在整串里扫描（可能只是其中一个片段敏感）， 而不是要求整串就是那一种形态——{@code remark} 里写「联系我
+   * 13800138000」要能挡住。
    */
   static String maskValue(String source) {
     String masked = ID_CARD.matcher(source).replaceAll(m -> keepEnds(m.group(), 3, 2));
@@ -154,8 +176,8 @@ public final class AuditRedactor {
   /**
    * 对单个字段值脱敏，返回可直接写入审计 JSON 的对象。
    *
-   * <p>非字符串值（布尔、数字、null）原样返回：它们不承载凭证或个人信息，
-   * 而审计详情需要保留「从 false 改成 true」这类事实，也需要 amountScale 是数字而不是字符串。
+   * <p>非字符串值（布尔、数字、null）原样返回：它们不承载凭证或个人信息， 而审计详情需要保留「从 false 改成 true」这类事实，也需要 amountScale
+   * 是数字而不是字符串。
    */
   public static Object redact(String field, Object value) {
     if (value == null) return null;
@@ -183,7 +205,8 @@ public final class AuditRedactor {
   public static Map<String, Object> redactAll(Map<String, Object> values) {
     if (values == null) return null;
     Map<String, Object> safe = new LinkedHashMap<>();
-    for (var entry : values.entrySet()) safe.put(entry.getKey(), redact(entry.getKey(), entry.getValue()));
+    for (var entry : values.entrySet())
+      safe.put(entry.getKey(), redact(entry.getKey(), entry.getValue()));
     return safe;
   }
 }

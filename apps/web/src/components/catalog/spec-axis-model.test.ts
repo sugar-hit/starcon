@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { SpecAxisOption, SpecAxisPanel } from '../../../../../packages/api-contracts/src/index';
+import type {
+  SpecAxisOption,
+  SpecAxisPanel,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   axisUsageText,
   codeProblem,
@@ -182,9 +185,9 @@ describe('类目必绑提示', () => {
   });
 
   it('全部绑定时报已齐', () => {
-    expect(
-      requiredAxisHint(panel({ boundAxisCount: 1, requiredAxisNotes: ['已绑定'] })),
-    ).toContain('已全部绑定');
+    expect(requiredAxisHint(panel({ boundAxisCount: 1, requiredAxisNotes: ['已绑定'] }))).toContain(
+      '已全部绑定',
+    );
   });
 });
 
@@ -193,7 +196,9 @@ describe('表单校验', () => {
     expect(
       validateAxis({ ...emptyAxisDraft(), code: '颜色', name: '颜色' }, true).join(''),
     ).not.toBe('');
-    expect(validateAxis({ ...emptyAxisDraft(), code: '颜色', name: '颜色' }, false)).toHaveLength(0);
+    expect(validateAxis({ ...emptyAxisDraft(), code: '颜色', name: '颜色' }, false)).toHaveLength(
+      0,
+    );
   });
 
   it('轴名称必填且限长', () => {
@@ -206,7 +211,9 @@ describe('表单校验', () => {
   });
 
   it('重复选项提示为幂等更新而不是新增', () => {
-    const errors = validateOption({ ...emptyOptionDraft(), value: '红' }, [option({ value: '红' })]);
+    const errors = validateOption({ ...emptyOptionDraft(), value: '红' }, [
+      option({ value: '红' }),
+    ]);
     expect(errors.join('')).toContain('已存在');
   });
 

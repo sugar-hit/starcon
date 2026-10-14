@@ -3,7 +3,6 @@ package com.starcon.channel;
 import static com.starcon.channel.ChannelModels.*;
 
 import com.starcon.tenancy.Ids;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -51,9 +50,8 @@ public class ChannelService {
   /**
    * 2.1.1.2 能力矩阵键名提取。
    *
-   * <p>jsonb 到达 JDBC 后可能是 String、PGobject 或 Map，取决于驱动与 jOOQ 配置；
-   * 这里统一转成 JSON 文本再解析，避免"能力为空"这种静默失真——能力矩阵是
-   * 09/07/10/11 禁用按钮的依据，读空等于让所有按钮都可点。
+   * <p>jsonb 到达 JDBC 后可能是 String、PGobject 或 Map，取决于驱动与 jOOQ 配置； 这里统一转成 JSON
+   * 文本再解析，避免"能力为空"这种静默失真——能力矩阵是 09/07/10/11 禁用按钮的依据，读空等于让所有按钮都可点。
    */
   private static List<String> capabilityKeys(Object raw) {
     if (raw == null) return List.of();
@@ -61,9 +59,11 @@ public class ChannelService {
     try {
       var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
       List<String> keys = new ArrayList<>();
-      node.fields().forEachRemaining(e -> {
-        if (e.getValue().asBoolean(false)) keys.add(e.getKey());
-      });
+      node.fields()
+          .forEachRemaining(
+              e -> {
+                if (e.getValue().asBoolean(false)) keys.add(e.getKey());
+              });
       return keys;
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
       throw new IllegalStateException("能力矩阵 JSON 解析失败", e);
@@ -75,8 +75,7 @@ public class ChannelService {
     if (raw instanceof String s) return s;
     if (raw instanceof org.jooq.JSONB j) return j.data();
     try {
-      Object value =
-          raw.getClass().getMethod("getValue").invoke(raw);
+      Object value = raw.getClass().getMethod("getValue").invoke(raw);
       return value == null ? "{}" : value.toString();
     } catch (ReflectiveOperationException e) {
       return raw.toString();
@@ -90,7 +89,9 @@ public class ChannelService {
   /** 2.1.1.1 平台目录 + 2.1.1.2 能力矩阵 + 2.1.1.3 站点参数。 */
   public List<PlatformView> platforms() {
     Map<UUID, PlatformView> platforms = new LinkedHashMap<>();
-    for (Record r : sql.fetch("select id,code,name,integration,support_status,capabilities from platform order by position,code")) {
+    for (Record r :
+        sql.fetch(
+            "select id,code,name,integration,support_status,capabilities from platform order by position,code")) {
       List<String> capabilities = new ArrayList<>();
       for (String key : capabilityKeys(r.get("capabilities"))) capabilities.add(key);
       platforms.put(
@@ -128,7 +129,11 @@ public class ChannelService {
   /** 2.1.1.2 能力判定：被 09/07/10/11 引用，在别处禁用按钮而不是点了才报错。 */
   public boolean supports(UUID platformId, String capability) {
     return Boolean.TRUE.equals(
-        one(Boolean.class, "select (capabilities->>?)::boolean from platform where id=?", capability, platformId));
+        one(
+            Boolean.class,
+            "select (capabilities->>?)::boolean from platform where id=?",
+            capability,
+            platformId));
   }
 
   // ------------------------------------------------------------------
@@ -139,8 +144,7 @@ public class ChannelService {
    * 2.1.2.1 生效映射：平台默认 + 租户覆盖，租户覆盖优先。
    *
    * <p>两条查询在 Java 里按 (enum_kind, external_value) 合并，而不是在 SQL 里做 full outer
-   * join：覆盖表与码表都是小表（每个平台几十行），可读性比省一次往返重要。合并键相同
-   * 时后写入的租户覆盖替换平台默认——这正是"平台默认 + 租户覆盖"的语义。
+   * join：覆盖表与码表都是小表（每个平台几十行），可读性比省一次往返重要。合并键相同 时后写入的租户覆盖替换平台默认——这正是"平台默认 + 租户覆盖"的语义。
    */
   public List<EnumMappingView> enumMappings(UUID tenantId, String platformCode, String enumKind) {
     boolean filtered = enumKind != null && !enumKind.isBlank();
@@ -154,7 +158,9 @@ public class ChannelService {
                 + filter
                 + " order by m.enum_kind,m.external_value",
             filtered ? new Object[] {platformCode, enumKind} : new Object[] {platformCode}))
-      merged.put(enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)), mapEnum(r));
+      merged.put(
+          enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)),
+          mapEnum(r));
     for (Record r :
         sql.fetch(
             "select o.id,p.code platform_code,o.enum_kind,o.external_value,o.internal_value,'TENANT' source"
@@ -162,8 +168,12 @@ public class ChannelService {
                 + " where o.tenant_id=? and p.code=?"
                 + filter
                 + " order by o.enum_kind,o.external_value",
-            filtered ? new Object[] {tenantId, platformCode, enumKind} : new Object[] {tenantId, platformCode}))
-      merged.put(enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)), mapEnum(r));
+            filtered
+                ? new Object[] {tenantId, platformCode, enumKind}
+                : new Object[] {tenantId, platformCode}))
+      merged.put(
+          enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)),
+          mapEnum(r));
     return List.copyOf(merged.values());
   }
 
@@ -184,10 +194,10 @@ public class ChannelService {
   /**
    * 2.1.2.1 登记或改写本租户的映射覆盖。
    *
-   * <p>同一个 (平台, 枚举种类, 外部值) 重复登记就是改写——用户改主意是正常操作，不该被
-   * 唯一约束挡成 500。全局默认表不碰。
+   * <p>同一个 (平台, 枚举种类, 外部值) 重复登记就是改写——用户改主意是正常操作，不该被 唯一约束挡成 500。全局默认表不碰。
    */
-  public UUID putEnumOverride(AccessService.Access actor, String platformCode, EnumOverrideInput input) {
+  public UUID putEnumOverride(
+      AccessService.Access actor, String platformCode, EnumOverrideInput input) {
     UUID platformId = requirePlatform(platformCode);
     String kind = input.enumKind().trim();
     String external = input.externalValue().trim();
@@ -225,8 +235,7 @@ public class ChannelService {
   /**
    * 删除覆盖后，该外部值回落到平台默认；平台默认本身没有删除入口。
    *
-   * <p>平台码进 WHERE 而不是只做校验：路径与行对不上时返回同一个"不存在"，
-   * 避免调用方拿到"别人的 id 被删了"这种含混反馈。
+   * <p>平台码进 WHERE 而不是只做校验：路径与行对不上时返回同一个"不存在"， 避免调用方拿到"别人的 id 被删了"这种含混反馈。
    */
   public void deleteEnumOverride(AccessService.Access actor, String platformCode, UUID id) {
     int deleted =
@@ -250,8 +259,8 @@ public class ChannelService {
   /**
    * 解析平台枚举：租户覆盖优先，其次平台默认，都没有则返回 null。
    *
-   * <p>2.1.2.1 铁律：映射缺失必须显式报"未映射"，绝不默认落到兜底状态——否则状态机被污染。
-   * 返回 {@code null} 就是"未映射"的信号，调用方必须自己报错，不许替换默认值。
+   * <p>2.1.2.1 铁律：映射缺失必须显式报"未映射"，绝不默认落到兜底状态——否则状态机被污染。 返回 {@code null}
+   * 就是"未映射"的信号，调用方必须自己报错，不许替换默认值。
    */
   public String resolveEnum(UUID tenantId, UUID platformId, String enumKind, String externalValue) {
     String overridden =
@@ -282,7 +291,10 @@ public class ChannelService {
     // 空搜索词直接走无过滤查询：避免 "?" 占位符在 LIKE 与空串判断混用时
     // 让 jOOQ 误判参数个数，也让计划能命中不同索引。
     boolean filtered = q != null && !q.isBlank();
-    String filter = filtered ? " and (c.display_name ilike ? or c.authorized_account ilike ? or p.name ilike ?)" : "";
+    String filter =
+        filtered
+            ? " and (c.display_name ilike ? or c.authorized_account ilike ? or p.name ilike ?)"
+            : "";
     String like = "%" + (filtered ? q.trim() : "") + "%";
     Result<?> rows =
         sql.fetch(
@@ -332,15 +344,18 @@ public class ChannelService {
 
   /** 2.2.1.2 授权向导的落库步骤：创建连接（不含凭据，等轮换时写入引用）。 */
   public UUID createConnection(AccessService.Access actor, ConnectionInput input) {
-    UUID platformId =
-        one(UUID.class, "select id from platform where code=?", input.platformCode());
+    UUID platformId = one(UUID.class, "select id from platform where code=?", input.platformCode());
     if (platformId == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "平台不存在或尚未开放接入");
     UUID id = Ids.next();
     sql.execute(
         "insert into channel_connection(id,tenant_id,platform_id,authorized_account,display_name)"
             + " values (?,?,?,?,?)",
-        id, actor.tenantId(), platformId, input.authorizedAccount(), nullToEmpty(input.displayName()));
+        id,
+        actor.tenantId(),
+        platformId,
+        input.authorizedAccount(),
+        nullToEmpty(input.displayName()));
     audit(actor, id, "channel.connection.create");
     return id;
   }
@@ -350,7 +365,8 @@ public class ChannelService {
    *
    * <p>库里永远没有明文令牌；轮换在同一个连接上换引用并更新有效期。
    */
-  public void rotateCredential(AccessService.Access actor, UUID connectionId, CredentialRotateInput input) {
+  public void rotateCredential(
+      AccessService.Access actor, UUID connectionId, CredentialRotateInput input) {
     // 连接自身的版本用于乐观锁；新建连接尚未挂凭据时 credential_id 为 NULL，
     // 因此必须用 "无行" 而非 "值为 null" 来判断连接是否存在。
     long expected = requireConnectionVersion(connectionId);
@@ -360,34 +376,48 @@ public class ChannelService {
             "select credential_id from channel_connection where tenant_id=? and id=?",
             actor.tenantId(),
             connectionId);
-    if (expected < 0)
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "连接不存在");
+    if (expected < 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "连接不存在");
     // jOOQ 3.19 把 Instant / OffsetDateTime / String 一律绑成 varchar，PG 拒绝写入 timestamptz；
     // 只有 LocalDateTime 会按原生类型发送。时区显式选 UTC，不能依赖 JVM 默认时区。
     LocalDateTime authorizedAt =
         LocalDateTime.ofInstant(
             input.authorizedAt() == null ? Instant.now() : input.authorizedAt(), ZoneOffset.UTC);
     LocalDateTime expiresAt =
-        input.expiresAt() == null ? null : LocalDateTime.ofInstant(input.expiresAt(), ZoneOffset.UTC);
+        input.expiresAt() == null
+            ? null
+            : LocalDateTime.ofInstant(input.expiresAt(), ZoneOffset.UTC);
     UUID credId;
     if (existing != null) {
       sql.execute(
           "update credential_ref set external_ref=?,granted_scopes=?,authorized_at=?,expires_at=?,rotated_at=now(),"
               + " status='ACTIVE',version=version+1,updated_at=now() where tenant_id=? and id=?",
-          input.externalRef(), input.grantedScopes(), authorizedAt, expiresAt, actor.tenantId(), existing);
+          input.externalRef(),
+          input.grantedScopes(),
+          authorizedAt,
+          expiresAt,
+          actor.tenantId(),
+          existing);
       credId = existing;
     } else {
       credId = Ids.next();
       sql.execute(
           "insert into credential_ref(id,tenant_id,external_ref,granted_scopes,authorized_at,expires_at)"
               + " values (?,?,?,?,?,?)",
-          credId, actor.tenantId(), input.externalRef(), input.grantedScopes(), authorizedAt, expiresAt);
+          credId,
+          actor.tenantId(),
+          input.externalRef(),
+          input.grantedScopes(),
+          authorizedAt,
+          expiresAt);
     }
     // 重新授权成功即恢复连接可用状态，并把到期状态重新算一遍
     sql.execute(
         "update channel_connection set credential_id=?,status=?,last_error='',version=version+1,updated_at=now()"
             + " where tenant_id=? and id=?",
-        credId, syncPausedStatus(credId), actor.tenantId(), connectionId);
+        credId,
+        syncPausedStatus(credId),
+        actor.tenantId(),
+        connectionId);
     audit(actor, connectionId, "channel.connection.rotate");
     // 乐观锁收尾：连接版本必须恰好 +1，否则说明中途被别人改过
     requireConnectionVersion(connectionId, expected + 1);
@@ -397,21 +427,27 @@ public class ChannelService {
     Instant expires =
         one(Instant.class, "select expires_at from credential_ref where id=?", credentialId);
     if (expires == null) return "ACTIVE";
-    return expires.isBefore(Instant.now()) ? "EXPIRED" : (daysUntil(expires) <= EXPIRY_WARN_DAYS ? "EXPIRING" : "ACTIVE");
+    return expires.isBefore(Instant.now())
+        ? "EXPIRED"
+        : (daysUntil(expires) <= EXPIRY_WARN_DAYS ? "EXPIRING" : "ACTIVE");
   }
 
   /** 2.2.1.1 断开连接：不删除历史数据，历史订单仍可查。 */
-  public void revokeConnection(AccessService.Access actor, UUID connectionId, long expectedVersion) {
+  public void revokeConnection(
+      AccessService.Access actor, UUID connectionId, long expectedVersion) {
     requireConnectionVersion(connectionId, expectedVersion);
     sql.execute(
         "update channel_connection set status='REVOKED',sync_paused=true,version=version+1,updated_at=now()"
             + " where tenant_id=? and id=?",
-        actor.tenantId(), connectionId);
+        actor.tenantId(),
+        connectionId);
     // 凭据同步失效，否则列表里会同时出现"连接已撤销"和"凭据仍有效"两种自相矛盾的状态
     sql.execute(
         "update credential_ref set status='REVOKED',version=version+1,updated_at=now() where tenant_id=? and status<>'REVOKED'"
             + " and id=(select credential_id from channel_connection where tenant_id=? and id=?)",
-        actor.tenantId(), actor.tenantId(), connectionId);
+        actor.tenantId(),
+        actor.tenantId(),
+        connectionId);
     audit(actor, connectionId, "channel.connection.revoke");
   }
 
@@ -449,7 +485,15 @@ public class ChannelService {
       canSync = !c.syncPaused();
     }
     return new ConnectionHealthView(
-        connectionId, status, diagnosis, recommendation, canSync, expires, days, c.lastSyncAt(), c.lastError());
+        connectionId,
+        status,
+        diagnosis,
+        recommendation,
+        canSync,
+        expires,
+        days,
+        c.lastSyncAt(),
+        c.lastError());
   }
 
   /** 2.2.2.2 重新授权提醒：临期连接进入工作台待办。 */
@@ -535,7 +579,8 @@ public class ChannelService {
             "select mk.id,mk.code,mk.name,ms.status,ms.enabled_at"
                 + " from shop_marketplace ms join marketplace mk on mk.id=ms.marketplace_id"
                 + " where ms.tenant_id=? and ms.shop_id=? order by mk.position,mk.code",
-            tenantId, id))
+            tenantId,
+            id))
       sites.add(
           new ShopMarketplaceView(
               m.get("id", UUID.class),
@@ -577,9 +622,12 @@ public class ChannelService {
     UUID legalEntityId = input.legalEntityId();
     if (connectionId != null) {
       Integer owned =
-          one(Integer.class,
+          one(
+              Integer.class,
               "select 1 from channel_connection where tenant_id=? and id=? and platform_id=?",
-              actor.tenantId(), connectionId, platformId);
+              actor.tenantId(),
+              connectionId,
+              platformId);
       if (owned == null)
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "所选连接不属于该平台或当前租户");
     }
@@ -627,14 +675,14 @@ public class ChannelService {
   /**
    * 2.3.1.2 删除店铺前必须检查是否仍被单据引用。
    *
-   * <p>刊登、订单等下游表还没有建（后续期），因此这里检查已存在的引用点：
-   * 启用中的站点配置不允许直接删除，只能先停用。
+   * <p>刊登、订单等下游表还没有建（后续期），因此这里检查已存在的引用点： 启用中的站点配置不允许直接删除，只能先停用。
    */
   public void deleteShop(AccessService.Access actor, UUID id, long expectedVersion) {
     long activeSites =
         count(
             "select count(*) from shop_marketplace where tenant_id=? and shop_id=? and status='ACTIVE'",
-            actor.tenantId(), id);
+            actor.tenantId(),
+            id);
     if (activeSites > 0)
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "该店铺仍有 " + activeSites + " 个启用中的站点，请先停用再删除");
@@ -645,21 +693,26 @@ public class ChannelService {
   }
 
   /** 2.3.1.1 启用站点。 */
-  public void enableMarketplace(AccessService.Access actor, UUID shopId, ShopMarketplaceInput input) {
+  public void enableMarketplace(
+      AccessService.Access actor, UUID shopId, ShopMarketplaceInput input) {
     // 站点码只在平台内唯一，因此必须把店铺的平台一起带入，否则会把别平台的同名站点挂上来
     UUID mkId =
         one(
             UUID.class,
             "select m.id from marketplace m join shop s on s.platform_id=m.platform_id"
                 + " where s.tenant_id=? and s.id=? and m.code=?",
-            actor.tenantId(), shopId, input.marketplaceCode());
-    if (mkId == null)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "站点不存在或不属于该店铺所在平台");
+            actor.tenantId(),
+            shopId,
+            input.marketplaceCode());
+    if (mkId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "站点不存在或不属于该店铺所在平台");
     sql.execute(
         "insert into shop_marketplace(tenant_id,shop_id,marketplace_id,status)"
             + " values (?,?,?,?) on conflict (tenant_id,shop_id,marketplace_id)"
             + " do update set status=excluded.status",
-        actor.tenantId(), shopId, mkId, input.status() == null ? "ACTIVE" : input.status());
+        actor.tenantId(),
+        shopId,
+        mkId,
+        input.status() == null ? "ACTIVE" : input.status());
     audit(actor, shopId, "channel.shop.marketplace.enable");
   }
 
@@ -667,7 +720,9 @@ public class ChannelService {
     int updated =
         sql.execute(
             "update shop_marketplace set status='SUSPENDED' where tenant_id=? and shop_id=? and marketplace_id=?",
-            actor.tenantId(), shopId, marketplaceId);
+            actor.tenantId(),
+            shopId,
+            marketplaceId);
     if (updated == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "该店铺未启用此站点");
     audit(actor, shopId, "channel.shop.marketplace.disable");
   }
@@ -675,8 +730,7 @@ public class ChannelService {
   /**
    * 2.3.2.2 负责人与数据范围。
    *
-   * <p>owner_id 在建表时由触发器锁为不可变，转让必须走这个显式端点，这样绩效归属的变化
-   * 一定会在审计里留下痕迹。
+   * <p>owner_id 在建表时由触发器锁为不可变，转让必须走这个显式端点，这样绩效归属的变化 一定会在审计里留下痕迹。
    */
   public void transferOwner(AccessService.Access actor, UUID shopId, ShopOwnerTransferInput input) {
     // 触发器只认这个显式意图位，因此转让只可能发生在这个可审计的端点上
@@ -684,7 +738,10 @@ public class ChannelService {
     int updated =
         sql.execute(
             "update shop set owner_id=?,department_id=?,version=version+1,updated_at=now() where tenant_id=? and id=?",
-            input.newOwnerId(), input.departmentId(), actor.tenantId(), shopId);
+            input.newOwnerId(),
+            input.departmentId(),
+            actor.tenantId(),
+            shopId);
     if (updated == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "店铺不存在");
     audit(actor, shopId, "channel.shop.transfer");
   }
@@ -702,8 +759,7 @@ public class ChannelService {
   private void requireConnectionVersion(UUID id, long expected) {
     long v = requireConnectionVersion(id);
     if (v < 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "连接不存在");
-    if (v != expected)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "记录已被他人修改，请刷新后重试");
+    if (v != expected) throw new ResponseStatusException(HttpStatus.CONFLICT, "记录已被他人修改，请刷新后重试");
   }
 
   private long requireVersion(UUID id) {
@@ -714,8 +770,7 @@ public class ChannelService {
 
   private long requireVersion(UUID id, long expected) {
     Long v = requireVersion(id);
-    if (v != expected)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "记录已被他人修改，请刷新后重试");
+    if (v != expected) throw new ResponseStatusException(HttpStatus.CONFLICT, "记录已被他人修改，请刷新后重试");
     return v;
   }
 
@@ -729,7 +784,11 @@ public class ChannelService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values (?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   private static String nullToEmpty(String s) {

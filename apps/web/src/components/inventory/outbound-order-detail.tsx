@@ -79,7 +79,7 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
       <div className="space-y-4">
         <PageHeader title="出库单详情" description="正在加载…" />
         <SectionCard title="加载中">
-          <p className="text-sm text-muted-foreground">正在读取出库单详情，请稍候。</p>
+          <p className="text-muted-foreground text-sm">正在读取出库单详情，请稍候。</p>
         </SectionCard>
       </div>
     );
@@ -175,8 +175,8 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
         <Notice tone="info" title="这两个数不是一个口径">
           <p>
             已拣量归 8.3.2.1 拣货任务，已发量归 8.3.4.1 发货交接，两者都尚未交付，
-            所以多数单据上**拿不到**。拿不到时下面显示灰块与归属模块，**不是 0** ——
-            0 会被读成「一件都没拣」。
+            所以多数单据上**拿不到**。拿不到时下面显示灰块与归属模块，**不是 0** —— 0
+            会被读成「一件都没拣」。
           </p>
         </Notice>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -184,17 +184,17 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
             const cell = quantityCell(q);
             return (
               <div key={q.quantity} className="rounded-lg border p-3">
-                <div className="text-xs text-muted-foreground">{q.label}</div>
+                <div className="text-muted-foreground text-xs">{q.label}</div>
                 <div className="mt-1 text-xl font-semibold">
                   {cell === null ? '待交付' : `${cell} 件`}
                 </div>
                 {cell === null ? (
-                  <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 flex items-start gap-1 text-xs">
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                     {quantityHint(q)}
                   </p>
                 ) : (
-                  <p className="mt-1 text-xs text-muted-foreground">{q.reason}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">{q.reason}</p>
                 )}
               </div>
             );
@@ -203,13 +203,18 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
       </SectionCard>
 
       {/* ---- 明细行 ---- */}
-      <SectionCard title={`明细行（${detail.skuLineCount} 行 / ${pieceText(detail.totalPieceCount)} 件）`}>
+      <SectionCard
+        title={`明细行（${detail.skuLineCount} 行 / ${pieceText(detail.totalPieceCount)} 件）`}
+      >
         {detail.lines.length === 0 ? (
-          <EmptyState title="这张单没有明细行" description="出库单是计划快照，没有明细就没有可作业的内容。" />
+          <EmptyState
+            title="这张单没有明细行"
+            description="出库单是计划快照，没有明细就没有可作业的内容。"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2 pr-3">行号</th>
                   <th className="py-2 pr-3">SKU</th>
@@ -224,15 +229,19 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
                     <td className="py-2 pr-3">{line.lineNo}</td>
                     <td className="py-2 pr-3">
                       <div>{line.skuCode}</div>
-                      <div className="text-xs text-muted-foreground">{line.skuName}</div>
+                      <div className="text-muted-foreground text-xs">{line.skuName}</div>
                     </td>
                     <td className="py-2 pr-3">{pieceText(line.plannedQuantity)}</td>
                     {/* 两列都必须显示归属模块，不能显示 0 —— 见类注释。 */}
-                    <td className="py-2 pr-3 text-muted-foreground">
-                      {line.pickedQuantity === null ? '待 8.3.2.1 交付' : pieceText(line.pickedQuantity)}
+                    <td className="text-muted-foreground py-2 pr-3">
+                      {line.pickedQuantity === null
+                        ? '待 8.3.2.1 交付'
+                        : pieceText(line.pickedQuantity)}
                     </td>
-                    <td className="py-2 text-muted-foreground">
-                      {line.shippedQuantity === null ? '待 8.3.4.1 交付' : pieceText(line.shippedQuantity)}
+                    <td className="text-muted-foreground py-2">
+                      {line.shippedQuantity === null
+                        ? '待 8.3.4.1 交付'
+                        : pieceText(line.shippedQuantity)}
                     </td>
                   </tr>
                 ))}
@@ -246,13 +255,16 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
       <SectionCard title="拣货交接">
         {detail.pickRequest ? (
           <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-            <Field label="交接量" value={`${detail.pickRequest.lineCount} 行 / ${pieceText(detail.pickRequest.totalPieceCount)} 件`} />
+            <Field
+              label="交接量"
+              value={`${detail.pickRequest.lineCount} 行 / ${pieceText(detail.pickRequest.totalPieceCount)} 件`}
+            />
             <Field label="交接时间" value={timeText(detail.pickRequest.requestedAt)} />
             <Field label="交接人" value={detail.pickRequest.requestedByUserId} />
             <Field label="交接说明" value={detail.pickRequest.note || '—'} />
           </dl>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             尚未生成拣货任务（这张单仍是待拣）。交接量是**请求量快照**，不是实拣量。
           </p>
         )}
@@ -261,19 +273,22 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
       {/* ---- 作业时间线 ---- */}
       <SectionCard title={`作业时间线（${detail.timelineEventCount} 条）`}>
         {detail.timeline.length === 0 ? (
-          <EmptyState title="还没有作业留痕" description="建单即会写入第一条事件；这里是空说明数据有问题。" />
+          <EmptyState
+            title="还没有作业留痕"
+            description="建单即会写入第一条事件；这里是空说明数据有问题。"
+          />
         ) : (
           <ol className="space-y-3">
             {detail.timeline.map((e) => (
               <li key={e.id} className="flex gap-3">
-                <Clock className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+                <Clock className="text-muted-foreground mt-1 h-4 w-4 shrink-0" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2 text-sm">
                     <Badge tone="neutral">{e.eventTypeLabel}</Badge>
                     <span>{eventText(e)}</span>
-                    <span className="text-xs text-muted-foreground">{timeText(e.occurredAt)}</span>
+                    <span className="text-muted-foreground text-xs">{timeText(e.occurredAt)}</span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{e.detail}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">{e.detail}</p>
                 </div>
               </li>
             ))}
@@ -287,21 +302,21 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
           {unavailable.map((link) => (
             <div key={link.label} className="rounded-lg border border-dashed p-3">
               <div className="flex items-center gap-2 text-sm">
-                <Package className="h-4 w-4 text-muted-foreground" />
+                <Package className="text-muted-foreground h-4 w-4" />
                 <span>{link.label}</span>
                 <Badge tone="neutral">{link.ownerModule ?? '本服务'}</Badge>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{unavailableHint(link)}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{unavailableHint(link)}</p>
             </div>
           ))}
           {detail.packages.map((link, i) => (
             <div key={`pkg-${i}-${link.label}`} className="rounded-lg border border-dashed p-3">
               <div className="flex items-center gap-2 text-sm">
-                <Package className="h-4 w-4 text-muted-foreground" />
+                <Package className="text-muted-foreground h-4 w-4" />
                 <span>{link.label}</span>
                 <Badge tone="neutral">{link.ownerModule ?? '本服务'}</Badge>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{unavailableHint(link)}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{unavailableHint(link)}</p>
             </div>
           ))}
         </div>
@@ -310,29 +325,30 @@ export function OutboundOrderDetailWorkspace({ orderId }: { orderId: string }) {
       {/* ---- 作业操作入口：由后端按转换矩阵给出，界面不自己写禁用规则 ---- */}
       <SectionCard title="作业操作入口">
         {detail.actions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {detail.terminal
               ? `这张单已${detail.statusLabel}，终态不再接受状态推进。`
               : '当前状态没有合法的下一步。'}
           </p>
         ) : (
           <div className="space-y-2">
-            {carrier ? (
-              <p className="text-xs text-muted-foreground">{carrier}</p>
-            ) : null}
+            {carrier ? <p className="text-muted-foreground text-xs">{carrier}</p> : null}
             {detail.actions.map((a) => (
-              <div key={a.toStatus} className="flex flex-wrap items-center gap-2 border-t pt-2 first:border-0 first:pt-0">
+              <div
+                key={a.toStatus}
+                className="flex flex-wrap items-center gap-2 border-t pt-2 first:border-0 first:pt-0"
+              >
                 <Button variant="outline" size="sm" disabled title="状态推进在出库单列表页执行">
                   {actionButtonText(a)}
                 </Button>
-                <span className="text-xs text-muted-foreground">{a.note}</span>
+                <span className="text-muted-foreground text-xs">{a.note}</span>
                 <Badge tone="neutral">{a.ownerModule}</Badge>
                 {a.requiresCarrier ? (
                   <span className="text-xs text-amber-600">需要承运渠道</span>
                 ) : null}
               </div>
             ))}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               状态推进在出库单列表页执行；这里只列出当前状态的合法去向与前置条件。
             </p>
           </div>
@@ -353,9 +369,9 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dt className="text-muted-foreground text-xs">{label}</dt>
       <dd className={hint ? 'text-sm' : 'text-sm font-medium'}>{value}</dd>
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="text-muted-foreground text-xs">{hint}</p> : null}
     </div>
   );
 }

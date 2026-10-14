@@ -33,17 +33,32 @@ import { api } from './api';
 /** 引用维度 → 中文名与处置提示。与后端 {@code SkuMergeRules} 同一词表。 */
 export const DIMENSION_HINTS: Record<string, { label: string; hint: string }> = {
   BARCODE: { label: '条码与物料标识', hint: '条码是外部唯一标识，搬得动就跟着主记录走' },
-  ATTRIBUTE: { label: '属性值', hint: '主记录已设过同一属性时不覆盖 —— 规格不能被另一条商品的值顶掉' },
+  ATTRIBUTE: {
+    label: '属性值',
+    hint: '主记录已设过同一属性时不覆盖 —— 规格不能被另一条商品的值顶掉',
+  },
   MEDIA: { label: '素材引用', hint: '两条重复 SKU 挂同一张图是重复的产物，冲突行按去重删除' },
   TRANSLATION: { label: '多语言标题', hint: '主记录已有该语种译文时不覆盖（译文是人工审过的）' },
-  QUOTE: { label: '供应商报价', hint: '蓝图的「价格」：报价必须跟着主记录走，否则合并后少一个供应商的价' },
+  QUOTE: {
+    label: '供应商报价',
+    hint: '蓝图的「价格」：报价必须跟着主记录走，否则合并后少一个供应商的价',
+  },
   BUNDLE: { label: '套装组件', hint: '同一套装版本里同时挂着两条时，用量相加（每套需要两条之和）' },
   BUNDLE_SKU: { label: '套装代表', hint: '一个 SKU 至多代表一个套装，主记录已是代表时不覆盖' },
-  BOM_OUTPUT: { label: 'BOM 产出物', hint: '主记录已有 BOM 时不覆盖 —— 两份工艺文件不能自动合成一份' },
+  BOM_OUTPUT: {
+    label: 'BOM 产出物',
+    hint: '主记录已有 BOM 时不覆盖 —— 两份工艺文件不能自动合成一份',
+  },
   BOM: { label: 'BOM 组件', hint: '同一 BOM 版本里同时挂着两条时，单位用量相加' },
-  PACKAGE: { label: '包装参数', hint: '主记录已有包装参数时留在原处 —— 重量尺寸是报关与运费的事实' },
+  PACKAGE: {
+    label: '包装参数',
+    hint: '主记录已有包装参数时留在原处 —— 重量尺寸是报关与运费的事实',
+  },
   SAFETY: { label: '安全属性', hint: '主记录已采集过时不覆盖 —— 电池/危险品是合规申报的输入' },
-  UNIT_RULE: { label: '单位换算规则', hint: '活的换算表，必须跟着主记录走，否则 06 建采购单会按错比例算数量' },
+  UNIT_RULE: {
+    label: '单位换算规则',
+    hint: '活的换算表，必须跟着主记录走，否则 06 建采购单会按错比例算数量',
+  },
   UNIT_CONVERSION_SNAPSHOT: {
     label: '单位换算快照',
     hint: '采购单/入库单的行冻结快照 —— 历史事实，刻意不搬',
@@ -217,10 +232,7 @@ export function fetchMergePreview(candidateId: string): Promise<SkuMergePreview>
  *
  * <p>{@code confirm} 必须为 true —— 后端把它当成显式确认，缺省时按预演处理（不写任何东西）。
  */
-export function executeMerge(
-  candidateId: string,
-  note: string,
-): Promise<SkuMergeRow> {
+export function executeMerge(candidateId: string, note: string): Promise<SkuMergeRow> {
   return api<SkuMergeRow>(`catalog/duplicate-candidates/${candidateId}/merge`, 'POST', {
     note: note.trim(),
     confirm: true,

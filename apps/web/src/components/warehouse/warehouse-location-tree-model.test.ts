@@ -129,14 +129,18 @@ describe('8.1.2.1 库位树 · 占用', () => {
   });
 
   it('天然不可拣却被手工设为可拣时给出提示', () => {
-    const text = occupancyText(node({ type: 'QUARANTINE', pickableByNature: false, pickable: true }));
+    const text = occupancyText(
+      node({ type: 'QUARANTINE', pickableByNature: false, pickable: true }),
+    );
     expect(text.pickableHint).toContain('天然不可拣');
   });
 
   it('可拣类型没有多余提示', () => {
     expect(occupancyText(node()).pickableHint).toBeNull();
-    expect(occupancyText(node({ type: 'FROZEN', pickableByNature: false, pickable: false })).pickableHint)
-      .toBeNull();
+    expect(
+      occupancyText(node({ type: 'FROZEN', pickableByNature: false, pickable: false }))
+        .pickableHint,
+    ).toBeNull();
   });
 });
 

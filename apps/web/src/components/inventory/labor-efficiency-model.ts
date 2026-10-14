@@ -125,7 +125,11 @@ export function createLaborTask(input: {
   return api<LaborWorkTask>(`${base}/work-tasks`, 'POST', input);
 }
 
-export function assignLaborTask(id: string, operatorUserId: string, note?: string): Promise<LaborWorkTask> {
+export function assignLaborTask(
+  id: string,
+  operatorUserId: string,
+  note?: string,
+): Promise<LaborWorkTask> {
   return api<LaborWorkTask>(`${base}/work-tasks/${id}/assign`, 'POST', {
     operatorUserId,
     note: note ?? '',
@@ -208,13 +212,25 @@ export const rankingMetricLabels: Record<string, string> = {
   ERROR_RATE_BY_ORDER: '差错率（按单量）',
 };
 
-export const workTypeOptions = Object.entries(workTypeLabels).map(([value, label]) => ({ value, label }));
+export const workTypeOptions = Object.entries(workTypeLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
 
-export const taskStatusOptions = Object.entries(taskStatusLabels).map(([value, label]) => ({ value, label }));
+export const taskStatusOptions = Object.entries(taskStatusLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
 
-export const exceptionOptions = Object.entries(exceptionLabels).map(([value, label]) => ({ value, label }));
+export const exceptionOptions = Object.entries(exceptionLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
 
-export const rankingMetricOptions = Object.entries(rankingMetricLabels).map(([value, label]) => ({ value, label }));
+export const rankingMetricOptions = Object.entries(rankingMetricLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
 
 /** 任务状态色：待开工与作业中是「还没出结果」，异常终止要一眼看见。 */
 export function taskStatusTone(status: string): 'ok' | 'warn' | 'bad' | 'neutral' {
@@ -335,7 +351,11 @@ export function trendPointText(point: {
 }
 
 /** 排名行的展示值：按指标方向给出箭头，避免「越高越好」的指标被当成绩效倒挂。 */
-export function metricValueText(value: number | null | undefined, higherIsBetter: boolean, isRate: boolean): string {
+export function metricValueText(
+  value: number | null | undefined,
+  higherIsBetter: boolean,
+  isRate: boolean,
+): string {
   if (value === null || value === undefined) return '不可计算';
   const arrow = higherIsBetter ? '↑' : '↓';
   return isRate ? `${rateText(value)} ${arrow}` : `${qty(value)} ${arrow}`;
@@ -343,7 +363,11 @@ export function metricValueText(value: number | null | undefined, higherIsBetter
 
 /** 数值列是否按「越大越好」排序（排名页表头用）。 */
 export function metricIsRate(metric: string): boolean {
-  return metric === 'REVIEW_ACCURACY' || metric === 'ERROR_RATE_BY_PIECE' || metric === 'ERROR_RATE_BY_ORDER';
+  return (
+    metric === 'REVIEW_ACCURACY' ||
+    metric === 'ERROR_RATE_BY_PIECE' ||
+    metric === 'ERROR_RATE_BY_ORDER'
+  );
 }
 
 // ------------------------------------------------------------ 校验
@@ -355,8 +379,10 @@ export function createTaskProblem(input: {
   sourceModule: string;
 }): string | null {
   if (!input.workType) return '必须选择作业类型：拣货 / 打包 / 复核，五个指标各自对应其中一类';
-  if (!input.warehouseId) return '必须选择作业仓库：人效分母是「人 × 日」，没有仓库就无法按仓切口径';
-  if (!input.sourceModule.trim()) return '必须填来源模块号：报表数字起争议时第一个要回答的是「这批数据从哪来」';
+  if (!input.warehouseId)
+    return '必须选择作业仓库：人效分母是「人 × 日」，没有仓库就无法按仓切口径';
+  if (!input.sourceModule.trim())
+    return '必须填来源模块号：报表数字起争议时第一个要回答的是「这批数据从哪来」';
   return null;
 }
 

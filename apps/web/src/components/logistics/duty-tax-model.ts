@@ -67,7 +67,8 @@ export function dutyEstimateQuery(params: DutyEstimateParams): string {
   if (text(params.destinationCountryCode)) {
     parts.push(`destinationCountryCode=${encodeURIComponent(text(params.destinationCountryCode))}`);
   }
-  if (text(params.dutyBearer)) parts.push(`dutyBearer=${encodeURIComponent(text(params.dutyBearer))}`);
+  if (text(params.dutyBearer))
+    parts.push(`dutyBearer=${encodeURIComponent(text(params.dutyBearer))}`);
   if (text(params.incoterm)) parts.push(`incoterm=${encodeURIComponent(text(params.incoterm))}`);
   if (params.declarationId) parts.push(`declarationId=${encodeURIComponent(params.declarationId)}`);
   if (params.unmatchedRateOnly) parts.push('unmatchedRateOnly=true');
@@ -150,34 +151,19 @@ export function updateDutyEstimate(id: string, input: DutyEstimateUpdateRequest)
  */
 export function recalculateDutyEstimate(id: string, rateDate?: string) {
   const query = rateDate ? `?rateDate=${encodeURIComponent(rateDate)}` : '';
-  return api<DutySaved>(
-    `${BASE}/${encodeURIComponent(id)}/recalculate${query}`,
-    'POST',
-  );
+  return api<DutySaved>(`${BASE}/${encodeURIComponent(id)}/recalculate${query}`, 'POST');
 }
 
 export function lockDutyEstimate(id: string, notes: string) {
-  return api<DutySaved>(
-    `${BASE}/${encodeURIComponent(id)}/lock`,
-    'POST',
-    { notes },
-  );
+  return api<DutySaved>(`${BASE}/${encodeURIComponent(id)}/lock`, 'POST', { notes });
 }
 
 export function voidDutyEstimate(id: string, reason: string) {
-  return api<DutySaved>(
-    `${BASE}/${encodeURIComponent(id)}/void`,
-    'POST',
-    { reason },
-  );
+  return api<DutySaved>(`${BASE}/${encodeURIComponent(id)}/void`, 'POST', { reason });
 }
 
 export function recordDutyPayment(id: string, input: DutyPaymentCreateRequest) {
-  return api<DutySaved>(
-    `${BASE}/${encodeURIComponent(id)}/payments`,
-    'POST',
-    input,
-  );
+  return api<DutySaved>(`${BASE}/${encodeURIComponent(id)}/payments`, 'POST', input);
 }
 
 export function createDutyRate(input: DutyRateCreateRequest) {
@@ -322,7 +308,10 @@ export function lockBlockers(detail: {
 /** 数值展示。数量与金额来自 NUMERIC，后端给的是 number，这里只做展示格式化。 */
 export function fmt(value: number | null | undefined, digits = 2): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—';
-  return value.toLocaleString('zh-CN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return value.toLocaleString('zh-CN', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
 export function money(value: number | null | undefined, currency?: string | null): string {
@@ -357,7 +346,9 @@ export function dateOnly(value: string | null | undefined): string {
  * 差异率展示：估算为 0 时差异率**无意义**（除零），不能显示成 0% ——
  * 那会把「税率根本没配」显示成「完全对得上」，正好掩盖蓝图点名要抓的那种错。
  */
-export function varianceRateText(row: Pick<DutyVarianceRow, 'rateCalculable' | 'varianceRate'>): string {
+export function varianceRateText(
+  row: Pick<DutyVarianceRow, 'rateCalculable' | 'varianceRate'>,
+): string {
   if (!row.rateCalculable || row.varianceRate === null || row.varianceRate === undefined) {
     return '不可算（估算为 0）';
   }

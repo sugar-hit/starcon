@@ -25,22 +25,17 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <p>重点不是"能存进去"，而是蓝图点名的三件事真的成立，外加多租户三断言：
  *
  * <ol>
- *   <li><b>规则冲突要在配置时校验</b>——同一实体上两条启用主规则的生效区间不允许交叠，
- *       写入前就 409；相邻区间（前一条的 {@code effectiveTo} 等于后一条的
+ *   <li><b>规则冲突要在配置时校验</b>——同一实体上两条启用主规则的生效区间不允许交叠， 写入前就 409；相邻区间（前一条的 {@code effectiveTo} 等于后一条的
  *       {@code effectiveFrom}）不算冲突，那是正常的接续配置。
- *   <li><b>序号按实体/日期重置</b>——跨日、跨月、跨年各换一个桶，序号从头开始；
- *       换一个实体则是另一条独立的计数线。分桶用的是业务日期（补录上周单据要落上周的桶）。
- *   <li><b>多级嵌套</b>——规则可嵌子规则，预览必须真实反映嵌套后的最终编号，
- *       而不是把子规则当成一段死文本。嵌套环与超深嵌套在配置时就被拒。
+ *   <li><b>序号按实体/日期重置</b>——跨日、跨月、跨年各换一个桶，序号从头开始； 换一个实体则是另一条独立的计数线。分桶用的是业务日期（补录上周单据要落上周的桶）。
+ *   <li><b>多级嵌套</b>——规则可嵌子规则，预览必须真实反映嵌套后的最终编号， 而不是把子规则当成一段死文本。嵌套环与超深嵌套在配置时就被拒。
  * </ol>
  *
- * <p>另外两条边界同样要实跑：<b>编号是可读标识不是外键</b>（单据引用只是字符串，
- * 且同一个实体下同一个编号不允许发两次），以及<b>取号与预览必须一致</b>
+ * <p>另外两条边界同样要实跑：<b>编号是可读标识不是外键</b>（单据引用只是字符串， 且同一个实体下同一个编号不允许发两次），以及<b>取号与预览必须一致</b>
  * （预览不占号，取号才递增，两个出口共用同一段渲染逻辑）。
  *
- * <p>时间字段按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz
- * 会静默偏 −28800 秒，所以 {@code effectiveFrom} / {@code issuedAt} 都落在
- * "请求前后两个墙钟之间"才算通过。
+ * <p>时间字段按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800 秒，所以 {@code
+ * effectiveFrom} / {@code issuedAt} 都落在 "请求前后两个墙钟之间"才算通过。
  */
 class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -48,12 +43,12 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
    * 每个用例前清空本模块的数据。
    *
    * <p>容器与 local-admin 租户在所有测试类之间共享（见 IdentityIntegrationTestBase），
-   * 同一个实体上的主规则会被上一个用例配过而撞冲突校验。已发放编号有不可篡改触发器，
-   * 普通 DELETE 会被它挡住，所以用 TRUNCATE —— 它不触发行级触发器。
+   * 同一个实体上的主规则会被上一个用例配过而撞冲突校验。已发放编号有不可篡改触发器， 普通 DELETE 会被它挡住，所以用 TRUNCATE —— 它不触发行级触发器。
    */
   @BeforeEach
   void resetModule() throws Exception {
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       s.execute(
           "truncate document_number_issued, document_number_sequence,"
@@ -83,8 +78,7 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private JsonNode segment(JsonNode n, String type) {
-    for (JsonNode s : n.get("segments"))
-      if (type.equals(s.get("segmentType").asText())) return s;
+    for (JsonNode s : n.get("segments")) if (type.equals(s.get("segmentType").asText())) return s;
     return null;
   }
 
@@ -129,14 +123,14 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private UUID createRule(String token, Map<String, Object> input) throws Exception {
-    return UUID.fromString(request(token, "POST", "/identity/numbering/rules", input, 200).asText());
+    return UUID.fromString(
+        request(token, "POST", "/identity/numbering/rules", input, 200).asText());
   }
 
   /**
    * 给规则安排一段不与既有规则交叠的生效区间。
    *
-   * <p>默认（{@code ruleInput} 不带生效时间）是从 now() 起长期有效，所以同一个实体上
-   * 再建第二条主规则会被冲突校验挡下——这正是「规则冲突要在配置时校验」要的行为。
+   * <p>默认（{@code ruleInput} 不带生效时间）是从 now() 起长期有效，所以同一个实体上 再建第二条主规则会被冲突校验挡下——这正是「规则冲突要在配置时校验」要的行为。
    * 用例里需要同实体多条规则时必须显式排开区间，否则 409 是正确结果而不是缺陷。
    */
   private Map<String, Object> during(Map<String, Object> input, String from, String to) {
@@ -172,10 +166,17 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 蓝图点名的下游是「全部单据创建（订单、采购、出库、售后等）」，这些实体必须在码表里。
     for (String code :
         List.of(
-            "ORDER", "PURCHASE_ORDER", "INBOUND", "OUTBOUND", "STOCK_TRANSFER",
-            "STOCK_ADJUSTMENT", "AFTERSALE", "RETURN_ORDER", "PAYMENT", "RECEIPT",
-            "CREDIT_NOTE"))
-      assertThat(findByCode(list, code)).as("实体 %s 必须在码表里", code).isNotNull();
+            "ORDER",
+            "PURCHASE_ORDER",
+            "INBOUND",
+            "OUTBOUND",
+            "STOCK_TRANSFER",
+            "STOCK_ADJUSTMENT",
+            "AFTERSALE",
+            "RETURN_ORDER",
+            "PAYMENT",
+            "RECEIPT",
+            "CREDIT_NOTE")) assertThat(findByCode(list, code)).as("实体 %s 必须在码表里", code).isNotNull();
 
     // 码表按 sort_order 稳定排序，前端下拉不用自己排。
     assertThat(list.get(0).get("code").asText()).isEqualTo("ORDER");
@@ -199,8 +200,13 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
         createRule(
             token,
             ruleInput(
-                "ORDER", "销售订单标准编号", "PRIMARY",
-                List.of(prefix("SO"), date("yyyyMMdd"), sequence(4, 1, "NONE", "ENTITY"),
+                "ORDER",
+                "销售订单标准编号",
+                "PRIMARY",
+                List.of(
+                    prefix("SO"),
+                    date("yyyyMMdd"),
+                    sequence(4, 1, "NONE", "ENTITY"),
                     suffix("-US"))));
 
     var detail = request(token, "GET", "/identity/numbering/rules/" + id, null, 200);
@@ -230,14 +236,16 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   void dateSegmentRendersInTheRuleTimezoneNotUtc() throws Exception {
     String token = login();
     // 2026-10-07T20:00Z 在上海是 10-08，在 UTC 是 10-07：这条规则必须渲染成 10-08。
-    var at =
-        OffsetDateTime.of(2026, 10, 7, 20, 0, 0, 0, ZoneOffset.UTC).toString();
+    var at = OffsetDateTime.of(2026, 10, 7, 20, 0, 0, 0, ZoneOffset.UTC).toString();
 
     UUID shanghai =
         createRule(
             token,
             during(
-                ruleInput("ORDER", "上海时区编号", "PRIMARY",
+                ruleInput(
+                    "ORDER",
+                    "上海时区编号",
+                    "PRIMARY",
                     List.of(prefix("SH"), date("yyyyMMdd"), sequence(3, 1, "NONE", "ENTITY"))),
                 "2020-01-01T00:00:00Z",
                 "2021-01-01T00:00:00Z"));
@@ -248,7 +256,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     var utcRuleInput =
         during(
-            ruleInput("ORDER", "UTC 编号", "PRIMARY",
+            ruleInput(
+                "ORDER",
+                "UTC 编号",
+                "PRIMARY",
                 List.of(prefix("UT"), date("yyyyMMdd"), sequence(3, 1, "NONE", "ENTITY"))),
             "2021-01-01T00:00:00Z",
             "2022-01-01T00:00:00Z");
@@ -270,7 +281,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID id =
         createRule(
             token,
-            ruleInput("OUTBOUND", "出库按日重置", "PRIMARY",
+            ruleInput(
+                "OUTBOUND",
+                "出库按日重置",
+                "PRIMARY",
                 List.of(prefix("OB"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY"))));
 
     String day1 = "2026-03-01T09:00:00Z", day2 = "2026-03-02T09:00:00Z";
@@ -303,7 +317,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID monthly =
         createRule(
             token,
-            ruleInput("PURCHASE_ORDER", "采购按月重置", "PRIMARY",
+            ruleInput(
+                "PURCHASE_ORDER",
+                "采购按月重置",
+                "PRIMARY",
                 List.of(prefix("PO"), date("yyyyMM"), sequence(3, 1, "MONTHLY", "ENTITY"))));
     // 规则时区是 Asia/Shanghai，所以这里用不会跨日的时刻：断言聚焦"按月分桶"本身，
     // 而不是被时区换算搅进去（时区换算另有 dateSegmentRendersInTheRuleTimezoneNotUtc 覆盖）。
@@ -315,7 +332,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID yearly =
         createRule(
             token,
-            ruleInput("PAYMENT", "付款按年重置", "PRIMARY",
+            ruleInput(
+                "PAYMENT",
+                "付款按年重置",
+                "PRIMARY",
                 List.of(prefix("PAY"), date("yyyy"), sequence(2, 1, "YEARLY", "ENTITY"))));
     // 日期格式是 yyyy（4 位年份），不是 yy
     assertThat(issue(token, yearly, "2026-12-15T10:00:00Z").get("number").asText())
@@ -326,8 +346,7 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 不同实体是两条独立的计数线：同样的日期，采购与付款互不影响
     var counters = sequences(token, null);
     var byEntity = new java.util.TreeMap<String, Integer>();
-    for (JsonNode c : counters)
-      byEntity.merge(c.get("entityCode").asText(), 1, Integer::sum);
+    for (JsonNode c : counters) byEntity.merge(c.get("entityCode").asText(), 1, Integer::sum);
     assertThat(byEntity).containsKeys("PURCHASE_ORDER", "PAYMENT");
     assertThat(byEntity.get("PURCHASE_ORDER")).isEqualTo(2);
     assertThat(byEntity.get("PAYMENT")).isEqualTo(2);
@@ -339,12 +358,18 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID id =
         createRule(
             token,
-            ruleInput("RECEIPT", "收款不重置", "PRIMARY",
+            ruleInput(
+                "RECEIPT",
+                "收款不重置",
+                "PRIMARY",
                 List.of(prefix("RC"), sequence(5, 1, "NONE", "ENTITY"))));
 
-    assertThat(issue(token, id, "2026-03-01T09:00:00Z").get("number").asText()).isEqualTo("RC00001");
-    assertThat(issue(token, id, "2026-03-02T09:00:00Z").get("number").asText()).isEqualTo("RC00002");
-    assertThat(issue(token, id, "2027-01-01T09:00:00Z").get("number").asText()).isEqualTo("RC00003");
+    assertThat(issue(token, id, "2026-03-01T09:00:00Z").get("number").asText())
+        .isEqualTo("RC00001");
+    assertThat(issue(token, id, "2026-03-02T09:00:00Z").get("number").asText())
+        .isEqualTo("RC00002");
+    assertThat(issue(token, id, "2027-01-01T09:00:00Z").get("number").asText())
+        .isEqualTo("RC00003");
 
     // 只有一个桶：NONE 的桶名固定是 ALL
     var counters = sequences(token, "RECEIPT");
@@ -359,16 +384,25 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
         createRule(
             token,
             during(
-                ruleInput("AFTERSALE", "售后规则一", "PRIMARY",
+                ruleInput(
+                    "AFTERSALE",
+                    "售后规则一",
+                    "PRIMARY",
                     List.of(prefix("AS"), sequence(3, 1, "NONE", "ENTITY"))),
                 "2020-01-01T00:00:00Z",
                 "2029-01-01T00:00:00Z"));
     assertThat(issue(token, first, null).get("number").asText()).isEqualTo("AS001");
 
     // 第二条规则接在同一实体上（时间段不重叠所以配置得进去），ENTITY 作用域接着数
-    var second = during(ruleInput("AFTERSALE", "售后规则二", "PRIMARY",
-        List.of(prefix("AS"), sequence(3, 1, "NONE", "ENTITY"))),
-        "2030-01-01T00:00:00Z", "2031-01-01T00:00:00Z");
+    var second =
+        during(
+            ruleInput(
+                "AFTERSALE",
+                "售后规则二",
+                "PRIMARY",
+                List.of(prefix("AS"), sequence(3, 1, "NONE", "ENTITY"))),
+            "2030-01-01T00:00:00Z",
+            "2031-01-01T00:00:00Z");
     UUID secondId = createRule(token, second);
     assertThat(issue(token, secondId, null).get("number").asText()).isEqualTo("AS002");
 
@@ -378,9 +412,15 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 换成 RULE 作用域：计数作用域键从 ENTITY 变成 RULE:<该段所属规则 id>，
     // 新规则从 1 重新开始（前缀另取一个字母，免得与已发放的编号文本撞唯一约束——
     // 编号文本重复会怎样由 sameEntityRefusesToIssueTheSameNumberTwice 专门覆盖）。
-    var third = during(ruleInput("AFTERSALE", "售后规则三", "PRIMARY",
-        List.of(prefix("B"), sequence(3, 1, "NONE", "RULE"))),
-        "2031-01-01T00:00:00Z", null);
+    var third =
+        during(
+            ruleInput(
+                "AFTERSALE",
+                "售后规则三",
+                "PRIMARY",
+                List.of(prefix("B"), sequence(3, 1, "NONE", "RULE"))),
+            "2031-01-01T00:00:00Z",
+            null);
     UUID thirdId = createRule(token, third);
     assertThat(issue(token, thirdId, null).get("number").asText()).isEqualTo("B001");
 
@@ -402,7 +442,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID id =
         createRule(
             token,
-            ruleInput("STOCK_TRANSFER", "调拨预览", "PRIMARY",
+            ruleInput(
+                "STOCK_TRANSFER",
+                "调拨预览",
+                "PRIMARY",
                 List.of(prefix("TR"), date("yyyyMMdd"), sequence(4, 7, "DAILY", "ENTITY"))));
     var day = "2026-05-04T02:00:00Z";
 
@@ -443,8 +486,12 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   @Test
   void previewResolvesTheActiveRuleByEntityWhenNoRuleIdGiven() throws Exception {
     String token = login();
-    var input = ruleInput("STOCK_ADJUSTMENT", "调整标准编号", "PRIMARY",
-        List.of(prefix("ADJ"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY")));
+    var input =
+        ruleInput(
+            "STOCK_ADJUSTMENT",
+            "调整标准编号",
+            "PRIMARY",
+            List.of(prefix("ADJ"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY")));
     createRule(token, input);
 
     var byEntity = new LinkedHashMap<String, Object>();
@@ -474,7 +521,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID component =
         createRule(
             token,
-            ruleInput("ORDER", "通用日期序号片段", "COMPONENT",
+            ruleInput(
+                "ORDER",
+                "通用日期序号片段",
+                "COMPONENT",
                 List.of(date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY"))));
 
     // 父规则：前缀 + 嵌套片段 + 后缀
@@ -482,7 +532,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
         createRule(
             token,
             during(
-                ruleInput("ORDER", "销售订单嵌套编号", "PRIMARY",
+                ruleInput(
+                    "ORDER",
+                    "销售订单嵌套编号",
+                    "PRIMARY",
                     List.of(prefix("SO"), nested(component), suffix("-X"))),
                 "2020-01-01T00:00:00Z",
                 "2021-01-01T00:00:00Z"));
@@ -541,14 +594,13 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID middle =
         createRule(
             token,
-            ruleInput("ORDER", "中间层片段", "COMPONENT",
-                List.of(date("yyyyMMdd"), nested(innermost))));
+            ruleInput("ORDER", "中间层片段", "COMPONENT", List.of(date("yyyyMMdd"), nested(innermost))));
     UUID outer =
         createRule(
             token,
             during(
-                ruleInput("ORDER", "最外层编号", "PRIMARY",
-                    List.of(prefix("L"), nested(middle), suffix("R"))),
+                ruleInput(
+                    "ORDER", "最外层编号", "PRIMARY", List.of(prefix("L"), nested(middle), suffix("R"))),
                 "2020-01-01T00:00:00Z",
                 "2021-01-01T00:00:00Z"));
 
@@ -568,7 +620,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID component =
         createRule(
             token,
-            ruleInput("ORDER", "共享序号片段", "COMPONENT",
+            ruleInput(
+                "ORDER",
+                "共享序号片段",
+                "COMPONENT",
                 List.of(prefix("S"), sequence(4, 1, "NONE", "ENTITY"))));
     UUID forOrder =
         createRule(
@@ -604,21 +659,30 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     String token = login();
 
     // 直接自嵌
-    UUID id =
-        createRule(token, ruleInput("ORDER", "自嵌宿主", "COMPONENT", List.of(prefix("H"))));
-    request(token, "PUT", "/identity/numbering/rules/" + id,
-        ruleInput("ORDER", "自嵌规则", "COMPONENT", List.of(nested(id))), 400);
+    UUID id = createRule(token, ruleInput("ORDER", "自嵌宿主", "COMPONENT", List.of(prefix("H"))));
+    request(
+        token,
+        "PUT",
+        "/identity/numbering/rules/" + id,
+        ruleInput("ORDER", "自嵌规则", "COMPONENT", List.of(nested(id))),
+        400);
 
     // 间接成环：A 嵌 B，B 再嵌 A
     UUID a = createRule(token, ruleInput("ORDER", "环A", "COMPONENT", List.of(prefix("A"))));
     UUID b = createRule(token, ruleInput("ORDER", "环B", "COMPONENT", List.of(nested(a))));
     // 让 A 嵌上 B 就成环了 → 写入时就得拒
-    request(token, "PUT", "/identity/numbering/rules/" + a,
-        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(b))), 400);
+    request(
+        token,
+        "PUT",
+        "/identity/numbering/rules/" + a,
+        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(b))),
+        400);
     // A 仍是单段规则，B 也仍是嵌 A，环没有真的写进去
-    assertThat(segment(request(token, "GET", "/identity/numbering/rules/" + a, null, 200), "NESTED"))
+    assertThat(
+            segment(request(token, "GET", "/identity/numbering/rules/" + a, null, 200), "NESTED"))
         .isNull();
-    assertThat(segment(request(token, "GET", "/identity/numbering/rules/" + b, null, 200), "NESTED"))
+    assertThat(
+            segment(request(token, "GET", "/identity/numbering/rules/" + b, null, 200), "NESTED"))
         .isNotNull();
 
     // 只能嵌子规则，不能嵌另一条主规则
@@ -629,11 +693,19 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
                 ruleInput("ORDER", "一条主规则", "PRIMARY", List.of(prefix("P"))),
                 "2020-01-01T00:00:00Z",
                 "2021-01-01T00:00:00Z"));
-    request(token, "PUT", "/identity/numbering/rules/" + a,
-        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(primary))), 400);
+    request(
+        token,
+        "PUT",
+        "/identity/numbering/rules/" + a,
+        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(primary))),
+        400);
     // 嵌一个不存在的规则同样被拒
-    request(token, "PUT", "/identity/numbering/rules/" + a,
-        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(UUID.randomUUID()))), 404);
+    request(
+        token,
+        "PUT",
+        "/identity/numbering/rules/" + a,
+        ruleInput("ORDER", "环A", "COMPONENT", List.of(nested(UUID.randomUUID()))),
+        404);
   }
 
   @Test
@@ -642,7 +714,11 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID component =
         createRule(
             token,
-            ruleInput("ORDER", "待删除片段", "COMPONENT", List.of(prefix("C"), sequence(2, 1, "NONE", "ENTITY"))));
+            ruleInput(
+                "ORDER",
+                "待删除片段",
+                "COMPONENT",
+                List.of(prefix("C"), sequence(2, 1, "NONE", "ENTITY"))));
     UUID parent =
         createRule(
             token,
@@ -664,7 +740,8 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   // ------------------------------------------------------------------
 
   @Test
-  void overlappingEffectiveIntervalsOnTheSameEntityAreRejectedAtConfigurationTime() throws Exception {
+  void overlappingEffectiveIntervalsOnTheSameEntityAreRejectedAtConfigurationTime()
+      throws Exception {
     String token = login();
     var segments = List.of(prefix("X"), sequence(4, 1, "NONE", "ENTITY"));
 
@@ -707,8 +784,9 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     createRule(token, afterDisable);
 
     // 冲突检测出口：报出来的 overlaps 与写入判定同源
-    var conflicts = request(token, "GET", "/identity/numbering/rules/conflicts?entityCode=RETURN_ORDER",
-        null, 200);
+    var conflicts =
+        request(
+            token, "GET", "/identity/numbering/rules/conflicts?entityCode=RETURN_ORDER", null, 200);
     assertThat(conflicts).isNotEmpty();
     boolean anyHit = false;
     for (JsonNode c : conflicts) if (c.get("overlaps").asBoolean()) anyHit = true;
@@ -718,8 +796,9 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   @Test
   void updatingARuleDoesNotConflictWithItselfAndRejectsReversedInterval() throws Exception {
     String token = login();
-    var input = ruleInput("INBOUND", "入库编号", "PRIMARY",
-        List.of(prefix("IN"), sequence(4, 1, "NONE", "ENTITY")));
+    var input =
+        ruleInput(
+            "INBOUND", "入库编号", "PRIMARY", List.of(prefix("IN"), sequence(4, 1, "NONE", "ENTITY")));
     input.put("effectiveFrom", "2026-01-01T00:00:00Z");
     UUID id = createRule(token, input);
 
@@ -745,7 +824,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID id =
         createRule(
             token,
-            ruleInput("AFTERSALE", "售后编号", "PRIMARY",
+            ruleInput(
+                "AFTERSALE",
+                "售后编号",
+                "PRIMARY",
                 List.of(prefix("AS"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY"))));
 
     var input = new LinkedHashMap<String, Object>();
@@ -772,11 +854,13 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(list.get(0).get("number").asText()).isEqualTo("AS202604150001");
 
     // 已发放记录不可改：触发器与 REVOKE 双重防线
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
-      var ex = assertThrows(
-          java.sql.SQLException.class,
-          () -> s.execute("update document_number_issued set number_text='X'"));
+      var ex =
+          assertThrows(
+              java.sql.SQLException.class,
+              () -> s.execute("update document_number_issued set number_text='X'"));
       assertThat(ex.getMessage()).contains("不可修改");
     }
   }
@@ -785,19 +869,35 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   void sameEntityRefusesToIssueTheSameNumberTwice() throws Exception {
     String token = login();
     // 两条不冲突的规则（按 RULE 作用域，各自独立计数），却会渲染出同一个编号文本
-    var first = during(ruleInput("CREDIT_NOTE", "贷项规则一", "PRIMARY",
-        List.of(prefix("CN"), sequence(4, 1, "NONE", "RULE"))),
-        "2020-01-01T00:00:00Z", "2029-01-01T00:00:00Z");
+    var first =
+        during(
+            ruleInput(
+                "CREDIT_NOTE",
+                "贷项规则一",
+                "PRIMARY",
+                List.of(prefix("CN"), sequence(4, 1, "NONE", "RULE"))),
+            "2020-01-01T00:00:00Z",
+            "2029-01-01T00:00:00Z");
     UUID firstId = createRule(token, first);
-    var second = during(ruleInput("CREDIT_NOTE", "贷项规则二", "PRIMARY",
-        List.of(prefix("CN"), sequence(4, 1, "NONE", "RULE"))),
-        "2030-01-01T00:00:00Z", null);
+    var second =
+        during(
+            ruleInput(
+                "CREDIT_NOTE",
+                "贷项规则二",
+                "PRIMARY",
+                List.of(prefix("CN"), sequence(4, 1, "NONE", "RULE"))),
+            "2030-01-01T00:00:00Z",
+            null);
     UUID secondId = createRule(token, second);
 
     assertThat(issue(token, firstId, null).get("number").asText()).isEqualTo("CN0001");
     // 第二条规则也从头数，渲染出同样的编号：唯一约束必须挡住，409 而不是发出去两个一样的号
-    request(token, "POST", "/identity/numbering/rules/" + secondId + "/next",
-        Map.of("documentDate", "2030-06-01T00:00:00Z"), 409);
+    request(
+        token,
+        "POST",
+        "/identity/numbering/rules/" + secondId + "/next",
+        Map.of("documentDate", "2030-06-01T00:00:00Z"),
+        409);
 
     // 已发放过的规则不能删（编号的来源要查得到）
     request(token, "DELETE", "/identity/numbering/rules/" + firstId, null, 400);
@@ -814,7 +914,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID id =
         createRule(
             owner,
-            ruleInput("PAYMENT", "权限测试编号", "PRIMARY",
+            ruleInput(
+                "PAYMENT",
+                "权限测试编号",
+                "PRIMARY",
                 List.of(prefix("PM"), sequence(4, 1, "NONE", "ENTITY"))));
 
     // 造一个只有成员读权限的角色：它对编号规则一无所知
@@ -825,25 +928,30 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
                     "POST",
                     "/identity/roles",
                     Map.of(
-                        "code", "NONUM_" + tag,
-                        "name", "无编号规则权限",
-                        "status", "ACTIVE",
-                        "permissions", List.of("identity.member.read")),
+                        "code",
+                        "NONUM_" + tag,
+                        "name",
+                        "无编号规则权限",
+                        "status",
+                        "ACTIVE",
+                        "permissions",
+                        List.of("identity.member.read")),
                     200)
                 .asText());
     request(
         owner,
         "POST",
         "/identity/members",
-        memberInput("num-viewer-" + tag.toLowerCase(), null,
+        memberInput(
+            "num-viewer-" + tag.toLowerCase(),
+            null,
             List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
         200);
     String viewer = loginUser("num-viewer-" + tag.toLowerCase());
 
     // 无编号规则权限：读与写都不放行
     request(viewer, "GET", "/identity/numbering/rules", null, 403);
-    request(viewer, "POST", "/identity/numbering/preview",
-        Map.of("ruleId", id.toString()), 403);
+    request(viewer, "POST", "/identity/numbering/preview", Map.of("ruleId", id.toString()), 403);
     request(viewer, "POST", "/identity/numbering/rules/" + id + "/next", null, 403);
 
     // 所有者可读可写
@@ -856,22 +964,41 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     String token = login();
 
     // 缺文本的前缀段
-    request(token, "POST", "/identity/numbering/rules",
-        ruleInput("ORDER", "坏前缀", "PRIMARY", List.of(Map.of("segmentType", "PREFIX"))), 400);
+    request(
+        token,
+        "POST",
+        "/identity/numbering/rules",
+        ruleInput("ORDER", "坏前缀", "PRIMARY", List.of(Map.of("segmentType", "PREFIX"))),
+        400);
     // 未实现的日期格式
-    request(token, "POST", "/identity/numbering/rules",
-        ruleInput("ORDER", "坏日期", "PRIMARY",
-            List.of(prefix("A"), Map.of("segmentType", "DATE", "dateFormat", "yyyy/MM/dd"))), 400);
+    request(
+        token,
+        "POST",
+        "/identity/numbering/rules",
+        ruleInput(
+            "ORDER",
+            "坏日期",
+            "PRIMARY",
+            List.of(prefix("A"), Map.of("segmentType", "DATE", "dateFormat", "yyyy/MM/dd"))),
+        400);
     // 序号段缺重置口径
     var noReset = new LinkedHashMap<String, Object>();
     noReset.put("segmentType", "SEQUENCE");
     noReset.put("sequenceWidth", 4);
     noReset.put("sequenceStart", 1);
-    request(token, "POST", "/identity/numbering/rules",
-        ruleInput("ORDER", "坏序号", "PRIMARY", List.of(noReset)), 400);
+    request(
+        token,
+        "POST",
+        "/identity/numbering/rules",
+        ruleInput("ORDER", "坏序号", "PRIMARY", List.of(noReset)),
+        400);
     // 不存在的实体
-    request(token, "POST", "/identity/numbering/rules",
-        ruleInput("NOT_AN_ENTITY", "坏实体", "PRIMARY", List.of(prefix("A"))), 400);
+    request(
+        token,
+        "POST",
+        "/identity/numbering/rules",
+        ruleInput("NOT_AN_ENTITY", "坏实体", "PRIMARY", List.of(prefix("A"))),
+        400);
     // 时区非法
     var badZone = ruleInput("ORDER", "坏时区", "PRIMARY", List.of(prefix("A")));
     badZone.put("timezone", "Mars/Olympus");
@@ -895,7 +1022,10 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID parentRule =
         createRule(
             owner,
-            ruleInput("ORDER", "父租户订单编号", "PRIMARY",
+            ruleInput(
+                "ORDER",
+                "父租户订单编号",
+                "PRIMARY",
                 List.of(prefix("PO"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY"))));
     var parentIssue = new LinkedHashMap<String, Object>();
     parentIssue.put("documentDate", "2026-02-02T01:00:00Z");
@@ -909,21 +1039,29 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "NUMC" + tag,
-            "name", "编号规则子租户",
-            "ownerUsername", childUser,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "NUMC" + tag,
+            "name",
+            "编号规则子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
         200);
     String childToken = loginUser(childUser);
     UUID childRule =
         createRule(
             childToken,
-            ruleInput("ORDER", "子租户订单编号", "PRIMARY",
+            ruleInput(
+                "ORDER",
+                "子租户订单编号",
+                "PRIMARY",
                 List.of(prefix("CO"), date("yyyyMMdd"), sequence(4, 1, "DAILY", "ENTITY"))));
     var childIssue = new LinkedHashMap<String, Object>();
     childIssue.put("documentDate", "2026-02-02T01:00:00Z");
     childIssue.put("documentNo", "CHILD-" + tag);
-    request(childToken, "POST", "/identity/numbering/rules/" + childRule + "/next", childIssue, 200);
+    request(
+        childToken, "POST", "/identity/numbering/rules/" + childRule + "/next", childIssue, 200);
 
     // 断言一：两租户互不可见
     var parentView = rules(owner);
@@ -947,14 +1085,18 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     // 拿子租户的规则 id 去父租户读 / 改 / 删 / 取号一律 404
     request(owner, "GET", "/identity/numbering/rules/" + childRule, null, 404);
-    request(owner, "PUT", "/identity/numbering/rules/" + childRule,
-        ruleInput("ORDER", "父租户改名", "PRIMARY", List.of(prefix("X"))), 404);
+    request(
+        owner,
+        "PUT",
+        "/identity/numbering/rules/" + childRule,
+        ruleInput("ORDER", "父租户改名", "PRIMARY", List.of(prefix("X"))),
+        404);
     request(owner, "DELETE", "/identity/numbering/rules/" + childRule, null, 404);
     request(owner, "POST", "/identity/numbering/rules/" + childRule + "/next", null, 404);
 
     // 父租户按子租户的规则预览：404 而不是悄悄用自己的规则渲染
-    request(owner, "POST", "/identity/numbering/preview",
-        Map.of("ruleId", childRule.toString()), 404);
+    request(
+        owner, "POST", "/identity/numbering/preview", Map.of("ruleId", childRule.toString()), 404);
 
     // 断言二：伪造 tenant header 无效。request() 每次都带随机 X-Tenant-Id。
     String forged = UUID.randomUUID().toString();
@@ -985,18 +1127,15 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 断言三：连接池归还后不串租户。池大小被压到 1，交替租户请求复用同一物理连接。
     for (int i = 0; i < 3; i++) {
       var parent = rules(owner);
-      assertThat(findRule(parent, "父租户订单编号"))
-          .as("第 %s 轮父租户不得看到子租户规则", i)
-          .isNotNull();
+      assertThat(findRule(parent, "父租户订单编号")).as("第 %s 轮父租户不得看到子租户规则", i).isNotNull();
       assertThat(parent.toString()).doesNotContain("子租户订单编号");
       var child = rules(childToken);
-      assertThat(findRule(child, "子租户订单编号"))
-          .as("第 %s 轮子租户不得看到父租户规则", i)
-          .isNotNull();
+      assertThat(findRule(child, "子租户订单编号")).as("第 %s 轮子租户不得看到父租户规则", i).isNotNull();
       assertThat(child.toString()).doesNotContain("父租户订单编号");
       // 计数器也必须跟着租户走
       assertThat(sequences(owner, "ORDER").get(0).get("currentValue").toString()).isEqualTo("1");
-      assertThat(sequences(childToken, "ORDER").get(0).get("currentValue").toString()).isEqualTo("1");
+      assertThat(sequences(childToken, "ORDER").get(0).get("currentValue").toString())
+          .isEqualTo("1");
     }
 
     // 事务外（无租户上下文）直查应当为空
@@ -1007,6 +1146,7 @@ class NumberRuleIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private UUID tenantOf(String token) throws Exception {
-    return UUID.fromString(request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
+    return UUID.fromString(
+        request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
   }
 }

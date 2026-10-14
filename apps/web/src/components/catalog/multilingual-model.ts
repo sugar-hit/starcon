@@ -116,8 +116,16 @@ export const BATCH_ACTIONS = [
     label: '补齐待翻占位',
     hint: '按语言需求为选中的商品铺开「待翻」记录；已有译文的会跳过，不会被抹掉',
   },
-  { value: 'ADOPT_SUGGESTIONS', label: '批量采纳 AI 建议', hint: '按 batchRef 找出 18 交来的一批建议逐条采纳' },
-  { value: 'MARK_REVIEWED', label: '批量标记已校对', hint: '把「已翻」的译文标成已校对；待翻的无正文，不予执行' },
+  {
+    value: 'ADOPT_SUGGESTIONS',
+    label: '批量采纳 AI 建议',
+    hint: '按 batchRef 找出 18 交来的一批建议逐条采纳',
+  },
+  {
+    value: 'MARK_REVIEWED',
+    label: '批量标记已校对',
+    hint: '把「已翻」的译文标成已校对；待翻的无正文，不予执行',
+  },
 ] as const;
 
 /** 逐条结果。 */
@@ -231,10 +239,18 @@ export function publishableTone(publishable: boolean): 'neutral' | 'success' | '
  * <p>返回 null 表示这个商品一条译文都没有（页面上是空态而不是「0% 完成」，
  * 「0%」会被读成「试过了都没成功」）。已登记但没正文的待翻不算完成，也不算失败。
  */
-export function completionOf(rows: {
-  required: boolean;
-  status: string | null;
-}[]): { required: number; reviewed: number; pending: number; missing: number; percent: number } | null {
+export function completionOf(
+  rows: {
+    required: boolean;
+    status: string | null;
+  }[],
+): {
+  required: number;
+  reviewed: number;
+  pending: number;
+  missing: number;
+  percent: number;
+} | null {
   const required = rows.filter((r) => r.required);
   if (required.length === 0) return null;
   const reviewed = required.filter((r) => r.status === 'REVIEWED').length;
@@ -352,7 +368,10 @@ export function emptyEntryEdit(entry: TranslationEntry): TranslationEntryEdit {
   };
 }
 
-export function emptyBatchInput(action = 'CREATE_PENDING', targetType = 'SPU'): TranslationBatchInput {
+export function emptyBatchInput(
+  action = 'CREATE_PENDING',
+  targetType = 'SPU',
+): TranslationBatchInput {
   return { action, targetType, targetIds: [], locales: [], batchRef: '' };
 }
 
@@ -390,7 +409,10 @@ export function setLocaleEnabled(id: string, enabled: boolean) {
 }
 
 export function deleteLocale(id: string, version: number) {
-  return api<{ deleted: boolean }>(`catalog/translations/locales/${id}?version=${version}`, 'DELETE');
+  return api<{ deleted: boolean }>(
+    `catalog/translations/locales/${id}?version=${version}`,
+    'DELETE',
+  );
 }
 
 /** 合并视图：人工维护 ∪ 店铺启用站点推导（未接入时 siteLocaleAvailable=false）。 */
@@ -431,7 +453,11 @@ export function createEntry(
   input: TranslationEntryInput,
 ) {
   const segment = targetType === 'SKU' ? 'skus' : 'spus';
-  return api<TranslationEntry>(`catalog/translations/${segment}/${targetId}/entries`, 'POST', input);
+  return api<TranslationEntry>(
+    `catalog/translations/${segment}/${targetId}/entries`,
+    'POST',
+    input,
+  );
 }
 
 export function updateEntry(id: string, input: TranslationEntryEdit) {
@@ -449,7 +475,10 @@ export function setEntryStatus(id: string, input: TranslationStatusInput) {
 }
 
 export function deleteEntry(id: string, version: number) {
-  return api<{ deleted: boolean }>(`catalog/translations/entries/${id}?version=${version}`, 'DELETE');
+  return api<{ deleted: boolean }>(
+    `catalog/translations/entries/${id}?version=${version}`,
+    'DELETE',
+  );
 }
 
 export function fetchCoverage(targetType: string, targetId: string, locales: string[] = []) {
@@ -516,7 +545,13 @@ export function deleteSuggestion(id: string, version: number) {
   );
 }
 
-export function fetchBatches(filter: { action: string | null; targetType: string | null; status: string | null; page: number; size: number }) {
+export function fetchBatches(filter: {
+  action: string | null;
+  targetType: string | null;
+  status: string | null;
+  page: number;
+  size: number;
+}) {
   const params = new URLSearchParams();
   if (filter.action) params.set('action', filter.action);
   if (filter.targetType) params.set('targetType', filter.targetType);

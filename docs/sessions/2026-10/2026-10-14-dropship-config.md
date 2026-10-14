@@ -55,6 +55,7 @@ pure_agency_exempt           = fulfillment_path =  'SUPPLIER_DIRECT' AND ownersh
 ## 文件清单
 
 **后端（trade）**
+
 - `backend/services/trade/src/main/resources/db/migration/V118__trade_dropship_config.sql`（新建，7 表 + 生成列不变量 + 6 个触发器 + RLS/GRANT）
 - `backend/services/trade/src/main/java/com/starcon/trade/DropshipConfigModels.java`（新建，全部 `Dropship*` 前缀避免 schema 键冲突）
 - `backend/services/trade/src/main/java/com/starcon/trade/DropshipConfigService.java`（新建，jOOQ 显式 SQL）
@@ -62,10 +63,12 @@ pure_agency_exempt           = fulfillment_path =  'SUPPLIER_DIRECT' AND ownersh
 - `backend/services/trade/src/test/java/com/starcon/trade/DropshipConfigIntegrationTest.java`（新建，24 例）
 
 **契约（codegen 产物，只经脚本生成）**
+
 - `packages/api-contracts/src/contracts/trade.ts`（+29 类型）
 - `packages/api-contracts/src/trade.openapi.json`
 
 **前端**
+
 - `apps/web/src/lib/api-proxy.ts`（外科式最小追加 trade 段的 `fulfillment/dropship` 一组）
 - `apps/web/src/app/orders/fulfillment/dropship/page.tsx`（新建）
 - `apps/web/src/components/orders/dropship-config-workspace.tsx`（新建）
@@ -74,6 +77,7 @@ pure_agency_exempt           = fulfillment_path =  'SUPPLIER_DIRECT' AND ownersh
 - `apps/web/src/app/api/trade/dropship-config-allowlist.test.ts`（新建，6 例）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 9.6.1.1 那一行的「状态」「证据」两格）
 
 ## 验证

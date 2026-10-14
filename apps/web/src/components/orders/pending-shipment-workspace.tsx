@@ -252,8 +252,8 @@ export function PendingShipmentWorkspace() {
                 <span
                   className={
                     dimension.available
-                      ? 'mt-0.5 inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-800'
-                      : 'mt-0.5 inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs bg-amber-100 text-amber-800'
+                      ? 'mt-0.5 inline-flex shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 text-xs text-emerald-800'
+                      : 'mt-0.5 inline-flex shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800'
                   }
                 >
                   {dimension.available ? '可用' : '未交付'}
@@ -265,22 +265,21 @@ export function PendingShipmentWorkspace() {
                     来源：{dimension.source}
                     {dimension.ownerModule ? ` · 归属模块：${dimension.ownerModule}` : ''}
                   </span>
-                  {dimension.impact ? <div className="text-muted-foreground">{dimension.impact}</div> : null}
+                  {dimension.impact ? (
+                    <div className="text-muted-foreground">{dimension.impact}</div>
+                  ) : null}
                 </span>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted-foreground">{capabilities.downstreamNote}</p>
+          <p className="text-muted-foreground mt-3 text-xs">{capabilities.downstreamNote}</p>
         </SectionCard>
       ) : null}
 
-      <SectionCard
-        title="从 8.3.3.2 同步已完成打包的出库单"
-        extra={<Boxes className="h-4 w-4" />}
-      >
-        <p className="text-sm text-muted-foreground">
-          待发货清单的唯一来源是 warehouse 服务 8.3.3.2 的授权只读接口
-          （跨库视图与跨服务 SQL 都被禁止）。同步是幂等的：重复同步只更新，不重复插入。
+      <SectionCard title="从 8.3.3.2 同步已完成打包的出库单" extra={<Boxes className="h-4 w-4" />}>
+        <p className="text-muted-foreground text-sm">
+          待发货清单的唯一来源是 warehouse 服务 8.3.3.2 的授权只读接口 （跨库视图与跨服务 SQL
+          都被禁止）。同步是幂等的：重复同步只更新，不重复插入。
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <FormField
@@ -352,7 +351,7 @@ export function PendingShipmentWorkspace() {
           </FormField>
         </div>
 
-        <p className="mt-2 text-xs text-muted-foreground">{summaryText(page?.summary)}</p>
+        <p className="text-muted-foreground mt-2 text-xs">{summaryText(page?.summary)}</p>
 
         {groups.length === 0 ? (
           <EmptyState
@@ -362,7 +361,7 @@ export function PendingShipmentWorkspace() {
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2">分组</th>
                   <th className="py-2">待发货单元</th>
@@ -394,7 +393,7 @@ export function PendingShipmentWorkspace() {
             </table>
           </div>
         )}
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-xs">
           分组值来自后端 GROUP BY，与列表翻到第几页无关；未登记时限单独成桶，不会混进「今天到期」。
         </p>
       </SectionCard>
@@ -444,9 +443,7 @@ export function PendingShipmentWorkspace() {
           <div className="mt-3 space-y-2 text-sm">
             <p>
               已选 {selectedUnits.length} 个单元，其中可入任务 {eligibleSelected.length} 个。
-              {selectedCarriers.length > 0
-                ? ` 涉及承运商：${selectedCarriers.join('、')}。`
-                : ' '}
+              {selectedCarriers.length > 0 ? ` 涉及承运商：${selectedCarriers.join('、')}。` : ' '}
             </p>
             {selectedCarriers.length > 1 ? (
               <Notice tone="danger" title="一次任务不许跨承运商">
@@ -454,7 +451,7 @@ export function PendingShipmentWorkspace() {
               </Notice>
             ) : null}
             {blockedSelected.length > 0 ? (
-              <ul className="text-xs text-muted-foreground">
+              <ul className="text-muted-foreground text-xs">
                 {blockedSelected.map((unit) => (
                   <li key={unit.id}>
                     {unit.outboundOrderNo}：{taskEligibility(unit).reason}
@@ -464,7 +461,7 @@ export function PendingShipmentWorkspace() {
             ) : null}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-sm">
             在下面清单里勾选单元后再建任务。承运商为空的单元会禁用并写明原因。
           </p>
         )}
@@ -472,7 +469,7 @@ export function PendingShipmentWorkspace() {
 
       <SectionCard title="待发货清单">
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : units.length === 0 ? (
           <EmptyState
             title="没有符合条件的待发货单元"
@@ -481,7 +478,7 @@ export function PendingShipmentWorkspace() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2">选</th>
                   <th className="py-2">出库单</th>
@@ -544,7 +541,7 @@ export function PendingShipmentWorkspace() {
                         >
                           {shipmentSlaBucketLabel(unit.slaBucket)}
                         </span>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {timeText(unit.slaDeadline)} · {shipmentSlaSourceLabel(unit.slaSource)}
                         </div>
                       </td>
@@ -630,10 +627,7 @@ export function PendingShipmentWorkspace() {
               disabled={busy || unitDetail.unit.status === 'HANDED_OVER'}
               onClick={() =>
                 void run(async () => {
-                  await cancelPendingShipmentUnit(
-                    unitDetail.unit.id,
-                    '运营作废：退回仓库重新处理',
-                  );
+                  await cancelPendingShipmentUnit(unitDetail.unit.id, '运营作废：退回仓库重新处理');
                   setUnitDetail(null);
                   return '已作废，该票退回仓库。';
                 })
@@ -645,7 +639,7 @@ export function PendingShipmentWorkspace() {
 
           <h4 className="mt-4 text-sm font-medium">包裹（批量打单的对象是包裹）</h4>
           <table className="mt-2 w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
+            <thead className="text-muted-foreground text-left text-xs">
               <tr>
                 <th className="py-1">#</th>
                 <th className="py-1">重量</th>
@@ -671,7 +665,7 @@ export function PendingShipmentWorkspace() {
 
           <h4 className="mt-4 text-sm font-medium">运单</h4>
           {unitDetail.waybills.length === 0 ? (
-            <p className="mt-1 text-sm text-muted-foreground">还没申请过运单号</p>
+            <p className="text-muted-foreground mt-1 text-sm">还没申请过运单号</p>
           ) : (
             <ul className="mt-1 space-y-1 text-sm">
               {unitDetail.waybills.map((waybill) => (
@@ -685,7 +679,7 @@ export function PendingShipmentWorkspace() {
           )}
 
           <h4 className="mt-4 text-sm font-medium">完成判据</h4>
-          <ul className="mt-1 list-disc pl-5 text-sm text-muted-foreground">
+          <ul className="text-muted-foreground mt-1 list-disc pl-5 text-sm">
             {unitDetail.completionCriteria.map((criterion) => (
               <li key={criterion}>{criterion}</li>
             ))}
@@ -700,7 +694,7 @@ export function PendingShipmentWorkspace() {
             ))}
           </ul>
 
-          <ul className="mt-4 list-disc pl-5 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground mt-4 list-disc pl-5 text-xs">
             {unitDetail.boundaryNotes.map((note) => (
               <li key={note}>{note}</li>
             ))}
@@ -710,13 +704,13 @@ export function PendingShipmentWorkspace() {
 
       <SectionCard title="批量操作任务" extra={<Truck className="h-4 w-4" />}>
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : (tasks?.items ?? []).length === 0 ? (
           <EmptyState title="还没有批量任务" description="在上面勾选单元后建一张任务" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2">任务号</th>
                   <th className="py-2">操作</th>
@@ -755,7 +749,7 @@ export function PendingShipmentWorkspace() {
                         <AlertTriangle className="ml-1 inline h-3.5 w-3.5 text-amber-600" />
                       ) : null}
                       {task.failureReason ? (
-                        <div className="text-xs text-muted-foreground">{task.failureReason}</div>
+                        <div className="text-muted-foreground text-xs">{task.failureReason}</div>
                       ) : null}
                     </td>
                     <td className="py-2">{timeText(task.createdAt)}</td>
@@ -778,8 +772,10 @@ export function PendingShipmentWorkspace() {
                             void run(async () => {
                               const detail = await executeShipmentBatchTask(task.id);
                               setTaskDetail(detail);
-                              return `${detail.task.taskNo} 执行完毕：${detail.task.statusLabel}`
-                                + `（成功 ${detail.task.succeededCount} / 失败 ${detail.task.failedCount} / 跳过 ${detail.task.skippedCount}）。`;
+                              return (
+                                `${detail.task.taskNo} 执行完毕：${detail.task.statusLabel}` +
+                                `（成功 ${detail.task.succeededCount} / 失败 ${detail.task.failedCount} / 跳过 ${detail.task.skippedCount}）。`
+                              );
                             })
                           }
                         >
@@ -817,7 +813,7 @@ export function PendingShipmentWorkspace() {
             {shipmentBatchStatusLabel(taskDetail.task.status)}
           </p>
           <table className="mt-2 w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
+            <thead className="text-muted-foreground text-left text-xs">
               <tr>
                 <th className="py-1">出库单</th>
                 <th className="py-1">包裹</th>
@@ -844,7 +840,7 @@ export function PendingShipmentWorkspace() {
               「跳过」和「漏了」必须能区分。
             </p>
           ) : null}
-          <ul className="mt-3 list-disc pl-5 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground mt-3 list-disc pl-5 text-xs">
             {taskDetail.boundaryNotes.map((note) => (
               <li key={note}>{note}</li>
             ))}

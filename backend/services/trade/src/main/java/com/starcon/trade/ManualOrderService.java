@@ -21,23 +21,18 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 9.1.2.2 手工订单。
  *
- * <p><b>来源是字段不是表。</b>本类写入的是<b>通用</b>销售订单 {@code sales_order}，
- * {@code order_source='MANUAL'}；9.1.2.1 平台订单同步（D5）将写入<b>同一张表</b>的
- * {@code order_source='AMAZON'/'SHOPIFY'/...}。这正是蓝图那句「手工单与平台单共用同一条履约链路，
- * 只有来源标记不同，避免两套流程」在代码里的落法 —— 9.3 履约、9.4 发货回传、13 销量
- * 只需要认 {@code sales_order} 一张表，不需要知道这单是怎么来的。
+ * <p><b>来源是字段不是表。</b>本类写入的是<b>通用</b>销售订单 {@code sales_order}， {@code order_source='MANUAL'}；9.1.2.1
+ * 平台订单同步（D5）将写入<b>同一张表</b>的 {@code order_source='AMAZON'/'SHOPIFY'/...}。这正是蓝图那句「手工单与平台单共用同一条履约链路，
+ * 只有来源标记不同，避免两套流程」在代码里的落法 —— 9.3 履约、9.4 发货回传、13 销量 只需要认 {@code sales_order} 一张表，不需要知道这单是怎么来的。
  *
- * <p><b>本服务不引入任何价格来源。</b>05 价目系统（D6）未交付，因此单价是
- * {@link SalesOrderLineInput#unitPrice()} 这个必填表单字段。刻意<b>不</b>引用不存在的
- * 价目服务、<b>不</b>内置任何默认单价 —— 单价是表数据不是代码常量。
+ * <p><b>本服务不引入任何价格来源。</b>05 价目系统（D6）未交付，因此单价是 {@link SalesOrderLineInput#unitPrice()}
+ * 这个必填表单字段。刻意<b>不</b>引用不存在的 价目服务、<b>不</b>内置任何默认单价 —— 单价是表数据不是代码常量。
  *
- * <p><b>快照纪律。</b>行与地址的每一列都是写入那一刻的冻结取值，服务层
- * <b>不</b>回查 catalog / crm 的活数据。商品事后改名、改规格、改映射版本，
+ * <p><b>快照纪律。</b>行与地址的每一列都是写入那一刻的冻结取值，服务层 <b>不</b>回查 catalog / crm 的活数据。商品事后改名、改规格、改映射版本，
  * 或买家事后改地址，历史订单<b>一个字节都不会变</b>。
  *
- * <p><b>金额口径与 DB 触发器逐条对齐。</b>{@link Totals} 的公式与 V99 第 8.2 节
- * {@code guard_sales_order_totals} 的公式是<b>同一条</b>，两边各算一次是刻意的：
- * 服务层算错时提交会被 DB 挡下，而不是等到对账时才发现总额对不上。
+ * <p><b>金额口径与 DB 触发器逐条对齐。</b>{@link Totals} 的公式与 V99 第 8.2 节 {@code guard_sales_order_totals}
+ * 的公式是<b>同一条</b>，两边各算一次是刻意的： 服务层算错时提交会被 DB 挡下，而不是等到对账时才发现总额对不上。
  */
 @Service
 public class ManualOrderService {
@@ -75,8 +70,7 @@ public class ManualOrderService {
   /**
    * 能力与上下游可用性。
    *
-   * <p>存在的理由与 9.3.2.2 / 6.4.1.1 一致：把「哪些输入真有依据」「下游有没有接上」
-   * 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
+   * <p>存在的理由与 9.3.2.2 / 6.4.1.1 一致：把「哪些输入真有依据」「下游有没有接上」 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
    */
   public SalesOrderCapabilities capabilities() {
     return new SalesOrderCapabilities(
@@ -87,11 +81,9 @@ public class ManualOrderService {
         List.of(SalesOrderAddressRole.values()),
         List.of(SalesOrderChargeType.values()),
         List.of(
-            "DRAFT → SUBMITTED（提交待审，9.2 审单的入口；提交时行 / 收货地址 / 客户快照 / 汇总金额"
-                + "由 DB 延迟约束触发器复核并冻结）",
+            "DRAFT → SUBMITTED（提交待审，9.2 审单的入口；提交时行 / 收货地址 / 客户快照 / 汇总金额" + "由 DB 延迟约束触发器复核并冻结）",
             "SUBMITTED 是本模块的终态：审单结论（通过 / 驳回）由 9.2 用「加值迁移」扩展，本模块不预留",
-            "本模块**没有**取消：草稿的处置方式是「不提交」，它从未进过审单队列，不需要作废；"
-                + "取消 / 作废属于 9.2 审单的驳回动作"),
+            "本模块**没有**取消：草稿的处置方式是「不提交」，它从未进过审单队列，不需要作废；" + "取消 / 作废属于 9.2 审单的驳回动作"),
         false,
         "05 价目系统（D6）未交付：本模块**不引用**任何价目服务、**不内置**任何默认单价，"
             + "单价是表单必填项并原样冻结进订单行。价目交付后由服务层取建议价填进表单，"
@@ -108,16 +100,14 @@ public class ManualOrderService {
                 "trade",
                 false,
                 "9.2 审单与异常",
-                "审单未交付：手工订单只能提交到 SUBMITTED（待审），"
-                    + "队列展示、批量通过/驳回与规则命中都还没有出口。"),
+                "审单未交付：手工订单只能提交到 SUBMITTED（待审），" + "队列展示、批量通过/驳回与规则命中都还没有出口。"),
             new SalesOrderDownstreamGap(
                 "9.2.1.2",
                 "审单规则",
                 "trade",
                 false,
                 "9.2 审单与异常",
-                "审单规则未交付：当前没有任何自动放行/转人工的判定，"
-                    + "SUBMITTED 的订单一律等人工处理。"),
+                "审单规则未交付：当前没有任何自动放行/转人工的判定，" + "SUBMITTED 的订单一律等人工处理。"),
             new SalesOrderDownstreamGap(
                 "9.1.2.1",
                 "平台订单同步",
@@ -128,12 +118,7 @@ public class ManualOrderService {
                     + "本模块已把 sales_order 的形状做成通用表（来源是字段，CHECK 值域已含全部平台来源），"
                     + "平台单落地时直接写同一张表，不需要改表结构。"),
             new SalesOrderDownstreamGap(
-                "9.3.1.1",
-                "履约请求",
-                "trade",
-                false,
-                "9.3 履约编排",
-                "履约请求未交付：手工订单暂不进入拣货与发货链路。")));
+                "9.3.1.1", "履约请求", "trade", false, "9.3 履约编排", "履约请求未交付：手工订单暂不进入拣货与发货链路。")));
   }
 
   // ================================================================ 列表
@@ -174,7 +159,8 @@ public class ManualOrderService {
         sql.fetchOne(
                 "select count(*) from sales_order o"
                     + " join sales_order_party_snapshot p"
-                    + " on p.tenant_id=o.tenant_id and p.order_id=o.id" + clause,
+                    + " on p.tenant_id=o.tenant_id and p.order_id=o.id"
+                    + clause,
                 binds.toArray())
             .get(0, Long.class);
     Record summary =
@@ -218,10 +204,12 @@ public class ManualOrderService {
     if (head == null) {
       throw notFound("订单 " + orderId + " 不存在或无权查看");
     }
-    Record party = sql.fetchOne("select customer_party_id,customer_code,customer_name,"
-            + " customer_type,customer_default_currency from sales_order_party_snapshot"
-            + " where order_id = ?",
-        orderId);
+    Record party =
+        sql.fetchOne(
+            "select customer_party_id,customer_code,customer_name,"
+                + " customer_type,customer_default_currency from sales_order_party_snapshot"
+                + " where order_id = ?",
+            orderId);
     SalesOrderCustomerRow customer =
         party == null
             ? null
@@ -347,9 +335,8 @@ public class ManualOrderService {
   /**
    * 创建手工销售订单。
    *
-   * <p>整个单头 + 客户快照 + 行 + 属性 + 地址 + 费用 + 首条事件在<b>一个事务</b>里写入：
-   * 半张单（只有头没有行）在业务上不是一张订单。这里算好全部汇总与行小计，让 V99 的延迟
-   * 约束触发器在提交时成为兜底防线而不是唯一防线。
+   * <p>整个单头 + 客户快照 + 行 + 属性 + 地址 + 费用 + 首条事件在<b>一个事务</b>里写入： 半张单（只有头没有行）在业务上不是一张订单。这里算好全部汇总与行小计，让
+   * V99 的延迟 约束触发器在提交时成为兜底防线而不是唯一防线。
    */
   @Transactional
   public SalesOrderSaved create(SalesOrderCreateInput input, AccessService.Access actor) {
@@ -382,8 +369,7 @@ public class ManualOrderService {
     } catch (DuplicateKeyException e) {
       // 内部单号撞了，或（带来源维的）外部单号撞了 —— 两种都是「同一个号两张单」，
       // 对账时无法回答「客户说的那个单是哪张」，所以明确报冲突而不是让 DB 错误冒成 500。
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "订单号已存在，或本来源下的外部订单号已存在：同租户同单号只能有一张单");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "订单号已存在，或本来源下的外部订单号已存在：同租户同单号只能有一张单");
     }
 
     writeCustomer(tenantId, orderId, input.customer());
@@ -391,8 +377,14 @@ public class ManualOrderService {
     writeAddresses(tenantId, orderId, input.addresses());
     writeCharges(tenantId, orderId, input.charges());
     writeEvent(
-        tenantId, orderId, SalesOrderEventType.CREATED, "", SalesOrderStatus.DRAFT.name(),
-        "手工录入创建", actor.membershipId(), OffsetDateTime.now());
+        tenantId,
+        orderId,
+        SalesOrderEventType.CREATED,
+        "",
+        SalesOrderStatus.DRAFT.name(),
+        "手工录入创建",
+        actor.membershipId(),
+        OffsetDateTime.now());
 
     return new SalesOrderSaved(
         orderId,
@@ -416,9 +408,7 @@ public class ManualOrderService {
     if (!SalesOrderStatus.DRAFT.name().equals(current.get("status", String.class))) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "订单已提交进审单队列，明细与金额已冻结，不能再改："
-              + "订单上的商品、地址、客户都是下单当时的快照，改了等于让「当时那笔交易是什么」"
-              + "在历史里出现两个答案");
+          "订单已提交进审单队列，明细与金额已冻结，不能再改：" + "订单上的商品、地址、客户都是下单当时的快照，改了等于让「当时那笔交易是什么」" + "在历史里出现两个答案");
     }
 
     List<Prepared> prepared = prepare(input.lines());
@@ -467,12 +457,10 @@ public class ManualOrderService {
   /**
    * 提交待审：DRAFT → SUBMITTED，9.2 审单的入口。
    *
-   * <p>提交时的四道闸（行 ≥ 1、有收货地址快照、有客户快照、五项汇总与明细相等）由 V99 的
-   * <b>延迟约束触发器</b>在提交时回表核对。之所以是「延迟」而不是当场：服务层的写入顺序是
+   * <p>提交时的四道闸（行 ≥ 1、有收货地址快照、有客户快照、五项汇总与明细相等）由 V99 的 <b>延迟约束触发器</b>在提交时回表核对。之所以是「延迟」而不是当场：服务层的写入顺序是
    * 「先插头 → 写行/地址/费用 → 提交」，当场算会把「还没写完」误判成「不完整」。
    *
-   * <p>所以本方法<b>刻意与建单分开</b>成独立事务：提交一旦发生，行/地址/费用立刻被冻结，
-   * 与建单放在同一个事务里会让「刚建的单」在还没确认前就被锁死。
+   * <p>所以本方法<b>刻意与建单分开</b>成独立事务：提交一旦发生，行/地址/费用立刻被冻结， 与建单放在同一个事务里会让「刚建的单」在还没确认前就被锁死。
    */
   @Transactional
   public SalesOrderSaved submit(UUID orderId, AccessService.Access actor) {
@@ -482,8 +470,7 @@ public class ManualOrderService {
       throw notFound("订单 " + orderId + " 不存在或无权提交");
     }
     if (!SalesOrderStatus.DRAFT.name().equals(current.get("status", String.class))) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "只有草稿能提交待审；本单当前不在草稿态");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "只有草稿能提交待审；本单当前不在草稿态");
     }
     OffsetDateTime now = OffsetDateTime.now();
     sql.execute(
@@ -492,9 +479,14 @@ public class ManualOrderService {
         now,
         orderId);
     writeEvent(
-        tenantId, orderId, SalesOrderEventType.SUBMITTED,
-        SalesOrderStatus.DRAFT.name(), SalesOrderStatus.SUBMITTED.name(),
-        "提交待审（9.2 审单入口）", actor.membershipId(), now);
+        tenantId,
+        orderId,
+        SalesOrderEventType.SUBMITTED,
+        SalesOrderStatus.DRAFT.name(),
+        SalesOrderStatus.SUBMITTED.name(),
+        "提交待审（9.2 审单入口）",
+        actor.membershipId(),
+        now);
     return new SalesOrderSaved(
         orderId,
         current.get("order_no", String.class),
@@ -641,9 +633,8 @@ public class ManualOrderService {
   /**
    * 行预处理：定行号、算行小计。
    *
-   * <p>行小计口径 {@code round(unitPrice × quantity, 4)} 与 DB 的
-   * {@code sales_order_line_amount_matches} CHECK <b>同一条</b>：服务层算一次、DB 复算一次，
-   * 服务层算错时提交会在这里被挡下，而不是等到对账时才发现总额对不上。
+   * <p>行小计口径 {@code round(unitPrice × quantity, 4)} 与 DB 的 {@code sales_order_line_amount_matches}
+   * CHECK <b>同一条</b>：服务层算一次、DB 复算一次， 服务层算错时提交会在这里被挡下，而不是等到对账时才发现总额对不上。
    */
   private static List<Prepared> prepare(List<SalesOrderLineInput> lines) {
     List<Prepared> out = new ArrayList<>();
@@ -651,9 +642,7 @@ public class ManualOrderService {
     for (SalesOrderLineInput in : lines) {
       no++;
       BigDecimal lineAmount =
-          in.unitPrice()
-              .multiply(in.quantity())
-              .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+          in.unitPrice().multiply(in.quantity()).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
       out.add(new Prepared(no, in, lineAmount));
     }
     return out;
@@ -749,7 +738,8 @@ public class ManualOrderService {
   }
 
   private static BigDecimal money(BigDecimal v) {
-    return v == null ? BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)
+    return v == null
+        ? BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP)
         : v.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
   }
 

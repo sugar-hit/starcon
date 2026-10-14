@@ -14,6 +14,11 @@ import { CustomsDestinationVersionWorkspace } from '@/components/catalog/customs
  * 「不传目的地看全部」的入口：后端把通配 '*' 一律拒绝（规则 B5），
  * 页面再补一道同样的判定与中文报错，免得用户填出一个必然被拒的值。
  */
-export default function CustomsDestinationVersionPage({ params }: { params: { id: string } }) {
-  return <CustomsDestinationVersionWorkspace skuId={params.id} />;
+export default async function CustomsDestinationVersionPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  return <CustomsDestinationVersionWorkspace skuId={resolvedParams.id} />;
 }

@@ -61,9 +61,7 @@ function query(params: CrossEntityTransferParams): string {
 }
 
 export function fetchCrossEntityTransfers(params: CrossEntityTransferParams) {
-  return api<LegalEntityTransferPage>(
-    `warehouse/inventory/cross-entity-transfers${query(params)}`,
-  );
+  return api<LegalEntityTransferPage>(`warehouse/inventory/cross-entity-transfers${query(params)}`);
 }
 
 export function fetchCrossEntityTransferDetail(transferId: string) {
@@ -133,10 +131,7 @@ export function confirmTargetSide(transferId: string, expectedVersion: number, n
 }
 
 /** 发出：扣转出方余额、挂在途、开具内部结算凭据。整单发运。 */
-export function shipCrossEntityTransfer(
-  transferId: string,
-  input: LegalEntityTransferShipRequest,
-) {
+export function shipCrossEntityTransfer(transferId: string, input: LegalEntityTransferShipRequest) {
   return api<LegalEntityTransferSaved>(
     `warehouse/inventory/cross-entity-transfers/${encodeURIComponent(transferId)}/ship`,
     'POST',
@@ -157,7 +152,10 @@ export function receiveCrossEntityTransfer(
 }
 
 /** 结案：发出过但收不到的部分如实记为差异。凭据不因此作废（部分货权确实转移了）。 */
-export function closeCrossEntityTransfer(transferId: string, input: LegalEntityTransferCloseRequest) {
+export function closeCrossEntityTransfer(
+  transferId: string,
+  input: LegalEntityTransferCloseRequest,
+) {
   return api<LegalEntityTransferSaved>(
     `warehouse/inventory/cross-entity-transfers/${encodeURIComponent(transferId)}/close`,
     'POST',

@@ -133,9 +133,7 @@ export function InventorySellableWorkspace() {
               className="mt-1"
               value={params.keyword ?? ''}
               placeholder="编码或名称"
-              onChange={(e) =>
-                setParams({ ...params, keyword: e.target.value, page: 0 })
-              }
+              onChange={(e) => setParams({ ...params, keyword: e.target.value, page: 0 })}
             />
           </label>
           <label className="text-sm text-slate-300">
@@ -144,9 +142,7 @@ export function InventorySellableWorkspace() {
               className="mt-1"
               value={params.warehouseId ?? ''}
               placeholder="留空 = 全部仓库"
-              onChange={(e) =>
-                setParams({ ...params, warehouseId: e.target.value, page: 0 })
-              }
+              onChange={(e) => setParams({ ...params, warehouseId: e.target.value, page: 0 })}
             />
           </label>
           <label className="text-sm text-slate-300">
@@ -155,9 +151,7 @@ export function InventorySellableWorkspace() {
               className="mt-1"
               value={params.locationId ?? ''}
               placeholder="留空 = 全部库位"
-              onChange={(e) =>
-                setParams({ ...params, locationId: e.target.value, page: 0 })
-              }
+              onChange={(e) => setParams({ ...params, locationId: e.target.value, page: 0 })}
             />
           </label>
           <label className="text-sm text-slate-300">
@@ -226,7 +220,10 @@ export function InventorySellableWorkspace() {
         每一行给「量 + 行数 + 这一片是计入还是被排除 + 判定依据」，
         被排除的四片用另一种视觉 —— 画成逐级相减会让人以为它们被扣了两道。
       */}
-      <SectionCard title="构成拆解" description="五片互斥且穷尽；被排除的片不进可售基数，也不重复扣减">
+      <SectionCard
+        title="构成拆解"
+        description="五片互斥且穷尽；被排除的片不进可售基数，也不重复扣减"
+      >
         <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-b border-slate-700 text-left text-slate-400">
@@ -373,9 +370,7 @@ export function InventorySellableWorkspace() {
               <div className="flex gap-2">
                 <Button
                   disabled={(page?.page ?? 0) === 0}
-                  onClick={() =>
-                    setParams({ ...params, page: Math.max(0, (page?.page ?? 0) - 1) })
-                  }
+                  onClick={() => setParams({ ...params, page: Math.max(0, (page?.page ?? 0) - 1) })}
                 >
                   上一页
                 </Button>

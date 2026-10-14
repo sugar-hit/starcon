@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
-import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import type { GoodsReceiptPage } from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
 import {
@@ -65,7 +74,9 @@ export function WarehouseLocationAllocationWorkspace() {
   const readable = session.permissions.includes('warehouse.facilities.read');
   const writable = session.permissions.includes('warehouse.facilities.update');
 
-  const [caps, setCaps] = useState<Awaited<ReturnType<typeof fetchAllocationCapabilities>> | null>(null);
+  const [caps, setCaps] = useState<Awaited<ReturnType<typeof fetchAllocationCapabilities>> | null>(
+    null,
+  );
   const [receipts, setReceipts] = useState<GoodsReceiptPage | null>(null);
   const [receiptId, setReceiptId] = useState('');
   const [receiptIdInput, setReceiptIdInput] = useState('');
@@ -105,7 +116,12 @@ export function WarehouseLocationAllocationWorkspace() {
     if (!readable) return;
     try {
       setList(
-        await fetchAllocationList({ status: status || undefined, keyword: keyword || undefined, page, size: 20 }),
+        await fetchAllocationList({
+          status: status || undefined,
+          keyword: keyword || undefined,
+          page,
+          size: 20,
+        }),
       );
     } catch (e) {
       setError(errorText(e));
@@ -185,7 +201,9 @@ export function WarehouseLocationAllocationWorkspace() {
 
   const cancel = useCallback(
     async (id: string, code: string) => {
-      const reason = window.prompt(`撤销库位 ${code} 的上架决策必须写原因（「为什么撤掉」是复盘必答题）：`);
+      const reason = window.prompt(
+        `撤销库位 ${code} 的上架决策必须写原因（「为什么撤掉」是复盘必答题）：`,
+      );
       if (reason === null) return;
       if (reason.trim() === '') {
         setError('撤销原因不能为空。');
@@ -244,7 +262,7 @@ export function WarehouseLocationAllocationWorkspace() {
           ))}
         </Notice>
       )}
-      {caps && <p className="text-xs leading-relaxed text-muted-foreground">{caps.note}</p>}
+      {caps && <p className="text-muted-foreground text-xs leading-relaxed">{caps.note}</p>}
 
       {totals && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -273,10 +291,14 @@ export function WarehouseLocationAllocationWorkspace() {
 
       <SectionCard title="按收货单推荐库位">
         <div className="grid gap-3 md:grid-cols-4">
-          <FormField id="alloc-receipt" label="收货单" hint="从真实收货单列表里选，或在下方手填收货单 id">
+          <FormField
+            id="alloc-receipt"
+            label="收货单"
+            hint="从真实收货单列表里选，或在下方手填收货单 id"
+          >
             <select
               id="alloc-receipt"
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
               value={receiptId}
               onChange={(e) => setReceiptId(e.target.value)}
             >
@@ -318,7 +340,11 @@ export function WarehouseLocationAllocationWorkspace() {
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-2">
-          <FormField id="alloc-receipt-id" label="或直接填写收货单 id" hint="列表没加载出来时也能用">
+          <FormField
+            id="alloc-receipt-id"
+            label="或直接填写收货单 id"
+            hint="列表没加载出来时也能用"
+          >
             <Input
               id="alloc-receipt-id"
               value={receiptIdInput}
@@ -338,10 +364,15 @@ export function WarehouseLocationAllocationWorkspace() {
         </div>
       </SectionCard>
 
-      {recommending && <p className="py-4 text-sm text-muted-foreground">正在按规则计算候选库位…</p>}
+      {recommending && (
+        <p className="text-muted-foreground py-4 text-sm">正在按规则计算候选库位…</p>
+      )}
 
       {plans && plans.length === 0 && (
-        <EmptyState title="没有可推荐的入库明细行" description="换一张收货单，或先在 8.2.1.1 收货单里登记实收。" />
+        <EmptyState
+          title="没有可推荐的入库明细行"
+          description="换一张收货单，或先在 8.2.1.1 收货单里登记实收。"
+        />
       )}
 
       {(plans ?? []).map((plan) => (
@@ -357,14 +388,16 @@ export function WarehouseLocationAllocationWorkspace() {
             </p>
             <p>
               <span className="text-muted-foreground">必须放进：</span>
-              <span className="font-medium text-primary">{requiredTypeText(plan)}</span>
-              <span className="ml-1 text-xs text-muted-foreground">（硬规则，不允许混放）</span>
+              <span className="text-primary font-medium">{requiredTypeText(plan)}</span>
+              <span className="text-muted-foreground ml-1 text-xs">（硬规则，不允许混放）</span>
             </p>
             <p>
               <span className="text-muted-foreground">待上架数量：</span>
               {plan.outstandingQuantity}
               {plan.sourceLocationCode ? (
-                <span className="ml-1 text-xs text-muted-foreground">当前在 {plan.sourceLocationCode}</span>
+                <span className="text-muted-foreground ml-1 text-xs">
+                  当前在 {plan.sourceLocationCode}
+                </span>
               ) : null}
             </p>
             <p>
@@ -380,10 +413,7 @@ export function WarehouseLocationAllocationWorkspace() {
           )}
 
           {plan.candidates.length === 0 && !isFullyAllocated(plan) && (
-            <EmptyState
-              title="没有符合硬规则且容量承重不超限的库位"
-              description={plan.note}
-            />
+            <EmptyState title="没有符合硬规则且容量承重不超限的库位" description={plan.note} />
           )}
 
           <ul className="mt-2 space-y-3">
@@ -391,26 +421,27 @@ export function WarehouseLocationAllocationWorkspace() {
               const lines = reasonLines(candidate);
               const drift = scoreDrift(candidate);
               return (
-                <li key={candidate.locationId} className="rounded-md border border-border p-3">
+                <li key={candidate.locationId} className="border-border rounded-md border p-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="text-sm font-medium">
                       {candidate.code} · {candidate.name}
-                      <span className="ml-2 text-xs font-normal text-muted-foreground">
-                        {locationTypeLabel(candidate.type)} · 层级 {candidate.depth} · 路径 {candidate.distance} 跳
+                      <span className="text-muted-foreground ml-2 text-xs font-normal">
+                        {locationTypeLabel(candidate.type)} · 层级 {candidate.depth} · 路径{' '}
+                        {candidate.distance} 跳
                       </span>
                     </p>
                     <p className="text-sm">
                       <span className="text-muted-foreground">推荐分：</span>
                       <span className="font-medium">{candidate.score}</span>
                       {drift !== 0 && (
-                        <span className="ml-2 text-xs text-destructive">
+                        <span className="text-destructive ml-2 text-xs">
                           与理由合计相差 {drift}（前端公式与后端权重不一致）
                         </span>
                       )}
                     </p>
                   </div>
 
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     容量：
                     {candidate.capacity === null ? '未量' : candidate.capacity}
                     {' · 已承诺 '}
@@ -433,8 +464,8 @@ export function WarehouseLocationAllocationWorkspace() {
                         key={line.text}
                         className={
                           line.advisory
-                            ? 'rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground'
-                            : 'rounded bg-primary/10 px-2 py-0.5 text-xs text-primary'
+                            ? 'bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs'
+                            : 'bg-primary/10 text-primary rounded px-2 py-0.5 text-xs'
                         }
                       >
                         {line.text}
@@ -454,7 +485,7 @@ export function WarehouseLocationAllocationWorkspace() {
               );
             })}
           </ul>
-          <p className="mt-2 text-xs text-muted-foreground">{plan.note}</p>
+          <p className="text-muted-foreground mt-2 text-xs">{plan.note}</p>
         </SectionCard>
       ))}
 
@@ -463,7 +494,7 @@ export function WarehouseLocationAllocationWorkspace() {
           <FormField id="alloc-status" label="状态">
             <select
               id="alloc-status"
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
@@ -491,7 +522,10 @@ export function WarehouseLocationAllocationWorkspace() {
         </div>
 
         {list && list.rows.length === 0 ? (
-          <EmptyState title="还没有上架决策" description="在上方推荐并指派一个库位后，这里会出现可审计的决策记录。" />
+          <EmptyState
+            title="还没有上架决策"
+            description="在上方推荐并指派一个库位后，这里会出现可审计的决策记录。"
+          />
         ) : null}
 
         {list && list.rows.length > 0 && (
@@ -499,7 +533,7 @@ export function WarehouseLocationAllocationWorkspace() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-border text-xs text-muted-foreground">
+                  <tr className="border-border text-muted-foreground border-b text-xs">
                     <th className="py-2 pr-3">收货单</th>
                     <th className="py-2 pr-3">SKU</th>
                     <th className="py-2 pr-3">质量状态</th>
@@ -512,15 +546,17 @@ export function WarehouseLocationAllocationWorkspace() {
                 </thead>
                 <tbody>
                   {list.rows.map((row) => (
-                    <tr key={row.id} className="border-b border-border/60 align-top">
+                    <tr key={row.id} className="border-border/60 border-b align-top">
                       <td className="py-2 pr-3">{row.receiptCode}</td>
                       <td className="py-2 pr-3">
                         {row.skuCode}
-                        {row.skuName ? <span className="ml-1 text-xs text-muted-foreground">{row.skuName}</span> : null}
+                        {row.skuName ? (
+                          <span className="text-muted-foreground ml-1 text-xs">{row.skuName}</span>
+                        ) : null}
                       </td>
                       <td className="py-2 pr-3">
                         {qualityRoleLabel(row.qualityRole)}
-                        <span className="ml-1 text-xs text-muted-foreground">
+                        <span className="text-muted-foreground ml-1 text-xs">
                           → {row.requiredTypeLabel ?? locationTypeLabel(row.requiredType)}
                         </span>
                       </td>
@@ -532,7 +568,9 @@ export function WarehouseLocationAllocationWorkspace() {
                       <td className="py-2 pr-3">
                         {allocationStatusLabel(row.status)}
                         {row.cancelReason ? (
-                          <span className="ml-1 text-xs text-muted-foreground">（{row.cancelReason}）</span>
+                          <span className="text-muted-foreground ml-1 text-xs">
+                            （{row.cancelReason}）
+                          </span>
                         ) : null}
                       </td>
                       <td className="py-2">
@@ -540,7 +578,7 @@ export function WarehouseLocationAllocationWorkspace() {
                           <span className="mr-2">
                             <button
                               type="button"
-                              className="text-xs text-primary underline-offset-2 hover:underline"
+                              className="text-primary text-xs underline-offset-2 hover:underline"
                               onClick={() => void release(row.id)}
                             >
                               释放
@@ -550,13 +588,13 @@ export function WarehouseLocationAllocationWorkspace() {
                         {writable && row.status !== 'CANCELLED' && (
                           <button
                             type="button"
-                            className="text-xs text-destructive underline-offset-2 hover:underline"
+                            className="text-destructive text-xs underline-offset-2 hover:underline"
                             onClick={() => void cancel(row.id, row.locationCode ?? row.id)}
                           >
                             撤销
                           </button>
                         )}
-                        <p className="mt-1 text-xs text-muted-foreground">{row.ruleSummary}</p>
+                        <p className="text-muted-foreground mt-1 text-xs">{row.ruleSummary}</p>
                       </td>
                     </tr>
                   ))}
@@ -565,7 +603,8 @@ export function WarehouseLocationAllocationWorkspace() {
             </div>
             <div className="mt-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                第 {list.page} 页 · 共 {list.total} 条（合计 {list.totals.decisionCount} 条，不受分页与筛选影响）
+                第 {list.page} 页 · 共 {list.total} 条（合计 {list.totals.decisionCount}{' '}
+                条，不受分页与筛选影响）
               </span>
               <span className="flex gap-2">
                 <Button
@@ -586,7 +625,7 @@ export function WarehouseLocationAllocationWorkspace() {
                 </Button>
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{list.note}</p>
+            <p className="text-muted-foreground mt-2 text-xs">{list.note}</p>
           </>
         )}
       </SectionCard>

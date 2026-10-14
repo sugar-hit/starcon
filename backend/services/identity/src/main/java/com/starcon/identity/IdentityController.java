@@ -23,8 +23,10 @@ public class IdentityController {
   private final String internalKey;
   private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
   private final Map<String, Attempt> attempts = new java.util.concurrent.ConcurrentHashMap<>();
+
   /** 17.5.3.2 操作日志写入侧。登录/登出事件由本控制器记录（见 login / logout）。 */
   private final OperationLog operationLog;
+
   private final TenantTransactions tenants;
 
   private record Attempt(long until, int count) {}
@@ -126,8 +128,7 @@ public class IdentityController {
    * 记录一次登录失败。
    *
    * <p>登录失败时还没有可信的租户上下文，而操作日志的 {@code tenant_id} 是 NOT NULL 且受 RLS 保护。
-   * 做法是交给数据库按<b>用户名的成员关系</b>反查候选租户并写入：调用方无从指定租户，
-   * 这与 V40「租户集合只能由已认证成员关系推导」的纪律一致。查不到任何租户（账号不存在）
+   * 做法是交给数据库按<b>用户名的成员关系</b>反查候选租户并写入：调用方无从指定租户， 这与 V40「租户集合只能由已认证成员关系推导」的纪律一致。查不到任何租户（账号不存在）
    * 就不写——给一个不存在的账号硬造归属，比不记更糟。
    */
   private void recordLoginFailure(String username, String reason) {
@@ -142,8 +143,7 @@ public class IdentityController {
   /**
    * 当前请求的 request_id。
    *
-   * <p>不在请求上下文里时（新生成的 ID + 固定前缀）返回一个独立值，而不是 null：
-   * {@code request_id} 是 NOT NULL，且一条查不到链路的日志等于没记。
+   * <p>不在请求上下文里时（新生成的 ID + 固定前缀）返回一个独立值，而不是 null： {@code request_id} 是 NOT NULL，且一条查不到链路的日志等于没记。
    */
   private static String requestId() {
     var current = RequestTrace.requestId();

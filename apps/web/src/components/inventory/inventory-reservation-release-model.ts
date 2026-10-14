@@ -132,10 +132,7 @@ function fill<T extends object>(input: T): T {
  * <p>`idempotencyKey` 建议由人工动作带上：上游事件是至少投递一次，重投必须拿到同一个回执，
  * 而不是把货还回两次。
  */
-export function releaseReservation(
-  reservationId: string,
-  input: ReservationReleaseRequest = {},
-) {
+export function releaseReservation(reservationId: string, input: ReservationReleaseRequest = {}) {
   return api<ReservationReleaseOutcome>(
     `${RESERVATION_RELEASE_BASE}/${reservationId}/release`,
     'POST',
@@ -184,10 +181,7 @@ export function releaseModeLabel(mode: string | undefined, label?: string | null
 }
 
 /** 释放来源标签。 */
-export function releaseTriggerLabel(
-  trigger: string | undefined,
-  label?: string | null,
-): string {
+export function releaseTriggerLabel(trigger: string | undefined, label?: string | null): string {
   if (label) return label;
   switch (trigger) {
     case 'ORDER_CANCELLED':
@@ -268,17 +262,18 @@ export const RESERVATION_RELEASE_SORT_OPTIONS = [
 ];
 
 /** 「EXPIRY_SWEEP 不能用于手动入口」的提示。常驻显示，免得用户选了才被拒。 */
-export const SWEEP_ONLY_TRIGGER_NOTE = '「超时回收」只由批量过期清理产生，手动释放请选订单取消 / 拆单减少 / 人工。';
+export const SWEEP_ONLY_TRIGGER_NOTE =
+  '「超时回收」只由批量过期清理产生，手动释放请选订单取消 / 拆单减少 / 人工。';
 
 /** 恢复量与释放量的口径说明。常驻显示，否则「还回 10 / 释放 12」会被当成算错。 */
 export const RESTORE_QUANTITY_NOTE =
-  '还回可用池 = 各分配本次释放量之和（货物的量）；需求释放 = 预占口径上放弃的量。'
-  + '需求没被全部分配时两者不相等：没圈到 bucket 的部分从未占过可用量，不该算进恢复量。';
+  '还回可用池 = 各分配本次释放量之和（货物的量）；需求释放 = 预占口径上放弃的量。' +
+  '需求没被全部分配时两者不相等：没圈到 bucket 的部分从未占过可用量，不该算进恢复量。';
 
 /** 过期规则说明（接口回传的 ruleNote 为准，这份是接口不可用时的兜底）。 */
 export const EXPIRY_RULE_NOTE =
-  '过期判据 = 预占中（HELD）且已过 expires_at；已承诺（COMMITTED）永不自动释放，'
-  + '名下还有承诺的预占整笔跳过批量回收。';
+  '过期判据 = 预占中（HELD）且已过 expires_at；已承诺（COMMITTED）永不自动释放，' +
+  '名下还有承诺的预占整笔跳过批量回收。';
 
 /** 可用量口径归属说明。 */
 export const AVAILABLE_OWNER_NOTE =

@@ -86,8 +86,7 @@ export function fetchInTransitNetting(params: {
   size?: number;
 }) {
   const parts: string[] = [];
-  if (params.toWarehouseId)
-    parts.push(`toWarehouseId=${encodeURIComponent(params.toWarehouseId)}`);
+  if (params.toWarehouseId) parts.push(`toWarehouseId=${encodeURIComponent(params.toWarehouseId)}`);
   if (params.skuId) parts.push(`skuId=${encodeURIComponent(params.skuId)}`);
   if (params.sort) parts.push(`sort=${encodeURIComponent(params.sort)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
@@ -353,10 +352,7 @@ export function outstanding(row: { outstandingQuantity: number }): number {
  * <p>只在「仍在途且还有未达量」时给到达 / 差异：已了结的腿（RECEIVED / CANCELLED）
  * 后端会返回 409，界面上再显示这两个按钮只会让人点了挨报错。
  */
-export function inTransitActions(row: {
-  status: string;
-  outstandingQuantity: number;
-}): string[] {
+export function inTransitActions(row: { status: string; outstandingQuantity: number }): string[] {
   if (row.status !== 'IN_TRANSIT') return [];
   return outstanding(row) > 0 ? ['arrive', 'discrepancy'] : [];
 }
@@ -450,7 +446,10 @@ export function etaText(row: { expectedArriveAt: string | null }): string {
 }
 
 /** 逾期时长文案。没 ETA 就没有逾期小时数，如实说明而不是显示 0 小时。 */
-export function overdueHoursText(row: { expectedArriveAt: string | null; overdueHours: number | null }): string {
+export function overdueHoursText(row: {
+  expectedArriveAt: string | null;
+  overdueHours: number | null;
+}): string {
   if (!row.expectedArriveAt) return '未登记 ETA，无法判断逾期';
   if (row.overdueHours === null || row.overdueHours === undefined) return '未逾期';
   if (row.overdueHours < 0) return '未逾期';

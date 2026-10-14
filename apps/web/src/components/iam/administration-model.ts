@@ -38,9 +38,7 @@ export function canManage(session: Access, kind: AdministrationKind, action = 'r
 }
 /** 按权限码判断，用于部门表单要读法人档案这种跨页面资源的场景。 */
 export function hasPermission(session: Access, permission: string) {
-  return session.grants.some(
-    (g) => g.scopeMode === 'ALL' && g.permissions.includes(permission),
-  );
+  return session.grants.some((g) => g.scopeMode === 'ALL' && g.permissions.includes(permission));
 }
 export function togglePermission(values: string[], code: string, enabled: boolean) {
   const page = code.slice(0, code.lastIndexOf('.'));

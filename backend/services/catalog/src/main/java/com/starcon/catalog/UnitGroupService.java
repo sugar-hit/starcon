@@ -11,9 +11,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -29,24 +27,19 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>本类的边界纪律：
  *
  * <ol>
- *   <li><b>不碰 {@code unit_of_measure} 的写入</b>。单位字典的写入所有者是
- *       {@link UnitConversionService}（V8 建立），本模块只**读**它：量纲、名称、数量精度。
- *       字典视角页面同时调两个端点，不新建第二个写入口，也不复制一份平行的单位字典表。
- *   <li><b>只写自己新建的三张表</b>：{@code unit_group} / {@code unit_group_member} /
- *       {@code unit_group_conversion}。SKU 侧换算（{@code sku_unit_conversion}）
- *       与单据冻结快照的既有语义一个字不动——组级换算是"这两个单位之间换多少"的通用答案，
- *       单据冻结仍然引用 SKU 侧换算行。
- *   <li><b>量纲守卫双层</b>。应用层判一次并给出人话（"单位「件」属于数量，
- *       请改选重量单位的成员"），V17 的三个守卫触发器再兜一次。
- *       只靠 DB 层的话运营看到的是一条 23514，没有任何可执行信息。
- *   <li><b>比例必须版本化、区间不重叠、查不到就报查不到</b>。与
- *       {@link UnitConversionService} 同一套语义：静默回退到"最近的一版"会让一张
+ *   <li><b>不碰 {@code unit_of_measure} 的写入</b>。单位字典的写入所有者是 {@link UnitConversionService}（V8
+ *       建立），本模块只**读**它：量纲、名称、数量精度。 字典视角页面同时调两个端点，不新建第二个写入口，也不复制一份平行的单位字典表。
+ *   <li><b>只写自己新建的三张表</b>：{@code unit_group} / {@code unit_group_member} / {@code
+ *       unit_group_conversion}。SKU 侧换算（{@code sku_unit_conversion}）
+ *       与单据冻结快照的既有语义一个字不动——组级换算是"这两个单位之间换多少"的通用答案， 单据冻结仍然引用 SKU 侧换算行。
+ *   <li><b>量纲守卫双层</b>。应用层判一次并给出人话（"单位「件」属于数量， 请改选重量单位的成员"），V17 的三个守卫触发器再兜一次。 只靠 DB 层的话运营看到的是一条
+ *       23514，没有任何可执行信息。
+ *   <li><b>比例必须版本化、区间不重叠、查不到就报查不到</b>。与 {@link UnitConversionService} 同一套语义：静默回退到"最近的一版"会让一张
  *       按过期比例生成的采购单看起来完全正常，这是最贵的一类错误。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}，
- * 与同 L3 的分类树（3.3.1.1）、类目属性要求（3.3.1.2）、品牌（3.3.2.1）一致——
- * 单位组是商品主数据域的租户级字典，不新造权限词表。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}， 与同 L3
+ * 的分类树（3.3.1.1）、类目属性要求（3.3.1.2）、品牌（3.3.2.1）一致—— 单位组是商品主数据域的租户级字典，不新造权限词表。
  */
 @Service
 public class UnitGroupService {
@@ -62,9 +55,8 @@ public class UnitGroupService {
   /**
    * 判定基准日：UTC 当天。
    *
-   * <p>用 UTC 而不是服务器本地当天，与 {@link BrandService#asOf()} 同一理由：
-   * 「这一版换算今天生效吗」按本地时区算，同一份数据在 UTC 机器与 Asia/Shanghai 机器上
-   * 会给出不同结论。判定结果里回带 {@code asOf}，调用方能看到这是按哪一天判的。
+   * <p>用 UTC 而不是服务器本地当天，与 {@link BrandService#asOf()} 同一理由： 「这一版换算今天生效吗」按本地时区算，同一份数据在 UTC 机器与
+   * Asia/Shanghai 机器上 会给出不同结论。判定结果里回带 {@code asOf}，调用方能看到这是按哪一天判的。
    */
   private static LocalDate asOf() {
     return LocalDate.now(ZoneOffset.UTC);
@@ -73,10 +65,9 @@ public class UnitGroupService {
   /**
    * 组列表 / 组详情的公共 SELECT。
    *
-   * <p>它带**两个** {@code asOf} 占位符（都落在 {@code all_members_convertible} 的
-   * {@code not exists} 子查询里：{@code effective_from<=?} 与 {@code effective_to>=?}）。
-   * 调用方必须先绑这两个 {@code LocalDate} 再绑后面的参数——少绑或多绑都会被驱动报成
-   * 类型错误，而报错信息（{@code invalid input syntax for type date: "2026-10-07"}）
+   * <p>它带**两个** {@code asOf} 占位符（都落在 {@code all_members_convertible} 的 {@code not exists}
+   * 子查询里：{@code effective_from<=?} 与 {@code effective_to>=?}）。 调用方必须先绑这两个 {@code LocalDate}
+   * 再绑后面的参数——少绑或多绑都会被驱动报成 类型错误，而报错信息（{@code invalid input syntax for type date: "2026-10-07"}）
    * 完全指不到真正的原因。
    */
   private static final String SELECT_GROUP =
@@ -110,8 +101,7 @@ public class UnitGroupService {
   /**
    * 概览：字典规模、组规模与三个治理缺口指标。
    *
-   * <p>三个缺口分别是「单位没进任何组」「组里有成员缺当天生效版本」「组里没配过任何换算」。
-   * 它们都会让换算查询报出一个可解释的拒绝原因码，界面上要能一眼看出是哪一类。
+   * <p>三个缺口分别是「单位没进任何组」「组里有成员缺当天生效版本」「组里没配过任何换算」。 它们都会让换算查询报出一个可解释的拒绝原因码，界面上要能一眼看出是哪一类。
    */
   public UnitGroupOverview overview() {
     var units =
@@ -153,7 +143,8 @@ public class UnitGroupService {
                 asOf())
             .get(0, Long.class);
     var dimensions =
-        sql.fetch(
+        sql
+            .fetch(
                 "select g.dimension,count(distinct g.id) as group_count,count(m.unit_code) as member_count"
                     + " from unit_group g"
                     + " left join unit_group_member m on m.tenant_id=g.tenant_id and m.group_id=g.id"
@@ -188,8 +179,7 @@ public class UnitGroupService {
   /**
    * 单位组列表：关键词（编码 / 名称 / 基准单位 / 成员单位名）+ 量纲 + 启用状态筛选，分页。
    *
-   * <p>关键词覆盖成员单位名：运营手里往往只有一个单位（「千克」），要问的是
-   * 「千克在哪个组里」，只搜组名会搜不到。成员匹配用 {@code exists} 子查询而不是 join——
+   * <p>关键词覆盖成员单位名：运营手里往往只有一个单位（「千克」），要问的是 「千克在哪个组里」，只搜组名会搜不到。成员匹配用 {@code exists} 子查询而不是 join——
    * join 会让一个有 8 个成员的组在结果里出现 8 次。
    */
   public UnitGroupPage list(UnitGroupQuery query) {
@@ -241,7 +231,9 @@ public class UnitGroupService {
     pageBinds.add((long) page * size);
     var rows =
         sql.fetch(
-            SELECT_GROUP + " from unit_group g where " + joined
+            SELECT_GROUP
+                + " from unit_group g where "
+                + joined
                 + " order by g.dimension,g.code limit ? offset ?",
             pageBinds.toArray());
     long enabledCount =
@@ -255,8 +247,7 @@ public class UnitGroupService {
         size,
         enabledCount,
         total - enabledCount,
-        "统计数不受筛选条件影响：界面上把「筛出来的 N 条」与「全租户 M 个组」并排显示，"
-            + "才知道自己漏看了多少。");
+        "统计数不受筛选条件影响：界面上把「筛出来的 N 条」与「全租户 M 个组」并排显示，" + "才知道自己漏看了多少。");
   }
 
   private UnitGroupRow toRow(Record r) {
@@ -288,11 +279,9 @@ public class UnitGroupService {
   /**
    * 单位组详情：组本体 + 成员（带当天生效比例）+ 组内换算版本（按成员 + 生效起始日倒序）。
    *
-   * <p>换算按成员聚成一组而不是拉平成长列表：运营问的是"千克现在几克一千克、以前是几克"，
-   * 聚在一起才看得出比例改过几次。每一版都带生效区间并标出当前生效的那版。
+   * <p>换算按成员聚成一组而不是拉平成长列表：运营问的是"千克现在几克一千克、以前是几克"， 聚在一起才看得出比例改过几次。每一版都带生效区间并标出当前生效的那版。
    *
-   * <p>{@code asOfText} 决定"当前生效"是按哪一天判的，不是按服务器当天——
-   * 补录一条 2024 年的比例时，"哪一版当时生效"与"今天哪一版生效"必须能分开看。
+   * <p>{@code asOfText} 决定"当前生效"是按哪一天判的，不是按服务器当天—— 补录一条 2024 年的比例时，"哪一版当时生效"与"今天哪一版生效"必须能分开看。
    */
   public UnitGroupDetail detail(UUID id, String asOfText) {
     LocalDate at = dateOrNull(asOfText);
@@ -300,11 +289,15 @@ public class UnitGroupService {
     var row =
         sql.fetchOne(
             SELECT_GROUP + " from unit_group g where g.tenant_id=? and g.id=?",
-            day, day, currentTenantId(), id);
+            day,
+            day,
+            currentTenantId(),
+            id);
     if (row == null) throw CatalogService.missing();
 
     var members =
-        sql.fetch(
+        sql
+            .fetch(
                 "select m.unit_code,m.position,u.name,u.scale,u.enabled,g.base_unit_code"
                     + " from unit_group_member m"
                     + " join unit_of_measure u on u.tenant_id=m.tenant_id and u.code=m.unit_code"
@@ -316,7 +309,8 @@ public class UnitGroupService {
             .map(r -> toMember(r, id, day))
             .toList();
     var conversions =
-        sql.fetch(
+        sql
+            .fetch(
                 "select id,unit_code,quantity_per_base,effective_from,effective_to,note,created_at"
                     + " from unit_group_conversion where tenant_id=? and group_id=?"
                     + " order by unit_code,effective_from desc,effective_to desc nulls last",
@@ -395,13 +389,11 @@ public class UnitGroupService {
   /**
    * 建或改单位组（id 为空即新建）。成员是**整体替换**语义。
    *
-   * <p>编码与量纲建后**不可改**：组编码是下游 06 / 07 / 08 按它引用换算关系的锚点；
-   * 量纲改了会让已配置的换算版本在守卫触发器下一次写入时突然报「量纲不匹配」。
+   * <p>编码与量纲建后**不可改**：组编码是下游 06 / 07 / 08 按它引用换算关系的锚点； 量纲改了会让已配置的换算版本在守卫触发器下一次写入时突然报「量纲不匹配」。
    * 要改就新建一个单位组。
    *
-   * <p>基准单位**可以改**（蓝图没禁止这个动作），但改它会让所有已配比例的含义变化，
-   * 所以旧基准单位改完会变成需要一条换算版本的普通成员；界面上要提示这一点，
-   * {@code allMembersConvertible} 指标会立刻变成 false。
+   * <p>基准单位**可以改**（蓝图没禁止这个动作），但改它会让所有已配比例的含义变化， 所以旧基准单位改完会变成需要一条换算版本的普通成员；界面上要提示这一点， {@code
+   * allMembersConvertible} 指标会立刻变成 false。
    *
    * <p>更新走 version 乐观锁，冲突直接 409。
    */
@@ -429,12 +421,10 @@ public class UnitGroupService {
     if (id != null && existingGroup == null) throw CatalogService.missing();
     if (existingGroup != null) {
       CatalogService.check(
-          existingGroup.get("code", String.class).equals(code),
-          "单位组编码建后不可修改：下游按编码引用换算关系，请新建一个单位组");
+          existingGroup.get("code", String.class).equals(code), "单位组编码建后不可修改：下游按编码引用换算关系，请新建一个单位组");
       CatalogService.check(
           existingGroup.get("dimension", String.class).equals(dimension),
-          "单位组量纲建后不可修改：改了会让已配置的组内换算在量纲守卫下一次写入时突然不通过，"
-              + "请新建一个单位组");
+          "单位组量纲建后不可修改：改了会让已配置的组内换算在量纲守卫下一次写入时突然不通过，" + "请新建一个单位组");
     }
 
     // 成员：去重 + 保序。重复提交同一个单位不能让换算矩阵出现两行一样的单位。
@@ -449,20 +439,17 @@ public class UnitGroupService {
       }
     }
     CatalogService.check(
-        members.size() <= MAX_MEMBERS,
-        "一个单位组最多 " + MAX_MEMBERS + " 个成员：超过这个数说明这是「所有单位」而不是一个换算组");
+        members.size() <= MAX_MEMBERS, "一个单位组最多 " + MAX_MEMBERS + " 个成员：超过这个数说明这是「所有单位」而不是一个换算组");
     CatalogService.check(
         members.containsKey(baseUnit),
-        "组基础单位「" + baseUnit + "」必须在本组成员里：它不占换算行（比例恒为 1），"
-            + "但组内换算比例都是相对它定义的");
+        "组基础单位「" + baseUnit + "」必须在本组成员里：它不占换算行（比例恒为 1），" + "但组内换算比例都是相对它定义的");
 
     // 每个成员都必须是已登记、启用、且与组同量纲的单位。
     // 这三条应用层先判一次：触发器的 23514 对运营没有可执行信息。
     for (String unitCode : members.keySet()) {
-      var unit = sql.fetchOne("select name,dimension,enabled from unit_of_measure where code=?", unitCode);
-      CatalogService.check(
-          unit != null,
-          "单位「" + unitCode + "」尚未登记到单位字典，请先在单位字典中新建后再加入单位组");
+      var unit =
+          sql.fetchOne("select name,dimension,enabled from unit_of_measure where code=?", unitCode);
+      CatalogService.check(unit != null, "单位「" + unitCode + "」尚未登记到单位字典，请先在单位字典中新建后再加入单位组");
       CatalogService.check(
           Boolean.TRUE.equals(unit.get("enabled", Boolean.class)),
           "单位「" + unitCode + "」已停用，不能加入单位组；停用只挡住新建，历史换算仍可读");
@@ -476,8 +463,7 @@ public class UnitGroupService {
     long version;
     if (id == null) {
       CatalogService.check(
-          sql.fetchOne("select id from unit_group where code=?", code) == null,
-          "单位组编码已存在：" + code);
+          sql.fetchOne("select id from unit_group where code=?", code) == null, "单位组编码已存在：" + code);
       groupId = Ids.next();
       try {
         sql.execute(
@@ -512,9 +498,9 @@ public class UnitGroupService {
       } catch (DataAccessException e) {
         throw conflict("单位组保存失败，请刷新后重试");
       }
-      if (updated != 1)
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "单位组已被他人修改，请刷新后重试");
-      version = sql.fetchOne("select version from unit_group where id=?", id).get("version", Long.class);
+      if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "单位组已被他人修改，请刷新后重试");
+      version =
+          sql.fetchOne("select version from unit_group where id=?", id).get("version", Long.class);
     }
 
     // 成员整体替换：按**增量**删 / 插，不做「删光再全插」。
@@ -594,10 +580,7 @@ public class UnitGroupService {
     return existing;
   }
 
-  /**
-   * 成员写入失败时的解释。V17 的守卫触发器对量纲不匹配抛 23514，
-   * 这里把它翻译成"换一个同量纲的单位"这种可执行的话。
-   */
+  /** 成员写入失败时的解释。V17 的守卫触发器对量纲不匹配抛 23514， 这里把它翻译成"换一个同量纲的单位"这种可执行的话。 */
   private ResponseStatusException memberWriteConflict(
       DataAccessException e, String unitCode, String groupCode, String groupDimension) {
     String message = e.getMessage() == null ? "" : e.getMessage();
@@ -605,7 +588,8 @@ public class UnitGroupService {
       var unit = sql.fetchOne("select dimension from unit_of_measure where code=?", unitCode);
       String unitDimension = unit == null ? "未知" : unit.get("dimension", String.class);
       return conflict(
-          dimensionMismatchMessage(unitCode, unitDimension, "单位组「" + groupCode + "」", groupDimension));
+          dimensionMismatchMessage(
+              unitCode, unitDimension, "单位组「" + groupCode + "」", groupDimension));
     }
     return conflict("单位「" + unitCode + "」写入单位组失败，请刷新后重试");
   }
@@ -613,10 +597,11 @@ public class UnitGroupService {
   /**
    * 启用 / 停用单位组。
    *
-   * <p>停用挡的是「新建换算版本」与「用这个组换算」，已配置的组内换算版本照常可读——
-   * 与 {@code unit_of_measure.enabled} 同一语义：停用是"不许再新建"，不是"抹掉过去"。
+   * <p>停用挡的是「新建换算版本」与「用这个组换算」，已配置的组内换算版本照常可读—— 与 {@code unit_of_measure.enabled}
+   * 同一语义：停用是"不许再新建"，不是"抹掉过去"。
    */
-  public UnitGroupSaved setEnabled(AccessService.Access actor, UUID id, boolean enabled, long version) {
+  public UnitGroupSaved setEnabled(
+      AccessService.Access actor, UUID id, boolean enabled, long version) {
     int updated =
         sql.execute(
             "update unit_group set enabled=?,version=version+1,updated_at=now()"
@@ -641,8 +626,7 @@ public class UnitGroupService {
   /**
    * 删除单位组（成员与组内换算版本随之级联删除）。
    *
-   * <p>还有组内换算版本时一律拒绝：删掉组会让那些版本指向一个查不到的组。
-   * 这种情况下应该停用——停用挡住「新建」，历史照常可读。
+   * <p>还有组内换算版本时一律拒绝：删掉组会让那些版本指向一个查不到的组。 这种情况下应该停用——停用挡住「新建」，历史照常可读。
    */
   public void delete(AccessService.Access actor, UUID id, long version) {
     var row = sql.fetchOne("select code,version from unit_group where id=?", id);
@@ -650,10 +634,14 @@ public class UnitGroupService {
     if (row.get("version", Long.class) != version)
       throw new ResponseStatusException(HttpStatus.CONFLICT, "单位组已被他人修改，请刷新后重试");
     long conversions =
-        sql.fetchOne("select count(*) from unit_group_conversion where group_id=?", id).get(0, Long.class);
+        sql.fetchOne("select count(*) from unit_group_conversion where group_id=?", id)
+            .get(0, Long.class);
     CatalogService.check(
         conversions == 0,
-        "单位组「" + row.get("code", String.class) + "」还有 " + conversions
+        "单位组「"
+            + row.get("code", String.class)
+            + "」还有 "
+            + conversions
             + " 条组内换算版本，不能删除；请改为停用，停用只挡住新建，历史换算仍可读");
     sql.execute("delete from unit_group where id=?", id);
     audit(actor, id, "UnitGroupDeleted");
@@ -676,7 +664,9 @@ public class UnitGroupService {
    */
   public UnitGroupConversionSaved addConversion(
       AccessService.Access actor, UUID groupId, UnitGroupConversionInput input) {
-    var group = sql.fetchOne("select code,dimension,base_unit_code,enabled from unit_group where id=?", groupId);
+    var group =
+        sql.fetchOne(
+            "select code,dimension,base_unit_code,enabled from unit_group where id=?", groupId);
     if (group == null) throw CatalogService.missing();
     String groupCode = group.get("code", String.class);
     String baseUnit = group.get("base_unit_code", String.class);
@@ -684,8 +674,7 @@ public class UnitGroupService {
     String unitCode = normalizeUnitCode(input.unitCode());
 
     CatalogService.check(
-        !unitCode.equals(baseUnit),
-        "单位「" + unitCode + "」就是本组的基础单位，比例恒为 1，不需要换算版本");
+        !unitCode.equals(baseUnit), "单位「" + unitCode + "」就是本组的基础单位，比例恒为 1，不需要换算版本");
     CatalogService.check(
         Boolean.TRUE.equals(group.get("enabled", Boolean.class)),
         "单位组「" + groupCode + "」已停用，不能再新建换算版本；停用只挡住新建，历史换算仍可读");
@@ -696,8 +685,7 @@ public class UnitGroupService {
                 groupId,
                 unitCode)
             != null,
-        "单位「" + unitCode + "」不是单位组「" + groupCode
-            + "」的成员，不能给它配组内换算；请先把它加入本组成员");
+        "单位「" + unitCode + "」不是单位组「" + groupCode + "」的成员，不能给它配组内换算；请先把它加入本组成员");
     var unit = sql.fetchOne("select dimension,enabled from unit_of_measure where code=?", unitCode);
     CatalogService.check(unit != null, "单位「" + unitCode + "」尚未登记到单位字典，无法做量纲校验");
     CatalogService.check(
@@ -706,7 +694,8 @@ public class UnitGroupService {
     String fromDimension = unit.get("dimension", String.class);
     CatalogService.check(
         sameDimension(fromDimension, groupDimension),
-        dimensionMismatchMessage(unitCode, fromDimension, "组基准单位「" + baseUnit + "」", groupDimension));
+        dimensionMismatchMessage(
+            unitCode, fromDimension, "组基准单位「" + baseUnit + "」", groupDimension));
 
     String ratioProblem = ratioProblem(input.quantityPerBase());
     CatalogService.check(ratioProblem == null, ratioProblem);
@@ -740,7 +729,11 @@ public class UnitGroupService {
     }
     audit(actor, groupId, "UnitGroupConversionAdded");
     return new UnitGroupConversionSaved(
-        id, groupId, unitCode, input.quantityPerBase(), from.toString(),
+        id,
+        groupId,
+        unitCode,
+        input.quantityPerBase(),
+        from.toString(),
         to == null ? null : to.toString());
   }
 
@@ -769,10 +762,11 @@ public class UnitGroupService {
               + "）：同一组的同一单位，同一时刻只能有一个版本生效。"
               + "请调整新区间的起止日，或把旧版本的 effective_to 闭合到新区间开始前一天");
     }
-    if (message.contains("组基础单位"))
-      throw conflict("组基础单位「" + unitCode + "」不需要换算版本：它的比例恒为 1");
+    if (message.contains("组基础单位")) throw conflict("组基础单位「" + unitCode + "」不需要换算版本：它的比例恒为 1");
     if (message.contains("量纲不匹配"))
-      throw conflict(dimensionMismatchMessage(unitCode, unitDimension, "组基准单位「" + baseUnit + "」", groupDimension));
+      throw conflict(
+          dimensionMismatchMessage(
+              unitCode, unitDimension, "组基准单位「" + baseUnit + "」", groupDimension));
     throw conflict("组内换算版本写入失败，请刷新后重试");
   }
 
@@ -787,14 +781,11 @@ public class UnitGroupService {
   /**
    * 删除一条组内换算版本。
    *
-   * <p>为什么组内换算可以删、而 3.1.2.4 的单据快照不能删：组内换算是**字典配置**，
-   * 写错了就该改掉；单据冻结快照是**已发生事实**，删掉就没法对账了。
+   * <p>为什么组内换算可以删、而 3.1.2.4 的单据快照不能删：组内换算是**字典配置**， 写错了就该改掉；单据冻结快照是**已发生事实**，删掉就没法对账了。
    * 两条不可变性的口径不同，所以这里给删除、那里给触发器禁止。
    *
-   * <p>唯一不能删的是当前仍然开放生效（{@code effective_to is null}）的那一版：
-   * 删掉它会让该单位在"今天"这个时刻没有生效版本，而换算查询不回退到历史版本——
-   * 那等于静默地把这个单位变成不可换算。正确做法是先把它的 effective_to 闭合，
-   * 再为下一个区间配一版。
+   * <p>唯一不能删的是当前仍然开放生效（{@code effective_to is null}）的那一版： 删掉它会让该单位在"今天"这个时刻没有生效版本，而换算查询不回退到历史版本——
+   * 那等于静默地把这个单位变成不可换算。正确做法是先把它的 effective_to 闭合， 再为下一个区间配一版。
    */
   public void deleteConversion(AccessService.Access actor, UUID groupId, UUID conversionId) {
     var row =
@@ -806,7 +797,8 @@ public class UnitGroupService {
     if (row == null) throw CatalogService.missing();
     if (row.get("effective_to", LocalDate.class) == null)
       throw conflict(
-          "不能删除当前仍生效的组内换算版本：删掉之后「" + row.get("unit_code", String.class)
+          "不能删除当前仍生效的组内换算版本：删掉之后「"
+              + row.get("unit_code", String.class)
               + "」在今天就没有生效比例了，而换算查询不回退到历史版本。请先把它的生效截止日闭合");
     sql.execute("delete from unit_group_conversion where id=?", conversionId);
     audit(actor, groupId, "UnitGroupConversionDeleted");
@@ -817,9 +809,8 @@ public class UnitGroupService {
   /**
    * 换算查询：从任意已登记单位换算到目标单位，按 asOf 取当天生效的组内版本。
    *
-   * <p>这是蓝图 3.3.3.1 的输出「换算查询能力」。换不动时返回
-   * {@code denied=true} + 原因码，**不抛 HTTP 错误**——「件换不成千克」是业务判定不是调用失败，
-   * 调用方要拿到结构化结果去提示用户，而不是接一个异常。
+   * <p>这是蓝图 3.3.3.1 的输出「换算查询能力」。换不动时返回 {@code denied=true} + 原因码，**不抛 HTTP
+   * 错误**——「件换不成千克」是业务判定不是调用失败， 调用方要拿到结构化结果去提示用户，而不是接一个异常。
    *
    * <p>判定顺序刻意如此，从最具体排到最笼统：
    *
@@ -833,8 +824,7 @@ public class UnitGroupService {
    *   <li>当天缺生效版本 → {@code NO_EFFECTIVE_VERSION}（**不回退到最近一版**）。
    * </ol>
    *
-   * <p>先判量纲再判组：蓝图的硬约束说的是"量纲不匹配的单位之间不允许换算"，
-   * 这句话在"能不能同组"之前就该给出答案——用户问的正是"为什么换不了"。
+   * <p>先判量纲再判组：蓝图的硬约束说的是"量纲不匹配的单位之间不允许换算"， 这句话在"能不能同组"之前就该给出答案——用户问的正是"为什么换不了"。
    */
   public UnitGroupConvertResult convert(UnitGroupConvertInput input) {
     LocalDate parsed = dateOrNull(input.asOf());
@@ -853,27 +843,43 @@ public class UnitGroupService {
       return denied(
           DENY_SELF_CONVERSION,
           "源单位与目标单位相同（" + fromCode + "），无需换算",
-          from, to, input.quantity(), day, "同单位换算的比例恒为 1，界面直接回显原数量即可");
+          from,
+          to,
+          input.quantity(),
+          day,
+          "同单位换算的比例恒为 1，界面直接回显原数量即可");
     }
     if (from == null || to == null) {
       String missing = from == null ? fromCode : toCode;
       return denied(
           DENY_UNIT_UNREGISTERED,
           "单位「" + missing + "」尚未登记到单位字典，无法换算；请先在单位字典中新建",
-          from, to, input.quantity(), day, "未登记的单位连量纲都无从判断，所以换算查询在查组之前就停下了");
+          from,
+          to,
+          input.quantity(),
+          day,
+          "未登记的单位连量纲都无从判断，所以换算查询在查组之前就停下了");
     }
     if (!sameDimension(from.dimension(), to.dimension())) {
       return denied(
           DENY_DIMENSION_MISMATCH,
           dimensionMismatchMessage(fromCode, from.dimension(), toCode, to.dimension()),
-          from, to, input.quantity(), day, "蓝图 3.3.3.1 的关系约束：量纲不匹配的单位之间不允许换算");
+          from,
+          to,
+          input.quantity(),
+          day,
+          "蓝图 3.3.3.1 的关系约束：量纲不匹配的单位之间不允许换算");
     }
     for (UnitRef unit : List.of(from, to)) {
       if (!unit.enabled()) {
         return denied(
             DENY_UNIT_DISABLED,
             "单位「" + unit.code() + "」已停用，不能用于新的换算；停用只挡住新建，历史换算仍可读",
-            from, to, input.quantity(), day, "停用是「不许再新建」，不是「抹掉过去」");
+            from,
+            to,
+            input.quantity(),
+            day,
+            "停用是「不许再新建」，不是「抹掉过去」");
       }
     }
 
@@ -906,14 +912,20 @@ public class UnitGroupService {
       return disabled == null
           ? denied(
               DENY_NOT_SAME_GROUP,
-              "「" + fromCode + "」与「" + toCode + "」不属于同一个单位组，无法换算；"
-                  + "请把它们放进同一个同量纲的单位组",
-              from, to, input.quantity(), day, "同量纲只是必要条件：两个单位还需要被维护进同一个单位组才谈得上换算")
+              "「" + fromCode + "」与「" + toCode + "」不属于同一个单位组，无法换算；" + "请把它们放进同一个同量纲的单位组",
+              from,
+              to,
+              input.quantity(),
+              day,
+              "同量纲只是必要条件：两个单位还需要被维护进同一个单位组才谈得上换算")
           : denied(
               DENY_GROUP_DISABLED,
-              "包含「" + fromCode + "」与「" + toCode + "」的单位组已停用，不能用于新的换算；"
-                  + "停用只挡住新建，历史换算仍可读",
-              from, to, input.quantity(), day, "启用该单位组后即可换算");
+              "包含「" + fromCode + "」与「" + toCode + "」的单位组已停用，不能用于新的换算；" + "停用只挡住新建，历史换算仍可读",
+              from,
+              to,
+              input.quantity(),
+              day,
+              "启用该单位组后即可换算");
     }
 
     UUID groupId = group.get("id", UUID.class);
@@ -923,19 +935,40 @@ public class UnitGroupService {
     if (fromRatio == null) {
       return deniedWithGroup(
           DENY_NO_EFFECTIVE_VERSION,
-          "单位「" + fromCode + "」在 " + day + " 没有生效的组内换算版本。"
+          "单位「"
+              + fromCode
+              + "」在 "
+              + day
+              + " 没有生效的组内换算版本。"
               + "请先配置该单位的组内换算版本并让生效区间覆盖这一天——这里不做「取最近一版」的回退，"
               + "否则一张按过期比例生成的采购单会看起来完全正常",
-          from, to, input.quantity(), day, groupId, groupCode, group.get("name", String.class), baseUnit, null, null,
+          from,
+          to,
+          input.quantity(),
+          day,
+          groupId,
+          groupCode,
+          group.get("name", String.class),
+          baseUnit,
+          null,
+          null,
           "组内换算版本与 SKU 侧换算版本是同一套版本化语义");
     }
     BigDecimal toRatio = ratioOn(groupId, toCode, baseUnit, day);
     if (toRatio == null) {
       return deniedWithGroup(
           DENY_NO_EFFECTIVE_VERSION,
-          "单位「" + toCode + "」在 " + day + " 没有生效的组内换算版本。"
-              + "请先配置该单位的组内换算版本并让生效区间覆盖这一天",
-          from, to, input.quantity(), day, groupId, groupCode, group.get("name", String.class), baseUnit, fromRatio, null,
+          "单位「" + toCode + "」在 " + day + " 没有生效的组内换算版本。" + "请先配置该单位的组内换算版本并让生效区间覆盖这一天",
+          from,
+          to,
+          input.quantity(),
+          day,
+          groupId,
+          groupCode,
+          group.get("name", String.class),
+          baseUnit,
+          fromRatio,
+          null,
           "换算结果依赖两个单位当天各自的比例，任一缺失都不能给答案");
     }
 
@@ -943,14 +976,43 @@ public class UnitGroupService {
     // UnitGroupRules.convert(BigDecimal,...) 同名，裸调用会解析到本类的方法上。
     BigDecimal converted = UnitGroupRules.convert(input.quantity(), fromRatio, toRatio);
     return new UnitGroupConvertResult(
-        false, null, null,
-        fromCode, from.name(), toCode, to.name(),
-        input.quantity(), converted, from.dimension(), to.dimension(),
-        groupId, groupCode, group.get("name", String.class), baseUnit,
-        fromRatio, toRatio, day.toString(),
-        "1 " + fromCode + " = " + fromRatio.toPlainString() + " " + baseUnit + "，1 " + toCode + " = "
-            + toRatio.toPlainString() + " " + baseUnit + "，按 " + input.quantity().toPlainString()
-            + " × " + fromRatio.toPlainString() + " ÷ " + toRatio.toPlainString() + " 得出");
+        false,
+        null,
+        null,
+        fromCode,
+        from.name(),
+        toCode,
+        to.name(),
+        input.quantity(),
+        converted,
+        from.dimension(),
+        to.dimension(),
+        groupId,
+        groupCode,
+        group.get("name", String.class),
+        baseUnit,
+        fromRatio,
+        toRatio,
+        day.toString(),
+        "1 "
+            + fromCode
+            + " = "
+            + fromRatio.toPlainString()
+            + " "
+            + baseUnit
+            + "，1 "
+            + toCode
+            + " = "
+            + toRatio.toPlainString()
+            + " "
+            + baseUnit
+            + "，按 "
+            + input.quantity().toPlainString()
+            + " × "
+            + fromRatio.toPlainString()
+            + " ÷ "
+            + toRatio.toPlainString()
+            + " 得出");
   }
 
   private UnitRef unitRef(String code) {
@@ -965,8 +1027,8 @@ public class UnitGroupService {
   }
 
   /**
-   * 取某个单位在组内当天生效的比例。基准单位返回 1（它不占换算行）。
-   * 查不到就返回 null，由调用方报 {@link UnitGroupRules#DENY_NO_EFFECTIVE_VERSION}。
+   * 取某个单位在组内当天生效的比例。基准单位返回 1（它不占换算行）。 查不到就返回 null，由调用方报 {@link
+   * UnitGroupRules#DENY_NO_EFFECTIVE_VERSION}。
    */
   private BigDecimal ratioOn(UUID groupId, String unitCode, String baseUnit, LocalDate at) {
     if (unitCode.equals(baseUnit)) return BigDecimal.ONE;
@@ -992,7 +1054,8 @@ public class UnitGroupService {
       BigDecimal quantity,
       LocalDate at,
       String note) {
-    return deniedWithGroup(code, message, from, to, quantity, at, null, null, null, null, null, null, note);
+    return deniedWithGroup(
+        code, message, from, to, quantity, at, null, null, null, null, null, null, note);
   }
 
   private UnitGroupConvertResult deniedWithGroup(
@@ -1066,7 +1129,11 @@ public class UnitGroupService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   private static ResponseStatusException conflict(String message) {

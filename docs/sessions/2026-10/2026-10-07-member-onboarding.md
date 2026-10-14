@@ -85,6 +85,7 @@ Testcontainers 容器由整个测试类共享，基础租户里还有其它用�
 ## 文件清单
 
 新增：
+
 - `backend/services/identity/src/main/resources/db/migration/V45__member_onboarding.sql`
 - `backend/services/identity/src/main/java/com/starcon/identity/MemberOnboardingController.java`
 - `backend/services/identity/src/test/java/com/starcon/identity/MemberOnboardingIntegrationTest.java`
@@ -94,6 +95,7 @@ Testcontainers 容器由整个测试类共享，基础租户里还有其它用�
 - `apps/web/src/app/org/onboarding/page.tsx`
 
 改动：
+
 - `apps/web/src/lib/api-proxy.ts`（白名单加 `onboardings` 与 `onboardings/{id}/complete`）
 - `apps/web/src/components/iam/identity-workspace.tsx`（新增 onboarding 工作区入口与导航项）
 - `packages/api-contracts/src/*`（codegen 产物，未手改）

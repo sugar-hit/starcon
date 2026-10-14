@@ -9,22 +9,19 @@ import java.util.UUID;
 /**
  * 8.3.1.2 出库单详情的传输模型。
  *
- * <p>蓝图原话：「单出库单作业视图：明细行与已拣/已发量、关联销售订单与买家地址、预占引用、
- * 包裹列表、作业时间线。」输入：「outbound_order_id；关联对象。」输出：「详情 + 作业操作入口。」
- * 以及本模块被点名的那条关系：「**详情页串联整条出库链路**，作业人员不需要在多个页面跳。」
+ * <p>蓝图原话：「单出库单作业视图：明细行与已拣/已发量、关联销售订单与买家地址、预占引用、 包裹列表、作业时间线。」输入：「outbound_order_id；关联对象。」输出：「详情 +
+ * 作业操作入口。」 以及本模块被点名的那条关系：「**详情页串联整条出库链路**，作业人员不需要在多个页面跳。」
  *
- * <p><b>本模块不拥有任何事实表</b>，是纯读投影：它读 8.3.1.1 的四张表（单头 / 明细计划快照 /
- * 拣货交接请求 / 作业留痕），把一屏之内该看到的东西聚到一起。七段内容里四段真实、三段
- * 不可得，不可得的一律 {@code available=false} 并给出 {@code ownerModule} 与原因。
+ * <p><b>本模块不拥有任何事实表</b>，是纯读投影：它读 8.3.1.1 的四张表（单头 / 明细计划快照 / 拣货交接请求 /
+ * 作业留痕），把一屏之内该看到的东西聚到一起。七段内容里四段真实、三段 不可得，不可得的一律 {@code available=false} 并给出 {@code ownerModule}
+ * 与原因。
  *
- * <p><b>已拣量为什么是 null 而不是 0</b>：8.3.1.1 刻意没建 picking_task（那张表归 8.3.2.1），
- * 它只做到 {@code outbound_pick_request} 交接为止 —— 那是**请求量快照**。填 0 会让作业员
- * 以为「一件都没拣」，那是假数字，比不显示更危险。所以逐行 {@code pickedQuantity} 恒为
- * {@code null}，由 {@link OutboundQuantityAvailability} 说清原因与归属模块。
+ * <p><b>已拣量为什么是 null 而不是 0</b>：8.3.1.1 刻意没建 picking_task（那张表归 8.3.2.1）， 它只做到 {@code
+ * outbound_pick_request} 交接为止 —— 那是**请求量快照**。填 0 会让作业员 以为「一件都没拣」，那是假数字，比不显示更危险。所以逐行 {@code
+ * pickedQuantity} 恒为 {@code null}，由 {@link OutboundQuantityAvailability} 说清原因与归属模块。
  *
- * <p><b>已发量为什么可以是真数</b>：{@code status = SHIPPED} 是终态且 DB 层冻结（V72 §4.2），
- * 而明细行是不可改的计划快照（V72 §4.4）—— 在这张单上「已发量 = 计划件数」是成立的。
- * 前提是 {@code status = SHIPPED}，其余状态一律 {@code null}：不按拣货进度推算发货进度。
+ * <p><b>已发量为什么可以是真数</b>：{@code status = SHIPPED} 是终态且 DB 层冻结（V72 §4.2）， 而明细行是不可改的计划快照（V72 §4.4）——
+ * 在这张单上「已发量 = 计划件数」是成立的。 前提是 {@code status = SHIPPED}，其余状态一律 {@code null}：不按拣货进度推算发货进度。
  */
 public final class OutboundOrderDetailModels {
 
@@ -35,9 +32,8 @@ public final class OutboundOrderDetailModels {
   /**
    * 一段**当前不可得**的数据：是什么、归谁、为什么现在拿不到、去哪看。
    *
-   * <p>与 8.2.1.1 的 {@code ReceiptSourceCapability} 同一套约定（available + ownerModule +
-   * href + note），刻意**不**用「返回空列表」表达「上游没交付」—— 空列表在界面上与
-   * 「确实没有记录」长得一模一样，作业员会以为这单没预占、没包裹，而不是「还没接入」。
+   * <p>与 8.2.1.1 的 {@code ReceiptSourceCapability} 同一套约定（available + ownerModule + href +
+   * note），刻意**不**用「返回空列表」表达「上游没交付」—— 空列表在界面上与 「确实没有记录」长得一模一样，作业员会以为这单没预占、没包裹，而不是「还没接入」。
    */
   public record OutboundUnavailableLink(
       String label,

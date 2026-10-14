@@ -18,14 +18,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * 17.5.3.2 API 调用摘要与错误堆栈的采集点。
  *
- * <p>蓝图要求记录「API 调用摘要、任务执行、错误堆栈」。后两者由具体写入点记录，
- * 而 API 调用摘要是<b>横切</b>关注点：每个请求都发生一次，不是某个业务方法里的语句。
+ * <p>蓝图要求记录「API 调用摘要、任务执行、错误堆栈」。后两者由具体写入点记录， 而 API 调用摘要是<b>横切</b>关注点：每个请求都发生一次，不是某个业务方法里的语句。
  * 采集点因此放在拦截器上——往业务代码里到处插记录语句，既会漏，也会把业务代码搅乱。
  *
  * <p>记录时机是请求<b>结束后</b>：那时才拿得到最终状态码与异常，也才量得出完整耗时。
  *
- * <p>写日志失败<b>绝不影响业务响应</b>：排障日志反过来变成故障源比缺一条日志糟糕得多。
- * 所以这里统一 catch 并吞掉。
+ * <p>写日志失败<b>绝不影响业务响应</b>：排障日志反过来变成故障源比缺一条日志糟糕得多。 所以这里统一 catch 并吞掉。
  */
 @Component
 @Order(0)
@@ -44,7 +42,8 @@ public class OperationLogInterceptor implements HandlerInterceptor {
   private static final String START = OperationLogInterceptor.class.getName() + ".start";
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+  public boolean preHandle(
+      HttpServletRequest request, HttpServletResponse response, Object handler) {
     RequestTrace.begin(request);
     request.setAttribute(START, System.nanoTime());
     // 把 request_id 回写到响应头：排障时前端/网关能把 ID 递回来，截图里就带着线索。
@@ -82,12 +81,26 @@ public class OperationLogInterceptor implements HandlerInterceptor {
           () -> {
             var name = actorName(request);
             log.apiCall(
-                access.tenantId(), requestId, traceId, access.userId(), name,
-                request.getMethod(), path, status, duration, status >= 400);
+                access.tenantId(),
+                requestId,
+                traceId,
+                access.userId(),
+                name,
+                request.getMethod(),
+                path,
+                status,
+                duration,
+                status >= 400);
             if (error != null)
               log.error(
-                  access.tenantId(), requestId, traceId, access.userId(), name,
-                  request.getMethod() + " " + path + " 处理失败", error, Map.of("status", status));
+                  access.tenantId(),
+                  requestId,
+                  traceId,
+                  access.userId(),
+                  name,
+                  request.getMethod() + " " + path + " 处理失败",
+                  error,
+                  Map.of("status", status));
             return null;
           });
     } catch (Exception ignored) {

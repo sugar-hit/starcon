@@ -21,15 +21,15 @@
 `sync.mjs` 的 `readRoutes()` 只从功能树的**深度 3 行**（`│   ├── x.y.z → /route`）读路由。
 但蓝图各卷的写法本来就不统一：
 
-| 卷 | 深度 2 声明 | 深度 3 声明 |
-| --- | --- | --- |
-| 08-warehouse-operations | **4** | **0** |
-| 09-order-and-fulfillment | 5 | 1 |
-| 07-inventory | 2 | 4 |
-| 03-product-master-data | 2 | 8 |
-| 06-purchase-and-supply | 1 | 3 |
-| 01-dashboard-and-portal | 1 | 2 |
-| 02 / 04 / 05 | 0 | 5 |
+| 卷                       | 深度 2 声明 | 深度 3 声明 |
+| ------------------------ | ----------- | ----------- |
+| 08-warehouse-operations  | **4**       | **0**       |
+| 09-order-and-fulfillment | 5           | 1           |
+| 07-inventory             | 2           | 4           |
+| 03-product-master-data   | 2           | 8           |
+| 06-purchase-and-supply   | 1           | 3           |
+| 01-dashboard-and-portal  | 1           | 2           |
+| 02 / 04 / 05             | 0           | 5           |
 
 **卷08 是唯一把全部路由都写在深度 2 的**，所以它整卷 22 个模块的路由列必然全空。
 其余卷是部分丢失 —— 这解释了为什么丢失是"零散的"而不是"整卷的"。

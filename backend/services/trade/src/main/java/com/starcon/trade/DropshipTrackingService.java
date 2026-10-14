@@ -27,28 +27,23 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <ol>
  *   <li><b>两段物流不合成。</b>{@code supplierLegStatus} 与 {@code ownLegStatus} 是两组
- *       各自独立的列，各带各的承运商与运单号。「改自营发货」时供应商段落
- *       ABANDONED（<b>保留</b>为凭据），我方段才开始推进 —— 合成一列就会把
- *       「供应商发过货」这个事实覆盖掉，而跑单纠纷问的恰好是这个。</li>
- *   <li><b>异常由规则检出，不手工标记。</b>三条判据（超时未发货 / 轨迹长时间无更新 /
- *       供应商报发货后无运单）是 {@link #evaluateTrackingExceptions()} 里三条
- *       <b>带 now() 的 SQL</b>，阈值取自租户策略视图；每条异常把当时用的阈值与算式
- *       写进自己的行（rule_threshold_hours / rule_evidence）。</li>
- *   <li><b>处置是真动作，不是勾。</b>催单 / 改自营 / 退款各自落 disposition（带状态机）
- *       + task（跨服务待办）+ 事件流。改自营还会真的把 active_leg 翻过去、
- *       把未决异常置为 DISPOSED —— 这就是「异常必须可发现<b>可切换</b>」。</li>
- *   <li><b>下游未交付时落任务，不落假结果。</b>回传平台（2.5.1.1 / channel）与
- *       退款（11 售后）写进 {@code fulfillment_dropship_task}，status 从 OPEN 起；
- *       只有下游真的接手才推进到 SENT / ACKNOWLEDGED。</li>
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上，
- *       cast 不出现在绑定序列末位；全程 {@link OffsetDateTime}。</li>
- *   <li><b>金额用 BigDecimal</b>，退款金额按 numeric(19,4) 落库，不走浮点。</li>
- *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。</li>
+ *       各自独立的列，各带各的承运商与运单号。「改自营发货」时供应商段落 ABANDONED（<b>保留</b>为凭据），我方段才开始推进 —— 合成一列就会把
+ *       「供应商发过货」这个事实覆盖掉，而跑单纠纷问的恰好是这个。
+ *   <li><b>异常由规则检出，不手工标记。</b>三条判据（超时未发货 / 轨迹长时间无更新 / 供应商报发货后无运单）是 {@link
+ *       #evaluateTrackingExceptions()} 里三条 <b>带 now() 的 SQL</b>，阈值取自租户策略视图；每条异常把当时用的阈值与算式
+ *       写进自己的行（rule_threshold_hours / rule_evidence）。
+ *   <li><b>处置是真动作，不是勾。</b>催单 / 改自营 / 退款各自落 disposition（带状态机） + task（跨服务待办）+ 事件流。改自营还会真的把 active_leg
+ *       翻过去、 把未决异常置为 DISPOSED —— 这就是「异常必须可发现<b>可切换</b>」。
+ *   <li><b>下游未交付时落任务，不落假结果。</b>回传平台（2.5.1.1 / channel）与 退款（11 售后）写进 {@code
+ *       fulfillment_dropship_task}，status 从 OPEN 起； 只有下游真的接手才推进到 SENT / ACKNOWLEDGED。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上， cast 不出现在绑定序列末位；全程 {@link
+ *       OffsetDateTime}。
+ *   <li><b>金额用 BigDecimal</b>，退款金额按 numeric(19,4) 落库，不走浮点。
+ *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。
  * </ol>
  *
- * <p><b>跨服务一律不读表</b>：2.5.1.1（channel）、11 售后、10 物流各在自己的库里，
- * 本模块一条 SQL 都不碰；上游 9.6.1.2 代发单<b>同属 trade 库</b>，因此可以 FK 引用
- * （模块边界纪律禁的是跨服务 FK，不是同库引用）。
+ * <p><b>跨服务一律不读表</b>：2.5.1.1（channel）、11 售后、10 物流各在自己的库里， 本模块一条 SQL 都不碰；上游 9.6.1.2 代发单<b>同属 trade
+ * 库</b>，因此可以 FK 引用 （模块边界纪律禁的是跨服务 FK，不是同库引用）。
  */
 @Service
 public class DropshipTrackingService {
@@ -111,9 +106,8 @@ public class DropshipTrackingService {
   /**
    * 本模块的能力与上下游可用性。
    *
-   * <p>两处 available=false 且点名 ownerModule：<b>平台回传</b>（2.5.1.1 / channel）
-   * 与 <b>售后退款</b>（11）。它们在本模块里的真实形态是**任务**（task_status=OPEN），
-   * 不是已完成的动作 —— 报成 true 会让人以为回传与退款已经通了。
+   * <p>两处 available=false 且点名 ownerModule：<b>平台回传</b>（2.5.1.1 / channel） 与
+   * <b>售后退款</b>（11）。它们在本模块里的真实形态是**任务**（task_status=OPEN）， 不是已完成的动作 —— 报成 true 会让人以为回传与退款已经通了。
    */
   public DropshipTrackingCapabilities capabilities() {
     List<DropshipTrackingCapabilityRule> rules =
@@ -149,8 +143,7 @@ public class DropshipTrackingService {
                 true,
                 "蓝图输入句「供应商发货/物流状态（接口或录入）」——人工录入路径已接线",
                 null,
-                "轨迹最后更新时刻 supplier_last_event_at 必须由观测方给；用写入时刻冒充"
-                    + "会让停滞检测永远算不出静默时长，丢件就永远检不出来"),
+                "轨迹最后更新时刻 supplier_last_event_at 必须由观测方给；用写入时刻冒充" + "会让停滞检测永远算不出静默时长，丢件就永远检不出来"),
             new DropshipTrackingCapabilityDimension(
                 "PLATFORM_CALLBACK",
                 "同步供应商运单号回传平台",
@@ -189,8 +182,7 @@ public class DropshipTrackingService {
                     + "，但**不拥有**轨迹本身；轨迹点的明细归 10.3")),
         false,
         false,
-        "两段物流分列是本模块唯一不可让步的一条：供应商段与我方段各带各的承运商、运单号、"
-            + "状态枚举与时间戳，「改自营发货」时供应商段落 ABANDONED 而非被覆盖。",
+        "两段物流分列是本模块唯一不可让步的一条：供应商段与我方段各带各的承运商、运单号、" + "状态枚举与时间戳，「改自营发货」时供应商段落 ABANDONED 而非被覆盖。",
         "代发模式下「及时发货」是供应商责任但平台考核算我方（蓝图原话），"
             + "因此延迟、丢件、供应商跑单三类异常必须**由规则检出**并可切换："
             + "超时未发货按承诺时限判（supplier_promised_ship_at，延迟检测的唯一基准），"
@@ -226,7 +218,8 @@ public class DropshipTrackingService {
 
   /** 维护检出策略（租户级单例，upsert）。 */
   @Transactional
-  public DropshipTrackingPolicyRow savePolicy(DropshipTrackingPolicyInput input, UUID membershipId) {
+  public DropshipTrackingPolicyRow savePolicy(
+      DropshipTrackingPolicyInput input, UUID membershipId) {
     if (input == null) {
       throw bad("请求体不能为空");
     }
@@ -314,7 +307,10 @@ public class DropshipTrackingService {
             .get("c", Long.class);
     List<DropshipTrackingRow> items =
         sql.fetch(
-                "select " + TRACKING_COLUMNS + " from fulfillment_dropship_tracking" + sqlWhere
+                "select "
+                    + TRACKING_COLUMNS
+                    + " from fulfillment_dropship_tracking"
+                    + sqlWhere
                     + " order by updated_at desc limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
             .map(DropshipTrackingService::trackingRow);
@@ -326,28 +322,32 @@ public class DropshipTrackingService {
     Record tracking = requireTracking(trackingId);
     List<DropshipTrackingExceptionRow> exceptions =
         sql.fetch(
-                "select " + EXCEPTION_COLUMNS
+                "select "
+                    + EXCEPTION_COLUMNS
                     + " from fulfillment_dropship_tracking_exception where tracking_id = ?"
                     + " order by detected_at desc",
                 trackingId)
             .map(DropshipTrackingService::exceptionRow);
     List<DropshipDispositionRow> dispositions =
         sql.fetch(
-                "select " + DISPOSITION_COLUMNS
+                "select "
+                    + DISPOSITION_COLUMNS
                     + " from fulfillment_dropship_disposition where tracking_id = ?"
                     + " order by created_at desc",
                 trackingId)
             .map(DropshipTrackingService::dispositionRow);
     List<DropshipTaskRow> tasks =
         sql.fetch(
-                "select " + TASK_COLUMNS
+                "select "
+                    + TASK_COLUMNS
                     + " from fulfillment_dropship_task where tracking_id = ?"
                     + " order by created_at desc",
                 trackingId)
             .map(this::taskRow);
     List<DropshipTrackingEventRow> events =
         sql.fetch(
-                "select " + EVENT_COLUMNS
+                "select "
+                    + EVENT_COLUMNS
                     + " from fulfillment_dropship_tracking_event where tracking_id = ?"
                     + " order by occurred_at desc limit 200",
                 trackingId)
@@ -359,8 +359,7 @@ public class DropshipTrackingService {
   /**
    * 建跟踪：一张代发单一条跟踪。
    *
-   * <p>承诺发货时限必填 —— 没有承诺时限就无从「迟」，而这恰恰是平台及时发货考核的依据；
-   * 把它留空等于让延迟检测对这张单**永久失效**，而不是「暂不检测」。
+   * <p>承诺发货时限必填 —— 没有承诺时限就无从「迟」，而这恰恰是平台及时发货考核的依据； 把它留空等于让延迟检测对这张单**永久失效**，而不是「暂不检测」。
    */
   @Transactional
   public DropshipTrackingSaved createTracking(DropshipTrackingInput input, UUID membershipId) {
@@ -398,7 +397,9 @@ public class DropshipTrackingService {
             + "sales_order_id,sales_order_no,supplier_code,active_leg,supplier_leg_status,"
             + "supplier_promised_ship_at,own_leg_status,note,created_by_membership_id,"
             + "created_at,updated_at) "
-            + "values (?,?," + no("DTR", "dropship_tracking_no_seq") + ",?,?,?,?,?,'SUPPLIER',"
+            + "values (?,?,"
+            + no("DTR", "dropship_tracking_no_seq")
+            + ",?,?,?,?,?,'SUPPLIER',"
             + "'NOT_SHIPMENT',?::timestamptz,'NOT_HANDED_OVER',?,?,?::timestamptz,?::timestamptz)",
         id,
         currentTenant(),
@@ -429,9 +430,8 @@ public class DropshipTrackingService {
   /**
    * 录入/更新供应商段。
    *
-   * <p>「供应商报发货且给了运单号」时自动落一条 <b>PLATFORM_CALLBACK 任务</b>：
-   * 运单号与承运商进 payload（不回传整张单），幂等键去重 —— 重复录同一张发货回执
-   * 不会造出第二条要下游执行的回传。
+   * <p>「供应商报发货且给了运单号」时自动落一条 <b>PLATFORM_CALLBACK 任务</b>： 运单号与承运商进 payload（不回传整张单），幂等键去重 ——
+   * 重复录同一张发货回执 不会造出第二条要下游执行的回传。
    */
   @Transactional
   public DropshipTrackingSaved recordSupplierLeg(
@@ -521,23 +521,20 @@ public class DropshipTrackingService {
   /**
    * 跑一轮检出：三条判据，三条**带 {@code now()} 的 SQL**。
    *
-   * <p>判据（阈值来自 {@code fulfillment_dropship_tracking_policy_effective}，
-   * 未登记时用迁移内置默认值）：
+   * <p>判据（阈值来自 {@code fulfillment_dropship_tracking_policy_effective}， 未登记时用迁移内置默认值）：
    *
    * <ol>
-   *   <li><b>DELAYED_SHIPMENT</b>：生效段=供应商段、仍「未发货」、承诺时限已过宽限。
-   *       逾期超 {@code critical_delay_hours} → CRITICAL。</li>
-   *   <li><b>PARCEL_LOST</b>：已发货/在途、**有运单号**、轨迹
-   *       {@code coalesce(supplier_last_event_at, supplier_shipped_at)}
-   *       静默超 {@code stall_threshold_hours}。静默超 {@code critical_stall_hours}
-   *       → CRITICAL。</li>
-   *   <li><b>SUPPLIER_RUNNING_AWAY</b>：已发货/在途/妥投却**没有运单号**
-   *       （且策略要求运单号）→ 恒 CRITICAL。没有单号就无法回传平台、无法举证、
-   *       无法对账。</li>
+   *   <li><b>DELAYED_SHIPMENT</b>：生效段=供应商段、仍「未发货」、承诺时限已过宽限。 逾期超 {@code critical_delay_hours} →
+   *       CRITICAL。
+   *   <li><b>PARCEL_LOST</b>：已发货/在途、**有运单号**、轨迹 {@code coalesce(supplier_last_event_at,
+   *       supplier_shipped_at)} 静默超 {@code stall_threshold_hours}。静默超 {@code critical_stall_hours}
+   *       → CRITICAL。
+   *   <li><b>SUPPLIER_RUNNING_AWAY</b>：已发货/在途/妥投却**没有运单号** （且策略要求运单号）→ 恒 CRITICAL。没有单号就无法回传平台、无法举证、
+   *       无法对账。
    * </ol>
    *
-   * <p>去重：{@code not exists} 排除该 (tracking, kind) 上未结案的异常，
-   * 配合 V126 的部分唯一索引，反复跑不会刷屏；误报要显式置 DISMISSED 才解禁。
+   * <p>去重：{@code not exists} 排除该 (tracking, kind) 上未结案的异常， 配合 V126 的部分唯一索引，反复跑不会刷屏；误报要显式置 DISMISSED
+   * 才解禁。
    */
   @Transactional
   public DropshipTrackingEvaluateResult evaluateTrackingExceptions() {
@@ -675,7 +672,9 @@ public class DropshipTrackingService {
             .get("c", Long.class);
     List<DropshipTrackingExceptionRow> items =
         sql.fetch(
-                "select " + EXCEPTION_COLUMNS + " from fulfillment_dropship_tracking_exception"
+                "select "
+                    + EXCEPTION_COLUMNS
+                    + " from fulfillment_dropship_tracking_exception"
                     + sqlWhere
                     + " order by case severity when 'CRITICAL' then 0 when 'WARNING' then 1 else 2 end,"
                     + " detected_at desc limit ? offset ?",
@@ -685,8 +684,7 @@ public class DropshipTrackingService {
   }
 
   /**
-   * 判为误报（DISMISSED）。必须写明理由 —— 否则下次同类异常会被一并放过，
-   * 而误报解封后重新逾期是**一条新事实**，会被重新检出（部分唯一索引刻意放行 DISMISSED）。
+   * 判为误报（DISMISSED）。必须写明理由 —— 否则下次同类异常会被一并放过， 而误报解封后重新逾期是**一条新事实**，会被重新检出（部分唯一索引刻意放行 DISMISSED）。
    */
   @Transactional
   public DropshipTrackingExceptionRow dismissException(
@@ -707,7 +705,9 @@ public class DropshipTrackingService {
         exceptionId);
     return exceptionRow(
         sql.fetchOne(
-            "select " + EXCEPTION_COLUMNS + " from fulfillment_dropship_tracking_exception where id = ?",
+            "select "
+                + EXCEPTION_COLUMNS
+                + " from fulfillment_dropship_tracking_exception where id = ?",
             exceptionId));
   }
 
@@ -717,14 +717,13 @@ public class DropshipTrackingService {
    * 处置一条异常（催供应商 / 改自营发货 / 发起退款）。
    *
    * <p>三个动作在本模块各做各的事：
+   *
    * <ul>
-   *   <li><b>URGE_SUPPLIER</b>：催单次数 +1（催了几次要看得见）、落 disposition +
-   *       task(SUPPLIER_URGE)；</li>
-   *   <li><b>SWITCH_TO_SELF</b>：<b>active_leg 真的翻到 OWN</b>、供应商段落 ABANDONED
-   *       <b>保留为凭据</b>、该跟踪上未决异常全部置 DISPOSED，落 disposition +
-   *       task(SELF_FULFILL_SWITCH) 交给我方仓。这就是蓝图那句「异常必须可切换」；</li>
-   *   <li><b>REQUEST_REFUND</b>：落 disposition（含金额与币种）+ task(REFUND_REQUEST)
-   *       交给 11 售后。<b>本模块不代为退款</b>，只登记待办。</li>
+   *   <li><b>URGE_SUPPLIER</b>：催单次数 +1（催了几次要看得见）、落 disposition + task(SUPPLIER_URGE)；
+   *   <li><b>SWITCH_TO_SELF</b>：<b>active_leg 真的翻到 OWN</b>、供应商段落 ABANDONED <b>保留为凭据</b>、该跟踪上未决异常全部置
+   *       DISPOSED，落 disposition + task(SELF_FULFILL_SWITCH) 交给我方仓。这就是蓝图那句「异常必须可切换」；
+   *   <li><b>REQUEST_REFUND</b>：落 disposition（含金额与币种）+ task(REFUND_REQUEST) 交给 11
+   *       售后。<b>本模块不代为退款</b>，只登记待办。
    * </ul>
    */
   @Transactional
@@ -735,8 +734,7 @@ public class DropshipTrackingService {
     }
     DropshipDispositionAction action = dispositionAction(input.actionKind());
     Record exception = requireException(exceptionId);
-    Record tracking =
-        requireTracking(exception.get("tracking_id", UUID.class));
+    Record tracking = requireTracking(exception.get("tracking_id", UUID.class));
     UUID tenant = currentTenant();
     OffsetDateTime now = OffsetDateTime.now();
 
@@ -744,9 +742,7 @@ public class DropshipTrackingService {
     String refundCurrency = null;
     if (action == DropshipDispositionAction.REQUEST_REFUND) {
       if (input.refundAmount() == null || !notBlank(input.refundCurrencyCode())) {
-        throw bad(
-            "发起退款必须给出退款金额与币种：11 售后未交付，金额此刻由运营按实际成本填，"
-                + "缺金额的退款待办到了下游还得回头找人补");
+        throw bad("发起退款必须给出退款金额与币种：11 售后未交付，金额此刻由运营按实际成本填，" + "缺金额的退款待办到了下游还得回头找人补");
       }
       refundAmount = input.refundAmount().setScale(MONEY_SCALE, RoundingMode.HALF_UP);
       refundCurrency = input.refundCurrencyCode().trim().toUpperCase(Locale.ROOT);
@@ -764,7 +760,8 @@ public class DropshipTrackingService {
         "insert into fulfillment_dropship_disposition (id,tenant_id,disposition_no,exception_id,"
             + "tracking_id,order_id,order_no,action_kind,status,refund_amount,"
             + "refund_currency_code,target_system,note,created_by_membership_id,created_at,updated_at) "
-            + "values (?,?," + no("DSP", "dropship_disposition_no_seq")
+            + "values (?,?,"
+            + no("DSP", "dropship_disposition_no_seq")
             + ",?,?,?,?,?,'PENDING',?,?,?,?,?,?::timestamptz,?::timestamptz)",
         dispositionId,
         tenant,
@@ -983,7 +980,10 @@ public class DropshipTrackingService {
             .get("c", Long.class);
     List<DropshipTaskRow> items =
         sql.fetch(
-                "select " + TASK_COLUMNS + " from fulfillment_dropship_task" + sqlWhere
+                "select "
+                    + TASK_COLUMNS
+                    + " from fulfillment_dropship_task"
+                    + sqlWhere
                     + " order by created_at desc limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
             .map(this::taskRow);
@@ -1010,17 +1010,14 @@ public class DropshipTrackingService {
         sql.fetchOne(
             "select " + TASK_COLUMNS + " from fulfillment_dropship_task where id = ?", taskId);
     return new DropshipTaskSaved(
-        taskId,
-        after.get("task_no", String.class),
-        row.get("task_status", String.class));
+        taskId, after.get("task_no", String.class), row.get("task_status", String.class));
   }
 
   /**
    * 下游回执（CLAIMED → ACKNOWLEDGED 或 FAILED）。
    *
-   * <p>只有走到这里，{@code callback_status} 才允许从 PENDING/QUEUED 变成
-   * SENT/ACKNOWLEDGED —— 也就是说「已回传平台」必须有一个下游真的受理过它的人，
-   * 否则就只能是待办。
+   * <p>只有走到这里，{@code callback_status} 才允许从 PENDING/QUEUED 变成 SENT/ACKNOWLEDGED ——
+   * 也就是说「已回传平台」必须有一个下游真的受理过它的人， 否则就只能是待办。
    */
   @Transactional
   public DropshipTaskSaved completeTask(
@@ -1072,8 +1069,8 @@ public class DropshipTrackingService {
     var after =
         sql.fetchOne(
             "select " + TASK_COLUMNS + " from fulfillment_dropship_task where id = ?", taskId);
-    return new DropshipTaskSaved(taskId, after.get("task_no", String.class),
-        after.get("task_status", String.class));
+    return new DropshipTaskSaved(
+        taskId, after.get("task_no", String.class), after.get("task_status", String.class));
   }
 
   // ================================================================ 事件流
@@ -1096,7 +1093,10 @@ public class DropshipTrackingService {
             .get("c", Long.class);
     List<DropshipTrackingEventRow> items =
         sql.fetch(
-                "select " + EVENT_COLUMNS + " from fulfillment_dropship_tracking_event" + sqlWhere
+                "select "
+                    + EVENT_COLUMNS
+                    + " from fulfillment_dropship_tracking_event"
+                    + sqlWhere
                     + " order by occurred_at desc limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
             .map(DropshipTrackingService::eventRow);
@@ -1123,7 +1123,9 @@ public class DropshipTrackingService {
     payload.put("salesOrderNo", tracking.get("sales_order_no", String.class));
     payload.put("supplierTrackingNo", trackingNo);
     payload.put("supplierCarrierCode", nz(tracking.get("supplier_carrier_code", String.class)));
-    payload.put("supplierShippedAt", String.valueOf(tracking.get("supplier_shipped_at", OffsetDateTime.class)));
+    payload.put(
+        "supplierShippedAt",
+        String.valueOf(tracking.get("supplier_shipped_at", OffsetDateTime.class)));
     ensureTask(
         tracking,
         DropshipTaskKind.PLATFORM_CALLBACK,
@@ -1152,7 +1154,8 @@ public class DropshipTrackingService {
         "insert into fulfillment_dropship_task (id,tenant_id,task_no,task_kind,task_status,"
             + "tracking_id,order_id,order_no,sales_order_no,disposition_id,exception_id,"
             + "target_system,payload,idempotency_key,created_at,updated_at) "
-            + "values (?,?," + no("DTK", "dropship_task_no_seq")
+            + "values (?,?,"
+            + no("DTK", "dropship_task_no_seq")
             + ",?,'OPEN',?,?,?,?,?,?,?,?::jsonb,?,?::timestamptz,?::timestamptz)"
             + " on conflict (tenant_id,idempotency_key) do nothing",
         UUID.randomUUID(),
@@ -1230,7 +1233,9 @@ public class DropshipTrackingService {
     }
     var row =
         sql.fetchOne(
-            "select " + EXCEPTION_COLUMNS + " from fulfillment_dropship_tracking_exception where id = ?",
+            "select "
+                + EXCEPTION_COLUMNS
+                + " from fulfillment_dropship_tracking_exception where id = ?",
             exceptionId);
     if (row == null) {
       throw notFound("履约异常不存在或不属于当前租户");
@@ -1257,7 +1262,8 @@ public class DropshipTrackingService {
   }
 
   private String dispositionNo(UUID id) {
-    return sql.fetchOne("select disposition_no from fulfillment_dropship_disposition where id = ?", id)
+    return sql.fetchOne(
+            "select disposition_no from fulfillment_dropship_disposition where id = ?", id)
         .get("disposition_no", String.class);
   }
 
@@ -1274,8 +1280,12 @@ public class DropshipTrackingService {
 
   /** 编号发号表达式（DB 生成，并发不撞号）。只接受内部常量，不接受外部输入。 */
   private static String no(String prefix, String sequence) {
-    return "'" + prefix + "-' || to_char(now(),'YYYYMMDD') || '-'"
-        + " || lpad(nextval('" + sequence + "')::text,6,'0')";
+    return "'"
+        + prefix
+        + "-' || to_char(now(),'YYYYMMDD') || '-'"
+        + " || lpad(nextval('"
+        + sequence
+        + "')::text,6,'0')";
   }
 
   // ================================================================ 行映射
@@ -1375,10 +1385,9 @@ public class DropshipTrackingService {
   /**
    * 任务行。
    *
-   * <p>payload 是 jsonb：jOOQ 读回来是 PGobject，<b>不会</b>自动变成 Map。
-   * 直接 {@code get(..., Object.class)} 会拿到一个 PGobject，前端拿到的就是空对象
-   * —— 而 payload 里正是「回传平台真正需要的运单号」这类字段，空掉等于
-   * 下游接手时看不到要回传什么。所以这里显式按字符串取出再用 Jackson 解析。
+   * <p>payload 是 jsonb：jOOQ 读回来是 PGobject，<b>不会</b>自动变成 Map。 直接 {@code get(..., Object.class)}
+   * 会拿到一个 PGobject，前端拿到的就是空对象 —— 而 payload 里正是「回传平台真正需要的运单号」这类字段，空掉等于 下游接手时看不到要回传什么。所以这里显式按字符串取出再用
+   * Jackson 解析。
    */
   private DropshipTaskRow taskRow(Record r) {
     DropshipTaskPayload map = readPayload(r.get("payload", String.class));
@@ -1510,9 +1519,7 @@ public class DropshipTrackingService {
       return DropshipDispositionAction.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException e) {
       throw bad(
-          "未知的处置动作："
-              + value
-              + "（URGE_SUPPLIER=催供应商，SWITCH_TO_SELF=改自营发货，REQUEST_REFUND=发起退款）");
+          "未知的处置动作：" + value + "（URGE_SUPPLIER=催供应商，SWITCH_TO_SELF=改自营发货，REQUEST_REFUND=发起退款）");
     }
   }
 

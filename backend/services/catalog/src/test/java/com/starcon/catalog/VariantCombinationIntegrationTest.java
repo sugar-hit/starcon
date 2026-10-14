@@ -22,8 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.1.3.2 组合唯一性校验：结构化冲突清单、矩阵生成前预校验、生成待建 SKU 草稿、
- * **数据库层唯一性约束（含绕过应用层仍被拒）**，以及租户隔离三断言。
+ * 3.1.3.2 组合唯一性校验：结构化冲突清单、矩阵生成前预校验、生成待建 SKU 草稿、 **数据库层唯一性约束（含绕过应用层仍被拒）**，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -154,7 +153,8 @@ class VariantCombinationIntegrationTest {
   }
 
   UUID saveAxis(String code, String name) {
-    return write(actor, () -> specAxis.saveAxis(actor, null, new SpecAxisInput(code, name, true, 0)))
+    return write(
+            actor, () -> specAxis.saveAxis(actor, null, new SpecAxisInput(code, name, true, 0)))
         .id();
   }
 
@@ -166,36 +166,36 @@ class VariantCombinationIntegrationTest {
 
   UUID spu(String category) {
     return write(
-            actor,
-            () ->
-                catalog.saveSpu(
-                    actor,
-                    null,
-                    new SpuInput(
-                        "VC-" + UUID.randomUUID().toString().substring(0, 8),
-                        "组合唯一性测试商品",
-                        "描述",
-                        "品牌",
-                        category,
-                        "DRAFT",
-                        0)));
+        actor,
+        () ->
+            catalog.saveSpu(
+                actor,
+                null,
+                new SpuInput(
+                    "VC-" + UUID.randomUUID().toString().substring(0, 8),
+                    "组合唯一性测试商品",
+                    "描述",
+                    "品牌",
+                    category,
+                    "DRAFT",
+                    0)));
   }
 
   UUID spuB(String category) {
     return write(
-            actorB,
-            () ->
-                catalog.saveSpu(
-                    actorB,
-                    null,
-                    new SpuInput(
-                        "VCB-" + UUID.randomUUID().toString().substring(0, 8),
-                        "B 租户商品",
-                        "",
-                        "品牌",
-                        category,
-                        "DRAFT",
-                        0)));
+        actorB,
+        () ->
+            catalog.saveSpu(
+                actorB,
+                null,
+                new SpuInput(
+                    "VCB-" + UUID.randomUUID().toString().substring(0, 8),
+                    "B 租户商品",
+                    "",
+                    "品牌",
+                    category,
+                    "DRAFT",
+                    0)));
   }
 
   /** 两条轴（颜色 + 尺码）绑到同一个 SPU：组合唯一性至少要两个维度才有意义。 */
@@ -211,12 +211,19 @@ class VariantCombinationIntegrationTest {
     UUID colorAxis =
         tenantA
             ? saveAxis(colorCode, "颜色")
-            : write(actorB, () -> specAxis.saveAxis(actorB, null, new SpecAxisInput(colorCode, "颜色", true, 0)))
+            : write(
+                    actorB,
+                    () ->
+                        specAxis.saveAxis(
+                            actorB, null, new SpecAxisInput(colorCode, "颜色", true, 0)))
                 .id();
     UUID sizeAxis =
         tenantA
             ? saveAxis(sizeCode, "尺码")
-            : write(actorB, () -> specAxis.saveAxis(actorB, null, new SpecAxisInput(sizeCode, "尺码", true, 0)))
+            : write(
+                    actorB,
+                    () ->
+                        specAxis.saveAxis(actorB, null, new SpecAxisInput(sizeCode, "尺码", true, 0)))
                 .id();
     UUID spuId = tenantA ? spu("服饰") : spuB("服饰");
     write(
@@ -230,7 +237,9 @@ class VariantCombinationIntegrationTest {
   }
 
   SpecAxisOptionSaved option(UUID axisId, String value, int position) {
-    return write(actor, () -> specAxis.addOption(actor, axisId, new SpecAxisOptionInput(value, position, true)));
+    return write(
+        actor,
+        () -> specAxis.addOption(actor, axisId, new SpecAxisOptionInput(value, position, true)));
   }
 
   SpecAxisOptionSaved optionB(UUID axisId, String value, int position) {
@@ -272,7 +281,10 @@ class VariantCombinationIntegrationTest {
         "insert into sku_matrix_draft(id,tenant_id,spu_id,mode,status,axis_count,combination_count,"
             + "notes,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,'EXPLICIT','PENDING',2,1,"
             + "'绕过应用层写入',?::uuid,now())",
-        draftId, a, spuId, user);
+        draftId,
+        a,
+        spuId,
+        user);
     return draftId;
   }
 
@@ -282,15 +294,28 @@ class VariantCombinationIntegrationTest {
     sql.execute(
         "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,draft_id,"
             + "actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,2,?::uuid,?::uuid,now())",
-        id, a, axes.spuId(), signature, draftId, user);
+        id,
+        a,
+        axes.spuId(),
+        signature,
+        draftId,
+        user);
     sql.execute(
         "insert into spu_variant_combination_value(tenant_id,combination_id,spec_axis_id,axis_code,"
             + "option_value,position) values(?::uuid,?::uuid,?::uuid,?,?,0)",
-        a, id, axes.colorAxis(), axes.colorCode(), "红");
+        a,
+        id,
+        axes.colorAxis(),
+        axes.colorCode(),
+        "红");
     sql.execute(
         "insert into spu_variant_combination_value(tenant_id,combination_id,spec_axis_id,axis_code,"
             + "option_value,position) values(?::uuid,?::uuid,?::uuid,?,?,1)",
-        a, id, axes.sizeAxis(), axes.sizeCode(), "大");
+        a,
+        id,
+        axes.sizeAxis(),
+        axes.sizeCode(),
+        "大");
     return id;
   }
 
@@ -320,11 +345,18 @@ class VariantCombinationIntegrationTest {
     sql.execute(
         "insert into attribute_value(id,tenant_id,spu_id,attribute_id,sku_id,state)"
             + " values(?::uuid,?::uuid,?::uuid,?::uuid,?::uuid,'SET')",
-        valueId, a, axes.spuId(), attributeId, skuId);
+        valueId,
+        a,
+        axes.spuId(),
+        attributeId,
+        skuId);
     sql.execute(
         "insert into attribute_value_item(tenant_id,value_id,attribute_id,ordinal,option_value)"
             + " values(?::uuid,?::uuid,?::uuid,0,?)",
-        a, valueId, attributeId, value);
+        a,
+        valueId,
+        attributeId,
+        value);
   }
 
   // ------------------------------------------------------------ 重复检测与结构化冲突清单
@@ -344,9 +376,7 @@ class VariantCombinationIntegrationTest {
                     axes.spuId(),
                     new CombinationCheckInput(
                         List.of(
-                            combo(axes, "红", "大"),
-                            combo(axes, "蓝", "大"),
-                            combo(axes, "红", "大")))));
+                            combo(axes, "红", "大"), combo(axes, "蓝", "大"), combo(axes, "红", "大")))));
 
     // 结构化清单，不是一个布尔值：运营要知道是"第 1 条和第 3 条撞了"。
     assertThat(result.valid()).isFalse();
@@ -361,7 +391,8 @@ class VariantCombinationIntegrationTest {
     assertThat(duplicate.occurrenceIndexes()).containsExactly(0, 2);
     assertThat(duplicate.message()).contains("2 次");
     // 撞自己那条不进 planned：它已经是冲突，不是可用组合。
-    assertThat(result.planned()).extracting(PlannedCombination::signature)
+    assertThat(result.planned())
+        .extracting(PlannedCombination::signature)
         .containsExactly(signature(axes, "蓝", "大"));
   }
 
@@ -460,40 +491,56 @@ class VariantCombinationIntegrationTest {
     option(axes.sizeAxis(), "大", 0);
 
     // 停用取值：挡新建。
-    write(actor, () -> specAxis.addOption(actor, axes.colorAxis(), new SpecAxisOptionInput("蓝", 1, false)));
+    write(
+        actor,
+        () -> specAxis.addOption(actor, axes.colorAxis(), new SpecAxisOptionInput("蓝", 1, false)));
     var blocked =
         tx(
             actor,
             () ->
                 service.check(
-                    axes.spuId(),
-                    new CombinationCheckInput(List.of(combo(axes, "蓝", "大")))));
+                    axes.spuId(), new CombinationCheckInput(List.of(combo(axes, "蓝", "大")))));
     assertThat(blocked.valid()).isFalse();
-    assertThat(blocked.conflicts()).extracting(CombinationConflict::reasonCode)
+    assertThat(blocked.conflicts())
+        .extracting(CombinationConflict::reasonCode)
         .contains("OPTION_DISABLED");
 
     // 历史组合照常可读：面板仍能解析出已占用组合的轴值。
-    write(actor, () -> service.generateDraft(actor, axes.spuId(),
-        new VariantDraftInput("EXPLICIT", List.of(combo(axes, "红", "大")), null, null)));
+    write(
+        actor,
+        () ->
+            service.generateDraft(
+                actor,
+                axes.spuId(),
+                new VariantDraftInput("EXPLICIT", List.of(combo(axes, "红", "大")), null, null)));
     var panel = tx(actor, () -> service.panel(axes.spuId()));
-    assertThat(panel.combinations()).anySatisfy(
-        row -> {
-          assertThat(row.values()).extracting(CombinationValue::value).contains("红", "大");
-        });
+    assertThat(panel.combinations())
+        .anySatisfy(
+            row -> {
+              assertThat(row.values()).extracting(CombinationValue::value).contains("红", "大");
+            });
 
     // 停用轴同样挡新建。
-    var axis = tx(actor, () -> specAxis.axes()).stream()
-        .filter(x -> x.id().equals(axes.sizeAxis())).findFirst().orElseThrow();
-    write(actor, () -> specAxis.saveAxis(actor, axis.id(),
-        new SpecAxisInput(axis.code(), axis.name(), false, axis.version())));
+    var axis =
+        tx(actor, () -> specAxis.axes()).stream()
+            .filter(x -> x.id().equals(axes.sizeAxis()))
+            .findFirst()
+            .orElseThrow();
+    write(
+        actor,
+        () ->
+            specAxis.saveAxis(
+                actor,
+                axis.id(),
+                new SpecAxisInput(axis.code(), axis.name(), false, axis.version())));
     var axisBlocked =
         tx(
             actor,
             () ->
                 service.check(
-                    axes.spuId(),
-                    new CombinationCheckInput(List.of(combo(axes, "红", "大")))));
-    assertThat(axisBlocked.conflicts()).extracting(CombinationConflict::reasonCode)
+                    axes.spuId(), new CombinationCheckInput(List.of(combo(axes, "红", "大")))));
+    assertThat(axisBlocked.conflicts())
+        .extracting(CombinationConflict::reasonCode)
         .contains("AXIS_DISABLED");
   }
 
@@ -519,7 +566,9 @@ class VariantCombinationIntegrationTest {
                                     new CombinationValueInput(axes.sizeAxis(), "大")))))));
     assertThat(result.valid()).isFalse();
     assertThat(result.planned()).isEmpty();
-    assertThat(result.conflicts()).extracting(CombinationConflict::reasonCode).contains("DUPLICATE_AXIS");
+    assertThat(result.conflicts())
+        .extracting(CombinationConflict::reasonCode)
+        .contains("DUPLICATE_AXIS");
   }
 
   // ------------------------------------------------------------ 生成待建 SKU 草稿
@@ -538,15 +587,19 @@ class VariantCombinationIntegrationTest {
     assertThat(draft.mode()).isEqualTo("MATRIX");
     assertThat(draft.axisCount()).isEqualTo(2);
     assertThat(draft.combinationCount()).isEqualTo(2);
-    assertThat(draft.combinations()).extracting(PlannedCombination::signature)
-        .containsExactlyInAnyOrder(
-            signature(axes, "红", "大"), signature(axes, "蓝", "大"));
+    assertThat(draft.combinations())
+        .extracting(PlannedCombination::signature)
+        .containsExactlyInAnyOrder(signature(axes, "红", "大"), signature(axes, "蓝", "大"));
     assertThat(draft.combinations().getFirst().values())
         .extracting(CombinationValue::value)
         .containsExactlyInAnyOrder("红", "大");
     assertThat(draft.occurredAt()).isNotBlank();
     long skus =
-        tx(actor, () -> sql.fetchOne("select count(*) from sku where spu_id=?", axes.spuId()).get(0, Long.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select count(*) from sku where spu_id=?", axes.spuId())
+                    .get(0, Long.class));
     assertThat(skus).isZero();
   }
 
@@ -577,7 +630,8 @@ class VariantCombinationIntegrationTest {
     // 作废草稿 → 释放占用 → 同一个组合可以重新生成。
     var discarded = write(actor, () -> service.discardDraft(actor, axes.spuId(), draft.id()));
     assertThat(discarded.releasedCombinationCount()).isEqualTo(1);
-    assertThat(tx(actor, () -> service.drafts(axes.spuId())).getFirst().status()).isEqualTo("DISCARDED");
+    assertThat(tx(actor, () -> service.drafts(axes.spuId())).getFirst().status())
+        .isEqualTo("DISCARDED");
     assertThat(
             tx(actor, () -> service.combinations(axes.spuId())).stream()
                 .filter(row -> "RESERVED".equals(row.source())))
@@ -634,7 +688,9 @@ class VariantCombinationIntegrationTest {
             row -> {
               assertThat(row.source()).isEqualTo("SKU");
               assertThat(row.skuId()).isEqualTo(skuId);
-              assertThat(row.values()).extracting(CombinationValue::value).containsExactlyInAnyOrder("红", "大");
+              assertThat(row.values())
+                  .extracting(CombinationValue::value)
+                  .containsExactlyInAnyOrder("红", "大");
             });
   }
 
@@ -650,7 +706,8 @@ class VariantCombinationIntegrationTest {
     assertThat(panel.matrixRowCount()).isEqualTo(2025);
     assertThat(panel.matrixTooLarge()).isTrue();
     assertThat(panel.note()).contains("2025");
-    assertThatThrownBy(() -> write(actor, () -> service.generateDraft(actor, axes.spuId(), matrixDraft())))
+    assertThatThrownBy(
+            () -> write(actor, () -> service.generateDraft(actor, axes.spuId(), matrixDraft())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("2025");
     // 一行也不该落库（限定本 SPU：这个库是所有用例共用的，全表 count 会把别的用例算进来）。
@@ -674,7 +731,8 @@ class VariantCombinationIntegrationTest {
     assertThat(panel.matrixRowCount()).isZero();
     assertThat(panel.availableMatrixCount()).isZero();
     assertThat(panel.note()).contains("0 行");
-    assertThatThrownBy(() -> write(actor, () -> service.generateDraft(actor, axes.spuId(), matrixDraft())))
+    assertThatThrownBy(
+            () -> write(actor, () -> service.generateDraft(actor, axes.spuId(), matrixDraft())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("尺码");
   }
@@ -686,8 +744,13 @@ class VariantCombinationIntegrationTest {
     option(axes.colorAxis(), "蓝", 1);
     option(axes.sizeAxis(), "大", 0);
     // 先占掉「红/大」。
-    write(actor, () -> service.generateDraft(actor, axes.spuId(),
-        new VariantDraftInput("EXPLICIT", List.of(combo(axes, "红", "大")), null, null)));
+    write(
+        actor,
+        () ->
+            service.generateDraft(
+                actor,
+                axes.spuId(),
+                new VariantDraftInput("EXPLICIT", List.of(combo(axes, "红", "大")), null, null)));
 
     var panel = tx(actor, () -> service.panel(axes.spuId()));
     assertThat(panel.matrixRowCount()).isEqualTo(2);
@@ -704,7 +767,12 @@ class VariantCombinationIntegrationTest {
     assertThat(overview.note()).isNotBlank();
     assertThat(overview.blockedSpuCount())
         .isEqualTo(
-            tx(actor, () -> sql.fetchOne("select count(distinct spu_id) from sku where btrim(variant_signature)<>''").get(0, Long.class))
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                                "select count(distinct spu_id) from sku where btrim(variant_signature)<>''")
+                            .get(0, Long.class))
                 .longValue());
   }
 
@@ -720,11 +788,14 @@ class VariantCombinationIntegrationTest {
     assertThat(detail.id()).isEqualTo(created.id());
     assertThat(detail.spuCode()).isNotBlank();
     assertThat(detail.combinations()).hasSize(2);
-    assertThat(detail.combinations()).allSatisfy(
-        combination -> {
-          assertThat(combination.values()).hasSize(2);
-          assertThat(combination.values()).extracting(CombinationValue::axisName).doesNotContainNull();
-        });
+    assertThat(detail.combinations())
+        .allSatisfy(
+            combination -> {
+              assertThat(combination.values()).hasSize(2);
+              assertThat(combination.values())
+                  .extracting(CombinationValue::axisName)
+                  .doesNotContainNull();
+            });
     // 不属于这个 SPU 的草稿 id 读不到。
     assertThatThrownBy(() -> tx(actor, () -> service.draft(spu("服饰"), created.id())))
         .isInstanceOf(ResponseStatusException.class);
@@ -741,8 +812,7 @@ class VariantCombinationIntegrationTest {
             service.generateDraft(
                 actor,
                 axes.spuId(),
-                new VariantDraftInput(
-                    "MATRIX", null, "自定义备注", "2026-01-02T03:04:05Z")));
+                new VariantDraftInput("MATRIX", null, "自定义备注", "2026-01-02T03:04:05Z")));
 
     var row =
         tx(
@@ -821,8 +891,7 @@ class VariantCombinationIntegrationTest {
     option(axes.colorAxis(), "红", 0);
     option(axes.sizeAxis(), "大", 0);
     tx(actor, () -> rawSku(axes, "红", "大", signature(axes, "红", "大")));
-    assertThatThrownBy(
-            () -> tx(actor, () -> rawSku(axes, "红", "大", signature(axes, "红", "大"))))
+    assertThatThrownBy(() -> tx(actor, () -> rawSku(axes, "红", "大", signature(axes, "红", "大"))))
         .hasMessageContaining("duplicate key");
   }
 
@@ -844,12 +913,21 @@ class VariantCombinationIntegrationTest {
                           "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,"
                               + "draft_id,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,1,"
                               + "?::uuid,?::uuid,now())",
-                          id, a, axes.spuId(), "自报但不存在的组合", draftId, user);
+                          id,
+                          a,
+                          axes.spuId(),
+                          "自报但不存在的组合",
+                          draftId,
+                          user);
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,0)",
-                          a, id, axes.colorAxis(), axes.colorCode(), "红");
+                          a,
+                          id,
+                          axes.colorAxis(),
+                          axes.colorCode(),
+                          "红");
                       return null;
                     }))
         .hasMessageContaining("不一致");
@@ -872,12 +950,21 @@ class VariantCombinationIntegrationTest {
                           "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,"
                               + "draft_id,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,2,"
                               + "?::uuid,?::uuid,now())",
-                          id, a, axes.spuId(), axes.colorCode() + "=红", draftId, user);
+                          id,
+                          a,
+                          axes.spuId(),
+                          axes.colorCode() + "=红",
+                          draftId,
+                          user);
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,0)",
-                          a, id, axes.colorAxis(), axes.colorCode(), "红");
+                          a,
+                          id,
+                          axes.colorAxis(),
+                          axes.colorCode(),
+                          "红");
                       return null;
                     }))
         .hasMessageContaining("轴数");
@@ -903,18 +990,31 @@ class VariantCombinationIntegrationTest {
                           "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,"
                               + "draft_id,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,2,"
                               + "?::uuid,?::uuid,now())",
-                          id, a, mine.spuId(), "混用轴", draftId, user);
+                          id,
+                          a,
+                          mine.spuId(),
+                          "混用轴",
+                          draftId,
+                          user);
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,0)",
-                          a, id, mine.colorAxis(), mine.colorCode(), "红");
+                          a,
+                          id,
+                          mine.colorAxis(),
+                          mine.colorCode(),
+                          "红");
                       // 第二个轴属于另一个 SPU。
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,1)",
-                          a, id, other.sizeAxis(), other.sizeCode(), "小");
+                          a,
+                          id,
+                          other.sizeAxis(),
+                          other.sizeCode(),
+                          "小");
                       return null;
                     }))
         .hasMessageContaining("不属于该 SPU");
@@ -936,12 +1036,20 @@ class VariantCombinationIntegrationTest {
                           "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,"
                               + "draft_id,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,2,"
                               + "?::uuid,?::uuid,now())",
-                          id, a, axes.spuId(), "自报编码", draftId, user);
+                          id,
+                          a,
+                          axes.spuId(),
+                          "自报编码",
+                          draftId,
+                          user);
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,'NOT_THE_REAL_CODE',?,0)",
-                          a, id, axes.colorAxis(), "红");
+                          a,
+                          id,
+                          axes.colorAxis(),
+                          "红");
                       return null;
                     }))
         .hasMessageContaining("不接受调用方自报");
@@ -954,8 +1062,7 @@ class VariantCombinationIntegrationTest {
     option(axes.sizeAxis(), "大", 0);
     write(
         actor,
-        () ->
-            specAxis.addOption(actor, axes.sizeAxis(), new SpecAxisOptionInput("大", 0, false)));
+        () -> specAxis.addOption(actor, axes.sizeAxis(), new SpecAxisOptionInput("大", 0, false)));
     assertThatThrownBy(
             () ->
                 write(
@@ -967,17 +1074,30 @@ class VariantCombinationIntegrationTest {
                           "insert into spu_variant_combination(id,tenant_id,spu_id,signature,axis_count,"
                               + "draft_id,actor_id,occurred_at) values(?::uuid,?::uuid,?::uuid,?,2,"
                               + "?::uuid,?::uuid,now())",
-                          id, a, axes.spuId(), "停用取值组合", draftId, user);
+                          id,
+                          a,
+                          axes.spuId(),
+                          "停用取值组合",
+                          draftId,
+                          user);
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,0)",
-                          a, id, axes.colorAxis(), axes.colorCode(), "红");
+                          a,
+                          id,
+                          axes.colorAxis(),
+                          axes.colorCode(),
+                          "红");
                       sql.execute(
                           "insert into spu_variant_combination_value(tenant_id,combination_id,"
                               + "spec_axis_id,axis_code,option_value,position)"
                               + " values(?::uuid,?::uuid,?::uuid,?,?,1)",
-                          a, id, axes.sizeAxis(), axes.sizeCode(), "大");
+                          a,
+                          id,
+                          axes.sizeAxis(),
+                          axes.sizeCode(),
+                          "大");
                       return null;
                     }))
         .hasMessageContaining("已停用");
@@ -998,11 +1118,15 @@ class VariantCombinationIntegrationTest {
                       sql.execute(
                           "insert into sku_matrix_draft_item(tenant_id,draft_id,combination_id,position)"
                               + " values(?::uuid,?::uuid,?::uuid,0)",
-                          a, draftId, combinationId);
+                          a,
+                          draftId,
+                          combinationId);
                       sql.execute(
                           "insert into sku_matrix_draft_item(tenant_id,draft_id,combination_id,position)"
                               + " values(?::uuid,?::uuid,?::uuid,1)",
-                          a, draftId, combinationId);
+                          a,
+                          draftId,
+                          combinationId);
                       return null;
                     }))
         .hasMessageContaining("duplicate key");
@@ -1035,8 +1159,7 @@ class VariantCombinationIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     assertThatThrownBy(() -> tx(actorB, () -> service.draft(mine.spuId(), myDraft.id())))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(
-            () -> tx(actor, () -> service.draft(theirs.spuId(), theirDraft.id())))
+    assertThatThrownBy(() -> tx(actor, () -> service.draft(theirs.spuId(), theirDraft.id())))
         .isInstanceOf(ResponseStatusException.class);
     // B 拿 A 的 SPU 生成草稿 → 404；台账与草稿都读不到。
     assertThatThrownBy(() -> tx(actorB, () -> service.panel(mine.spuId())))
@@ -1051,7 +1174,8 @@ class VariantCombinationIntegrationTest {
                         .get(0, Long.class)))
         .isZero();
     // A 的数据仍在。
-    assertThat(tx(actor, () -> service.panel(mine.spuId())).reservedCombinationCount()).isEqualTo(1);
+    assertThat(tx(actor, () -> service.panel(mine.spuId())).reservedCombinationCount())
+        .isEqualTo(1);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
     http.perform(
@@ -1074,7 +1198,8 @@ class VariantCombinationIntegrationTest {
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(tx(actor, () -> service.panel(mine.spuId())).reservedCombinationCount()).isEqualTo(1);
+      assertThat(tx(actor, () -> service.panel(mine.spuId())).reservedCombinationCount())
+          .isEqualTo(1);
       assertThat(tx(actorB, () -> service.panel(theirs.spuId())).reservedCombinationCount())
           .isEqualTo(1);
       assertThat(
@@ -1106,18 +1231,22 @@ class VariantCombinationIntegrationTest {
             post("/catalog/variant-combination/spus/" + axes.spuId() + "/check")
                 .header("Authorization", "Bearer reader")
                 .contentType("application/json")
-                .content("{\"combinations\":[{\"values\":[{\"specAxisId\":\"" + axes.colorAxis()
-                    + "\",\"value\":\"红\"}]}]}"))
+                .content(
+                    "{\"combinations\":[{\"values\":[{\"specAxisId\":\""
+                        + axes.colorAxis()
+                        + "\",\"value\":\"红\"}]}]}"))
         .andExpect(status().isOk());
   }
 
   @Test
-  void httpEndpointsExposeTheRealWorkflowAndReturnStructuredConflictsOnRejection() throws Exception {
+  void httpEndpointsExposeTheRealWorkflowAndReturnStructuredConflictsOnRejection()
+      throws Exception {
     TwoAxes axes = twoAxes();
     option(axes.colorAxis(), "红", 0);
     option(axes.sizeAxis(), "大", 0);
 
-    http.perform(get("/catalog/variant-combination/overview").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/variant-combination/overview").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
     http.perform(
             get("/catalog/variant-combination/spus/" + axes.spuId())
@@ -1170,7 +1299,10 @@ class VariantCombinationIntegrationTest {
 
     // 未认证 → 不能是 200。
     int anonymous =
-        http.perform(get("/catalog/variant-combination/overview")).andReturn().getResponse().getStatus();
+        http.perform(get("/catalog/variant-combination/overview"))
+            .andReturn()
+            .getResponse()
+            .getStatus();
     assertThat(anonymous).isNotEqualTo(200);
   }
 

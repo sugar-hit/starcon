@@ -189,10 +189,7 @@ export function PickTaskWorkspace() {
           label="含不可拣库位取货的任务"
           value={String(summary?.nonPickableTaskCount ?? 0)}
         />
-        <StatCard
-          label="含 SKU 分散的任务"
-          value={String(summary?.dispersionTaskCount ?? 0)}
-        />
+        <StatCard label="含 SKU 分散的任务" value={String(summary?.dispersionTaskCount ?? 0)} />
       </div>
       <p className="text-xs text-slate-400">
         「含不可拣库位取货」与「含 SKU 分散」两张卡对应 8.5.2.1 库位利用率里
@@ -298,7 +295,9 @@ export function PickTaskWorkspace() {
                       {row.hasUnresolvedException ? '（有未处理）' : ''}
                     </td>
                     <td className="py-2 text-xs text-amber-200">
-                      {row.nonPickableLineCount > 0 ? `${row.nonPickableLineCount} 段不可拣库位` : ''}
+                      {row.nonPickableLineCount > 0
+                        ? `${row.nonPickableLineCount} 段不可拣库位`
+                        : ''}
                       {row.reopenCount > 0 ? ` · 已重开 ${row.reopenCount} 次` : ''}
                     </td>
                     <td className="py-2 text-right">
@@ -309,9 +308,7 @@ export function PickTaskWorkspace() {
               </tbody>
             </table>
             <div className="flex items-center justify-between text-sm text-slate-400">
-              <span>
-                共 {list?.total ?? 0} 张（汇总不受筛选影响）
-              </span>
+              <span>共 {list?.total ?? 0} 张（汇总不受筛选影响）</span>
               <div className="flex gap-2">
                 <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
                   上一页
@@ -451,7 +448,10 @@ export function PickTaskWorkspace() {
             </div>
           </SectionCard>
 
-          <SectionCard title="登记实拣" description="实际库位可以与计划不同：分配是建议，现场是事实">
+          <SectionCard
+            title="登记实拣"
+            description="实际库位可以与计划不同：分配是建议，现场是事实"
+          >
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className="text-sm text-slate-300">
                 拣哪一段
@@ -633,9 +633,7 @@ export function PickTaskWorkspace() {
               {detail.events.map((event) => (
                 <li key={event.id} className="border-l-2 border-slate-700 pl-3">
                   <span className="text-xs text-slate-400">{event.occurredAt}</span>{' '}
-                  <span className="text-slate-200">
-                    {event.eventTypeLabel ?? event.eventType}
-                  </span>
+                  <span className="text-slate-200">{event.eventTypeLabel ?? event.eventType}</span>
                   <p className="text-slate-400">{event.detail}</p>
                 </li>
               ))}

@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -22,15 +21,14 @@ import java.util.UUID;
  *
  * <ul>
  *   <li><b>变更请求</b>（{@link OrderChangeCancelChangeRequest}）：地址修改与数量调整。
- *       蓝图说「数量调整（<b>需平台允许</b>）」，所以它带平台规则命中结果。</li>
- *   <li><b>取消请求</b>（{@link OrderChangeCancelCancellation}）：取消未发货数量，
- *       状态机五态，终态数量只在责任方确认后落。</li>
- *   <li><b>两项下游任务</b>：仓库停止作业与释放占用（7.2.1.3）、平台回写（2.5.1.1）。</li>
+ *       蓝图说「数量调整（<b>需平台允许</b>）」，所以它带平台规则命中结果。
+ *   <li><b>取消请求</b>（{@link OrderChangeCancelCancellation}）：取消未发货数量， 状态机五态，终态数量只在责任方确认后落。
+ *   <li><b>两项下游任务</b>：仓库停止作业与释放占用（7.2.1.3）、平台回写（2.5.1.1）。
  * </ul>
  *
  * <p><b>数量一律 {@code numeric(19,6)} + {@link BigDecimal}，金额一律 {@code numeric(19,4)}</b>，
- * 禁浮点（AGENTS.md）。时间一律 {@link OffsetDateTime} 对应 {@code timestamptz}，
- * 服务层用 {@code ?::timestamptz} 绑定。
+ * 禁浮点（AGENTS.md）。时间一律 {@link OffsetDateTime} 对应 {@code timestamptz}， 服务层用 {@code ?::timestamptz}
+ * 绑定。
  */
 public final class OrderChangeCancelModels {
 
@@ -41,12 +39,10 @@ public final class OrderChangeCancelModels {
   /**
    * 变更类型。
    *
-   * <p>数量调整刻意<b>不</b>合成一个带符号的 {@code QUANTITY_ADJUST} + 正负数量：
-   * 增与减在平台侧是两种能力（多数平台允许加量，几乎都不允许改已下单行的量），
+   * <p>数量调整刻意<b>不</b>合成一个带符号的 {@code QUANTITY_ADJUST} + 正负数量： 增与减在平台侧是两种能力（多数平台允许加量，几乎都不允许改已下单行的量），
    * 合并后规则表就没法按方向配，而配不出方向就等于退回「代码里的 if」。
    *
-   * <p>{@code CANCEL} 是取消用的第四个值：取消在平台上同样是「能不能改」的一种，
-   * 与数量减少不是同一回事（平台往往允许取消整单却不允许改行数量），
+   * <p>{@code CANCEL} 是取消用的第四个值：取消在平台上同样是「能不能改」的一种， 与数量减少不是同一回事（平台往往允许取消整单却不允许改行数量），
    * 所以它必须是规则表里独立的一行。
    */
   public enum OrderChangeKind {
@@ -57,12 +53,10 @@ public final class OrderChangeCancelModels {
   }
 
   /**
-   * 变更 / 取消的共用状态机（服务层 {@code OrderChangeCancelService.TRANSITIONS}
-   * 与测试逐状态比对，不另写一份矩阵）。
+   * 变更 / 取消的共用状态机（服务层 {@code OrderChangeCancelService.TRANSITIONS} 与测试逐状态比对，不另写一份矩阵）。
    *
-   * <p><b>{@code PENDING_VERIFICATION} 不是终态</b>：等待平台或仓库核验后仍可转
-   * {@code CONFIRMED}。蓝图要求的状态（「取消申请 / 处理中 / 已确认 / 拒绝 / 待核验」）
-   * 五个值一一对应，缺一个就答不出「等待核验的申请现在算什么」。
+   * <p><b>{@code PENDING_VERIFICATION} 不是终态</b>：等待平台或仓库核验后仍可转 {@code CONFIRMED}。蓝图要求的状态（「取消申请 / 处理中
+   * / 已确认 / 拒绝 / 待核验」） 五个值一一对应，缺一个就答不出「等待核验的申请现在算什么」。
    */
   public enum OrderChangeStatus {
     REQUESTED,
@@ -358,9 +352,8 @@ public final class OrderChangeCancelModels {
   /**
    * 取消逐行明细。
    *
-   * @param cancelledQuantity <b>责任方确认前恒为 0</b>（V119 守卫 9.1）。
-   *     界面拿它与 {@code cancelQuantity} 之差就是「已确认掉的量」；
-   *     显示成申请量会在仓库一个货都没放的时候告诉运营「已取消 3 件」。
+   * @param cancelledQuantity <b>责任方确认前恒为 0</b>（V119 守卫 9.1）。 界面拿它与 {@code cancelQuantity}
+   *     之差就是「已确认掉的量」； 显示成申请量会在仓库一个货都没放的时候告诉运营「已取消 3 件」。
    * @param shipBlocking 是否因已发货被拒（可取消量为 0）。
    */
   public record OrderChangeCancelCancellationLineRow(
@@ -423,8 +416,7 @@ public final class OrderChangeCancelModels {
   /**
    * 「现在还差什么才能确认」的一条阻塞项。
    *
-   * <p>存在的理由：取消单的确认有两个责任方前置条件（仓库释放完成、平台接受）。
-   * 界面上只显示一个 {@code status=REQUESTED} 的话，操作人看不出**卡在哪**；
+   * <p>存在的理由：取消单的确认有两个责任方前置条件（仓库释放完成、平台接受）。 界面上只显示一个 {@code status=REQUESTED} 的话，操作人看不出**卡在哪**；
    * 让服务端逐条报出阻塞项，比让人去翻两个模块的表快得多。
    */
   public record OrderChangeCancelBlocker(
@@ -432,16 +424,20 @@ public final class OrderChangeCancelModels {
 
   /** 变更 / 取消请求的集合查询。 */
   public record OrderChangeCancelQuery(
-      UUID orderId, String orderNo, OrderChangeStatus status, String changeKind, int page, int size) {}
+      UUID orderId,
+      String orderNo,
+      OrderChangeStatus status,
+      String changeKind,
+      int page,
+      int size) {}
 
   public record OrderChangeCancelPage<T>(List<T> items, long total, int page, int size) {}
 
   /**
    * 能力声明：本模块哪些能力有数据、哪些还没接上。
    *
-   * <p>与 9.1.1.1 的 {@code /list/capabilities}（列表页筛选边界）、
-   * 9.1.1.2 的 {@code /detail/capabilities}（详情页分区边界）三者并排读，
-   * 才不会把「本模块能改什么」当成「订单详情里有什么」。
+   * <p>与 9.1.1.1 的 {@code /list/capabilities}（列表页筛选边界）、 9.1.1.2 的 {@code
+   * /detail/capabilities}（详情页分区边界）三者并排读， 才不会把「本模块能改什么」当成「订单详情里有什么」。
    */
   public record OrderChangeCancelCapabilities(
       List<String> availableCapabilities,

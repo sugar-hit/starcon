@@ -25,7 +25,11 @@ import {
   waterLevelLabel,
   waterLevelTone,
 } from './vmi-model';
-import type { VmiLine, VmiOwnershipSplit, VmiWaterLevelMonitor } from '../../../../../packages/api-contracts/src/index';
+import type {
+  VmiLine,
+  VmiOwnershipSplit,
+  VmiWaterLevelMonitor,
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 7.7.2.1 前端纯函数单测。

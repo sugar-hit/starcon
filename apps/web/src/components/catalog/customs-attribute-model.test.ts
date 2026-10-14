@@ -80,7 +80,9 @@ function draft(patch: Partial<CustomsDraft> = {}): CustomsDraft {
     preferentialOriginEligible: false,
     preferenceAgreement: '',
     note: '',
-    elements: [{ elementCode: '01', elementName: '品名', elementValue: '移动电话机', required: true }],
+    elements: [
+      { elementCode: '01', elementName: '品名', elementValue: '移动电话机', required: true },
+    ],
     version: 0,
     ...patch,
   };
@@ -117,7 +119,11 @@ describe('审核状态机：五种状态而不是三种', () => {
   });
 
   it('已驳回：tone 是 danger，且下一步是改完重提', () => {
-    const state = reviewState({ status: 'REJECTED', submittedAt: 'x', rejectReason: '品牌类型不符' });
+    const state = reviewState({
+      status: 'REJECTED',
+      submittedAt: 'x',
+      rejectReason: '品牌类型不符',
+    });
     expect(state.tone).toBe('danger');
     expect(state.next).toContain('重新提交');
   });
@@ -257,7 +263,9 @@ describe('必填却空着的申报要素', () => {
 
 describe('列表行的摘要判定', () => {
   it('未维护是中性态', () => {
-    expect(rowState({ status: null, requiredMissingCount: 0, elementCount: 0, submittedAt: null }).label).toBe('未维护');
+    expect(
+      rowState({ status: null, requiredMissingCount: 0, elementCount: 0, submittedAt: null }).label,
+    ).toBe('未维护');
   });
 
   it('已通过但必填要素缺失要显式报警，不能显示成「已通过」', () => {
@@ -272,7 +280,12 @@ describe('列表行的摘要判定', () => {
   });
 
   it('已通过但一条要素都没有也要报警', () => {
-    const state = rowState({ status: 'APPROVED', requiredMissingCount: 0, elementCount: 0, submittedAt: 'x' });
+    const state = rowState({
+      status: 'APPROVED',
+      requiredMissingCount: 0,
+      elementCount: 0,
+      submittedAt: 'x',
+    });
     expect(state.tone).toBe('danger');
   });
 });
@@ -341,14 +354,18 @@ describe('草稿校验（与后端同一套判定）', () => {
 
   it('申报价值参考留空合法，但小数位不得超过 6 位', () => {
     expect(validateDraft(draft({ declaredValueReference: '' }))).toEqual([]);
-    expect(validateDraft(draft({ declaredValueReference: '12.1234567' })).join()).toContain('6 位小数');
+    expect(validateDraft(draft({ declaredValueReference: '12.1234567' })).join()).toContain(
+      '6 位小数',
+    );
     expect(validateDraft(draft({ declaredValueReference: '0' })).join()).toContain('大于 0');
     expect(validateDraft(draft({ declaredValueReference: 'abc' })).length).toBeGreaterThan(0);
   });
 
   // 享惠与协定代码必须双向一致：两个矛盾的答案会让下游无法判断。
   it('勾了可享惠必须填协定代码', () => {
-    const errors = validateDraft(draft({ preferentialOriginEligible: true, preferenceAgreement: '' }));
+    const errors = validateDraft(
+      draft({ preferentialOriginEligible: true, preferenceAgreement: '' }),
+    );
     expect(errors.join()).toContain('协定代码');
   });
 
@@ -398,7 +415,9 @@ describe('草稿转入参', () => {
   });
 
   it('空申报要素值转成 null 而不是空串', () => {
-    const payload = draftToPayload(draft({ elements: [{ ...emptyElement(), elementValue: '  ' }] }));
+    const payload = draftToPayload(
+      draft({ elements: [{ ...emptyElement(), elementValue: '  ' }] }),
+    );
     expect(payload.elements[0]?.elementValue).toBeNull();
   });
 

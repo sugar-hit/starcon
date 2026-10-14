@@ -16,7 +16,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "tenantContext",
+        "operationId": "get_identity_tenants_current",
         "parameters": [
           {
             "name": "Authorization",
@@ -45,7 +45,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "updateTenantProfile",
+        "operationId": "put_identity_tenants_current",
         "parameters": [
           {
             "name": "Authorization",
@@ -79,7 +79,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "updateRole",
+        "operationId": "put_identity_roles_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -128,7 +128,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "deleteRole",
+        "operationId": "delete_identity_roles_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -161,7 +161,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "rule",
+        "operationId": "get_identity_numbering_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -199,7 +199,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "update",
+        "operationId": "put_identity_numbering_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -240,7 +240,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "delete",
+        "operationId": "delete_identity_numbering_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -273,7 +273,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "put_identity_members_membershipId_role_assignments_roleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -325,7 +325,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "updateMember",
+        "operationId": "put_identity_members_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -366,7 +366,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "removeMember",
+        "operationId": "delete_identity_members_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -399,7 +399,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "defaultBook",
+        "operationId": "get_identity_legal_entities_legalEntityId_default_book",
         "parameters": [
           {
             "name": "Authorization",
@@ -437,7 +437,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "setDefaultBook",
+        "operationId": "put_identity_legal_entities_legalEntityId_default_book",
         "parameters": [
           {
             "name": "Authorization",
@@ -480,7 +480,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "legalEntityUpdate",
+        "operationId": "put_identity_legal_entities_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -521,7 +521,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "legalEntityDelete",
+        "operationId": "delete_identity_legal_entities_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -554,7 +554,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "put_identity_hierarchy_authorizations_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -597,7 +597,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "item",
+        "operationId": "get_identity_dict_items_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -635,7 +635,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "put_identity_dict_items_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -678,7 +678,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "updateDepartment",
+        "operationId": "put_identity_departments_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -719,7 +719,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "deleteDepartment",
+        "operationId": "delete_identity_departments_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -752,7 +752,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "moveDepartment",
+        "operationId": "put_identity_departments_id_parent",
         "parameters": [
           {
             "name": "Authorization",
@@ -795,7 +795,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "setDepartmentLeader",
+        "operationId": "put_identity_departments_id_leader",
         "parameters": [
           {
             "name": "Authorization",
@@ -844,7 +844,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "clearDepartmentLeader",
+        "operationId": "delete_identity_departments_id_leader",
         "parameters": [
           {
             "name": "Authorization",
@@ -877,7 +877,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "updateChild",
+        "operationId": "put_identity_children_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -920,7 +920,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "put_identity_business_parameters_overrides_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -961,7 +961,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_identity_business_parameters_overrides_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -994,7 +994,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "ruleSet",
+        "operationId": "get_identity_approval_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1032,7 +1032,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "put_identity_approval_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1073,7 +1073,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_identity_approval_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1106,7 +1106,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "flow",
+        "operationId": "get_identity_approval_flows_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1144,7 +1144,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "put_identity_approval_flows_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1185,7 +1185,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_identity_approval_flows_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1218,7 +1218,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "updatePosition",
+        "operationId": "put_identity_approval_flows_positions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1259,7 +1259,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "deletePosition",
+        "operationId": "delete_identity_approval_flows_positions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1292,7 +1292,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "put_identity_accounting_books_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1333,7 +1333,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_identity_accounting_books_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1366,7 +1366,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "roles",
+        "operationId": "get_identity_roles",
         "parameters": [
           {
             "name": "Authorization",
@@ -1398,7 +1398,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createRole",
+        "operationId": "post_identity_roles",
         "parameters": [
           {
             "name": "Authorization",
@@ -1440,7 +1440,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "transfer",
+        "operationId": "post_identity_owner_transfer",
         "parameters": [
           {
             "name": "Authorization",
@@ -1474,7 +1474,7 @@
         "tags": [
           "operation-log-controller"
         ],
-        "operationId": "purge",
+        "operationId": "post_identity_operation_log_purge",
         "parameters": [
           {
             "name": "Authorization",
@@ -1513,7 +1513,7 @@
         "tags": [
           "member-onboarding-controller"
         ],
-        "operationId": "list",
+        "operationId": "get_identity_onboardings",
         "parameters": [
           {
             "name": "Authorization",
@@ -1545,7 +1545,7 @@
         "tags": [
           "member-onboarding-controller"
         ],
-        "operationId": "create",
+        "operationId": "post_identity_onboardings",
         "parameters": [
           {
             "name": "Authorization",
@@ -1586,7 +1586,7 @@
         "tags": [
           "member-onboarding-controller"
         ],
-        "operationId": "complete",
+        "operationId": "post_identity_onboardings_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -1619,7 +1619,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "cases",
+        "operationId": "get_identity_offboarding",
         "parameters": [
           {
             "name": "Authorization",
@@ -1651,7 +1651,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "post_identity_offboarding",
         "parameters": [
           {
             "name": "Authorization",
@@ -1693,7 +1693,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "revert",
+        "operationId": "post_identity_offboarding_id_revert",
         "parameters": [
           {
             "name": "Authorization",
@@ -1726,7 +1726,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "addResponsibilityItem",
+        "operationId": "post_identity_offboarding_caseId_responsibility_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -1777,7 +1777,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "transferResponsibility",
+        "operationId": "post_identity_offboarding_caseId_responsibility_items_itemId_transfer",
         "parameters": [
           {
             "name": "Authorization",
@@ -1829,7 +1829,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "addReclaimItem",
+        "operationId": "post_identity_offboarding_caseId_reclaim_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -1880,7 +1880,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "reclaimItem",
+        "operationId": "post_identity_offboarding_caseId_reclaim_items_itemId_reclaim",
         "parameters": [
           {
             "name": "Authorization",
@@ -1932,7 +1932,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "rules",
+        "operationId": "get_identity_numbering_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -1988,7 +1988,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "post_identity_numbering_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -2030,7 +2030,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "next",
+        "operationId": "post_identity_numbering_rules_id_next",
         "parameters": [
           {
             "name": "Authorization",
@@ -2079,7 +2079,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "preview",
+        "operationId": "post_identity_numbering_preview",
         "parameters": [
           {
             "name": "Authorization",
@@ -2120,7 +2120,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "members",
+        "operationId": "get_identity_members",
         "parameters": [
           {
             "name": "Authorization",
@@ -2152,7 +2152,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createMember",
+        "operationId": "post_identity_members",
         "parameters": [
           {
             "name": "Authorization",
@@ -2194,7 +2194,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "post_identity_members_membershipId_role_assignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -2245,7 +2245,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "revoke",
+        "operationId": "post_identity_members_membershipId_role_assignments_roleId_revoke",
         "parameters": [
           {
             "name": "Authorization",
@@ -2287,7 +2287,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "legalEntities",
+        "operationId": "get_identity_legal_entities",
         "parameters": [
           {
             "name": "Authorization",
@@ -2319,7 +2319,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "legalEntityCreate",
+        "operationId": "post_identity_legal_entities",
         "parameters": [
           {
             "name": "Authorization",
@@ -2361,7 +2361,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "post_identity_legal_entities_legalEntityId_accounting_books",
         "parameters": [
           {
             "name": "Authorization",
@@ -2412,7 +2412,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "legalEntityReference",
+        "operationId": "post_identity_legal_entities_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -2446,7 +2446,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "grants",
+        "operationId": "get_identity_hierarchy_authorizations",
         "parameters": [
           {
             "name": "Authorization",
@@ -2478,7 +2478,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "post_identity_hierarchy_authorizations",
         "parameters": [
           {
             "name": "Authorization",
@@ -2520,7 +2520,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "revoke_1",
+        "operationId": "post_identity_hierarchy_authorizations_id_revoke",
         "parameters": [
           {
             "name": "Authorization",
@@ -2553,7 +2553,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "check",
+        "operationId": "post_identity_hierarchy_authorizations_check",
         "parameters": [
           {
             "name": "Authorization",
@@ -2594,7 +2594,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "items",
+        "operationId": "get_identity_dict_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -2650,7 +2650,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "post_identity_dict_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -2692,7 +2692,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "usages",
+        "operationId": "get_identity_dict_items_id_usage",
         "parameters": [
           {
             "name": "Authorization",
@@ -2733,7 +2733,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "recordUsage",
+        "operationId": "post_identity_dict_items_id_usage",
         "parameters": [
           {
             "name": "Authorization",
@@ -2776,7 +2776,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "reactivate",
+        "operationId": "post_identity_dict_items_id_reactivate",
         "parameters": [
           {
             "name": "Authorization",
@@ -2819,7 +2819,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "deactivate",
+        "operationId": "post_identity_dict_items_id_deactivate",
         "parameters": [
           {
             "name": "Authorization",
@@ -2862,7 +2862,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "departments",
+        "operationId": "get_identity_departments",
         "parameters": [
           {
             "name": "Authorization",
@@ -2894,7 +2894,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createDepartment",
+        "operationId": "post_identity_departments",
         "parameters": [
           {
             "name": "Authorization",
@@ -2936,7 +2936,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createLeaderProxy",
+        "operationId": "post_identity_departments_id_leader_proxies",
         "parameters": [
           {
             "name": "Authorization",
@@ -2987,7 +2987,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createLeaderGrant",
+        "operationId": "post_identity_departments_id_leader_grants",
         "parameters": [
           {
             "name": "Authorization",
@@ -3038,7 +3038,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "children",
+        "operationId": "get_identity_children",
         "parameters": [
           {
             "name": "Authorization",
@@ -3070,7 +3070,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "createChild",
+        "operationId": "post_identity_children",
         "parameters": [
           {
             "name": "Authorization",
@@ -3112,7 +3112,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "overrides",
+        "operationId": "get_identity_business_parameters_overrides",
         "parameters": [
           {
             "name": "Authorization",
@@ -3160,7 +3160,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "post_identity_business_parameters_overrides",
         "parameters": [
           {
             "name": "Authorization",
@@ -3202,7 +3202,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "freeze",
+        "operationId": "post_identity_business_parameters_freezes",
         "parameters": [
           {
             "name": "Authorization",
@@ -3244,7 +3244,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "ruleSets",
+        "operationId": "get_identity_approval_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3292,7 +3292,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "post_identity_approval_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3334,7 +3334,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "evaluate",
+        "operationId": "post_identity_approval_rules_evaluate",
         "parameters": [
           {
             "name": "Authorization",
@@ -3375,7 +3375,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "flows",
+        "operationId": "get_identity_approval_flows",
         "parameters": [
           {
             "name": "Authorization",
@@ -3423,7 +3423,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "post_identity_approval_flows",
         "parameters": [
           {
             "name": "Authorization",
@@ -3465,7 +3465,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "positions",
+        "operationId": "get_identity_approval_flows_positions",
         "parameters": [
           {
             "name": "Authorization",
@@ -3497,7 +3497,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "createPosition",
+        "operationId": "post_identity_approval_flows_positions",
         "parameters": [
           {
             "name": "Authorization",
@@ -3539,7 +3539,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "factAssignments",
+        "operationId": "get_identity_accounting_books_bookId_fact_assignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -3588,7 +3588,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "assignFact",
+        "operationId": "post_identity_accounting_books_bookId_fact_assignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -3639,7 +3639,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "switchMembership",
+        "operationId": "post_auth_switch",
         "parameters": [
           {
             "name": "Authorization",
@@ -3673,7 +3673,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "logout",
+        "operationId": "post_auth_logout",
         "parameters": [
           {
             "name": "Authorization",
@@ -3697,7 +3697,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "login",
+        "operationId": "post_auth_login",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3727,7 +3727,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "access",
+        "operationId": "get_internal_access",
         "parameters": [
           {
             "name": "X-Internal-Key",
@@ -3765,7 +3765,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "tenants",
+        "operationId": "get_identity_tenants",
         "parameters": [
           {
             "name": "Authorization",
@@ -3799,7 +3799,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "assignments",
+        "operationId": "get_identity_role_assignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -3842,7 +3842,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "scopeOptions",
+        "operationId": "get_identity_role_assignment_scopes",
         "parameters": [
           {
             "name": "Authorization",
@@ -3876,7 +3876,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "permissions",
+        "operationId": "get_identity_permissions",
         "parameters": [
           {
             "name": "Authorization",
@@ -3910,7 +3910,7 @@
         "tags": [
           "operation-log-controller"
         ],
-        "operationId": "search",
+        "operationId": "get_identity_operation_log",
         "parameters": [
           {
             "name": "Authorization",
@@ -4010,7 +4010,7 @@
         "tags": [
           "operation-log-controller"
         ],
-        "operationId": "detail",
+        "operationId": "get_identity_operation_log_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4050,7 +4050,7 @@
         "tags": [
           "operation-log-controller"
         ],
-        "operationId": "trace",
+        "operationId": "get_identity_operation_log_trace_requestId",
         "parameters": [
           {
             "name": "Authorization",
@@ -4089,7 +4089,7 @@
         "tags": [
           "operation-log-controller"
         ],
-        "operationId": "export",
+        "operationId": "get_identity_operation_log_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -4170,7 +4170,7 @@
         "tags": [
           "offboarding-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "get_identity_offboarding_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4210,7 +4210,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "sequences",
+        "operationId": "get_identity_numbering_sequences",
         "parameters": [
           {
             "name": "Authorization",
@@ -4252,7 +4252,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "conflicts",
+        "operationId": "get_identity_numbering_rules_conflicts",
         "parameters": [
           {
             "name": "Authorization",
@@ -4294,7 +4294,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "issued",
+        "operationId": "get_identity_numbering_issued",
         "parameters": [
           {
             "name": "Authorization",
@@ -4336,7 +4336,7 @@
         "tags": [
           "number-rule-controller"
         ],
-        "operationId": "entities",
+        "operationId": "get_identity_numbering_entities",
         "parameters": [
           {
             "name": "Authorization",
@@ -4370,7 +4370,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "effective",
+        "operationId": "get_identity_members_membershipId_effective_permissions",
         "parameters": [
           {
             "name": "Authorization",
@@ -4410,7 +4410,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "ledgerBooks",
+        "operationId": "get_identity_legal_entities_legalEntityId_ledger_books",
         "parameters": [
           {
             "name": "Authorization",
@@ -4450,7 +4450,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "options",
+        "operationId": "get_identity_dict_items_options_dictCode",
         "parameters": [
           {
             "name": "Authorization",
@@ -4492,7 +4492,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "history",
+        "operationId": "get_identity_dict_history",
         "parameters": [
           {
             "name": "Authorization",
@@ -4543,7 +4543,7 @@
         "tags": [
           "dictionary-controller"
         ],
-        "operationId": "catalog",
+        "operationId": "get_identity_dict_catalog",
         "parameters": [
           {
             "name": "Authorization",
@@ -4577,7 +4577,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "approvalChain",
+        "operationId": "get_identity_departments_id_approval_chain",
         "parameters": [
           {
             "name": "Authorization",
@@ -4626,7 +4626,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "departmentLeaders",
+        "operationId": "get_identity_department_leaders",
         "parameters": [
           {
             "name": "Authorization",
@@ -4660,7 +4660,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "definitions",
+        "operationId": "get_identity_business_parameters",
         "parameters": [
           {
             "name": "Authorization",
@@ -4694,7 +4694,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "history_1",
+        "operationId": "get_identity_business_parameters_history",
         "parameters": [
           {
             "name": "Authorization",
@@ -4744,7 +4744,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "frozen",
+        "operationId": "get_identity_business_parameters_freezes_documentType_documentNo",
         "parameters": [
           {
             "name": "Authorization",
@@ -4791,7 +4791,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "effective_1",
+        "operationId": "get_identity_business_parameters_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -4843,7 +4843,7 @@
         "tags": [
           "audit-controller"
         ],
-        "operationId": "search_1",
+        "operationId": "get_identity_audit",
         "parameters": [
           {
             "name": "Authorization",
@@ -4944,7 +4944,7 @@
         "tags": [
           "audit-controller"
         ],
-        "operationId": "detail_2",
+        "operationId": "get_identity_audit_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4984,7 +4984,7 @@
         "tags": [
           "audit-controller"
         ],
-        "operationId": "export_1",
+        "operationId": "get_identity_audit_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -5066,7 +5066,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "validate",
+        "operationId": "get_identity_approval_rules_id_validation",
         "parameters": [
           {
             "name": "Authorization",
@@ -5106,7 +5106,7 @@
         "tags": [
           "approval-rule-controller"
         ],
-        "operationId": "effectivePolicy",
+        "operationId": "get_identity_approval_rules_effective_policy",
         "parameters": [
           {
             "name": "Authorization",
@@ -5145,7 +5145,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "validate_1",
+        "operationId": "get_identity_approval_flows_id_validation",
         "parameters": [
           {
             "name": "Authorization",
@@ -5185,7 +5185,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "registrations",
+        "operationId": "get_identity_approval_flows_registrations",
         "parameters": [
           {
             "name": "Authorization",
@@ -5219,7 +5219,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "documentTypes",
+        "operationId": "get_identity_approval_flows_document_types",
         "parameters": [
           {
             "name": "Authorization",
@@ -5253,7 +5253,7 @@
         "tags": [
           "approval-flow-controller"
         ],
-        "operationId": "active",
+        "operationId": "get_identity_approval_flows_active",
         "parameters": [
           {
             "name": "Authorization",
@@ -5292,7 +5292,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "accountingBooks",
+        "operationId": "get_identity_accounting_books",
         "parameters": [
           {
             "name": "Authorization",
@@ -5335,7 +5335,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "session",
+        "operationId": "get_auth_session",
         "parameters": [
           {
             "name": "Authorization",
@@ -5366,7 +5366,7 @@
         "tags": [
           "identity-controller"
         ],
-        "operationId": "memberships",
+        "operationId": "get_auth_memberships",
         "parameters": [
           {
             "name": "Authorization",
@@ -5400,7 +5400,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "deleteLeaderProxy",
+        "operationId": "delete_identity_departments_id_leader_proxies_proxyId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5442,7 +5442,7 @@
         "tags": [
           "administration-controller"
         ],
-        "operationId": "deleteLeaderGrant",
+        "operationId": "delete_identity_departments_id_leader_grants_grantId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5484,7 +5484,7 @@
         "tags": [
           "ledger-book-controller"
         ],
-        "operationId": "releaseFact",
+        "operationId": "delete_identity_accounting_books_bookId_fact_assignments_assignmentId",
         "parameters": [
           {
             "name": "Authorization",

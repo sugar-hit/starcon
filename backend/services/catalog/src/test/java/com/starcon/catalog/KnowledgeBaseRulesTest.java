@@ -13,9 +13,8 @@ import org.junit.jupiter.api.Test;
 /**
  * 11.4.2.2 客服知识库与话术的纯规则测试。
  *
- * <p>本文件逐条钉死 R1~R5（口径写在 {@link KnowledgeBaseRules} 的类注释里），
- * 并对与 3.4.2.2（{@code DescriptionRules}）共有的纪律做<b>跨模块一致性回归断言</b>：
- * 两条资产线各自演进，但「多语言占位符必须一致」这条不能让其中一边先破。
+ * <p>本文件逐条钉死 R1~R5（口径写在 {@link KnowledgeBaseRules} 的类注释里）， 并对与 3.4.2.2（{@code
+ * DescriptionRules}）共有的纪律做<b>跨模块一致性回归断言</b>： 两条资产线各自演进，但「多语言占位符必须一致」这条不能让其中一边先破。
  */
 class KnowledgeBaseRulesTest {
 
@@ -23,19 +22,23 @@ class KnowledgeBaseRulesTest {
 
   @Test
   void 占位符完全一致时通过() {
-    assertThat(placeholderProblem("您好 {buyer_name}，订单 {order_no}", "Hi {buyer_name}, order {order_no}"))
+    assertThat(
+            placeholderProblem(
+                "您好 {buyer_name}，订单 {order_no}", "Hi {buyer_name}, order {order_no}"))
         .isNull();
   }
 
   @Test
   void 译文漏占位符必须报错并说清漏了哪个() {
-    String problem = placeholderProblem("您好 {buyer_name}，订单 {order_no}", "Hi buyer_name, order {order_no}");
+    String problem =
+        placeholderProblem("您好 {buyer_name}，订单 {order_no}", "Hi buyer_name, order {order_no}");
     assertThat(problem).contains("不一致").contains("buyer_name").contains("漏抄");
   }
 
   @Test
   void 译文多占位符必须报错并说清多了哪个() {
-    String problem = placeholderProblem("您好 {buyer_name}", "Hi {buyer_name}, tracking {tracking_no}");
+    String problem =
+        placeholderProblem("您好 {buyer_name}", "Hi {buyer_name}, tracking {tracking_no}");
     assertThat(problem).contains("不一致").contains("tracking_no").contains("永远填不上");
   }
 
@@ -48,7 +51,8 @@ class KnowledgeBaseRulesTest {
   @Test
   void 占位符集合与出现次数无关() {
     // {x} 出现三次与出现一次是同一个「缺失」：同一个占位符没有取到值，报三次没有信息量。
-    assertThat(placeholderProblem("请确认 {order_no}", "请确认 {order_no} {order_no} {order_no}")).isNull();
+    assertThat(placeholderProblem("请确认 {order_no}", "请确认 {order_no} {order_no} {order_no}"))
+        .isNull();
   }
 
   @Test
@@ -59,8 +63,7 @@ class KnowledgeBaseRulesTest {
   @Test
   void 占位符取花括号之间的任意非空内容() {
     // 与 3.4.2.2 同一宽松口径：不限定 ASCII 标识符，带空格的中文也是占位符。
-    assertThat(placeholdersOf("提示：{有空格} 与 {order_no}"))
-        .isEqualTo(Set.of("有空格", "order_no"));
+    assertThat(placeholdersOf("提示：{有空格} 与 {order_no}")).isEqualTo(Set.of("有空格", "order_no"));
     // 空花括号不是占位符。
     assertThat(placeholdersOf("{ } 与 {}")).isEmpty();
     // 没闭合的左花括号不算（后面没有配对的 }）。
@@ -147,8 +150,10 @@ class KnowledgeBaseRulesTest {
 
   @Test
   void 触发词数量超限必须报错() {
-    assertThat(keywordsProblem(String.join(",", java.util.stream.IntStream.range(0, 13)
-            .mapToObj(i -> "词" + i).toList())))
+    assertThat(
+            keywordsProblem(
+                String.join(
+                    ",", java.util.stream.IntStream.range(0, 13).mapToObj(i -> "词" + i).toList())))
         .contains("最多 12 个");
   }
 
@@ -294,7 +299,8 @@ class KnowledgeBaseRulesTest {
     // 每个枚举值都有中文标签（页面上不显示裸枚举值）。
     for (String type : ENTRY_TYPES) assertThat(entryTypeLabel(type)).isNotEqualTo(type);
     for (String outcome : USAGE_OUTCOMES) assertThat(outcomeLabel(outcome)).isNotEqualTo(outcome);
-    for (String status : REVIEW_STATUSES) assertThat(reviewStatusLabel(status)).isNotEqualTo(status);
+    for (String status : REVIEW_STATUSES)
+      assertThat(reviewStatusLabel(status)).isNotEqualTo(status);
   }
 
   @Test

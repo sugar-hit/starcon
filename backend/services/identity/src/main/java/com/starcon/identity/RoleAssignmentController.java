@@ -25,12 +25,12 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 17.3.2.1 角色分配。
  *
- * <p>蓝图对本模块的立场是一句话：<b>分配时必须同时设定范围</b>——「没有范围的角色等于全量权限，实践中极易误配」。
- * 这条不在应用层兜底，落在 V47 的库内约束上：{@code role_assignment} 的 scope_mode 去掉了默认值，
- * 非 ALL/SELF 的分配必须挂至少一条 {@code role_assignment_scope}，由延迟约束触发器在提交时强制。
- * 所以这里能写出来的分配，一定是带着范围的分配。
+ * <p>蓝图对本模块的立场是一句话：<b>分配时必须同时设定范围</b>——「没有范围的角色等于全量权限，实践中极易误配」。 这条不在应用层兜底，落在 V47 的库内约束上：{@code
+ * role_assignment} 的 scope_mode 去掉了默认值， 非 ALL/SELF 的分配必须挂至少一条 {@code
+ * role_assignment_scope}，由延迟约束触发器在提交时强制。 所以这里能写出来的分配，一定是带着范围的分配。
  *
  * <p>本模块负责三件事，与邻居划清边界：
+ *
  * <ul>
  *   <li><b>分配记录</b>：选角色、定生效时间、定作用范围（法人 / 店铺 / 仓库 / 部门）、撤销；
  *   <li><b>有效权限预览</b>：把一个成员身上同时生效的多条分配合并成一份权限清单，并说清合并方式；
@@ -40,8 +40,8 @@ import org.springframework.web.bind.annotation.*;
  * <p><b>不做什么</b>：数据范围如何落到行级过滤是 17.3.2.2 的引擎（catalog V3 的 scopeMode RLS），
  * 本模块只负责把范围引用**携带**在分配上并在预览里说清楚，不在这里重写一套过滤引擎。
  *
- * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系，
- * <b>不采信 {@code X-Tenant-Id} 头</b>；表级 FORCE RLS 再兜一层。
+ * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系， <b>不采信 {@code X-Tenant-Id} 头</b>；表级
+ * FORCE RLS 再兜一层。
  */
 @RestController
 @RequestMapping("/identity")
@@ -54,13 +54,15 @@ public class RoleAssignmentController {
    * 合并规则说明。
    *
    * <p>「多个角色并存时的合并规则」在蓝图里是要能被解释的，所以它不是一句注释，而是输出的一部分：
+   *
    * <ul>
    *   <li><b>权限取并集</b>——同一操作被多条有效分配覆盖时合并为一条权限，不因为角色多而互相抵消；
    *   <li><b>范围取并集</b>——各分配携带的范围对象去重合并，而不是各算各的交集；
    *   <li><b>全量范围吸收其余来源</b>——只要其中一条分配是租户内全部，整体按全量生效。
    * </ul>
-   * <p>刻意<b>不取交集</b>：成员同时有「店铺运营（范围=店铺 A）」和「仓库主管（范围=仓库 B）」时，
-   * 交集会让这个成员什么都看不到——并集才是「他确实同时负责 A 和 B」的正确答案。
+   *
+   * <p>刻意<b>不取交集</b>：成员同时有「店铺运营（范围=店铺 A）」和「仓库主管（范围=仓库 B）」时， 交集会让这个成员什么都看不到——并集才是「他确实同时负责 A 和
+   * B」的正确答案。
    */
   public static final String MERGE_RULE =
       "权限取并集：同一操作被多条有效分配覆盖时合并为一条；范围取并集：各分配携带的范围对象去重合并；"
@@ -126,8 +128,7 @@ public class RoleAssignmentController {
   public record RoleAssignmentScopeInput(
       @NotNull @Pattern(regexp = SCOPE_TYPES, message = "范围类型必须是法人、店铺、仓库或部门") String scopeType,
       @NotNull UUID scopeId,
-      @Schema(nullable = true, description = "范围名称；法人与部门由服务端覆写为真实编码，店铺与仓库必填")
-          @Size(max = 64)
+      @Schema(nullable = true, description = "范围名称；法人与部门由服务端覆写为真实编码，店铺与仓库必填") @Size(max = 64)
           String scopeCode) {}
 
   public record MemberRoleAssignmentInput(
@@ -144,7 +145,10 @@ public class RoleAssignmentController {
       String pageCode,
       String pageName,
       String action,
-      @Schema(description = "合并后的范围模式", allowableValues = {"ALL", "SELF", "DEPARTMENT"}) String mergedScopeMode,
+      @Schema(
+              description = "合并后的范围模式",
+              allowableValues = {"ALL", "SELF", "DEPARTMENT"})
+          String mergedScopeMode,
       List<String> sourceRoles,
       List<RoleAssignmentScopeView> scopeObjects,
       @Schema(
@@ -173,11 +177,11 @@ public class RoleAssignmentController {
   /**
    * 本服务可提供的范围候选：法人与部门。
    *
-   * <p>店铺与仓库的候选不在这里——它们的表属于 channel 与 warehouse 服务，本库没有，
-   * 建跨库外键是被 AGENTS.md 禁止的。页面分别向那两个服务取列表，取不到就只显示本服务能给的两类，
-   * 而不是拿一份假数据凑齐四类。
+   * <p>店铺与仓库的候选不在这里——它们的表属于 channel 与 warehouse 服务，本库没有， 建跨库外键是被 AGENTS.md
+   * 禁止的。页面分别向那两个服务取列表，取不到就只显示本服务能给的两类， 而不是拿一份假数据凑齐四类。
    */
-  public record RoleAssignmentScopeOption(String scopeType, UUID scopeId, String code, String name) {}
+  public record RoleAssignmentScopeOption(
+      String scopeType, UUID scopeId, String code, String name) {}
 
   @GetMapping("/role-assignment-scopes")
   public List<RoleAssignmentScopeOption> scopeOptions(
@@ -194,13 +198,19 @@ public class RoleAssignmentController {
                   a.tenantId()))
             options.add(
                 new RoleAssignmentScopeOption(
-                    "LEGAL_ENTITY", r.get("id", UUID.class), r.get("code", String.class),
+                    "LEGAL_ENTITY",
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
                     r.get("legal_name", String.class)));
           for (var r :
-              sql.fetch("select id,code,name from department where tenant_id=? order by code", a.tenantId()))
+              sql.fetch(
+                  "select id,code,name from department where tenant_id=? order by code",
+                  a.tenantId()))
             options.add(
                 new RoleAssignmentScopeOption(
-                    "DEPARTMENT", r.get("id", UUID.class), r.get("code", String.class),
+                    "DEPARTMENT",
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
                     r.get("name", String.class)));
           return options;
         });
@@ -210,11 +220,7 @@ public class RoleAssignmentController {
   public List<RoleAssignmentView> assignments(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam("membershipId") UUID membershipId) {
-    return call(
-        auth,
-        READ,
-        false,
-        a -> views(a, membershipId));
+    return call(auth, READ, false, a -> views(a, membershipId));
   }
 
   @PostMapping("/members/{membershipId}/role-assignments")
@@ -270,9 +276,8 @@ public class RoleAssignmentController {
   /**
    * 撤销分配。
    *
-   * <p>走 POST 而不是 DELETE：撤销是审计事件（要留下谁在什么时候撤的），不是资源消失，
-   * 与 V42 层级授权同一取舍。撤销后 assignment 仍然可查，只是 effectiveStatus 变成 REVOKED，
-   * 权限预览里也会显式说明它没有参与合并。
+   * <p>走 POST 而不是 DELETE：撤销是审计事件（要留下谁在什么时候撤的），不是资源消失， 与 V42 层级授权同一取舍。撤销后 assignment 仍然可查，只是
+   * effectiveStatus 变成 REVOKED， 权限预览里也会显式说明它没有参与合并。
    */
   @PostMapping("/members/{membershipId}/role-assignments/{roleId}/revoke")
   public void revoke(
@@ -303,8 +308,7 @@ public class RoleAssignmentController {
   /**
    * 有效权限预览（合并后）。
    *
-   * <p>蓝图要求输出「角色分配记录 + 有效权限预览（合并后）」。这个端点回答的是管理员配置时最需要知道的一件事：
-   * 这个人现在到底有什么权限、范围到哪、这条权限是哪几个角色合并出来的。
+   * <p>蓝图要求输出「角色分配记录 + 有效权限预览（合并后）」。这个端点回答的是管理员配置时最需要知道的一件事： 这个人现在到底有什么权限、范围到哪、这条权限是哪几个角色合并出来的。
    *
    * <p>未生效的分配也在结果里（{@code inactive}），否则「我明明配了这个角色怎么没权限」就只能靠猜。
    */
@@ -332,7 +336,10 @@ public class RoleAssignmentController {
    * <p>授权与组织变更仍要求租户所有者执行——这与 V42 层级授权同一道闸，不另立一套「谁能分配角色」的身份。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -343,8 +350,7 @@ public class RoleAssignmentController {
           var a = identity.resolve(auth);
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
-              a.grants()
-                  .stream()
+              a.grants().stream()
                   .anyMatch(
                       g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
@@ -385,11 +391,11 @@ public class RoleAssignmentController {
   /**
    * 应用层校验：与 V47 的库内约束互为防线，两边都留是因为它们回答的是不同的问题。
    *
-   * <p>库内约束回答「结构上是否自洽」（范围非空、ALL 不得挂对象、对象必须属于本租户）；
-   * 这里回答「这条配置在业务上说不说得通」，返回 400 而不是笼统的 409，
+   * <p>库内约束回答「结构上是否自洽」（范围非空、ALL 不得挂对象、对象必须属于本租户）； 这里回答「这条配置在业务上说不说得通」，返回 400 而不是笼统的 409，
    * 用户能直接看到哪一条填错了。
    */
-  private void validate(IdentityController.Access a, UUID membershipId, MemberRoleAssignmentInput input) {
+  private void validate(
+      IdentityController.Access a, UUID membershipId, MemberRoleAssignmentInput input) {
     var role = role(input.roleId());
     require(!role.get("code", String.class).equals("OWNER"), "请使用转移所有者操作");
     check(role.get("status", String.class).equals("ACTIVE"), "不能分配停用角色");
@@ -411,15 +417,11 @@ public class RoleAssignmentController {
       else
         // 店铺与仓库属于别的服务，本库无法校验存在性，只能要求调用方把名称说清楚，
         // 否则预览里会出现一个没有任何出处的范围名。
-        check(
-            scope.scopeCode() != null && !scope.scopeCode().isBlank(),
-            "店铺与仓库范围必须提供名称");
+        check(scope.scopeCode() != null && !scope.scopeCode().isBlank(), "店铺与仓库范围必须提供名称");
     }
 
     if (input.scopeMode().equals("ALL") || input.scopeMode().equals("SELF")) {
-      check(
-          input.scopes().isEmpty(),
-          "租户内全部与仅本人范围自带完整范围，无需再指定范围对象");
+      check(input.scopes().isEmpty(), "租户内全部与仅本人范围自带完整范围，无需再指定范围对象");
       return;
     }
     check(!input.scopes().isEmpty(), "本部门范围必须指定作用对象");
@@ -429,9 +431,7 @@ public class RoleAssignmentController {
     check(department != null, "本部门范围需要先设置成员部门");
     for (var scope : input.scopes())
       if (scope.scopeType().equals("DEPARTMENT"))
-        check(
-            scope.scopeId().equals(department),
-            "本部门范围只能落在该成员所属部门上");
+        check(scope.scopeId().equals(department), "本部门范围只能落在该成员所属部门上");
   }
 
   /**
@@ -439,14 +439,16 @@ public class RoleAssignmentController {
    *
    * <p>{@code id} 传 null 表示更新（复用既有行），否则新建一行。
    *
-   * <p>timestamptz 一律显式带 {@code ?::timestamptz} 且**不在 VALUES 列表末位**：
-   * jOOQ 对列表里的裸 {@code ?} 按 varchar 推断类型，{@code OffsetDateTime} 会被当字符串塞进去，
-   * 不抛异常、只让值偏掉；而把 cast 挪到末位会让 jOOQ 整体绑定错位一格。两个坑都踩过，顺序是刻意的。
+   * <p>timestamptz 一律显式带 {@code ?::timestamptz} 且**不在 VALUES 列表末位**： jOOQ 对列表里的裸 {@code ?} 按
+   * varchar 推断类型，{@code OffsetDateTime} 会被当字符串塞进去， 不抛异常、只让值偏掉；而把 cast 挪到末位会让 jOOQ
+   * 整体绑定错位一格。两个坑都踩过，顺序是刻意的。
    */
   private void write(
       IdentityController.Access a, UUID membershipId, MemberRoleAssignmentInput input, UUID id) {
-    sql.execute("delete from role_assignment_scope where membership_id=? and role_id=?",
-        membershipId, input.roleId());
+    sql.execute(
+        "delete from role_assignment_scope where membership_id=? and role_id=?",
+        membershipId,
+        input.roleId());
     if (id == null) {
       // 三列一起改：V47 的 CHECK 规定 ACTIVE 必须没有撤销痕迹、REVOKED 必须有撤销人，
       // 分两条语句改会在中间态撞约束。改内容即视为重新生效，所以同时清掉撤销痕迹。
@@ -484,7 +486,9 @@ public class RoleAssignmentController {
           input.roleId(),
           scope.scopeType(),
           scope.scopeId(),
-          scope.scopeCode() == null || scope.scopeCode().isBlank() ? scope.scopeType() : scope.scopeCode());
+          scope.scopeCode() == null || scope.scopeCode().isBlank()
+              ? scope.scopeType()
+              : scope.scopeCode());
   }
 
   /** 一个成员的分配列表。范围行一次取回后按角色分组，避免每条分配都发一次查询。 */
@@ -538,11 +542,11 @@ public class RoleAssignmentController {
   /**
    * 合并有效权限。
    *
-   * <p>合并在 Java 里显式做，而不是把多条分配塞进 SQL 交给数据库去猜：规则要能对着输出解释，
-   * 写成一句 {@code array_agg} 就只剩结果、没有依据了。取数仍然是一条显式 SQL（可审阅），
-   * 合并规则与 {@link #MERGE_RULE} 一一对应。
+   * <p>合并在 Java 里显式做，而不是把多条分配塞进 SQL 交给数据库去猜：规则要能对着输出解释， 写成一句 {@code array_agg}
+   * 就只剩结果、没有依据了。取数仍然是一条显式 SQL（可审阅）， 合并规则与 {@link #MERGE_RULE} 一一对应。
    */
-  private RoleAssignmentMergeView merge(String auth, IdentityController.Access a, UUID membershipId) {
+  private RoleAssignmentMergeView merge(
+      String auth, IdentityController.Access a, UUID membershipId) {
     var now = OffsetDateTime.now();
     var live = new ArrayList<org.jooq.Record>();
     var inactive = new ArrayList<RoleAssignmentInactiveReason>();
@@ -612,8 +616,7 @@ public class RoleAssignmentController {
         if (acc.sources.contains(roleCode))
           // 按 (类型,对象) 去重：同一条范围被两个角色各带一次时只应出现一次，
           // 它在预览里代表的是「范围并集里有哪些对象」，不是「被几个角色提到」。
-          acc.objects.putIfAbsent(
-              view.scopeType() + ":" + view.scopeId(), view);
+          acc.objects.putIfAbsent(view.scopeType() + ":" + view.scopeId(), view);
     }
 
     var permissions = new ArrayList<RoleAssignmentMergedPermission>();

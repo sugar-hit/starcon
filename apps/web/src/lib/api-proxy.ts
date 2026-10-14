@@ -472,139 +472,139 @@ const services: readonly {
     //   刻意**没有** DELETE 段：打印凭据（label_print_log）与任务明细都是 append-only 审计凭据，
     //   放行一个删除形状会让「能不能把一条打印痕迹抹掉」看起来是能。
     pattern:
-    // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
-    // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-    //
-    // 7.2.1.2 预占分配明细（只动 reservations 这一支，别人的分支一律没碰）：
-    //   reservations                              集合级（7.2.1.1 预占需求列表）
-    //   reservations/options                      字面量子路径，7.2.1.1
-    //   reservations/capabilities                 字面量子路径，7.2.1.1
-    //   reservations/{id}/allocations             本模块：分配明细行（GET）+ 登记分配（POST）
-    //   reservations/{id}/allocations/{id}/commit 本模块：承诺分配（POST）
-    //   reservations/{id}/allocations/{id}/consume 本模块：消耗出库（POST）
-    //   reservations/{id}/timeline                本模块：状态迁移时间线（GET）
-    //   reservations/{id}/allocation-options      本模块：下拉项（状态 / bucket 候选 / 登记目标）
-    //   reservations/{id}/capabilities            本模块：能力声明（释放与过期见下方 7.2.1.3 段落）
-    //
-    // 为什么 options / capabilities 排在 [0-9a-f-]+ 那支**前面**：
-    //   这两支是字面量子路径，而 [0-9a-f-]+ 能吃下任意十六进制串。若把字面量支放到后面，
-    //   `reservations/options` 会先被通配支判成「id=options 的明细」而放行 —— 白名单宁可少放，
-    //   不可放错：放错等于凭空开出一个后端不存在的端点入口。
-    // 为什么 [0-9a-f-]+ 支排在最后：
-    //   它必须排在所有字面量子路径之后，否则 options/capabilities/allocation-options/timeline
-    //   全都会被它当成「带 id 的子路径」提前匹配掉（正则 alternation 是**首个命中即返回**，
-    //   不是最长匹配 —— 这是与「贪婪」直觉相反、但在这一行正则上真实生效的行为）。
-    // reservations/{id}/entries **仍然不放行**：本链路的时间线叫 /timeline，
-    //   /entries 不是对外形状。放行一个后端不存在的形状，比 404 更糟。
-    //   （reservations/{id}/release 与 /expiry 由 7.2.1.3 就地加进同一支的最内层，
-    //     见下方 7.2.1.3 段落。）
-    //
-    // 尾部几条分支的相对位置（8.5.2.1 库位利用率 / 8.4.2.1 拆解单 / 8.2.2.1 上架 / 8.3.2.1 拣货）：
-    //   location-trees → location-utilization → location-allocations → assembly-orders
-    //   → disassembly-orders → putaway-tasks → pick-tasks
-    // 七条都是**字面量前缀**，两两之间不存在前缀歧义（`location-` 之后第 9 个字符就分叉：
-    //   trees 的 t / utilization 的 u / allocations 的 a；assembly / disassembly 在第 2 个字符
-    //   分叉；putaway-tasks 与 pick-tasks 在第 1 个字符就分叉），因此彼此调换不改变匹配结果。
-    // 仍保留各自车道当时选的位置，只为让下一条车道插进来时看得出该挨着谁：
-    //   location-utilization 挨着 location-trees（同属库位命名空间，8.5.2.1 选的位置）；
-    //   disassembly-orders 挨着 assembly-orders（8.4.2.1 选的位置）。
-    //
-    // ⚠️ 8.2.2.1（putaway-tasks）与 8.3.2.1（pick-tasks）**选的是同一个插入点**
-    //   （disassembly-orders 之后、当时的最末一条），两条车道必然互撞。
-    //   求并时必须**先后排成两条**（如上），**绝不能二选一** —— 少一条就是那个模块
-    //   在浏览器里静默 404，而 typecheck / lint / vitest / Playwright 全绿。
-    //   本行最终顺序按模块号升序（8.2.2.1 在 8.3.2.1 前）。
-    //
-    // 7.1.1.3 可用量计算（本行已并入集成头；下面这段留作后续车道的定位参照）：
-    //   本车道插在 warehouse 的**第一处** `inventory\/` 分组里，紧跟
-    //   `sellable-policies(...)` 之后、`stocktakes(...)` 之前：
-    //     ...|policies(?:\/[0-9a-f-]+)?|sellable-policies(...)|sellable(?:\/(?:capabilities|skus))?|stocktakes(...)
-    //   **只改了第一处**：该正则里 `inventory\/` 分组出现两次（内容逐字相同的历史重复），
-    //   alternation 首个命中即返回，所以第一处生效即足够，第二处不动以免求并时多一处冲突点。
-    //   为什么排在 sellable-policies 之后而不是之前：`sellable` 是 `sellable-policies` 的前缀，
-    //   放在其后即使 `sellable(?:\/(?:capabilities|skus))?` 只吃掉 `sellable` 五字符，
-    //   锚点 `$` 也会让它失败并回退到 sellable-policies 分支，结论无歧义。
-    //   为什么没有 `[0-9a-f-]+` 通配歧义：`s` / `l` 非十六进制字符，
-    //   `sellable` 永远匹配不上任何 `\/[0-9a-f-]+` 分支（`b`、`e`、`d`、`c`、`a`、`f` 是，
-    //   但整串匹配不上），所以不存在「被当成 id 凭空放行」的风险。
-    //   放行形状：GET /warehouse/inventory/sellable、/sellable/skus、/sellable/capabilities。
-    //   刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，算一次不构成一次库存业务。
-    //
-    // 7.2.1.3 释放与过期（**就地扩展 reservations 同一支**，别人的分支一条没碰）：
-    //   reservations/release-candidates          字面量集合级：过期候选清单 + 汇总
-    //   reservations/expiry-runs                 字面量集合级：批量过期清理的运行历史
-    //   reservations/expiry-runs/{id}            单次运行详情
-    //   reservations/release-records             字面量集合级：释放凭据（可按预占过滤）
-    //   reservations/release-options             字面量集合级：下拉项 + 过期规则
-    //   reservations/release-capabilities        字面量集合级：本链路的能力声明
-    //   reservations/expire-overdue              字面量集合级：批量过期清理（POST）
-    //   reservations/{id}/release                手动释放（POST）
-    //   reservations/{id}/expiry                 补写 / 清空过期时刻（POST）
-    //
-    //   本车道新增的 7 条**字面量子路径全部插在 [0-9a-f-]+ 那支之前**，位置在既有
-    //   `options` / `capabilities` 之后。7.2.1.2 的注释已写明原因：alternation 是
-    //   **首个命中即返回**，字面量支放到通配支后面，`release-candidates` 会被判成
-    //   「id=release-candidates 的明细」而凭空放行一个不存在的形状。
-    //   `release` / `expiry` 挂在 `[0-9a-f-]+(...)?` 最内层，与 allocations / timeline 同级。
-    //
-    // 8.2.2.1 上架任务 / 8.3.2.1 拣货任务：见上方「尾部几条分支的相对位置」段落 ——
-    //   两条都是**顶层**分支（warehouse/pick-tasks/... 、warehouse/putaway-tasks/...），
-    //   不在 inventory/ 之下，也不挂在 goods-receipts / outbound-orders 底下。
-    //   各自形状逐条列在自己的 allowlist 测试里，两条车道各自新增的分支都保留。
-    // 7.2.2.1 的 sellable-policies 刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，
-    //   算一次不构成一次库存业务（7.8.1.2 那条车道已查证：白名单按路径登记、不区分方法，
-    //   所以同一路径的 DELETE 会被转发到后端，「不能删」的防线因此在服务端而非白名单）。
-    // 8.3.2.2 波次与合并拣货：**顶层**分支 warehouse/pick-waves/...，不挂在 outbound-orders 之下 ——
-    //   一个波次横跨多张出库单，它不属于任何一张出库单（同 pick-tasks 的理由）。
-    //   放行形状：capabilities / rules / rules/{id}/retire / candidates / {id} /
-    //   {id}/release / {id}/complete / {id}/cancel / {id}/tasks/{taskId}/detach，加集合级 GET 与 POST。
-    //   **capabilities / rules / candidates 三个字面量子路径全部排在 [0-9a-f-]+ 之前**：
-    //   alternation 是首个命中即返回，而 `candidates` 的 c/a/n/d/i/t/e/s 全落在 [0-9a-f-] 里，
-    //   排到通配支后面会被判成「id=candidates 的波次」而凭空放行一个不存在的形状。
-    //   刻意**不含** pick-tasks/{id}/waves 那种形状：波次不是某一张拣货任务的子资源。
-    // 8.3.3.1 复核扫描：**顶层**分支 warehouse/recount-scans/...，不挂在 outbound-orders 之下 ——
-    //   一张出库单可以复核多次（判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立复核单，
-    //   挂成 outbound-orders/{id}/recount 会让契约看起来像「一张单只复核一次」。
-    //   放行形状：capabilities / rules / rules/{id} / rules/{id}/retire / {id} /
-    //   {id}/(open-box|scans|settle|complete|escalate|cancel) / {id}/exceptions/{exceptionId}/resolve，
-    //   加集合级 GET 与 POST。
-    //   **capabilities / rules 两个字面量子路径排在 [0-9a-f-]+ 之前**：alternation 是首个命中即返回。
-    //   **两段 uuid 的 exceptions/{exceptionId}/resolve 排在单段 {id} 组里用 \/ 分支匹配**，
-    //   否则会被 {id}(exceptions) 提前吃掉半截、把 resolve 留在匹配之外。
-    //   刻意**不含** pick-tasks/{id}/recount 那种形状：复核接的是「已完成拣货 + 出库单待复核」，
-    //   不接某一张拣货任务的子资源。
-    // 7.2.2.2 安全库存（safety-stock，17 个形状）：阈值分档（policies / policies\/effective /
-    //   policies\/{id} / policies\/{id}\/versions / policies\/{id}\/retire）、日均销量登记
-    //   （sales 读写）、评估与预警（evaluate / evaluations / alerts / alerts\/{id} /
-    //   alerts\/{id}\/acknowledge / alerts\/{id}\/resolve）、补货建议
-    //   （suggestions / suggestions\/{id}\/acknowledge / suggestions\/{id}\/dismiss）与能力声明
-    //   （capabilities）。
-    //   判别顺序：`capabilities` / `effective` / `sales` / `evaluate` / `evaluations` 这些
-    //   **字面量**子路径一律排在各自的 `[0-9a-f-]+` 通配**之前**判别，否则 `alerts/capabilities`
-    //   会被当成 `alerts/{id}` 凭空放行一个后端并不存在的形状。
-    //   刻意**不含** DELETE 段：阈值作废走 retire（关区间），预警与建议都要留档复盘，
-    //   能不能物理删掉的答案是不能 —— 服务端无 DELETE 端点（405）+ V114 的 REVOKE DELETE。
-    //   注意本文件的 pattern 是**按路径登记、不区分方法**的，所以读写形状合并在一支里。
-    //   刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，算一次不构成一次库存业务。
-    //
-    // shipment-handovers 是 8.3.4.1 发货交接的六个形状（追加在 packing-orders 之后，
-    // 仍是同一个 alternation 里的一个分支，没有改动任何既有分支）：
-    //   capabilities   能力与边界声明（含「轨迹归 10」「平台回写归 2」）
-    //   [id]           详情；[id]/completion 判据；[id]/waybills 登记承运商与运单号
-    //   [id]/confirm   交接确认 = 实发扣减 + 预占消费（同一事务）
-    //   [id]/cancel    作废（库存不动）
-    // 同样**不含** DELETE/PUT：交接是事实、流水是 append-only（V123 的守卫会拒），
-    // 作废一次就不能复活 —— 要更正就作废重开一张。
-    // 10.2.2.1 包裹详情：**顶层**分支 warehouse/parcels/...，不挂在 packing-orders 之下 ——
-    //   10 物流查轨迹、12 财务做运费归集时手里拿的是 parcel_id，不是作业单 id
-    //   （打包作业单可以失败退回复核再重打包，每次一张独立作业单，挂上去会让契约看起来
-    //   像「一个包裹只有一个作业单」）。
-    //   放行形状：capabilities / {id}。
-    //   **capabilities 排在 [0-9a-f-]+ 之前**：alternation 是首个命中即返回，而
-    //   capabilities 的 c/a/p 里 p 落在 [0-9a-f-] 之外，判别顺序错了会凭空放行一个
-    //   后端并不存在的「id=capabilities 的包裹」。
-    //   刻意**不含任何写操作**：本模块是 8.3.3.2 包裹凭据的只读视图，
-    //   包裹与明细项是事实（V121 的守卫直接拒已结束的打包单再改），没有 POST/PUT/DELETE 端点。
+      // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
+      // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
+      //
+      // 7.2.1.2 预占分配明细（只动 reservations 这一支，别人的分支一律没碰）：
+      //   reservations                              集合级（7.2.1.1 预占需求列表）
+      //   reservations/options                      字面量子路径，7.2.1.1
+      //   reservations/capabilities                 字面量子路径，7.2.1.1
+      //   reservations/{id}/allocations             本模块：分配明细行（GET）+ 登记分配（POST）
+      //   reservations/{id}/allocations/{id}/commit 本模块：承诺分配（POST）
+      //   reservations/{id}/allocations/{id}/consume 本模块：消耗出库（POST）
+      //   reservations/{id}/timeline                本模块：状态迁移时间线（GET）
+      //   reservations/{id}/allocation-options      本模块：下拉项（状态 / bucket 候选 / 登记目标）
+      //   reservations/{id}/capabilities            本模块：能力声明（释放与过期见下方 7.2.1.3 段落）
+      //
+      // 为什么 options / capabilities 排在 [0-9a-f-]+ 那支**前面**：
+      //   这两支是字面量子路径，而 [0-9a-f-]+ 能吃下任意十六进制串。若把字面量支放到后面，
+      //   `reservations/options` 会先被通配支判成「id=options 的明细」而放行 —— 白名单宁可少放，
+      //   不可放错：放错等于凭空开出一个后端不存在的端点入口。
+      // 为什么 [0-9a-f-]+ 支排在最后：
+      //   它必须排在所有字面量子路径之后，否则 options/capabilities/allocation-options/timeline
+      //   全都会被它当成「带 id 的子路径」提前匹配掉（正则 alternation 是**首个命中即返回**，
+      //   不是最长匹配 —— 这是与「贪婪」直觉相反、但在这一行正则上真实生效的行为）。
+      // reservations/{id}/entries **仍然不放行**：本链路的时间线叫 /timeline，
+      //   /entries 不是对外形状。放行一个后端不存在的形状，比 404 更糟。
+      //   （reservations/{id}/release 与 /expiry 由 7.2.1.3 就地加进同一支的最内层，
+      //     见下方 7.2.1.3 段落。）
+      //
+      // 尾部几条分支的相对位置（8.5.2.1 库位利用率 / 8.4.2.1 拆解单 / 8.2.2.1 上架 / 8.3.2.1 拣货）：
+      //   location-trees → location-utilization → location-allocations → assembly-orders
+      //   → disassembly-orders → putaway-tasks → pick-tasks
+      // 七条都是**字面量前缀**，两两之间不存在前缀歧义（`location-` 之后第 9 个字符就分叉：
+      //   trees 的 t / utilization 的 u / allocations 的 a；assembly / disassembly 在第 2 个字符
+      //   分叉；putaway-tasks 与 pick-tasks 在第 1 个字符就分叉），因此彼此调换不改变匹配结果。
+      // 仍保留各自车道当时选的位置，只为让下一条车道插进来时看得出该挨着谁：
+      //   location-utilization 挨着 location-trees（同属库位命名空间，8.5.2.1 选的位置）；
+      //   disassembly-orders 挨着 assembly-orders（8.4.2.1 选的位置）。
+      //
+      // ⚠️ 8.2.2.1（putaway-tasks）与 8.3.2.1（pick-tasks）**选的是同一个插入点**
+      //   （disassembly-orders 之后、当时的最末一条），两条车道必然互撞。
+      //   求并时必须**先后排成两条**（如上），**绝不能二选一** —— 少一条就是那个模块
+      //   在浏览器里静默 404，而 typecheck / lint / vitest / Playwright 全绿。
+      //   本行最终顺序按模块号升序（8.2.2.1 在 8.3.2.1 前）。
+      //
+      // 7.1.1.3 可用量计算（本行已并入集成头；下面这段留作后续车道的定位参照）：
+      //   本车道插在 warehouse 的**第一处** `inventory\/` 分组里，紧跟
+      //   `sellable-policies(...)` 之后、`stocktakes(...)` 之前：
+      //     ...|policies(?:\/[0-9a-f-]+)?|sellable-policies(...)|sellable(?:\/(?:capabilities|skus))?|stocktakes(...)
+      //   **只改了第一处**：该正则里 `inventory\/` 分组出现两次（内容逐字相同的历史重复），
+      //   alternation 首个命中即返回，所以第一处生效即足够，第二处不动以免求并时多一处冲突点。
+      //   为什么排在 sellable-policies 之后而不是之前：`sellable` 是 `sellable-policies` 的前缀，
+      //   放在其后即使 `sellable(?:\/(?:capabilities|skus))?` 只吃掉 `sellable` 五字符，
+      //   锚点 `$` 也会让它失败并回退到 sellable-policies 分支，结论无歧义。
+      //   为什么没有 `[0-9a-f-]+` 通配歧义：`s` / `l` 非十六进制字符，
+      //   `sellable` 永远匹配不上任何 `\/[0-9a-f-]+` 分支（`b`、`e`、`d`、`c`、`a`、`f` 是，
+      //   但整串匹配不上），所以不存在「被当成 id 凭空放行」的风险。
+      //   放行形状：GET /warehouse/inventory/sellable、/sellable/skus、/sellable/capabilities。
+      //   刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，算一次不构成一次库存业务。
+      //
+      // 7.2.1.3 释放与过期（**就地扩展 reservations 同一支**，别人的分支一条没碰）：
+      //   reservations/release-candidates          字面量集合级：过期候选清单 + 汇总
+      //   reservations/expiry-runs                 字面量集合级：批量过期清理的运行历史
+      //   reservations/expiry-runs/{id}            单次运行详情
+      //   reservations/release-records             字面量集合级：释放凭据（可按预占过滤）
+      //   reservations/release-options             字面量集合级：下拉项 + 过期规则
+      //   reservations/release-capabilities        字面量集合级：本链路的能力声明
+      //   reservations/expire-overdue              字面量集合级：批量过期清理（POST）
+      //   reservations/{id}/release                手动释放（POST）
+      //   reservations/{id}/expiry                 补写 / 清空过期时刻（POST）
+      //
+      //   本车道新增的 7 条**字面量子路径全部插在 [0-9a-f-]+ 那支之前**，位置在既有
+      //   `options` / `capabilities` 之后。7.2.1.2 的注释已写明原因：alternation 是
+      //   **首个命中即返回**，字面量支放到通配支后面，`release-candidates` 会被判成
+      //   「id=release-candidates 的明细」而凭空放行一个不存在的形状。
+      //   `release` / `expiry` 挂在 `[0-9a-f-]+(...)?` 最内层，与 allocations / timeline 同级。
+      //
+      // 8.2.2.1 上架任务 / 8.3.2.1 拣货任务：见上方「尾部几条分支的相对位置」段落 ——
+      //   两条都是**顶层**分支（warehouse/pick-tasks/... 、warehouse/putaway-tasks/...），
+      //   不在 inventory/ 之下，也不挂在 goods-receipts / outbound-orders 底下。
+      //   各自形状逐条列在自己的 allowlist 测试里，两条车道各自新增的分支都保留。
+      // 7.2.2.1 的 sellable-policies 刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，
+      //   算一次不构成一次库存业务（7.8.1.2 那条车道已查证：白名单按路径登记、不区分方法，
+      //   所以同一路径的 DELETE 会被转发到后端，「不能删」的防线因此在服务端而非白名单）。
+      // 8.3.2.2 波次与合并拣货：**顶层**分支 warehouse/pick-waves/...，不挂在 outbound-orders 之下 ——
+      //   一个波次横跨多张出库单，它不属于任何一张出库单（同 pick-tasks 的理由）。
+      //   放行形状：capabilities / rules / rules/{id}/retire / candidates / {id} /
+      //   {id}/release / {id}/complete / {id}/cancel / {id}/tasks/{taskId}/detach，加集合级 GET 与 POST。
+      //   **capabilities / rules / candidates 三个字面量子路径全部排在 [0-9a-f-]+ 之前**：
+      //   alternation 是首个命中即返回，而 `candidates` 的 c/a/n/d/i/t/e/s 全落在 [0-9a-f-] 里，
+      //   排到通配支后面会被判成「id=candidates 的波次」而凭空放行一个不存在的形状。
+      //   刻意**不含** pick-tasks/{id}/waves 那种形状：波次不是某一张拣货任务的子资源。
+      // 8.3.3.1 复核扫描：**顶层**分支 warehouse/recount-scans/...，不挂在 outbound-orders 之下 ——
+      //   一张出库单可以复核多次（判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立复核单，
+      //   挂成 outbound-orders/{id}/recount 会让契约看起来像「一张单只复核一次」。
+      //   放行形状：capabilities / rules / rules/{id} / rules/{id}/retire / {id} /
+      //   {id}/(open-box|scans|settle|complete|escalate|cancel) / {id}/exceptions/{exceptionId}/resolve，
+      //   加集合级 GET 与 POST。
+      //   **capabilities / rules 两个字面量子路径排在 [0-9a-f-]+ 之前**：alternation 是首个命中即返回。
+      //   **两段 uuid 的 exceptions/{exceptionId}/resolve 排在单段 {id} 组里用 \/ 分支匹配**，
+      //   否则会被 {id}(exceptions) 提前吃掉半截、把 resolve 留在匹配之外。
+      //   刻意**不含** pick-tasks/{id}/recount 那种形状：复核接的是「已完成拣货 + 出库单待复核」，
+      //   不接某一张拣货任务的子资源。
+      // 7.2.2.2 安全库存（safety-stock，17 个形状）：阈值分档（policies / policies\/effective /
+      //   policies\/{id} / policies\/{id}\/versions / policies\/{id}\/retire）、日均销量登记
+      //   （sales 读写）、评估与预警（evaluate / evaluations / alerts / alerts\/{id} /
+      //   alerts\/{id}\/acknowledge / alerts\/{id}\/resolve）、补货建议
+      //   （suggestions / suggestions\/{id}\/acknowledge / suggestions\/{id}\/dismiss）与能力声明
+      //   （capabilities）。
+      //   判别顺序：`capabilities` / `effective` / `sales` / `evaluate` / `evaluations` 这些
+      //   **字面量**子路径一律排在各自的 `[0-9a-f-]+` 通配**之前**判别，否则 `alerts/capabilities`
+      //   会被当成 `alerts/{id}` 凭空放行一个后端并不存在的形状。
+      //   刻意**不含** DELETE 段：阈值作废走 retire（关区间），预警与建议都要留档复盘，
+      //   能不能物理删掉的答案是不能 —— 服务端无 DELETE 端点（405）+ V114 的 REVOKE DELETE。
+      //   注意本文件的 pattern 是**按路径登记、不区分方法**的，所以读写形状合并在一支里。
+      //   刻意**不含** DELETE/PUT/POST —— 可售量是纯读算式，算一次不构成一次库存业务。
+      //
+      // shipment-handovers 是 8.3.4.1 发货交接的六个形状（追加在 packing-orders 之后，
+      // 仍是同一个 alternation 里的一个分支，没有改动任何既有分支）：
+      //   capabilities   能力与边界声明（含「轨迹归 10」「平台回写归 2」）
+      //   [id]           详情；[id]/completion 判据；[id]/waybills 登记承运商与运单号
+      //   [id]/confirm   交接确认 = 实发扣减 + 预占消费（同一事务）
+      //   [id]/cancel    作废（库存不动）
+      // 同样**不含** DELETE/PUT：交接是事实、流水是 append-only（V123 的守卫会拒），
+      // 作废一次就不能复活 —— 要更正就作废重开一张。
+      // 10.2.2.1 包裹详情：**顶层**分支 warehouse/parcels/...，不挂在 packing-orders 之下 ——
+      //   10 物流查轨迹、12 财务做运费归集时手里拿的是 parcel_id，不是作业单 id
+      //   （打包作业单可以失败退回复核再重打包，每次一张独立作业单，挂上去会让契约看起来
+      //   像「一个包裹只有一个作业单」）。
+      //   放行形状：capabilities / {id}。
+      //   **capabilities 排在 [0-9a-f-]+ 之前**：alternation 是首个命中即返回，而
+      //   capabilities 的 c/a/p 里 p 落在 [0-9a-f-] 之外，判别顺序错了会凭空放行一个
+      //   后端并不存在的「id=capabilities 的包裹」。
+      //   刻意**不含任何写操作**：本模块是 8.3.3.2 包裹凭据的只读视图，
+      //   包裹与明细项是事实（V121 的守卫直接拒已结束的打包单再改），没有 POST/PUT/DELETE 端点。
       /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|sellable(?:\/(?:capabilities|skus))?|safety-stock(?:\/capabilities|\/policies(?:\/effective|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|\/sales|\/evaluate|\/alerts(?:\/[0-9a-f-]+(?:\/(?:acknowledge|resolve))?)?|\/suggestions(?:\/[0-9a-f-]+\/(?:acknowledge|dismiss))?|\/evaluations)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|reservations(?:\/options|\/capabilities|\/release-candidates|\/expiry-runs(?:\/[0-9a-f-]+)?|\/release-records|\/release-options|\/release-capabilities|\/expire-overdue|\/[0-9a-f-]+(?:\/allocations(?:\/[0-9a-f-]+\/(?:commit|consume))?|\/timeline|\/allocation-options|\/capabilities|\/release|\/expiry)?)?|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities))?|warehouses|legal-entities|skus|quality-statuses|locations|labor(?:\/capabilities|\/report|\/ranking|\/trend|\/work-tasks(?:\/[0-9a-f-]+(?:\/(?:assign|start|complete|exception))?)?)?|goods-receipts(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:movements|receive|close))?)?|goods-receipt-discrepancies(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:evidence|decide|claim(?:\/(?:submit|withdraw))?|close))?)?|processing-orders(?:\/capabilities|\/boundary|\/issues|\/executions)?|first-mile-shipments(?:\/capabilities|\/source-candidates|\/[0-9a-f-]+(?:\/(?:transit-legs|confirm|dispatch|cancel))?)?|transit-trackings(?:\/capabilities|\/alerts(?:\/evaluate-all|\/[0-9a-f-]+\/(?:acknowledge|close))?|\/thresholds(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:events|receipt|close)|\/alerts\/evaluate)?)?|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints))?)?|lots|customs-declarations(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:documents|results|events|submit-for-review|review|reject-review|withdraw-review|submit|amend|cancel)|\/documents\/[0-9a-f-]+\/finalize)?)?|duty-taxes(?:\/capabilities|\/variance-analysis|\/rates(?:\/[0-9a-f-]+)?|\/[0-9a-f-]+(?:\/(?:lines|payments|variances|recalculate|lock|void))?)?|trade-documents(?:\/capabilities|\/rules(?:\/[0-9a-f-]+)?|\/templates(?:\/[0-9a-f-]+)?|\/certifications(?:\/[0-9a-f-]+)?|\/preference-rules(?:\/[0-9a-f-]+)?|\/preference-confirmations|\/reminders(?:\/[0-9a-f-]+\/resolve)?|\/[0-9a-f-]+(?:\/(?:documents|checks|reminders|events|submit-for-review|review|reject-review|withdraw-review|check|submit|acknowledge|send-back|cancel)|\/documents\/[0-9a-f-]+(?:\/finalize|\/preference-claim|\/preference-confirm))?)?|inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|vmi(?:\/capabilities|\/agreements(?:\/[0-9a-f-]+(?:\/(?:activate|suspend|close|water-levels|settlement-window|audit|sales|lines(?:\/[0-9a-f-]+\/sales)?|replenishment-signals|snapshots|settlements(?:\/[0-9a-f-]+)?))?)?|\/replenishment-signals(?:\/[0-9a-f-]+(?:\/(?:acknowledge|dispatch|fulfil|cancel))?)?|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?)|outbound-orders(?:\/(?:capabilities|detail-capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+(?:\/transition)?)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|allocation-priority(?:\/(?:capabilities|calculation|runs|resolutions|floors(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?)|facilities(?:\/(?:options|capabilities)|\/[0-9a-f-]+(?:\/(?:locations|entrypoints|config(?:\/(?:options|impacts|changes)|\/(?:shifts)(?:\/[0-9a-f-]+)?)?))?)?|location-trees(?:\/capabilities|\/[0-9a-f-]+(?:\/locations(?:\/[0-9a-f-]+)?)?)|location-utilization(?:\/capabilities|\/[0-9a-f-]+(?:\/locations\/[0-9a-f-]+)?)|location-allocations(?:\/(?:capabilities|recommend|list|by-receipt\/[0-9a-f-]+|[0-9a-f-]+(?:\/release)?))?|assembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:issue|cancel))?)?|disassembly-orders(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?|putaway-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|start|scan|complete|cancel))?)?|pick-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|picks|exceptions(?:\/[0-9a-f-]+\/resolve)?|complete|reopen|cancel))?)?|pick-waves(?:\/capabilities|\/rules(?:\/[0-9a-f-]+\/retire)?|\/candidates|\/[0-9a-f-]+(?:\/(?:release|complete|cancel)|\/tasks\/[0-9a-f-]+\/detach)?)?|recount-scans(?:\/capabilities|\/rules(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/(?:open-box|scans|settle|complete|escalate|cancel)|\/exceptions\/[0-9a-f-]+\/resolve)?)?|packing-orders(?:\/capabilities|\/materials(?:\/[0-9a-f-]+(?:\/retire)?)?|\/[0-9a-f-]+(?:\/completion|\/parcels(?:\/[0-9a-f-]+\/(?:items|measure|label))?|\/complete|\/fail|\/cancel)?)?|shipment-handovers(?:\/capabilities|\/[0-9a-f-]+(?:\/completion|\/waybills|\/confirm|\/cancel)?)?|parcels(?:\/capabilities|\/[0-9a-f-]+))$/,
   },
   {
@@ -696,37 +696,37 @@ const services: readonly {
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern:
-    // fulfillment/dropship-tracking 是 9.6.1.3 代发履约跟踪与异常（**新的一组**，
-    // 与上面两组并列而不是并进去）：配置说「走不走代发」，代发单说「怎么下的」，
-    // 跟踪说「现在到哪了、卡在哪、怎么处置」。三件事混在一组里，权限与日志分不开。
-    //   capabilities     能力与上下游可用性声明（含三条检出规则的自述）
-    //   policy           检出策略（租户级单例）：集合读 + POST 维护
-    //   trackings        集合读 + POST 建单 + {uuid} 详情
-    //   trackings/{uuid}/supplier-leg  录入供应商段（发货 / 轨迹 / 妥投）
-    //   trackings/{uuid}/own-leg       录入我方段（交运 / 妥投）
-    //   exceptions       异常清单（集合读）；exceptions/evaluate 是跑检出规则
-    //   exceptions/{uuid}/dispose      处置（催供应商 / 改自营发货 / 发起退款）
-    //   exceptions/{uuid}/dismiss      判为误报（必须写明理由）
-    //   dispositions/{uuid}/status     处置状态流转
-    //   tasks            待回传 / 待处置任务（集合读）
-    //   tasks/{uuid}/claim             下游领取
-    //   tasks/{uuid}/complete          下游回执（受理 / 失败）
-    //   events           事件流（集合读；append-only，**没有**任何写形状）
-    // 判别顺序：字面量子路径（capabilities / policy / events / exceptions/evaluate）
-    // 排在 {uuid} 分支之前，否则会被 [0-9a-f-]+ 分支吃掉半截。
-    // 刻意**没有** DELETE：跟踪事件流与异常判定证据都是凭据，删掉等于抹掉历史。
-    // b2b-orders 是 9.7.1.1 批发订单与账期（卷 09，本车道追加这一支）：
-    //   capabilities          能力与上下游可用性
-    //   customer-terms        客户档案投影（3.6.1.2 → trade 侧只读投影）：GET 集合 + PUT upsert
-    //   price-books           阶梯价投影（05 价目 5.1.1.2 的 trade 侧投影）：GET 集合 + PUT upsert + {uuid} 详情
-    //   price-quote           阶梯价试算（POST，只读不落库）
-    //   receivables           账期应收列表（只读；核销属于 12 财务，本服务不提供写形状）
-    //   {uuid}                订单详情
-    //   {uuid}/confirm        确认订单（**确认不产生应收**）
-    //   {uuid}/shipments      发货确认 —— 应收的**唯一**产生入口
-    //   {uuid}/invoice-requests 登记开票需求
-    // 判别顺序：字面量子路径排在 {uuid} 之前，否则会被 [0-9a-f-]+ 分支吃掉。
-    // 裸路径 b2b-orders 与集合读共用一支（本文件的 pattern 按路径登记、不区分方法）。
+      // fulfillment/dropship-tracking 是 9.6.1.3 代发履约跟踪与异常（**新的一组**，
+      // 与上面两组并列而不是并进去）：配置说「走不走代发」，代发单说「怎么下的」，
+      // 跟踪说「现在到哪了、卡在哪、怎么处置」。三件事混在一组里，权限与日志分不开。
+      //   capabilities     能力与上下游可用性声明（含三条检出规则的自述）
+      //   policy           检出策略（租户级单例）：集合读 + POST 维护
+      //   trackings        集合读 + POST 建单 + {uuid} 详情
+      //   trackings/{uuid}/supplier-leg  录入供应商段（发货 / 轨迹 / 妥投）
+      //   trackings/{uuid}/own-leg       录入我方段（交运 / 妥投）
+      //   exceptions       异常清单（集合读）；exceptions/evaluate 是跑检出规则
+      //   exceptions/{uuid}/dispose      处置（催供应商 / 改自营发货 / 发起退款）
+      //   exceptions/{uuid}/dismiss      判为误报（必须写明理由）
+      //   dispositions/{uuid}/status     处置状态流转
+      //   tasks            待回传 / 待处置任务（集合读）
+      //   tasks/{uuid}/claim             下游领取
+      //   tasks/{uuid}/complete          下游回执（受理 / 失败）
+      //   events           事件流（集合读；append-only，**没有**任何写形状）
+      // 判别顺序：字面量子路径（capabilities / policy / events / exceptions/evaluate）
+      // 排在 {uuid} 分支之前，否则会被 [0-9a-f-]+ 分支吃掉半截。
+      // 刻意**没有** DELETE：跟踪事件流与异常判定证据都是凭据，删掉等于抹掉历史。
+      // b2b-orders 是 9.7.1.1 批发订单与账期（卷 09，本车道追加这一支）：
+      //   capabilities          能力与上下游可用性
+      //   customer-terms        客户档案投影（3.6.1.2 → trade 侧只读投影）：GET 集合 + PUT upsert
+      //   price-books           阶梯价投影（05 价目 5.1.1.2 的 trade 侧投影）：GET 集合 + PUT upsert + {uuid} 详情
+      //   price-quote           阶梯价试算（POST，只读不落库）
+      //   receivables           账期应收列表（只读；核销属于 12 财务，本服务不提供写形状）
+      //   {uuid}                订单详情
+      //   {uuid}/confirm        确认订单（**确认不产生应收**）
+      //   {uuid}/shipments      发货确认 —— 应收的**唯一**产生入口
+      //   {uuid}/invoice-requests 登记开票需求
+      // 判别顺序：字面量子路径排在 {uuid} 之前，否则会被 [0-9a-f-]+ 分支吃掉。
+      // 裸路径 b2b-orders 与集合读共用一支（本文件的 pattern 按路径登记、不区分方法）。
       /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?)|sales-orders\/change\/(?:capabilities|platform-rules(?:\/[0-9a-f-]+)?|fulfillment-progress|requests(?:\/[0-9a-f-]+(?:\/(?:status|writeback-tasks))?)?|cancellations(?:\/[0-9a-f-]+(?:\/(?:status|warehouse-tasks(?:\/[0-9a-f-]+\/status)?|writeback-tasks))?)?|writeback-tasks\/[0-9a-f-]+\/status)|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?)$/,
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
@@ -777,8 +777,11 @@ function resolve(path: string) {
   return null;
 }
 
-export async function proxy(request: NextRequest, context: { params: { path: string[] } }) {
-  const path = context.params.path.join('/');
+export async function proxy(
+  request: NextRequest,
+  context: { params: { path: string[] } | Promise<{ path: string[] }> },
+) {
+  const path = (await context.params).path.join('/');
   const target = resolve(path);
   if (!target) return NextResponse.json({ message: '接口不存在' }, { status: 404 });
   if (
@@ -857,4 +860,12 @@ export async function proxy(request: NextRequest, context: { params: { path: str
   } catch {
     return NextResponse.json({ message: '服务暂时无法连接，请稍后重试' }, { status: 503 });
   }
+}
+
+/** Next.js route handlers receive asynchronously resolved route parameters. */
+export async function routeProxy(
+  request: NextRequest,
+  context: { params: Promise<{ path: string[] }> },
+) {
+  return proxy(request, context);
 }

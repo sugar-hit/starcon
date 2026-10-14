@@ -30,22 +30,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.5.2.1 库位利用率。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住八件「错了会误导人」的事：
  *
  * <ul>
- *   <li><b>容量利用率真用 capacity 列。</b>库位容量是 8.1.2.1（V105）补的
- *       {@code warehouse_location.capacity}，本模块读它算分母 —— 不是拿一个占位容积常量。
- *       用例里同一个库位改一次 capacity，报表里的利用率必须跟着变。
- *   <li><b>三处分母边界一律 null，绝不 NaN、绝不假装 100%。</b>容量未量 / 容量为 0 /
- *       在手为 0，三种情况的断言都单独写死。
- *   <li><b>出库量摊分配平。</b>{@code Σ库位摊分出库量 == 仓库真实出库量} ——
- *       同一 SKU 散在两个库位时最容易被重复计数，这条断言就是防它的。
+ *   <li><b>容量利用率真用 capacity 列。</b>库位容量是 8.1.2.1（V105）补的 {@code
+ *       warehouse_location.capacity}，本模块读它算分母 —— 不是拿一个占位容积常量。 用例里同一个库位改一次 capacity，报表里的利用率必须跟着变。
+ *   <li><b>三处分母边界一律 null，绝不 NaN、绝不假装 100%。</b>容量未量 / 容量为 0 / 在手为 0，三种情况的断言都单独写死。
+ *   <li><b>出库量摊分配平。</b>{@code Σ库位摊分出库量 == 仓库真实出库量} —— 同一 SKU 散在两个库位时最容易被重复计数，这条断言就是防它的。
  *   <li><b>NUMERIC 精确</b>：0.1×3 读回必须是 0.3，不是 0.30000000000000004。
- *   <li><b>热力图是真数据驱动</b>：强度来自利用率/在手相对值，metric 字段说清来源，
- *       且「容量未量」与「量过」走不同 metric。
+ *   <li><b>热力图是真数据驱动</b>：强度来自利用率/在手相对值，metric 字段说清来源， 且「容量未量」与「量过」走不同 metric。
  *   <li><b>租户隔离三断言</b>实跑 + FORCE RLS 逐张断言。
  *   <li><b>建议由真实数据触发</b>：没有触发条件就不该出现（空仓不该冒出任何建议）。
  *   <li><b>合计不受筛选影响</b>。
@@ -60,16 +55,25 @@ class LocationUtilizationIntegrationTest {
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
-      List.of("warehouse.facilities.read", "warehouse.facilities.create", "warehouse.facilities.update");
+      List.of(
+          "warehouse.facilities.read",
+          "warehouse.facilities.create",
+          "warehouse.facilities.update");
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-location-utilization-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-location-utilization-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -79,7 +83,8 @@ class LocationUtilizationIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -94,7 +99,8 @@ class LocationUtilizationIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -161,20 +167,37 @@ class LocationUtilizationIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 6; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 7),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 8), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", "Asia/Shanghai", idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 8),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                "Asia/Shanghai",
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -194,8 +217,11 @@ class LocationUtilizationIntegrationTest {
 
   LocationUtilizationReport report(UUID tenant) {
     return access.run(
-        actorFor(tenant), "warehouse.facilities.read",
-        () -> service.report(wh(tenant), new LocationUtilizationQuery(null, null, null, null, null, null)));
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () ->
+            service.report(
+                wh(tenant), new LocationUtilizationQuery(null, null, null, null, null, null)));
   }
 
   LocationUtilizationReport report(UUID tenant, LocationUtilizationQuery q) {
@@ -207,90 +233,127 @@ class LocationUtilizationIntegrationTest {
 
   UUID insertLocation(
       UUID tenant, String code, String type, boolean pickable, BigDecimal capacity) {
-    return access.run(actorFor(tenant), "warehouse.facilities.read", () -> {
-      UUID id = UUID.randomUUID();
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
-              + "pickable,capacity) values(?,?,?,?,?,?,'ACTIVE',?,cast(? as numeric))",
-          id, tenant, wh(tenant), code, code + " 位", type, pickable,
-          capacity == null
-              ? DSL.val((BigDecimal) null, BigDecimal.class)
-              : DSL.val(capacity, BigDecimal.class));
-      return id;
-    });
+    return access.run(
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () -> {
+          UUID id = UUID.randomUUID();
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
+                  + "pickable,capacity) values(?,?,?,?,?,?,'ACTIVE',?,cast(? as numeric))",
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type,
+              pickable,
+              capacity == null
+                  ? DSL.val((BigDecimal) null, BigDecimal.class)
+                  : DSL.val(capacity, BigDecimal.class));
+          return id;
+        });
   }
 
   /**
    * 落一条 bucket（占用来源）。
    *
-   * <p><b>同一 SKU 重复调用时复用同一条 balance</b>，不是新建一条 ——
-   * {@code inventory_balance} 的唯一键是 {@code (tenant, sku, warehouse, legal_entity, quality)}，
-   * 一个「仓库 × SKU」只有一个可用量决策单位（V1 的分层纪律），库位维度的拆分在 bucket 上。
+   * <p><b>同一 SKU 重复调用时复用同一条 balance</b>，不是新建一条 —— {@code inventory_balance} 的唯一键是 {@code (tenant,
+   * sku, warehouse, legal_entity, quality)}， 一个「仓库 × SKU」只有一个可用量决策单位（V1 的分层纪律），库位维度的拆分在 bucket 上。
    * 复用它才能造出「一个 SKU 散在多个库位」这个真实形状，也才测得到摊分配平。
    */
   void bucket(UUID tenant, UUID location, UUID skuId, String quantity) {
-    access.run(actorFor(tenant), "warehouse.facilities.read", () -> {
-      // fetchOne + get(0, ...)：jOOQ 的 fetchValue(sql, Class, args) 重载在本仓库的
-      // jOOQ 版本上会把 Class 当成绑定值（报 "Type class java.lang.Class is not supported"）。
-      var found =
-          sql.fetchOne(
-              """
+    access.run(
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () -> {
+          // fetchOne + get(0, ...)：jOOQ 的 fetchValue(sql, Class, args) 重载在本仓库的
+          // jOOQ 版本上会把 Class 当成绑定值（报 "Type class java.lang.Class is not supported"）。
+          var found =
+              sql.fetchOne(
+                  """
               select id from inventory_balance
                where tenant_id = current_setting('app.current_tenant', true)::uuid
                  and sku_id = ? and warehouse_id = ?
               """,
-              skuId, wh(tenant));
-      UUID balanceId = found == null ? null : found.get(0, UUID.class);
-      if (balanceId == null) {
-        balanceId = UUID.randomUUID();
-        sql.execute(
-            "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-                + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-            balanceId, tenant, skuId, wh(tenant), idFor(tenant, 1), idFor(tenant, 7),
-            new BigDecimal(quantity));
-      } else {
-        // 复用既有 balance 时把在手量累加上，保持 V2 的延迟守恒式 Σbucket == balance 成立。
-        sql.execute(
-            "update inventory_balance set on_hand = on_hand + cast(? as numeric) "
-                + "where tenant_id = current_setting('app.current_tenant', true)::uuid and id = ?",
-            new BigDecimal(quantity), balanceId);
-      }
-      sql.execute(
-          "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
-              + "quality_status_id,balance_id,on_hand,reserved,last_movement_at) "
-              + "values(?,?,?,?,?,?,?,?,?,0::numeric,?::timestamptz)",
-          UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), location,
-          idFor(tenant, 7), balanceId, new BigDecimal(quantity), daysAgo(30));
-      return null;
-    });
+                  skuId,
+                  wh(tenant));
+          UUID balanceId = found == null ? null : found.get(0, UUID.class);
+          if (balanceId == null) {
+            balanceId = UUID.randomUUID();
+            sql.execute(
+                "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                    + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
+                balanceId,
+                tenant,
+                skuId,
+                wh(tenant),
+                idFor(tenant, 1),
+                idFor(tenant, 7),
+                new BigDecimal(quantity));
+          } else {
+            // 复用既有 balance 时把在手量累加上，保持 V2 的延迟守恒式 Σbucket == balance 成立。
+            sql.execute(
+                "update inventory_balance set on_hand = on_hand + cast(? as numeric) "
+                    + "where tenant_id = current_setting('app.current_tenant', true)::uuid and id = ?",
+                new BigDecimal(quantity),
+                balanceId);
+          }
+          sql.execute(
+              "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
+                  + "quality_status_id,balance_id,on_hand,reserved,last_movement_at) "
+                  + "values(?,?,?,?,?,?,?,?,?,0::numeric,?::timestamptz)",
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              location,
+              idFor(tenant, 7),
+              balanceId,
+              new BigDecimal(quantity),
+              daysAgo(30));
+          return null;
+        });
   }
 
   /**
    * 追加一条**真实出库分录**（inventory_transaction kind='SHIPMENT' + inventory_entry）。
    *
-   * <p>{@code on_hand_delta} 为负数（出库方向）。本模块只读这两张表，不改任何数量 ——
-   * 所以这是「已经发生过的出库」这一既成事实，与 bucket 上的当前余量互不干扰。
+   * <p>{@code on_hand_delta} 为负数（出库方向）。本模块只读这两张表，不改任何数量 —— 所以这是「已经发生过的出库」这一既成事实，与 bucket
+   * 上的当前余量互不干扰。
    */
   void shipment(UUID tenant, UUID skuId, String quantity, int daysAgo) {
-    access.run(actorFor(tenant), "warehouse.facilities.read", () -> {
-      var balance =
-          sql.fetchOne(
-              "select id from inventory_balance where tenant_id = "
-                  + "current_setting('app.current_tenant', true)::uuid and sku_id = ? and warehouse_id = ?",
-              skuId, wh(tenant));
-      if (balance == null) return null;
-      UUID txId = UUID.randomUUID();
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes) "
-              + "values(?,?,'SHIPMENT','OUTBOUND_ORDER',?,?::timestamptz,?,'库位利用率测试出库')",
-          txId, tenant, UUID.randomUUID(), daysAgo(daysAgo), user);
-      sql.execute(
-          "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta) "
-              + "values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenant, txId, balance.get("id", UUID.class),
-          new BigDecimal(quantity).negate());
-      return null;
-    });
+    access.run(
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () -> {
+          var balance =
+              sql.fetchOne(
+                  "select id from inventory_balance where tenant_id = "
+                      + "current_setting('app.current_tenant', true)::uuid and sku_id = ? and warehouse_id = ?",
+                  skuId,
+                  wh(tenant));
+          if (balance == null) return null;
+          UUID txId = UUID.randomUUID();
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes) "
+                  + "values(?,?,'SHIPMENT','OUTBOUND_ORDER',?,?::timestamptz,?,'库位利用率测试出库')",
+              txId,
+              tenant,
+              UUID.randomUUID(),
+              daysAgo(daysAgo),
+              user);
+          sql.execute(
+              "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta) "
+                  + "values(?,?,?,?,?,0)",
+              UUID.randomUUID(),
+              tenant,
+              txId,
+              balance.get("id", UUID.class),
+              new BigDecimal(quantity).negate());
+          return null;
+        });
   }
 
   static OffsetDateTime daysAgo(int d) {
@@ -304,23 +367,32 @@ class LocationUtilizationIntegrationTest {
     UUID loc = insertLocation(a, "LOC-A", "STORAGE", true, new BigDecimal("10"));
     bucket(a, loc, sku(a, 2), "4");
 
-    var row = report(a).locations().stream()
-        .filter(r -> r.code().equals("LOC-A")).findFirst().orElseThrow();
+    var row =
+        report(a).locations().stream()
+            .filter(r -> r.code().equals("LOC-A"))
+            .findFirst()
+            .orElseThrow();
     assertThat(row.capacity()).isEqualByComparingTo(new BigDecimal("10"));
     assertThat(row.onHand()).isEqualByComparingTo(new BigDecimal("4"));
     assertThat(row.capacityUtilization()).isEqualByComparingTo(new BigDecimal("0.400000"));
     assertThat(row.capacityMeasured()).isTrue();
 
     // 同一批货，改容量 → 利用率必须跟着变。写死容积常量的实现会在这里露馅。
-    access.run(actorA, "warehouse.facilities.read", () -> {
-      sql.execute(
-          "update warehouse_location set capacity = cast(5 as numeric) "
-              + "where tenant_id = current_setting('app.current_tenant', true)::uuid and id = ?",
-          loc);
-      return null;
-    });
-    var after = report(a).locations().stream()
-        .filter(r -> r.code().equals("LOC-A")).findFirst().orElseThrow();
+    access.run(
+        actorA,
+        "warehouse.facilities.read",
+        () -> {
+          sql.execute(
+              "update warehouse_location set capacity = cast(5 as numeric) "
+                  + "where tenant_id = current_setting('app.current_tenant', true)::uuid and id = ?",
+              loc);
+          return null;
+        });
+    var after =
+        report(a).locations().stream()
+            .filter(r -> r.code().equals("LOC-A"))
+            .findFirst()
+            .orElseThrow();
     assertThat(after.capacityUtilization()).isEqualByComparingTo(new BigDecimal("0.800000"));
   }
 
@@ -332,8 +404,9 @@ class LocationUtilizationIntegrationTest {
     bucket(a, unmeasured, sku(a, 2), "5");
     bucket(a, zeroCap, sku(a, 3), "4");
 
-    var byCode = report(a).locations().stream()
-        .collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
+    var byCode =
+        report(a).locations().stream()
+            .collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
 
     // 容量从没量过：缺的是**知识**，给 0 会被读成「量过，是空的」。
     var u = byCode.get("LOC-UNMEAS");
@@ -364,8 +437,11 @@ class LocationUtilizationIntegrationTest {
     UUID emptySpot = insertLocation(a, "LOC-IDLE", "STORAGE", true, new BigDecimal("50"));
     assertThat(emptySpot).isNotNull();
 
-    var row = report(a).locations().stream()
-        .filter(r -> r.code().equals("LOC-IDLE")).findFirst().orElseThrow();
+    var row =
+        report(a).locations().stream()
+            .filter(r -> r.code().equals("LOC-IDLE"))
+            .findFirst()
+            .orElseThrow();
     assertThat(row.onHand()).isEqualByComparingTo(BigDecimal.ZERO);
     assertThat(row.skuCount()).isZero();
     // 出库 0 ÷ 在手 0 不是「0 倍」，是除以零。返回 0 会说「周转很慢」，
@@ -373,7 +449,7 @@ class LocationUtilizationIntegrationTest {
     assertThat(row.turnover()).isNull();
     assertThat(row.turnoverComputable()).isFalse();
     assertThat(row.outboundQuantity()).isEqualByComparingTo(BigDecimal.ZERO);
-    assertThat(row.dwellDays()).isNull();   // 从没放过货 ≠ 0 天
+    assertThat(row.dwellDays()).isNull(); // 从没放过货 ≠ 0 天
     assertThat(row.grade()).isEqualTo(LocationUtilizationGrade.IDLE);
   }
 
@@ -388,12 +464,15 @@ class LocationUtilizationIntegrationTest {
     assertThat(partial.capacityUtilization()).isNull();
     assertThat(partial.utilizationComputable()).isFalse();
 
-    access.run(actorA, "warehouse.facilities.read", () -> {
-      sql.execute(
-          "update warehouse_location set capacity = cast(20 as numeric) "
-              + "where tenant_id = current_setting('app.current_tenant', true)::uuid and code = 'L2'");
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.facilities.read",
+        () -> {
+          sql.execute(
+              "update warehouse_location set capacity = cast(20 as numeric) "
+                  + "where tenant_id = current_setting('app.current_tenant', true)::uuid and code = 'L2'");
+          return null;
+        });
     var full = report(a).totals();
     assertThat(full.capacityMeasuredCount()).isEqualTo(2);
     assertThat(full.utilizationComputable()).isTrue();
@@ -414,8 +493,8 @@ class LocationUtilizationIntegrationTest {
     bucket(a, stuck, sku(a, 3), "50");
 
     var rep = report(a);
-    var byCode = rep.locations().stream()
-        .collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
+    var byCode =
+        rep.locations().stream().collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
 
     var f = byCode.get("LOC-FULL");
     assertThat(f.grade()).isEqualTo(LocationUtilizationGrade.OVERFULL);
@@ -424,13 +503,15 @@ class LocationUtilizationIntegrationTest {
     assertThat(byCode.get("LOC-IDLE").grade()).isEqualTo(LocationUtilizationGrade.IDLE);
 
     // 建议是**派生**出来的：爆满 + 空置 + 低效各自出一条，缺数据就不出。
-    assertThat(rep.advice()).extracting(LocationUtilizationAdvice::kind)
+    assertThat(rep.advice())
+        .extracting(LocationUtilizationAdvice::kind)
         .contains(
             LocationUtilizationAdviceKind.OVERFULL_LOCATION,
             LocationUtilizationAdviceKind.IDLE_LOCATION,
             LocationUtilizationAdviceKind.INEFFICIENT_LOCATION);
     // 严重度：爆满是 HIGH
-    assertThat(rep.advice()).filteredOn(a -> a.kind() == LocationUtilizationAdviceKind.OVERFULL_LOCATION)
+    assertThat(rep.advice())
+        .filteredOn(a -> a.kind() == LocationUtilizationAdviceKind.OVERFULL_LOCATION)
         .allMatch(a -> a.severity() == LocationUtilizationSeverity.HIGH);
     // 每条建议都写明落地归谁
     assertThat(rep.advice()).allMatch(a -> a.message() != null && !a.message().isBlank());
@@ -447,13 +528,15 @@ class LocationUtilizationIntegrationTest {
     assertThat(rep.totals().onHand()).isEqualByComparingTo(BigDecimal.ZERO);
     assertThat(rep.totals().turnover()).isNull();
     assertThat(rep.totals().turnoverComputable()).isFalse();
-    assertThat(rep.advice()).extracting(LocationUtilizationAdvice::kind)
+    assertThat(rep.advice())
+        .extracting(LocationUtilizationAdvice::kind)
         .doesNotContain(
             LocationUtilizationAdviceKind.OVERFULL_LOCATION,
             LocationUtilizationAdviceKind.INEFFICIENT_LOCATION,
             LocationUtilizationAdviceKind.UNMEASURED_LOCATION);
     // 空置建议按库位逐条给出（这正是蓝图点名要识别的形态）
-    assertThat(rep.advice()).extracting(LocationUtilizationAdvice::kind)
+    assertThat(rep.advice())
+        .extracting(LocationUtilizationAdvice::kind)
         .containsOnly(LocationUtilizationAdviceKind.IDLE_LOCATION);
   }
 
@@ -461,8 +544,11 @@ class LocationUtilizationIntegrationTest {
   void 正好装满是高位而不是爆满() {
     UUID exact = insertLocation(a, "LOC-EXACT", "STORAGE", true, new BigDecimal("10"));
     bucket(a, exact, sku(a, 2), "10");
-    var row = report(a).locations().stream()
-        .filter(r -> r.code().equals("LOC-EXACT")).findFirst().orElseThrow();
+    var row =
+        report(a).locations().stream()
+            .filter(r -> r.code().equals("LOC-EXACT"))
+            .findFirst()
+            .orElseThrow();
     // 正好装满是「刚好放不下下一件」，仍属高位；只有 > 1.0 才叫爆满。
     assertThat(row.capacityUtilization()).isEqualByComparingTo(BigDecimal.ONE);
     assertThat(row.capacityExceeded()).isFalse();
@@ -485,7 +571,7 @@ class LocationUtilizationIntegrationTest {
 
     var hot = heat.stream().filter(c -> c.code().equals("LOC-HOT")).findFirst().orElseThrow();
     assertThat(hot.metric()).isEqualTo(LocationUtilizationMetric.CAPACITY_UTILIZATION);
-    assertThat(hot.heat()).isEqualTo(90);   // 0.9 × 100，来自真利用率
+    assertThat(hot.heat()).isEqualTo(90); // 0.9 × 100，来自真利用率
     assertThat(hot.value()).isEqualByComparingTo(new BigDecimal("0.900000"));
 
     // 容量量不出来 → 退回「在手量相对值」，并**说破**用的是另一个指标，
@@ -493,7 +579,7 @@ class LocationUtilizationIntegrationTest {
     var cold = heat.stream().filter(c -> c.code().equals("LOC-COLD")).findFirst().orElseThrow();
     assertThat(cold.metric()).isEqualTo(LocationUtilizationMetric.ON_HAND_RELATIVE);
     assertThat(cold.capacityUtilization()).isNull();
-    assertThat(cold.heat()).isEqualTo(33);   // 3 / 9 × 100
+    assertThat(cold.heat()).isEqualTo(33); // 3 / 9 × 100
 
     // 量过且空：0% 是关于事实的断言（容量 10、货 0 件），所以它是 CAPACITY_UTILIZATION。
     var empty = heat.stream().filter(c -> c.code().equals("LOC-EMPTY")).findFirst().orElseThrow();
@@ -527,17 +613,20 @@ class LocationUtilizationIntegrationTest {
     shipment(a, sku(a, 3), "3", 5);
 
     var rep = report(a);
-    var byCode = rep.locations().stream()
-        .collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
+    var byCode =
+        rep.locations().stream().collect(java.util.stream.Collectors.toMap(r -> r.code(), r -> r));
 
     // SKU-1 在手共 10，出库 10 → L-1 分 4（40%）、L-2 分 6（60%）
-    assertThat(byCode.get("L-1").outboundQuantity()).isEqualByComparingTo(new BigDecimal("7.000000"));
-    assertThat(byCode.get("L-2").outboundQuantity()).isEqualByComparingTo(new BigDecimal("6.000000"));
+    assertThat(byCode.get("L-1").outboundQuantity())
+        .isEqualByComparingTo(new BigDecimal("7.000000"));
+    assertThat(byCode.get("L-2").outboundQuantity())
+        .isEqualByComparingTo(new BigDecimal("6.000000"));
 
     // 摊分的关键性质：各库位之和 == 仓库真实出库量（不重复、不漏）
-    BigDecimal sum = rep.locations().stream()
-        .map(LocationUtilizationRow::outboundQuantity)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal sum =
+        rep.locations().stream()
+            .map(LocationUtilizationRow::outboundQuantity)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     assertThat(sum).isEqualByComparingTo(rep.totals().outboundQuantity());
     assertThat(rep.totals().outboundQuantity()).isEqualByComparingTo(new BigDecimal("13"));
 
@@ -550,7 +639,7 @@ class LocationUtilizationIntegrationTest {
   void 窗口外的出库不算频次() {
     UUID loc = insertLocation(a, "L-1", "STORAGE", true, new BigDecimal("100"));
     bucket(a, loc, sku(a, 2), "10");
-    shipment(a, sku(a, 2), "4", 200);  // 200 天前，默认窗口 30 天之外
+    shipment(a, sku(a, 2), "4", 200); // 200 天前，默认窗口 30 天之外
     assertThat(report(a).totals().outboundQuantity()).isEqualByComparingTo(BigDecimal.ZERO);
 
     // 缩短窗口到 365 天就能看见 —— 证明「看不见」是窗口过滤，不是没数据。
@@ -567,8 +656,10 @@ class LocationUtilizationIntegrationTest {
     shipment(a, sku(a, 2), "10", 3);
 
     var rep = report(a);
-    var dispersion = rep.advice().stream()
-        .filter(x -> x.kind() == LocationUtilizationAdviceKind.SKU_DISPERSION).toList();
+    var dispersion =
+        rep.advice().stream()
+            .filter(x -> x.kind() == LocationUtilizationAdviceKind.SKU_DISPERSION)
+            .toList();
     assertThat(dispersion).isNotEmpty();
     // 离散度是**真数**：这个 SKU 在 2 个库位，所以每个库位记 1
     assertThat(rep.locations()).allMatch(r -> r.skuDispersion() == 1);
@@ -583,9 +674,10 @@ class LocationUtilizationIntegrationTest {
     shipment(a, sku(a, 2), "300", 4);
 
     var advice = report(a).advice();
-    var hit = advice.stream()
-        .filter(x -> x.kind() == LocationUtilizationAdviceKind.HIGH_FREQUENT_NON_PICKABLE)
-        .toList();
+    var hit =
+        advice.stream()
+            .filter(x -> x.kind() == LocationUtilizationAdviceKind.HIGH_FREQUENT_NON_PICKABLE)
+            .toList();
     assertThat(hit).isNotEmpty();
     assertThat(hit.get(0).severity()).isEqualTo(LocationUtilizationSeverity.HIGH);
     assertThat(hit.get(0).ownerModule()).startsWith("8.3.2.1");
@@ -598,8 +690,11 @@ class LocationUtilizationIntegrationTest {
     bucket(a, loc, sku(a, 3), "0.1");
     bucket(a, loc, sku(a, 4), "0.1");
 
-    var row = report(a).locations().stream()
-        .filter(r -> r.code().equals("LOC-FRAC")).findFirst().orElseThrow();
+    var row =
+        report(a).locations().stream()
+            .filter(r -> r.code().equals("LOC-FRAC"))
+            .findFirst()
+            .orElseThrow();
     // 0.1 × 3 必须是 0.3，不是 0.30000000000000004
     assertThat(row.onHand()).isEqualByComparingTo(new BigDecimal("0.3"));
     assertThat(row.onHand().toPlainString()).isEqualTo("0.3000");
@@ -617,8 +712,9 @@ class LocationUtilizationIntegrationTest {
     var all = report(a);
     assertThat(all.locations()).hasSize(2);
 
-    var over90 = report(a, new LocationUtilizationQuery(null, null, null, null,
-        new BigDecimal("0.90"), null));
+    var over90 =
+        report(
+            a, new LocationUtilizationQuery(null, null, null, null, new BigDecimal("0.90"), null));
     assertThat(over90.locations()).isEmpty();
     // 合计仍是全仓真相
     assertThat(over90.totals().locationCount()).isEqualTo(2);
@@ -631,17 +727,25 @@ class LocationUtilizationIntegrationTest {
   @Test
   void 非法筛选与非法窗口返回400() throws Exception {
     UUID loc = insertLocation(a, "L1", "STORAGE", true, new BigDecimal("10"));
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer tenant-a").param("windowDays", "0"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer tenant-a")
+                .param("windowDays", "0"))
         .andExpect(status().isBadRequest());
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer tenant-a").param("windowDays", "9999"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer tenant-a")
+                .param("windowDays", "9999"))
         .andExpect(status().isBadRequest());
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer tenant-a").param("grade", "NOT_A_GRADE"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer tenant-a")
+                .param("grade", "NOT_A_GRADE"))
         .andExpect(status().isBadRequest());
-    http.perform(get("/warehouse/location-utilization/{id}/locations/{lid}", wh(a), loc)
-            .header("Authorization", "Bearer tenant-a").param("type", "NOT_A_TYPE"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}/locations/{lid}", wh(a), loc)
+                .header("Authorization", "Bearer tenant-a")
+                .param("type", "NOT_A_TYPE"))
         .andExpect(status().isBadRequest());
   }
 
@@ -656,8 +760,13 @@ class LocationUtilizationIntegrationTest {
     bucket(a, l1, sku(a, 3), "2");
     shipment(a, sku(a, 2), "5", 3);
 
-    var detail = access.run(actorA, "warehouse.facilities.read",
-        () -> service.detail(wh(a), l1, new LocationUtilizationQuery(null, null, null, null, null, null)));
+    var detail =
+        access.run(
+            actorA,
+            "warehouse.facilities.read",
+            () ->
+                service.detail(
+                    wh(a), l1, new LocationUtilizationQuery(null, null, null, null, null, null)));
 
     assertThat(detail.location().code()).isEqualTo("L-1");
     assertThat(detail.skus()).hasSize(2);
@@ -665,7 +774,8 @@ class LocationUtilizationIntegrationTest {
     assertThat(detail.skus().get(0).skuId()).isEqualTo(sku(a, 2));
     assertThat(detail.skus().get(0).outboundQuantity()).isEqualByComparingTo(new BigDecimal("5"));
     // 占该 SKU 全仓在手量的比例：3 / 10 = 0.3
-    assertThat(detail.skus().get(0).shareOfSkuOnHand()).isEqualByComparingTo(new BigDecimal("0.300000"));
+    assertThat(detail.skus().get(0).shareOfSkuOnHand())
+        .isEqualByComparingTo(new BigDecimal("0.300000"));
     // 这个 SKU 散在 2 个库位 → 离散度 1
     assertThat(detail.skus().get(0).locationCount()).isEqualTo(2);
     assertThat(detail.skus().get(0).skuDispersion()).isEqualTo(1);
@@ -673,8 +783,16 @@ class LocationUtilizationIntegrationTest {
 
     // 不属于本租户的库位 → 404
     UUID foreign = insertLocation(b, "B-L", "STORAGE", true, new BigDecimal("10"));
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.facilities.read",
-        () -> service.detail(wh(a), foreign, new LocationUtilizationQuery(null, null, null, null, null, null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.facilities.read",
+                    () ->
+                        service.detail(
+                            wh(a),
+                            foreign,
+                            new LocationUtilizationQuery(null, null, null, null, null, null))))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
   }
 
@@ -714,31 +832,45 @@ class LocationUtilizationIntegrationTest {
     var rb = report(b);
     assertThat(rb.locations()).extracting(LocationUtilizationRow::code).containsExactly("B-LOC");
     // B 用 A 的仓 id → 404，而不是「同名仓库」或空列表
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.facilities.read",
-        () -> service.report(wh(a), new LocationUtilizationQuery(null, null, null, null, null, null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB,
+                    "warehouse.facilities.read",
+                    () ->
+                        service.report(
+                            wh(a),
+                            new LocationUtilizationQuery(null, null, null, null, null, null))))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
 
     // ② 伪造 X-Tenant-Id 头无效
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头下拿到的仍然只有自己的行
-    http.perform(get("/warehouse/location-utilization/{id}", wh(b))
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(b))
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.locations[0].code").value("B-LOC"));
 
     // ③ 连接池归还后不串租户（单连接池上 A→B→A→B 三轮）
     for (int i = 0; i < 3; i++) {
-      assertThat(report(a).locations()).extracting(LocationUtilizationRow::code).containsExactly("A-LOC");
-      assertThat(report(b).locations()).extracting(LocationUtilizationRow::code).containsExactly("B-LOC");
+      assertThat(report(a).locations())
+          .extracting(LocationUtilizationRow::code)
+          .containsExactly("A-LOC");
+      assertThat(report(b).locations())
+          .extracting(LocationUtilizationRow::code)
+          .containsExactly("B-LOC");
     }
 
     // 不设 app.current_tenant → 读到 0 行（RLS 生效）
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), "warehouse_app", "test-only");
         var st = c.createStatement();
-        var rs = st.executeQuery(
-            "select count(*) from warehouse_location")) {
+        var rs = st.executeQuery("select count(*) from warehouse_location")) {
       rs.next();
       assertThat(rs.getLong(1)).isZero();
     }
@@ -748,8 +880,11 @@ class LocationUtilizationIntegrationTest {
   void 本模块读到的表逐张断言FORCE_RLS() throws Exception {
     List<String> tables =
         List.of(
-            "warehouse_location", "stock_bucket", "inventory_balance",
-            "inventory_transaction", "inventory_entry");
+            "warehouse_location",
+            "stock_bucket",
+            "inventory_balance",
+            "inventory_transaction",
+            "inventory_entry");
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var st = c.createStatement()) {
       for (var table : tables) {
@@ -769,33 +904,43 @@ class LocationUtilizationIntegrationTest {
     UUID loc = insertLocation(a, "L-1", "STORAGE", true, new BigDecimal("10"));
     bucket(a, loc, sku(a, 2), "5");
 
-    http.perform(get("/warehouse/location-utilization/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-utilization/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.autoAllocationAvailable").value(false))
         .andExpect(jsonPath("$.outboundFrequencyGrain").isNotEmpty());
 
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.locations[0].code").value("L-1"))
         .andExpect(jsonPath("$.heatmap").isArray())
         .andExpect(jsonPath("$.totals.locationCount").value(1));
 
-    http.perform(get("/warehouse/location-utilization/{id}/locations/{lid}", wh(a), loc)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-utilization/{id}/locations/{lid}", wh(a), loc)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.skus").isArray());
 
     // 无凭据 401、无权限 403
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))).andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer no-permission")).andExpect(status().isForbidden());
+    http.perform(get("/warehouse/location-utilization/{id}", wh(a)))
+        .andExpect(status().isUnauthorized());
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer no-permission"))
+        .andExpect(status().isForbidden());
     // 只读角色能看（本模块是只读分析）
-    http.perform(get("/warehouse/location-utilization/{id}", wh(a))
-            .header("Authorization", "Bearer read-only")).andExpect(status().isOk());
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(a))
+                .header("Authorization", "Bearer read-only"))
+        .andExpect(status().isOk());
     // 别人的仓 404
-    http.perform(get("/warehouse/location-utilization/{id}", wh(b))
-            .header("Authorization", "Bearer tenant-a")).andExpect(status().isNotFound());
+    http.perform(
+            get("/warehouse/location-utilization/{id}", wh(b))
+                .header("Authorization", "Bearer tenant-a"))
+        .andExpect(status().isNotFound());
   }
 }

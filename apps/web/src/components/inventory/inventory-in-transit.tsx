@@ -20,7 +20,10 @@ import {
   Segmented,
   StatCard,
 } from '@starcon/ui';
-import type { InTransitDetail, InTransitRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  InTransitDetail,
+  InTransitRow,
+} from '../../../../../packages/api-contracts/src/index';
 import type { LotRef } from '../../../../../packages/api-contracts/src/index';
 import {
   arriveBlockers,
@@ -113,8 +116,12 @@ export function InventoryInTransitWorkspace() {
 
   const [tab, setTab] = useState<Tab>('legs');
   const [page, setPage] = useState<Awaited<ReturnType<typeof fetchInTransitLegs>> | null>(null);
-  const [alerts, setAlerts] = useState<Awaited<ReturnType<typeof fetchInTransitAlerts>> | null>(null);
-  const [netting, setNetting] = useState<Awaited<ReturnType<typeof fetchInTransitNetting>> | null>(null);
+  const [alerts, setAlerts] = useState<Awaited<ReturnType<typeof fetchInTransitAlerts>> | null>(
+    null,
+  );
+  const [netting, setNetting] = useState<Awaited<ReturnType<typeof fetchInTransitNetting>> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
@@ -183,7 +190,19 @@ export function InventoryInTransitWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [readable, sort, pageNumber, keyword, transitKind, fromWarehouseId, toWarehouseId, skuId, overdueLevel, overdueOnly, nettingSort]);
+  }, [
+    readable,
+    sort,
+    pageNumber,
+    keyword,
+    transitKind,
+    fromWarehouseId,
+    toWarehouseId,
+    skuId,
+    overdueLevel,
+    overdueOnly,
+    nettingSort,
+  ]);
 
   useEffect(() => {
     if (!readable) return;
@@ -210,22 +229,25 @@ export function InventoryInTransitWorkspace() {
 
   const summary = page?.summary;
 
-  const openDetail = useCallback(async (legId: string) => {
-    if (expanded === legId) {
-      setExpanded(null);
+  const openDetail = useCallback(
+    async (legId: string) => {
+      if (expanded === legId) {
+        setExpanded(null);
+        setDetail(null);
+        setDetailError('');
+        return;
+      }
+      setExpanded(legId);
       setDetail(null);
       setDetailError('');
-      return;
-    }
-    setExpanded(legId);
-    setDetail(null);
-    setDetailError('');
-    try {
-      setDetail(await fetchInTransitLeg(legId));
-    } catch (e) {
-      setDetailError(errorText(e));
-    }
-  }, [expanded]);
+      try {
+        setDetail(await fetchInTransitLeg(legId));
+      } catch (e) {
+        setDetailError(errorText(e));
+      }
+    },
+    [expanded],
+  );
 
   const openArrive = useCallback(
     async (legId: string, needsLocation: boolean, destinationWarehouseId: string | null) => {
@@ -389,7 +411,15 @@ export function InventoryInTransitWorkspace() {
     } finally {
       setBusy('');
     }
-  }, [targetRow, discrepancyIssues, discrepancyAmount, discrepancyReason, discrepancyNotes, load, expanded]);
+  }, [
+    targetRow,
+    discrepancyIssues,
+    discrepancyAmount,
+    discrepancyReason,
+    discrepancyNotes,
+    load,
+    expanded,
+  ]);
 
   const loadLots = useCallback(async (id: string) => {
     if (!id) {
@@ -442,7 +472,11 @@ export function InventoryInTransitWorkspace() {
             return (
               <tr key={row.id} className="border-b last:border-0">
                 <td className="p-2">
-                  <Badge tone="brand">{row.transitKindLabel || inTransitKindLabels[row.transitKind] || row.transitKind}</Badge>
+                  <Badge tone="brand">
+                    {row.transitKindLabel ||
+                      inTransitKindLabels[row.transitKind] ||
+                      row.transitKind}
+                  </Badge>
                 </td>
                 <td className="p-2">
                   <div>{row.skuCode}</div>
@@ -451,12 +485,16 @@ export function InventoryInTransitWorkspace() {
                 <td className="p-2 text-xs">{routeText(row)}</td>
                 <td className="p-2 text-right tabular-nums">{fmt(row.declaredQuantity)}</td>
                 <td className="p-2 text-right tabular-nums">{fmt(row.settledQuantity)}</td>
-                <td className="p-2 text-right font-medium tabular-nums">{fmt(row.outstandingQuantity)}</td>
+                <td className="p-2 text-right font-medium tabular-nums">
+                  {fmt(row.outstandingQuantity)}
+                </td>
                 <td className="p-2 text-xs">{etaText(row)}</td>
                 <td className="p-2">
                   <div className="flex flex-col gap-1">
                     <Badge tone={overdueTone(row.overdueLevel)}>
-                      {row.overdueLevelLabel || inTransitOverdueLabels[row.overdueLevel] || row.overdueLevel}
+                      {row.overdueLevelLabel ||
+                        inTransitOverdueLabels[row.overdueLevel] ||
+                        row.overdueLevel}
                     </Badge>
                     <span className="text-muted-foreground text-xs">{overdueHoursText(row)}</span>
                   </div>
@@ -704,8 +742,8 @@ export function InventoryInTransitWorkspace() {
           {page && legTable(page.rows)}
 
           <p className="text-muted-foreground mt-3 text-xs">
-            缺口计算要扣的是<strong>仍在途</strong>，不是原发量。
-            调拨腿的已了结恒为 0（7.5.1.1 把到达量拆成独立 RECEIVED 行），到达权威在调拨单的已实收列。
+            缺口计算要扣的是<strong>仍在途</strong>，不是原发量。 调拨腿的已了结恒为 0（7.5.1.1
+            把到达量拆成独立 RECEIVED 行），到达权威在调拨单的已实收列。
           </p>
           <p className="text-muted-foreground mt-1 text-xs">
             守恒式（原发 = 已了结 + 仍在途）是<strong>逐行</strong>成立的，在详情里显式摆出；
@@ -715,10 +753,10 @@ export function InventoryInTransitWorkspace() {
           {expanded && (
             <div className="mt-4 space-y-2 border-t pt-3">
               {detailError && (
-                    <Notice tone="danger" title="详情读取失败">
-                      {detailError}
-                    </Notice>
-                  )}
+                <Notice tone="danger" title="详情读取失败">
+                  {detailError}
+                </Notice>
+              )}
               {!detail && !detailError && (
                 <p className="text-muted-foreground text-sm">正在读取在途腿详情…</p>
               )}
@@ -804,11 +842,14 @@ export function InventoryInTransitWorkspace() {
         <SectionCard title="到达预警（逾期未达）">
           <p className="text-muted-foreground mb-3 text-xs">
             档位与清单用<strong>同一套阈值</strong>（都是「ETA + 此刻 + 仍在途」算出来的），
-            所以同一条在途腿在两个页面上不会给出互相矛盾的逾期档。
-            计算时刻：{alerts ? moment(alerts.generatedAt) : '—'}。
+            所以同一条在途腿在两个页面上不会给出互相矛盾的逾期档。 计算时刻：
+            {alerts ? moment(alerts.generatedAt) : '—'}。
           </p>
           {alerts && alerts.rows.length === 0 && (
-            <EmptyState title="没有逾期在途" description="所有在途腿都还在预计到达时间之内，或已了结。" />
+            <EmptyState
+              title="没有逾期在途"
+              description="所有在途腿都还在预计到达时间之内，或已了结。"
+            />
           )}
           {alerts && alerts.rows.length > 0 && legTable(alerts.rows)}
         </SectionCard>
@@ -836,7 +877,7 @@ export function InventoryInTransitWorkspace() {
               {netting.usageNote}
             </Notice>
           )}
-          <p className="text-muted-foreground mt-2 mb-3 text-xs">
+          <p className="text-muted-foreground mb-3 mt-2 text-xs">
             本页只交数、<strong>不给补货建议</strong>：需求预测与下单属 6.2.1.1，不在本模块。
             也没有接入审批流或常驻调度 —— 到货与差异登记是直接落库的业务事件。
           </p>
@@ -855,7 +896,10 @@ export function InventoryInTransitWorkspace() {
                 </thead>
                 <tbody>
                   {netting.rows.map((row) => (
-                    <tr key={`${row.toWarehouseId}:${row.skuId}`} className="border-b last:border-0">
+                    <tr
+                      key={`${row.toWarehouseId}:${row.skuId}`}
+                      className="border-b last:border-0"
+                    >
                       <td className="p-2">
                         {row.toWarehouseCode} {row.toWarehouseName}
                       </td>
@@ -883,8 +927,8 @@ export function InventoryInTransitWorkspace() {
                 </tbody>
               </table>
               <p className="text-muted-foreground mt-3 text-xs">
-                合计可扣在途 {fmt(netting.totalOutstandingQuantity)}（共 {netting.total} 组「目的仓 × SKU」）。
-                无 ETA 的那部分要单独看：扣了它，缺口会算小，但货什么时候到没人说得清。
+                合计可扣在途 {fmt(netting.totalOutstandingQuantity)}（共 {netting.total} 组「目的仓
+                × SKU」）。 无 ETA 的那部分要单独看：扣了它，缺口会算小，但货什么时候到没人说得清。
               </p>
             </div>
           )}
@@ -898,8 +942,8 @@ export function InventoryInTransitWorkspace() {
             <ModalTitle>登记外部在途腿</ModalTitle>
             <ModalDescription>
               登记头程发运 / 采购发运 / FBA 发货运单事件。
-              <strong>调拨在途不在这里登记</strong> —— 它由 7.5.1.1 调拨单的发出动作产生。
-              来源系统 + 来源单据号是幂等锚点，上游重复投递会被后端挡成 409。
+              <strong>调拨在途不在这里登记</strong> —— 它由 7.5.1.1 调拨单的发出动作产生。 来源系统
+              + 来源单据号是幂等锚点，上游重复投递会被后端挡成 409。
             </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3 md:grid-cols-2">
@@ -946,7 +990,11 @@ export function InventoryInTransitWorkspace() {
                 ))}
               </select>
             </FormField>
-            <FormField id="lot" label="批次（可选）" hint="留空表示未指定批次；填了必须属于所选 SKU">
+            <FormField
+              id="lot"
+              label="批次（可选）"
+              hint="留空表示未指定批次；填了必须属于所选 SKU"
+            >
               <select
                 id="lot"
                 className="w-full rounded-md border px-2 py-1 text-sm"
@@ -1116,8 +1164,8 @@ export function InventoryInTransitWorkspace() {
             <ModalTitle>登记到货</ModalTitle>
             <ModalDescription>
               可分批到货。本次数量不得超过该腿未达量
-              {targetRow ? `（当前未达 ${fmt(targetRow.outstandingQuantity)}）` : ''}。
-              携带版本号 {targetRow?.version ?? '—'} 做乐观锁：有人先改过会拿到 409。
+              {targetRow ? `（当前未达 ${fmt(targetRow.outstandingQuantity)}）` : ''}。 携带版本号{' '}
+              {targetRow?.version ?? '—'} 做乐观锁：有人先改过会拿到 409。
             </ModalDescription>
           </ModalHeader>
           <div className="grid gap-3">

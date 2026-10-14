@@ -2,7 +2,6 @@ package com.starcon.warehouse;
 
 import static com.starcon.warehouse.InventorySerialModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,18 +27,16 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.3.2.1 序列号：录入/批量导入、数量与序列号条数强一致、状态机、位置与状态配套、
- * 批次绑定、流转历史、时区偏移，以及租户隔离三断言。
+ * 7.3.2.1 序列号：录入/批量导入、数量与序列号条数强一致、状态机、位置与状态配套、 批次绑定、流转历史、时区偏移，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryReconciliationIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryReconciliationIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake
+ * identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>硬约束要在数据库层证明，不能只在应用层证明</b>。本类里三处直接绕过服务用裸 SQL 写：
- * 操作头声明与条数不符、声明数对得上但少写流转行、试图把报废的号改回在库。
+ * <p><b>硬约束要在数据库层证明，不能只在应用层证明</b>。本类里三处直接绕过服务用裸 SQL 写： 操作头声明与条数不符、声明数对得上但少写流转行、试图把报废的号改回在库。
  * 只测应用层等于假设「没人会直接写库」，而这恰恰是那条 CHECK 与触发器存在的理由。
  */
 @SpringBootTest
@@ -51,7 +48,10 @@ class InventorySerialIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID leA = idFor(a, 1);
@@ -66,13 +66,19 @@ class InventorySerialIntegrationTest {
   static final UUID lotB = idFor(a, 10);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-serial-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-serial-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -82,7 +88,8 @@ class InventorySerialIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -97,7 +104,8 @@ class InventorySerialIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -107,7 +115,8 @@ class InventorySerialIntegrationTest {
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
       // 只有读权限：序列号校验（只算不写）必须只读权限可用，写入必须真的被挡住
       actors.put(
-          "Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+          "Bearer read-only",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -160,37 +169,76 @@ class InventorySerialIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "手机一号");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "手机一号");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 3), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 3),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type)"
                     + " values(?,?,?,?,?,'STORAGE')",
-                idFor(tenant, 6), tenant, idFor(tenant, 3), "SH-A1", "上海仓A架1", "STORAGE");
+                idFor(tenant, 6),
+                tenant,
+                idFor(tenant, 3),
+                "SH-A1",
+                "上海仓A架1",
+                "STORAGE");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type)"
                     + " values(?,?,?,?,?,'STORAGE')",
-                idFor(tenant, 7), tenant, idFor(tenant, 3), "SH-B2", "上海仓B架2", "STORAGE");
+                idFor(tenant, 7),
+                tenant,
+                idFor(tenant, 3),
+                "SH-B2",
+                "上海仓B架2",
+                "STORAGE");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type)"
                     + " values(?,?,?,?,?,'RECEIVING')",
-                idFor(tenant, 8), tenant, idFor(tenant, 4), "SZ-RCV", "深圳收货区", "RECEIVING");
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 4),
+                "SZ-RCV",
+                "深圳收货区",
+                "RECEIVING");
             sql.execute(
                 "insert into inventory_lot(id,tenant_id,sku_id,lot_code,status) values(?,?,?,'LOT-2026-A','ACTIVE')",
-                idFor(tenant, 9), tenant, idFor(tenant, 2));
+                idFor(tenant, 9),
+                tenant,
+                idFor(tenant, 2));
             sql.execute(
                 "insert into inventory_lot(id,tenant_id,sku_id,lot_code,status) values(?,?,?,'LOT-2026-B','DEPLETED')",
-                idFor(tenant, 10), tenant, idFor(tenant, 2));
+                idFor(tenant, 10),
+                tenant,
+                idFor(tenant, 2));
             return null;
           });
     }
@@ -199,7 +247,6 @@ class InventorySerialIntegrationTest {
   AccessService.Access actorFor(UUID tenant) {
     return tenant.equals(a) ? actorA : actorB;
   }
-
 
   // ================================================================ 租户事务包装
   //
@@ -252,10 +299,13 @@ class InventorySerialIntegrationTest {
   }
 
   void delete(UUID id) {
-    access.run(actorA, "warehouse.inventory.delete", () -> {
-      svc.delete(id);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.delete",
+        () -> {
+          svc.delete(id);
+          return null;
+        });
   }
 
   // --- B 侧读口：租户隔离的两条断言必须真的换身份去读，
@@ -288,7 +338,12 @@ class InventorySerialIntegrationTest {
           sql.execute(
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,lot_id,status,"
                   + "current_location_id) values(?,current_setting('app.current_tenant',true)::uuid,?,?,?,?,?)",
-              id, number, skuA, lotId, status, locationId);
+              id,
+              number,
+              skuA,
+              lotId,
+              status,
+              locationId);
           return null;
         });
     return id;
@@ -297,8 +352,7 @@ class InventorySerialIntegrationTest {
   /**
    * 裸 SQL 插一条操作头。
    *
-   * <p>存在的意义是**故意写出自相矛盾的操作头**：服务永远不会写出
-   * 「声明 2 件、实际 1 件」这种东西，只有直接写库才造得出来。
+   * <p>存在的意义是**故意写出自相矛盾的操作头**：服务永远不会写出 「声明 2 件、实际 1 件」这种东西，只有直接写库才造得出来。
    */
   UUID rawOperation(int declaredQuantity, int serialCount) {
     var id = UUID.randomUUID();
@@ -311,7 +365,11 @@ class InventorySerialIntegrationTest {
                   + "declared_quantity,serial_count,actor_id,occurred_at)"
                   + " values(?,current_setting('app.current_tenant',true)::uuid,'INBOUND',?,?,?,?,"
                   + "now())",
-              id, skuA, new BigDecimal(declaredQuantity), serialCount, user);
+              id,
+              skuA,
+              new BigDecimal(declaredQuantity),
+              serialCount,
+              user);
           return null;
         });
     return id;
@@ -324,7 +382,12 @@ class InventorySerialIntegrationTest {
             + "serial_number,from_status,to_status,to_location_id,actor_id,occurred_at)"
             + " values(?,current_setting('app.current_tenant',true)::uuid,?,?,'INBOUND',?,'IN_STOCK',"
             + "'IN_STOCK',?,?,now())",
-        UUID.randomUUID(), serialId, operationId, number, locA, user);
+        UUID.randomUUID(),
+        serialId,
+        operationId,
+        number,
+        locA,
+        user);
   }
 
   // ================================================================ 录入 / 批量导入
@@ -334,7 +397,8 @@ class InventorySerialIntegrationTest {
     var at = OffsetDateTime.parse("2026-10-01T09:30:00+08:00");
     var result =
         register(
-            new SerialRegisterRequest("SN-0001", skuA, lotA, locA, "PO", UUID.randomUUID(), "首批到货", at));
+            new SerialRegisterRequest(
+                "SN-0001", skuA, lotA, locA, "PO", UUID.randomUUID(), "首批到货", at));
 
     assertThat(result.passed()).isTrue();
     assertThat(result.applied()).isTrue();
@@ -373,8 +437,7 @@ class InventorySerialIntegrationTest {
     // 都会在这里偏出一个具体值，而正确实现必须原样回到同一个瞬间。
     var written = OffsetDateTime.parse("2026-10-01T09:30:00+05:30");
     var result =
-        register(
-            new SerialRegisterRequest("SN-TZ", skuA, null, locA, null, null, null, written));
+        register(new SerialRegisterRequest("SN-TZ", skuA, null, locA, null, null, null, written));
     assertThat(result.applied()).isTrue();
 
     // 逐字比对：取 epoch 秒而不是读 Java 对象，绕开任何时区转换的可能。
@@ -400,8 +463,15 @@ class InventorySerialIntegrationTest {
     var dry =
         importBatch(
             new SerialImportRequest(
-                skuA, lotA, locA, List.of("SN-B1", "SN-B2", "SN-B3"), "PO", null, "整箱",
-                null, true));
+                skuA,
+                lotA,
+                locA,
+                List.of("SN-B1", "SN-B2", "SN-B3"),
+                "PO",
+                null,
+                "整箱",
+                null,
+                true));
     assertThat(dry.passed()).isTrue();
     assertThat(dry.applied()).isFalse();
     assertThat(dry.operation()).isNull();
@@ -412,8 +482,15 @@ class InventorySerialIntegrationTest {
     var result =
         importBatch(
             new SerialImportRequest(
-                skuA, lotA, locA, List.of("SN-B1", "SN-B2", "SN-B3"), "PO", null, "整箱",
-                null, false));
+                skuA,
+                lotA,
+                locA,
+                List.of("SN-B1", "SN-B2", "SN-B3"),
+                "PO",
+                null,
+                "整箱",
+                null,
+                false));
     assertThat(result.applied()).isTrue();
     assertThat(result.declaredQuantity()).isEqualByComparingTo("3");
     assertThat(result.operation().serialCount()).isEqualTo(3);
@@ -427,7 +504,8 @@ class InventorySerialIntegrationTest {
     assertThatThrownBy(
             () ->
                 importBatch(
-                    new SerialImportRequest(skuA, null, locA, List.of("SN-ONLY-1"), null, null, null, null, false)))
+                    new SerialImportRequest(
+                        skuA, null, locA, List.of("SN-ONLY-1"), null, null, null, null, false)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("批量导入至少");
   }
@@ -442,7 +520,20 @@ class InventorySerialIntegrationTest {
     rawSerial("SN-2", "IN_STOCK", locA, lotA);
     var result =
         move(
-            new SerialMoveRequest("OUTBOUND", skuA, new BigDecimal("3"), List.of("SN-1", "SN-2"), null, null, null, "SOLD", null, null, null, null, false));
+            new SerialMoveRequest(
+                "OUTBOUND",
+                skuA,
+                new BigDecimal("3"),
+                List.of("SN-1", "SN-2"),
+                null,
+                null,
+                null,
+                "SOLD",
+                null,
+                null,
+                null,
+                null,
+                false));
 
     assertThat(result.passed()).isFalse();
     assertThat(result.applied()).isFalse();
@@ -465,7 +556,20 @@ class InventorySerialIntegrationTest {
   void 数量带小数按离散件拒绝() {
     var result =
         move(
-            new SerialMoveRequest("OUTBOUND", skuA, new BigDecimal("1.5"), List.of("SN-1"), null, null, null, "SOLD", null, null, null, null, false));
+            new SerialMoveRequest(
+                "OUTBOUND",
+                skuA,
+                new BigDecimal("1.5"),
+                List.of("SN-1"),
+                null,
+                null,
+                null,
+                "SOLD",
+                null,
+                null,
+                null,
+                null,
+                false));
     assertThat(result.passed()).isFalse();
     assertThat(result.issues())
         .extracting(SerialIssue::code)
@@ -507,11 +611,15 @@ class InventorySerialIntegrationTest {
               "insert into inventory_serial_operation(id,tenant_id,direction,sku_id,"
                   + "declared_quantity,serial_count,actor_id,occurred_at)"
                   + " values(?,current_setting('app.current_tenant',true)::uuid,'INBOUND',?,1,1,?,now())",
-              op, skuA, user);
+              op,
+              skuA,
+              user);
           rawMovement(op, serial, "SN-FULL");
           return null;
         });
-    assertThat(movements(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 50)).total())
+    assertThat(
+            movements(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 50))
+                .total())
         .isEqualTo(1);
   }
 
@@ -523,30 +631,81 @@ class InventorySerialIntegrationTest {
     var ok =
         move(
             new SerialMoveRequest(
-                "INBOUND", skuA, BigDecimal.ONE, List.of("SN-SM"), locB, null, lotA, null, "RETURN",
-                null, "退货入库", null, false));
+                "INBOUND",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-SM"),
+                locB,
+                null,
+                lotA,
+                null,
+                "RETURN",
+                null,
+                "退货入库",
+                null,
+                false));
     assertThat(ok.applied()).isTrue();
     var profile = profile(id);
     assertThat(profile.status()).isEqualTo(SerialStatus.IN_STOCK);
     assertThat(profile.currentLocationId()).isEqualTo(locB);
 
     // 在库 → 在途 → 在库，来回一次；然后试图在库直接跳到「维修以外」的目标状态
-    assertThat(move(
-            new SerialMoveRequest("OUTBOUND", skuA, BigDecimal.ONE, List.of("SN-SM"), null, null, null,
-                "IN_TRANSIT", null, null, "发往深圳", null, false)).applied()).isTrue();
+    assertThat(
+            move(new SerialMoveRequest(
+                    "OUTBOUND",
+                    skuA,
+                    BigDecimal.ONE,
+                    List.of("SN-SM"),
+                    null,
+                    null,
+                    null,
+                    "IN_TRANSIT",
+                    null,
+                    null,
+                    "发往深圳",
+                    null,
+                    false))
+                .applied())
+        .isTrue();
     assertThat(profile(id).status()).isEqualTo(SerialStatus.IN_TRANSIT);
     assertThat(profile(id).currentLocationId()).isNull();
 
-    assertThat(move(
-            new SerialMoveRequest("INBOUND", skuA, BigDecimal.ONE, List.of("SN-SM"), locC, null, null, null, null, null, "到货入库", null, false)).applied()).isTrue();
+    assertThat(
+            move(new SerialMoveRequest(
+                    "INBOUND",
+                    skuA,
+                    BigDecimal.ONE,
+                    List.of("SN-SM"),
+                    locC,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "到货入库",
+                    null,
+                    false))
+                .applied())
+        .isTrue();
     assertThat(profile(id).status()).isEqualTo(SerialStatus.IN_STOCK);
 
     // 状态流转只能改「有库位」的两档：已售必须走出库方向
     var wrong =
         move(
             new SerialMoveRequest(
-                "STATUS_CHANGE", skuA, BigDecimal.ONE, List.of("SN-SM"), null, null, null, "SOLD",
-                null, null, "直接标已售", null, false));
+                "STATUS_CHANGE",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-SM"),
+                null,
+                null,
+                null,
+                "SOLD",
+                null,
+                null,
+                "直接标已售",
+                null,
+                false));
     assertThat(wrong.passed()).isFalse();
     assertThat(wrong.issues().get(0).code()).isEqualTo(SerialIssueCode.STATUS_NOT_ALLOWED);
     assertThat(wrong.issues().get(0).message()).contains("出库方向");
@@ -559,7 +718,20 @@ class InventorySerialIntegrationTest {
     rawSerial("SN-OUT", "SOLD", null, lotA);
     var result =
         move(
-            new SerialMoveRequest("OUTBOUND", skuA, new BigDecimal("2"), List.of("SN-IN", "SN-OUT"), null, null, null, "SOLD", null, null, null, null, false));
+            new SerialMoveRequest(
+                "OUTBOUND",
+                skuA,
+                new BigDecimal("2"),
+                List.of("SN-IN", "SN-OUT"),
+                null,
+                null,
+                null,
+                "SOLD",
+                null,
+                null,
+                null,
+                null,
+                false));
     assertThat(result.passed()).isFalse();
     assertThat(result.serials()).isNull();
     // 逐条归因是本用例的全部意义：错在哪个号上必须当场说清，
@@ -573,8 +745,7 @@ class InventorySerialIntegrationTest {
         .extracting(SerialIssue::message)
         .allMatch(m -> m.contains("不在任何库位上"));
     // 能出库的那个号不该被牵连
-    assertThat(result.issues())
-        .noneMatch(i -> i.serialNumber().equals("SN-IN"));
+    assertThat(result.issues()).noneMatch(i -> i.serialNumber().equals("SN-IN"));
     // 整单不落库：SN-IN 的状态也没被动过
     assertThat(profile(serialId("SN-IN")).status()).isEqualTo(SerialStatus.IN_STOCK);
   }
@@ -582,16 +753,43 @@ class InventorySerialIntegrationTest {
   @Test
   void 报废是终态服务与数据库都不放行复活() {
     var id = rawSerial("SN-DEAD", "IN_STOCK", locA, lotA);
-    assertThat(move(
-            new SerialMoveRequest("OUTBOUND", skuA, BigDecimal.ONE, List.of("SN-DEAD"), null, null, null,
-                "SCRAPPED", null, null, "摔坏了", null, false)).applied()).isTrue();
+    assertThat(
+            move(new SerialMoveRequest(
+                    "OUTBOUND",
+                    skuA,
+                    BigDecimal.ONE,
+                    List.of("SN-DEAD"),
+                    null,
+                    null,
+                    null,
+                    "SCRAPPED",
+                    null,
+                    null,
+                    "摔坏了",
+                    null,
+                    false))
+                .applied())
+        .isTrue();
     assertThat(profile(id).status()).isEqualTo(SerialStatus.SCRAPPED);
     assertThat(profile(id).currentLocationId()).isNull();
 
     // 应用层：报废 → 在库 不在状态机里
     var revive =
         move(
-            new SerialMoveRequest("INBOUND", skuA, BigDecimal.ONE, List.of("SN-DEAD"), locA, null, null, null, null, null, "想复活", null, false));
+            new SerialMoveRequest(
+                "INBOUND",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-DEAD"),
+                locA,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "想复活",
+                null,
+                false));
     assertThat(revive.passed()).isFalse();
     assertThat(revive.issues().get(0).code()).isEqualTo(SerialIssueCode.TRANSITION_NOT_ALLOWED);
 
@@ -605,7 +803,8 @@ class InventorySerialIntegrationTest {
                       sql.execute(
                           "update inventory_serial set status = 'IN_STOCK', current_location_id = ?"
                               + " where id = ?",
-                          locA, id);
+                          locA,
+                          id);
                       return null;
                     }))
         .satisfies(e -> assertThat(root(e)).contains("报废是终态"));
@@ -634,7 +833,8 @@ class InventorySerialIntegrationTest {
                     () -> {
                       sql.execute(
                           "update inventory_serial set sku_id = ? where id = ?",
-                          UUID.randomUUID(), id);
+                          UUID.randomUUID(),
+                          id);
                       return null;
                     }))
         .satisfies(e -> assertThat(root(e)).contains("不可变"));
@@ -650,8 +850,19 @@ class InventorySerialIntegrationTest {
     var result =
         move(
             new SerialMoveRequest(
-                "RELOCATION", skuA, BigDecimal.ONE, List.of("SN-MOVE"), locB, locA, null, null,
-                null, null, "挪到B架", null, false));
+                "RELOCATION",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-MOVE"),
+                locB,
+                locA,
+                null,
+                null,
+                null,
+                null,
+                "挪到B架",
+                null,
+                false));
     assertThat(result.applied()).isTrue();
     assertThat(profile(serialId("SN-MOVE")).currentLocationId()).isEqualTo(locB);
     assertThat(profile(serialId("SN-MOVE")).status()).isEqualTo(SerialStatus.IN_STOCK);
@@ -668,8 +879,19 @@ class InventorySerialIntegrationTest {
     var result =
         move(
             new SerialMoveRequest(
-                "RELOCATION", skuA, BigDecimal.ONE, List.of("SN-HERE"), locB, locC, null, null,
-                null, null, "从C架挪到B架", null, false));
+                "RELOCATION",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-HERE"),
+                locB,
+                locC,
+                null,
+                null,
+                null,
+                null,
+                "从C架挪到B架",
+                null,
+                false));
     assertThat(result.passed()).isFalse();
     var issue = result.issues().get(0);
     assertThat(issue.code()).isEqualTo(SerialIssueCode.LOCATION_MISMATCH);
@@ -682,8 +904,19 @@ class InventorySerialIntegrationTest {
     var result =
         move(
             new SerialMoveRequest(
-                "REBIND", skuA, BigDecimal.ONE, List.of("SN-LOT"), null, null, lotB, null, null,
-                null, "批次录错了", null, false));
+                "REBIND",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-LOT"),
+                null,
+                null,
+                lotB,
+                null,
+                null,
+                null,
+                "批次录错了",
+                null,
+                false));
     assertThat(result.applied()).isTrue();
     assertThat(profile(id).lotId()).isEqualTo(lotB);
 
@@ -715,8 +948,19 @@ class InventorySerialIntegrationTest {
     var result =
         move(
             new SerialMoveRequest(
-                "RELOCATION", skuA, BigDecimal.ONE, List.of("SN-SAME"), locA, locA, null, null, null,
-                null, null, null, false));
+                "RELOCATION",
+                skuA,
+                BigDecimal.ONE,
+                List.of("SN-SAME"),
+                locA,
+                locA,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false));
     assertThat(result.passed()).isFalse();
     assertThat(result.issues().get(0).code()).isEqualTo(SerialIssueCode.NO_CHANGE);
   }
@@ -725,7 +969,20 @@ class InventorySerialIntegrationTest {
   void 同一次操作里重复的序列号被逐条指出() {
     var result =
         move(
-            new SerialMoveRequest("OUTBOUND", skuA, new BigDecimal("2"), List.of("SN-DUP", "SN-DUP"), null, null, null, "SOLD", null, null, null, null, false));
+            new SerialMoveRequest(
+                "OUTBOUND",
+                skuA,
+                new BigDecimal("2"),
+                List.of("SN-DUP", "SN-DUP"),
+                null,
+                null,
+                null,
+                "SOLD",
+                null,
+                null,
+                null,
+                null,
+                false));
     assertThat(result.passed()).isFalse();
     assertThat(result.issues())
         .filteredOn(i -> i.serialNumber().equals("SN-DUP"))
@@ -739,9 +996,10 @@ class InventorySerialIntegrationTest {
   void 未被引用的档案可以删除被引用的删不掉() {
     // 录错了：只有建档那一次入库，仍在库 → 可删
     var fresh =
-        register(
-            new SerialRegisterRequest("SN-ERR", skuA, null, locA, null, null, null, null))
-            .serials().get(0).id();
+        register(new SerialRegisterRequest("SN-ERR", skuA, null, locA, null, null, null, null))
+            .serials()
+            .get(0)
+            .id();
     delete(fresh);
     assertThat(page(new SerialQuery(null, null, null, null, null, null, null, 0, 50)).total())
         .isZero();
@@ -750,10 +1008,20 @@ class InventorySerialIntegrationTest {
     var used = rawSerial("SN-USED", "IN_STOCK", locA, lotA);
     move(
         new SerialMoveRequest(
-            "RELOCATION", skuA, BigDecimal.ONE, List.of("SN-USED"), locB, locA, null, null, null,
-            null, "挪过位", null, false));
-    assertThatThrownBy(() -> delete(used))
-        .satisfies(e -> assertThat(root(e)).contains("已被业务引用"));
+            "RELOCATION",
+            skuA,
+            BigDecimal.ONE,
+            List.of("SN-USED"),
+            locB,
+            locA,
+            null,
+            null,
+            null,
+            null,
+            "挪过位",
+            null,
+            false));
+    assertThatThrownBy(() -> delete(used)).satisfies(e -> assertThat(root(e)).contains("已被业务引用"));
     assertThat(profile(used)).isNotNull();
   }
 
@@ -783,16 +1051,13 @@ class InventorySerialIntegrationTest {
         .isEqualTo(8);
 
     // 状态筛选
-    assertThat(
-            page(new SerialQuery(null, null, null, null, "SOLD", null, null, 0, 50)).total())
+    assertThat(page(new SerialQuery(null, null, null, null, "SOLD", null, null, 0, 50)).total())
         .isEqualTo(1);
     // 仓库筛选只看在库的号：已售的号没有库位，不属于任何仓库
-    assertThat(
-            page(new SerialQuery(null, whSh, null, null, null, null, null, 0, 50)).total())
+    assertThat(page(new SerialQuery(null, whSh, null, null, null, null, null, 0, 50)).total())
         .isEqualTo(7);
     // 关键字：序列号 / SKU 编码 / 批次号都能命中
-    assertThat(
-            page(new SerialQuery(null, null, null, null, null, "SN-001", null, 0, 50)).total())
+    assertThat(page(new SerialQuery(null, null, null, null, null, "SN-001", null, 0, 50)).total())
         .isEqualTo(1);
     assertThat(
             page(new SerialQuery(null, null, null, null, null, "LOT-2026-A", null, 0, 50)).total())
@@ -833,8 +1098,19 @@ class InventorySerialIntegrationTest {
     rawSerial("SN-H2", "IN_STOCK", locA, lotA);
     move(
         new SerialMoveRequest(
-            "RELOCATION", skuA, new BigDecimal("2"), List.of("SN-H1", "SN-H2"), locB, locA, null, null,
-            "ADJUST", refId, "整批挪位", null, false));
+            "RELOCATION",
+            skuA,
+            new BigDecimal("2"),
+            List.of("SN-H1", "SN-H2"),
+            locB,
+            locA,
+            null,
+            null,
+            "ADJUST",
+            refId,
+            "整批挪位",
+            null,
+            false));
 
     var movements =
         movements(new SerialMovementQuery(null, null, null, null, "ADJUST", refId, null, 0, 50));
@@ -851,10 +1127,15 @@ class InventorySerialIntegrationTest {
     // 声明数量与实际条数并列摆在同一份响应里，界面上直接可比
     assertThat(op.declaredQuantity().intValueExact()).isEqualTo((int) op.serialCount());
 
-    assertThat(movements(
-            new SerialMovementQuery(null, op.id(), null, null, null, null, null, 0, 50)).total())
+    assertThat(
+            movements(new SerialMovementQuery(null, op.id(), null, null, null, null, null, 0, 50))
+                .total())
         .isEqualTo(2);
-    assertThat(movements(new SerialMovementQuery(serialId("SN-H1"), null, null, null, null, null, null, 0, 50)).total())
+    assertThat(
+            movements(
+                    new SerialMovementQuery(
+                        serialId("SN-H1"), null, null, null, null, null, null, 0, 50))
+                .total())
         .isEqualTo(1);
   }
 
@@ -881,7 +1162,9 @@ class InventorySerialIntegrationTest {
         .andExpect(jsonPath("$.passed").value(false))
         .andExpect(jsonPath("$.issues[0].code").value("SERIAL_COUNT_MISMATCH"));
 
-    http.perform(get("/warehouse/inventory/serial-vocabularies").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/serial-vocabularies")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statuses.length()").value(5))
         .andExpect(jsonPath("$.directions.length()").value(5));
@@ -904,7 +1187,11 @@ class InventorySerialIntegrationTest {
                 .header("Authorization", "Bearer read-only")
                 .contentType("application/json")
                 .content(
-                    "{\"serialNumber\":\"SN-NEW\",\"skuId\":\"" + skuA + "\",\"locationId\":\"" + locA + "\"}"))
+                    "{\"serialNumber\":\"SN-NEW\",\"skuId\":\""
+                        + skuA
+                        + "\",\"locationId\":\""
+                        + locA
+                        + "\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -926,7 +1213,9 @@ class InventorySerialIntegrationTest {
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,status,current_location_id)"
                   + " values(?,current_setting('app.current_tenant',true)::uuid,'SN-B-TENANT',?,"
                   + "'IN_STOCK',?)",
-              id, idFor(b, 2), idFor(b, 6));
+              id,
+              idFor(b, 2),
+              idFor(b, 6));
           return id;
         });
   }
@@ -948,7 +1237,9 @@ class InventorySerialIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(root(e)).contains("序列号不存在"));
     // 历史与操作头同样隔离
-    assertThat(movementsB(new SerialMovementQuery(bId, null, null, null, null, null, null, 0, 50)).total())
+    assertThat(
+            movementsB(new SerialMovementQuery(bId, null, null, null, null, null, null, 0, 50))
+                .total())
         .isZero();
     assertThat(access.run(actorB, "warehouse.inventory.read", () -> svc.operations(null)).total())
         .isZero();
@@ -1004,20 +1295,38 @@ class InventorySerialIntegrationTest {
     for (int i = 0; i < 20; i++) {
       var listA = page(new SerialQuery(null, null, null, null, null, null, null, 0, 50));
       var listB = pageB(new SerialQuery(null, null, null, null, null, null, null, 0, 50));
-      assertThat(listA.serials()).extracting(SerialProfile::serialNumber).containsExactly("SN-A-TENANT");
-      assertThat(listB.serials()).extracting(SerialProfile::serialNumber).containsExactly("SN-B-TENANT");
+      assertThat(listA.serials())
+          .extracting(SerialProfile::serialNumber)
+          .containsExactly("SN-A-TENANT");
+      assertThat(listB.serials())
+          .extracting(SerialProfile::serialNumber)
+          .containsExactly("SN-B-TENANT");
 
       // 写入路径：A 那边写一条历史，交替之后 B 那边绝不该看见它。
       // 只给目标库位、不钉住来源：钉死 locA 的话第二轮就因「不在指定库位」被拒，
       // 那测的就不是「交替租户」而是「我的测试数据自相矛盾」了。
       move(
           new SerialMoveRequest(
-              "RELOCATION", skuA, BigDecimal.ONE, List.of("SN-A-TENANT"),
-              i % 2 == 0 ? locB : locA, null, null, null, null, null,
-              "第 " + i + " 次挪位", null, false));
-      assertThat(movements(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 200)).total())
+              "RELOCATION",
+              skuA,
+              BigDecimal.ONE,
+              List.of("SN-A-TENANT"),
+              i % 2 == 0 ? locB : locA,
+              null,
+              null,
+              null,
+              null,
+              null,
+              "第 " + i + " 次挪位",
+              null,
+              false));
+      assertThat(
+              movements(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 200))
+                  .total())
           .isEqualTo(i + 1L);
-      assertThat(movementsB(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 200)).total())
+      assertThat(
+              movementsB(new SerialMovementQuery(null, null, null, null, null, null, null, 0, 200))
+                  .total())
           .isZero();
       assertThat(profileB(bId).serialNumber()).isEqualTo("SN-B-TENANT");
       assertThatThrownBy(() -> profileB(serialId("SN-A-TENANT")))

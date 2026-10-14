@@ -18,27 +18,22 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.1.2.1 库存流水台账：append-only 台账的**只读查询面**。
  *
- * <p>本服务**不写任何表**。蓝图要求「流水只追加不修改，错误用反向分录纠正，原记录永久保留」，
- * 这一点在 V1 已经由 DB 层坐实：两张事实表都有 append-only 触发器，
- * 且 warehouse_app 被 REVOKE 了 UPDATE/DELETE。所以本模块连"冲正"入口也不提供 ——
- * 写一条相反符号的分录属于库存业务写入方（7.4.1.1 调整 / 7.5.1.1 调拨 / 收货发货流程）的职责，
- * 台账只负责把发生过的一切如实列出来、筛得动、能下钻、能汇总。
+ * <p>本服务**不写任何表**。蓝图要求「流水只追加不修改，错误用反向分录纠正，原记录永久保留」， 这一点在 V1 已经由 DB 层坐实：两张事实表都有 append-only 触发器， 且
+ * warehouse_app 被 REVOKE 了 UPDATE/DELETE。所以本模块连"冲正"入口也不提供 —— 写一条相反符号的分录属于库存业务写入方（7.4.1.1 调整 /
+ * 7.5.1.1 调拨 / 收货发货流程）的职责， 台账只负责把发生过的一切如实列出来、筛得动、能下钻、能汇总。
  *
  * <p>与 7.1.1.x 的分层关系：7.1.1.x 读的是 {@code inventory_balance} / {@code stock_bucket} 的
- * **当前值**（随时可被重算的投影），本模块读的是 {@code inventory_transaction} /
- * {@code inventory_entry} 的**历史**（只追加的事实）。7.1.1.2 行上的「查看流水」入口指向本模块，
- * 下游 7.1.2.2 核对与 12 财务成本结转的来源追溯也取自这里。
+ * **当前值**（随时可被重算的投影），本模块读的是 {@code inventory_transaction} / {@code inventory_entry}
+ * 的**历史**（只追加的事实）。7.1.1.2 行上的「查看流水」入口指向本模块， 下游 7.1.2.2 核对与 12 财务成本结转的来源追溯也取自这里。
  *
  * <p>三条实现纪律：
  *
  * <ul>
- *   <li><b>粒度写在代码里而不是只写在文档里</b>：行 = 一笔业务（数量是该笔全部分录之和），
- *       分录在下钻端点。SKU/仓库筛选是"这笔业务碰没碰过它"的存在性过滤，
+ *   <li><b>粒度写在代码里而不是只写在文档里</b>：行 = 一笔业务（数量是该笔全部分录之和）， 分录在下钻端点。SKU/仓库筛选是"这笔业务碰没碰过它"的存在性过滤，
  *       筛选维度上的量另给 {@code entryOnHandDelta}，两个口径的差是能被解释的。
- *   <li><b>汇总来自全量而不是当前页</b>：合计与分组统计各走一次独立聚合，翻页时数字不变，
- *       否则"翻页时期间净变动变小"会被当成丢数据。
- *   <li><b>数量一律 numeric(19,4) + BigDecimal</b>，沿用既有表口径；时间为 timestamptz，
- *       绑定用 {@code ?::timestamptz} 并以 OffsetDateTime 传值（用 Timestamp 会静默偏 8 小时）。
+ *   <li><b>汇总来自全量而不是当前页</b>：合计与分组统计各走一次独立聚合，翻页时数字不变， 否则"翻页时期间净变动变小"会被当成丢数据。
+ *   <li><b>数量一律 numeric(19,4) + BigDecimal</b>，沿用既有表口径；时间为 timestamptz， 绑定用 {@code ?::timestamptz}
+ *       并以 OffsetDateTime 传值（用 Timestamp 会静默偏 8 小时）。
  * </ul>
  */
 @Service
@@ -49,20 +44,13 @@ public class InventoryLedgerService {
 
   /** 排序键白名单：排序键来自 query string，只允许这些。 */
   private static final List<String> SORTS =
-      List.of(
-          "OCCURRED_AT",
-          "OCCURRED_AT_ASC",
-          "KIND",
-          "REF_TYPE",
-          "ON_HAND_DELTA",
-          "ENTRY_COUNT");
+      List.of("OCCURRED_AT", "OCCURRED_AT_ASC", "KIND", "REF_TYPE", "ON_HAND_DELTA", "ENTRY_COUNT");
 
   /**
    * 行级 FROM：一笔业务 + 它的全部带符号分录 + 分录所属的余额行。
    *
-   * <p>两个 join 都是 {@code left join}：业务单与分录、分录与余额行之间没有任何"保证非空"的
-   * 约束（V1 只约束了"分录存在时 delta 至少一个非零"），一条分录都没有的业务单是写入方中途
-   * 失败的痕迹，把它藏起来就等于让账平得不明不白，所以留着并在汇总里单独计数。
+   * <p>两个 join 都是 {@code left join}：业务单与分录、分录与余额行之间没有任何"保证非空"的 约束（V1 只约束了"分录存在时 delta
+   * 至少一个非零"），一条分录都没有的业务单是写入方中途 失败的痕迹，把它藏起来就等于让账平得不明不白，所以留着并在汇总里单独计数。
    */
   private static final String ROW_FROM =
       clause(
@@ -75,9 +63,8 @@ public class InventoryLedgerService {
   /**
    * 分录级 FROM：按分录口径汇总时用。
    *
-   * <p>这里 balance / sku_ref / warehouse 用**内连接**：分录的外键本来就锁死了 balance 行
-   * （V1 的复合外键），balance 行又锁死了 SKU 与仓库，连不上说明数据已经坏了而不是"可选维度"，
-   * 让它炸掉比静默丢一行强。dimJoins 在这里接得上，是因为 SKU / 仓库的编码名本来就要供下钻与关键字筛选用。
+   * <p>这里 balance / sku_ref / warehouse 用**内连接**：分录的外键本来就锁死了 balance 行 （V1 的复合外键），balance 行又锁死了 SKU
+   * 与仓库，连不上说明数据已经坏了而不是"可选维度"， 让它炸掉比静默丢一行强。dimJoins 在这里接得上，是因为 SKU / 仓库的编码名本来就要供下钻与关键字筛选用。
    */
   private static final String ENTRY_FROM =
       clause(
@@ -86,7 +73,7 @@ public class InventoryLedgerService {
           join inventory_transaction t on t.tenant_id=e.tenant_id and t.id=e.transaction_id
           join inventory_balance bal on bal.tenant_id=e.tenant_id and bal.id=e.balance_id
           """
-          + dimJoins(""));
+              + dimJoins(""));
 
   /** 下钻用 FROM：在分录级基础上补货权法人与质量状态两张维表。 */
   private static final String DRILL_FROM =
@@ -118,18 +105,14 @@ public class InventoryLedgerService {
   /**
    * 台账列表 + 期间净变动汇总，可按批次收窄。纯读：不写任何表。
    *
-   * <p>7.3.1.1 批次管理用它取「批次出入库历史」。刻意做成**重载**而不是往
-   * {@link InventoryLedgerQuery} 里加 {@code lotId} 字段：加字段会改掉那条 record 的构造签名，
-   * 台账控制器与它的集成测试里每一处构造都要跟着改，而那属于另一个模块的改动。
+   * <p>7.3.1.1 批次管理用它取「批次出入库历史」。刻意做成**重载**而不是往 {@link InventoryLedgerQuery} 里加 {@code lotId}
+   * 字段：加字段会改掉那条 record 的构造签名， 台账控制器与它的集成测试里每一处构造都要跟着改，而那属于另一个模块的改动。
    * 重载是纯加法：不传批次时行为与原来逐字节一致，既有调用方一个都不用动。
    *
-   * <p><b>批次归属口径（写在这里是因为它决定了这个数怎么读）</b>：流水按 balance 记账，
-   * 而 {@code inventory_balance} 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，
-   * <b>不含批次</b>；批次是 {@code stock_bucket} 这一层的事实。所以一条分录不能被精确归属到
-   * 某一个批次 —— 同一 balance 行下可能同时挂着本批次与别的批次。本重载取的是
-   * 「该批次当前所在 bucket 的 balance 行上发生过的全部流水」，属**批次相关流水**；
-   * 同一 balance 下并存多个批次时，其数量不可按批次拆分。要真正按批次记账就得给
-   * {@code inventory_entry} 加批次维度，那是台账表结构变更，不在本模块范围内。
+   * <p><b>批次归属口径（写在这里是因为它决定了这个数怎么读）</b>：流水按 balance 记账， 而 {@code inventory_balance} 的唯一键是 SKU × 仓库
+   * × 货权法人 × 质量状态， <b>不含批次</b>；批次是 {@code stock_bucket} 这一层的事实。所以一条分录不能被精确归属到 某一个批次 —— 同一 balance
+   * 行下可能同时挂着本批次与别的批次。本重载取的是 「该批次当前所在 bucket 的 balance 行上发生过的全部流水」，属**批次相关流水**； 同一 balance
+   * 下并存多个批次时，其数量不可按批次拆分。要真正按批次记账就得给 {@code inventory_entry} 加批次维度，那是台账表结构变更，不在本模块范围内。
    */
   public InventoryLedgerPage page(InventoryLedgerQuery query, UUID lotId) {
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, query.size() == null ? 50 : query.size()));
@@ -190,8 +173,8 @@ public class InventoryLedgerService {
    *   <li>{@code byEntry}：命中业务的分录中满足 SKU/仓库筛选的部分 —— 7.1.2.2 拿去核对的数。
    * </ul>
    *
-   * <p>没有 SKU/仓库筛选时两者必然相等，这个等式就是账实核对的基线，所以直接算成
-   * {@code onHandConserved} / {@code reservedConserved} 摆在响应里。
+   * <p>没有 SKU/仓库筛选时两者必然相等，这个等式就是账实核对的基线，所以直接算成 {@code onHandConserved} / {@code reservedConserved}
+   * 摆在响应里。
    */
   private InventoryLedgerSummary summary(InventoryLedgerQuery query, UUID lotId) {
     var tWhere = new ArrayList<String>();
@@ -259,10 +242,9 @@ public class InventoryLedgerService {
   /**
    * 取聚合出来的时间值。
    *
-   * <p>{@code min/max(occurred_at)} 走纯文本语句时 jOOQ 拿不到列类型，返回的可能是
-   * {@link OffsetDateTime}、{@link java.time.Instant} 或 {@link java.sql.Timestamp}。
-   * 直接 {@code r.get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛 ClassCastException ——
-   * 这里统一收口，并按 JVM 默认时区换算（与 PG 驱动自身的行为一致）。
+   * <p>{@code min/max(occurred_at)} 走纯文本语句时 jOOQ 拿不到列类型，返回的可能是 {@link OffsetDateTime}、{@link
+   * java.time.Instant} 或 {@link java.sql.Timestamp}。 直接 {@code r.get(field, OffsetDateTime.class)}
+   * 会在拿到 Instant 时抛 ClassCastException —— 这里统一收口，并按 JVM 默认时区换算（与 PG 驱动自身的行为一致）。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);
@@ -284,8 +266,7 @@ public class InventoryLedgerService {
   /**
    * 按业务类型的分组统计。
    *
-   * <p>只返回期间真实发生过的类型：没有发生的类型报 0 笔会让人误判"这个期间查过了、没有这类业务"，
-   * 与 7.1.1.1 把「未设阈值」和「未超储」分开是同一条纪律。
+   * <p>只返回期间真实发生过的类型：没有发生的类型报 0 笔会让人误判"这个期间查过了、没有这类业务"， 与 7.1.1.1 把「未设阈值」和「未超储」分开是同一条纪律。
    */
   private List<InventoryLedgerBreakdown> breakdown(InventoryLedgerQuery query, UUID lotId) {
     var where = new ArrayList<String>();
@@ -313,8 +294,7 @@ public class InventoryLedgerService {
   /**
    * 来源单据类型下拉。
    *
-   * <p>租户级词表，**不受时间与其它筛选影响**：它是"这个租户开过哪些来源单据类型"的清单，
-   * 跟着筛选抖动的下拉会让用户以为某类单据不存在。
+   * <p>租户级词表，**不受时间与其它筛选影响**：它是"这个租户开过哪些来源单据类型"的清单， 跟着筛选抖动的下拉会让用户以为某类单据不存在。
    */
   public List<InventoryRefType> refTypes() {
     return sql.fetch(
@@ -397,12 +377,10 @@ public class InventoryLedgerService {
    *
    * <ul>
    *   <li><b>业务单级</b>（时间范围、业务类型、来源单据类型、数据范围）直接落在 {@code t.} 上。
-   *   <li><b>维度级</b>（SKU、仓库、关键字）必须经分录 → 余额行，所以只能用
-   *       {@code exists(...)} 表达"这笔业务碰没碰过它"。
+   *   <li><b>维度级</b>（SKU、仓库、关键字）必须经分录 → 余额行，所以只能用 {@code exists(...)} 表达"这笔业务碰没碰过它"。
    * </ul>
    *
-   * <p>维度条件刻意**不进** WHERE 的主查询：把它塞进主查询会让行上的"该笔净变动"被筛成半个数，
-   * 一行就不再等于一笔真实发生过的业务了（见类注释的粒度说明）。
+   * <p>维度条件刻意**不进** WHERE 的主查询：把它塞进主查询会让行上的"该笔净变动"被筛成半个数， 一行就不再等于一笔真实发生过的业务了（见类注释的粒度说明）。
    */
   private void conditions(
       InventoryLedgerQuery query, UUID lotId, List<String> where, List<Object> binds) {
@@ -424,11 +402,7 @@ public class InventoryLedgerService {
     }
     if (query.refTypes() != null && !query.refTypes().isEmpty()) {
       var refs =
-          query.refTypes().stream()
-              .map(String::trim)
-              .filter(v -> !v.isEmpty())
-              .distinct()
-              .toList();
+          query.refTypes().stream().map(String::trim).filter(v -> !v.isEmpty()).distinct().toList();
       if (!refs.isEmpty()) {
         where.add("t.ref_type in (" + placeholders(refs.size()) + ")");
         binds.addAll(refs);
@@ -448,12 +422,15 @@ public class InventoryLedgerService {
   /**
    * 维度条件（SKU / 仓库 / 关键字）。
    *
-   * @param prefix 列别名后缀。{@code ""} = 主查询（列前缀 {@code bal}/{@code s}/{@code w}），
-   *     {@code "2"} = 相关子查询（{@code bal2}/{@code s2}/{@code w2}）。
-   *     同一段条件在列表查询（exists 内）与分录口径汇总里都要用，别名参数化才不用写两遍。
+   * @param prefix 列别名后缀。{@code ""} = 主查询（列前缀 {@code bal}/{@code s}/{@code w}）， {@code "2"} =
+   *     相关子查询（{@code bal2}/{@code s2}/{@code w2}）。 同一段条件在列表查询（exists 内）与分录口径汇总里都要用，别名参数化才不用写两遍。
    */
   private void dimensionConditions(
-      InventoryLedgerQuery query, UUID lotId, String prefix, List<String> where, List<Object> binds) {
+      InventoryLedgerQuery query,
+      UUID lotId,
+      String prefix,
+      List<String> where,
+      List<Object> binds) {
     var conditions = new ArrayList<String>();
     if (query.skuId() != null) {
       conditions.add("bal" + prefix + ".sku_id = ?");
@@ -486,8 +463,16 @@ public class InventoryLedgerService {
     }
     if (query.keyword() != null && !query.keyword().isBlank()) {
       conditions.add(
-          "(s" + prefix + ".code ilike ? or s" + prefix + ".name ilike ?"
-              + " or w" + prefix + ".code ilike ? or w" + prefix + ".name ilike ?"
+          "(s"
+              + prefix
+              + ".code ilike ? or s"
+              + prefix
+              + ".name ilike ?"
+              + " or w"
+              + prefix
+              + ".code ilike ? or w"
+              + prefix
+              + ".name ilike ?"
               + " or t.notes ilike ?)");
       var k = "%" + query.keyword().trim() + "%";
       for (int i = 0; i < 5; i++) binds.add(k);
@@ -504,43 +489,76 @@ public class InventoryLedgerService {
     // 子查询里必须自己把 balance 接上（外层的 bal 是主查询的别名，子查询看不见），
     // SKU / 仓库两张参照表又依赖 balance 才能连上。
     where.add(
-        "exists (select 1 from inventory_entry e" + prefix
-            + " join inventory_balance bal" + prefix
-            + " on bal" + prefix + ".tenant_id=e" + prefix + ".tenant_id"
-            + " and bal" + prefix + ".id=e" + prefix + ".balance_id"
+        "exists (select 1 from inventory_entry e"
+            + prefix
+            + " join inventory_balance bal"
+            + prefix
+            + " on bal"
+            + prefix
+            + ".tenant_id=e"
+            + prefix
+            + ".tenant_id"
+            + " and bal"
+            + prefix
+            + ".id=e"
+            + prefix
+            + ".balance_id"
             + dimJoins(prefix)
-            + " where e" + prefix + ".tenant_id=t.tenant_id"
-            + " and e" + prefix + ".transaction_id=t.id"
-            + " and " + String.join(" and ", conditions) + ")");
+            + " where e"
+            + prefix
+            + ".tenant_id=t.tenant_id"
+            + " and e"
+            + prefix
+            + ".transaction_id=t.id"
+            + " and "
+            + String.join(" and ", conditions)
+            + ")");
   }
 
   /** 维度条件用到的参照表 join：SKU 与仓库编码/名称都在这里（sku / 仓库仍是逻辑 ID + 引用登记）。 */
   private static String dimJoins(String prefix) {
-    return " join sku_ref s" + prefix
-        + " on s" + prefix + ".tenant_id=bal" + prefix + ".tenant_id"
-        + " and s" + prefix + ".id=bal" + prefix + ".sku_id"
-        + " join warehouse w" + prefix
-        + " on w" + prefix + ".tenant_id=bal" + prefix + ".tenant_id"
-        + " and w" + prefix + ".id=bal" + prefix + ".warehouse_id";
+    return " join sku_ref s"
+        + prefix
+        + " on s"
+        + prefix
+        + ".tenant_id=bal"
+        + prefix
+        + ".tenant_id"
+        + " and s"
+        + prefix
+        + ".id=bal"
+        + prefix
+        + ".sku_id"
+        + " join warehouse w"
+        + prefix
+        + " on w"
+        + prefix
+        + ".tenant_id=bal"
+        + prefix
+        + ".tenant_id"
+        + " and w"
+        + prefix
+        + ".id=bal"
+        + prefix
+        + ".warehouse_id";
   }
 
   private static String placeholders(int count) {
     return String.join(",", java.util.Collections.nCopies(count, "?"));
   }
 
-  /**
-   * 排序。决胜键恒定追加 {@code t.id}：同一毫秒内多笔业务时翻页不会错位或重复。
-   */
+  /** 排序。决胜键恒定追加 {@code t.id}：同一毫秒内多笔业务时翻页不会错位或重复。 */
   private String order(InventoryLedgerQuery query) {
     String sort = query.sort() == null ? "OCCURRED_AT" : query.sort().toUpperCase(Locale.ROOT);
     if (!SORTS.contains(sort)) {
-      throw new IllegalArgumentException("不支持的排序键：" + query.sort() + "，可选：" + String.join("、", SORTS));
+      throw new IllegalArgumentException(
+          "不支持的排序键：" + query.sort() + "，可选：" + String.join("、", SORTS));
     }
     return switch (sort) {
       case "OCCURRED_AT_ASC" -> " order by t.occurred_at,t.id";
       case "KIND" -> " order by t.kind,t.occurred_at desc,t.id desc";
       case "REF_TYPE" -> " order by t.ref_type,t.occurred_at desc,t.id desc";
-      // 按聚合列排序：PG 允许 order by 聚合表达式，不必再包一层子查询。
+        // 按聚合列排序：PG 允许 order by 聚合表达式，不必再包一层子查询。
       case "ON_HAND_DELTA" -> " order by coalesce(sum(e.on_hand_delta),0) desc,t.id desc";
       case "ENTRY_COUNT" -> " order by count(e.id) desc,t.id desc";
       default -> " order by t.occurred_at desc,t.id desc";
@@ -552,8 +570,7 @@ public class InventoryLedgerService {
   /**
    * 时间范围校验。
    *
-   * <p>from/to 是左闭右开，所以 from == to 表示空区间（合法、返回空）；from &gt; to 一定是填反了，
-   * 直接 400 而不是返回空列表。
+   * <p>from/to 是左闭右开，所以 from == to 表示空区间（合法、返回空）；from &gt; to 一定是填反了， 直接 400 而不是返回空列表。
    */
   private void checkRange(InventoryLedgerQuery query) {
     if (query.from() != null && query.to() != null && query.from().isAfter(query.to())) {

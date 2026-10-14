@@ -272,8 +272,7 @@ export function quantityProblem(value: string): string | null {
 export function windowProblem(from: string, to: string): string | null {
   if (!from.trim()) return '生效起始日不能为空';
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from.trim())) return '生效起始日格式需为 yyyy-MM-dd';
-  if (to.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(to.trim()))
-    return '生效截止日格式需为 yyyy-MM-dd';
+  if (to.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(to.trim())) return '生效截止日格式需为 yyyy-MM-dd';
   if (to.trim() && to.trim() < from.trim()) return '生效截止日不能早于生效起始日';
   return null;
 }
@@ -504,9 +503,7 @@ export function validateGroupConversion(
   return errors;
 }
 
-export function draftToGroupConversionInput(
-  draft: GroupConversionDraft,
-): UnitGroupConversionInput {
+export function draftToGroupConversionInput(draft: GroupConversionDraft): UnitGroupConversionInput {
   return {
     unitCode: draft.unitCode.trim(),
     // 按字符串直接转，避免 Number 丢掉 6 位小数以下的精度。

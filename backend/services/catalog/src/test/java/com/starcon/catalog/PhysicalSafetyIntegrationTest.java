@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jooq.DSLContext;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,27 +25,22 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
-import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.7.2.1 物理与安全属性：物理参数 + 安全属性读写、体积重与计费重派生、
- * 按安全属性筛选、渠道可用性判定、装箱体积核算，以及<b>租户隔离三断言</b>。
+ * 3.7.2.1 物理与安全属性：物理参数 + 安全属性读写、体积重与计费重派生、 按安全属性筛选、渠道可用性判定、装箱体积核算，以及<b>租户隔离三断言</b>。
  *
- * <p><b>真实 PostgreSQL 16 + 强制 RLS</b>：{@code sku_package} 与
- * {@code sku_safety_attribute} 全部真的落库，Flyway 真的跑 V28。
- * 连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p><b>真实 PostgreSQL 16 + 强制 RLS</b>：{@code sku_package} 与 {@code sku_safety_attribute}
+ * 全部真的落库，Flyway 真的跑 V28。 连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本文件最重要的断言</b>：
  *
  * <ol>
- *   <li>{@link #安全属性未采集一律判不可发()}：规则 R2 的核心 —— 默认放行等于
- *       给了一条「不填就能绕过申报」的路。
+ *   <li>{@link #安全属性未采集一律判不可发()}：规则 R2 的核心 —— 默认放行等于 给了一条「不填就能绕过申报」的路。
  *   <li>{@link #已采集且都不带时渠道才放行()}：且明确要求 {@code safetyCollected=true}。
  *   <li>{@link #体积重按调用方给的除数计算()}：两个除数给出两个不同答案（规则 R3）。
  *   <li>{@link #未采集与都不带在列表与档案上必须显示成不同状态()}：V28 规则 B2。
- *   <li>{@link #租户隔离三断言()}：两租户互不可见、伪造 tenant header 无效、
- *       连接池归还后不串租户。
+ *   <li>{@link #租户隔离三断言()}：两租户互不可见、伪造 tenant header 无效、 连接池归还后不串租户。
  *   <li>{@link #新表强制rls且数量列精度正确()}：RLS 与 NUMERIC 精度在库层核对。
  * </ol>
  */
@@ -60,8 +56,13 @@ class PhysicalSafetyIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -70,7 +71,8 @@ class PhysicalSafetyIntegrationTest {
 
   static {
     pg.start();
-    try (var conn = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    try (var conn =
+            DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = conn.createStatement()) {
       s.execute("create role starcon_app nologin");
       s.execute("create role catalog_app login password 'test-only' nosuperuser nobypassrls");
@@ -154,36 +156,87 @@ class PhysicalSafetyIntegrationTest {
   }
 
   String unique(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   UUID skuOf(AccessService.Access who, String code) {
     UUID spuId =
-        write(who, () -> catalog.saveSpu(
-            who, null, new SpuInput(code, "SPU " + code, "", "Brand", "Category", "DRAFT", 0)));
-    return write(who, () -> catalog.saveSku(
-        who, spuId, null, new SkuInput(code, "SKU " + code, unique("BC"), "PCS", "ACTIVE", List.of(), 0)));
+        write(
+            who,
+            () ->
+                catalog.saveSpu(
+                    who,
+                    null,
+                    new SpuInput(code, "SPU " + code, "", "Brand", "Category", "DRAFT", 0)));
+    return write(
+        who,
+        () ->
+            catalog.saveSku(
+                who,
+                spuId,
+                null,
+                new SkuInput(code, "SKU " + code, unique("BC"), "PCS", "ACTIVE", List.of(), 0)));
   }
 
   /** 存一份完整的物理 + 安全档案。 */
   PhysicalSafetySaved save(
-      AccessService.Access who, UUID skuId, String l, String w, String h,
-      String net, String gross, String packaging, boolean collected,
-      boolean battery, boolean liquid, boolean dg, boolean magnetic) {
-    return write(who, () -> physical.save(who, skuId, input(l, w, h, net, gross, packaging,
-        collected, battery, liquid, dg, magnetic, 0, 0)));
+      AccessService.Access who,
+      UUID skuId,
+      String l,
+      String w,
+      String h,
+      String net,
+      String gross,
+      String packaging,
+      boolean collected,
+      boolean battery,
+      boolean liquid,
+      boolean dg,
+      boolean magnetic) {
+    return write(
+        who,
+        () ->
+            physical.save(
+                who,
+                skuId,
+                input(
+                    l, w, h, net, gross, packaging, collected, battery, liquid, dg, magnetic, 0,
+                    0)));
   }
 
   PhysicalSafetyInput input(
-      String l, String w, String h, String net, String gross, String packaging,
-      boolean collected, boolean battery, boolean liquid, boolean dg, boolean magnetic,
-      long safetyVersion, long packagingVersion) {
+      String l,
+      String w,
+      String h,
+      String net,
+      String gross,
+      String packaging,
+      boolean collected,
+      boolean battery,
+      boolean liquid,
+      boolean dg,
+      boolean magnetic,
+      long safetyVersion,
+      long packagingVersion) {
     // 危险品按规则 B3 必须带类别：测试只走「合法档案」这一条路，
     // 非法组合由 危险品必须带类别否则服务层与库层都拒绝 单独断言。
     return new PhysicalSafetyInput(
-        decimal(l), decimal(w), decimal(h), decimal(net), decimal(gross), packaging,
-        collected, battery, liquid, dg, magnetic, dg ? "UN1266" : "", "",
-        safetyVersion, packagingVersion);
+        decimal(l),
+        decimal(w),
+        decimal(h),
+        decimal(net),
+        decimal(gross),
+        packaging,
+        collected,
+        battery,
+        liquid,
+        dg,
+        magnetic,
+        dg ? "UN1266" : "",
+        "",
+        safetyVersion,
+        packagingVersion);
   }
 
   static BigDecimal decimal(String value) {
@@ -195,13 +248,19 @@ class PhysicalSafetyIntegrationTest {
   @Test
   void 物理参数与安全属性一次提交写入两张表() {
     UUID sku = skuOf(actor, unique("PS"));
-    var saved = save(actor, sku, "200", "150", "100", "500", "800", "纸箱",
-        true, true, false, false, false);
+    var saved =
+        save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, true, false, false, false);
 
     // sku_package（V6 的表，本模块不另建表抄一份）
-    var pkg = tx(actor, () -> sql.fetchOne(
-        "select length_mm,width_mm,height_mm,net_weight_g,gross_weight_g,packaging_type"
-            + " from sku_package where tenant_id=? and sku_id=?", a, sku));
+    var pkg =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select length_mm,width_mm,height_mm,net_weight_g,gross_weight_g,packaging_type"
+                        + " from sku_package where tenant_id=? and sku_id=?",
+                    a,
+                    sku));
     assertThat(pkg.get("length_mm", BigDecimal.class)).isEqualByComparingTo(decimal("200"));
     assertThat(pkg.get("width_mm", BigDecimal.class)).isEqualByComparingTo(decimal("150"));
     assertThat(pkg.get("height_mm", BigDecimal.class)).isEqualByComparingTo(decimal("100"));
@@ -210,9 +269,15 @@ class PhysicalSafetyIntegrationTest {
     assertThat(pkg.get("packaging_type", String.class)).isEqualTo("纸箱");
 
     // sku_safety_attribute（V28 新表）
-    var safety = tx(actor, () -> sql.fetchOne(
-        "select contains_battery,contains_liquid,dangerous_goods,is_magnetic"
-            + " from sku_safety_attribute where tenant_id=? and sku_id=?", a, sku));
+    var safety =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select contains_battery,contains_liquid,dangerous_goods,is_magnetic"
+                        + " from sku_safety_attribute where tenant_id=? and sku_id=?",
+                    a,
+                    sku));
     assertThat(safety.get("contains_battery", Boolean.class)).isTrue();
     assertThat(safety.get("contains_liquid", Boolean.class)).isFalse();
     assertThat(safety.get("dangerous_goods", Boolean.class)).isFalse();
@@ -228,12 +293,16 @@ class PhysicalSafetyIntegrationTest {
   @Test
   void 毛重小于净重被拒且不写任何一行() {
     UUID sku = skuOf(actor, unique("PS"));
-    assertThatThrownBy(() -> save(actor, sku, "200", "150", "100", "900", "100", "纸箱",
-        true, false, false, false, false))
+    assertThatThrownBy(
+            () ->
+                save(
+                    actor, sku, "200", "150", "100", "900", "100", "纸箱", true, false, false, false,
+                    false))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("毛重不能小于净重");
     // 整次提交是原子的：物理参数与安全属性都不该留下半截。
-    assertThat(tx(actor, () -> sql.fetch("select * from sku_package where sku_id=?", sku))).isEmpty();
+    assertThat(tx(actor, () -> sql.fetch("select * from sku_package where sku_id=?", sku)))
+        .isEmpty();
     assertThat(tx(actor, () -> sql.fetch("select * from sku_safety_attribute where sku_id=?", sku)))
         .isEmpty();
   }
@@ -242,8 +311,11 @@ class PhysicalSafetyIntegrationTest {
   void 勾了安全标记却没确认已采集被拒() {
     UUID sku = skuOf(actor, unique("PS"));
     // 自相矛盾的提交：渠道会看到「带电」，运营却以为自己没填。
-    assertThatThrownBy(() -> save(actor, sku, "200", "150", "100", "500", "800", "纸箱",
-        false, true, false, false, false))
+    assertThatThrownBy(
+            () ->
+                save(
+                    actor, sku, "200", "150", "100", "500", "800", "纸箱", false, true, false, false,
+                    false))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已采集安全属性");
   }
@@ -253,8 +325,9 @@ class PhysicalSafetyIntegrationTest {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, true, false, false, false);
     // 取消「已采集」：安全属性回到未采集，物理参数不动。
-    var saved = save(actor, sku, "200", "150", "100", "500", "800", "纸箱",
-        false, false, false, false, false);
+    var saved =
+        save(
+            actor, sku, "200", "150", "100", "500", "800", "纸箱", false, false, false, false, false);
     assertThat(saved.profile().safetyCollected()).isFalse();
     assertThat(saved.profile().volumeCm3()).isEqualByComparingTo(decimal("3000"));
     assertThat(tx(actor, () -> sql.fetch("select * from sku_safety_attribute where sku_id=?", sku)))
@@ -266,8 +339,17 @@ class PhysicalSafetyIntegrationTest {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
     // 用过期的 safetyVersion 再写一次。
-    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, sku,
-        input("200", "150", "100", "500", "800", "纸箱", true, true, false, false, false, 99, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        physical.save(
+                            actor,
+                            sku,
+                            input(
+                                "200", "150", "100", "500", "800", "纸箱", true, true, false, false,
+                                false, 99, 0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已被他人修改");
   }
@@ -293,7 +375,8 @@ class PhysicalSafetyIntegrationTest {
   void 计费重取实重与体积重的较大者() {
     UUID bulky = skuOf(actor, unique("PS"));
     // 泡货：1m³ 的空箱子只有 0.2kg 实重，但体积重 166.67kg。
-    save(actor, bulky, "1000", "1000", "1000", "100", "200", "纸箱", true, false, false, false, false);
+    save(
+        actor, bulky, "1000", "1000", "1000", "100", "200", "纸箱", true, false, false, false, false);
     var bulkyView = tx(actor, () -> physical.profile(bulky, decimal("6000")));
     // 1,000×1,000×1,000 mm = 1,000,000 cm³ ÷ 6000 = 166.666667 kg
     assertThat(bulkyView.volumetricWeightKg()).isEqualByComparingTo(decimal("166.666667"));
@@ -327,8 +410,9 @@ class PhysicalSafetyIntegrationTest {
     UUID notCollected = skuOf(actor, unique("PS"));
     UUID plain = skuOf(actor, unique("PS"));
     var untouched = tx(actor, () -> physical.profile(notCollected, decimal("6000")));
-    var confirmed = save(actor, plain, null, null, null, null, null, "",
-        true, false, false, false, false).profile();
+    var confirmed =
+        save(actor, plain, null, null, null, null, null, "", true, false, false, false, false)
+            .profile();
 
     assertThat(untouched.safetyCollected()).isFalse();
     assertThat(confirmed.safetyCollected()).isTrue();
@@ -348,7 +432,8 @@ class PhysicalSafetyIntegrationTest {
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", false, false, false, false, false);
     assertThat(tx(actor, () -> physical.profile(sku, null)).safetyCollected()).isFalse();
     // 渠道什么都不限制，但安全属性没采集 → 仍然拒发。
-    var result = tx(actor, () -> physical.verdict(sku, policy("ANY", true, true, true, true, false)));
+    var result =
+        tx(actor, () -> physical.verdict(sku, policy("ANY", true, true, true, true, false)));
     assertThat(result.shippable()).isFalse();
     assertThat(result.blockers()).contains("SAFETY_NOT_COLLECTED");
     // 附注要讲清「按不知道处理」，页面不靠猜。
@@ -359,7 +444,8 @@ class PhysicalSafetyIntegrationTest {
   void 已采集且都不带时渠道才放行() {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
-    var result = tx(actor, () -> physical.verdict(sku, policy("EXPRESS", true, true, true, true, false)));
+    var result =
+        tx(actor, () -> physical.verdict(sku, policy("EXPRESS", true, true, true, true, false)));
     assertThat(result.shippable()).isTrue();
     assertThat(result.blockers()).isEmpty();
     assertThat(result.declarations()).isEmpty();
@@ -369,13 +455,15 @@ class PhysicalSafetyIntegrationTest {
   void 带电货物遇到不收带电的渠道被拦下() {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, true, false, false, false);
-    var blocked = tx(actor, () -> physical.verdict(sku, policy("ROAD", false, true, true, true, false)));
+    var blocked =
+        tx(actor, () -> physical.verdict(sku, policy("ROAD", false, true, true, true, false)));
     assertThat(blocked.shippable()).isFalse();
     assertThat(blocked.blockers()).containsExactly("BATTERY_NOT_ALLOWED");
     assertThat(blocked.blockerLabels()).allMatch(label -> !label.isBlank());
 
     // 收带电的渠道放行，但仍要给电池申报 —— 拦截与申报是两件事。
-    var allowed = tx(actor, () -> physical.verdict(sku, policy("AIR-DG", true, true, true, true, false)));
+    var allowed =
+        tx(actor, () -> physical.verdict(sku, policy("AIR-DG", true, true, true, true, false)));
     assertThat(allowed.shippable()).isTrue();
     assertThat(allowed.declarations()).containsExactly("BATTERY");
   }
@@ -384,7 +472,8 @@ class PhysicalSafetyIntegrationTest {
   void 渠道判定带上体积重与计费重() {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
-    var result = tx(actor, () -> physical.verdict(sku, policy("AIR", true, true, true, true, true)));
+    var result =
+        tx(actor, () -> physical.verdict(sku, policy("AIR", true, true, true, true, true)));
     assertThat(result.shippable()).isTrue();
     assertThat(result.volumeCm3()).isEqualByComparingTo(decimal("3000"));
     assertThat(result.volumetricWeightKg()).isEqualByComparingTo(decimal("0.5"));
@@ -397,14 +486,21 @@ class PhysicalSafetyIntegrationTest {
   void 渠道要求物理参数时缺一维被拦下() {
     UUID sku = skuOf(actor, unique("PS"));
     save(actor, sku, "200", "150", null, "500", "800", "纸箱", true, false, false, false, false);
-    var result = tx(actor, () -> physical.verdict(sku, policy("AIR", true, true, true, true, true)));
+    var result =
+        tx(actor, () -> physical.verdict(sku, policy("AIR", true, true, true, true, true)));
     assertThat(result.shippable()).isFalse();
     assertThat(result.blockers()).contains("PHYSICAL_PARAMETERS_MISSING");
   }
 
   ChannelVerdictInput policy(
-      String code, boolean battery, boolean liquid, boolean dg, boolean magnetic, boolean requireParams) {
-    return new ChannelVerdictInput(code, battery, liquid, dg, magnetic, requireParams, decimal("6000"));
+      String code,
+      boolean battery,
+      boolean liquid,
+      boolean dg,
+      boolean magnetic,
+      boolean requireParams) {
+    return new ChannelVerdictInput(
+        code, battery, liquid, dg, magnetic, requireParams, decimal("6000"));
   }
 
   // ============================================================ 筛选
@@ -419,19 +515,33 @@ class PhysicalSafetyIntegrationTest {
     save(actor, battery, null, null, null, null, null, "", true, true, false, false, false);
     save(actor, plain, null, null, null, null, null, "", true, false, false, false, false);
 
-    var dangerRows = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, true, null, null, null, null, 0, 50)));
-    assertThat(dangerRows.items()).extracting(PhysicalSafetyRow::skuCode)
+    var dangerRows =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, true, null, null, null, null, 0, 50)));
+    assertThat(dangerRows.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .contains(codeOf(dangerous));
-    assertThat(dangerRows.items()).extracting(PhysicalSafetyRow::skuCode)
+    assertThat(dangerRows.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .doesNotContain(codeOf(battery), codeOf(plain));
 
     // 筛「不是危险品」也必须能答 —— 运营会问这个问题。
-    var notDangerous = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, false, null, null, null, null, 0, 50)));
-    assertThat(notDangerous.items()).extracting(PhysicalSafetyRow::skuCode)
+    var notDangerous =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, false, null, null, null, null, 0, 50)));
+    assertThat(notDangerous.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .contains(codeOf(battery), codeOf(plain));
-    assertThat(notDangerous.items()).extracting(PhysicalSafetyRow::skuCode)
+    assertThat(notDangerous.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .doesNotContain(codeOf(dangerous));
   }
 
@@ -442,18 +552,32 @@ class PhysicalSafetyIntegrationTest {
     UUID liquid = skuOf(actor, prefix + "LIQ");
     save(actor, liquid, null, null, null, null, null, "", true, false, true, false, false);
 
-    var uncollected = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, null, null, false, null, null, 0, 50)));
-    assertThat(uncollected.items()).extracting(PhysicalSafetyRow::skuCode)
+    var uncollected =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, null, null, false, null, null, 0, 50)));
+    assertThat(uncollected.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .contains(codeOf(untouched));
-    assertThat(uncollected.items()).extracting(PhysicalSafetyRow::skuCode)
+    assertThat(uncollected.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .doesNotContain(codeOf(liquid));
 
-    var needsDeclaration = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, null, null, null, true, null, 0, 50)));
-    assertThat(needsDeclaration.items()).extracting(PhysicalSafetyRow::skuCode)
+    var needsDeclaration =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, null, null, null, true, null, 0, 50)));
+    assertThat(needsDeclaration.items())
+        .extracting(PhysicalSafetyRow::skuCode)
         .contains(codeOf(liquid));
-    assertThat(needsDeclaration.items()).extracting(PhysicalSafetyRow::requiredDeclarations)
+    assertThat(needsDeclaration.items())
+        .extracting(PhysicalSafetyRow::requiredDeclarations)
         .allSatisfy(declarations -> assertThat(declarations).isNotEmpty());
   }
 
@@ -464,10 +588,20 @@ class PhysicalSafetyIntegrationTest {
       UUID sku = skuOf(actor, prefix + i);
       save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
     }
-    var page0 = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, null, null, null, null, null, 0, 2)));
-    var page1 = tx(actor, () -> physical.search(
-        new PhysicalSafetyQuery(prefix, null, null, null, null, null, null, null, 1, 2)));
+    var page0 =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, null, null, null, null, null, 0, 2)));
+    var page1 =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        prefix, null, null, null, null, null, null, null, 1, 2)));
     assertThat(page0.items()).hasSize(2);
     assertThat(page0.total()).isEqualTo(3);
     assertThat(page0.totalPages()).isEqualTo(2);
@@ -477,7 +611,9 @@ class PhysicalSafetyIntegrationTest {
   }
 
   String codeOf(UUID sku) {
-    return tx(actor, () -> sql.fetchOne("select code from sku where id=?", sku).get("code", String.class));
+    return tx(
+        actor,
+        () -> sql.fetchOne("select code from sku where id=?", sku).get("code", String.class));
   }
 
   // ============================================================ 装箱体积核算
@@ -488,8 +624,15 @@ class PhysicalSafetyIntegrationTest {
     // 单件 3000 cm³、毛重 600g。每箱容积 10000 cm³ → 体积上 3 件；限重 10000g → 16 件。
     // 取更紧的 3 件。
     save(actor, sku, "200", "150", "100", "500", "600", "纸箱", true, false, false, false, false);
-    var result = tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(sku, decimal("7"))), decimal("10000"), decimal("10000"))));
+    var result =
+        tx(
+            actor,
+            () ->
+                physical.cartonCalc(
+                    new CartonCalcInput(
+                        List.of(new CartonLineInput(sku, decimal("7"))),
+                        decimal("10000"),
+                        decimal("10000"))));
     var line = result.lines().get(0);
     assertThat(line.unitsPerCartonByVolume()).isEqualTo(3);
     assertThat(line.unitsPerCartonByWeight()).isEqualTo(16);
@@ -505,8 +648,15 @@ class PhysicalSafetyIntegrationTest {
   void 限重更紧时按限重算并标明重量受限() {
     UUID sku = skuOf(actor, unique("CARTON"));
     save(actor, sku, "100", "100", "100", "2800", "3000", "纸箱", true, false, false, false, false);
-    var result = tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(sku, decimal("4"))), decimal("10000"), decimal("8000"))));
+    var result =
+        tx(
+            actor,
+            () ->
+                physical.cartonCalc(
+                    new CartonCalcInput(
+                        List.of(new CartonLineInput(sku, decimal("4"))),
+                        decimal("10000"),
+                        decimal("8000"))));
     var line = result.lines().get(0);
     assertThat(line.unitsPerCartonByVolume()).isEqualTo(10);
     assertThat(line.unitsPerCartonByWeight()).isEqualTo(2);
@@ -521,9 +671,17 @@ class PhysicalSafetyIntegrationTest {
     save(actor, sku, "200", "150", "100", "500", "600", "纸箱", true, false, false, false, false);
     // 分成 4 + 4 两行：合并后是 8 件、每箱 3 件 → 3 箱。
     // 不合并的话会算成 2 + 2 = 4 箱，而真实的拣货是把这 8 件装进同一批箱子。
-    var result = tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(sku, decimal("4")), new CartonLineInput(sku, decimal("4"))),
-        decimal("10000"), decimal("100000"))));
+    var result =
+        tx(
+            actor,
+            () ->
+                physical.cartonCalc(
+                    new CartonCalcInput(
+                        List.of(
+                            new CartonLineInput(sku, decimal("4")),
+                            new CartonLineInput(sku, decimal("4"))),
+                        decimal("10000"),
+                        decimal("100000"))));
     assertThat(result.lines()).hasSize(1);
     assertThat(result.lines().get(0).quantity()).isEqualByComparingTo(decimal("8"));
     assertThat(result.totalCartons()).isEqualTo(3);
@@ -533,8 +691,15 @@ class PhysicalSafetyIntegrationTest {
   void 缺体积的件在核算里显式标明而不是当作零() {
     UUID sku = skuOf(actor, unique("CARTON"));
     save(actor, sku, null, null, null, "1000", "2000", "", true, false, false, false, false);
-    var result = tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(sku, decimal("10"))), decimal("10000"), decimal("10000"))));
+    var result =
+        tx(
+            actor,
+            () ->
+                physical.cartonCalc(
+                    new CartonCalcInput(
+                        List.of(new CartonLineInput(sku, decimal("10"))),
+                        decimal("10000"),
+                        decimal("10000"))));
     var line = result.lines().get(0);
     assertThat(line.unitVolumeCm3()).isNull();
     assertThat(line.totalVolumeCm3()).isNull();
@@ -545,11 +710,24 @@ class PhysicalSafetyIntegrationTest {
   @Test
   void 箱规不合法时被拒() {
     UUID sku = skuOf(actor, unique("CARTON"));
-    assertThatThrownBy(() -> tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(sku, decimal("1"))), BigDecimal.ZERO, decimal("1000")))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        physical.cartonCalc(
+                            new CartonCalcInput(
+                                List.of(new CartonLineInput(sku, decimal("1"))),
+                                BigDecimal.ZERO,
+                                decimal("1000")))))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(() -> tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(), decimal("1000"), decimal("1000")))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        physical.cartonCalc(
+                            new CartonCalcInput(List.of(), decimal("1000"), decimal("1000")))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -563,7 +741,9 @@ class PhysicalSafetyIntegrationTest {
 
     String theirPrefix = unique("THEIRS");
     UUID theirSku = skuOf(actorB, theirPrefix);
-    save(actorB, theirSku, "300", "300", "300", "900", "1200", "木箱", true, false, false, true, false);
+    save(
+        actorB, theirSku, "300", "300", "300", "900", "1200", "木箱", true, false, false, true,
+        false);
 
     // 1) 两租户互不可见：读对方的档案直接 404。
     assertThatThrownBy(() -> tx(actor, () -> physical.profile(theirSku, decimal("6000"))))
@@ -571,40 +751,71 @@ class PhysicalSafetyIntegrationTest {
     assertThatThrownBy(() -> tx(actorB, () -> physical.profile(mySku, decimal("6000"))))
         .isInstanceOf(ResponseStatusException.class);
     // 写对方的档案同样拿不到目标。
-    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, theirSku,
-        input("1", "1", "1", "1", "1", "", true, false, false, false, false, 0, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        physical.save(
+                            actor,
+                            theirSku,
+                            input(
+                                "1", "1", "1", "1", "1", "", true, false, false, false, false, 0,
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
     // 对方的物理参数不能被本租户改掉。
-    assertThat(tx(actorB, () -> sql.fetchOne(
-        "select length_mm from sku_package where sku_id=?", theirSku))
-        .get("length_mm", BigDecimal.class)).isEqualByComparingTo(decimal("300"));
+    assertThat(
+            tx(
+                    actorB,
+                    () ->
+                        sql.fetchOne("select length_mm from sku_package where sku_id=?", theirSku))
+                .get("length_mm", BigDecimal.class))
+        .isEqualByComparingTo(decimal("300"));
     // 装箱核算跨租户取行同样 404。
-    assertThatThrownBy(() -> tx(actor, () -> physical.cartonCalc(new CartonCalcInput(
-        List.of(new CartonLineInput(theirSku, decimal("1"))), decimal("1000"), decimal("1000")))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        physical.cartonCalc(
+                            new CartonCalcInput(
+                                List.of(new CartonLineInput(theirSku, decimal("1"))),
+                                decimal("1000"),
+                                decimal("1000")))))
         .isInstanceOf(ResponseStatusException.class);
     // 渠道判定跨租户取档案同样 404。
-    assertThatThrownBy(() -> tx(actor, () -> physical.verdict(theirSku,
-        policy("AIR", true, true, true, true, false))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () -> physical.verdict(theirSku, policy("AIR", true, true, true, true, false))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系。
-    http.perform(get("/catalog/physical-safety/skus/" + mySku)
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/physical-safety/skus/" + mySku)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 即便带上除数也一样 —— 参数不能绕过隔离。
-    http.perform(get("/catalog/physical-safety/skus/" + mySku)
-            .param("divisorCm3PerKg", "6000")
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/physical-safety/skus/" + mySku)
+                .param("divisorCm3PerKg", "6000")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 筛选接口同样不认伪造的头。
-    http.perform(get("/catalog/physical-safety/profiles")
-            .param("keyword", myPrefix)
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/physical-safety/profiles")
+                .param("keyword", myPrefix)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isOk())
-        .andExpect(result -> {
-          var body = JSON.readTree(result.getResponse().getContentAsString());
-          assertThat(body.get("total").asLong()).isZero();
-        });
+        .andExpect(
+            result -> {
+              var body = JSON.readTree(result.getResponse().getContentAsString());
+              assertThat(body.get("total").asLong()).isZero();
+            });
 
     // 3) 连接池归还后不串租户（单连接反复交替），逐轮断言档案与列表都不串。
     for (int i = 0; i < 5; i++) {
@@ -619,12 +830,22 @@ class PhysicalSafetyIntegrationTest {
       assertThat(mine.volumeCm3()).isEqualByComparingTo(decimal("3000"));
       assertThat(theirs.volumeCm3()).isEqualByComparingTo(decimal("27000"));
 
-      var myRows = tx(actor, () -> physical.search(
-          new PhysicalSafetyQuery(null, null, null, null, null, null, null, null, 0, 100)))
-          .items();
-      var theirRows = tx(actorB, () -> physical.search(
-          new PhysicalSafetyQuery(null, null, null, null, null, null, null, null, 0, 100)))
-          .items();
+      var myRows =
+          tx(
+                  actor,
+                  () ->
+                      physical.search(
+                          new PhysicalSafetyQuery(
+                              null, null, null, null, null, null, null, null, 0, 100)))
+              .items();
+      var theirRows =
+          tx(
+                  actorB,
+                  () ->
+                      physical.search(
+                          new PhysicalSafetyQuery(
+                              null, null, null, null, null, null, null, null, 0, 100)))
+              .items();
       var myIds = myRows.stream().map(PhysicalSafetyRow::skuId).toList();
       var theirIds = theirRows.stream().map(PhysicalSafetyRow::skuId).toList();
       assertThat(myIds).contains(mySku).doesNotContain(theirSku);
@@ -637,9 +858,13 @@ class PhysicalSafetyIntegrationTest {
 
   @Test
   void 新表强制rls() {
-    var table = tx(actor, () -> sql.fetchOne(
-        "select relrowsecurity,relforcerowsecurity from pg_class"
-            + " where relname='sku_safety_attribute' and relkind='r'"));
+    var table =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select relrowsecurity,relforcerowsecurity from pg_class"
+                        + " where relname='sku_safety_attribute' and relkind='r'"));
     assertThat(Boolean.TRUE.equals(table.get("relrowsecurity", Boolean.class))).isTrue();
     assertThat(Boolean.TRUE.equals(table.get("relforcerowsecurity", Boolean.class))).isTrue();
   }
@@ -647,34 +872,44 @@ class PhysicalSafetyIntegrationTest {
   @Test
   void 物理参数列保持numeric精度不被本模块改坏() {
     // 本模块复用 sku_package 而不是另建表：V6 的 NUMERIC(19,6) 精度必须原样保留。
-    var columns = tx(actor, () -> sql.fetch(
-        "select column_name,numeric_precision p,numeric_scale s from information_schema.columns"
-            + " where table_name='sku_package' and column_name in"
-            + " ('length_mm','width_mm','height_mm','net_weight_g','gross_weight_g')"));
+    var columns =
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select column_name,numeric_precision p,numeric_scale s from information_schema.columns"
+                        + " where table_name='sku_package' and column_name in"
+                        + " ('length_mm','width_mm','height_mm','net_weight_g','gross_weight_g')"));
     assertThat(columns).hasSize(5);
-    assertThat(columns).allMatch(r ->
-        r.get("p", Integer.class) == 19 && r.get("s", Integer.class) == 6);
+    assertThat(columns)
+        .allMatch(r -> r.get("p", Integer.class) == 19 && r.get("s", Integer.class) == 6);
   }
 
   @Test
   void 写入后经http读回的是真实落库的值() throws Exception {
     UUID sku = skuOf(actor, unique("HTTP"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, true, false, false);
-    http.perform(get("/catalog/physical-safety/skus/" + sku).param("divisorCm3PerKg", "6000")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/physical-safety/skus/" + sku)
+                .param("divisorCm3PerKg", "6000")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
-        .andExpect(result -> {
-          var body = JSON.readTree(result.getResponse().getContentAsString());
-          assertThat(body.get("skuId").asText()).isEqualTo(sku.toString());
-          assertThat(body.get("lengthMm").decimalValue()).isEqualByComparingTo(decimal("200"));
-          assertThat(body.get("volumeCm3").decimalValue()).isEqualByComparingTo(decimal("3000"));
-          assertThat(body.get("volumetricWeightKg").decimalValue()).isEqualByComparingTo(decimal("0.5"));
-          assertThat(body.get("chargeableWeightKg").decimalValue()).isEqualByComparingTo(decimal("0.8"));
-          assertThat(body.get("safetyCollected").asBoolean()).isTrue();
-          assertThat(body.get("containsLiquid").asBoolean()).isTrue();
-          assertThat(body.get("dangerousGoods").asBoolean()).isFalse();
-          assertThat(body.get("requiredDeclarations").toString()).contains("LIQUID");
-        });
+        .andExpect(
+            result -> {
+              var body = JSON.readTree(result.getResponse().getContentAsString());
+              assertThat(body.get("skuId").asText()).isEqualTo(sku.toString());
+              assertThat(body.get("lengthMm").decimalValue()).isEqualByComparingTo(decimal("200"));
+              assertThat(body.get("volumeCm3").decimalValue())
+                  .isEqualByComparingTo(decimal("3000"));
+              assertThat(body.get("volumetricWeightKg").decimalValue())
+                  .isEqualByComparingTo(decimal("0.5"));
+              assertThat(body.get("chargeableWeightKg").decimalValue())
+                  .isEqualByComparingTo(decimal("0.8"));
+              assertThat(body.get("safetyCollected").asBoolean()).isTrue();
+              assertThat(body.get("containsLiquid").asBoolean()).isTrue();
+              assertThat(body.get("dangerousGoods").asBoolean()).isFalse();
+              assertThat(body.get("requiredDeclarations").toString()).contains("LIQUID");
+            });
   }
 
   // ============================================================ DB 层约束（绕开 Java 直接写 SQL）
@@ -687,12 +922,22 @@ class PhysicalSafetyIntegrationTest {
     UUID sku = skuOf(actor, unique("DBCHK"));
     // 先用服务层写出一行合法数据，再绕过服务层改坏它。
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
-    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
-        "update sku_package set gross_weight_g=100, net_weight_g=500 where sku_id=?", sku)))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update sku_package set gross_weight_g=100, net_weight_g=500 where sku_id=?",
+                            sku)))
         .hasMessageContaining("毛重");
     // 值没被改脏：库里仍然是提交时的 800 / 500。
-    var row = tx(actor, () -> sql.fetchOne(
-        "select gross_weight_g,net_weight_g from sku_package where sku_id=?", sku));
+    var row =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select gross_weight_g,net_weight_g from sku_package where sku_id=?", sku));
     assertThat(row.get("gross_weight_g", BigDecimal.class)).isEqualByComparingTo(decimal("800"));
     assertThat(row.get("net_weight_g", BigDecimal.class)).isEqualByComparingTo(decimal("500"));
   }
@@ -702,11 +947,16 @@ class PhysicalSafetyIntegrationTest {
     UUID sku = skuOf(actor, unique("DBZERO"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
     // 0 长度的箱子不是「体积为 0」的箱子，而是「这一维没量到」（规则 R1）。
-    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
-        "update sku_package set length_mm=0 where sku_id=?", sku))).isNotNull();
-    assertThat(tx(actor, () -> sql.fetchOne(
-        "select length_mm from sku_package where sku_id=?", sku))
-        .get("length_mm", BigDecimal.class)).isEqualByComparingTo(decimal("200"));
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () -> sql.execute("update sku_package set length_mm=0 where sku_id=?", sku)))
+        .isNotNull();
+    assertThat(
+            tx(actor, () -> sql.fetchOne("select length_mm from sku_package where sku_id=?", sku))
+                .get("length_mm", BigDecimal.class))
+        .isEqualByComparingTo(decimal("200"));
   }
 
   @Test
@@ -714,8 +964,12 @@ class PhysicalSafetyIntegrationTest {
     UUID sku = skuOf(actor, unique("DBNET"));
     save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
     // 净重 0 会让计费重退化成只看体积重，渠道拿不到真实实重。
-    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
-        "update sku_package set net_weight_g=0 where sku_id=?", sku))).isNotNull();
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () -> sql.execute("update sku_package set net_weight_g=0 where sku_id=?", sku)))
+        .isNotNull();
   }
 
   @Test
@@ -724,28 +978,76 @@ class PhysicalSafetyIntegrationTest {
     // 服务层先拦（给可读的中文错误）。
     // 这里**不能**走 save(...) 帮助方法：它按规则 B3 自动补上类别，
     // 那样构造出来的就不是「缺类别」这个场景了。显式传空串才是被测输入。
-    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, sku,
-        new PhysicalSafetyInput(
-            decimal("200"), decimal("150"), decimal("100"), decimal("500"), decimal("800"), "纸箱",
-            true, false, false, true, false, "", "", 0, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        physical.save(
+                            actor,
+                            sku,
+                            new PhysicalSafetyInput(
+                                decimal("200"),
+                                decimal("150"),
+                                decimal("100"),
+                                decimal("500"),
+                                decimal("800"),
+                                "纸箱",
+                                true,
+                                false,
+                                false,
+                                true,
+                                false,
+                                "",
+                                "",
+                                0,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("危险品类别");
 
     // 绕过服务层直接写：库层同样拒绝（CHECK 或触发器，至少有一层咬住即可）。
-    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
-        "insert into sku_safety_attribute(id,tenant_id,sku_id,dangerous_goods,"
-            + "dangerous_substance_class) values(?,?,?,true,'')",
-        java.util.UUID.randomUUID(), a, sku))).isNotNull();
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "insert into sku_safety_attribute(id,tenant_id,sku_id,dangerous_goods,"
+                                + "dangerous_substance_class) values(?,?,?,true,'')",
+                            java.util.UUID.randomUUID(),
+                            a,
+                            sku)))
+        .isNotNull();
   }
 
   @Test
   void 不是危险品却挂了危险品类别被拒() {
     UUID sku = skuOf(actor, unique("DBCLASS2"));
     // 服务层：两个方向都拦。
-    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, sku,
-        new PhysicalSafetyInput(
-            decimal("200"), decimal("150"), decimal("100"), decimal("500"), decimal("800"), "纸箱",
-            true, false, false, false, false, "UN1266", "", 0, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        physical.save(
+                            actor,
+                            sku,
+                            new PhysicalSafetyInput(
+                                decimal("200"),
+                                decimal("150"),
+                                decimal("100"),
+                                decimal("500"),
+                                decimal("800"),
+                                "纸箱",
+                                true,
+                                false,
+                                false,
+                                false,
+                                false,
+                                "UN1266",
+                                "",
+                                0,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("危险品类别");
   }
@@ -759,9 +1061,15 @@ class PhysicalSafetyIntegrationTest {
     assertThat(view.dangerousSubstanceClass()).isEqualTo("UN1266");
 
     // 按类别反查（16 合规的取数形状）：只捞这一类危险品。
-    var rows = tx(actor, () -> physical.search(new PhysicalSafetyQuery(
-        codeOf(sku), null, null, null, null, null, null, null, 0, 20)));
-    assertThat(rows.items()).extracting(PhysicalSafetyRow::dangerousSubstanceClass)
+    var rows =
+        tx(
+            actor,
+            () ->
+                physical.search(
+                    new PhysicalSafetyQuery(
+                        codeOf(sku), null, null, null, null, null, null, null, 0, 20)));
+    assertThat(rows.items())
+        .extracting(PhysicalSafetyRow::dangerousSubstanceClass)
         .contains("UN1266");
   }
 
@@ -783,12 +1091,15 @@ class PhysicalSafetyIntegrationTest {
   void 写操作按权限收敛() throws Exception {
     UUID sku = skuOf(actor, unique("PERM"));
     // reader 只有 compliance.read，没有 update。
-    http.perform(put("/catalog/physical-safety/skus/" + sku)
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content(
-                JSON.writeValueAsString(
-                    input("200", "150", "100", "500", "800", "纸箱", true, false, false, false, false, 0, 0))))
+    http.perform(
+            put("/catalog/physical-safety/skus/" + sku)
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(
+                    JSON.writeValueAsString(
+                        input(
+                            "200", "150", "100", "500", "800", "纸箱", true, false, false, false,
+                            false, 0, 0))))
         .andExpect(status().isForbidden());
   }
 

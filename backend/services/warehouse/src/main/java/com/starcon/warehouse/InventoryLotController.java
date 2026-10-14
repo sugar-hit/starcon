@@ -20,17 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.3.1.1 批次管理。
  *
- * <p>命名空间 {@code /warehouse/inventory/lots}：与总览、明细、台账、核对同一前缀，
- * 浏览器只经 /api/warehouse 代理访问。刻意**不挂在 {@code /warehouse/lots}** —— 那是 7.1.1.2
- * 明细页的批次下拉（{@code InventoryController.lots}），一个只读精简列表，
+ * <p>命名空间 {@code /warehouse/inventory/lots}：与总览、明细、台账、核对同一前缀， 浏览器只经 /api/warehouse 代理访问。刻意**不挂在
+ * {@code /warehouse/lots}** —— 那是 7.1.1.2 明细页的批次下拉（{@code InventoryController.lots}），一个只读精简列表，
  * 与本模块的完整档案不是同一个东西。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}（与总览/明细/台账同源同权），
- * 建立与修改用 {@code warehouse.inventory.update} —— 建立批次是收货/建档流程的一环，
- * 不是读权限能带过去的动作。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}（与总览/明细/台账同源同权）， 建立与修改用 {@code
+ * warehouse.inventory.update} —— 建立批次是收货/建档流程的一环， 不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。
  */
 @RestController
 @RequestMapping("/warehouse/inventory/lots")
@@ -53,8 +51,7 @@ public class InventoryLotController {
   /**
    * 批次档案列表 + 全量汇总（**合计不受分页影响**）。
    *
-   * <p>{@code expiringWithinDays} 是**读侧**筛选（取数），临期预警与 FEFO 出库推荐属 7.3.1.2，
-   * 本模块不产生任何预警。
+   * <p>{@code expiringWithinDays} 是**读侧**筛选（取数），临期预警与 FEFO 出库推荐属 7.3.1.2， 本模块不产生任何预警。
    */
   @GetMapping
   public LotArchivePage lots(
@@ -91,9 +88,7 @@ public class InventoryLotController {
                     size)));
   }
 
-  /**
-   * 单个批次的档案详情。跨租户在 RLS 下查不到 → 404（403 会泄露「这个批次存在」）。
-   */
+  /** 单个批次的档案详情。跨租户在 RLS 下查不到 → 404（403 会泄露「这个批次存在」）。 */
   @GetMapping("/{lotId}")
   public LotArchiveRow archive(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -114,8 +109,7 @@ public class InventoryLotController {
    *
    * <p>时间参数与台账端点同一套规则：必须带偏移量的 ISO-8601，不按服务器本地时区猜。
    *
-   * <p>数据范围（SELF）由角色授权推导，与台账列表完全一致：actorId 取自已认证身份，
-   * **不是**客户端参数 —— 否则「只看我自己的流水」会变成一个能越权的开关。
+   * <p>数据范围（SELF）由角色授权推导，与台账列表完全一致：actorId 取自已认证身份， **不是**客户端参数 —— 否则「只看我自己的流水」会变成一个能越权的开关。
    */
   @GetMapping("/{lotId}/movements")
   public LotMovements movements(
@@ -154,9 +148,8 @@ public class InventoryLotController {
   /**
    * 建立批次：收货生成（8 收货调用，origin=RECEIPT）与手工建立（origin=MANUAL）共用这一条。
    *
-   * <p>用 POST：它真的落库。收货侧调同一端点建立批次，来源单据 id 走
-   * {@code sourceSystem + sourceRefId} 跨服务定位键 —— 采购(6)/收货(8) 不在本服务，
-   * 本模块既不建外键也不联查它们的表。
+   * <p>用 POST：它真的落库。收货侧调同一端点建立批次，来源单据 id 走 {@code sourceSystem + sourceRefId} 跨服务定位键 —— 采购(6)/收货(8)
+   * 不在本服务， 本模块既不建外键也不联查它们的表。
    */
   @PostMapping
   public LotArchiveSaved create(
@@ -171,9 +164,8 @@ public class InventoryLotController {
   /**
    * 修改批次属性。
    *
-   * <p>用 PUT：资源整体替换语义，但**批次身份三件套（批号 / SKU / origin）不可改** ——
-   * 改了等于换了一个批次，而库位上的 lot_id 还指着旧身份。要换批号请新建批次。
-   * 可改属性中 null 表示不修改（见 {@code LotArchiveUpdateRequest}）。
+   * <p>用 PUT：资源整体替换语义，但**批次身份三件套（批号 / SKU / origin）不可改** —— 改了等于换了一个批次，而库位上的 lot_id
+   * 还指着旧身份。要换批号请新建批次。 可改属性中 null 表示不修改（见 {@code LotArchiveUpdateRequest}）。
    */
   @PutMapping("/{lotId}")
   public LotArchiveSaved update(

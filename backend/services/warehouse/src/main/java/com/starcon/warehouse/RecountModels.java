@@ -4,38 +4,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
  * 8.3.3.1 复核扫描的传输模型。
  *
  * <p>蓝图 08 卷 8.3.3.1 原文：「<b>打包前复核：逐件扫描商品与订单核对，检出漏件/错件/多件，支持开箱复核（高价值订单）。</b>
- * 输入：扫描记录（条码/序列号）；订单明细；复核规则。输出：复核通过/异常结果；异常单转人工处理。」
- * 关系段：「上游 = 8.3.2.1 拣货任务 / 8.3.2.2 波次与合并拣货；下游 = 8.3.3.2 打包。
- * <b>复核是错发拦截的最后机会</b>，序列号商品必须逐件核对。」
+ * 输入：扫描记录（条码/序列号）；订单明细；复核规则。输出：复核通过/异常结果；异常单转人工处理。」 关系段：「上游 = 8.3.2.1 拣货任务 / 8.3.2.2 波次与合并拣货；下游 =
+ * 8.3.3.2 打包。 <b>复核是错发拦截的最后机会</b>，序列号商品必须逐件核对。」
  *
- * <p><b>命名空间：全部 {@code Recount} 前缀。</b>springdoc 用 record 的<b>简单类名</b>做
- * {@code components.schemas} 的键，重名会被<b>静默覆盖</b>：别人的字段形状被改掉、
- * 单测全绿、只有跨服务的契约比对才红。开工前逐个 grep 过
- * backend 各服务与 libraries 下的 Java 源码，
+ * <p><b>命名空间：全部 {@code Recount} 前缀。</b>springdoc 用 record 的<b>简单类名</b>做 {@code components.schemas}
+ * 的键，重名会被<b>静默覆盖</b>：别人的字段形状被改掉、 单测全绿、只有跨服务的契约比对才红。开工前逐个 grep 过 backend 各服务与 libraries 下的 Java 源码，
  * {@code Recount} 开头的十个类型名全部 0 冲突。
  *
  * <p><b>四个刻意不给默认值的地方：</b>
  *
  * <ul>
- *   <li><b>复核通过 ≠ 已发货 ≠ 已打包。</b>{@link RecountStatus} 四态里没有「已打包」与
- *       「已发货」：复核通过只是把出库单交给 8.3.3.2，打包与称重是下游的事，
- *       发货是 8.3.4.1 的事。与 8.3.2.1「拣货完 ≠ 已发货」同一纪律。</li>
- *   <li><b>件数相等 ≠ 核过了。</b>{@code requiresSerial} 的行必须 {@code serialMatch}
- *       （集合相等，由两个差集查询得出）才能拿 MATCHED。三台机器里混进一台别的机器，
- *       件数一样内容不一样，那是最典型的错件。</li>
- *   <li><b>没有规则 ≠ 没有口径。</b>{@code ruleCode} 与 {@code ruleBasis} 允许为 null，
- *       但那时 {@code verifyBasis} 必须如实写「本次无规则，使用内置默认口径」——
- *       绝不假装有一条规则存在。</li>
- *   <li><b>「高价值」在本服务里只能取件数。</b>{@code highValueQuantityThreshold}
- *       的名字里是 quantity 不是 amount：出库单上根本没有金额列（V72 §1 明写
- *       「不存类目/售价/成本」），warehouse 侧造一个金额就是编数。详见 V117 §3。</li>
+ *   <li><b>复核通过 ≠ 已发货 ≠ 已打包。</b>{@link RecountStatus} 四态里没有「已打包」与 「已发货」：复核通过只是把出库单交给
+ *       8.3.3.2，打包与称重是下游的事， 发货是 8.3.4.1 的事。与 8.3.2.1「拣货完 ≠ 已发货」同一纪律。
+ *   <li><b>件数相等 ≠ 核过了。</b>{@code requiresSerial} 的行必须 {@code serialMatch} （集合相等，由两个差集查询得出）才能拿
+ *       MATCHED。三台机器里混进一台别的机器， 件数一样内容不一样，那是最典型的错件。
+ *   <li><b>没有规则 ≠ 没有口径。</b>{@code ruleCode} 与 {@code ruleBasis} 允许为 null， 但那时 {@code verifyBasis}
+ *       必须如实写「本次无规则，使用内置默认口径」—— 绝不假装有一条规则存在。
+ *   <li><b>「高价值」在本服务里只能取件数。</b>{@code highValueQuantityThreshold} 的名字里是 quantity 不是
+ *       amount：出库单上根本没有金额列（V72 §1 明写 「不存类目/售价/成本」），warehouse 侧造一个金额就是编数。详见 V117 §3。
  * </ul>
  */
 public final class RecountModels {
@@ -47,8 +39,8 @@ public final class RecountModels {
   /**
    * 复核单状态。
    *
-   * <p>四态：复核中 / 复核通过 / 复核异常 / 已取消。<b>没有「已打包」与「已发货」</b> ——
-   * 蓝图把它们分给了 8.3.3.2 与 8.3.4.1，混在一列里会让「复核通过」看起来像「已经发出去了」。
+   * <p>四态：复核中 / 复核通过 / 复核异常 / 已取消。<b>没有「已打包」与「已发货」</b> —— 蓝图把它们分给了 8.3.3.2 与
+   * 8.3.4.1，混在一列里会让「复核通过」看起来像「已经发出去了」。
    */
   public enum RecountStatus {
     /** 复核中：可以扫、可以开箱、可以撤异常。 */
@@ -82,10 +74,7 @@ public final class RecountModels {
     }
   }
 
-  /**
-   * 复核基线行的五态。<b>由数量 + 序列号集合派生</b>（V117 的 BEFORE UPDATE 触发器），
-   * 应用层写不出与数量对不上的状态。
-   */
+  /** 复核基线行的五态。<b>由数量 + 序列号集合派生</b>（V117 的 BEFORE UPDATE 触发器）， 应用层写不出与数量对不上的状态。 */
   public enum RecountLineStatus {
     /** 未核：本行一件都没扫到。 */
     PENDING("未核"),
@@ -152,8 +141,8 @@ public final class RecountModels {
   /**
    * 复核异常种类 —— 蓝图点名的「漏件/错件/多件」三值，加上三种现场真实存在的形态。
    *
-   * <p>六类各有判定来源，不是同一类问题换个名字：SERIAL_MISMATCH 来自两个差集查询，
-   * DUPLICATE_SCAN 来自 recount_scan 的第几次计数，UNKNOWN_BARCODE 来自条码解析失败。
+   * <p>六类各有判定来源，不是同一类问题换个名字：SERIAL_MISMATCH 来自两个差集查询， DUPLICATE_SCAN 来自 recount_scan
+   * 的第几次计数，UNKNOWN_BARCODE 来自条码解析失败。
    */
   public enum RecountExceptionKind {
     /** 漏件：该发的行没扫够。 */
@@ -234,10 +223,8 @@ public final class RecountModels {
    *
    * @param warehouseId 适用仓。<b>可空 = 全仓通用</b>：一张仓网可以只有一套复核口径。
    * @param requireSerialCheck 「序列号商品必须逐件核对」的开关（蓝图关系段原话）。
-   * @param highValueQuantityThreshold 高价值 → 强制开箱的<b>件数</b>阈值。
-   *     <b>刻意不是金额</b>：出库单上没有金额列（V72 §1「不存类目/售价/成本」），
-   *     金额的 owner 是 9 订单履约侧，跨服务读表被模块边界纪律禁止。
-   *     可空 = 不按件数强制开箱（仍可手动开箱）。
+   * @param highValueQuantityThreshold 高价值 → 强制开箱的<b>件数</b>阈值。 <b>刻意不是金额</b>：出库单上没有金额列（V72
+   *     §1「不存类目/售价/成本」）， 金额的 owner 是 9 订单履约侧，跨服务读表被模块边界纪律禁止。 可空 = 不按件数强制开箱（仍可手动开箱）。
    */
   public record RecountRuleInput(
       String ruleCode,
@@ -263,14 +250,15 @@ public final class RecountModels {
    * @param note 现场备注
    */
   public record RecountScanInput(
-      String scanType, String scannedValue, @Schema(nullable = true) String scannedAt,
+      String scanType,
+      String scannedValue,
+      @Schema(nullable = true) String scannedAt,
       @Schema(nullable = true) String note) {}
 
   /**
    * 开箱复核入参。
    *
-   * <p>{@code reason} <b>必填</b>：开箱是一次要把货倒出来重新核的动作，
-   * 不写理由的开箱既费时又说不清。
+   * <p>{@code reason} <b>必填</b>：开箱是一次要把货倒出来重新核的动作， 不写理由的开箱既费时又说不清。
    */
   public record RecountOpenBoxInput(String reason) {}
 
@@ -278,8 +266,7 @@ public final class RecountModels {
    * 处置一条异常入参。
    *
    * @param resolution 转人工 / 已修正 / 接受现状 / 忽略。
-   * @param note 处置意见。<b>这四个值全都必填</b> —— 「已处理」而不写怎么处理，
-   *     半年后回看等于没处理。
+   * @param note 处置意见。<b>这四个值全都必填</b> —— 「已处理」而不写怎么处理， 半年后回看等于没处理。
    */
   public record RecountResolveInput(String resolution, String note) {}
 
@@ -356,7 +343,8 @@ public final class RecountModels {
       OffsetDateTime cancelledAt) {}
 
   /** 复核单分页页。汇总不受筛选影响 —— 与 8.3.2.1 / 8.3.2.2 同一纪律。 */
-  public record RecountPage(List<RecountRow> items, int page, int size, long total, RecountSummary summary) {}
+  public record RecountPage(
+      List<RecountRow> items, int page, int size, long total, RecountSummary summary) {}
 
   /** 复核作业台汇总。 */
   public record RecountSummary(
@@ -378,9 +366,8 @@ public final class RecountModels {
   /**
    * 复核基线行（应发明细的冻结快照 + 逐行结论）。
    *
-   * <p>{@code expectedQuantity} 来自订单明细、{@code pickedQuantity} 来自实拣、
-   * {@code scannedQuantity} 来自扫描 —— <b>三个数分开</b>：
-   * 「拣漏了」和「复核没扫到」是两件不同的事，混成一个数就分不清该退回拣货还是重扫一遍。
+   * <p>{@code expectedQuantity} 来自订单明细、{@code pickedQuantity} 来自实拣、 {@code scannedQuantity} 来自扫描 ——
+   * <b>三个数分开</b>： 「拣漏了」和「复核没扫到」是两件不同的事，混成一个数就分不清该退回拣货还是重扫一遍。
    */
   public record RecountLineRow(
       UUID id,
@@ -465,9 +452,8 @@ public final class RecountModels {
   /**
    * 复核结论报告。
    *
-   * <p>{@code blocking} 是「能不能放行给 8.3.3.2」的唯一判据，且它是
-   * {@code blockingReasons} 非空**且** {@code verdict=PASSED} 才为 false 的派生值 ——
-   * 界面上的「通过」按钮不该由前端自己判断该不该可点。
+   * <p>{@code blocking} 是「能不能放行给 8.3.3.2」的唯一判据，且它是 {@code blockingReasons} 非空**且** {@code
+   * verdict=PASSED} 才为 false 的派生值 —— 界面上的「通过」按钮不该由前端自己判断该不该可点。
    */
   public record RecountVerdictReport(
       String verdict,

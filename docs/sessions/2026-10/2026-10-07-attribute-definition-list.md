@@ -16,11 +16,11 @@
 
 **三个候选与取舍**：
 
-| 方案 | 结论 | 理由 |
-| --- | --- | --- |
+| 方案                                | 结论     | 理由                                                                                                                                                                                                                         |
+| ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **(A) 同表提升**（`spu_id` 改可空） | **选它** | `spu_id IS NULL` = 租户级字典条目，`spu_id IS NOT NULL` = 已交付的 SPU 级定义，同表两种作用域。字典选项仍落在 `attribute_option`，于是「值源只有一处」**自动继续成立**，V9 的 `guard_spec_axis_option_source` 一个字都不用改 |
-| (B) 另建 `attribute_dictionary` 表 | 否 | 不动 V1，但字典选项会落到第二张选项表，规格轴（V9 锁死在 `attribute_option`）与字典选项变成两个值源，直接违反蓝图硬约束 |
-| (C) 字典条目彻底替代 SPU 级定义 | 否 | 最干净，但要重写已交付 3.2.2.1 的写入路径与全部既有测试，属于重开旧账 |
+| (B) 另建 `attribute_dictionary` 表  | 否       | 不动 V1，但字典选项会落到第二张选项表，规格轴（V9 锁死在 `attribute_option`）与字典选项变成两个值源，直接违反蓝图硬约束                                                                                                      |
+| (C) 字典条目彻底替代 SPU 级定义     | 否       | 最干净，但要重写已交付 3.2.2.1 的写入路径与全部既有测试，属于重开旧账                                                                                                                                                        |
 
 ### (A) 的代价：两处连带改动（都不是可选项）
 
@@ -96,9 +96,11 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V11__attribute_dictionary.sql`（新增）
 
 **后端**
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/AttributeDictionaryRules.java`（新增，纯规则）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/AttributeDictionaryService.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/AttributeDictionaryController.java`（新增）
@@ -107,13 +109,16 @@
   （改 1 行：`attribute_option` 位置化插入 → 显式列名）
 
 **测试**
+
 - `backend/services/catalog/src/test/java/com/starcon/catalog/AttributeDictionaryRulesTest.java`（新增，12 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/AttributeDictionaryIntegrationTest.java`（新增，26 例）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`、`identity.openapi.json`
 
 **前端**
+
 - `apps/web/src/components/catalog/attribute-dictionary-model.ts`（新增）
 - `apps/web/src/components/catalog/attribute-dictionary-model.test.ts`（新增，27 例）
 - `apps/web/src/components/catalog/attribute-dictionary-workspace.tsx`（新增）
@@ -123,25 +128,26 @@
 - `apps/web/src/components/catalog/sku-list-workspace.tsx`（改：列表页加入口链接，最小改动）
 
 **台账 / 日志**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.2.1.1 一行；其余 5 行是
   sync.mjs 自动重算的计数器 40→41）
 
 ## 端点
 
-| 方法 | 路径 | 权限 |
-| --- | --- | --- |
-| GET | `/catalog/attributes`（分页 + q/dataType/usage/filterable/enabled/groupName） | `catalog.attribute.read` |
-| GET | `/catalog/attributes/overview` | `catalog.attribute.read` |
-| POST | `/catalog/attributes` | `catalog.attribute.update` |
-| PUT | `/catalog/attributes/{id}` | `catalog.attribute.update` |
-| DELETE | `/catalog/attributes/{id}?version=` | `catalog.attribute.update` |
-| GET | `/catalog/attributes/{id}/options` | `catalog.attribute.read` |
-| POST | `/catalog/attributes/{id}/options` | `catalog.attribute.update` |
-| PUT | `/catalog/attributes/{id}/options?value=` | `catalog.attribute.update` |
-| DELETE | `/catalog/attributes/{id}/options?value=` | `catalog.attribute.update` |
-| GET | `/catalog/attributes/category-rules?category=&attributeId=` | `catalog.attribute.read` |
-| POST | `/catalog/attributes/{id}/category-rules` | `catalog.attribute.update` |
-| DELETE | `/catalog/attributes/{id}/category-rules?category=` | `catalog.attribute.update` |
+| 方法   | 路径                                                                          | 权限                       |
+| ------ | ----------------------------------------------------------------------------- | -------------------------- |
+| GET    | `/catalog/attributes`（分页 + q/dataType/usage/filterable/enabled/groupName） | `catalog.attribute.read`   |
+| GET    | `/catalog/attributes/overview`                                                | `catalog.attribute.read`   |
+| POST   | `/catalog/attributes`                                                         | `catalog.attribute.update` |
+| PUT    | `/catalog/attributes/{id}`                                                    | `catalog.attribute.update` |
+| DELETE | `/catalog/attributes/{id}?version=`                                           | `catalog.attribute.update` |
+| GET    | `/catalog/attributes/{id}/options`                                            | `catalog.attribute.read`   |
+| POST   | `/catalog/attributes/{id}/options`                                            | `catalog.attribute.update` |
+| PUT    | `/catalog/attributes/{id}/options?value=`                                     | `catalog.attribute.update` |
+| DELETE | `/catalog/attributes/{id}/options?value=`                                     | `catalog.attribute.update` |
+| GET    | `/catalog/attributes/category-rules?category=&attributeId=`                   | `catalog.attribute.read`   |
+| POST   | `/catalog/attributes/{id}/category-rules`                                     | `catalog.attribute.update` |
+| DELETE | `/catalog/attributes/{id}/category-rules?category=`                           | `catalog.attribute.update` |
 
 权限沿用属性域（`catalog.attribute.*`）：字典条目是属性体系的定义，不是 SKU 自身档案字段。
 后端路由挂 `/catalog/attributes` 而非 `/products/attributes`——后者是台账里的**前端页面路径**

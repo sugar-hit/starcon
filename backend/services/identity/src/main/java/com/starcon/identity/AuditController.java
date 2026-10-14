@@ -21,22 +21,21 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 17.5.3.1 审计日志读侧。
  *
- * <p>蓝图要求「支持按资源/操作人/时间检索与导出」，而 V3 时期只 GRANT 了 INSERT——
- * 记录写得进、没人查得到。这里补上检索、变更详情与 CSV 导出三件事。
+ * <p>蓝图要求「支持按资源/操作人/时间检索与导出」，而 V3 时期只 GRANT 了 INSERT—— 记录写得进、没人查得到。这里补上检索、变更详情与 CSV 导出三件事。
  *
- * <p>租户隔离沿用 identity 既有纪律：租户上下文来自 {@link IdentityController#resolve} 解析出的
- * 已认证成员关系（经 {@link TenantTransactions} 写入 {@code app.current_tenant}），
- * <b>不采信 {@code X-Tenant-Id} 头</b>；真正的边界由 {@code identity_audit} 的 FORCE RLS 兜底。
- * 因此伪造 tenant 头查不到别的租户的审计行，而连接归还后租户设置是事务局部的（{@code local=true}），
- * 下一个请求不会串租户。
+ * <p>租户隔离沿用 identity 既有纪律：租户上下文来自 {@link IdentityController#resolve} 解析出的 已认证成员关系（经 {@link
+ * TenantTransactions} 写入 {@code app.current_tenant}）， <b>不采信 {@code X-Tenant-Id} 头</b>；真正的边界由
+ * {@code identity_audit} 的 FORCE RLS 兜底。 因此伪造 tenant 头查不到别的租户的审计行，而连接归还后租户设置是事务局部的（{@code
+ * local=true}）， 下一个请求不会串租户。
  *
- * <p>与 17.5.3.2 操作日志的分工：这里只有合规所需的「谁、对什么、做了什么、凭什么」，
- * 不含登录流水、API 调用摘要、错误堆栈与请求 ID 链路——那些属于运维排障，用途和留存期都不同。
+ * <p>与 17.5.3.2 操作日志的分工：这里只有合规所需的「谁、对什么、做了什么、凭什么」， 不含登录流水、API 调用摘要、错误堆栈与请求 ID
+ * 链路——那些属于运维排障，用途和留存期都不同。
  */
 @RestController
 @RequestMapping("/identity/audit")
 public class AuditController {
   private static final String READ = "identity.audit.read";
+
   /** 单页上限，防止一次把整年审计拉进内存。 */
   private static final int MAX_PAGE_SIZE = 200;
 
@@ -66,8 +65,8 @@ public class AuditController {
   /**
    * 变更详情。
    *
-   * <p>{@code changes} 内含写入侧已脱敏的 before/after（见 {@link AuditRedactor}），
-   * {@code authorization} 是操作当时的角色与数据范围快照。
+   * <p>{@code changes} 内含写入侧已脱敏的 before/after（见 {@link AuditRedactor}）， {@code authorization}
+   * 是操作当时的角色与数据范围快照。
    */
   public record AuditDetail(
       UUID id,
@@ -121,8 +120,8 @@ public class AuditController {
   /**
    * 条件拼装：显式 SQL，不用字符串拼接用户输入。
    *
-   * <p>时间列是 timestamptz，绑定走 {@link AuditLog#utc(Instant)}——直接用
-   * {@code LocalDateTime} 会静默按 Asia/Shanghai 偏移 -28800 秒，检索窗口就整体错 8 小时。
+   * <p>时间列是 timestamptz，绑定走 {@link AuditLog#utc(Instant)}——直接用 {@code LocalDateTime} 会静默按
+   * Asia/Shanghai 偏移 -28800 秒，检索窗口就整体错 8 小时。
    */
   private Condition where(AuditQuery query) {
     var condition = new Condition();
@@ -135,8 +134,10 @@ public class AuditController {
       condition.add("action = ?", query.action().trim());
     // 显式 cast：jOOQ 在纯文本语句里无法为 OffsetDateTime 推断类型，
     // 不写 ::timestamptz 会被驱动按 varchar 处理并报类型错误。
-    if (query.from() != null) condition.add("occurred_at >= ?::timestamptz", AuditLog.utc(query.from()));
-    if (query.to() != null) condition.add("occurred_at <= ?::timestamptz", AuditLog.utc(query.to()));
+    if (query.from() != null)
+      condition.add("occurred_at >= ?::timestamptz", AuditLog.utc(query.from()));
+    if (query.to() != null)
+      condition.add("occurred_at <= ?::timestamptz", AuditLog.utc(query.to()));
     return condition;
   }
 
@@ -175,9 +176,8 @@ public class AuditController {
   /**
    * 解析 ISO-8601 时刻。
    *
-   * <p>手写解析而不是让 Spring 转 {@link Instant}：{@code Instant.toString()} 会输出
-   * {@code 2026-10-06T16:42:38.905614Z} 这种纳秒精度串，交给默认转换器容易踩到
-   * 格式不匹配的 400，而这里能给出确切原因。
+   * <p>手写解析而不是让 Spring 转 {@link Instant}：{@code Instant.toString()} 会输出 {@code
+   * 2026-10-06T16:42:38.905614Z} 这种纳秒精度串，交给默认转换器容易踩到 格式不匹配的 400，而这里能给出确切原因。
    */
   private static String str(Object value) {
     return value == null ? null : String.valueOf(value);
@@ -188,8 +188,7 @@ public class AuditController {
     try {
       return Instant.parse(value.trim());
     } catch (DateTimeParseException e) {
-      throw IdentityController.error(
-          HttpStatus.BAD_REQUEST, "时间格式需为 ISO-8601，例如 " + Instant.EPOCH);
+      throw IdentityController.error(HttpStatus.BAD_REQUEST, "时间格式需为 ISO-8601，例如 " + Instant.EPOCH);
     }
   }
 
@@ -205,13 +204,15 @@ public class AuditController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int size) {
     var query =
-        new AuditQuery(resourceType, resourceId, actorId, action, instant(from), instant(to), page, size);
+        new AuditQuery(
+            resourceType, resourceId, actorId, action, instant(from), instant(to), page, size);
     return call(auth, access -> page(query));
   }
 
   private AuditPage page(AuditQuery query) {
     check(query.page() >= 0, "页码不能为负");
-    check(query.size() >= 1 && query.size() <= MAX_PAGE_SIZE, "每页条数需在 1 到 " + MAX_PAGE_SIZE + " 之间");
+    check(
+        query.size() >= 1 && query.size() <= MAX_PAGE_SIZE, "每页条数需在 1 到 " + MAX_PAGE_SIZE + " 之间");
     check(
         query.from() == null || query.to() == null || !query.from().isAfter(query.to()),
         "开始时间不能晚于结束时间");
@@ -240,8 +241,7 @@ public class AuditController {
   /**
    * 单条变更详情。
    *
-   * <p>跨租户访问在 RLS 下表现为「查不到」，因此返回 404 而不是 403：
-   * 403 会泄露「这条记录存在」，404 不泄露。
+   * <p>跨租户访问在 RLS 下表现为「查不到」，因此返回 404 而不是 403： 403 会泄露「这条记录存在」，404 不泄露。
    */
   @GetMapping("/{id}")
   public AuditDetail detail(
@@ -256,8 +256,7 @@ public class AuditController {
                       + " occurred_at,authorization_context,changes,(authorization_context->>'owner')::boolean as owner"
                       + " from identity_audit where id=?",
                   id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "审计记录不存在或无权查看");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "审计记录不存在或无权查看");
           var base = view(row);
           return new AuditDetail(
               base.id(),
@@ -277,9 +276,8 @@ public class AuditController {
   /**
    * 导出 CSV。
    *
-   * <p>走与检索完全相同的条件拼装，所以导出的就是当前查到的那些行，不是另一个数据源。
-   * 上限 {@value #MAX_EXPORT_ROWS} 行：审计是长期留存的合规数据，一次导出全部历史既慢又容易
-   * 变成信息泄露面，超限明确报错让操作人收窄时间窗，而不是悄悄截断。
+   * <p>走与检索完全相同的条件拼装，所以导出的就是当前查到的那些行，不是另一个数据源。 上限 {@value #MAX_EXPORT_ROWS}
+   * 行：审计是长期留存的合规数据，一次导出全部历史既慢又容易 变成信息泄露面，超限明确报错让操作人收窄时间窗，而不是悄悄截断。
    */
   private static final int MAX_EXPORT_ROWS = 50_000;
 
@@ -297,11 +295,13 @@ public class AuditController {
             auth,
             access -> {
               var query =
-                  new AuditQuery(resourceType, resourceId, actorId, action, instant(from), instant(to), 0, 1);
+                  new AuditQuery(
+                      resourceType, resourceId, actorId, action, instant(from), instant(to), 0, 1);
               var condition = where(query);
               long total =
                   sql.fetchOne(
-                          "select count(*) from identity_audit" + condition.sql(), condition.values())
+                          "select count(*) from identity_audit" + condition.sql(),
+                          condition.values())
                       .get(0, Long.class);
               check(total <= MAX_EXPORT_ROWS, "命中 " + total + " 条，超过单次导出上限，请收窄时间范围");
               var records =
@@ -329,8 +329,8 @@ public class AuditController {
         String.join(
             ",",
             List.of(
-                "发生时间", "操作人", "操作人ID", "动作", "资源类型", "资源", "资源ID",
-                "是否所有者", "授权上下文", "变更前", "变更后")));
+                "发生时间", "操作人", "操作人ID", "动作", "资源类型", "资源", "资源ID", "是否所有者", "授权上下文", "变更前",
+                "变更后")));
     out.append('\n');
     for (var row : records) {
       var authorization = AuditLog.parseChanges(row.get("authorization_context", String.class));
@@ -359,7 +359,9 @@ public class AuditController {
     if (value instanceof Map<?, ?> map) {
       var rendered = new LinkedHashMap<String, String>();
       for (var entry : map.entrySet())
-        rendered.put(String.valueOf(entry.getKey()), entry.getValue() == null ? "" : String.valueOf(entry.getValue()));
+        rendered.put(
+            String.valueOf(entry.getKey()),
+            entry.getValue() == null ? "" : String.valueOf(entry.getValue()));
       return rendered.toString();
     }
     return String.valueOf(value);

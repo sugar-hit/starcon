@@ -22,7 +22,10 @@ import { useWorkspaceTabs } from '../../lib/workspace-tabs';
  * hover 反馈:跟周围 Link 一致,不叠 4 件套
  */
 
-export interface ExternalLinkProps extends Omit<React.ComponentProps<typeof Link>, 'href' | 'onClick'> {
+export interface ExternalLinkProps extends Omit<
+  React.ComponentProps<typeof Link>,
+  'href' | 'onClick'
+> {
   href: string;
   /** 是否显示 ⎘ 图标,默认 true */
   showIcon?: boolean;

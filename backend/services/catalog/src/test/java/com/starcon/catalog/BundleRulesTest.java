@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.5.1.1 套装版本管理 · 纯规则层。
  *
- * <p>这个文件的价值全在<b>把生效区间的裁决规则钉死</b>：半开区间、重叠拒绝、当前生效版本、
- * 向前关闭。蓝图标了「设置生效区间」却没说重叠怎么办，本实现的取舍是「一律拒绝，不做裁决」——
+ * <p>这个文件的价值全在<b>把生效区间的裁决规则钉死</b>：半开区间、重叠拒绝、当前生效版本、 向前关闭。蓝图标了「设置生效区间」却没说重叠怎么办，本实现的取舍是「一律拒绝，不做裁决」——
  * 那条取舍只有在测试里逐条钉住，才不会在下一次重构时被换成「后来者覆盖」而无人察觉。
  */
 class BundleRulesTest {
@@ -96,31 +95,54 @@ class BundleRulesTest {
   void rangesAreHalfOpenSoAdjacentIntervalsDoNotOverlap() {
     // 这是整个模块最容易被改坏的一处：区间一旦变成闭区间，
     // 12:00 这一瞬间会同时属于两版，「当前生效版本」就必须返回两行或随便挑一行。
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), at("2026-03-01T00:00:00Z"),
-        at("2026-03-01T00:00:00Z"), null))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                at("2026-03-01T00:00:00Z"),
+                at("2026-03-01T00:00:00Z"),
+                null))
         .isFalse();
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), at("2026-03-01T00:00:00Z"),
-        at("2026-04-01T00:00:00Z"), null))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                at("2026-03-01T00:00:00Z"),
+                at("2026-04-01T00:00:00Z"),
+                null))
         .isFalse();
     // 真重叠必须被认出来。
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), at("2026-05-01T00:00:00Z"),
-        at("2026-04-01T00:00:00Z"), null))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                at("2026-05-01T00:00:00Z"),
+                at("2026-04-01T00:00:00Z"),
+                null))
         .isTrue();
     // 开放区间与之后开始的区间重叠（但与它之前结束的区间**不**重叠 ——
     // 「开放」不等于「和所有东西都撞」）。
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), null,
-        at("2027-01-01T00:00:00Z"), null))
+    assertThat(overlaps(at("2026-01-01T00:00:00Z"), null, at("2027-01-01T00:00:00Z"), null))
         .isTrue();
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), null,
-        at("2020-01-01T00:00:00Z"), at("2020-06-01T00:00:00Z")))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                null,
+                at("2020-01-01T00:00:00Z"),
+                at("2020-06-01T00:00:00Z")))
         .isFalse();
     // 区间包含（外层包住内层）也算重叠。
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), null,
-        at("2026-02-01T00:00:00Z"), at("2026-03-01T00:00:00Z")))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                null,
+                at("2026-02-01T00:00:00Z"),
+                at("2026-03-01T00:00:00Z")))
         .isTrue();
     // 两个区间完全相同。
-    assertThat(overlaps(at("2026-01-01T00:00:00Z"), at("2026-02-01T00:00:00Z"),
-        at("2026-01-01T00:00:00Z"), at("2026-02-01T00:00:00Z")))
+    assertThat(
+            overlaps(
+                at("2026-01-01T00:00:00Z"),
+                at("2026-02-01T00:00:00Z"),
+                at("2026-01-01T00:00:00Z"),
+                at("2026-02-01T00:00:00Z")))
         .isTrue();
   }
 
@@ -188,14 +210,13 @@ class BundleRulesTest {
     Instant now = at("2026-10-01T00:00:00Z");
     // 唯一的例外：把开放区间收到一个仍在未来的时刻。
     assertThat(forwardCloseProblem(null, at("2027-01-01T00:00:00Z"), now)).isNull();
-    assertThat(forwardCloseProblem(at("2027-06-01T00:00:00Z"), at("2027-03-01T00:00:00Z"), now)).isNull();
+    assertThat(forwardCloseProblem(at("2027-06-01T00:00:00Z"), at("2027-03-01T00:00:00Z"), now))
+        .isNull();
 
     // 重新变成「一直有效」会与已接替它的版本重叠。
-    assertThat(forwardCloseProblem(at("2027-06-01T00:00:00Z"), null, now))
-        .contains("重新变成「一直有效」");
+    assertThat(forwardCloseProblem(at("2027-06-01T00:00:00Z"), null, now)).contains("重新变成「一直有效」");
     // 落进过去 = 追溯改写「那时生效的是哪一版」。
-    assertThat(forwardCloseProblem(null, at("2026-09-30T23:59:59Z"), now))
-        .contains("必须落在当前时刻之后");
+    assertThat(forwardCloseProblem(null, at("2026-09-30T23:59:59Z"), now)).contains("必须落在当前时刻之后");
     // 正好等于 now 也不行：那已经是过去的一刻。
     assertThat(forwardCloseProblem(null, now, now)).contains("必须落在当前时刻之后");
     // 往后延 = 与接替版本重叠。

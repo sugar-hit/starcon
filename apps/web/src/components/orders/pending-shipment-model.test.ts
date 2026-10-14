@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { PendingShipmentUnitRow, ShipmentBatchTaskItemRow, ShipmentBatchTaskRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  PendingShipmentUnitRow,
+  ShipmentBatchTaskItemRow,
+  ShipmentBatchTaskRow,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   batchStatusSeverity,
   batchTaskFinished,

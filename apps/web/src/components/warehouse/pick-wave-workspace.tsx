@@ -174,7 +174,11 @@ export function PickWaveWorkspace() {
     }
   };
 
-  const buildWave = async (group: { carrierCode: string; zoneId: string | null; ruleId: string | null }) => {
+  const buildWave = async (group: {
+    carrierCode: string;
+    zoneId: string | null;
+    ruleId: string | null;
+  }) => {
     setActionLoading(true);
     setActionError('');
     setNotice('');
@@ -189,8 +193,8 @@ export function PickWaveWorkspace() {
         note: null,
       });
       setNotice(
-        `已排波 ${created.waveCode}：并入 ${created.memberCount} 张出库单`
-          + (created.waitingCount > 0 ? `，另有 ${created.waitingCount} 张等下一波。` : '。'),
+        `已排波 ${created.waveCode}：并入 ${created.memberCount} 张出库单` +
+          (created.waitingCount > 0 ? `，另有 ${created.waitingCount} 张等下一波。` : '。'),
       );
       await load();
       await openWave(created.id);
@@ -372,15 +376,27 @@ export function PickWaveWorkspace() {
           <div className="mt-4 grid gap-3 sm:grid-cols-6">
             <label className="text-sm text-slate-300">
               规则号
-              <Input value={ruleCode} placeholder="R-MERGE-1" onChange={(e) => setRuleCode(e.target.value)} />
+              <Input
+                value={ruleCode}
+                placeholder="R-MERGE-1"
+                onChange={(e) => setRuleCode(e.target.value)}
+              />
             </label>
             <label className="text-sm text-slate-300">
               名称
-              <Input value={ruleName} placeholder="SF 上午班" onChange={(e) => setRuleName(e.target.value)} />
+              <Input
+                value={ruleName}
+                placeholder="SF 上午班"
+                onChange={(e) => setRuleName(e.target.value)}
+              />
             </label>
             <label className="text-sm text-slate-300">
               承运渠道（留空 = 不限）
-              <Input value={ruleCarrier} placeholder="SF" onChange={(e) => setRuleCarrier(e.target.value)} />
+              <Input
+                value={ruleCarrier}
+                placeholder="SF"
+                onChange={(e) => setRuleCarrier(e.target.value)}
+              />
             </label>
             <label className="text-sm text-slate-300">
               时段起（仓本地小时）
@@ -402,7 +418,9 @@ export function PickWaveWorkspace() {
                 新建合并规则
               </Button>
               {warehouseId === '' && (
-                <span className="ml-2 text-xs text-amber-200">先填仓库 id：规则必须属于一个仓。</span>
+                <span className="ml-2 text-xs text-amber-200">
+                  先填仓库 id：规则必须属于一个仓。
+                </span>
               )}
             </div>
           </div>
@@ -425,11 +443,14 @@ export function PickWaveWorkspace() {
         ) : (
           <div className="space-y-4">
             <p className="text-xs text-slate-400">
-              共 {candidates?.totalEligible ?? 0} 张现在能并、{candidates?.totalWaiting ?? 0} 张在等。
-              时段按仓本地 {candidates?.timezone} 判定。
+              共 {candidates?.totalEligible ?? 0} 张现在能并、{candidates?.totalWaiting ?? 0}{' '}
+              张在等。 时段按仓本地 {candidates?.timezone} 判定。
             </p>
             {candidates?.groups.map((group) => (
-              <div key={`${group.carrierCode}-${group.zoneId ?? 'any'}`} className="rounded border border-slate-800 p-3">
+              <div
+                key={`${group.carrierCode}-${group.zoneId ?? 'any'}`}
+                className="rounded border border-slate-800 p-3"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <div className="text-sm text-slate-200">
@@ -443,7 +464,9 @@ export function PickWaveWorkspace() {
                   </div>
                   {writable && (
                     <Button
-                      disabled={actionLoading || group.eligibleCount === 0 || group.openWaveId !== null}
+                      disabled={
+                        actionLoading || group.eligibleCount === 0 || group.openWaveId !== null
+                      }
                       onClick={() =>
                         void buildWave({
                           carrierCode: group.carrierCode,
@@ -554,9 +577,7 @@ export function PickWaveWorkspace() {
                       {progressText(row.progress.progress)}
                       <span className="ml-1 text-xs text-slate-400">{row.message}</span>
                     </td>
-                    <td className="py-2 text-xs">
-                      {new Date(row.plannedPickAt).toLocaleString()}
-                    </td>
+                    <td className="py-2 text-xs">{new Date(row.plannedPickAt).toLocaleString()}</td>
                     <td className="py-2 text-right">
                       <Button onClick={() => void openWave(row.id)}>详情</Button>
                     </td>
@@ -674,10 +695,18 @@ export function PickWaveWorkspace() {
                 )}
                 <Button
                   disabled={
-                    actionLoading || !canComplete(wave.status, wave.progress.terminalTaskCount, wave.progress.taskCount)
+                    actionLoading ||
+                    !canComplete(
+                      wave.status,
+                      wave.progress.terminalTaskCount,
+                      wave.progress.taskCount,
+                    )
                   }
                   onClick={() =>
-                    void run(() => completePickWave(wave.id, { note: null }), '波次已完成：出库单各自去复核与打包。')
+                    void run(
+                      () => completePickWave(wave.id, { note: null }),
+                      '波次已完成：出库单各自去复核与打包。',
+                    )
                   }
                 >
                   完成波次
@@ -686,7 +715,10 @@ export function PickWaveWorkspace() {
                   <>
                     <label className="text-sm text-slate-300">
                       取消原因（<b>必填</b>）
-                      <Input value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
+                      <Input
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                      />
                     </label>
                     <Button
                       disabled={actionLoading || cancelReason === ''}
@@ -705,7 +737,8 @@ export function PickWaveWorkspace() {
             )}
             {!writable && (
               <p className="text-xs text-amber-200">
-                当前身份只能查看：放行 / 移出 / 完成 / 取消需要出入库作业写入权限（warehouse.inventory.update）。
+                当前身份只能查看：放行 / 移出 / 完成 /
+                取消需要出入库作业写入权限（warehouse.inventory.update）。
               </p>
             )}
 

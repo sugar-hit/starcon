@@ -35,10 +35,10 @@
 
 ### 3. 四类来源按可信度分三种表达
 
-| 来源 | 上游 | 表达 |
-|---|---|---|
+| 来源                                 | 上游                                    | 表达                              |
+| ------------------------------------ | --------------------------------------- | --------------------------------- |
 | SALES / PURCHASE_RETURN / PRODUCTION | 9 订单 / 6 采购 / 10 加工，**均未交付** | 只存外部单号字符串，跨服务不建 FK |
-| TRANSFER | 7.5.1.1，**已交付且同服务** | 真复合外键到 `transfer_order` |
+| TRANSFER                             | 7.5.1.1，**已交付且同服务**             | 真复合外键到 `transfer_order`     |
 
 TRANSFER 建单时还校验发货仓 = 调拨单 `from_warehouse_id`，且每个明细 SKU 都在该调拨单明细里 ——
 发一个调拨单上没有的 SKU 在业务上不可能成立。CHECK 钉死两种表达互斥。
@@ -47,15 +47,15 @@ TRANSFER 建单时还校验发货仓 = 调拨单 `from_warehouse_id`，且每个
 
 合法跃迁：
 
-| from | → to |
-|---|---|
-| PENDING_PICKING 待拣 | PICKING / CANCELLED |
-| PICKING 拣货中 | PENDING_RECHECK / CANCELLED |
-| PENDING_RECHECK 待复核 | PENDING_PACKING / **PICKING** / CANCELLED |
-| PENDING_PACKING 待打包 | PENDING_SHIPMENT / **PENDING_RECHECK** / CANCELLED |
-| PENDING_SHIPMENT 待发货 | SHIPPED / CANCELLED |
-| SHIPPED 已发货 | （终态，无去向） |
-| CANCELLED 取消 | （终态，无去向） |
+| from                    | → to                                               |
+| ----------------------- | -------------------------------------------------- |
+| PENDING_PICKING 待拣    | PICKING / CANCELLED                                |
+| PICKING 拣货中          | PENDING_RECHECK / CANCELLED                        |
+| PENDING_RECHECK 待复核  | PENDING_PACKING / **PICKING** / CANCELLED          |
+| PENDING_PACKING 待打包  | PENDING_SHIPMENT / **PENDING_RECHECK** / CANCELLED |
+| PENDING_SHIPMENT 待发货 | SHIPPED / CANCELLED                                |
+| SHIPPED 已发货          | （终态，无去向）                                   |
+| CANCELLED 取消          | （终态，无去向）                                   |
 
 两条返工边（加粗）不是随手加的。**复核不通过为什么不退回「待拣」**：待拣的含义是「一件都没拣」，
 而复核不通过时货已离开库位、正处在返工循环里。退回待拣会让待拣同时表达「没开始」与「拣错重来」，
@@ -107,6 +107,7 @@ TRANSFER 建单时还校验发货仓 = 调拨单 `from_warehouse_id`，且每个
 ## 文件清单
 
 **新增**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V72__outbound_order_list.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/OutboundOrderModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/OutboundOrderService.java`
@@ -118,6 +119,7 @@ TRANSFER 建单时还校验发货仓 = 调拨单 `from_warehouse_id`，且每个
 - `apps/web/src/app/warehouse/outbound/page.tsx`
 
 **修改**
+
 - `apps/web/src/lib/api-proxy.ts`（只追加 `outbound-orders` 一支，未重写整段正则）
 - `packages/api-contracts/src/catalog.ts` / `warehouse.openapi.json`（codegen 产物）
 - `docs/product/capability-blueprint/module-progress.md`（只改 8.3.1.1 那一行）

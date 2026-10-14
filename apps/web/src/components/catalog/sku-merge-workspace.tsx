@@ -161,7 +161,7 @@ export function SkuMergeWorkspace() {
   if (loading) {
     return (
       <SectionCard title="SKU 合并" description="正在加载治理概览…">
-        <p className="text-muted-foreground flex items-center gap-2 text-copy-13">
+        <p className="text-muted-foreground text-copy-13 flex items-center gap-2">
           <Loader2 className="size-4 animate-spin" aria-hidden />
           正在读取合并历史与治理概览
         </p>
@@ -192,7 +192,8 @@ export function SkuMergeWorkspace() {
       <p className="text-muted-foreground text-copy-13">
         每一次归并都留下一条不可变的合并记录；被合并的 SKU 是<b>标记合并并停用</b>而不是物理删除；
         「待执行决定」是 3.9.1.1 判了合并、还没执行的数量；
-        「搬不动的引用」是因唯一约束或业务规则留在被合并记录上的行数（合计 {overview?.conflictReferences ?? 0} / 历史冻结 {overview?.frozenReferences ?? 0}）。
+        「搬不动的引用」是因唯一约束或业务规则留在被合并记录上的行数（合计{' '}
+        {overview?.conflictReferences ?? 0} / 历史冻结 {overview?.frozenReferences ?? 0}）。
       </p>
 
       {overview && overview.totalMerges === 0 ? (
@@ -203,11 +204,11 @@ export function SkuMergeWorkspace() {
       ) : null}
 
       {overview && overview.totalMerges > 0 && overview.pendingMergeDecisions > 0 ? (
-        <p className="text-muted-foreground flex items-start gap-2 text-copy-13">
+        <p className="text-muted-foreground text-copy-13 flex items-start gap-2">
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
           <span>
-            还有 <strong className="text-foreground">{overview.pendingMergeDecisions}</strong> 条已判合并的决定没执行。
-            在下面填入候选 ID 先预演影响面，确认后再执行。
+            还有 <strong className="text-foreground">{overview.pendingMergeDecisions}</strong>{' '}
+            条已判合并的决定没执行。 在下面填入候选 ID 先预演影响面，确认后再执行。
           </span>
         </p>
       ) : null}
@@ -227,7 +228,7 @@ export function SkuMergeWorkspace() {
             <label className="flex-1 space-y-1">
               <span className="text-copy-13 font-medium">重复候选 ID</span>
               <input
-                className="border-input w-full rounded-md border px-3 py-2 text-copy-13"
+                className="border-input text-copy-13 w-full rounded-md border px-3 py-2"
                 value={candidateId}
                 placeholder="从 3.9.1.1 候选清单里取候选 ID"
                 onChange={(e) => setCandidateId(e.target.value)}
@@ -253,22 +254,24 @@ export function SkuMergeWorkspace() {
             <div className="space-y-3">
               <div className="bg-muted/40 space-y-2 rounded-md p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={versionCheckTone(preview.versionCheck) === 'ok' ? 'success' : 'danger'}>
+                  <Badge
+                    tone={versionCheckTone(preview.versionCheck) === 'ok' ? 'success' : 'danger'}
+                  >
                     {versionCheckLabel(preview.versionCheck)}
                   </Badge>
                   <span className="text-muted-foreground text-copy-13">{preview.scopeLabel}</span>
                 </div>
                 <p className="text-copy-13">{preview.versionCheckLabel}</p>
 
-                <div className="grid gap-2 text-copy-13 sm:grid-cols-2">
+                <div className="text-copy-13 grid gap-2 sm:grid-cols-2">
                   <div className="rounded border p-2">
                     <p className="text-muted-foreground">保留为主记录</p>
                     <p className="font-medium">
                       {preview.primaryCode} · {preview.primaryName}
                     </p>
                     <p className="text-muted-foreground">
-                      商品 {preview.primarySpuCode} · 当前版本 {preview.primaryVersion} ·
-                      登记时版本 {preview.expectedPrimaryVersion}
+                      商品 {preview.primarySpuCode} · 当前版本 {preview.primaryVersion} · 登记时版本{' '}
+                      {preview.expectedPrimaryVersion}
                     </p>
                   </div>
                   <div className="rounded border p-2">
@@ -293,13 +296,15 @@ export function SkuMergeWorkspace() {
 
               <div className="space-y-2">
                 <p className="text-copy-13 font-medium">引用迁移报告</p>
-                <p className="text-muted-foreground text-copy-13">{reportSummary(preview.report)}</p>
+                <p className="text-muted-foreground text-copy-13">
+                  {reportSummary(preview.report)}
+                </p>
                 {reportNote(preview.report) ? (
                   <p className="text-muted-foreground text-copy-13">{reportNote(preview.report)}</p>
                 ) : null}
 
                 {preview.report.blockedDimensions > 0 ? (
-                  <p className="text-destructive flex items-start gap-2 text-copy-13">
+                  <p className="text-destructive text-copy-13 flex items-start gap-2">
                     <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
                     <span>
                       有 {preview.report.blockedDimensions} 个维度<b>原理上不能跨商品搬</b>，
@@ -311,7 +316,7 @@ export function SkuMergeWorkspace() {
                 {actionable.length > 0 ? (
                   <ul className="space-y-1">
                     {actionable.map((row) => (
-                      <li key={row.dimension} className="rounded border p-2 text-copy-13">
+                      <li key={row.dimension} className="text-copy-13 rounded border p-2">
                         <p className="font-medium">
                           {dimensionLabel(row.dimension)}
                           {row.blocked ? '（整维度不搬）' : ''}
@@ -328,7 +333,7 @@ export function SkuMergeWorkspace() {
                 <label className="flex-1 space-y-1">
                   <span className="text-copy-13 font-medium">合并备注（留档用）</span>
                   <input
-                    className="border-input w-full rounded-md border px-3 py-2 text-copy-13"
+                    className="border-input text-copy-13 w-full rounded-md border px-3 py-2"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="例：条码相同且主记录报价更全，保留主记录"
@@ -348,9 +353,7 @@ export function SkuMergeWorkspace() {
                 </Button>
               </div>
               {noteError ? <p className="text-destructive text-copy-13">{noteError}</p> : null}
-              {blocked ? (
-                <p className="text-muted-foreground text-copy-13">{blocked}</p>
-              ) : null}
+              {blocked ? <p className="text-muted-foreground text-copy-13">{blocked}</p> : null}
               {!canWrite ? (
                 <p className="text-muted-foreground text-copy-13">
                   当前角色没有写权限（需要 catalog.spu.update），可以预演但不能执行。
@@ -369,9 +372,7 @@ export function SkuMergeWorkspace() {
                 {executed.secondaryCode} → {executed.primaryCode} · {executed.scopeLabel} ·{' '}
                 {timeText(executed.executedAt)}
               </p>
-              <p className="text-muted-foreground text-copy-13">
-                {reportSummary(executed.report)}
-              </p>
+              <p className="text-muted-foreground text-copy-13">{reportSummary(executed.report)}</p>
               <p className="text-muted-foreground text-copy-13">
                 原记录已标记合并（指向 {executed.mergedIntoSkuId}）并停用为{' '}
                 {executed.secondaryStatusAfter}，<b>没有物理删除</b>；
@@ -386,7 +387,7 @@ export function SkuMergeWorkspace() {
         {history && history.items.length > 0 ? (
           <ul className="space-y-2">
             {history.items.map((row) => (
-              <li key={row.id} className="rounded border p-2 text-copy-13">
+              <li key={row.id} className="text-copy-13 rounded border p-2">
                 <p className="font-medium">
                   {row.primaryCode} ← {row.secondaryCode}
                   <span className="text-muted-foreground ml-2 font-normal">{row.scopeLabel}</span>
@@ -411,7 +412,7 @@ export function SkuMergeWorkspace() {
           <label className="flex-1 space-y-1">
             <span className="text-copy-13 font-medium">SKU ID</span>
             <input
-              className="border-input w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-input text-copy-13 w-full rounded-md border px-3 py-2"
               value={traceSkuId}
               placeholder="填入任意一条 SKU 的 ID"
               onChange={(e) => setTraceSkuId(e.target.value)}
@@ -428,7 +429,7 @@ export function SkuMergeWorkspace() {
         </div>
 
         {trace ? (
-          <div className="mt-3 space-y-2 text-copy-13">
+          <div className="text-copy-13 mt-3 space-y-2">
             <p className="font-medium">
               {trace.skuCode} · {trace.skuName}
             </p>
@@ -447,7 +448,9 @@ export function SkuMergeWorkspace() {
               </ul>
             ) : null}
             {trace.lastReport ? (
-              <p className="text-muted-foreground">最近一次合并的引用报告：{reportSummary(trace.lastReport)}</p>
+              <p className="text-muted-foreground">
+                最近一次合并的引用报告：{reportSummary(trace.lastReport)}
+              </p>
             ) : null}
           </div>
         ) : null}

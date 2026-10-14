@@ -6,7 +6,7 @@
   "description": "Enterprise SaaS ERP for cross-border e-commerce",
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=20.11.0",
+    "node": ">=22.12.0",
     "pnpm": ">=9.0.0"
   },
   "scripts": {
@@ -40,14 +40,15 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "^20.11.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.35",
+    "eslint-config-next": "15.5.27",
     "husky": "^9.0.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.0",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.11",
+    "braces": "3.0.3"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -57,5 +58,20 @@
     "*.{json,md,yaml,yml}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.23",
+      "source-map-js": "^1.2.2",
+      "glob@10.3.10": "^10.5.0"
+    },
+    "patchedDependencies": {
+      "braces@3.0.3": "patches/braces@3.0.3.patch"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-93687"
+      ]
+    }
   }
 }

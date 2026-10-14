@@ -20,22 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 8.2.1.1 收货单。
  *
- * <p>命名空间 {@code /warehouse/goods-receipts}：与总览、明细、台账、核对、调拨同一 {@code
- * /warehouse} 前缀，浏览器只经 /api/warehouse 代理访问。
- * 刻意**不**挂在 {@code /inventory/} 下面 —— 8.2 入库作业是 warehouse 的现场作业系统，
- * 而 {@code /inventory} 是 07 库存核算的账本视图；收货单既产生账本、又不只是账本。
+ * <p>命名空间 {@code /warehouse/goods-receipts}：与总览、明细、台账、核对、调拨同一 {@code /warehouse} 前缀，浏览器只经
+ * /api/warehouse 代理访问。 刻意**不**挂在 {@code /inventory/} 下面 —— 8.2 入库作业是 warehouse 的现场作业系统， 而 {@code
+ * /inventory} 是 07 库存核算的账本视图；收货单既产生账本、又不只是账本。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 全部写动作（建单 / 改单 / 实收 / 关单）挂 {@code warehouse.inventory.update} ——
- * 收货是真实入库，权限等级与调拨发货同档。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 全部写动作（建单 / 改单 / 实收 / 关单）挂 {@code
+ * warehouse.inventory.update} —— 收货是真实入库，权限等级与调拨发货同档。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
  *
- * <p>动作端点是 **POST**（{@code /receive}、{@code /close}）：
- * 它们都是「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，
- * 而实际发生的是库存移动 + 分录落库。
+ * <p>动作端点是 **POST**（{@code /receive}、{@code /close}）： 它们都是「发生一次业务事件」，用 PUT 会被 HTTP
+ * 语义读成「把单据设置成某个状态」， 而实际发生的是库存移动 + 分录落库。
  */
 @RestController
 @RequestMapping("/warehouse/goods-receipts")
@@ -61,8 +57,7 @@ public class GoodsReceiptController {
   /**
    * 收货能力：四类来源的接入情况、四态状态机的合法转换、七类差异，以及三条口径说明。
    *
-   * <p>前端据此渲染来源下拉与动作按钮 —— 未交付的来源**显式报不可用并给出原因**，
-   * 而不是给一个点下去没反应的选项。
+   * <p>前端据此渲染来源下拉与动作按钮 —— 未交付的来源**显式报不可用并给出原因**， 而不是给一个点下去没反应的选项。
    */
   @GetMapping("/capabilities")
   public GoodsReceiptCapabilities capabilities(
@@ -104,8 +99,7 @@ public class GoodsReceiptController {
   /**
    * 本单的库存分录 —— **复用 7.1.2.1 台账**，不另写一套流水查询。
    *
-   * <p>归属口径与局限随响应返回：拒收量**不在分录里**（它从没进过库存），
-   * 不说明的话「预期 100、实收 60、拒收 10、分录只有 +60」会被读成「30 件的账去哪了」。
+   * <p>归属口径与局限随响应返回：拒收量**不在分录里**（它从没进过库存）， 不说明的话「预期 100、实收 60、拒收 10、分录只有 +60」会被读成「30 件的账去哪了」。
    */
   @GetMapping("/{receiptId}/movements")
   public GoodsReceiptMovements movements(
@@ -211,8 +205,7 @@ public class GoodsReceiptController {
   }
 
   private static GoodsReceiptReceiveRequest emptyReceive() {
-    return new GoodsReceiptReceiveRequest(
-        null, null, null, null, null, List.of(), List.of());
+    return new GoodsReceiptReceiveRequest(null, null, null, null, null, List.of(), List.of());
   }
 
   private static GoodsReceiptCloseRequest emptyClose() {

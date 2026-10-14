@@ -222,8 +222,8 @@ public final class CatalogModels {
   /**
    * SKU 列表筛选条件。区间条件分 min/max，min 与 max 同时为空表示不筛。
    *
-   * <p>依赖未接入投影的条件（库存区间、价格区间、是否缺货、是否在售）不会静默生效：
-   * {@link SkuListService} 在执行前显式拒绝并说明归哪个服务，见该类 {@code requireProjections}。
+   * <p>依赖未接入投影的条件（库存区间、价格区间、是否缺货、是否在售）不会静默生效： {@link SkuListService} 在执行前显式拒绝并说明归哪个服务，见该类 {@code
+   * requireProjections}。
    */
   public record SkuListQuery(
       @Schema(nullable = true) UUID spuId,
@@ -317,8 +317,8 @@ public final class CatalogModels {
   /**
    * 单个属性在某个 SKU 上的**有效值**解析结果。
    *
-   * <p>{@code source} 区分「谁的值在生效」：SKU_OVERRIDE / SKU_CLEARED / SPU_COMMON / UNSET。
-   * 只回一个 values 数组的话，运营分不清"没填"和"被清空了"，这两种都要补。
+   * <p>{@code source} 区分「谁的值在生效」：SKU_OVERRIDE / SKU_CLEARED / SPU_COMMON / UNSET。 只回一个 values
+   * 数组的话，运营分不清"没填"和"被清空了"，这两种都要补。
    */
   public record SkuEffectiveAttribute(
       UUID attributeId,
@@ -400,13 +400,13 @@ public final class CatalogModels {
       String createdAt) {}
 
   /** 跨服务子分区的可用性声明，前端据此把整区标成「未接入」而不是显示 0。 */
-  public record SkuDetailSource(String code, String label, String owner, boolean available, String note) {}
+  public record SkuDetailSource(
+      String code, String label, String owner, boolean available, String note) {}
 
   /**
    * SKU 详情聚合体。
    *
-   * <p>{@code version} 是编辑入口的乐观锁凭据：任何分区写回都要带上读取时的 version，
-   * 版本不符直接 409，绝不覆盖别人的修改。
+   * <p>{@code version} 是编辑入口的乐观锁凭据：任何分区写回都要带上读取时的 version， 版本不符直接 409，绝不覆盖别人的修改。
    */
   public record SkuDetail(
       UUID id,
@@ -439,8 +439,7 @@ public final class CatalogModels {
   /**
    * SKU 详情编辑请求。
    *
-   * <p>只覆盖本模块（3.1.2.2）拥有的档案字段：名称、条码、基础单位与包装尺寸重量。
-   * 属性覆写归 3.2.2.2、编码规则与外部条码归 3.1.2.3、单位版本维护归 3.1.2.4，
+   * <p>只覆盖本模块（3.1.2.2）拥有的档案字段：名称、条码、基础单位与包装尺寸重量。 属性覆写归 3.2.2.2、编码规则与外部条码归 3.1.2.3、单位版本维护归 3.1.2.4，
    * 都在这里显式拒绝而不是偷偷代劳。
    */
   public record SkuDetailInput(
@@ -477,8 +476,8 @@ public final class CatalogModels {
   /**
    * 规则视图。
    *
-   * <p>{@code nextValue} 是下一个将被分配的序号，{@code sampleCode} 是用它展开的样例——
-   * 运营在保存前就能看到"这条规则会产出什么样的编码"，而不是先生成 500 个再看。
+   * <p>{@code nextValue} 是下一个将被分配的序号，{@code sampleCode} 是用它展开的样例—— 运营在保存前就能看到"这条规则会产出什么样的编码"，而不是先生成
+   * 500 个再看。
    */
   public record SkuCodeRule(
       UUID id,
@@ -560,8 +559,7 @@ public final class CatalogModels {
   /**
    * 批量补齐 / 按规则自动生成请求。
    *
-   * <p>GENERATE 对 skuIds 指定的 SKU 逐个生成；BACKFILL 忽略 skuIds，扫该规则范围内的
-   * 「尚无编码」的 SKU 补齐。两者共用同一套拒绝清单与留痕。
+   * <p>GENERATE 对 skuIds 指定的 SKU 逐个生成；BACKFILL 忽略 skuIds，扫该规则范围内的 「尚无编码」的 SKU 补齐。两者共用同一套拒绝清单与留痕。
    */
   public record SkuCodeBatchInput(
       @NotBlank String action,
@@ -573,8 +571,8 @@ public final class CatalogModels {
   /**
    * 批量结果里的单行。
    *
-   * <p>三个 outcome 必须分清：APPLIED 改成功；SKIPPED 跳过（如已有编码，规则不覆盖手工编码）；
-   * REJECTED 被拒（如展开编码越界或与既有编码冲突）——后两者都带原因，供用户改完重传。
+   * <p>三个 outcome 必须分清：APPLIED 改成功；SKIPPED 跳过（如已有编码，规则不覆盖手工编码）； REJECTED
+   * 被拒（如展开编码越界或与既有编码冲突）——后两者都带原因，供用户改完重传。
    */
   public record SkuCodeBatchItem(
       int rowNo,
@@ -611,7 +609,12 @@ public final class CatalogModels {
       boolean dryRun) {}
 
   public record SkuIdentifierImportItem(
-      int rowNo, @Schema(nullable = true) UUID skuId, String scheme, String value, String outcome, String reason) {}
+      int rowNo,
+      @Schema(nullable = true) UUID skuId,
+      String scheme,
+      String value,
+      String outcome,
+      String reason) {}
 
   public record SkuIdentifierImportResult(
       UUID batchId,
@@ -654,8 +657,7 @@ public final class CatalogModels {
   /**
    * 单位字典写入请求。
    *
-   * <p>{@code code} 允许中文与拉丁字母数字：单位码不是 SKU 内部编码，历史数据里就是
-   * '件' / '箱' / '千克'，套 [A-Z0-9] 词表会把既有数据判成非法。
+   * <p>{@code code} 允许中文与拉丁字母数字：单位码不是 SKU 内部编码，历史数据里就是 '件' / '箱' / '千克'，套 [A-Z0-9] 词表会把既有数据判成非法。
    */
   public record UnitOfMeasureInput(
       @NotBlank @Size(max = 32) String code,
@@ -671,8 +673,8 @@ public final class CatalogModels {
   /**
    * 单位字典一行。
    *
-   * <p>{@code conversionCount} 是"有多少条换算版本引用了这个单位"，删除前必须看见它。
-   * {@code scale} 是数量精度：决定单据上该单位数量显示几位小数，与存储精度分开。
+   * <p>{@code conversionCount} 是"有多少条换算版本引用了这个单位"，删除前必须看见它。 {@code scale}
+   * 是数量精度：决定单据上该单位数量显示几位小数，与存储精度分开。
    */
   public record UnitOfMeasure(
       UUID id,
@@ -695,8 +697,8 @@ public final class CatalogModels {
   /**
    * 新增一条换算版本。
    *
-   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个基础单位」（1 箱 = 12 件 → 12）。
-   * 生效区间由 V6 的触发器保证不重叠：与已有版本重叠时由 DB 拒绝，应用层转成可读的 409。
+   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个基础单位」（1 箱 = 12 件 → 12）。 生效区间由 V6 的触发器保证不重叠：与已有版本重叠时由 DB
+   * 拒绝，应用层转成可读的 409。
    */
   public record UnitConversionInput(
       @NotBlank @Size(max = 32) String unitCode,
@@ -707,7 +709,11 @@ public final class CatalogModels {
       @Schema(nullable = true) String effectiveTo) {}
 
   public record UnitConversionSaved(
-      UUID id, UUID skuId, String unitCode, String role, String effectiveFrom,
+      UUID id,
+      UUID skuId,
+      String unitCode,
+      String role,
+      String effectiveFrom,
       @Schema(nullable = true) String effectiveTo) {}
 
   /** 换算表里的一行（一个生效版本）。 */
@@ -727,8 +733,7 @@ public final class CatalogModels {
   /**
    * 一个「单位 + 角色」下的全部版本，按生效起始日倒序。
    *
-   * <p>把版本聚成一组而不是拉平成一长串：运营问的是"箱这个采购单位现在几件一箱、
-   * 以前是几件"，聚在一起才看得出比例改过几次。
+   * <p>把版本聚成一组而不是拉平成一长串：运营问的是"箱这个采购单位现在几件一箱、 以前是几件"，聚在一起才看得出比例改过几次。
    */
   public record UnitConversionGroup(
       String unitCode,
@@ -743,9 +748,8 @@ public final class CatalogModels {
   /**
    * 单个 SKU 的单位与换算面板。
    *
-   * <p>{@code baseUnit} 来自 {@code sku.base_unit}（V1 的列），**不在换算表里**：
-   * 基础单位是 SKU 自身的属性，换算表只放其他单位相对它的比例。
-   * {@code baseUnitRegistered} 为 false 表示这个基础单位还没进字典——这是本模块要提示的治理缺口，
+   * <p>{@code baseUnit} 来自 {@code sku.base_unit}（V1 的列），**不在换算表里**： 基础单位是 SKU
+   * 自身的属性，换算表只放其他单位相对它的比例。 {@code baseUnitRegistered} 为 false 表示这个基础单位还没进字典——这是本模块要提示的治理缺口，
    * 不是错误：换算与冻结仍可进行，只是量纲校验对它放行。
    */
   public record UnitPanel(
@@ -771,8 +775,8 @@ public final class CatalogModels {
   /**
    * 换算结果。
    *
-   * <p>{@code conversionId} 为空表示命中的是基础单位本身（比例恒为 1）。
-   * {@code effectiveFrom}/{@code effectiveTo} 是这一版的生效区间——单据据此回显"用的是哪一版"。
+   * <p>{@code conversionId} 为空表示命中的是基础单位本身（比例恒为 1）。 {@code effectiveFrom}/{@code effectiveTo}
+   * 是这一版的生效区间——单据据此回显"用的是哪一版"。
    */
   public record UnitConvertResult(
       UUID skuId,
@@ -854,8 +858,8 @@ public final class CatalogModels {
   /**
    * 规格轴字典写入请求。
    *
-   * <p>{@code code} 是轴的机器标识，且**必须与承载它的 variant_axis 属性定义同 code**
-   * （V9 的 guard_spu_spec_axis 触发器强制）：两边各叫各的会让值源永远对不齐。
+   * <p>{@code code} 是轴的机器标识，且**必须与承载它的 variant_axis 属性定义同 code** （V9 的 guard_spu_spec_axis
+   * 触发器强制）：两边各叫各的会让值源永远对不齐。
    */
   public record SpecAxisInput(
       @NotBlank @Size(max = 64) String code,
@@ -887,8 +891,7 @@ public final class CatalogModels {
    * 规格轴的一个选项。
    *
    * <p>{@code sourceAttributeCode} 是**这个值在属性选项值源里的承载属性**：
-   * 规格选项不得独立于属性选项存在（蓝图硬约束），所以界面上必须把"它同时也是一个属性选项"
-   * 讲出来，而不是让人以为规格轴自己存了一份值。
+   * 规格选项不得独立于属性选项存在（蓝图硬约束），所以界面上必须把"它同时也是一个属性选项" 讲出来，而不是让人以为规格轴自己存了一份值。
    */
   public record SpecAxisOption(
       String value,
@@ -901,18 +904,15 @@ public final class CatalogModels {
 
   /** 规格轴选项写入请求。value 会同时落到属性选项值源与规格轴选项，两处同事务。 */
   public record SpecAxisOptionInput(
-      @NotBlank @Size(max = 100) String value,
-      @PositiveOrZero int position,
-      boolean enabled) {}
+      @NotBlank @Size(max = 100) String value, @PositiveOrZero int position, boolean enabled) {}
 
   public record SpecAxisOptionSaved(UUID specAxisId, String value, int position) {}
 
   /**
    * 绑定请求。
    *
-   * <p>{@code createAttribute=true} 允许在 SPU 上还没有同 code 的 variant_axis 属性时自动建一条
-   * 承载属性——3.2.1.1 属性定义列表未开发，规格轴必须能在自己的端点里自洽地走完，
-   * 不能因为"属性管理页面不存在"就让链路断掉。
+   * <p>{@code createAttribute=true} 允许在 SPU 上还没有同 code 的 variant_axis 属性时自动建一条 承载属性——3.2.1.1
+   * 属性定义列表未开发，规格轴必须能在自己的端点里自洽地走完， 不能因为"属性管理页面不存在"就让链路断掉。
    */
   public record SpecAxisBindingInput(
       @NotNull UUID specAxisId,
@@ -925,9 +925,7 @@ public final class CatalogModels {
 
   /** 类目允许的规格轴规则写入请求。category 是 spu.category 的自由文本（3.3.1.1 未开发）。 */
   public record CategorySpecAxisInput(
-      @NotBlank @Size(max = 100) String category,
-      boolean required,
-      @PositiveOrZero int position) {}
+      @NotBlank @Size(max = 100) String category, boolean required, @PositiveOrZero int position) {}
 
   /** 一条类目规则。{@code boundSpuCount} 让运营看见这条规则实际覆盖了多少 SPU。 */
   public record CategorySpecAxisRule(
@@ -945,8 +943,8 @@ public final class CatalogModels {
   /**
    * 单个 SPU 的规格轴面板。
    *
-   * <p>{@code matrixRowCount} 是各轴可用选项的笛卡尔积行数——即"按当前规格轴展开能生成多少个 SKU"。
-   * 它是 {@code long}：四条各 50 个选项已经是 6.25M 行，{@code int} 会溢出成负数。
+   * <p>{@code matrixRowCount} 是各轴可用选项的笛卡尔积行数——即"按当前规格轴展开能生成多少个 SKU"。 它是 {@code long}：四条各 50 个选项已经是
+   * 6.25M 行，{@code int} 会溢出成负数。
    */
   public record SpecAxisPanel(
       UUID spuId,
@@ -976,10 +974,9 @@ public final class CatalogModels {
   /**
    * 规格轴概览。
    *
-   * <p>{@code unboundVariantAxisAttributes} 是本模块的治理缺口指标：V1 允许
-   * {@code variant_axis=true} 的属性定义独立存在（3.1.1/3.1.2 的既有测试就这么写），
-   * 本迁移**不加"必须挂到轴上"的触发器**（那会打碎已交付模块的写入口），改为把缺口显式暴露出来。
-   * 0 与"没查过"含义不同，界面上要分开写。
+   * <p>{@code unboundVariantAxisAttributes} 是本模块的治理缺口指标：V1 允许 {@code variant_axis=true}
+   * 的属性定义独立存在（3.1.1/3.1.2 的既有测试就这么写）， 本迁移**不加"必须挂到轴上"的触发器**（那会打碎已交付模块的写入口），改为把缺口显式暴露出来。 0
+   * 与"没查过"含义不同，界面上要分开写。
    */
   public record SpecAxisOverview(
       long axisCount,
@@ -1002,7 +999,8 @@ public final class CatalogModels {
       @NotNull UUID specAxisId, @NotBlank @Size(max = 100) String value) {}
 
   /** 一个待建组合：必须给本 SPU 每条已绑定轴各一个取值。 */
-  public record CombinationInput(@NotEmpty @Size(max = 100) List<@Valid CombinationValueInput> values) {}
+  public record CombinationInput(
+      @NotEmpty @Size(max = 100) List<@Valid CombinationValueInput> values) {}
 
   /** 批量校验请求。整批要么全部通过、要么给出完整冲突清单，不做部分成功。 */
   public record CombinationCheckInput(
@@ -1011,8 +1009,8 @@ public final class CatalogModels {
   /**
    * 生成待建 SKU 草稿的请求。
    *
-   * <p>{@code mode=MATRIX} 时按各轴启用选项展开笛卡尔积，{@code combinations} 留空；
-   * {@code mode=EXPLICIT} 时按提交的组合集合生成。两种模式都先过同一套预校验。
+   * <p>{@code mode=MATRIX} 时按各轴启用选项展开笛卡尔积，{@code combinations} 留空； {@code mode=EXPLICIT}
+   * 时按提交的组合集合生成。两种模式都先过同一套预校验。
    */
   public record VariantDraftInput(
       @NotBlank String mode,
@@ -1023,8 +1021,8 @@ public final class CatalogModels {
   /**
    * 组合里的一对「轴 + 取值」，已解析出轴编码与轴名称。
    *
-   * <p>{@code specAxisId} 可空：按 SKU 轴值实时解析出来的组合（来源 {@code source=SKU}）
-   * 只能定位到轴编码——那个 SKU 的属性值行上并没有规格轴的 id，硬凑一个会骗人。
+   * <p>{@code specAxisId} 可空：按 SKU 轴值实时解析出来的组合（来源 {@code source=SKU}） 只能定位到轴编码——那个 SKU
+   * 的属性值行上并没有规格轴的 id，硬凑一个会骗人。
    */
   public record CombinationValue(
       @Schema(nullable = true) UUID specAxisId,
@@ -1051,9 +1049,8 @@ public final class CatalogModels {
   /**
    * 一条冲突。
    *
-   * <p>蓝图要求输出是**结构化冲突清单**而不是一个布尔值，理由很实际：
-   * 运营看到"重复 3 个组合"没法干活，他需要知道是哪几个组合、分别撞了谁
-   * （撞已存在的 SKU？撞上一次生成的草稿？同一批里自己撞自己？）、出现在第几条。
+   * <p>蓝图要求输出是**结构化冲突清单**而不是一个布尔值，理由很实际： 运营看到"重复 3 个组合"没法干活，他需要知道是哪几个组合、分别撞了谁 （撞已存在的
+   * SKU？撞上一次生成的草稿？同一批里自己撞自己？）、出现在第几条。
    */
   public record CombinationConflict(
       String reasonCode,
@@ -1069,8 +1066,7 @@ public final class CatalogModels {
   /**
    * 校验结果。
    *
-   * <p>{@code planned} 是**去重后**的合法组合，不是提交原样回显：
-   * "提交 10 条、其中 3 条自己撞自己、合法 7 条"这件事必须在结构里说清楚。
+   * <p>{@code planned} 是**去重后**的合法组合，不是提交原样回显： "提交 10 条、其中 3 条自己撞自己、合法 7 条"这件事必须在结构里说清楚。
    */
   public record CombinationCheckResult(
       boolean valid,
@@ -1127,8 +1123,7 @@ public final class CatalogModels {
   /**
    * 单 SPU 的组合校验面板。
    *
-   * <p>{@code availableMatrixCount} 是"矩阵里还没被占用的组合数"：
-   * 拿它减 {@code matrixRowCount} 就知道矩阵被占了多少，这是运营决定
+   * <p>{@code availableMatrixCount} 是"矩阵里还没被占用的组合数"： 拿它减 {@code matrixRowCount} 就知道矩阵被占了多少，这是运营决定
    * "还能不能再生成一批草稿"的唯一依据。
    */
   public record VariantCombinationPanel(
@@ -1150,9 +1145,8 @@ public final class CatalogModels {
   /**
    * 组合唯一性概览。
    *
-   * <p>{@code blockedMatrixSpuCount} 是治理缺口指标：有已存在 SKU 组合的 SPU 数量——
-   * 这些 SPU 再生成草稿时会与历史 SKU 逐条比对，缺口大说明历史 SKU 多，
-   * 拿它跟 {@code pendingDraftCount} 一起看才知道草稿这条路走不走得通。
+   * <p>{@code blockedMatrixSpuCount} 是治理缺口指标：有已存在 SKU 组合的 SPU 数量—— 这些 SPU 再生成草稿时会与历史 SKU
+   * 逐条比对，缺口大说明历史 SKU 多， 拿它跟 {@code pendingDraftCount} 一起看才知道草稿这条路走不走得通。
    */
   public record VariantCombinationOverview(
       long axisBoundSpuCount,
@@ -1174,15 +1168,14 @@ public final class CatalogModels {
   /**
    * 属性定义写入请求（租户级字典条目）。
    *
-   * <p>对应 {@code attribute_definition} 里 {@code spu_id IS NULL} 的那些行。SPU 级定义
-   * （{@code spu_id IS NOT NULL}）由 3.2.2.1 的商品属性端点维护，两者在同一张表里但作用域不同，
-   * 见 V11 迁移注释里的模型决策。
+   * <p>对应 {@code attribute_definition} 里 {@code spu_id IS NULL} 的那些行。SPU 级定义 （{@code spu_id IS NOT
+   * NULL}）由 3.2.2.1 的商品属性端点维护，两者在同一张表里但作用域不同， 见 V11 迁移注释里的模型决策。
    *
-   * <p>{@code dataType} 决定 {@code options} 与类目规则的形态：只有 OPTION 能配选项集合，
-   * 只有 DECIMAL 能配 {@code minValue}/{@code maxValue} 范围。服务层会拒绝不匹配的组合。
+   * <p>{@code dataType} 决定 {@code options} 与类目规则的形态：只有 OPTION 能配选项集合， 只有 DECIMAL 能配 {@code
+   * minValue}/{@code maxValue} 范围。服务层会拒绝不匹配的组合。
    *
-   * <p>{@code variantAxis} 沿用 V1 的蕴含式（规格轴必须是按 SKU 填写的必填单选枚举属性），
-   * V11 追加了一条 `variant_axis → usage='SPECIFICATION'`，让蓝图里的「用途=规格」真的生效。
+   * <p>{@code variantAxis} 沿用 V1 的蕴含式（规格轴必须是按 SKU 填写的必填单选枚举属性）， V11 追加了一条 `variant_axis →
+   * usage='SPECIFICATION'`，让蓝图里的「用途=规格」真的生效。
    */
   public record AttributeDefinitionInput(
       @NotBlank @Size(max = 64) String code,
@@ -1204,9 +1197,8 @@ public final class CatalogModels {
   /**
    * 列表页的一行。
    *
-   * <p>三个计数是「删除或停用前必须看见」的信息：选项数、类目规则数（这条属性被哪些类目要求了）、
-   * 以及 {@code spuUsageCount}（有多少 SPU 已经有同 code 的属性定义在用这个编码）。
-   * 最后一个不是外键计数——字典条目与 SPU 级定义不在同一个命名空间里，只能按 code 对齐统计。
+   * <p>三个计数是「删除或停用前必须看见」的信息：选项数、类目规则数（这条属性被哪些类目要求了）、 以及 {@code spuUsageCount}（有多少 SPU 已经有同 code
+   * 的属性定义在用这个编码）。 最后一个不是外键计数——字典条目与 SPU 级定义不在同一个命名空间里，只能按 code 对齐统计。
    */
   public record AttributeDefinitionRow(
       UUID id,
@@ -1254,17 +1246,14 @@ public final class CatalogModels {
    * <p>三个计数字段都是「删除或停用前必须看见」的信息：
    *
    * <ul>
-   *   <li>{@code productValueCount} = 已有多少处商品属性值取用了它（命中
-   *       {@code attribute_value_item}）。蓝图要求「有商品引用的选项只能停用」，
-   *       所以这个数 &gt; 0 时删除会被拒。
-   *   <li>{@code categoryRuleCount} = 有多少条类目规则把它列为可选值。删掉它会连带改掉那些规则，
-   *       所以同样先拒，并提示先改规则。
+   *   <li>{@code productValueCount} = 已有多少处商品属性值取用了它（命中 {@code
+   *       attribute_value_item}）。蓝图要求「有商品引用的选项只能停用」， 所以这个数 &gt; 0 时删除会被拒。
+   *   <li>{@code categoryRuleCount} = 有多少条类目规则把它列为可选值。删掉它会连带改掉那些规则， 所以同样先拒，并提示先改规则。
    *   <li>{@code inUse} 是上面两者的合成，界面上用它决定给「删除」还是给「停用」。
    * </ul>
    *
-   * <p>字典条目目前还不会被赋属性值（{@code attribute_value} 的复合外键仍锁在 SPU 作用域，
-   * 那是下游 3.2.2.x 的接线），所以 {@code productValueCount} 现在恒为 0——
-   * 它照实反映数据库现状，接上赋值链路后会自动开始计数，界面上不需要改。
+   * <p>字典条目目前还不会被赋属性值（{@code attribute_value} 的复合外键仍锁在 SPU 作用域， 那是下游 3.2.2.x 的接线），所以 {@code
+   * productValueCount} 现在恒为 0—— 它照实反映数据库现状，接上赋值链路后会自动开始计数，界面上不需要改。
    */
   public record AttributeOptionRow(
       String value,
@@ -1277,30 +1266,26 @@ public final class CatalogModels {
 
   /** 选项写入请求。value 落在 {@code attribute_option}，也就是规格轴共享的那个值源。 */
   public record AttributeOptionInput(
-      @NotBlank @Size(max = 100) String value,
-      @PositiveOrZero int position,
-      boolean enabled) {}
+      @NotBlank @Size(max = 100) String value, @PositiveOrZero int position, boolean enabled) {}
 
-  public record AttributeOptionSaved(UUID attributeId, String value, int position, boolean enabled) {}
+  public record AttributeOptionSaved(
+      UUID attributeId, String value, int position, boolean enabled) {}
 
   // ============================================================ 3.2.1.2 属性选项管理
 
   /**
    * 跨属性的选项总览一行：把租户下所有枚举属性的选项拍平成一张可筛选、可排序、可分页的表。
    *
-   * <p>3.2.1.1 只能按单个 attributeId 取选项，回答不了「哪些选项没人用」「哪些属性还没配值」。
-   * 本行因此额外带出归属信息（{@code attributeId} / {@code attributeCode} / {@code attributeName}），
-   * 让筛选、排序与批量操作都能在**不回到字典页**的前提下完成。
+   * <p>3.2.1.1 只能按单个 attributeId 取选项，回答不了「哪些选项没人用」「哪些属性还没配值」。 本行因此额外带出归属信息（{@code attributeId} /
+   * {@code attributeCode} / {@code attributeName}）， 让筛选、排序与批量操作都能在**不回到字典页**的前提下完成。
    *
    * <p>两个引用计数沿用 3.2.1.1 的口径，语义不变：
    *
    * <ul>
-   *   <li>{@code productValueCount} = 有多少处商品属性值取用了这个选项。
-   *       字典条目目前恒为 0——{@code attribute_value} 的复合外键仍锁在 SPU 作用域，
-   *       那是数据库现状而非 bug，本字段照实反映，不伪造。
+   *   <li>{@code productValueCount} = 有多少处商品属性值取用了这个选项。 字典条目目前恒为 0——{@code attribute_value}
+   *       的复合外键仍锁在 SPU 作用域， 那是数据库现状而非 bug，本字段照实反映，不伪造。
    *   <li>{@code categoryRuleCount} = 有多少条类目规则把它列为可选值。
-   *   <li>{@code deletable} = 「此刻能不能删」。它是上面两个计数的合成，与 inUse 同源，
-   *       单独给出是为了让界面不必自己重算一遍「删还是停用」。
+   *   <li>{@code deletable} = 「此刻能不能删」。它是上面两个计数的合成，与 inUse 同源， 单独给出是为了让界面不必自己重算一遍「删还是停用」。
    * </ul>
    */
   public record AttributeOptionOverviewRow(
@@ -1319,9 +1304,8 @@ public final class CatalogModels {
   /**
    * 跨属性选项总览的分页结果。
    *
-   * <p>{@code enabledCount} 与 {@code inUseCount} 都**不受筛选条件影响**：
-   * 界面上把它们放在筛选结果旁边，用户才知道「筛出来的 3 条」之外还有多少停用/被引用的条目。
-   * 0 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
+   * <p>{@code enabledCount} 与 {@code inUseCount} 都**不受筛选条件影响**： 界面上把它们放在筛选结果旁边，用户才知道「筛出来的 3
+   * 条」之外还有多少停用/被引用的条目。 0 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
    */
   public record AttributeOptionPage(
       List<AttributeOptionOverviewRow> items,
@@ -1335,11 +1319,10 @@ public final class CatalogModels {
   /**
    * 选项总览的筛选与排序条件。三个布尔用 {@link Boolean} 收参保持三态（不筛 / 只要满足 / 只要不满足）。
    *
-   * <p>{@code referenced} 表达的是「有没有被引用」而不是引用来源——商品取用与类目规则两条来源
-   * 在 {@code productValueCount} / {@code categoryRuleCount} 上分别可见。
+   * <p>{@code referenced} 表达的是「有没有被引用」而不是引用来源——商品取用与类目规则两条来源 在 {@code productValueCount} / {@code
+   * categoryRuleCount} 上分别可见。
    *
-   * <p>{@code sort} 是白名单值而不是任意列名：排序串直接拼进 SQL，
-   * 只有映射到固定片段的取值才允许出库（见 AttributeOptionService.ORDER_BY）。
+   * <p>{@code sort} 是白名单值而不是任意列名：排序串直接拼进 SQL， 只有映射到固定片段的取值才允许出库（见 AttributeOptionService.ORDER_BY）。
    */
   public record AttributeOptionQuery(
       @Schema(nullable = true) @Size(max = 200) String keyword,
@@ -1358,13 +1341,13 @@ public final class CatalogModels {
       UUID attributeId, String value, boolean enabled, boolean inUse, boolean deletable) {}
 
   /** 批量重排的一行：某个选项该排到第几位。 */
-  public record AttributeOptionOrderItem(@NotBlank @Size(max = 100) String value, @PositiveOrZero int position) {}
+  public record AttributeOptionOrderItem(
+      @NotBlank @Size(max = 100) String value, @PositiveOrZero int position) {}
 
   /**
    * 批量重排请求：一次提交某个属性的全部（或部分）选项及其新位置。
    *
-   * <p>整体覆盖式提交而不是「逐条 update」：拖拽排序天然是一组位置，
-   * 逐条提交会在中途失败时留下半套顺序——那时用户看到的是一个既不是旧顺序也不是新顺序的列表，
+   * <p>整体覆盖式提交而不是「逐条 update」：拖拽排序天然是一组位置， 逐条提交会在中途失败时留下半套顺序——那时用户看到的是一个既不是旧顺序也不是新顺序的列表，
    * 比整批失败更难判断发生了什么。服务端在一个事务里逐条校验后统一写入。
    */
   public record AttributeOptionOrderInput(
@@ -1377,8 +1360,8 @@ public final class CatalogModels {
   /**
    * 类目属性规则一行：某类目对某属性的要求（必填 + 可选范围）。
    *
-   * <p>{@code allowedOptionCount} 与 {@code allowedOptions} 只对枚举属性有意义；
-   * {@code minValue}/{@code maxValue} 只对数值属性有意义。两者互斥由服务层校验。
+   * <p>{@code allowedOptionCount} 与 {@code allowedOptions} 只对枚举属性有意义； {@code minValue}/{@code
+   * maxValue} 只对数值属性有意义。两者互斥由服务层校验。
    */
   public record CategoryAttributeRule(
       String category,
@@ -1399,11 +1382,10 @@ public final class CatalogModels {
   /**
    * 类目属性规则写入请求。
    *
-   * <p>{@code category} 是 {@code spu.category} 的自由文本（3.3.1.1 分类树未开发，无可引用的主键），
-   * 与 V9 的 {@code category_spec_axis} 同一口径。
+   * <p>{@code category} 是 {@code spu.category} 的自由文本（3.3.1.1 分类树未开发，无可引用的主键）， 与 V9 的 {@code
+   * category_spec_axis} 同一口径。
    *
-   * <p>{@code allowedOptions} 是该类目允许取用的枚举值子集，必须是属性值源里已有的值
-   * （复合外键兜底）。传空数组表示「不设子集，全部选项都允许」。
+   * <p>{@code allowedOptions} 是该类目允许取用的枚举值子集，必须是属性值源里已有的值 （复合外键兜底）。传空数组表示「不设子集，全部选项都允许」。
    */
   public record CategoryAttributeRuleInput(
       @NotBlank @Size(max = 100) String category,
@@ -1413,7 +1395,8 @@ public final class CatalogModels {
       @PositiveOrZero int position,
       @Size(max = 50) List<@Size(max = 100) String> allowedOptions) {}
 
-  public record CategoryAttributeRuleSaved(String category, UUID attributeId, int allowedOptionCount) {}
+  public record CategoryAttributeRuleSaved(
+      String category, UUID attributeId, int allowedOptionCount) {}
 
   /**
    * 属性字典概览。
@@ -1421,8 +1404,7 @@ public final class CatalogModels {
    * <p>{@code dictionaryAttributeCount} 与 SPU 级定义分开统计：V11 之后两者同表，
    * 不分开就会把「这个租户定义了几条属性字典」与「有多少商品各自建了属性」混成一个数。
    *
-   * <p>{@code categoryWithoutRuleCount} 是治理缺口：已有商品的类目里，
-   * 一个属性要求都没配的类目数——这些类目的录入表单不会做必填校验。
+   * <p>{@code categoryWithoutRuleCount} 是治理缺口：已有商品的类目里， 一个属性要求都没配的类目数——这些类目的录入表单不会做必填校验。
    */
   public record AttributeDictionaryOverview(
       long dictionaryAttributeCount,
@@ -1445,9 +1427,8 @@ public final class CatalogModels {
   /**
    * 设置一条 SKU 覆写的请求。
    *
-   * <p>{@code values} 为空即拒绝，**不用空数组表达"清空"**：清空是一个有后果的动作
-   * （它会让这条属性不再退回 SPU 公共值），必须走独立的清空端点，否则界面上一个"保存空值"
-   * 的手滑就会静默改掉解析结果。删除覆写（取消覆写、回落公共值）则是第三个动作，同样独立。
+   * <p>{@code values} 为空即拒绝，**不用空数组表达"清空"**：清空是一个有后果的动作 （它会让这条属性不再退回 SPU
+   * 公共值），必须走独立的清空端点，否则界面上一个"保存空值" 的手滑就会静默改掉解析结果。删除覆写（取消覆写、回落公共值）则是第三个动作，同样独立。
    */
   public record SkuOverrideInput(
       @NotNull @Size(min = 1, max = 50) List<@NotNull @Size(max = 2000) String> values) {}
@@ -1455,17 +1436,14 @@ public final class CatalogModels {
   /**
    * 单个属性在某个 SKU 上的覆写视图。
    *
-   * <p>{@code overrideState} 与 {@code source} 分开：前者是**操作事实**
-   * （SET / CLEAR / INHERIT，即 SKU 侧那一行现在是什么），后者是**生效值来源**
-   * （SPU_COMMON / SKU_OVERRIDE / SKU_CLEARED / UNSET，即解析结果是谁的值在起作用）。
+   * <p>{@code overrideState} 与 {@code source} 分开：前者是**操作事实** （SET / CLEAR / INHERIT，即 SKU
+   * 侧那一行现在是什么），后者是**生效值来源** （SPU_COMMON / SKU_OVERRIDE / SKU_CLEARED / UNSET，即解析结果是谁的值在起作用）。
    * 两者在"覆写了一个与公共值相同的值"时仍然不同——那是 SKU_OVERRIDE，但语义上等于没改。
    *
-   * <p>{@code effectiveValues} 就是界面上要显示的**最终有效值**；空数组与"值是空串"不是一回事，
-   * 界面据此显示"未设置 / 已显式清空"而不是留白。
+   * <p>{@code effectiveValues} 就是界面上要显示的**最终有效值**；空数组与"值是空串"不是一回事， 界面据此显示"未设置 / 已显式清空"而不是留白。
    *
-   * <p>{@code overridable=false} 时 {@code blockReason} 必非空，说明为什么这条属性改不动
-   * （公共固定 / 属性已停用 / 该 SKU 已停用）。界面据此禁用控件并显示原因，
-   * 而不是让人点了之后才吃一个 400。
+   * <p>{@code overridable=false} 时 {@code blockReason} 必非空，说明为什么这条属性改不动 （公共固定 / 属性已停用 / 该 SKU
+   * 已停用）。界面据此禁用控件并显示原因， 而不是让人点了之后才吃一个 400。
    */
   public record SkuOverrideAttribute(
       UUID attributeId,
@@ -1505,9 +1483,8 @@ public final class CatalogModels {
   /**
    * SKU 属性覆写面板的聚合体。
    *
-   * <p>{@code skuVersion} 是 3.1.2.x 的乐观锁凭据，本模块**只读不改**它（见
-   * {@code SkuAttributeOverrideService} 的类注释），所以这里回传它只是为了让界面能显示
-   * 这个 SKU 的版本，不是给本模块做并发控制用的。
+   * <p>{@code skuVersion} 是 3.1.2.x 的乐观锁凭据，本模块**只读不改**它（见 {@code SkuAttributeOverrideService}
+   * 的类注释），所以这里回传它只是为了让界面能显示 这个 SKU 的版本，不是给本模块做并发控制用的。
    */
   public record SkuOverrideView(
       UUID skuId,
@@ -1525,11 +1502,7 @@ public final class CatalogModels {
 
   /** 必填校验里的一条缺失项：界面上按条显示"缺什么、为什么算缺"。 */
   public record SkuOverrideMissing(
-      UUID attributeId,
-      String code,
-      String name,
-      String source,
-      String reason) {}
+      UUID attributeId, String code, String name, String source, String reason) {}
 
   // ============================================================ 3.3.1.1 分类树管理
 
@@ -1537,8 +1510,7 @@ public final class CatalogModels {
    * 一棵分类树。
    *
    * <p>{@code treeKind} 区分「内部管理分类」与「平台类目映射」——蓝图明确要求这是**多棵独立的树**：
-   * 两者的维护节奏完全不同（平台类目跟着平台改版走，内部类目跟着商品结构走），
-   * 混成一棵会让任一方改动都牵动另一方。
+   * 两者的维护节奏完全不同（平台类目跟着平台改版走，内部类目跟着商品结构走）， 混成一棵会让任一方改动都牵动另一方。
    */
   public record CategoryTree(
       UUID id,
@@ -1567,9 +1539,8 @@ public final class CatalogModels {
   /**
    * 分类树上的一个节点。
    *
-   * <p>{@code path} 是从根到自己的名称路径串（"服饰 / 上装 / T恤"），供 13 分析按层级下钻；
-   * {@code directProductCount} 是**直接**挂在这一节点上的商品数，
-   * {@code subtreeProductCount} 含所有子孙——两者含义不同，界面上分开显示，
+   * <p>{@code path} 是从根到自己的名称路径串（"服饰 / 上装 / T恤"），供 13 分析按层级下钻； {@code directProductCount}
+   * 是**直接**挂在这一节点上的商品数， {@code subtreeProductCount} 含所有子孙——两者含义不同，界面上分开显示，
    * 否则「把商品挂到子类目」会让父类目的数字看起来莫名变少。
    */
   public record CategoryNode(
@@ -1613,8 +1584,7 @@ public final class CatalogModels {
   /**
    * 拖拽落点：新的父节点与同级位置。
    *
-   * <p>单独一个 record 而不是复用 {@code CategoryInput}：拖拽只关心落点，
-   * 不该顺带把名称、启用状态一起提交（那两个字段可能正在被别人编辑）。
+   * <p>单独一个 record 而不是复用 {@code CategoryInput}：拖拽只关心落点， 不该顺带把名称、启用状态一起提交（那两个字段可能正在被别人编辑）。
    */
   public record CategoryMoveInput(
       @Schema(nullable = true) UUID parentId,
@@ -1626,7 +1596,10 @@ public final class CatalogModels {
 
   /** SPU 的主分类与辅助分类。 */
   public record SpuCategoryAssignment(
-      UUID spuId, UUID primaryCategoryId, String primaryCategoryName, List<SpuCategoryLink> secondary) {}
+      UUID spuId,
+      UUID primaryCategoryId,
+      String primaryCategoryName,
+      List<SpuCategoryLink> secondary) {}
 
   /** 一个辅助分类。 */
   public record SpuCategoryLink(UUID categoryId, String code, String name, int position) {}
@@ -1642,8 +1615,8 @@ public final class CatalogModels {
   /**
    * 分类树概览：规模与几个治理缺口指标。
    *
-   * <p>{@code uncategorizedSpuCount} 是「有商品但既没有主分类也没有历史类目文本」的 SPU 数——
-   * 0 与「没查过」含义不同，所以单独返回（与 V8 的 unregisteredSkus 同一口径）。
+   * <p>{@code uncategorizedSpuCount} 是「有商品但既没有主分类也没有历史类目文本」的 SPU 数—— 0 与「没查过」含义不同，所以单独返回（与 V8 的
+   * unregisteredSkus 同一口径）。
    */
   public record CategoryOverview(
       long treeCount,
@@ -1665,6 +1638,7 @@ public final class CatalogModels {
    * 一条类目属性要求（V15 的 {@code category_attribute_rule} 读出口径）。
    *
    * <p>三个字段共同说明「这条要求来自哪里」，缺一个运营就无法自查继承：
+   *
    * <ul>
    *   <li>{@code sourceCategoryId} / {@code sourceCategoryName} —— 规则实际挂着的那个类目节点，
    *       可能是祖先（继承而来），也可能是自己；
@@ -1672,8 +1646,8 @@ public final class CatalogModels {
    *       页面据此把继承来的规则标注出来，并在「只显示本节点规则」与「显示全部生效规则」之间切换。
    * </ul>
    *
-   * <p>{@code allowedOptions} 为空表示「不限定子集，属性值源里的全部选项都可选」，
-   * 与 {@code allowFreeText}（允许提交不在选项集内的值）是两个不同方向的放宽，不要混用。
+   * <p>{@code allowedOptions} 为空表示「不限定子集，属性值源里的全部选项都可选」， 与 {@code
+   * allowFreeText}（允许提交不在选项集内的值）是两个不同方向的放宽，不要混用。
    */
   public record CategoryAttributeRequirement(
       UUID categoryId,
@@ -1705,9 +1679,8 @@ public final class CatalogModels {
   /**
    * 条件必填依赖的前置属性。
    *
-   * <p>存的是**属性 id + 算子**，取值另表存（{@link CategoryAttributeConditionValue}）——
-   * 与 V11 的 {@code category_attribute_option} 同一形态。id 而非 code 是权威：
-   * 属性改 code 时条件不会跟着断（code 是运营可改的展示标识，id 才是引用）。
+   * <p>存的是**属性 id + 算子**，取值另表存（{@link CategoryAttributeConditionValue}）—— 与 V11 的 {@code
+   * category_attribute_option} 同一形态。id 而非 code 是权威： 属性改 code 时条件不会跟着断（code 是运营可改的展示标识，id 才是引用）。
    */
   public record CategoryAttributeCondition(
       @NotNull UUID attributeId,
@@ -1724,8 +1697,7 @@ public final class CatalogModels {
    * 类目属性要求写入请求。
    *
    * <p>{@code requirement} 与 {@code condition} / {@code conditionValues} 必须成套出现：
-   * 条件必填必须给出前置属性、算子与至少一个取值；非条件必填则三者都必须为空
-   * （一条永远不生效的条件留在配置里，比没有条件更危险——运营会以为它生效了）。
+   * 条件必填必须给出前置属性、算子与至少一个取值；非条件必填则三者都必须为空 （一条永远不生效的条件留在配置里，比没有条件更危险——运营会以为它生效了）。
    */
   public record CategoryAttributeRequirementInput(
       @NotNull UUID attributeId,
@@ -1737,7 +1709,8 @@ public final class CatalogModels {
       @PositiveOrZero int position,
       @Size(max = 50) List<@Size(max = 100) String> allowedOptions,
       @Schema(nullable = true) @Valid CategoryAttributeCondition condition,
-      @Schema(nullable = true) @Size(max = 20) List<@Valid CategoryAttributeConditionValue> conditionValues,
+      @Schema(nullable = true) @Size(max = 20)
+          List<@Valid CategoryAttributeConditionValue> conditionValues,
       boolean enabled,
       @PositiveOrZero long version) {}
 
@@ -1757,8 +1730,7 @@ public final class CatalogModels {
   /**
    * 规则集统计。
    *
-   * <p>{@code inheritedCount} 单独给出：祖先改了规则会同时影响这一层的所有子类目，
-   * 「有多少条是继承来的」决定了这个类目的配置自主度，也决定改祖先时要评估多大的影响面。
+   * <p>{@code inheritedCount} 单独给出：祖先改了规则会同时影响这一层的所有子类目， 「有多少条是继承来的」决定了这个类目的配置自主度，也决定改祖先时要评估多大的影响面。
    */
   public record CategoryRequirementsSummary(
       long effectiveCount,
@@ -1773,16 +1745,15 @@ public final class CatalogModels {
   /**
    * 录入表单 schema 的一个字段。
    *
-   * <p>这是 3.3.1.2 交给 3.1.1.2 商品编辑与 04 刊登表单的**核心输出**，
-   * 字段设计目标是「前端不需要再问后端任何规则问题」：
+   * <p>这是 3.3.1.2 交给 3.1.1.2 商品编辑与 04 刊登表单的**核心输出**， 字段设计目标是「前端不需要再问后端任何规则问题」：
    *
    * <ul>
-   *   <li>{@code control} —— 控件类型（TEXT / NUMBER / SELECT / BOOLEAN / DATE），
-   *       由属性数据类型 + 规则推导，前端不再自己映射一遍；
-   *   <li>{@code required} —— **求值之后**的必填性。条件必填在条件成立时为 {@code true}，
-   *       不成立时为 {@code false}，前端直接绑到控件的 required 属性上即可；
-   *   <li>{@code options} —— 可选值列表，每项带 {@code enabled}：
-   *       选项被 3.2.1.2 停用后前端要能显示为禁用而不是直接消失（消失会让运营以为自己配错了）；
+   *   <li>{@code control} —— 控件类型（TEXT / NUMBER / SELECT / BOOLEAN / DATE）， 由属性数据类型 +
+   *       规则推导，前端不再自己映射一遍；
+   *   <li>{@code required} —— **求值之后**的必填性。条件必填在条件成立时为 {@code true}， 不成立时为 {@code false}，前端直接绑到控件的
+   *       required 属性上即可；
+   *   <li>{@code options} —— 可选值列表，每项带 {@code enabled}： 选项被 3.2.1.2
+   *       停用后前端要能显示为禁用而不是直接消失（消失会让运营以为自己配错了）；
    *   <li>{@code constraints} —— 校验约束（数值区间 / 长度 / 选项白名单 / 自由填写）。
    * </ul>
    */
@@ -1806,12 +1777,16 @@ public final class CatalogModels {
   /**
    * 条件必填在 schema 上的依赖声明。
    *
-   * <p>{@code active} 是「按本次传入的当前值，条件是否已成立」。前端拿到这个就能
-   * 直接决定「字段要不要亮必填星号」，不需要自己实现一遍求值逻辑——
-   * 那正是「条件必填要真正参与 schema 生成」的落点。
+   * <p>{@code active} 是「按本次传入的当前值，条件是否已成立」。前端拿到这个就能 直接决定「字段要不要亮必填星号」，不需要自己实现一遍求值逻辑—— 那正是「条件必填要真正参与
+   * schema 生成」的落点。
    */
   public record EntryFormDependency(
-      UUID attributeId, String attributeCode, String label, String operator, List<String> values, boolean active) {}
+      UUID attributeId,
+      String attributeCode,
+      String label,
+      String operator,
+      List<String> values,
+      boolean active) {}
 
   /** 可选值。停用的选项仍然返回，由前端按 {@code enabled} 置灰。 */
   public record EntryFormOption(String value, boolean enabled) {}
@@ -1819,9 +1794,8 @@ public final class CatalogModels {
   /**
    * 取值约束。全部可空：非空字段的语义是「这条约束存在」，具体值看对应字段。
    *
-   * <p>用嵌套 record 而不是把 5 个字段平铺进 {@link EntryFormField}：
-   * 前端 {@code field.constraints?.maxLength} 这种写法能一眼看出哪些约束可空，
-   * 平铺则要逐个判 null，写错一个就是「undefined 参与比较恒为 false」的静默漏校验。
+   * <p>用嵌套 record 而不是把 5 个字段平铺进 {@link EntryFormField}： 前端 {@code field.constraints?.maxLength}
+   * 这种写法能一眼看出哪些约束可空， 平铺则要逐个判 null，写错一个就是「undefined 参与比较恒为 false」的静默漏校验。
    */
   public record EntryFormConstraints(
       @Schema(nullable = true) BigDecimal minValue,
@@ -1833,8 +1807,7 @@ public final class CatalogModels {
   /**
    * 录入表单 schema 整体输出。
    *
-   * <p>{@code requiredFieldCount} 与 {@code conditionalFieldCount} 让前端不必遍历就能
-   * 显示「共 N 项，其中 M 项必填」这类提示。
+   * <p>{@code requiredFieldCount} 与 {@code conditionalFieldCount} 让前端不必遍历就能 显示「共 N 项，其中 M 项必填」这类提示。
    */
   public record EntryFormSchema(
       UUID categoryId,
@@ -1850,12 +1823,11 @@ public final class CatalogModels {
   /**
    * 提交的属性值（保存前校验的入参）。
    *
-   * <p>一律按**字符串**收，而不是按属性数据类型分字段：提交来源是 HTTP 表单，
-   * JSON 里的 12 与 "12" 对 TEXT 属性都是合法输入。先按字符串到、再按目标数据类型解析，
-   * 类型不符才判 {@code TYPE_MISMATCH}——这比让前端按类型拼不同形状的载荷更贴合实际录入。
+   * <p>一律按**字符串**收，而不是按属性数据类型分字段：提交来源是 HTTP 表单， JSON 里的 12 与 "12" 对 TEXT
+   * 属性都是合法输入。先按字符串到、再按目标数据类型解析， 类型不符才判 {@code TYPE_MISMATCH}——这比让前端按类型拼不同形状的载荷更贴合实际录入。
    *
-   * <p>{@code attributeId} 与 {@code attributeCode} 二选一：前端拿到的是 schema，
-   * 用 key（= code）最顺手；批量脚本按 id 提交更稳。两者都给时以 id 为准。
+   * <p>{@code attributeId} 与 {@code attributeCode} 二选一：前端拿到的是 schema， 用 key（= code）最顺手；批量脚本按 id
+   * 提交更稳。两者都给时以 id 为准。
    */
   public record AttributeValueInput(
       @Schema(nullable = true) UUID attributeId,
@@ -1869,12 +1841,12 @@ public final class CatalogModels {
   /**
    * 单个字段的校验结果。
    *
-   * <p>{@code code} 用词表而不是自由文本：前端要按 code 决定提示位置与样式，
-   * 而 {@code message} 是人话、可以直接显示。这与 {@link ApiErrorHandler} 的错误口径一致。
+   * <p>{@code code} 用词表而不是自由文本：前端要按 code 决定提示位置与样式， 而 {@code message} 是人话、可以直接显示。这与 {@link
+   * ApiErrorHandler} 的错误口径一致。
    *
-   * <p>词表：{@code PASSED} / {@code MISSING} / {@code TYPE_MISMATCH} / {@code OUT_OF_RANGE} /
-   * {@code LENGTH_EXCEEDED} / {@code OPTION_NOT_ALLOWED} / {@code CONDITION_UNMET} /
-   * {@code UNKNOWN_ATTRIBUTE}。
+   * <p>词表：{@code PASSED} / {@code MISSING} / {@code TYPE_MISMATCH} / {@code OUT_OF_RANGE} / {@code
+   * LENGTH_EXCEEDED} / {@code OPTION_NOT_ALLOWED} / {@code CONDITION_UNMET} / {@code
+   * UNKNOWN_ATTRIBUTE}。
    */
   public record AttributeValidationResult(
       UUID attributeId,
@@ -1891,8 +1863,8 @@ public final class CatalogModels {
   /**
    * 保存前校验报告。
    *
-   * <p>{@code valid} 是整体结论：全部 {@code PASSED} 才为 true。
-   * {@code results} 按录入表单的字段顺序返回（含未被提交的字段，前端可据此逐项高亮）。
+   * <p>{@code valid} 是整体结论：全部 {@code PASSED} 才为 true。 {@code results}
+   * 按录入表单的字段顺序返回（含未被提交的字段，前端可据此逐项高亮）。
    */
   public record AttributeValidationReport(
       UUID categoryId,
@@ -1919,17 +1891,16 @@ public final class CatalogModels {
       @NotBlank @Size(max = 16) String locale, @NotBlank @Size(max = 200) String name) {}
 
   /** 品牌关联的一个类目（写入用）。 */
-  public record BrandCategoryLinkInput(@NotNull UUID categoryId, @PositiveOrZero Integer position) {}
+  public record BrandCategoryLinkInput(
+      @NotNull UUID categoryId, @PositiveOrZero Integer position) {}
 
   /**
    * 建 / 改品牌的请求。
    *
-   * <p>{@code categories} 是**整体替换**语义（提交什么就等于什么，不是增量追加）：
-   * 关联类目是「这个品牌属于哪几个类目」的一组完整描述，增量语义下
+   * <p>{@code categories} 是**整体替换**语义（提交什么就等于什么，不是增量追加）： 关联类目是「这个品牌属于哪几个类目」的一组完整描述，增量语义下
    * 前端必须先取回当前全集再算差集，少发一条就是静默的关联丢失。
    *
-   * <p>{@code authorizationStatus} 与凭证的关系不在这里校验成「必须同时有凭证」：
-   * 允许「先登记成需授权、凭证稍后补」是正常业务流（见 V16 迁移第 6 节），
+   * <p>{@code authorizationStatus} 与凭证的关系不在这里校验成「必须同时有凭证」： 允许「先登记成需授权、凭证稍后补」是正常业务流（见 V16 迁移第 6 节），
    * 被拒的应该是刊登而不是建档。
    */
   public record BrandInput(
@@ -1944,7 +1915,11 @@ public final class CatalogModels {
 
   /** 品牌保存结果。带刊登判定，前端不必为了刷新状态再打一次判定端点。 */
   public record BrandSaved(
-      UUID id, long version, String authorizationStatus, boolean publishable, String publishBlockCode) {}
+      UUID id,
+      long version,
+      String authorizationStatus,
+      boolean publishable,
+      String publishBlockCode) {}
 
   /** 一条授权凭证的读出口径。 */
   public record BrandAuthorization(
@@ -1966,8 +1941,8 @@ public final class CatalogModels {
   /**
    * 凭证写入请求。
    *
-   * <p>{@code validTo} 可空 = 长期有效（不是漏填）；{@code enabled=false} 是撤销，
-   * 行仍在——删了就查不到「曾经有过授权、后来被撤销」，而 16 侵权检测要这个事实。
+   * <p>{@code validTo} 可空 = 长期有效（不是漏填）；{@code enabled=false} 是撤销， 行仍在——删了就查不到「曾经有过授权、后来被撤销」，而 16
+   * 侵权检测要这个事实。
    */
   public record BrandAuthorizationInput(
       @NotBlank @Size(max = 64) String certificateNo,
@@ -1980,13 +1955,17 @@ public final class CatalogModels {
       @PositiveOrZero long version) {}
 
   /** 品牌关联的一个类目（读出口径，带路径串方便界面上直接显示）。 */
-  public record BrandCategoryLink(UUID categoryId, String categoryCode, String categoryName, String categoryPath, int position) {}
+  public record BrandCategoryLink(
+      UUID categoryId,
+      String categoryCode,
+      String categoryName,
+      String categoryPath,
+      int position) {}
 
   /**
    * 品牌详情：品牌本体 + 多语言名 + 关联类目 + 凭证 + 刊登判定。
    *
-   * <p>合成在一个 record 里而不是拆成四个端点：详情页要显示的就是这四块的**同一瞬间**，
-   * 拆开的话运营在「凭证刚被别人撤销」之后看到的页面会是拼接出来的旧数据，
+   * <p>合成在一个 record 里而不是拆成四个端点：详情页要显示的就是这四块的**同一瞬间**， 拆开的话运营在「凭证刚被别人撤销」之后看到的页面会是拼接出来的旧数据，
    * 而「凭证还在但已过期」这种状态恰恰是靠页面当场发现才不至于误刊登。
    */
   public record BrandDetail(
@@ -2011,9 +1990,8 @@ public final class CatalogModels {
   /**
    * 刊登判定结果（蓝图点名的业务规则）。
    *
-   * <p>04 刊登与 16 侵权检测消费这个形状：{@code publishable} 是能不能发，
-   * {@code blockCode} 是机器可读的原因码（两者处理动作不同：等生效 vs 续约），
-   * {@code blockMessage} 是可以直接显示的人话。
+   * <p>04 刊登与 16 侵权检测消费这个形状：{@code publishable} 是能不能发， {@code blockCode} 是机器可读的原因码（两者处理动作不同：等生效 vs
+   * 续约）， {@code blockMessage} 是可以直接显示的人话。
    */
   public record BrandPublishEligibility(
       UUID brandId,
@@ -2032,8 +2010,7 @@ public final class CatalogModels {
    * 列表页的一行。
    *
    * <p>{@code publishable} / {@code publishBlockCode} 在**列表查询里就一起算出来**，
-   * 不是让前端点开详情才知道：列表页的用途就是「找出不能刊登的品牌」，
-   * 要逐个点开才知道的话这个筛选就没有意义了。
+   * 不是让前端点开详情才知道：列表页的用途就是「找出不能刊登的品牌」， 要逐个点开才知道的话这个筛选就没有意义了。
    */
   public record BrandRow(
       UUID id,
@@ -2057,12 +2034,17 @@ public final class CatalogModels {
   /**
    * 品牌列表的分页结果。
    *
-   * <p>三个统计都**不受筛选条件影响**：界面上把它们放在筛选结果旁边，
-   * 用户才知道「筛出来的 3 条」之外还有多少停用 / 被阻止刊登的条目。
-   * 0 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
+   * <p>三个统计都**不受筛选条件影响**：界面上把它们放在筛选结果旁边， 用户才知道「筛出来的 3 条」之外还有多少停用 / 被阻止刊登的条目。 0
+   * 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
    */
   public record BrandPage(
-      List<BrandRow> items, long total, int page, int size, long enabledCount, long blockedCount, String note) {}
+      List<BrandRow> items,
+      long total,
+      int page,
+      int size,
+      long enabledCount,
+      long blockedCount,
+      String note) {}
 
   /** 列表页筛选条件。null 表示不筛；空串按「不过滤」处理。 */
   public record BrandQuery(
@@ -2078,8 +2060,7 @@ public final class CatalogModels {
    * 批量刊登判定的请求。
    *
    * <p>上限 500 是服务层的硬约束（{@code BrandService.eligibility}）：一次判定几千个品牌
-   * 会把结果行数推到不可控，而刊登侧真正要判的是「这批货涉及的品牌」，
-   * 那个集合天然在几十的量级。
+   * 会把结果行数推到不可控，而刊登侧真正要判的是「这批货涉及的品牌」， 那个集合天然在几十的量级。
    */
   public record BrandEligibilityBatchInput(
       @NotNull @Size(min = 1, max = 500) List<@NotNull UUID> brandIds) {}
@@ -2087,9 +2068,8 @@ public final class CatalogModels {
   /**
    * 品牌概览：规模与几个治理缺口指标。
    *
-   * <p>{@code blockedListingCount} 是本模块最该被盯住的数字——它就是
-   * 「现在有多少品牌处于不能刊登状态」。{@code licensedWithoutCredentialCount}
-   * 是更窄的一个：需授权却一条凭证都没有，属于「必然登不了」的那一类。
+   * <p>{@code blockedListingCount} 是本模块最该被盯住的数字——它就是 「现在有多少品牌处于不能刊登状态」。{@code
+   * licensedWithoutCredentialCount} 是更窄的一个：需授权却一条凭证都没有，属于「必然登不了」的那一类。
    */
   public record BrandOverview(
       long brandCount,
@@ -2107,17 +2087,16 @@ public final class CatalogModels {
   // ============================================================ 3.3.3.1 计量单位（字典视角）
 
   /** 单位组成员的写入（整体替换用）。position 决定组内展示顺序。 */
-  public record UnitGroupMemberInput(@NotBlank @Size(max = 32) String unitCode, @PositiveOrZero Integer position) {}
+  public record UnitGroupMemberInput(
+      @NotBlank @Size(max = 32) String unitCode, @PositiveOrZero Integer position) {}
 
   /**
    * 建 / 改单位组的请求。
    *
-   * <p>{@code members} 是**整体替换**语义（提交什么就等于什么），与 {@link BrandInput} 的
-   * {@code categories} 同一口径：成员关系是「这个组有哪些单位」的完整描述，
-   * 增量语义下前端必须先取回当前全集再算差集，少发一条就是静默的成员丢失。
+   * <p>{@code members} 是**整体替换**语义（提交什么就等于什么），与 {@link BrandInput} 的 {@code categories}
+   * 同一口径：成员关系是「这个组有哪些单位」的完整描述， 增量语义下前端必须先取回当前全集再算差集，少发一条就是静默的成员丢失。
    *
-   * <p>{@code baseUnitCode} 必须是本次提交成员里的一个：组基础单位不占换算行，
-   * 移出组会让已配置的换算版本失去基准。
+   * <p>{@code baseUnitCode} 必须是本次提交成员里的一个：组基础单位不占换算行， 移出组会让已配置的换算版本失去基准。
    */
   public record UnitGroupInput(
       @NotBlank @Size(max = 32) String code,
@@ -2135,8 +2114,7 @@ public final class CatalogModels {
   /**
    * 组内换算版本的写入。
    *
-   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个**组基础单位**」
-   * （组基础单位为克时，1 千克 → 1000）。区间不重叠由 V17 触发器保证，
+   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个**组基础单位**」 （组基础单位为克时，1 千克 → 1000）。区间不重叠由 V17 触发器保证，
    * 与已有版本重叠时由 DB 拒绝，应用层转成可读的 409。
    */
   public record UnitGroupConversionInput(
@@ -2149,8 +2127,12 @@ public final class CatalogModels {
 
   /** 组内换算版本保存结果。 */
   public record UnitGroupConversionSaved(
-      UUID id, UUID groupId, String unitCode, BigDecimal quantityPerBase,
-      String effectiveFrom, @Schema(nullable = true) String effectiveTo) {}
+      UUID id,
+      UUID groupId,
+      String unitCode,
+      BigDecimal quantityPerBase,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo) {}
 
   /** 单位组一行。列表页每行自带成员数与当前生效版本数，不点开详情也看得出行不行。 */
   public record UnitGroupRow(
@@ -2200,8 +2182,7 @@ public final class CatalogModels {
   /**
    * 单位组详情：组本体 + 成员 + 组内换算版本。
    *
-   * <p>{@code asOf} 是这批「当前生效」标记的基准日，按它求值而不是按服务器当天——
-   * 补录一条 2024 年的比例时，"哪一版当时生效"与"今天哪一版生效"必须能分开看。
+   * <p>{@code asOf} 是这批「当前生效」标记的基准日，按它求值而不是按服务器当天—— 补录一条 2024 年的比例时，"哪一版当时生效"与"今天哪一版生效"必须能分开看。
    */
   public record UnitGroupDetail(
       UnitGroupRow group,
@@ -2212,8 +2193,13 @@ public final class CatalogModels {
 
   /** 单位组分页结果。三个统计不受筛选影响，让用户知道筛出来的之外还有什么。 */
   public record UnitGroupPage(
-      List<UnitGroupRow> items, long total, int page, int size,
-      long enabledCount, long disabledCount, String note) {}
+      List<UnitGroupRow> items,
+      long total,
+      int page,
+      int size,
+      long enabledCount,
+      long disabledCount,
+      String note) {}
 
   /** 单位组列表筛选条件。null 表示不筛；空串按不过滤处理。 */
   public record UnitGroupQuery(
@@ -2239,8 +2225,7 @@ public final class CatalogModels {
    * 换算查询的结果。
    *
    * <p>换不动时 {@code denied=true} + {@code denyCode} + {@code denyMessage}，**不**是 HTTP 错误：
-   * 「件换算不成千克」是业务判定不是调用失败，调用方要拿到结构化结果去提示用户，
-   * 而不是接一个异常。同一条 SQL 一次算完，不在应用层拼。
+   * 「件换算不成千克」是业务判定不是调用失败，调用方要拿到结构化结果去提示用户， 而不是接一个异常。同一条 SQL 一次算完，不在应用层拼。
    */
   public record UnitGroupConvertResult(
       boolean denied,
@@ -2264,15 +2249,15 @@ public final class CatalogModels {
       String note) {}
 
   /** 各量纲下的单位组数与成员数，用于概览显示"换算组覆盖了哪些量纲"。 */
-  public record UnitGroupDimensionCount(String dimension, String dimensionLabel, long groupCount, long memberCount) {}
+  public record UnitGroupDimensionCount(
+      String dimension, String dimensionLabel, long groupCount, long memberCount) {}
 
   /**
    * 计量单位概览：字典规模 + 组规模 + 治理缺口指标。
    *
-   * <p>{@code unregisteredUnitCount} 是「有多少单位还没进任何单位组」——
-   * 这些单位能配 SKU 换算，但组级换算查不到它们。0 与"没查过"含义不同，界面上要分开写。
-   * {@code incompleteGroupCount} 是「有多少组存在没有当前生效换算版本的成员」，
-   * 这类组在换算查询里会直接报 NO_EFFECTIVE_VERSION。
+   * <p>{@code unregisteredUnitCount} 是「有多少单位还没进任何单位组」—— 这些单位能配 SKU 换算，但组级换算查不到它们。0
+   * 与"没查过"含义不同，界面上要分开写。 {@code incompleteGroupCount} 是「有多少组存在没有当前生效换算版本的成员」， 这类组在换算查询里会直接报
+   * NO_EFFECTIVE_VERSION。
    */
   public record UnitGroupOverview(
       long unitCount,
@@ -2293,9 +2278,8 @@ public final class CatalogModels {
    * 上传媒体的**元数据**部分（文件本体走 multipart 的 file 字段）。
    *
    * <p>这里刻意**没有** format / mimeType / byteSize / width / height / duration / sha256：
-   * 那些是「这份文件是什么」的客观事实，由 {@code MediaRules.probe} 从字节里探测。
-   * 让调用方填就等于允许它声称「一个 1KB 的 jpg 有 4000×3000」，而刊登侧会拿这个尺寸
-   * 去校验平台规格（3.4.1.2 的职责），错的尺寸会静默导致刊登失败。
+   * 那些是「这份文件是什么」的客观事实，由 {@code MediaRules.probe} 从字节里探测。 让调用方填就等于允许它声称「一个 1KB 的 jpg 有
+   * 4000×3000」，而刊登侧会拿这个尺寸 去校验平台规格（3.4.1.2 的职责），错的尺寸会静默导致刊登失败。
    */
   public record MediaUpload(
       @NotBlank @Size(max = 200) String name,
@@ -2323,8 +2307,7 @@ public final class CatalogModels {
   /**
    * 上传 / 保存结果。
    *
-   * <p>{@code deduplicated=true} 表示这份字节在当前租户已经有一份素材，
-   * 这次没有新建行、也没有再写一份对象——返回的是既有素材。
+   * <p>{@code deduplicated=true} 表示这份字节在当前租户已经有一份素材， 这次没有新建行、也没有再写一份对象——返回的是既有素材。
    * 「素材库复用」的字面含义就在这里：重复上传同一张图不会让库多一条。
    */
   public record MediaSaved(
@@ -2395,8 +2378,7 @@ public final class CatalogModels {
    * 列表页的一行。
    *
    * <p>{@code referenceCount} / {@code tagCodes} / {@code integrityStatus} 在**列表查询里
-   * 就一起算出来**：删除保护要让人在列表上就看见「这个素材被引用着、删不掉」，
-   * 逐个点开详情才知道的话，用户会先点删除、再吃一个 409。
+   * 就一起算出来**：删除保护要让人在列表上就看见「这个素材被引用着、删不掉」， 逐个点开详情才知道的话，用户会先点删除、再吃一个 409。
    */
   public record MediaRow(
       UUID id,
@@ -2466,8 +2448,7 @@ public final class CatalogModels {
   /**
    * 标签保存结果。
    *
-   * <p>回带 {@code code}：上传/编辑素材时提交的是**编码**而不是 id，
-   * 存完立刻就能拿它继续打标签，不必再查一次字典。
+   * <p>回带 {@code code}：上传/编辑素材时提交的是**编码**而不是 id， 存完立刻就能拿它继续打标签，不必再查一次字典。
    */
   public record MediaTagSaved(UUID id, String code, long version, long usageCount) {}
 
@@ -2491,7 +2472,12 @@ public final class CatalogModels {
       @Schema(nullable = true) @Size(max = 500) String note) {}
 
   /** 引用保存结果（带删除保护要用的计数）。 */
-  public record MediaReferenceSaved(UUID id, UUID assetId, long referenceCount, boolean deletable, @Schema(nullable = true) String deletableReason) {}
+  public record MediaReferenceSaved(
+      UUID id,
+      UUID assetId,
+      long referenceCount,
+      boolean deletable,
+      @Schema(nullable = true) String deletableReason) {}
 
   /** 完整性校验结果：一次探测的结论 + 新记录。 */
   public record MediaIntegrityResult(
@@ -2536,8 +2522,8 @@ public final class CatalogModels {
   /**
    * 处理配方的一个比例档（「生成多比例版本」的一档，如主图 1:1 + 缩略图）。
    *
-   * <p>尺寸是 {@code numeric(19,6)}：与仓库里 byte_size / width_px 同一口径，
-   * 像素数是整数也不改成 bigint，免得同一份「量」在前端有两套格式化。
+   * <p>尺寸是 {@code numeric(19,6)}：与仓库里 byte_size / width_px 同一口径， 像素数是整数也不改成
+   * bigint，免得同一份「量」在前端有两套格式化。
    */
   public record MediaProcessRatio(
       UUID id,
@@ -2642,9 +2628,8 @@ public final class CatalogModels {
   /**
    * 一个产物：某素材在某比例档下的处理结果。
    *
-   * <p>{@code fromVersion} 与 {@code toVersion} 是这条「原图始终保留」最直接的证据：
-   * 产物落在**新版本**上（V19 的 CHECK 强制 {@code toVersion > fromVersion}），
-   * 作为来源的旧版本原封不动。
+   * <p>{@code fromVersion} 与 {@code toVersion} 是这条「原图始终保留」最直接的证据： 产物落在**新版本**上（V19 的 CHECK 强制
+   * {@code toVersion > fromVersion}）， 作为来源的旧版本原封不动。
    */
   public record MediaProcessOutput(
       UUID id,
@@ -2723,9 +2708,7 @@ public final class CatalogModels {
   /**
    * 模板的一个变量占位（「品牌 + 品类 + 核心词 + 卖点」的其中一格）。
    *
-   * <p>{@code source} 决定它取自 SPU/SKU 事实字段还是三类词池：
-   * 事实字段那一批是「这条标题里必须出现的商品事实」，
-   * 词池那一批是「可以在批次之间换着来的差异化素材」。
+   * <p>{@code source} 决定它取自 SPU/SKU 事实字段还是三类词池： 事实字段那一批是「这条标题里必须出现的商品事实」， 词池那一批是「可以在批次之间换着来的差异化素材」。
    */
   public record TitleTemplateVariable(
       UUID id, String name, String source, String sourceLabel, int slotNo) {}
@@ -2737,8 +2720,7 @@ public final class CatalogModels {
       @Schema(nullable = true) Integer slotNo) {}
 
   /** 模板的一个平台长度上限。平台没配的批次会被拒，而不是悄悄用默认值。 */
-  public record TitleTemplatePlatform(
-      UUID id, String platform, int maxLength) {}
+  public record TitleTemplatePlatform(UUID id, String platform, int maxLength) {}
 
   /** 平台长度上限输入。 */
   public record TitleTemplatePlatformInput(
@@ -2831,7 +2813,8 @@ public final class CatalogModels {
       @NotNull UUID templateId,
       @NotNull @Size(max = 200) List<@NotNull UUID> skuIds,
       @NotNull @Size(max = 5) List<@NotBlank @Size(max = 64) String> platforms,
-      @Schema(nullable = true) @Size(max = 20) List<@NotBlank @Size(max = 32) String> keywordCodes) {}
+      @Schema(nullable = true) @Size(max = 20)
+          List<@NotBlank @Size(max = 32) String> keywordCodes) {}
 
   /** 提交结果：同步生成已完成，进度与候选从批次详情查。 */
   public record TitleGeneration(
@@ -2883,8 +2866,7 @@ public final class CatalogModels {
    * 一条生成的标题候选。
    *
    * <p>{@code similarityPermille} 是这一行存在的关键：它记着「这条标题与本 SKU 已有
-   * 标题的最大相似度」，所以重复度控制不是一个看不见的内部过程，而是一条可查、可导出、
-   * 可被 04 刊登拿去复核的事实。
+   * 标题的最大相似度」，所以重复度控制不是一个看不见的内部过程，而是一条可查、可导出、 可被 04 刊登拿去复核的事实。
    */
   public record TitleRecord(
       UUID id,
@@ -2981,8 +2963,7 @@ public final class CatalogModels {
   /**
    * 模板的一个变量占位。
    *
-   * <p>{@code source} 决定它取自 SPU/SKU 事实字段、卖点短语池还是同 SPU 型号清单：
-   * 事实字段那一批是「这段文字里必须出现的商品事实」，
+   * <p>{@code source} 决定它取自 SPU/SKU 事实字段、卖点短语池还是同 SPU 型号清单： 事实字段那一批是「这段文字里必须出现的商品事实」，
    * 短语池那一批是「可以在批次之间换着来的可复用文案」。
    */
   public record ContentTemplateVariable(
@@ -3021,12 +3002,14 @@ public final class CatalogModels {
   /**
    * 译文完整度：某一批语言里，哪些有译文、哪些还没有。
    *
-   * <p>「缺译文」是一等公民而不是错误：多语言版本本来就是逐语言补的，
-   * 而缺了译文时填充会被报成 {@code TRANSLATION_MISSING}，所以这里提前答
+   * <p>「缺译文」是一等公民而不是错误：多语言版本本来就是逐语言补的， 而缺了译文时填充会被报成 {@code TRANSLATION_MISSING}，所以这里提前答
    * 「这几种语言能不能直接填」。
    */
   public record ContentTranslationCoverage(
-      List<ContentTranslation> translations, List<String> locales, List<String> missingLocales, String note) {}
+      List<ContentTranslation> translations,
+      List<String> locales,
+      List<String> missingLocales,
+      String note) {}
 
   /** 内容模板写入（新建或改，id 为空即新建）。变量整体替换。 */
   public record ContentTemplateInput(
@@ -3107,9 +3090,8 @@ public final class CatalogModels {
   /**
    * 批量填充提交。
    *
-   * <p>skuIds 放请求体而不是 URL（一次可能 200 个）。
-   * {@code locale} 是本批次的输出语言：等于模板源语言时直接用 body 渲染，
-   * 否则必须已有译文，否则整批报 {@code TRANSLATION_MISSING}。
+   * <p>skuIds 放请求体而不是 URL（一次可能 200 个）。 {@code locale} 是本批次的输出语言：等于模板源语言时直接用 body 渲染， 否则必须已有译文，否则整批报
+   * {@code TRANSLATION_MISSING}。
    */
   public record ContentRenderInput(
       @NotNull UUID templateId,
@@ -3158,8 +3140,7 @@ public final class CatalogModels {
   /**
    * 逐 SKU 结果：填好了几段、缺了几段、缺了什么。
    *
-   * <p>{@code reason} 是把该 SKU 的多条缺失报告压成一句可读的话（列表上要显示），
-   * 逐变量的明细在 {@link ContentRenderIssue} 上。
+   * <p>{@code reason} 是把该 SKU 的多条缺失报告压成一句可读的话（列表上要显示）， 逐变量的明细在 {@link ContentRenderIssue} 上。
    */
   public record ContentRenderSkuRow(
       UUID id,
@@ -3180,8 +3161,8 @@ public final class CatalogModels {
   /**
    * 一段填充结果：蓝图点名的输出「填充后的描述文本（分语言）」。
    *
-   * <p>{@code complete=false} 时正文里**不会有任何占位符**——缺变量的位置被剥空了，
-   * 缺了什么在 {@code issues} 上逐条列出来（V21 的 CHECK 与触发器钉死了这条）。
+   * <p>{@code complete=false} 时正文里**不会有任何占位符**——缺变量的位置被剥空了， 缺了什么在 {@code issues} 上逐条列出来（V21 的 CHECK
+   * 与触发器钉死了这条）。
    */
   public record ContentSection(
       UUID id,
@@ -3206,8 +3187,7 @@ public final class CatalogModels {
   /**
    * 一条缺失变量报告 —— 蓝图「变量缺失必须在填充时报告」的那个「报告」。
    *
-   * <p>{@code issueKind} 四值分别对应四种完全不同的修法：
-   * {@code EMPTY_FACT} 去补商品字段，{@code EMPTY_PHRASE_POOL} 去建短语，
+   * <p>{@code issueKind} 四值分别对应四种完全不同的修法： {@code EMPTY_FACT} 去补商品字段，{@code EMPTY_PHRASE_POOL} 去建短语，
    * {@code TRANSLATION_MISSING} 去补译文，{@code UNBOUND_PLACEHOLDER} 去补变量绑定。
    * 混成一句话的话，运营看到「填充有问题」却不知道该改哪。
    */
@@ -3232,12 +3212,15 @@ public final class CatalogModels {
   /**
    * 按变量汇总的缺失情况。
    *
-   * <p>逐变量加总而不是逐段落罗列：200 个 SKU 各缺 brand 时，
-   * 「brand 缺 200 次」比 200 行「brand 缺了」有用得多，
+   * <p>逐变量加总而不是逐段落罗列：200 个 SKU 各缺 brand 时， 「brand 缺 200 次」比 200 行「brand 缺了」有用得多，
    * 而且它直接对应「该去补品牌字段还是该去补短语库」这个决定。
    */
   public record ContentMissingVariable(
-      String variableName, String issueKind, String issueKindLabel, long occurrences, String detail) {}
+      String variableName,
+      String issueKind,
+      String issueKindLabel,
+      long occurrences,
+      String detail) {}
 
   /** 段落列表筛选条件。 */
   public record ContentSectionQuery(
@@ -3282,8 +3265,7 @@ public final class CatalogModels {
   /**
    * 描述与卖点库概览。
    *
-   * <p>{@code incompleteSectionCount} 与 {@code issueCount} 放在最前面：
-   * 「有多少段落还没填好」是这个库唯一需要每天盯的数字，
+   * <p>{@code incompleteSectionCount} 与 {@code issueCount} 放在最前面： 「有多少段落还没填好」是这个库唯一需要每天盯的数字，
    * 它藏在概览里是刻意的 —— 模板配得不全时它是唯一能提醒运营去补的信号。
    */
   public record ContentOverview(
@@ -3312,9 +3294,8 @@ public final class CatalogModels {
   /**
    * 多语言内容概览。
    *
-   * <p>{@code pendingTranslationCount} 是这个模块唯一需要每天盯的数字：
-   * 「需要哪些语言」推导出来后，待翻的积压直接决定 04 刊登能不能上新。
-   * {@code siteLocaleAvailable} 让页面能把「站点推导」标成未接入而不是显示空的语言列表。
+   * <p>{@code pendingTranslationCount} 是这个模块唯一需要每天盯的数字： 「需要哪些语言」推导出来后，待翻的积压直接决定 04 刊登能不能上新。 {@code
+   * siteLocaleAvailable} 让页面能把「站点推导」标成未接入而不是显示空的语言列表。
    */
   public record TranslationOverview(
       long localeCount,
@@ -3377,10 +3358,9 @@ public final class CatalogModels {
   /**
    * 合并视图里的一种语言。
    *
-   * <p>{@code required} 为 true 表示该语言在**租户语言需求**里（人工维护 ∪ 站点推导）。
-   * 站点推导那一侧未接入时 {@code shopCount} / {@code marketplaceCount} 为 0，
-   * 但那表示「取不到」而不是「没有店铺用这种语言」——区分靠同级的
-   * {@code siteLocaleAvailable}，不是靠这两个数字。
+   * <p>{@code required} 为 true 表示该语言在**租户语言需求**里（人工维护 ∪ 站点推导）。 站点推导那一侧未接入时 {@code shopCount} /
+   * {@code marketplaceCount} 为 0， 但那表示「取不到」而不是「没有店铺用这种语言」——区分靠同级的 {@code
+   * siteLocaleAvailable}，不是靠这两个数字。
    */
   public record TranslationRequirementRow(
       String locale,
@@ -3400,9 +3380,8 @@ public final class CatalogModels {
   /**
    * 「人工维护 ∪ 站点推导」的合并视图。
    *
-   * <p>{@code siteLocaleAvailable=false} 时 {@code siteNote} 说明归 02 渠道，
-   * 而 {@code requirements} 里 {@code fromSite} 的行**一条都不会有**——
-   * 空的站点推导列表会被读成「这个租户不需要多语言」，那是本模块最危险的错误方向。
+   * <p>{@code siteLocaleAvailable=false} 时 {@code siteNote} 说明归 02 渠道， 而 {@code requirements} 里
+   * {@code fromSite} 的行**一条都不会有**—— 空的站点推导列表会被读成「这个租户不需要多语言」，那是本模块最危险的错误方向。
    */
   public record TranslationRequirementView(
       boolean siteLocaleAvailable,
@@ -3441,9 +3420,7 @@ public final class CatalogModels {
   /**
    * 改译文。
    *
-   * <p>刻意**不含 locale**：语言的唯一性是这张表的业务主键的一部分，
-   * 「把德语译文改成法语」不是编辑而是「删一条建一条」，
-   * 混进编辑会让「按语言唯一」的语义在审计上说不清。
+   * <p>刻意**不含 locale**：语言的唯一性是这张表的业务主键的一部分， 「把德语译文改成法语」不是编辑而是「删一条建一条」， 混进编辑会让「按语言唯一」的语义在审计上说不清。
    */
   public record TranslationEntryEdit(
       @Schema(nullable = true) @Size(max = 200) String name,
@@ -3453,8 +3430,7 @@ public final class CatalogModels {
       @PositiveOrZero long version) {}
 
   /** 翻译状态流转（人工校对 / 退回）。 */
-  public record TranslationStatusInput(
-      @NotBlank String status, @PositiveOrZero long version) {}
+  public record TranslationStatusInput(@NotBlank String status, @PositiveOrZero long version) {}
 
   /** 译文列表筛选条件。字段与 GET /catalog/translations/entries 的 query 逐字对应。 */
   public record TranslationEntryQuery(
@@ -3473,8 +3449,7 @@ public final class CatalogModels {
   /**
    * 一个商品在一种语言上的翻译情况。
    *
-   * <p>这是本模块的核心读形状：把「需要哪些语言」（租户语言需求）与
-   * 「翻到什么程度」（译文状态）在**同一行**对上，
+   * <p>这是本模块的核心读形状：把「需要哪些语言」（租户语言需求）与 「翻到什么程度」（译文状态）在**同一行**对上，
    * 否则页面得自己拼两张表再对齐，而「这个商品还差哪几种语言」正是运营唯一要问的问题。
    *
    * @param required 该语言是否在租户语言需求里（不在需求里的译文也照常显示，但标成「非需求语言」）
@@ -3542,8 +3517,7 @@ public final class CatalogModels {
       @NotNull @Size(max = 500) List<@NotNull TranslationSuggestionInput> items) {}
 
   /** 驳回建议。理由必填——不给理由的驳回让下一轮翻译无从改进。 */
-  public record TranslationSuggestionReject(
-      @NotBlank @Size(max = 500) String rejectReason) {}
+  public record TranslationSuggestionReject(@NotBlank @Size(max = 500) String rejectReason) {}
 
   /** 建议列表筛选条件。字段与 GET /catalog/translations/suggestions 的 query 逐字对应。 */
   public record TranslationSuggestionQuery(
@@ -3563,9 +3537,8 @@ public final class CatalogModels {
   /**
    * 批量操作提交。
    *
-   * @param action CREATE_PENDING 补齐待翻占位（按 locales 展开 targetIds × locales）
-   *     · ADOPT_SUGGESTIONS 批量采纳（按 batchRef 找建议，targetIds 忽略）
-   *     · MARK_REVIEWED 批量标记已校对（按 locales 展开，已翻的行才动）
+   * @param action CREATE_PENDING 补齐待翻占位（按 locales 展开 targetIds × locales） · ADOPT_SUGGESTIONS
+   *     批量采纳（按 batchRef 找建议，targetIds 忽略） · MARK_REVIEWED 批量标记已校对（按 locales 展开，已翻的行才动）
    * @param targetIds 选中的商品 ID（CREATE_PENDING / MARK_REVIEWED 用）
    * @param locales 期望语言（CREATE_PENDING / MARK_REVIEWED 用）
    * @param batchRef AI 建议的批次归组键（ADOPT_SUGGESTIONS 用）
@@ -3599,8 +3572,8 @@ public final class CatalogModels {
   /**
    * 逐条结果一行。
    *
-   * <p>{@code targetCode} / {@code targetName} 随行带出：批次详情页要能直接回答
-   * 「哪几个商品没成」，页面不必再为每一行回查商品表（那会让 N 行详情变成 N 次往返）。
+   * <p>{@code targetCode} / {@code targetName} 随行带出：批次详情页要能直接回答 「哪几个商品没成」，页面不必再为每一行回查商品表（那会让 N
+   * 行详情变成 N 次往返）。
    */
   public record TranslationBatchItemRow(
       UUID id,
@@ -3633,8 +3606,7 @@ public final class CatalogModels {
   /**
    * 翻译完整度：一个商品在一种语言上能不能直接刊登。
    *
-   * <p>04 刊登填充的读形状：只有 {@code publishable=true}（status='REVIEWED'）才可刊登，
-   * 「已翻」是机器译文，拿去发平台等于没做校对这一步。
+   * <p>04 刊登填充的读形状：只有 {@code publishable=true}（status='REVIEWED'）才可刊登， 「已翻」是机器译文，拿去发平台等于没做校对这一步。
    */
   public record TranslationCoverageRow(
       String locale,
@@ -3665,8 +3637,7 @@ public final class CatalogModels {
   /**
    * 套装档案输入。
    *
-   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是套装自己的属性，
-   * 名称/版本号/生效区间全在版本上（V23 文件头第一节写了为什么不合并）。
+   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是套装自己的属性， 名称/版本号/生效区间全在版本上（V23 文件头第一节写了为什么不合并）。
    *
    * <p>{@code version} 是乐观锁，新建时传 0。
    */
@@ -3709,8 +3680,8 @@ public final class CatalogModels {
   /**
    * 套装详情。
    *
-   * <p>{@code effectiveVersionNo} 是「此刻」的答案；想查别的时刻请用
-   * {@code GET /catalog/bundles/{id}/effective?at=}（规则 R4 的时刻查询）。
+   * <p>{@code effectiveVersionNo} 是「此刻」的答案；想查别的时刻请用 {@code GET
+   * /catalog/bundles/{id}/effective?at=}（规则 R4 的时刻查询）。
    */
   public record BundleDetail(
       BundleRow bundle,
@@ -3722,8 +3693,8 @@ public final class CatalogModels {
   /**
    * 版本输入（建草稿与改草稿共用）。
    *
-   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601 字符串（带时区偏移）。
-   * {@code effectiveTo} 为 null 表示「此后一直有效」。半开区间的语义见 V23 规则 R1。
+   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601 字符串（带时区偏移）。 {@code effectiveTo} 为
+   * null 表示「此后一直有效」。半开区间的语义见 V23 规则 R1。
    */
   public record BundleVersionInput(
       @NotBlank @Size(max = 32) String versionNo,
@@ -3736,8 +3707,7 @@ public final class CatalogModels {
   /**
    * 版本行。
    *
-   * <p>{@code editable} 是「现在能不能改」。已发布版本为 false —— 不是「改某些字段」，
-   * 是整个版本内容冻结（唯一例外是向前关闭生效区间，走单独的接口）。
+   * <p>{@code editable} 是「现在能不能改」。已发布版本为 false —— 不是「改某些字段」， 是整个版本内容冻结（唯一例外是向前关闭生效区间，走单独的接口）。
    */
   public record BundleVersionRow(
       UUID id,
@@ -3777,8 +3747,7 @@ public final class CatalogModels {
   /**
    * 版本详情：版本 + 组件清单。
    *
-   * <p>{@code editHint} 用一句中文说明「现在为什么不能改」，而不是只给一个 false ——
-   * 已发布的版本页面上要能看到理由，否则运营只能反复试。
+   * <p>{@code editHint} 用一句中文说明「现在为什么不能改」，而不是只给一个 false —— 已发布的版本页面上要能看到理由，否则运营只能反复试。
    */
   public record BundleVersionDetail(
       BundleVersionRow version,
@@ -3798,8 +3767,7 @@ public final class CatalogModels {
   /**
    * 组件清单整体替换输入。
    *
-   * <p><b>整体替换而不是增删式</b>：组件清单有「同版本内一个 SKU 只有一行」的约束，
-   * 增删式提交时前端必须自己算出最终集合并逐条对账，而漏对账的表现是「页面上还剩一条
+   * <p><b>整体替换而不是增删式</b>：组件清单有「同版本内一个 SKU 只有一行」的约束， 增删式提交时前端必须自己算出最终集合并逐条对账，而漏对账的表现是「页面上还剩一条
    * 幽灵组件」。整体替换让「保存后清单就是提交的那份」成为事实。
    */
   public record BundleComponentsInput(
@@ -3809,8 +3777,7 @@ public final class CatalogModels {
   /**
    * 当前生效版本视图（规则 R4）。
    *
-   * <p>{@code effective=false} 表示「这一刻这个套装没有生效版本」。这是真实状态（草稿
-   * 未发布、区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
+   * <p>{@code effective=false} 表示「这一刻这个套装没有生效版本」。这是真实状态（草稿 未发布、区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
    */
   public record BundleEffectiveView(
       UUID bundleId,
@@ -3826,8 +3793,7 @@ public final class CatalogModels {
   /**
    * 套装版本概览。
    *
-   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的
-   * 已发布版本如果没有被接替，这个套装就永远停在一个旧版本上。
+   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的 已发布版本如果没有被接替，这个套装就永远停在一个旧版本上。
    */
   public record BundleOverview(
       long bundleCount,
@@ -3860,10 +3826,8 @@ public final class CatalogModels {
    *
    * <ul>
    *   <li>{@code selfReferencingCount} 与 {@code nonPositiveQuantityCount} <b>必须恒为 0</b> ——
-   *       它们是纪律的体检指标。写出来是为了让「一条都没坏」这件事<b>可核对</b>，
-   *       而不是靠「约束建了就一定对」。
-   *   <li>{@code nestedComponentCount} 是「指向套装可售 SKU 的组件」数量，也就是嵌套套装的实际规模；
-   *       循环检测守的就是这一类边。
+   *       它们是纪律的体检指标。写出来是为了让「一条都没坏」这件事<b>可核对</b>， 而不是靠「约束建了就一定对」。
+   *   <li>{@code nestedComponentCount} 是「指向套装可售 SKU 的组件」数量，也就是嵌套套装的实际规模； 循环检测守的就是这一类边。
    * </ul>
    */
   public record BundleComponentOverview(
@@ -3879,12 +3843,10 @@ public final class CatalogModels {
   /**
    * 组件清单行（跨版本工作台的主形状）。
    *
-   * <p>与 3.5.1.1 的 {@link BundleComponentRow} 的区别：这里带上了
-   * 「这个组件属于哪个套装的哪一版、那一版还能不能改」——
+   * <p>与 3.5.1.1 的 {@link BundleComponentRow} 的区别：这里带上了 「这个组件属于哪个套装的哪一版、那一版还能不能改」——
    * 工作台是<b>跨版本</b>的，运营在一个列表里要能立刻看出哪几行是冻结的。
    *
-   * <p>{@code nested} + {@code linkedBundleCode} 是循环检测的可见面：
-   * 嵌套套装在界面上必须一眼看出来，因为它意味着展开还会继续往下走一层。
+   * <p>{@code nested} + {@code linkedBundleCode} 是循环检测的可见面： 嵌套套装在界面上必须一眼看出来，因为它意味着展开还会继续往下走一层。
    */
   public record BundleComponentItem(
       UUID id,
@@ -3917,8 +3879,7 @@ public final class CatalogModels {
   /**
    * 单行组件修改输入。
    *
-   * <p><b>没有 skuId</b>：组件行的身份是「这个版本里的这个 SKU」，
-   * 换 SKU 等于删掉这一行再新建一行（那样历史更清楚：改了什么就是改了什么）。
+   * <p><b>没有 skuId</b>：组件行的身份是「这个版本里的这个 SKU」， 换 SKU 等于删掉这一行再新建一行（那样历史更清楚：改了什么就是改了什么）。
    * 逐行编辑只改数量、角色、备注。
    */
   public record BundleComponentEditInput(
@@ -3931,9 +3892,8 @@ public final class CatalogModels {
   /**
    * 一条校验问题。
    *
-   * <p>{@code code} 是稳定的机器可读码（前端按它决定图标与分组），
-   * {@code message} 是可以直接显示的中文原因。两者都要：界面按 code 排版，
-   * 人按 message 判断下一步做什么。
+   * <p>{@code code} 是稳定的机器可读码（前端按它决定图标与分组）， {@code message} 是可以直接显示的中文原因。两者都要：界面按 code 排版， 人按
+   * message 判断下一步做什么。
    */
   public record BundleComponentProblem(
       String code,
@@ -3945,9 +3905,8 @@ public final class CatalogModels {
   /**
    * 组件校验结果（蓝图的「校验结果」输出）。
    *
-   * <p>与「保存时报错」是两件事：保存被拒只会给一条原因，
-   * 而工作台要在保存<b>之前</b>就把一个版本的所有问题一次列全
-   * （少一个环、三个数量非法、一个 SKU 不存在），否则运营只能反复提交试错。
+   * <p>与「保存时报错」是两件事：保存被拒只会给一条原因， 而工作台要在保存<b>之前</b>就把一个版本的所有问题一次列全 （少一个环、三个数量非法、一个 SKU
+   * 不存在），否则运营只能反复提交试错。
    *
    * <p>{@code ok=false} 时 {@code problems} 一定非空；{@code ok=true} 时一定为空。
    */
@@ -3968,8 +3927,7 @@ public final class CatalogModels {
   /**
    * SKU ↔ 套装指向行。
    *
-   * <p>「这个 SKU 是那个套装的可售面」—— 循环引用就发生在这些指向构成的边上。
-   * {@code usedByComponentCount} 是「有多少个组件行把这个 SKU 当组件」，
+   * <p>「这个 SKU 是那个套装的可售面」—— 循环引用就发生在这些指向构成的边上。 {@code usedByComponentCount} 是「有多少个组件行把这个 SKU 当组件」，
    * 删指向前必须先看它：已发布版本里的那些组件是冻结的历史。
    */
   public record BundleSkuRow(
@@ -3995,8 +3953,7 @@ public final class CatalogModels {
   /**
    * 指向输入（新建与改指向共用）。
    *
-   * <p>「改指向」是本模块里最危险的一个操作：它一次性改掉所有把该 SKU 当组件的套装的出边，
-   * 所以它同样要过循环检测（V24 的 guard_bundle_sku_cycle 兜底）。
+   * <p>「改指向」是本模块里最危险的一个操作：它一次性改掉所有把该 SKU 当组件的套装的出边， 所以它同样要过循环检测（V24 的 guard_bundle_sku_cycle 兜底）。
    */
   public record BundleSkuInput(
       @NotNull UUID bundleId,
@@ -4009,11 +3966,10 @@ public final class CatalogModels {
   /**
    * BOM 档案输入。
    *
-   * <p><b>有 outputSkuId，套装档案没有</b>（V25 文件头「差异 1」）：BOM 产出的是实物成品，
-   * 成品必须是一个真实存在的 SKU；虚拟套装不占 SKU 行，所以 bundle 表里没有任何 sku 外键。
+   * <p><b>有 outputSkuId，套装档案没有</b>（V25 文件头「差异 1」）：BOM 产出的是实物成品， 成品必须是一个真实存在的 SKU；虚拟套装不占 SKU 行，所以
+   * bundle 表里没有任何 sku 外键。
    *
-   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是 BOM 自己的属性，
-   * 名称/版本号/生效区间全在版本上（V25 第一节）。
+   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是 BOM 自己的属性， 名称/版本号/生效区间全在版本上（V25 第一节）。
    */
   public record BomInput(
       @NotBlank @Size(max = 64) String code,
@@ -4066,8 +4022,8 @@ public final class CatalogModels {
   /**
    * BOM 版本输入（建草稿与改草稿共用）。
    *
-   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601（带时区偏移）；
-   * {@code effectiveTo} 为 null 表示「此后一直有效」。半开区间语义见 V25 规则 R1。
+   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601（带时区偏移）； {@code effectiveTo} 为 null
+   * 表示「此后一直有效」。半开区间语义见 V25 规则 R1。
    */
   public record BomVersionInput(
       @NotBlank @Size(max = 32) String versionNo,
@@ -4080,8 +4036,7 @@ public final class CatalogModels {
   /**
    * BOM 版本行。
    *
-   * <p>{@code scrapPercent} 是「本版本里损耗率最高的那一行」，用来在列表上一眼看出
-   * 「这一版比上一版费料多少」—— 它是 BOM 独有的列，套装版本行没有对应字段。
+   * <p>{@code scrapPercent} 是「本版本里损耗率最高的那一行」，用来在列表上一眼看出 「这一版比上一版费料多少」—— 它是 BOM 独有的列，套装版本行没有对应字段。
    * {@code editable} 是「现在能不能改」：已发布为 false（整版冻结，例外只有向前关闭生效区间）。
    */
   public record BomVersionRow(
@@ -4115,9 +4070,8 @@ public final class CatalogModels {
   /**
    * BOM 组件行。
    *
-   * <p>{@code unitQuantity} 与 {@code scrapRate} 是 BOM 相对套装多出来的两个业务量：
-   * 「每 1 个成品要多少」与「会损耗百分之几」。数量是 {@code NUMERIC(19,6)}、
-   * 损耗率是百分数 {@code NUMERIC(7,4)}（规则 R6：{@code 5} = 5%）。
+   * <p>{@code unitQuantity} 与 {@code scrapRate} 是 BOM 相对套装多出来的两个业务量： 「每 1 个成品要多少」与「会损耗百分之几」。数量是
+   * {@code NUMERIC(19,6)}、 损耗率是百分数 {@code NUMERIC(7,4)}（规则 R6：{@code 5} = 5%）。
    */
   public record BomComponentRow(
       UUID id,
@@ -4141,14 +4095,17 @@ public final class CatalogModels {
   /**
    * BOM 组件行输入。
    *
-   * <p>{@code scrapRate} 传 null 时按 0（无损耗）处理，页面上不用逼用户为「没有损耗」填一个 0。
-   * @Digits 与列精度逐字一致：用量 13+6 = numeric(19,6)，损耗率 3+4 = numeric(7,4)。
+   * <p>{@code scrapRate} 传 null 时按 0（无损耗）处理，页面上不用逼用户为「没有损耗」填一个 0。 @Digits 与列精度逐字一致：用量 13+6 =
+   * numeric(19,6)，损耗率 3+4 = numeric(7,4)。
    */
   public record BomComponentInput(
       @NotNull UUID skuId,
       @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
           BigDecimal unitQuantity,
-      @Schema(nullable = true) @DecimalMin("0") @DecimalMax("100") @Digits(integer = 3, fraction = 4)
+      @Schema(nullable = true)
+          @DecimalMin("0")
+          @DecimalMax("100")
+          @Digits(integer = 3, fraction = 4)
           BigDecimal scrapRate,
       @Schema(nullable = true) @Size(max = 32) String role,
       @Schema(nullable = true) @Size(max = 200) String note) {}
@@ -4156,8 +4113,7 @@ public final class CatalogModels {
   /**
    * BOM 组件清单整体替换输入。
    *
-   * <p>整体替换而不是增删式：清单有「同版本内一个 SKU 只有一行」的约束，
-   * 增删式提交时前端必须自己算出最终集合，漏对账的表现是页面上剩一条幽灵组件。
+   * <p>整体替换而不是增删式：清单有「同版本内一个 SKU 只有一行」的约束， 增删式提交时前端必须自己算出最终集合，漏对账的表现是页面上剩一条幽灵组件。
    */
   public record BomComponentsInput(
       @NotEmpty @Size(max = 50) List<@Valid BomComponentInput> components,
@@ -4166,8 +4122,7 @@ public final class CatalogModels {
   /**
    * 当前生效 BOM 版本视图（规则 R4）。
    *
-   * <p>{@code effective=false} 表示「这一刻这个 BOM 没有生效版本」——真实状态（草稿未发布、
-   * 区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
+   * <p>{@code effective=false} 表示「这一刻这个 BOM 没有生效版本」——真实状态（草稿未发布、 区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
    */
   public record BomEffectiveView(
       UUID bomId,
@@ -4185,11 +4140,10 @@ public final class CatalogModels {
   /**
    * 单层需求量明细（规则 R7）。
    *
-   * <p>这是本模块自己算的量：{@code requiredQuantity = unitQuantity × outputQuantity ×
-   * (1 + scrapRate/100)}，6 位小数 HALF_UP。
+   * <p>这是本模块自己算的量：{@code requiredQuantity = unitQuantity × outputQuantity × (1 + scrapRate/100)}，6
+   * 位小数 HALF_UP。
    *
-   * <p><b>刻意不给「建议采购量」</b>：取整、补安全库存、判缺口是 3.5.2.2 与 06 的决定
-   * （蓝图原话「展开结果是建议不是事实」）。
+   * <p><b>刻意不给「建议采购量」</b>：取整、补安全库存、判缺口是 3.5.2.2 与 06 的决定 （蓝图原话「展开结果是建议不是事实」）。
    */
   public record BomRequirementLine(
       UUID skuId,
@@ -4202,8 +4156,8 @@ public final class CatalogModels {
   /**
    * 单层需求量：生产 {@code outputQuantity} 个成品需要哪些料。
    *
-   * <p>{@code singleLevel=true} 是这个接口的自我说明：多级递归展开是 3.5.2.2 的职责，
-   * 本接口只把本版本直接列出的组件乘一遍，页面据此说明「这里不含子 BOM 里的料」。
+   * <p>{@code singleLevel=true} 是这个接口的自我说明：多级递归展开是 3.5.2.2 的职责， 本接口只把本版本直接列出的组件乘一遍，页面据此说明「这里不含子 BOM
+   * 里的料」。
    */
   public record BomRequirement(
       UUID bomId,
@@ -4220,10 +4174,8 @@ public final class CatalogModels {
   /**
    * BOM 版本概览。
    *
-   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的
-   * 已发布版本如果没有被接替，这个 BOM 会永远停在一个旧版本上。
-   * {@code zeroScrapPublishedCount} 是**必须恒为 0** 的体检指标
-   * （没有任何组件的已发布版本会让组装单领不出料）——写出来是为了让「一条都没坏」可核对。
+   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的 已发布版本如果没有被接替，这个 BOM 会永远停在一个旧版本上。 {@code
+   * zeroScrapPublishedCount} 是**必须恒为 0** 的体检指标 （没有任何组件的已发布版本会让组装单领不出料）——写出来是为了让「一条都没坏」可核对。
    */
   public record BomOverview(
       long bomCount,
@@ -4242,8 +4194,7 @@ public final class CatalogModels {
   public record BomQuery(String keyword, String status, int page, int size) {}
 
   /** BOM 版本列表筛选条件（跨 BOM）。 */
-  public record BomVersionQuery(
-      String keyword, String status, UUID bomId, int page, int size) {}
+  public record BomVersionQuery(String keyword, String status, UUID bomId, int page, int size) {}
 
   /**
    * 倒排查询结果行：这个 SKU 被哪些 BOM 版本当组件用着。
@@ -4276,17 +4227,17 @@ public final class CatalogModels {
       int totalPages) {}
 
   /** 倒排查询筛选条件。 */
-  public record BomUsageQuery(UUID skuId, String keyword, Boolean onlyEffective, int page, int size) {}
+  public record BomUsageQuery(
+      UUID skuId, String keyword, Boolean onlyEffective, int page, int size) {}
 
   // ================================================================ 3.5.2.2 BOM 展开
 
   /**
    * 展开请求。
    *
-   * <p><b>{@code versionId} 与 {@code bomId} 至少给一个</b>：
-   * 给 {@code versionId} 就是「按这一版展开」（可含草稿，试算是纯计算不是事实）；
-   * 给 {@code bomId} 就是「按 {@code asOf} 这一刻生效的那一版展开」（规则 R4 的时刻查询），
-   * 与 06 采购建议、08 加工单取版本的形状一致。
+   * <p><b>{@code versionId} 与 {@code bomId} 至少给一个</b>： 给 {@code versionId}
+   * 就是「按这一版展开」（可含草稿，试算是纯计算不是事实）； 给 {@code bomId} 就是「按 {@code asOf} 这一刻生效的那一版展开」（规则 R4 的时刻查询）， 与 06
+   * 采购建议、08 加工单取版本的形状一致。
    *
    * @param outputQuantity 成品数量。规则 R7 的产量因子，正整数（生产计划按件下达）
    * @param warehouseId 仓库过滤。null = 全仓合计。逻辑 ID，**不建外键**（warehouse 是另一个服务）
@@ -4312,8 +4263,8 @@ public final class CatalogModels {
    * @param requiredQuantity 需求量 = 父级驱动量 × 单位用量 × (1 + 损耗率/100)，6 位小数不取整（规则 R7）
    * @param available 当前可用。跨服务取自 warehouse 的授权端点，<b>不在 catalog 库聚合</b>
    * @param inTransit 在途。抵扣它是为了不把同一批料重复下单（货权已归本租户，只是没到）
-   * @param gap 缺口 = max(0, required − available − inTransit)。下限 0：负数表达「多出来」，
-   *     对采购决策无用，富余量由 {@code surplus} 单独给出
+   * @param gap 缺口 = max(0, required − available − inTransit)。下限 0：负数表达「多出来」， 对采购决策无用，富余量由 {@code
+   *     surplus} 单独给出
    * @param isSubAssembly 该组件 SKU 本身是某个 BOM 的成品（判定规则 E3）
    * @param expanded 是否真的向下展开了（子装配 + 有生效版本 + 未命中深度上限）
    * @param covered 可用 + 在途已够本行 → 不再向下展开（再展开只会产出一串 0 需求的噪声行）
@@ -4353,10 +4304,8 @@ public final class CatalogModels {
   /**
    * 一次展开的完整结果。
    *
-   * <p><b>展开结果是建议不是事实</b>（蓝图原话）：实际采购由 06 生成单据后成立。
-   * 所以本记录把「当时算的是什么」整份冻结下来（规则、版本、仓库过滤、as_of 全部在内），
-   * 06 的采购单引用的是 {@code id} 而不是「现在的 BOM × 现在的库存」——
-   * 后者随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
+   * <p><b>展开结果是建议不是事实</b>（蓝图原话）：实际采购由 06 生成单据后成立。 所以本记录把「当时算的是什么」整份冻结下来（规则、版本、仓库过滤、as_of 全部在内）， 06
+   * 的采购单引用的是 {@code id} 而不是「现在的 BOM × 现在的库存」—— 后者随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
    *
    * @param status COMPLETED = 清单完整；TRUNCATED = 命中深度上限，<b>清单不完整</b>
    * @param asOf 展开基准时刻（业务时间），与 {@code createdAt}（系统时间）分开存
@@ -4419,24 +4368,23 @@ public final class CatalogModels {
   /**
    * 角色指派（写入用，**整体替换**语义）。
    *
-   * <p>一个主体可以同时是供应商、客户与承运商，所以角色是<b>一组</b>而不是单个字段。
-   * 整体替换而不是增量追加：角色集合是「这个主体扮演哪些身份」的完整描述，
+   * <p>一个主体可以同时是供应商、客户与承运商，所以角色是<b>一组</b>而不是单个字段。 整体替换而不是增量追加：角色集合是「这个主体扮演哪些身份」的完整描述，
    * 增量语义下前端必须先取回当前全集再算差集，少发一条就是静默的身份丢失。
    *
-   * <p>本 record 里**没有**任何角色特有字段（账期、MOQ、客户分级、信用额度、接口类型…）——
-   * 那是 3.6.1.2 的职责，它按蓝图要求「每个角色一张 1:1 档案表」落地。
-   * 理由见 {@code V27__party_profile.sql} 第三节：塞在这里就是蓝图点名否决的
-   * 「一个巨大可空字段表」。
+   * <p>本 record 里**没有**任何角色特有字段（账期、MOQ、客户分级、信用额度、接口类型…）—— 那是 3.6.1.2 的职责，它按蓝图要求「每个角色一张 1:1 档案表」落地。
+   * 理由见 {@code V27__party_profile.sql} 第三节：塞在这里就是蓝图点名否决的 「一个巨大可空字段表」。
    */
   public record PartyRoleInput(
-      @NotBlank String roleType, @NotBlank String status, @Schema(nullable = true) @Size(max = 2000) String note) {}
+      @NotBlank String roleType,
+      @NotBlank String status,
+      @Schema(nullable = true) @Size(max = 2000) String note) {}
 
   /**
    * 单条角色指派的保存请求（{@code POST /{id}/roles} 与 {@code PUT /{id}/roles/{roleId}} 共用）。
    *
-   * <p>与 {@link PartyRoleInput} 分成两个 record 是因为整体替换的嵌套列表里
-   * {@code version} 没有意义（那些行由主体那次保存整体接管），而单条端点需要行级乐观锁
-   * —— 与 {@code BundleComponentInput} / {@code BundleComponentEditInput} 同一个理由。
+   * <p>与 {@link PartyRoleInput} 分成两个 record 是因为整体替换的嵌套列表里 {@code version}
+   * 没有意义（那些行由主体那次保存整体接管），而单条端点需要行级乐观锁 —— 与 {@code BundleComponentInput} / {@code
+   * BundleComponentEditInput} 同一个理由。
    *
    * <p>创建时 {@code version} 不传（默认 0），更新时必须回传详情里拿到的版本号。
    */
@@ -4449,10 +4397,8 @@ public final class CatalogModels {
   /**
    * 建 / 改往来单位的请求。
    *
-   * <p>{@code roles} 是整体替换语义（见 {@link PartyRoleInput}）。
-   * {@code status} 在这里是**首次设定**用的；已有主体的状态变更走
-   * {@code PUT /{id}/status} 端点而不是这里 —— 因为变更要带理由（规则 P4），
-   * 混在保存里的话「改个名字」也会被迫填理由。
+   * <p>{@code roles} 是整体替换语义（见 {@link PartyRoleInput}）。 {@code status} 在这里是**首次设定**用的；已有主体的状态变更走
+   * {@code PUT /{id}/status} 端点而不是这里 —— 因为变更要带理由（规则 P4）， 混在保存里的话「改个名字」也会被迫填理由。
    *
    * <p>{@code version} 是行级乐观锁：编辑时必须回传详情里拿到的版本号。
    */
@@ -4471,11 +4417,12 @@ public final class CatalogModels {
   /**
    * 状态流转的请求。
    *
-   * <p>独立成一个 record 而不是复用 {@link PartyInput}：流转只改状态，
-   * 走保存路径会让人以为「改状态要重传全部字段」，而那正好是并发覆盖的来源。
+   * <p>独立成一个 record 而不是复用 {@link PartyInput}：流转只改状态， 走保存路径会让人以为「改状态要重传全部字段」，而那正好是并发覆盖的来源。
    */
   public record PartyStatusInput(
-      @NotBlank String status, @Schema(nullable = true) @Size(max = 500) String reason, @PositiveOrZero long version) {}
+      @NotBlank String status,
+      @Schema(nullable = true) @Size(max = 500) String reason,
+      @PositiveOrZero long version) {}
 
   /**
    * 往来单位保存结果。
@@ -4483,7 +4430,12 @@ public final class CatalogModels {
    * <p>带角色指派结果与状态，前端不必为了刷新状态再打一次详情端点。
    */
   public record PartySaved(
-      UUID id, long version, String status, String statusLabel, List<String> roleTypes, int activeRoleCount) {}
+      UUID id,
+      long version,
+      String status,
+      String statusLabel,
+      List<String> roleTypes,
+      int activeRoleCount) {}
 
   /** 一条角色指派的读出口径。 */
   public record PartyRole(
@@ -4501,8 +4453,7 @@ public final class CatalogModels {
   /**
    * 往来单位详情：主体 + 角色指派，同一时刻的一致快照。
    *
-   * <p>合成一个 record 而不是拆成两个端点：详情页要显示的就是这两块的<b>同一瞬间</b>。
-   * 拆开的话，运营在「角色刚被别人解掉」之后看到的页面会是拼接出来的旧数据，
+   * <p>合成一个 record 而不是拆成两个端点：详情页要显示的就是这两块的<b>同一瞬间</b>。 拆开的话，运营在「角色刚被别人解掉」之后看到的页面会是拼接出来的旧数据，
    * 而「主体已停用但还挂着供应商角色」这种状态恰恰要靠页面当场发现才不至于下错单。
    */
   public record PartyDetail(
@@ -4526,9 +4477,8 @@ public final class CatalogModels {
       /**
        * 是否已软删除。
        *
-       * <p>已删除的主体<b>详情仍可读</b>（而不是 404）：行还在，运营删完想回头看一眼时
-       * 会看到「已删除」而不是一个凭空消失的条目。列表默认不显示它，
-       * {@code usable} 恒为 false，{@code usableBlockCode} 恒为 {@code PARTY_DELETED}。
+       * <p>已删除的主体<b>详情仍可读</b>（而不是 404）：行还在，运营删完想回头看一眼时 会看到「已删除」而不是一个凭空消失的条目。列表默认不显示它， {@code
+       * usable} 恒为 false，{@code usableBlockCode} 恒为 {@code PARTY_DELETED}。
        */
       boolean deleted,
       /** 主体是否「可用」：ACTIVE 且至少一个 ACTIVE 角色。06/11/12 的下拉默认只取这些。 */
@@ -4542,8 +4492,7 @@ public final class CatalogModels {
    * 列表页的一行。
    *
    * <p>{@code roles} / {@code roleSummary} / {@code usable} 在<b>列表查询里就一起算出来</b>，
-   * 不是让前端点开详情才知道：蓝图的整条要点就是「同一主体可同时是供应商和客户」，
-   * 如果列表上看不出来，运营就会去建第二条记录 —— 那正是本模块要消灭的形态。
+   * 不是让前端点开详情才知道：蓝图的整条要点就是「同一主体可同时是供应商和客户」， 如果列表上看不出来，运营就会去建第二条记录 —— 那正是本模块要消灭的形态。
    */
   public record PartyRow(
       UUID id,
@@ -4570,11 +4519,17 @@ public final class CatalogModels {
   /**
    * 往来单位列表的分页结果。
    *
-   * <p>三个统计都<b>不受筛选条件影响</b>：界面上把它们放在筛选结果旁边，
-   * 用户才知道「筛出来的 3 条」之外还有多少停用 / 被拉黑的条目。
+   * <p>三个统计都<b>不受筛选条件影响</b>：界面上把它们放在筛选结果旁边， 用户才知道「筛出来的 3 条」之外还有多少停用 / 被拉黑的条目。
    */
   public record PartyPage(
-      List<PartyRow> items, long total, int page, int size, long activeCount, long blacklistedCount, long noRoleCount, String note) {}
+      List<PartyRow> items,
+      long total,
+      int page,
+      int size,
+      long activeCount,
+      long blacklistedCount,
+      long noRoleCount,
+      String note) {}
 
   /** 列表页筛选条件。null 表示不筛；空串按「不过滤」处理。 */
   public record PartyQuery(
@@ -4592,9 +4547,7 @@ public final class CatalogModels {
   /**
    * 往来单位概览：规模与几个治理缺口指标。
    *
-   * <p>{@code noRoleCount} 是本模块最该被盯住的数字之一 ——
-   * 它就是「多少条往来单位既没有可用状态、又没挂任何角色」，也就是
-   * 3.9.2.2 僵尸主数据清理的候选来源。
+   * <p>{@code noRoleCount} 是本模块最该被盯住的数字之一 —— 它就是「多少条往来单位既没有可用状态、又没挂任何角色」，也就是 3.9.2.2 僵尸主数据清理的候选来源。
    */
   public record PartyOverview(
       long partyCount,
@@ -4624,22 +4577,19 @@ public final class CatalogModels {
   /**
    * 地址用途：收货 / 发货 / 提货。
    *
-   * <p>三个值与蓝图点名的三个下游用途一一对应，刻意不合并：{@code SHIP_FROM}（06 的发货地址）
-   * 与 {@code PICKUP}（10 的提货地址）在多数场景是同一个物理地点，但它们在单据上
-   * 各自带理由，而「每个用途各有一个默认」要在数据上落得下（V31 第六节的部分唯一索引）。
+   * <p>三个值与蓝图点名的三个下游用途一一对应，刻意不合并：{@code SHIP_FROM}（06 的发货地址） 与 {@code PICKUP}（10
+   * 的提货地址）在多数场景是同一个物理地点，但它们在单据上 各自带理由，而「每个用途各有一个默认」要在数据上落得下（V31 第六节的部分唯一索引）。
    */
-  public record PartyAddressUsageInput(
-      @NotBlank String usage, boolean isDefault) {}
+  public record PartyAddressUsageInput(@NotBlank String usage, boolean isDefault) {}
 
   /**
    * 建 / 改地址的请求。
    *
-   * <p>{@code usages} 是整体替换语义（与 {@link PartyInput#roles()} 同一约定）：
-   * 提交什么就等于什么，{@code null} 等价于「这条地址不承担任何用途」。
+   * <p>{@code usages} 是整体替换语义（与 {@link PartyInput#roles()} 同一约定）： 提交什么就等于什么，{@code null}
+   * 等价于「这条地址不承担任何用途」。
    *
-   * <p>把用途放进同一个请求而不是只留一个 {@code /usages} 端点，是为了「新建地址时顺手标用途」
-   * 少一次往返；而<b>只</b>改用途 / 默认标记时应该走 {@code PUT /{id}/usages} ——
-   * 那条路径不碰地址内容，因此不会产生一条内容没变的版本行（规则 A3）。
+   * <p>把用途放进同一个请求而不是只留一个 {@code /usages} 端点，是为了「新建地址时顺手标用途」 少一次往返；而<b>只</b>改用途 / 默认标记时应该走 {@code
+   * PUT /{id}/usages} —— 那条路径不碰地址内容，因此不会产生一条内容没变的版本行（规则 A3）。
    */
   public record PartyAddressInput(
       @NotBlank @Size(max = 2) String countryCode,
@@ -4657,8 +4607,7 @@ public final class CatalogModels {
   /**
    * 只改用途与默认标记的请求（{@code PUT /{id}/usages}）。
    *
-   * <p>独立成一个 record 与一个端点，而不是让运营为了换个默认地址去重填整个地址：
-   * 用途与默认是**标签**，地址内容才是**快照**，两者混在一个保存动作里会让版本链
+   * <p>独立成一个 record 与一个端点，而不是让运营为了换个默认地址去重填整个地址： 用途与默认是**标签**，地址内容才是**快照**，两者混在一个保存动作里会让版本链
    * 记下一条内容没变的版本（规则 A3）。
    *
    * <p>{@code version} 是地址行的乐观锁，不是历史序号（{@link PartyAddressVersion#versionNo()}）。
@@ -4670,15 +4619,12 @@ public final class CatalogModels {
   /**
    * 设 / 取消某个用途的默认地址（{@code PUT /{id}/default}）。
    *
-   * <p>「默认」按用途分别设，所以要带 {@code usage}；{@code isDefault=false} 是显式取消
-   * （不是「传空就好」—— 空值分不清是取消默认还是忘了填）。
+   * <p>「默认」按用途分别设，所以要带 {@code usage}；{@code isDefault=false} 是显式取消 （不是「传空就好」—— 空值分不清是取消默认还是忘了填）。
    */
   public record PartyAddressDefaultInput(
       @NotBlank String usage, boolean isDefault, @PositiveOrZero long version) {}
 
-  /**
-   * 地址保存结果：带最新版本号，前端不必为了拿「刚才是第几版」再打一次版本列表。
-   */
+  /** 地址保存结果：带最新版本号，前端不必为了拿「刚才是第几版」再打一次版本列表。 */
   public record PartyAddressSaved(
       UUID id,
       long version,
@@ -4690,12 +4636,10 @@ public final class CatalogModels {
   /**
    * 一条地址的读出口径（列表行与详情共用同一个 record）。
    *
-   * <p>共用而不是拆两个 record，是因为详情页要显示的就是列表行那一套字段
-   * 加上「历史版本」。拆开会让「列表里的默认标记」与「详情里的默认标记」有两次实现。
+   * <p>共用而不是拆两个 record，是因为详情页要显示的就是列表行那一套字段 加上「历史版本」。拆开会让「列表里的默认标记」与「详情里的默认标记」有两次实现。
    *
-   * <p>{@code oneLine} 是服务端拼好的单行地址（面单与列表都用它），
-   * 前端不自己拼 —— 各家地址的拼接顺序不一样，浏览器里拼出来的结果
-   * 与 10 物流打印出来的对不上是最难查的一类问题。
+   * <p>{@code oneLine} 是服务端拼好的单行地址（面单与列表都用它）， 前端不自己拼 —— 各家地址的拼接顺序不一样，浏览器里拼出来的结果 与 10
+   * 物流打印出来的对不上是最难查的一类问题。
    */
   public record PartyAddress(
       UUID id,
@@ -4724,12 +4668,10 @@ public final class CatalogModels {
   /**
    * 地址的一个历史版本 —— <b>冻结快照的载体</b>。
    *
-   * <p>内容列与 {@link PartyAddress} 的地址列一一对应（同宽），所以「当时长什么样」
-   * 可以直接读出来，而不需要从当前行回放差异。
+   * <p>内容列与 {@link PartyAddress} 的地址列一一对应（同宽），所以「当时长什么样」 可以直接读出来，而不需要从当前行回放差异。
    *
-   * <p>{@link #versionNo()} 是**历史序号**（只在内容真的变了时 +1），
-   * 与 {@link PartyAddress#version()}（乐观锁，每次保存都 +1）是两个数。
-   * 下游单据存的是 {@code (addressId, versionNo)} 指路牌。
+   * <p>{@link #versionNo()} 是**历史序号**（只在内容真的变了时 +1）， 与 {@link PartyAddress#version()}（乐观锁，每次保存都
+   * +1）是两个数。 下游单据存的是 {@code (addressId, versionNo)} 指路牌。
    */
   public record PartyAddressVersion(
       UUID addressId,
@@ -4807,12 +4749,10 @@ public final class CatalogModels {
   /**
    * 供应商角色档案的写入请求（{@code PUT /catalog/parties/{id}/supplier-profile}）。
    *
-   * <p>字段就是蓝图职责点名的四项：账期、MOQ、合作等级、结算方式，外加备注。
-   * MOQ 拆成 {@code moqQuantity} + {@code moqUnitCode} 两个字段而不是一个字符串，
-   * 因为「100」在「件」和「箱」下差几十倍，只存数字等于没存。
+   * <p>字段就是蓝图职责点名的四项：账期、MOQ、合作等级、结算方式，外加备注。 MOQ 拆成 {@code moqQuantity} + {@code moqUnitCode}
+   * 两个字段而不是一个字符串， 因为「100」在「件」和「箱」下差几十倍，只存数字等于没存。
    *
-   * <p>{@code version} 是行级乐观锁：更新时必须回传详情里拿到的版本号，
-   * 建档时不传（默认 0）。两个枚举字段留空时各自取 V30 的 DEFAULT，
+   * <p>{@code version} 是行级乐观锁：更新时必须回传详情里拿到的版本号， 建档时不传（默认 0）。两个枚举字段留空时各自取 V30 的 DEFAULT，
    * 所以「先建个空档案再慢慢填」是合法路径。
    */
   public record PartySupplierProfileInput(
@@ -4827,13 +4767,11 @@ public final class CatalogModels {
   /**
    * 客户角色档案的写入请求（{@code PUT /catalog/parties/{id}/customer-profile}）。
    *
-   * <p>蓝图职责点名的是「客户分级、默认币种、信用额度」三项，
-   * 这里多一个 {@code paymentTermsDays}：蓝图的「输入」行写的是「账期与信用额度设置」，
-   * 而 12 应收的到期日 = 单据日 + 账期天数 —— 那个天数是算式里的 N，
-   * 把它留在 12 财务自己家就等于让 12 拥有了一份本该属于往来单位的默认值。
+   * <p>蓝图职责点名的是「客户分级、默认币种、信用额度」三项， 这里多一个 {@code paymentTermsDays}：蓝图的「输入」行写的是「账期与信用额度设置」， 而 12
+   * 应收的到期日 = 单据日 + 账期天数 —— 那个天数是算式里的 N， 把它留在 12 财务自己家就等于让 12 拥有了一份本该属于往来单位的默认值。
    *
-   * <p>{@code defaultCreditLimit} 可空 = <b>不设额度（不限制赊账）</b>；
-   * 0 是非法值，因为「额度 0」与「没设额度」在业务上是<b>相反</b>的两种默认（规则 **R2**）。
+   * <p>{@code defaultCreditLimit} 可空 = <b>不设额度（不限制赊账）</b>； 0 是非法值，因为「额度
+   * 0」与「没设额度」在业务上是<b>相反</b>的两种默认（规则 **R2**）。
    */
   public record PartyCustomerProfileInput(
       @Schema(nullable = true) String customerLevel,
@@ -4846,12 +4784,11 @@ public final class CatalogModels {
   /**
    * 承运商角色档案的写入请求（{@code PUT /catalog/parties/{id}/carrier-profile}）。
    *
-   * <p>{@code accountRef} 必填（不是 {@code @NotBlank} 而是 {@code @NotBlank} 的服务层同源判定，
-   * 这里用 {@code @NotBlank} 让 400 早于业务逻辑触发，两处文案一致）。
+   * <p>{@code accountRef} 必填（不是 {@code @NotBlank} 而是 {@code @NotBlank} 的服务层同源判定， 这里用
+   * {@code @NotBlank} 让 400 早于业务逻辑触发，两处文案一致）。
    *
-   * <p>{@code serviceCapabilities} 是<b>数组</b>而不是逗号串：逗号串在
-   * {@code like '%,SEA,%'} 那种筛选里会因为 SEA 排在第一个而漏匹配（与 V27 第四节
-   * 拒绝拼接索引的同一个坑）。
+   * <p>{@code serviceCapabilities} 是<b>数组</b>而不是逗号串：逗号串在 {@code like '%,SEA,%'} 那种筛选里会因为 SEA
+   * 排在第一个而漏匹配（与 V27 第四节 拒绝拼接索引的同一个坑）。
    */
   public record PartyCarrierProfileInput(
       @Schema(nullable = true) String interfaceType,
@@ -4865,12 +4802,10 @@ public final class CatalogModels {
   /**
    * 供应商角色档案的读出记录：主体身份 + 角色身份 + 档案字段 + 默认取值提示。
    *
-   * <p>带主体身份（code / name）而不是只给 roleId：06 采购单要显示「供应商：星尘科技（账期 30 天）」，
-   * 一次查询就该够，不必再回查一次主体。
+   * <p>带主体身份（code / name）而不是只给 roleId：06 采购单要显示「供应商：星尘科技（账期 30 天）」， 一次查询就该够，不必再回查一次主体。
    *
-   * <p>{@code warnings} 是<b>给下游单据看的提示</b>，不是校验错误：
-   * 「该供应商未设置最小起订量」这类信息在页面上是提醒，在 06 建单时是「别按 MOQ 校验这一行」。
-   * 它放在这里而不是让每个下游各判一次，与 {@code PartyRules.usableBlock} 单一实现的纪律同源。
+   * <p>{@code warnings} 是<b>给下游单据看的提示</b>，不是校验错误： 「该供应商未设置最小起订量」这类信息在页面上是提醒，在 06 建单时是「别按 MOQ
+   * 校验这一行」。 它放在这里而不是让每个下游各判一次，与 {@code PartyRules.usableBlock} 单一实现的纪律同源。
    */
   public record PartySupplierProfile(
       UUID partyId,
@@ -4946,11 +4881,9 @@ public final class CatalogModels {
   /**
    * 一个主体的三张角色档案汇总（{@code GET /catalog/parties/{id}/role-profiles}）。
    *
-   * <p>合成一个 record 而不是三个端点：详情页要显示的就是这三块的<b>同一瞬间</b>。
-   * 拆开的话，运营在「供应商身份刚被别人解掉」之后看到的页面会是拼接出来的旧数据。
+   * <p>合成一个 record 而不是三个端点：详情页要显示的就是这三块的<b>同一瞬间</b>。 拆开的话，运营在「供应商身份刚被别人解掉」之后看到的页面会是拼接出来的旧数据。
    *
-   * <p>没有对应角色时对应槽位为 null（而不是一个空档案）：
-   * 「没有供应商档案」与「有供应商档案但账期是 0」在界面上必须长得不一样。
+   * <p>没有对应角色时对应槽位为 null（而不是一个空档案）： 「没有供应商档案」与「有供应商档案但账期是 0」在界面上必须长得不一样。
    */
   public record PartyRoleProfiles(
       UUID partyId,
@@ -4964,8 +4897,7 @@ public final class CatalogModels {
   /**
    * 列表页的一行：一个主体的某个角色的档案摘要。
    *
-   * <p>{@code headline} 是服务端算好的中文串（"账期 30 天 · 常规供应商" 这类）。
-   * 在服务端算而不是让前端拼，是因为三张表的 headline 口径完全不同，
+   * <p>{@code headline} 是服务端算好的中文串（"账期 30 天 · 常规供应商" 这类）。 在服务端算而不是让前端拼，是因为三张表的 headline 口径完全不同，
    * 散到三个组件里就会漂移 —— 而"这一列到底显示什么"正是运营判断档案全不全的唯一依据。
    */
   public record PartyRoleProfileRow(
@@ -5012,8 +4944,8 @@ public final class CatalogModels {
   /**
    * 角色档案概览：三种角色的覆盖率与两个治理缺口指标。
    *
-   * <p>{@code missingProfileCount} 是最该被盯住的数字：它等于「已经指派了身份、
-   * 却没建角色档案」的条数，也就是 06 采购 / 12 应收**取不到默认值**的那些对手方。
+   * <p>{@code missingProfileCount} 是最该被盯住的数字：它等于「已经指派了身份、 却没建角色档案」的条数，也就是 06 采购 / 12
+   * 应收**取不到默认值**的那些对手方。
    */
   public record PartyRoleProfileOverview(
       long supplierRoleCount,
@@ -5032,8 +4964,7 @@ public final class CatalogModels {
   /**
    * 词表选项：前端下拉的数据源。
    *
-   * <p>刻意<b>不</b>在这里给币种列表：ISO 4217 的完整词表是 12 财务的资产，
-   * 在本模块硬编码一份就等于复制了别人的写入所有权，而两份列表迟早会不一样
+   * <p>刻意<b>不</b>在这里给币种列表：ISO 4217 的完整词表是 12 财务的资产， 在本模块硬编码一份就等于复制了别人的写入所有权，而两份列表迟早会不一样
    * （一方加了新币种时另一方不会跟）。所以 {@code defaultCurrency} 走自由输入 + 格式校验。
    */
   public record PartyRoleProfileOptions(
@@ -5050,12 +4981,11 @@ public final class CatalogModels {
   /**
    * 一档阶梯价（{@code POST} / {@code PUT /catalog/supplier-quotes} 的嵌套元素）。
    *
-   * <p><b>刻意没有 currency 字段</b>：币种只在报价行上，同一报价的全部阶梯同币种（规则 **R3**）。
-   * 逐档设币种会造出「100 件档是 USD、500 件档是 EUR」这种行 —— 06 采购单无法判定该用哪个币种
-   * 结算，界面只能让用户挑，而挑错了没有任何东西会报错。理由见 V32 第七节。
+   * <p><b>刻意没有 currency 字段</b>：币种只在报价行上，同一报价的全部阶梯同币种（规则 **R3**）。 逐档设币种会造出「100 件档是 USD、500 件档是
+   * EUR」这种行 —— 06 采购单无法判定该用哪个币种 结算，界面只能让用户挑，而挑错了没有任何东西会报错。理由见 V32 第七节。
    *
-   * <p>数组顺序即档位顺序：{@code minQuantity} 必须严格递增（规则 **R5**）。
-   * 提交时按升序排好，服务层原样落库 —— 档位顺序是写入前确定的，不靠 DB 的排序保证。
+   * <p>数组顺序即档位顺序：{@code minQuantity} 必须严格递增（规则 **R5**）。 提交时按升序排好，服务层原样落库 —— 档位顺序是写入前确定的，不靠 DB
+   * 的排序保证。
    */
   public record SupplierQuotePriceTierInput(
       @Schema(nullable = true) @DecimalMin(value = "0", inclusive = false) BigDecimal minQuantity,
@@ -5065,14 +4995,11 @@ public final class CatalogModels {
   /**
    * 供应商报价的写入请求（{@code POST /catalog/supplier-quotes} 与 {@code PUT /{id}}）。
    *
-   * <p>{@code supplierId} 是**主体 id**（{@code party.id}）而不是角色 id：
-   * 前端手上只有主体（页面上点的是某个供应商），角色由服务端从该主体的 SUPPLIER 角色解析。
-   * 让客户端直接传 role_id 等于把「这条报价属于供应商身份」这层判断交给前端，
-   * 而前端完全可能传来一个 CUSTOMER 角色的 id。
+   * <p>{@code supplierId} 是**主体 id**（{@code party.id}）而不是角色 id： 前端手上只有主体（页面上点的是某个供应商），角色由服务端从该主体的
+   * SUPPLIER 角色解析。 让客户端直接传 role_id 等于把「这条报价属于供应商身份」这层判断交给前端， 而前端完全可能传来一个 CUSTOMER 角色的 id。
    *
-   * <p>{@code version} 是行级乐观锁：改档时必须回传详情里拿到的版本号，新建时不传（默认 0）。
-   * {@code tiers} 会<b>整体替换</b>（不是增量合并）：报价的阶梯是一个整体，
-   * 合并写入会让"删掉一档"这个动作无法表达。
+   * <p>{@code version} 是行级乐观锁：改档时必须回传详情里拿到的版本号，新建时不传（默认 0）。 {@code tiers}
+   * 会<b>整体替换</b>（不是增量合并）：报价的阶梯是一个整体， 合并写入会让"删掉一档"这个动作无法表达。
    */
   public record SupplierQuoteInput(
       @NotNull UUID supplierId,
@@ -5100,14 +5027,14 @@ public final class CatalogModels {
   /**
    * 一条报价的读出记录（详情 / 列表共用）。
    *
-   * <p>带供应商与 SKU 的身份（code / name）而不只是 id：报价台账上运营要认的是
-   * 「星尘科技 的 SKU-000123 报 3.80 USD」，一次查询就该够，不必回查两次主体与商品。
+   * <p>带供应商与 SKU 的身份（code / name）而不只是 id：报价台账上运营要认的是 「星尘科技 的 SKU-000123 报 3.80
+   * USD」，一次查询就该够，不必回查两次主体与商品。
    *
-   * <p>{@code selectionState} 只在<b>有效报价</b>集合里有意义（{@code null} = 这条报价
-   * 停用或已过期）。见 {@link SupplierQuoteRules#selectionStates} 与规则 **R2**。
+   * <p>{@code selectionState} 只在<b>有效报价</b>集合里有意义（{@code null} = 这条报价 停用或已过期）。见 {@link
+   * SupplierQuoteRules#selectionStates} 与规则 **R2**。
    *
-   * <p>{@code warnings} 是给下游的提示（"该供应商还没建角色档案"这类），
-   * 不是校验错误 —— 与 {@code PartyRoleProfileService.warnings} 同一纪律。
+   * <p>{@code warnings} 是给下游的提示（"该供应商还没建角色档案"这类）， 不是校验错误 —— 与 {@code
+   * PartyRoleProfileService.warnings} 同一纪律。
    */
   public record SupplierQuote(
       UUID id,
@@ -5172,13 +5099,12 @@ public final class CatalogModels {
   /**
    * 有效报价解析结果（{@code GET /catalog/supplier-quotes/effective}）。
    *
-   * <p>这就是蓝图点名的输出「有效报价列表（默认取优先级最高且在有效期内的版本）」，
-   * 而**「默认取」在本类里是一个可以失败的状态**：{@code selected} 在歧义时是 null
-   * 而不是"随便一条"（规则 **R2**）。{@code candidates} 永远给出全部有效报价并逐条标状态，
-   * 运营据此选；{@code ambiguityProblem} 是可读的处置建议。
+   * <p>这就是蓝图点名的输出「有效报价列表（默认取优先级最高且在有效期内的版本）」， 而**「默认取」在本类里是一个可以失败的状态**：{@code selected} 在歧义时是 null
+   * 而不是"随便一条"（规则 **R2**）。{@code candidates} 永远给出全部有效报价并逐条标状态， 运营据此选；{@code ambiguityProblem}
+   * 是可读的处置建议。
    *
-   * <p>{@code selectedTiers} 只在 {@code selected != null} 时有值 ——
-   * 它是"默认采用那条报价的阶梯"，下游取价时按 {@code quantity} 在其中定位适用档。
+   * <p>{@code selectedTiers} 只在 {@code selected != null} 时有值 —— 它是"默认采用那条报价的阶梯"，下游取价时按 {@code
+   * quantity} 在其中定位适用档。
    */
   public record SupplierQuoteEffectiveResult(
       @Schema(nullable = true) UUID skuId,
@@ -5220,8 +5146,7 @@ public final class CatalogModels {
   /**
    * 描述模板写入（新建或改，id 为空即新建）。
    *
-   * <p><b>段落整体替换</b>而不是增量增删：五段骨架是「这个模板长什么样」的完整口径，
-   * 增删式会让「当前有哪些段落」这个问题有两个答案（与 3.4.2.2 的变量整体替换同一纪律）。
+   * <p><b>段落整体替换</b>而不是增量增删：五段骨架是「这个模板长什么样」的完整口径， 增删式会让「当前有哪些段落」这个问题有两个答案（与 3.4.2.2 的变量整体替换同一纪律）。
    */
   public record DescriptionTemplateInput(
       @NotBlank @Size(max = 32) String code,
@@ -5235,9 +5160,8 @@ public final class CatalogModels {
   /**
    * 一个段落（五类之一）。
    *
-   * <p><b>contentTemplateId 在新建时可以不传</b>：服务层会用 {@code body} + {@code variables}
-   * 自动在 V21 的 content_template 里建/改出对应的一行——段落内容仍然只有一份，
-   * 变量与译文的机制也仍然只有 3.4.2.2 那一套（见 V96 文件头的取舍说明）。
+   * <p><b>contentTemplateId 在新建时可以不传</b>：服务层会用 {@code body} + {@code variables} 自动在 V21 的
+   * content_template 里建/改出对应的一行——段落内容仍然只有一份， 变量与译文的机制也仍然只有 3.4.2.2 那一套（见 V96 文件头的取舍说明）。
    */
   public record DescriptionSectionInput(
       @NotBlank @Size(max = 32) String sectionType,
@@ -5314,8 +5238,8 @@ public final class CatalogModels {
   /**
    * 描述模板概览。
    *
-   * <p>{@code incompleteRenderCount} 与 {@code issueCount} 放最前面：
-   * 「有多少份渲染出来的描述 HTML 还带着缺失」是这个模块唯一需要每天盯的数字。
+   * <p>{@code incompleteRenderCount} 与 {@code issueCount} 放最前面： 「有多少份渲染出来的描述 HTML
+   * 还带着缺失」是这个模块唯一需要每天盯的数字。
    */
   public record DescriptionTemplateOverview(
       long templateCount,
@@ -5333,8 +5257,8 @@ public final class CatalogModels {
   /**
    * 渲染提交（一次渲染 = 一个模板 × 一个 SKU × 一种语言）。
    *
-   * <p>images 按 {@code slotNo} 对上段落的插图位；同一 slotNo 出现在多个段落时取第一个，
-   * 因为 {@code data-position} 是渲染全局序号，同一张图落进两个位置会让人以为有两张。
+   * <p>images 按 {@code slotNo} 对上段落的插图位；同一 slotNo 出现在多个段落时取第一个， 因为 {@code data-position}
+   * 是渲染全局序号，同一张图落进两个位置会让人以为有两张。
    */
   public record DescriptionRenderInput(
       @NotNull UUID templateId,
@@ -5433,11 +5357,7 @@ public final class CatalogModels {
       int size) {}
 
   public record DescriptionRenderPage(
-      List<DescriptionRenderRow> items,
-      long total,
-      int page,
-      int size,
-      String note) {}
+      List<DescriptionRenderRow> items, long total, int page, int size, String note) {}
 
   /** 词表选项（前端下拉的数据源，与 {@link DescriptionTemplateRules} 同源）。 */
   public record DescriptionTemplateOptions(
@@ -5449,4 +5369,3 @@ public final class CatalogModels {
       Map<String, String> defaultPhrasesBySectionType,
       String note) {}
 }
-

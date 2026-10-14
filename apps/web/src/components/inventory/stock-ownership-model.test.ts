@@ -114,15 +114,23 @@ describe('所有权类型与指向的自洽', () => {
 
 describe('货权档的作用域', () => {
   it('按仓库 / 法人 / SKU 显示各自的作用对象', () => {
-    expect(scopeTargetText({ scopeType: 'WAREHOUSE', warehouseCode: 'WH-OWN' })).toBe('整仓 WH-OWN');
-    expect(scopeTargetText({ scopeType: 'LEGAL_ENTITY', legalEntityCode: 'LE-1' })).toBe('法人 LE-1');
+    expect(scopeTargetText({ scopeType: 'WAREHOUSE', warehouseCode: 'WH-OWN' })).toBe(
+      '整仓 WH-OWN',
+    );
+    expect(scopeTargetText({ scopeType: 'LEGAL_ENTITY', legalEntityCode: 'LE-1' })).toBe(
+      '法人 LE-1',
+    );
     expect(scopeTargetText({ scopeType: 'SKU', skuCode: 'SKU-1' })).toBe('SKU SKU-1');
     expect(scopeTargetText({ scopeType: 'DEFAULT' })).toBe('全租户兜底');
   });
 
   it('未选对象时明说未选，而不是显示一个空白让人以为没配对象', () => {
-    expect(scopeTargetText({ scopeType: 'WAREHOUSE', warehouseCode: null })).toBe('整仓（未选仓库）');
-    expect(scopeTargetText({ scopeType: 'LEGAL_ENTITY', legalEntityCode: null })).toBe('按法人（未选法人）');
+    expect(scopeTargetText({ scopeType: 'WAREHOUSE', warehouseCode: null })).toBe(
+      '整仓（未选仓库）',
+    );
+    expect(scopeTargetText({ scopeType: 'LEGAL_ENTITY', legalEntityCode: null })).toBe(
+      '按法人（未选法人）',
+    );
     expect(scopeTargetText({ scopeType: 'SKU', skuCode: null })).toBe('按 SKU（未选 SKU）');
   });
 

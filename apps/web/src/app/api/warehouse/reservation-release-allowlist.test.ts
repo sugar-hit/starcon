@@ -22,7 +22,12 @@ import { GET, POST } from './[...path]/route';
 
 // 相对**本文件**定位：vitest 从仓库根或 apps/web 跑时 cwd 都不同，用 cwd 会静默读空。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/inventory/inventory-reservation-release-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL(
+      '../../../components/inventory/inventory-reservation-release-model.ts',
+      import.meta.url,
+    ),
+  ),
   'utf8',
 );
 
@@ -78,7 +83,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了一条」也算通过。
@@ -105,7 +112,9 @@ it('写形状被放行，且真的转发到 8084', async () => {
     `warehouse/inventory/reservations/${ID}/release`,
     `warehouse/inventory/reservations/${ID}/expiry`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -133,7 +142,9 @@ it('集合级字面量子路径不会被 uuid 通配支吞掉', async () => {
     'warehouse/inventory/reservations/expire-overdue',
     'warehouse/inventory/reservations/expiry-runs',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
   expect(fetcher, '放行的路径必须真的转发到后端').toHaveBeenCalledWith(
@@ -159,7 +170,9 @@ it('未交付 / 不该存在的形状仍然被拒，且「多一层后缀」也�
     // 拼错的顶层形状不放行。
     'warehouse/inventory/reservation-release/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -192,7 +205,9 @@ it('不误伤本车道之前已放行的分支（求并，不是二选一）', a
     'warehouse/disassembly-orders/capabilities',
     'warehouse/inventory/expiry/alerts',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
   }
 });
@@ -208,7 +223,7 @@ it('跨源写请求被 403 拒绝，不转发', async () => {
       headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
       body: '{}',
     }),
-    { params: { path: path.split('/') } },
+    { params: Promise.resolve({ path: path.split('/') }) },
   );
   expect(response.status).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();

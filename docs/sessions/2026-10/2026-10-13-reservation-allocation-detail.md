@@ -22,7 +22,7 @@ V102 §一 明写「7.2.1.2 与 7.2.1.3 都不建空表占位」。只建主表�
 （先圈住这批货，到货才建 bucket），引它会让「先预占后建账」写不进去；
 (b) 预占分配长于 bucket 存续时间，bucket 会被盘点/效期/合桶重建，
 而「当初圈在了哪个货位」是审计事实，不该因为下游事实表换了一行 id 就查不到。
-兜底是维度自洽：货位用**复合外键** `(tenant_id,warehouse_id,location_id)` → 
+兜底是维度自洽：货位用**复合外键** `(tenant_id,warehouse_id,location_id)` →
 `warehouse_location(tenant_id,warehouse_id,id)`（V2 专门为此建了那个唯一键），
 所以「仓 A + 仓 B 的货位」在 DB 层就被拒；批次与预占的 SKU 同商品由触发器比对。
 
@@ -48,14 +48,14 @@ V102 §一 已把「allocated_quantity 由 7.2.1.2 回写」写进契约，而 7
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 代价 / 理由 |
-| --- | --- | --- |
-| 分配定位到哪一级 | 仓 + 货位 + 批次三维（弱引用 + 维度自洽） | 放弃「引用 stock_bucket」带来的存量兜底；换来「先预占后建账」可写、审计痕迹不被 bucket 重建冲掉 |
-| 父表 allocated 谁维护 | DB 触发器（非终态分配之和） | Java 侧不再有回写代码；7.2.1.3 释放后自动对账，无需记得改 |
-| 预占状态联动 | 服务层在 commit / consume 里推进 | 多一次父表 UPDATE；换来超时清理不会误释放已承诺的货 |
-| 已释放量的口径 | 本模块**不碰**父表 `released_quantity` | 归 7.2.1.3。碰了就会在对方写完释放量后被下一次分配变更覆盖回去 |
-| 下拉候选值 | 筛选候选只含本预占出现过的；登记目标给全量在用 | 两组候选值含义不同。登记目标必须全量 —— 新建预占零分配，拿候选集填表是死结 |
-| 白名单改动面 | 只改 `reservations(...)` 一支，不重排整条正则 | 字面量子路径排在 `[0-9a-f-]+` 之前（正则 alternation 首个命中即返回，不是最长匹配） |
+| 取舍                  | 选择                                           | 代价 / 理由                                                                                     |
+| --------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 分配定位到哪一级      | 仓 + 货位 + 批次三维（弱引用 + 维度自洽）      | 放弃「引用 stock_bucket」带来的存量兜底；换来「先预占后建账」可写、审计痕迹不被 bucket 重建冲掉 |
+| 父表 allocated 谁维护 | DB 触发器（非终态分配之和）                    | Java 侧不再有回写代码；7.2.1.3 释放后自动对账，无需记得改                                       |
+| 预占状态联动          | 服务层在 commit / consume 里推进               | 多一次父表 UPDATE；换来超时清理不会误释放已承诺的货                                             |
+| 已释放量的口径        | 本模块**不碰**父表 `released_quantity`         | 归 7.2.1.3。碰了就会在对方写完释放量后被下一次分配变更覆盖回去                                  |
+| 下拉候选值            | 筛选候选只含本预占出现过的；登记目标给全量在用 | 两组候选值含义不同。登记目标必须全量 —— 新建预占零分配，拿候选集填表是死结                      |
+| 白名单改动面          | 只改 `reservations(...)` 一支，不重排整条正则  | 字面量子路径排在 `[0-9a-f-]+` 之前（正则 alternation 首个命中即返回，不是最长匹配）             |
 
 ## 踩到并修掉的三个真问题
 
@@ -95,11 +95,13 @@ V102 §一 已把「allocated_quantity 由 7.2.1.2 回写」写进契约，而 7
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V107__warehouse_reservation_allocation.sql`
   （新建 `reservation_allocation` + `reservation_entry`；4 个守卫触发器 + 1 个回写触发器；
   4 条索引；tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT + starcon_app REVOKE）
 
 **后端**
+
 - `.../ReservationAllocationModels.java`（16 个类型，全部 `ReservationAllocation*` 前缀）
 - `.../ReservationAllocationService.java`（jOOQ 显式 SQL；读 4 端点 / 写 3 动作）
 - `.../ReservationAllocationController.java`（7 个形状挂在
@@ -107,6 +109,7 @@ V102 §一 已把「allocated_quantity 由 7.2.1.2 回写」写进契约，而 7
 - `.../ReservationAllocationIntegrationTest.java`（34 例，PG16 Testcontainers，池容量 1）
 
 **前端**
+
 - `apps/web/src/components/inventory/inventory-reservation-allocation-model.ts` + `.test.ts`（14 例）
 - `apps/web/src/components/inventory/inventory-reservation-allocation.tsx`（真实工作区）
 - `apps/web/src/app/inventory/reservation/[reservationId]/page.tsx`
@@ -115,6 +118,7 @@ V102 §一 已把「allocated_quantity 由 7.2.1.2 回写」写进契约，而 7
   把 `${id}/allocations` 从 404 清单移出，`release` / `entries` 保持 404）
 
 **契约**（codegen 产物，未手改）
+
 - `packages/api-contracts/src/contracts/warehouse.ts`、`.../src/warehouse.openapi.json`
 
 ## 后续待办

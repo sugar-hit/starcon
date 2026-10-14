@@ -25,10 +25,11 @@ import { InventoryReservationAllocationWorkspace } from '@/components/inventory/
  * <p>蓝图同时明确「承诺分配（committed）后不再自动 TTL 释放」，
  * 所以「已承诺」不是终态，界面上也不会把它显示成「已结束」。
  */
-export default function InventoryReservationAllocationPage({
+export default async function InventoryReservationAllocationPage({
   params,
 }: {
-  params: { reservationId: string };
+  params: Promise<{ reservationId: string }>;
 }) {
-  return <InventoryReservationAllocationWorkspace reservationId={params.reservationId} />;
+  const resolvedParams = await params;
+  return <InventoryReservationAllocationWorkspace reservationId={resolvedParams.reservationId} />;
 }

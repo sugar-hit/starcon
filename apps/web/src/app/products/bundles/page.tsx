@@ -47,9 +47,9 @@ export default function BundlePage() {
         <p className="text-muted-foreground text-copy-13">
           管理组合套装（多个 SKU 按数量捆绑销售）的版本与组件：名称、版本号、生效区间、组件清单。
           <strong>发布后整版冻结</strong>，改内容要新建版本 —— 历史订单冻结的是当时那一版；
-          唯一还能做的是「提前停用本版」（把生效终点向前收紧）。生效区间是左闭右开的
-          [起点, 终点)，重叠一律拒绝，所以<strong>同一时刻至多一个生效版本</strong>。
-          组件之间<strong>不能互相包含成环</strong> —— 套装 A 含 B 且 B 含 A 会让订单展开在环上
+          唯一还能做的是「提前停用本版」（把生效终点向前收紧）。生效区间是左闭右开的 [起点,
+          终点)，重叠一律拒绝，所以<strong>同一时刻至多一个生效版本</strong>。 组件之间
+          <strong>不能互相包含成环</strong> —— 套装 A 含 B 且 B 含 A 会让订单展开在环上
           无限递归。虚拟套装不持有独立库存，扣的是组件库存。
         </p>
       </header>
@@ -69,8 +69,8 @@ export default function BundlePage() {
             onClick={() => setTab(t.id)}
             className={
               tab === t.id
-                ? 'border-primary text-foreground -mb-px border-b-2 px-3 py-2 text-copy-13 font-medium'
-                : 'text-muted-foreground hover:text-foreground -mb-px border-b-2 border-transparent px-3 py-2 text-copy-13'
+                ? 'border-primary text-foreground text-copy-13 -mb-px border-b-2 px-3 py-2 font-medium'
+                : 'text-muted-foreground hover:text-foreground text-copy-13 -mb-px border-b-2 border-transparent px-3 py-2'
             }
           >
             {t.label}

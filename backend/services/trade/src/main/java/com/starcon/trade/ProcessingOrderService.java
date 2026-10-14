@@ -23,17 +23,13 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 6.4.1.1 加工单。
  *
- * <p><b>本服务不碰库存。</b>蓝图关系句「加工是『消耗组件产生成品』的库存动作，
- * 必须在 warehouse 本地事务完成，不能由 trade 直接改库存」是验收项：
- * 本类只产出加工单据（加工单 + 组件领用记录 + 进度事件 + 入库需求通知），
- * 组件出库与成品入库由 warehouse 服务在它自己的一个本地事务里完成
- * （warehouse 侧端点 {@code POST /warehouse/processing-orders}）。
+ * <p><b>本服务不碰库存。</b>蓝图关系句「加工是『消耗组件产生成品』的库存动作， 必须在 warehouse 本地事务完成，不能由 trade 直接改库存」是验收项：
+ * 本类只产出加工单据（加工单 + 组件领用记录 + 进度事件 + 入库需求通知）， 组件出库与成品入库由 warehouse 服务在它自己的一个本地事务里完成 （warehouse 侧端点
+ * {@code POST /warehouse/processing-orders}）。
  *
- * <p><b>组件领用量只有一个来源</b>：catalog 3.5.2.1 的规则 R7
- * （{@code 需求量 = 单位用量 × 产量 × (1 + 损耗率/100)}，6 位小数 HALF_UP，
- * 损耗率是<b>百分数</b>不是比率）。本类经 {@link BomVersionPort} 调 catalog 的授权接口
- * 取回该三元组并<b>原样冻结</b>进组件领用记录，
- * 既不重算也不取整 —— 取整成采购量是 3.5.2.2 与 06 采购建议的职责。
+ * <p><b>组件领用量只有一个来源</b>：catalog 3.5.2.1 的规则 R7 （{@code 需求量 = 单位用量 × 产量 × (1 + 损耗率/100)}，6 位小数
+ * HALF_UP， 损耗率是<b>百分数</b>不是比率）。本类经 {@link BomVersionPort} 调 catalog 的授权接口
+ * 取回该三元组并<b>原样冻结</b>进组件领用记录， 既不重算也不取整 —— 取整成采购量是 3.5.2.2 与 06 采购建议的职责。
  */
 @Service
 public class ProcessingOrderService {
@@ -65,8 +61,7 @@ public class ProcessingOrderService {
   /**
    * 能力与上下游可用性。
    *
-   * <p>存在的理由与 9.3.2.2 一致：把「哪些输入真有依据」「库存动作归谁」
-   * 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
+   * <p>存在的理由与 9.3.2.2 一致：把「哪些输入真有依据」「库存动作归谁」 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
    */
   public ProcessingCapabilities capabilities() {
     return new ProcessingCapabilities(
@@ -95,8 +90,7 @@ public class ProcessingOrderService {
                 "warehouse",
                 false,
                 "8 仓储作业 · 8.4 组装与加工",
-                "仓库现场作业单据未交付：加工单当前只登记入库需求通知与实收数量，"
-                    + "仓库内部的拣货/复核/上架现场流程尚未建模。"),
+                "仓库现场作业单据未交付：加工单当前只登记入库需求通知与实收数量，" + "仓库内部的拣货/复核/上架现场流程尚未建模。"),
             new ProcessingCapabilities.ProcessingDownstreamGap(
                 "6.4.1.2",
                 "BOM 关联",
@@ -112,17 +106,10 @@ public class ProcessingOrderService {
                 "trade",
                 false,
                 "6.4.2 质检",
-                "来料/成品质检未交付：完工报数量时不能做抽样判定与扣量，"
-                    + "不合格量的处置（6.4.2.2）也无下游出口。"),
+                "来料/成品质检未交付：完工报数量时不能做抽样判定与扣量，" + "不合格量的处置（6.4.2.2）也无下游出口。"),
             new ProcessingCapabilities.ProcessingDownstreamGap(
-                "6.5.1.1",
-                "采购对账",
-                "trade",
-                false,
-                "6.5.采购对账",
-                "按期间汇总加工用料与供应商对账未交付，加工单暂不参与对账单。")),
-        "加工是『消耗组件产生成品』的库存动作：下单与进度在 trade，"
-            + "组件出库与成品入库在 warehouse 的本地事务。跨服务只经授权 API，不共享数据库。");
+                "6.5.1.1", "采购对账", "trade", false, "6.5.采购对账", "按期间汇总加工用料与供应商对账未交付，加工单暂不参与对账单。")),
+        "加工是『消耗组件产生成品』的库存动作：下单与进度在 trade，" + "组件出库与成品入库在 warehouse 的本地事务。跨服务只经授权 API，不共享数据库。");
   }
 
   // ================================================================ 加工厂
@@ -149,8 +136,9 @@ public class ProcessingOrderService {
       binds.add(pattern);
     }
     String clause = where.isEmpty() ? "" : " where " + String.join(" and ", where);
-    long total = sql.fetchOne("select count(*) from processing_factory" + clause, binds.toArray())
-        .get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from processing_factory" + clause, binds.toArray())
+            .get(0, Long.class);
     Record summary =
         sql.fetchOne(
             "select count(*) filter (where status='ACTIVE') as active,"
@@ -199,14 +187,20 @@ public class ProcessingOrderService {
     }
     OffsetDateTime now = now();
     if (existsByCode(code)) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "加工厂编码「" + code + "」已被本租户其它加工厂占用");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "加工厂编码「" + code + "」已被本租户其它加工厂占用");
     }
     UUID id = UUID.randomUUID();
     sql.execute(
         "insert into processing_factory(id,tenant_id,code,name,factory_kind,status,note,"
             + "created_at,updated_at) values(?,?,?,?,?,'ACTIVE',?,?::timestamptz,?::timestamptz)",
-        id, currentTenant(), code, name, kind.name(), fit(input.note(), 2000, "备注"), now, now);
+        id,
+        currentTenant(),
+        code,
+        name,
+        kind.name(),
+        fit(input.note(), 2000, "备注"),
+        now,
+        now);
     return factory(id);
   }
 
@@ -245,8 +239,7 @@ public class ProcessingOrderService {
   /**
    * 组件需求量试算（只读，不落库）：按 catalog 的 R7 算这一版 BOM 要领哪些料。
    *
-   * <p>页面在新建加工单之前用它预览「按这一版 BOM，这些组件各要多少」，
-   * 下达时落进组件领用记录的是<b>同一口径</b>的数。
+   * <p>页面在新建加工单之前用它预览「按这一版 BOM，这些组件各要多少」， 下达时落进组件领用记录的是<b>同一口径</b>的数。
    */
   public RequirementPreview previewRequirement(RequirementPreviewInput input, String bearer) {
     BomVersionPort.VersionView version = bom.version(input.bomVersionId(), bearer);
@@ -264,7 +257,9 @@ public class ProcessingOrderService {
         "需求量按 catalog 3.5.2.1 的规则 R7 算出（单位用量 × 产量 × (1 + 损耗率/100)，"
             + "6 位小数 HALF_UP）；损耗率是百分数不是比率。仅单层，不含子 BOM 里的料，"
             + "也不取整成采购量 —— 取整与补安全库存是 3.5.2.2 与采购建议的职责。"
-            + "（BOM 版本 " + version.versionNo() + "）");
+            + "（BOM 版本 "
+            + version.versionNo()
+            + "）");
   }
 
   // ================================================================ 加工单
@@ -302,7 +297,8 @@ public class ProcessingOrderService {
     String from =
         " from processing_order o join processing_factory f"
             + " on f.tenant_id = o.tenant_id and f.id = o.factory_id";
-    long total = sql.fetchOne("select count(*)" + from + clause, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*)" + from + clause, binds.toArray()).get(0, Long.class);
     Record summary =
         sql.fetchOne(
             "select count(*) filter (where o.status='DRAFT') as draft,"
@@ -314,10 +310,14 @@ public class ProcessingOrderService {
                 + " count(*) filter (where o.due_on < current_date"
                 + " and o.status not in ('RECEIVED','CANCELLED')) as overdue,"
                 + " coalesce(sum(o.planned_output_quantity),0) as total_planned,"
-                + " coalesce(sum(o.completed_quantity),0) as total_completed" + from);
+                + " coalesce(sum(o.completed_quantity),0) as total_completed"
+                + from);
     List<ProcessingOrderSaved> items =
         sql.fetch(
-                "select " + ORDER_COLUMNS + from + clause
+                "select "
+                    + ORDER_COLUMNS
+                    + from
+                    + clause
                     + " order by o.due_on, o.id limit ? offset ?",
                 append(binds, size, page * size).toArray())
             .map(ProcessingOrderService::orderRow);
@@ -340,9 +340,8 @@ public class ProcessingOrderService {
   /**
    * 新建加工单（草稿）。
    *
-   * <p>组件领用记录在此**就已按 catalog 的 R7 算好并落库**，而不是等下达时才算：
-   * 冻结必须发生在「这一版 BOM 还说得清是谁」的时刻，而草稿与下达之间
-   * BOM 可能已经接替了新版本。
+   * <p>组件领用记录在此**就已按 catalog 的 R7 算好并落库**，而不是等下达时才算： 冻结必须发生在「这一版 BOM 还说得清是谁」的时刻，而草稿与下达之间 BOM
+   * 可能已经接替了新版本。
    */
   @Transactional
   public ProcessingOrderSaved createOrder(ProcessingOrderInput input, UUID actorId, String bearer) {
@@ -352,8 +351,7 @@ public class ProcessingOrderService {
       throw bad("加工单号不能为空");
     }
     if (existsByOrderNo(orderNo)) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "加工单号「" + orderNo + "」已被本租户其它加工单占用");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "加工单号「" + orderNo + "」已被本租户其它加工单占用");
     }
     Record factory = requireActiveFactory(input.factoryId());
 
@@ -369,8 +367,7 @@ public class ProcessingOrderService {
               + "只有**已发布**版本的组件与损耗率是稳定的（3.5.2.1 规则 R2/R3）");
     }
     BigDecimal planned = positiveQty(input.plannedOutputQuantity(), "约定完工数量");
-    BomVersionPort.Requirement requirement =
-        bom.requirement(input.bomVersionId(), planned, bearer);
+    BomVersionPort.Requirement requirement = bom.requirement(input.bomVersionId(), planned, bearer);
     if (requirement.lines().isEmpty()) {
       throw bad(
           "BOM 版本「"
@@ -421,9 +418,15 @@ public class ProcessingOrderService {
           now,
           now);
     }
-    appendEvent(orderId, ProcessingEventType.CREATED, "DRAFT", "DRAFT", BigDecimal.ZERO,
-        "按 BOM 版本 " + requirement.versionNo() + " 冻结 " + requirement.lines().size()
-            + " 个组件的领用量", actorId, now);
+    appendEvent(
+        orderId,
+        ProcessingEventType.CREATED,
+        "DRAFT",
+        "DRAFT",
+        BigDecimal.ZERO,
+        "按 BOM 版本 " + requirement.versionNo() + " 冻结 " + requirement.lines().size() + " 个组件的领用量",
+        actorId,
+        now);
     return orderSaved(orderId);
   }
 
@@ -460,16 +463,14 @@ public class ProcessingOrderService {
         nextStatuses(ProcessingStatus.valueOf(order.status())),
         List.of(
             "组件出库与成品入库由 warehouse 在**一个本地事务**里完成；本服务不直接改库存。",
-            "组件领用量冻结自 catalog 3.5.2.1 的 BOM 版本（规则 R7），已下达后不可改；"
-                + "后来 BOM 接替新版本不影响这张单。",
+            "组件领用量冻结自 catalog 3.5.2.1 的 BOM 版本（规则 R7），已下达后不可改；" + "后来 BOM 接替新版本不影响这张单。",
             "完工数量是工厂**报**的数，实收数量是仓库**收**的数；两者不相等时以实收为准。"));
   }
 
   /**
    * 推进状态（DRAFT → RELEASED → IN_PROCESS → COMPLETED → RECEIVED）。
    *
-   * <p>「下达」这一步同时做三件在蓝图里被点名的事：冻结组件领用量已生效、
-   * 产生入库需求通知（入库需求通知 8）、并开始按状态机推进。
+   * <p>「下达」这一步同时做三件在蓝图里被点名的事：冻结组件领用量已生效、 产生入库需求通知（入库需求通知 8）、并开始按状态机推进。
    */
   @Transactional
   public ProcessingOrderSaved advanceStatus(
@@ -481,8 +482,14 @@ public class ProcessingOrderService {
     ProcessingStatus to = processingStatus(input.status());
     if (!from.canMoveTo(to)) {
       throw bad(
-          "加工单当前状态「" + from.label() + "」不能推进到「" + to.label() + "」。"
-              + "合法下一步是 " + nextLabels(from) + "（已入库与已作废是终态，不可离开）");
+          "加工单当前状态「"
+              + from.label()
+              + "」不能推进到「"
+              + to.label()
+              + "」。"
+              + "合法下一步是 "
+              + nextLabels(from)
+              + "（已入库与已作废是终态，不可离开）");
     }
     BigDecimal quantity = input.quantity() == null ? BigDecimal.ZERO : qty(input.quantity());
     OffsetDateTime now = now();
@@ -497,21 +504,37 @@ public class ProcessingOrderService {
       BigDecimal planned = head.get("planned_output_quantity", BigDecimal.class);
       if (quantity.compareTo(planned) > 0) {
         throw bad(
-            "完工数量 " + quantity + " 超过了约定的 " + planned
-                + "：超产要么先改约定、要么走第二张单，让完工数超过约定会让良率这个数失去意义");
+            "完工数量 " + quantity + " 超过了约定的 " + planned + "：超产要么先改约定、要么走第二张单，让完工数超过约定会让良率这个数失去意义");
       }
       BigDecimal done = head.get("completed_quantity", BigDecimal.class);
       sql.execute(
           "update processing_order set status=?,completed_quantity=?,completed_at=?::timestamptz,"
               + "version=version+1,updated_at=now() where id=?",
-          to.name(), done.add(quantity), now, orderId);
-      appendEvent(orderId, ProcessingEventType.COMPLETED, from.name(), to.name(), quantity,
-          nz(input.note()), actorId, now);
+          to.name(),
+          done.add(quantity),
+          now,
+          orderId);
+      appendEvent(
+          orderId,
+          ProcessingEventType.COMPLETED,
+          from.name(),
+          to.name(),
+          quantity,
+          nz(input.note()),
+          actorId,
+          now);
       return orderSaved(orderId);
     } else if (to == ProcessingStatus.RECEIVED) {
       markReceived(tenantId, orderId, quantity, now, input);
-      appendEvent(orderId, ProcessingEventType.RECEIVED, from.name(), to.name(), quantity,
-          nz(input.note()), actorId, now);
+      appendEvent(
+          orderId,
+          ProcessingEventType.RECEIVED,
+          from.name(),
+          to.name(),
+          quantity,
+          nz(input.note()),
+          actorId,
+          now);
       return orderSaved(orderId);
     } else if (to == ProcessingStatus.CANCELLED) {
       String reason = fit(input.reason(), 300, "作废原因");
@@ -521,35 +544,58 @@ public class ProcessingOrderService {
       sql.execute(
           "update processing_order set status=?,cancel_reason=?,version=version+1,"
               + "updated_at=now() where id=?",
-          to.name(), reason, orderId);
+          to.name(),
+          reason,
+          orderId);
       // 入库需求通知随加工单一起作废，否则待办清单里会挂着永远等不到的入库需求。
       sql.execute(
           "update processing_inbound_request set status='CANCELLED',version=version+1,"
               + "updated_at=now() where order_id=? and status in ('PENDING','PARTIAL')",
           orderId);
-      appendEvent(orderId, ProcessingEventType.CANCELLED, from.name(), to.name(),
-          BigDecimal.ZERO, reason, actorId, now);
+      appendEvent(
+          orderId,
+          ProcessingEventType.CANCELLED,
+          from.name(),
+          to.name(),
+          BigDecimal.ZERO,
+          reason,
+          actorId,
+          now);
       return orderSaved(orderId);
     }
 
     // RELEASED / IN_PROCESS：不带数量，只推状态。
     sql.execute(
         "update processing_order set status=?,version=version+1,updated_at=now() where id=?",
-        to.name(), orderId);
-    appendEvent(orderId,
-        to == ProcessingStatus.RELEASED ? ProcessingEventType.RELEASED : ProcessingEventType.PROGRESS,
-        from.name(), to.name(), BigDecimal.ZERO, nz(input.note()), actorId, now);
+        to.name(),
+        orderId);
+    appendEvent(
+        orderId,
+        to == ProcessingStatus.RELEASED
+            ? ProcessingEventType.RELEASED
+            : ProcessingEventType.PROGRESS,
+        from.name(),
+        to.name(),
+        BigDecimal.ZERO,
+        nz(input.note()),
+        actorId,
+        now);
     return orderSaved(orderId);
   }
 
   /** 下达：置下达时刻 + 生成入库需求通知（入库需求通知 8，蓝图输出句的硬输出）。 */
-  private void release(UUID tenantId, UUID orderId, OffsetDateTime now, ProcessingStatusInput input) {
+  private void release(
+      UUID tenantId, UUID orderId, OffsetDateTime now, ProcessingStatusInput input) {
     sql.execute(
         "update processing_order set status='RELEASED',released_at=?::timestamptz,"
             + "version=version+1,updated_at=now() where id=?",
-        now, orderId);
-    Record head = sql.fetchOne("select output_sku_id,output_sku_code,planned_output_quantity"
-        + " from processing_order where id=?", orderId);
+        now,
+        orderId);
+    Record head =
+        sql.fetchOne(
+            "select output_sku_id,output_sku_code,planned_output_quantity"
+                + " from processing_order where id=?",
+            orderId);
     sql.execute(
         "insert into processing_inbound_request(id,tenant_id,order_id,sku_id,sku_code,"
             + "requested_quantity,received_quantity,inventory_transaction_ref,status,requested_at,note,"
@@ -570,13 +616,14 @@ public class ProcessingOrderService {
    *
    * <p>实收不得超过需求（DB CHECK 也钉了这一条）：超收是凭空多出成品。
    *
-   * <p><b>部分入库时加工单停在「已完工」，不转「已入库」</b>：已入库是终态
-   * （DB 触发器 6.6 钉死不可离开），若 10 件里先收 8 件就把单子推到终态，
-   * 剩下的 2 件将**永远没有地方登记** —— 那正是仓库账实不符的起点。
-   * 只有实收累计等于待入库量时才转已入库。
+   * <p><b>部分入库时加工单停在「已完工」，不转「已入库」</b>：已入库是终态 （DB 触发器 6.6 钉死不可离开），若 10 件里先收 8 件就把单子推到终态， 剩下的 2
+   * 件将**永远没有地方登记** —— 那正是仓库账实不符的起点。 只有实收累计等于待入库量时才转已入库。
    */
   private void markReceived(
-      UUID tenantId, UUID orderId, BigDecimal quantity, OffsetDateTime now,
+      UUID tenantId,
+      UUID orderId,
+      BigDecimal quantity,
+      OffsetDateTime now,
       ProcessingStatusInput input) {
     Record request =
         sql.fetchOne(
@@ -593,9 +640,7 @@ public class ProcessingOrderService {
     BigDecimal already = request.get("received_quantity", BigDecimal.class);
     BigDecimal total = already.add(quantity);
     if (total.compareTo(requested) > 0) {
-      throw bad(
-          "入库实收 " + total + " 超过了待入库量 " + requested
-              + "：超收等于凭空多出成品。要多收请先改约定或另开加工单");
+      throw bad("入库实收 " + total + " 超过了待入库量 " + requested + "：超收等于凭空多出成品。要多收请先改约定或另开加工单");
     }
     String ref = fit(input.reason(), 64, "入库单号");
     boolean full = total.compareTo(requested) == 0;
@@ -612,7 +657,9 @@ public class ProcessingOrderService {
     sql.execute(
         "update processing_order set status=?,received_at=?::timestamptz,"
             + "version=version+1,updated_at=now() where id=?",
-        full ? "RECEIVED" : "COMPLETED", now, orderId);
+        full ? "RECEIVED" : "COMPLETED",
+        now,
+        orderId);
   }
 
   /** 进度登记：只记「推进到哪、报了多少」，不改生命周期。 */
@@ -627,8 +674,15 @@ public class ProcessingOrderService {
     }
     BigDecimal quantity = input.quantity() == null ? BigDecimal.ZERO : qty(input.quantity());
     OffsetDateTime now = now();
-    appendEvent(orderId, ProcessingEventType.PROGRESS, status.name(), status.name(), quantity,
-        fit(input.note(), 2000, "进度说明"), actorId, now);
+    appendEvent(
+        orderId,
+        ProcessingEventType.PROGRESS,
+        status.name(),
+        status.name(),
+        quantity,
+        fit(input.note(), 2000, "进度说明"),
+        actorId,
+        now);
     sql.execute("update processing_order set updated_at=now() where id=?", orderId);
     return orderSaved(orderId);
   }
@@ -636,8 +690,7 @@ public class ProcessingOrderService {
   /**
    * 登记组件领用（**领用进度**，不是改库存）。
    *
-   * <p>仓库那边真正发料、并改掉组件库存余额的动作在 warehouse 的本地事务里完成；
-   * 本方法记的是「已领了多少」，加工单因此能算出还欠多少料。
+   * <p>仓库那边真正发料、并改掉组件库存余额的动作在 warehouse 的本地事务里完成； 本方法记的是「已领了多少」，加工单因此能算出还欠多少料。
    */
   @Transactional
   public ProcessingOrderSaved issueComponent(UUID orderId, IssueInput input, UUID actorId) {
@@ -651,7 +704,8 @@ public class ProcessingOrderService {
         sql.fetchOne(
             "select id,sku_code,required_quantity,issued_quantity from processing_order_component"
                 + " where id = ? and order_id = ? for update",
-            input.componentId(), orderId);
+            input.componentId(),
+            orderId);
     if (component == null) {
       throw notFound("组件领用记录 " + input.componentId() + " 不存在或不属于这张加工单");
     }
@@ -661,16 +715,38 @@ public class ProcessingOrderService {
     BigDecimal total = already.add(issued);
     if (total.compareTo(required) > 0) {
       throw bad(
-          "组件「" + component.get("sku_code", String.class) + "」本次领 " + issued
-              + " 后累计 " + total + "，超过需求量 " + required
+          "组件「"
+              + component.get("sku_code", String.class)
+              + "」本次领 "
+              + issued
+              + " 后累计 "
+              + total
+              + "，超过需求量 "
+              + required
               + "：超领的料没有对应产出，账上会凭空多出组件。要多领请先改 BOM 版本再重下加工单");
     }
     sql.execute(
         "update processing_order_component set issued_quantity=?,note=?,updated_at=now() where id=?",
-        total, fit(input.note(), 2000, "备注"), input.componentId());
-    appendEvent(orderId, ProcessingEventType.PROGRESS, status.name(), status.name(), BigDecimal.ZERO,
-        "组件 " + component.get("sku_code", String.class) + " 领用 " + issued
-            + "（累计 " + total + " / 需求 " + required + "）", actorId, now());
+        total,
+        fit(input.note(), 2000, "备注"),
+        input.componentId());
+    appendEvent(
+        orderId,
+        ProcessingEventType.PROGRESS,
+        status.name(),
+        status.name(),
+        BigDecimal.ZERO,
+        "组件 "
+            + component.get("sku_code", String.class)
+            + " 领用 "
+            + issued
+            + "（累计 "
+            + total
+            + " / 需求 "
+            + required
+            + "）",
+        actorId,
+        now());
     sql.execute("update processing_order set updated_at=now() where id=?", orderId);
     return orderSaved(orderId);
   }
@@ -679,9 +755,12 @@ public class ProcessingOrderService {
 
   private ProcessingOrderSaved orderSaved(UUID orderId) {
     Record row =
-        sql.fetchOne("select " + ORDER_COLUMNS
-            + " from processing_order o join processing_factory f"
-            + " on f.tenant_id = o.tenant_id and f.id = o.factory_id where o.id = ?", orderId);
+        sql.fetchOne(
+            "select "
+                + ORDER_COLUMNS
+                + " from processing_order o join processing_factory f"
+                + " on f.tenant_id = o.tenant_id and f.id = o.factory_id where o.id = ?",
+            orderId);
     if (row == null) {
       throw notFound("加工单 " + orderId + " 不存在或无权查看");
     }
@@ -719,8 +798,7 @@ public class ProcessingOrderService {
   }
 
   private Record lockOrder(UUID orderId) {
-    Record head =
-        sql.fetchOne("select * from processing_order where id = ? for update", orderId);
+    Record head = sql.fetchOne("select * from processing_order where id = ? for update", orderId);
     if (head == null) {
       throw notFound("加工单 " + orderId + " 不存在或无权操作");
     }
@@ -781,8 +859,7 @@ public class ProcessingOrderService {
   /**
    * 加工单行映射。
    *
-   * <p>纯文本 SQL 里的表达式列（count / sum）jOOQ 拿不到列类型，
-   * 所以数量一律经 {@link #decimal} 读回（7.3.1.1 同一个坑）。
+   * <p>纯文本 SQL 里的表达式列（count / sum）jOOQ 拿不到列类型， 所以数量一律经 {@link #decimal} 读回（7.3.1.1 同一个坑）。
    */
   private static ProcessingOrderSaved orderRow(Record r, Record rollup) {
     String status = r.get("status", String.class);
@@ -832,7 +909,8 @@ public class ProcessingOrderService {
         nz(r.get("note", String.class)));
   }
 
-  private static InboundRequestView inboundRow(Record r) {    BigDecimal requested = qty(r.get("requested_quantity", BigDecimal.class));
+  private static InboundRequestView inboundRow(Record r) {
+    BigDecimal requested = qty(r.get("requested_quantity", BigDecimal.class));
     BigDecimal received = qty(r.get("received_quantity", BigDecimal.class));
     return new InboundRequestView(
         r.get("id", UUID.class),
@@ -912,10 +990,7 @@ public class ProcessingOrderService {
     return value == null ? 0L : ((Number) value).longValue();
   }
 
-  /**
-   * 读数量。纯文本 SQL 里的表达式列 jOOQ 拿不到列类型，
-   * 收口成不依赖驱动返回类型的读法（7.3.1.1 同一个坑：null 被静默读成 0）。
-   */
+  /** 读数量。纯文本 SQL 里的表达式列 jOOQ 拿不到列类型， 收口成不依赖驱动返回类型的读法（7.3.1.1 同一个坑：null 被静默读成 0）。 */
   private static BigDecimal decimal(Record r, String field) {
     Object value = r.get(field);
     if (value == null) {
@@ -960,8 +1035,7 @@ public class ProcessingOrderService {
     if (actual != expected) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "加工单已被他人修改（当前版本 " + actual + "，你的版本 " + expected
-              + "）。请刷新后重试，绝不静默覆盖");
+          "加工单已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "）。请刷新后重试，绝不静默覆盖");
     }
   }
 
@@ -992,7 +1066,9 @@ public class ProcessingOrderService {
       return ProcessingStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (RuntimeException e) {
       throw bad(
-          "未知的加工单状态「" + value + "」：只能是 DRAFT / RELEASED / IN_PROCESS / "
+          "未知的加工单状态「"
+              + value
+              + "」：只能是 DRAFT / RELEASED / IN_PROCESS / "
               + "COMPLETED / RECEIVED / CANCELLED");
     }
   }
@@ -1000,8 +1076,8 @@ public class ProcessingOrderService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义
-   * GUC **复位成空串**而不是「回到未设置」，直接 cast 会报 uuid 语法错（与 V92 同一句写法）。
+   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义 GUC **复位成空串**而不是「回到未设置」，直接 cast 会报
+   * uuid 语法错（与 V92 同一句写法）。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")

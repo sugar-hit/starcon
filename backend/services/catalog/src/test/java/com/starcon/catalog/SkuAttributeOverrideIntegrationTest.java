@@ -22,16 +22,14 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.2.2.2 SKU 属性覆写：四种来源的解析、覆写 / 显式清空 / 取消覆写、类型与选项校验、
- * 类目必填校验，以及租户隔离三断言。
+ * 3.2.2.2 SKU 属性覆写：四种来源的解析、覆写 / 显式清空 / 取消覆写、类型与选项校验、 类目必填校验，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>所有服务调用都经 {@link #write} / {@link #read} 包一层 {@code access.run}：
- * 租户上下文是事务级设置的（{@code set_config(..., true)}），裸调服务方法拿不到
- * {@code app.current_tenant}，RLS 会把行全部过滤掉——那样断言的不是业务规则而是 RLS。
+ * <p>所有服务调用都经 {@link #write} / {@link #read} 包一层 {@code access.run}： 租户上下文是事务级设置的（{@code
+ * set_config(..., true)}），裸调服务方法拿不到 {@code app.current_tenant}，RLS 会把行全部过滤掉——那样断言的不是业务规则而是 RLS。
  *
  * <p>每个用例用独立编码与类目：容器在整个测试类共用，固定编码会互相抢占字典位。
  */
@@ -200,15 +198,15 @@ class SkuAttributeOverrideIntegrationTest {
             who,
             () ->
                 sql.fetchOne(
-                    "select id from spu where category=? order by created_at desc limit 1", category))
+                    "select id from spu where category=? order by created_at desc limit 1",
+                    category))
         .get("id", UUID.class);
   }
 
   /**
    * 建一条 SPU 级属性定义。
    *
-   * <p>每次都现读 {@code spu.version} 再传进去：{@code saveAttribute} 会走乐观锁并顶一次版本号，
-   * 固定传 0 在第二条属性上就会被 409 拒掉。
+   * <p>每次都现读 {@code spu.version} 再传进去：{@code saveAttribute} 会走乐观锁并顶一次版本号， 固定传 0 在第二条属性上就会被 409 拒掉。
    */
   UUID attr(
       UUID spuId,
@@ -273,10 +271,9 @@ class SkuAttributeOverrideIntegrationTest {
   /**
    * 给某个类目挂一条必填规则。
    *
-   * <p>用 SQL 直插而不是 3.2.1.1 的端点：已交付的 {@code saveCategoryRule} 走 {@code dictionaryRow}，
-   * 要求 {@code spu_id} 为空，只能给字典条目建规则。但表的复合外键
-   * {@code (tenant_id,attribute_id) → attribute_definition(tenant_id,id)} 与 RLS 都允许指向
-   * SPU 级定义，所以本模块读的这条校验路径是真实可用的——不是为测试单开的后门。
+   * <p>用 SQL 直插而不是 3.2.1.1 的端点：已交付的 {@code saveCategoryRule} 走 {@code dictionaryRow}， 要求 {@code
+   * spu_id} 为空，只能给字典条目建规则。但表的复合外键 {@code (tenant_id,attribute_id) →
+   * attribute_definition(tenant_id,id)} 与 RLS 都允许指向 SPU 级定义，所以本模块读的这条校验路径是真实可用的——不是为测试单开的后门。
    *
    * <p>必须在租户上下文里写：裸 {@code sql.execute} 不带 {@code app.current_tenant}，RLS 会直接拒。
    */
@@ -320,10 +317,9 @@ class SkuAttributeOverrideIntegrationTest {
   /**
    * 断言这次写会被 400 拒掉。
    *
-   * <p>两种形态都算：服务层用 {@code CatalogService.check} 抛的 {@link ResponseStatusException}，
-   * 以及 {@code ApiErrorHandler} 映射成 400 的 {@link IllegalArgumentException} /
-   * {@link java.time.format.DateTimeParseException}——日期格式就是这么拒的，
-   * 用户传错格式不该看到 500。
+   * <p>两种形态都算：服务层用 {@code CatalogService.check} 抛的 {@link ResponseStatusException}， 以及 {@code
+   * ApiErrorHandler} 映射成 400 的 {@link IllegalArgumentException} / {@link
+   * java.time.format.DateTimeParseException}——日期格式就是这么拒的， 用户传错格式不该看到 500。
    */
   void assertBadRequest(java.util.function.Supplier<?> work) {
     assertBadRequest(actor, work);
@@ -383,8 +379,7 @@ class SkuAttributeOverrideIntegrationTest {
   /**
    * 核心断言：同一个 SKU 的四条属性分别落在四种来源上，且「显式清空」**不等于**「未设置」。
    *
-   * <p>这是整个模块的灵魂——清空那条有效值是空且不退回公共值；未设置那条也是空，
-   * 但两者在数据层形态不同（一个有 state=CLEAR 的行，一个根本没有行）。
+   * <p>这是整个模块的灵魂——清空那条有效值是空且不退回公共值；未设置那条也是空， 但两者在数据层形态不同（一个有 state=CLEAR 的行，一个根本没有行）。
    */
   @Test
   void resolvesFourSourcesAndExplicitClearIsNotTheSameAsUnset() {
@@ -493,7 +488,8 @@ class SkuAttributeOverrideIntegrationTest {
   @Test
   void removingOverrideFallsBackToSpuValueAndIsIdempotent() {
     UUID spuId = spu(uniqueCategory("remove"));
-    UUID color = attr(spuId, "颜色", "OPTION", "COMMON_DEFAULT", false, List.of("红", "蓝"), List.of("红"));
+    UUID color =
+        attr(spuId, "颜色", "OPTION", "COMMON_DEFAULT", false, List.of("红", "蓝"), List.of("红"));
     UUID skuId = createSku(spuId, List.of());
 
     set(actor, skuId, color, values("蓝"));
@@ -563,10 +559,14 @@ class SkuAttributeOverrideIntegrationTest {
     assertThat(unknown.getReason()).contains("没有选项");
 
     // 存在但已停用：说的是"停用"，不是"不存在"
-    write(actor, () -> sql.execute(
-        "update attribute_option set enabled=false where attribute_id=? and value=?", color, "蓝"));
-    ResponseStatusException disabled =
-        expectFailure(() -> set(actor, skuId, color, values("蓝")));
+    write(
+        actor,
+        () ->
+            sql.execute(
+                "update attribute_option set enabled=false where attribute_id=? and value=?",
+                color,
+                "蓝"));
+    ResponseStatusException disabled = expectFailure(() -> set(actor, skuId, color, values("蓝")));
     assertThat(disabled.getStatusCode().value()).isEqualTo(400);
     assertThat(disabled.getReason()).contains("已停用");
 
@@ -594,7 +594,8 @@ class SkuAttributeOverrideIntegrationTest {
 
     // 停用属性：挡住新建赋值，已有取值照常可读
     set(actor, skuId, soft, values("改过的值"));
-    write(actor, () -> sql.execute("update attribute_definition set enabled=false where id=?", soft));
+    write(
+        actor, () -> sql.execute("update attribute_definition set enabled=false where id=?", soft));
     var disabled = row(view(skuId), soft);
     assertThat(disabled.overridable()).isFalse();
     assertThat(disabled.blockReason()).contains("停用");
@@ -720,7 +721,8 @@ class SkuAttributeOverrideIntegrationTest {
     String base = base(skuId);
 
     assertThat(row(viewOf(reader, skuId), color).effectiveValues()).containsExactly("红");
-    http.perform(get(panel(skuId)).header("Authorization", "Bearer reader")).andExpect(status().isOk());
+    http.perform(get(panel(skuId)).header("Authorization", "Bearer reader"))
+        .andExpect(status().isOk());
     http.perform(
             put(base + "/" + color)
                 .header("Authorization", "Bearer reader")
@@ -740,8 +742,7 @@ class SkuAttributeOverrideIntegrationTest {
                 .content("{\"values\":[\"红\"]}"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("SKU_OVERRIDE")));
-    http.perform(
-            put(base + "/" + color + "/clear").header("Authorization", "Bearer tenant-a"))
+    http.perform(put(base + "/" + color + "/clear").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("SKU_CLEARED")));
     http.perform(delete(base + "/" + color).header("Authorization", "Bearer tenant-a"))
@@ -765,11 +766,12 @@ class SkuAttributeOverrideIntegrationTest {
                 actor,
                 () ->
                     sql.fetch(
-                            "select action from audit_event where resource_id=? order by occurred_at",
-                            spuId))
+                        "select action from audit_event where resource_id=? order by occurred_at",
+                        spuId))
             .getValues("action", String.class);
     assertThat(actions)
-        .containsSubsequence("SkuAttributeOverridden", "SkuAttributeCleared", "SkuAttributeOverrideRemoved");
+        .containsSubsequence(
+            "SkuAttributeOverridden", "SkuAttributeCleared", "SkuAttributeOverrideRemoved");
   }
 
   /** 覆写写入不推进 sku.version：那个版本号是 3.1.2.x 的乐观锁凭据，不归本模块顶。 */
@@ -807,7 +809,8 @@ class SkuAttributeOverrideIntegrationTest {
     assertNotFound(actor, () -> read(actor, () -> overrides.view(UUID.randomUUID())));
     assertNotFound(actor, () -> set(actor, skuId, UUID.randomUUID(), values("x")));
     // 别的商品的属性定义不能在这个 SKU 上覆写
-    UUID foreign = attr(otherSpu, "别的商品属性", "TEXT", "COMMON_DEFAULT", false, List.of(), List.of("别的"));
+    UUID foreign =
+        attr(otherSpu, "别的商品属性", "TEXT", "COMMON_DEFAULT", false, List.of(), List.of("别的"));
     assertNotFound(actor, () -> set(actor, skuId, foreign, values("x")));
     assertNotFound(actor, () -> clear(actor, skuId, foreign));
     assertNotFound(actor, () -> remove(actor, skuId, foreign));
@@ -818,7 +821,8 @@ class SkuAttributeOverrideIntegrationTest {
   @Test
   void skuAttributeOverrideIsTenantIsolatedAndHeaderForgeryIsIgnored() throws Exception {
     UUID spuId = spu(uniqueCategory("iso"));
-    UUID material = attr(spuId, "材质", "TEXT", "COMMON_DEFAULT", false, List.of(), List.of("我租户的公共值"));
+    UUID material =
+        attr(spuId, "材质", "TEXT", "COMMON_DEFAULT", false, List.of(), List.of("我租户的公共值"));
     UUID skuId = createSku(spuId, List.of());
     set(actor, skuId, material, values("我租户的覆写值"));
 
@@ -843,7 +847,8 @@ class SkuAttributeOverrideIntegrationTest {
     String base = base(skuId);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(get(panel(skuId)).header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get(panel(skuId)).header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     http.perform(
             put(base + "/" + material + "/clear")
@@ -856,7 +861,8 @@ class SkuAttributeOverrideIntegrationTest {
                 .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 伪造头也不能借道写：A 自己的会话带上 B 的租户头，仍然只能操作 A 的 SKU
-    http.perform(get(panel(skuId)).header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
+    http.perform(
+            get(panel(skuId)).header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("我租户的覆写值")));
     assertThat(row(view(skuId), material).source()).isEqualTo("SKU_OVERRIDE");

@@ -21,29 +21,23 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.3.1.2 效期与先进先出。
  *
- * <p>蓝图：「对有保质期的商品，按 FEFO（先到期先出）或 FIFO 分配出库批次，预警临期与过期库存」，
- * 输入「批次失效日期；出库分配策略（FEFO/FIFO/指定批次）；预警提前天数」，
+ * <p>蓝图：「对有保质期的商品，按 FEFO（先到期先出）或 FIFO 分配出库批次，预警临期与过期库存」， 输入「批次失效日期；出库分配策略（FEFO/FIFO/指定批次）；预警提前天数」，
  * 输出「推荐出库批次；临期/过期预警清单」。
  *
  * <p>五条实现纪律：
  *
  * <ul>
- *   <li><b>分配真从 {@code stock_bucket} 排序算出来</b>。批次只在 {@code stock_bucket} 这一层是精确的
- *       （{@code inventory_balance} / {@code inventory_entry} 都没有 {@code lot_id}，
- *       与 7.3.1.1 的 {@code attribution=BALANCE_GRANULAR} 是同一事实），
- *       所以推荐的每一行都对应真实的 bucket，不是按批次号估算的。
- *   <li><b>FEFO 与 FIFO 是两种不同的排序依据</b>，各自有测试钉住：
- *       FEFO 按 {@code expires_on} 升序，FIFO 按 {@code received_on}（业务日期）升序、
- *       缺失时退回 {@code stock_bucket.created_at}。
- *       <b>刻意不用 {@code last_movement_at} 排序</b>：它是「最近一次变动的业务时间」，
- *       每动一次就前移，拿它排先进先出等于按"最近被碰过的先后"出库，完全不是先进先出。
- *   <li><b>过期库存在任何策略下都不参与出库</b>，并且它的数量被单独报进
- *       {@link FefoAllocationIneligible#expiredAvailable} —— 分配不足时界面能回答「为什么不够」。
- *   <li><b>提前天数是每 SKU 的配置</b>（{@code inventory_expiry_policy.lead_days}），
- *       不是全局常量：食品与日化的临期窗口差一个数量级。
- *   <li><b>策略开关开着才生效</b>。蓝图说「第一期是否启用可延后，但维度已保留」，
- *       这句话落到代码上就是 {@code enabled}：关着时出库退回按库位顺序取可用量，
- *       并在响应里 {@code policyEnabled=false} 如实报出，不假装已经排过 FEFO。
+ *   <li><b>分配真从 {@code stock_bucket} 排序算出来</b>。批次只在 {@code stock_bucket} 这一层是精确的 （{@code
+ *       inventory_balance} / {@code inventory_entry} 都没有 {@code lot_id}， 与 7.3.1.1 的 {@code
+ *       attribution=BALANCE_GRANULAR} 是同一事实）， 所以推荐的每一行都对应真实的 bucket，不是按批次号估算的。
+ *   <li><b>FEFO 与 FIFO 是两种不同的排序依据</b>，各自有测试钉住： FEFO 按 {@code expires_on} 升序，FIFO 按 {@code
+ *       received_on}（业务日期）升序、 缺失时退回 {@code stock_bucket.created_at}。 <b>刻意不用 {@code
+ *       last_movement_at} 排序</b>：它是「最近一次变动的业务时间」， 每动一次就前移，拿它排先进先出等于按"最近被碰过的先后"出库，完全不是先进先出。
+ *   <li><b>过期库存在任何策略下都不参与出库</b>，并且它的数量被单独报进 {@link FefoAllocationIneligible#expiredAvailable} ——
+ *       分配不足时界面能回答「为什么不够」。
+ *   <li><b>提前天数是每 SKU 的配置</b>（{@code inventory_expiry_policy.lead_days}）， 不是全局常量：食品与日化的临期窗口差一个数量级。
+ *   <li><b>策略开关开着才生效</b>。蓝图说「第一期是否启用可延后，但维度已保留」， 这句话落到代码上就是 {@code enabled}：关着时出库退回按库位顺序取可用量， 并在响应里
+ *       {@code policyEnabled=false} 如实报出，不假装已经排过 FEFO。
  * </ul>
  *
  * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离。
@@ -57,18 +51,16 @@ public class InventoryExpiryService {
   /**
    * 没有配置策略时的提前天数。
    *
-   * <p>刻意是一个**有名字的默认值而不是魔法数字**：30 天是食品行业最常见的临期口径，
-   * 而它是「没人配时的兜底」—— 响应里的 {@code leadDaysSource} 会如实标成 DEFAULT，
-   * 界面上能看出这个 30 不是谁调出来的。
+   * <p>刻意是一个**有名字的默认值而不是魔法数字**：30 天是食品行业最常见的临期口径， 而它是「没人配时的兜底」—— 响应里的 {@code leadDaysSource} 会如实标成
+   * DEFAULT， 界面上能看出这个 30 不是谁调出来的。
    */
   public static final int DEFAULT_LEAD_DAYS = 30;
 
   /**
    * 「本次请求没有覆盖提前天数」的哨兵值。
    *
-   * <p>必须是**合法天数区间之外**的值：任何落在 0~3650 的数都可能是用户真的填的。
-   * 之所以不传 null，是因为 SQL 侧的优先级要写成 {@code coalesce(nullif(?,-1), p.lead_days, ?)} ——
-   * 见 {@link #alerts} 里那段说明。
+   * <p>必须是**合法天数区间之外**的值：任何落在 0~3650 的数都可能是用户真的填的。 之所以不传 null，是因为 SQL 侧的优先级要写成 {@code
+   * coalesce(nullif(?,-1), p.lead_days, ?)} —— 见 {@link #alerts} 里那段说明。
    */
   private static final int NO_OVERRIDE = -1;
 
@@ -111,17 +103,12 @@ public class InventoryExpiryService {
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne(
-                "select count(*)" + policyFrom("") + sqlWhere, binds.toArray())
+        sql.fetchOne("select count(*)" + policyFrom("") + sqlWhere, binds.toArray())
             .get(0, Long.class);
 
     var rows =
         sql.fetch(
-            POLICY_SELECT
-                + policyFrom("")
-                + sqlWhere
-                + policyOrder(query)
-                + " limit ? offset ?",
+            POLICY_SELECT + policyFrom("") + sqlWhere + policyOrder(query) + " limit ? offset ?",
             append(binds, size, (long) pageNumber * size).toArray());
 
     return new ExpiryPolicyPage(
@@ -136,12 +123,11 @@ public class InventoryExpiryService {
   /**
    * 策略列表行投影。
    *
-   * <p>{@code expiringLotCount} / {@code expiredLotCount} 用该策略自己的 {@code lead_days} 算，
-   * 所以「这个 SKU 配的 60 天窗口下有多少临期批次」在列表里就能直接看到 ——
-   * 配 7 天和配 90 天的两个 SKU，同一批货的临期数完全不同，这正是阈值可配置的意义。
+   * <p>{@code expiringLotCount} / {@code expiredLotCount} 用该策略自己的 {@code lead_days} 算， 所以「这个 SKU 配的
+   * 60 天窗口下有多少临期批次」在列表里就能直接看到 —— 配 7 天和配 90 天的两个 SKU，同一批货的临期数完全不同，这正是阈值可配置的意义。
    *
-   * <p>批次数一律 {@code count(distinct l.id)}：同一批次横跨多个库位 / 多个仓时，
-   * {@code count(*)} 数的是 bucket 行数，会让「有多少个临期批次」变成「有多少个库位有临期货」。
+   * <p>批次数一律 {@code count(distinct l.id)}：同一批次横跨多个库位 / 多个仓时， {@code count(*)} 数的是 bucket
+   * 行数，会让「有多少个临期批次」变成「有多少个库位有临期货」。
    */
   private static final String POLICY_SELECT =
       """
@@ -218,8 +204,7 @@ public class InventoryExpiryService {
   /**
    * 策略汇总。**全量**，不受筛选与分页影响。
    *
-   * <p>{@code skuWithExpiryLotCount} 数的是「本租户有带失效日期批次的 SKU 数」，
-   * 它回答的是「效期管理这件事目前覆盖了多少个品」—— 与已配置的策略数对比，
+   * <p>{@code skuWithExpiryLotCount} 数的是「本租户有带失效日期批次的 SKU 数」， 它回答的是「效期管理这件事目前覆盖了多少个品」—— 与已配置的策略数对比，
    * 就能一眼看出还有哪些效期品没纳入策略。
    */
   private ExpiryPolicySummary policySummary() {
@@ -267,8 +252,8 @@ public class InventoryExpiryService {
   /**
    * 某个 SKU 的**生效策略**：配了就用配的，没配就用兜底默认值并如实标成 {@code configured=false}。
    *
-   * <p>与 7.2.2.1 的 {@code /effective} 同一纪律：未配置必须**如实报出**，
-   * 而不是静默按 0 或某个隐含值处理 —— 界面上「配成 30 天」与「没人配」必须分得开。
+   * <p>与 7.2.2.1 的 {@code /effective} 同一纪律：未配置必须**如实报出**， 而不是静默按 0 或某个隐含值处理 —— 界面上「配成 30
+   * 天」与「没人配」必须分得开。
    *
    * <p>跨租户的 SKU 查不到 → 404，不泄露存在性。
    */
@@ -320,17 +305,16 @@ public class InventoryExpiryService {
   /**
    * 建立或修改某 SKU 的出库分配策略（按 SKU 幂等 upsert）。
    *
-   * <p>用 {@code INSERT ... ON CONFLICT (tenant_id,sku_id) DO UPDATE} 而不是「先查再决定」：
-   * 前者由 DB 的唯一索引在并发下裁决，后者的两次调用可能都走 INSERT 分支而撞 23505。
+   * <p>用 {@code INSERT ... ON CONFLICT (tenant_id,sku_id) DO UPDATE} 而不是「先查再决定」： 前者由 DB
+   * 的唯一索引在并发下裁决，后者的两次调用可能都走 INSERT 分支而撞 23505。
    *
    * <p>{@code updated_at} 显式推进：{@code inventory_expiry_policy} 上没有自动更新触发器
    * （本迁移刻意不加：配置行的最后修改时间由应用层显式写，与 inventory_lot 同一口径）。
    *
-   * <p>指定批次的归属由 DB 触发器兜底（{@code guard_expiry_policy_lot_sku}），
-   * 这里先做一次前置校验只为给出可读错误 —— 可读报错比 PG 的约束名有用。
+   * <p>指定批次的归属由 DB 触发器兜底（{@code guard_expiry_policy_lot_sku}）， 这里先做一次前置校验只为给出可读错误 —— 可读报错比 PG
+   * 的约束名有用。
    *
-   * @param tenantId 来自已认证成员关系（控制器传入），**不是**客户端参数。
-   *     RLS 的 WITH CHECK 会再用它复核一次，两道都不靠客户端。
+   * @param tenantId 来自已认证成员关系（控制器传入），**不是**客户端参数。 RLS 的 WITH CHECK 会再用它复核一次，两道都不靠客户端。
    */
   public ExpiryPolicySaved upsertPolicy(UUID tenantId, ExpiryPolicyUpsertRequest request) {
     UUID skuId = request.skuId();
@@ -391,8 +375,7 @@ public class InventoryExpiryService {
     }
     UUID owner = lot.get("sku_id", UUID.class);
     if (!owner.equals(skuId)) {
-      throw new IllegalArgumentException(
-          "指定批次不属于该 SKU（批次 " + lotId + " 归属的 SKU 是 " + owner + "）");
+      throw new IllegalArgumentException("指定批次不属于该 SKU（批次 " + lotId + " 归属的 SKU 是 " + owner + "）");
     }
   }
 
@@ -439,19 +422,16 @@ public class InventoryExpiryService {
    *
    * <ol>
    *   <li>取出该 SKU 在该仓全部 {@code available > 0} 的 bucket，按策略的 ORDER BY 排好；
-   *   <li>逐行分类：非可售 / 不可拣 / 过期 / 无批次 / 无效期（FEFO 下）→ 进 {@code ineligible}；
-   *       其余为可分配候选；
+   *   <li>逐行分类：非可售 / 不可拣 / 过期 / 无批次 / 无效期（FEFO 下）→ 进 {@code ineligible}； 其余为可分配候选；
    *   <li>按顺序逐个 bucket 取 {@code min(剩余需求, 该 bucket 可用量)}，取完即止。
    * </ol>
    *
-   * <p>分到批次的量因此是**批次精确**的（stock_bucket 是批次粒度事实层），
-   * 不像 7.3.1.1 的流水那样只能到 balance 口径。
+   * <p>分到批次的量因此是**批次精确**的（stock_bucket 是批次粒度事实层）， 不像 7.3.1.1 的流水那样只能到 balance 口径。
    *
-   * <p><b>过期 / 临期判定全部在 SQL 侧用 {@code current_date} 完成</b>（与 7.3.1.1 同一口径）：
-   * 用 {@code LocalDate.now()} 会在跨时区部署时与建档兜底差一天，而 FEFO 的整个排序建立在这上面。
+   * <p><b>过期 / 临期判定全部在 SQL 侧用 {@code current_date} 完成</b>（与 7.3.1.1 同一口径）： 用 {@code
+   * LocalDate.now()} 会在跨时区部署时与建档兜底差一天，而 FEFO 的整个排序建立在这上面。
    *
-   * <p>本方法**只读不写**：它出的是推荐，扣减由 8 拣货的业务单据负责，
-   * 避免在没有真实出库单的情况下凭空减少库存。
+   * <p>本方法**只读不写**：它出的是推荐，扣减由 8 拣货的业务单据负责， 避免在没有真实出库单的情况下凭空减少库存。
    */
   public FefoAllocationPlan recommend(FefoAllocationRequest request) {
     UUID skuId = request.skuId();
@@ -610,15 +590,22 @@ public class InventoryExpiryService {
       // 策略关着时可能取到无批次货：单列一行，批号留空而不是编一个。
       planLines.add(
           new FefoAllocationLine(
-              null, null, null, null, null, null, "库位顺序", null,
-              sumTake(ungrouped), ungrouped.size(), bucketLines(ungrouped)));
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              "库位顺序",
+              null,
+              sumTake(ungrouped),
+              ungrouped.size(),
+              bucketLines(ungrouped)));
     }
 
     if (remaining.signum() > 0) {
       notes.add(
-          "可分配量不足，缺口 "
-              + remaining.toPlainString()
-              + "：缺口来源见 ineligible 各分项（过期库存需先走 6.4.2 临期品处理）。");
+          "可分配量不足，缺口 " + remaining.toPlainString() + "：缺口来源见 ineligible 各分项（过期库存需先走 6.4.2 临期品处理）。");
     }
     if (strategy == ExpiryAllocationStrategy.FEFO && noExpiry.signum() > 0) {
       notes.add("该 SKU 有 " + noExpiry.toPlainString() + " 无失效日期的可售量未参与 FEFO 排序。");
@@ -651,11 +638,11 @@ public class InventoryExpiryService {
   /**
    * 候选 bucket 投影。
    *
-   * <p>刻意把 {@code available} 一起取出来而不是自己算 {@code on_hand - reserved}：
-   * {@code available} 是 V2 的生成列，值只有一个来源。
+   * <p>刻意把 {@code available} 一起取出来而不是自己算 {@code on_hand - reserved}： {@code available} 是 V2
+   * 的生成列，值只有一个来源。
    *
-   * <p>{@code is_expired} 与 {@code days_to_expiry} 都在 SQL 侧算（基准是数据库当天）：
-   * 日期判定必须与建档兜底、7.3.1.1 的过期判定同源，否则同一条数据会出现两个答案。
+   * <p>{@code is_expired} 与 {@code days_to_expiry} 都在 SQL 侧算（基准是数据库当天）： 日期判定必须与建档兜底、7.3.1.1
+   * 的过期判定同源，否则同一条数据会出现两个答案。
    */
   private static final String CANDIDATE_SELECT =
       """
@@ -674,9 +661,8 @@ public class InventoryExpiryService {
    *
    * <ul>
    *   <li>FEFO：{@code expires_on} 升序（先到期先出）。失效日期为空的排最后（随后被 ineligible 收走）。
-   *   <li>FIFO：{@code coalesce(received_on, created_at::date)} 升序（先进先出），
-   *       同日入库再按 bucket 建行时间细分。**刻意不用 {@code last_movement_at}**：
-   *       它记录「最近一次变动的业务时间」，每动一次就前移，拿它排序等于按「最近被碰过的先后」出库。
+   *   <li>FIFO：{@code coalesce(received_on, created_at::date)} 升序（先进先出）， 同日入库再按 bucket
+   *       建行时间细分。**刻意不用 {@code last_movement_at}**： 它记录「最近一次变动的业务时间」，每动一次就前移，拿它排序等于按「最近被碰过的先后」出库。
    *   <li>SPECIFIED_LOT：只有一个批次，排序退化为按库位取（同一批次跨库位时的取用顺序）。
    *   <li>策略关着（null）：纯库位顺序，不做任何效期排序。
    * </ul>
@@ -698,9 +684,8 @@ public class InventoryExpiryService {
   /**
    * 一次取用：来源 bucket 行 + 从它取的量。
    *
-   * <p>刻意用一个显式的小 record 而不是往 jOOQ 的 {@code Record} 上加列 ——
-   * {@code with(String, Object)} 这类重载不存在（只有 {@code with(Field<T>, T)}），
-   * 而 {@code Record} 一旦被 {@code with(Field,...)} 改写就成了一份副本，混着用反而更难读。
+   * <p>刻意用一个显式的小 record 而不是往 jOOQ 的 {@code Record} 上加列 —— {@code with(String, Object)} 这类重载不存在（只有
+   * {@code with(Field<T>, T)}）， 而 {@code Record} 一旦被 {@code with(Field,...)} 改写就成了一份副本，混着用反而更难读。
    */
   private record Pick(Record row, BigDecimal take) {}
 
@@ -713,9 +698,8 @@ public class InventoryExpiryService {
   /**
    * 把一次取用折成一行推荐。
    *
-   * <p>{@code sortBasis} / {@code sortBasisValue} 报的是**本次实际用的排序键**，
-   * 由策略决定而不是由「这个批次有没有失效日期」决定：FIFO 下同样是有失效日期的批次，
-   * 排的却是入库时间，标成「失效日期」会让人以为系统排错了。
+   * <p>{@code sortBasis} / {@code sortBasisValue} 报的是**本次实际用的排序键**， 由策略决定而不是由「这个批次有没有失效日期」决定：FIFO
+   * 下同样是有失效日期的批次， 排的却是入库时间，标成「失效日期」会让人以为系统排错了。
    */
   private static FefoAllocationLine allocationLine(
       Pick head, List<Pick> picks, ExpiryAllocationStrategy strategy) {
@@ -778,11 +762,11 @@ public class InventoryExpiryService {
   /**
    * 效期预警清单（临期 / 过期 / 非效期品）。
    *
-   * <p>提前天数是**逐 SKU 取的**：{@code coalesce(本次覆盖值, 该 SKU 策略的 lead_days, 默认 30)}。
-   * 所以同一个租户里不同 SKU 的临期口径可以不同，而 {@code leadDaysSource} 会如实标明这一行用的是哪一个。
+   * <p>提前天数是**逐 SKU 取的**：{@code coalesce(本次覆盖值, 该 SKU 策略的 lead_days, 默认 30)}。 所以同一个租户里不同 SKU
+   * 的临期口径可以不同，而 {@code leadDaysSource} 会如实标明这一行用的是哪一个。
    *
-   * <p><b>汇总不受 expiryStatus 档位筛选影响</b>（其余筛选生效）：默认只看临期/过期两档时，
-   * 若汇总也跟着收窄，{@code healthyLotCount} 就会恒为 0 —— 一个恒为 0 的字段等于没有这个字段。
+   * <p><b>汇总不受 expiryStatus 档位筛选影响</b>（其余筛选生效）：默认只看临期/过期两档时， 若汇总也跟着收窄，{@code healthyLotCount} 就会恒为
+   * 0 —— 一个恒为 0 的字段等于没有这个字段。
    */
   public ExpiryAlertPage alerts(ExpiryAlertQuery query) {
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, query.size() == null ? 50 : query.size()));
@@ -805,9 +789,7 @@ public class InventoryExpiryService {
     // 而这个 bug 的表现只是「配了 7 天却按 30 天算」，不看返回值根本发现不了。
     // nullif 两个参数 + coalesce 两个默认值，所以这里有**三个**占位符，
     // 三个值全部从下面这同一个数组派生，不手数（手数正是「错位一格」的来源）。
-    Object[] leadBind = {
-      override == null ? NO_OVERRIDE : override, NO_OVERRIDE, DEFAULT_LEAD_DAYS
-    };
+    Object[] leadBind = {override == null ? NO_OVERRIDE : override, NO_OVERRIDE, DEFAULT_LEAD_DAYS};
     String cte = alertCte(sqlWhere);
 
     var statuses = statusesOf(query);
@@ -839,9 +821,7 @@ public class InventoryExpiryService {
     String leadNote =
         override != null
             ? "本次统一按 " + override + " 天窗口计算（临时覆盖，未改动各 SKU 的策略）。"
-            : "逐 SKU 按各自策略的提前天数计算；没有配置策略的 SKU 用默认值 "
-                + DEFAULT_LEAD_DAYS
-                + " 天。";
+            : "逐 SKU 按各自策略的提前天数计算；没有配置策略的 SKU 用默认值 " + DEFAULT_LEAD_DAYS + " 天。";
 
     return new ExpiryAlertPage(
         alertSummary(cte, leadBind, binds.toArray()),
@@ -857,18 +837,15 @@ public class InventoryExpiryService {
   /**
    * 效期预警的两级 CTE。
    *
-   * <p><b>为什么分两级</b>：{@code expiry_status} 要用同层的 {@code days_to_expiry} 与
-   * {@code effective_lead_days}，而 PG 的 SELECT 列表里引用不到刚定义的别名。
-   * 把「算天数与阈值」放进 {@code base}，把「按它们算档位」放进 {@code scoped}，
-   * 绑定值就只在 {@code base} 出现一次 —— 重复写一遍 {@code coalesce(...)} 就得多绑一次，
+   * <p><b>为什么分两级</b>：{@code expiry_status} 要用同层的 {@code days_to_expiry} 与 {@code
+   * effective_lead_days}，而 PG 的 SELECT 列表里引用不到刚定义的别名。 把「算天数与阈值」放进 {@code base}，把「按它们算档位」放进 {@code
+   * scoped}， 绑定值就只在 {@code base} 出现一次 —— 重复写一遍 {@code coalesce(...)} 就得多绑一次，
    * 提前天数一改就极易错位一格，而错位的表现是「筛选结果莫名其妙少一批」。
    *
-   * <p>返回的是完整的 {@code WITH} 子句，**必须拼在每条语句最前面** ——
-   * {@code select count(*) with x as ...} 不是合法 SQL，而这种拼接顺序错误的表现是
-   * 驱动报「bad SQL grammar」，看起来像 SQL 写错了，根因却只是顺序。
+   * <p>返回的是完整的 {@code WITH} 子句，**必须拼在每条语句最前面** —— {@code select count(*) with x as ...} 不是合法
+   * SQL，而这种拼接顺序错误的表现是 驱动报「bad SQL grammar」，看起来像 SQL 写错了，根因却只是顺序。
    *
-   * <p>两级的天数表达式与档位阈值必须同源：天数算出 N、档位用另一个阈值判，
-   * 就会出现「天数是临期但档位是正常」这种自相矛盾的行。
+   * <p>两级的天数表达式与档位阈值必须同源：天数算出 N、档位用另一个阈值判， 就会出现「天数是临期但档位是正常」这种自相矛盾的行。
    */
   private static String alertCte(String sqlWhere) {
     return " with base as (select l.id as lot_id,l.sku_id,s.code as sku_code,s.name as sku_name,"
@@ -898,8 +875,7 @@ public class InventoryExpiryService {
    *
    * <p>{@code expiryStatus} 档位筛选**不在这里**（它作用在外层，汇总不受它影响）。
    *
-   * <p>{@code inStock} 默认 true：零库存批次发不出货，占着预警位是噪声。
-   * 显式传 {@code false} 时不看在手条件（此时清单退化成「本租户所有批次」）。
+   * <p>{@code inStock} 默认 true：零库存批次发不出货，占着预警位是噪声。 显式传 {@code false} 时不看在手条件（此时清单退化成「本租户所有批次」）。
    */
   private void alertConditions(ExpiryAlertQuery query, List<String> where, List<Object> binds) {
     if (query.skuId() != null) {
@@ -928,8 +904,7 @@ public class InventoryExpiryService {
   /**
    * 档位筛选：不传只看「需要处理」的两档。
    *
-   * <p>预警清单的用途是「找出待办的货」，把 HEALTHY 也塞进来会让清单长到没法用 ——
-   * 一个几千行的清单里没有一行是需要动手的。
+   * <p>预警清单的用途是「找出待办的货」，把 HEALTHY 也塞进来会让清单长到没法用 —— 一个几千行的清单里没有一行是需要动手的。
    */
   private static List<String> statusesOf(ExpiryAlertQuery query) {
     if (query.expiryStatus() == null || query.expiryStatus().isEmpty()) {
@@ -940,8 +915,7 @@ public class InventoryExpiryService {
       if (raw == null || raw.isBlank()) continue;
       var code = raw.trim().toUpperCase(Locale.ROOT);
       if (!STATUSES.contains(code)) {
-        throw new IllegalArgumentException(
-            "未知的效期档位：" + raw + "，可选：" + String.join("、", STATUSES));
+        throw new IllegalArgumentException("未知的效期档位：" + raw + "，可选：" + String.join("、", STATUSES));
       }
       if (!codes.contains(code)) codes.add(code);
     }
@@ -955,7 +929,7 @@ public class InventoryExpiryService {
           "不支持的排序键：" + query.sort() + "，可选：" + String.join("、", ALERT_SORTS));
     }
     return switch (sort) {
-      // 紧急度优先：剩余天数升序 —— 已过期的（负数）排在最前，临期的紧随其后。
+        // 紧急度优先：剩余天数升序 —— 已过期的（负数）排在最前，临期的紧随其后。
       case "EXPIRY" -> " order by days_to_expiry nulls last,lot_code,lot_id";
       case "ON_HAND" -> " order by on_hand desc,days_to_expiry nulls last,lot_id";
       case "RECEIVED_ON" -> " order by received_on desc nulls last,lot_id";
@@ -967,15 +941,14 @@ public class InventoryExpiryService {
   /**
    * 效期预警汇总。
    *
-   * <p>数量与在手量都**按档位拆开**报：过期走 6.4.2 临期品处理、临期走促销或调拨，
-   * 处置路径完全不同，合成一个数就没法派工。
+   * <p>数量与在手量都**按档位拆开**报：过期走 6.4.2 临期品处理、临期走促销或调拨， 处置路径完全不同，合成一个数就没法派工。
    *
-   * <p>{@code skuCount} 单独查一次而不按档位加总：一个同时有临期与过期批次的 SKU
-   * 在两个档位里各数一次，加起来会把它算成两个 SKU。
+   * <p>{@code skuCount} 单独查一次而不按档位加总：一个同时有临期与过期批次的 SKU 在两个档位里各数一次，加起来会把它算成两个 SKU。
    */
   private ExpiryAlertSummary alertSummary(String cte, Object[] leadBind, Object[] whereBinds) {
     var byStatus =
-        sql.fetch(
+        sql
+            .fetch(
                 cte
                     + " select expiry_status,count(*) as lot_count,sum(on_hand) as on_hand,"
                     + " min(expires_on) as min_exp,max(expires_on) as max_exp"
@@ -1044,8 +1017,7 @@ public class InventoryExpiryService {
   /**
    * 效期档位下拉项（带命中批次数）。
    *
-   * <p>用**兜底阈值**而不是各 SKU 的策略值来数：下拉是「这个租户的效期盘子有多大」，
-   * 一个随 SKU 配置跳动的计数在筛选器里只会让人以为数错了。
+   * <p>用**兜底阈值**而不是各 SKU 的策略值来数：下拉是「这个租户的效期盘子有多大」， 一个随 SKU 配置跳动的计数在筛选器里只会让人以为数错了。
    */
   private List<ExpiryStatusOption> statusOptions() {
     // 刻意**不 join 策略表**，恒用兜底阈值：一个随各 SKU 配置跳动的下拉计数，
@@ -1085,7 +1057,8 @@ public class InventoryExpiryService {
 
   /** 某 SKU 的批次下拉（指定批次策略用）。按失效日期升序：先到期的排前面。 */
   public List<ExpiryLotOption> lots(UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select l.id,l.lot_code,l.expires_on from inventory_lot l where l.sku_id=?"
                 + " order by l.expires_on nulls last,l.lot_code,l.id",
             skuId)
@@ -1188,9 +1161,8 @@ public class InventoryExpiryService {
   /**
    * 取整数列。
    *
-   * <p>{@code expires_on - current_date} 与 {@code count(*)} 在 PG 里都是 integer，
-   * 但**纯文本语句里 jOOQ 拿不到列类型**，直接 {@code r.get(field, Integer.class)}
-   * 会因类型不匹配而返回 null —— 于是每一行都退化成「没有效期 / 天数是空」，
+   * <p>{@code expires_on - current_date} 与 {@code count(*)} 在 PG 里都是 integer， 但**纯文本语句里 jOOQ
+   * 拿不到列类型**，直接 {@code r.get(field, Integer.class)} 会因类型不匹配而返回 null —— 于是每一行都退化成「没有效期 / 天数是空」，
    * 而这恰恰是最该显示出来的那两列。这里收口成不受驱动返回类型影响的读法。
    */
   private static Integer intOrNull(Record r, String field) {

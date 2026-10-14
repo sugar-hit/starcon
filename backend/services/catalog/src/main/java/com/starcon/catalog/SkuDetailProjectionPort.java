@@ -7,17 +7,14 @@ import java.util.UUID;
 /**
  * SKU 详情需要的跨服务聚合读取端口。
  *
- * <p>3.1.2.2 的详情页是整个 SKU 档案的入口，但它聚合的库存分布（07）、成本与采购价（06）、
- * 售价（05）、平台 listing（04）、各单据引用（04/06/07/08/09/11）都不是 catalog 的事实。
- * 蓝图明确「库存数以 07 为准，售价以 05 为准」，所以这些数据**不落成本地列**——
- * 落了就等于 catalog 成了第二个事实来源，两边数字迟早对不上，而且没人说得清该信哪个。
+ * <p>3.1.2.2 的详情页是整个 SKU 档案的入口，但它聚合的库存分布（07）、成本与采购价（06）、 售价（05）、平台
+ * listing（04）、各单据引用（04/06/07/08/09/11）都不是 catalog 的事实。 蓝图明确「库存数以 07 为准，售价以 05
+ * 为准」，所以这些数据**不落成本地列**—— 落了就等于 catalog 成了第二个事实来源，两边数字迟早对不上，而且没人说得清该信哪个。
  *
- * <p>未接入时取不到就是取不到：{@link UnwiredSkuDetailProjectionPort} 显式声明未接入，
- * 详情页把对应分区标成「未接入」并写明归哪个服务，而不是回 0 或空数组。
- * 0 会被读成"库存为零"，空数组会被读成"这个 SKU 没有任何平台 listing"——两者都是假事实。
+ * <p>未接入时取不到就是取不到：{@link UnwiredSkuDetailProjectionPort} 显式声明未接入， 详情页把对应分区标成「未接入」并写明归哪个服务，而不是回 0
+ * 或空数组。 0 会被读成"库存为零"，空数组会被读成"这个 SKU 没有任何平台 listing"——两者都是假事实。
  *
- * <p>本端口只承载 catalog 之外的数据；catalog 自有的字段（编码、规格、有效值、包装、换算）
- * 直接走 jOOQ 读本库，不经过这里。
+ * <p>本端口只承载 catalog 之外的数据；catalog 自有的字段（编码、规格、有效值、包装、换算） 直接走 jOOQ 读本库，不经过这里。
  */
 public interface SkuDetailProjectionPort {
 
@@ -32,12 +29,13 @@ public interface SkuDetailProjectionPort {
     /**
      * 平台 listing。归 04 刊登。
      *
-     * <p>店铺的 {@code seller_sku} 是**平台属性**，不是内部编码（蓝图 3.1.2.3 的口径）：
-     * 内部编码由 catalog 拥有，映射关系在 04 维护，所以这个分区不能反向写回 sku.code。
+     * <p>店铺的 {@code seller_sku} 是**平台属性**，不是内部编码（蓝图 3.1.2.3 的口径）： 内部编码由 catalog 拥有，映射关系在 04
+     * 维护，所以这个分区不能反向写回 sku.code。
      */
     LISTINGS("LISTINGS", "平台 listing", "04 刊登"),
     /** 各单据引用（刊登 / 采购单 / 出入库 / 订单 / 售后）。分属 04/06/07/08/09/11。 */
-    DOCUMENT_REFERENCES("DOCUMENT_REFERENCES", "各单据引用", "04 刊登 / 06 采购 / 07 库存 / 08 仓储 / 09 订单 / 11 售后");
+    DOCUMENT_REFERENCES(
+        "DOCUMENT_REFERENCES", "各单据引用", "04 刊登 / 06 采购 / 07 库存 / 08 仓储 / 09 订单 / 11 售后");
 
     private final String code;
     private final String label;
@@ -64,11 +62,7 @@ public interface SkuDetailProjectionPort {
 
     /** 未接入时给界面看的一句话：说明归属与为什么不显示数字。 */
     public String unwiredNote() {
-      return "上游投影未接入："
-          + label
-          + "的事实来源是"
-          + ownerLabel
-          + "，这些服务本阶段尚未开发，catalog 无权威数据。";
+      return "上游投影未接入：" + label + "的事实来源是" + ownerLabel + "，这些服务本阶段尚未开发，catalog 无权威数据。";
     }
   }
 
@@ -93,7 +87,12 @@ public interface SkuDetailProjectionPort {
    * @param detail 行补充说明（例如平台的 seller_sku，与内部编码明确区分）
    */
   record Row(
-      String key, String label, BigDecimal quantity, BigDecimal amount, String state, String detail) {}
+      String key,
+      String label,
+      BigDecimal quantity,
+      BigDecimal amount,
+      String state,
+      String detail) {}
 
   /** 该实现能提供的子分区；未列出的视为未接入。 */
   List<Source> supportedSources();

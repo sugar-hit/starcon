@@ -195,16 +195,13 @@ export function SkuCodeWorkspace() {
         <div>
           <h2 className="text-xl font-semibold">编码与条码</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            内部 SKU 编码（手工输入 / 按规则自动生成 / 批量补齐）与外部条码
-            （scheme + value 唯一），供 08 拣货扫码与 10 面单打印使用。
+            内部 SKU 编码（手工输入 / 按规则自动生成 / 批量补齐）与外部条码 （scheme + value
+            唯一），供 08 拣货扫码与 10 面单打印使用。
           </p>
         </div>
         <div className="flex items-center gap-2">
           {writable && (
-            <Button
-              size="sm"
-              onClick={() => setEditingRule({ id: null, draft: emptyRuleDraft() })}
-            >
+            <Button size="sm" onClick={() => setEditingRule({ id: null, draft: emptyRuleDraft() })}>
               <Plus className="h-4 w-4" />
               新建规则
             </Button>
@@ -278,7 +275,9 @@ export function SkuCodeWorkspace() {
                     {rule.sampleCode ? (
                       <span className="text-foreground ml-1 tabular-nums">{rule.sampleCode}</span>
                     ) : (
-                      <span className="text-destructive ml-1">展开后超出 64 位上限，请修改前后缀</span>
+                      <span className="text-destructive ml-1">
+                        展开后超出 64 位上限，请修改前后缀
+                      </span>
                     )}
                   </p>
                 </div>
@@ -374,7 +373,7 @@ export function SkuCodeWorkspace() {
         )}
         {batchResult && (
           <BatchOutcome
-            title={`${batchResult.dryRun ? '预览' : actionLabels[batchResult.action] ?? batchResult.action} · ${batchSummary(batchResult)}`}
+            title={`${batchResult.dryRun ? '预览' : (actionLabels[batchResult.action] ?? batchResult.action)} · ${batchSummary(batchResult)}`}
             note={
               batchResult.dryRun
                 ? '预览不写数据，也不消耗序号。确认无误后再点执行。'
@@ -457,7 +456,7 @@ export function SkuCodeWorkspace() {
                   <tr key={item.rowNo} className="border-control-border border-t">
                     <td className="py-1.5 tabular-nums">{item.rowNo}</td>
                     <td className="py-1.5">{schemeLabels[item.scheme] ?? item.scheme}</td>
-                    <td className="py-1.5 break-all tabular-nums">{item.value}</td>
+                    <td className="break-all py-1.5 tabular-nums">{item.value}</td>
                     <td className="py-1.5">
                       <Badge tone={outcomeTone(item.outcome)}>{outcomeLabels[item.outcome]}</Badge>
                     </td>
@@ -521,7 +520,11 @@ export function SkuCodeWorkspace() {
               <Value label="当前版本" value={String(panel.version)} />
               <Value
                 label="当前编码来源"
-                value={panel.internalSource ? (sourceLabels[panel.internalSource] ?? panel.internalSource) : '尚无分配留痕'}
+                value={
+                  panel.internalSource
+                    ? (sourceLabels[panel.internalSource] ?? panel.internalSource)
+                    : '尚无分配留痕'
+                }
               />
             </dl>
 
@@ -609,8 +612,8 @@ export function SkuCodeWorkspace() {
               )}
               {primaryIdentifier(panel.identifiers) && (
                 <p className="text-muted-foreground mt-2 text-xs">
-                  主条码是 SKU 的内部条码位：08 拣货扫码与 10 面单打印取的就是它。删掉主条码后该位会被清空，
-                  避免留下一个已经不存在的条码。
+                  主条码是 SKU 的内部条码位：08 拣货扫码与 10
+                  面单打印取的就是它。删掉主条码后该位会被清空， 避免留下一个已经不存在的条码。
                 </p>
               )}
 
@@ -641,7 +644,9 @@ export function SkuCodeWorkspace() {
                       <input
                         type="checkbox"
                         checked={scanDraft.isPrimary}
-                        onChange={(e) => setScanDraft({ ...scanDraft, isPrimary: e.target.checked })}
+                        onChange={(e) =>
+                          setScanDraft({ ...scanDraft, isPrimary: e.target.checked })
+                        }
                       />
                       设为主条码
                     </label>
@@ -675,7 +680,9 @@ export function SkuCodeWorkspace() {
                   {panel.assignments.map((assignment) => (
                     <li key={assignment.id} className="text-muted-foreground">
                       {timestamp(assignment.occurredAt)} ·{' '}
-                      {assignment.sourceLabel ?? sourceLabels[assignment.source] ?? assignment.source}
+                      {assignment.sourceLabel ??
+                        sourceLabels[assignment.source] ??
+                        assignment.source}
                       {assignment.ruleCode ? `（规则 ${assignment.ruleCode}）` : ''} ·{' '}
                       <span className="tabular-nums">
                         {assignment.fromCode ?? '（空）'} → {assignment.toCode}
@@ -798,9 +805,7 @@ export function SkuCodeWorkspace() {
       // 粘贴文本里的 SKU 编码要先解析成 UUID。本模块没有 SKU 检索端点，
       // 因此只支持「直接粘 SKU ID」的整列——解析不到的行原样报出来，不静默丢弃。
       const { rows, problems } = parseImportText(importText, (code) =>
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code)
-          ? code
-          : null,
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code) ? code : null,
       );
       if (problems.length > 0)
         setImportError(
@@ -1058,7 +1063,7 @@ function BatchOutcome({
             {result.items.map((item) => (
               <tr key={item.rowNo} className="border-control-border border-t">
                 <td className="py-1.5 tabular-nums">{item.rowNo}</td>
-                <td className="py-1.5 break-all">{item.skuCode || '—'}</td>
+                <td className="break-all py-1.5">{item.skuCode || '—'}</td>
                 <td className="py-1.5">
                   <Badge tone={outcomeTone(item.outcome)}>{outcomeLabels[item.outcome]}</Badge>
                 </td>

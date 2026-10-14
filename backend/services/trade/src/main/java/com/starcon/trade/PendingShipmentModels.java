@@ -12,8 +12,7 @@ import java.util.UUID;
 /**
  * 9.4.1.1 待发货的契约形状。
  *
- * <p>风格照抄 9.6.1.2（{@code DropshipOrderModels}）：枚举与记录同文件，
- * 输入用 {@code @Valid} record，响应是不可变 record。
+ * <p>风格照抄 9.6.1.2（{@code DropshipOrderModels}）：枚举与记录同文件， 输入用 {@code @Valid} record，响应是不可变 record。
  */
 final class PendingShipmentModels {
   private PendingShipmentModels() {}
@@ -36,8 +35,7 @@ final class PendingShipmentModels {
   /**
    * 批量任务状态机。
    *
-   * <p>{@code PARTIAL} 不是可选的：部分失败在大促期是常态，
-   * 把它并进 SUCCEEDED 就等于让「交接漏发」在界面上显示成「交接完成」。
+   * <p>{@code PARTIAL} 不是可选的：部分失败在大促期是常态， 把它并进 SUCCEEDED 就等于让「交接漏发」在界面上显示成「交接完成」。
    */
   enum ShipmentBatchStatus {
     PENDING("待执行"),
@@ -106,9 +104,8 @@ final class PendingShipmentModels {
   /**
    * 发货时限分组桶。
    *
-   * <p>{@code UNSET} 是**刻意的一桶**，不是兜底：上游 2.5.1.1 回传未交付，
-   * trade 的 sales_order 也没有平台 SLA 列（见 V124 文件头第二节），
-   * 所以「还不知道时限」是常态。把它混进 DUE_TODAY 等于把最该盯的货藏起来。
+   * <p>{@code UNSET} 是**刻意的一桶**，不是兜底：上游 2.5.1.1 回传未交付， trade 的 sales_order 也没有平台 SLA 列（见 V124
+   * 文件头第二节）， 所以「还不知道时限」是常态。把它混进 DUE_TODAY 等于把最该盯的货藏起来。
    */
   enum ShipmentSlaBucket {
     OVERDUE("已逾期"),
@@ -378,16 +375,12 @@ final class PendingShipmentModels {
   /**
    * 从 warehouse 授权 API 拉取已完成打包的出库单。
    *
-   * <p>{@code carrierAssignments} 是本模块**必须由调用方给出**的一段事实：
-   * 承运商来自 9.3.x 路由决策，而路由读的是我方的运费时效估算，不是仓库的打包单。
-   * 没给承运商的单元照样投影进来（看板必须看见「还没选路由」这件事），
-   * 但它**建不了批量任务** —— 交接必须知道交给谁。
+   * <p>{@code carrierAssignments} 是本模块**必须由调用方给出**的一段事实： 承运商来自 9.3.x 路由决策，而路由读的是我方的运费时效估算，不是仓库的打包单。
+   * 没给承运商的单元照样投影进来（看板必须看见「还没选路由」这件事）， 但它**建不了批量任务** —— 交接必须知道交给谁。
    */
   public record PendingShipmentSyncInput(
       UUID warehouseId,
-      @Pattern(
-              regexp = "^[A-Z0-9_\\-]{2,32}$",
-              message = "承运渠道代码只能是大写字母、数字、下划线或中划线")
+      @Pattern(regexp = "^[A-Z0-9_\\-]{2,32}$", message = "承运渠道代码只能是大写字母、数字、下划线或中划线")
           String carrierChannel,
       @Pattern(regexp = "^$|^[A-Z0-9_\\-]{2,64}$", message = "承运商代码只能是大写字母、数字、下划线或中划线")
           String carrierCode,
@@ -405,9 +398,7 @@ final class PendingShipmentModels {
   public record ShipmentSlaInput(
       @NotNull OffsetDateTime deadlineAt,
       @NotNull ShipmentSlaSource source,
-      @NotBlank
-          @Pattern(regexp = ".{4,400}", message = "登记依据至少 4 个字符")
-          String note) {}
+      @NotBlank @Pattern(regexp = ".{4,400}", message = "登记依据至少 4 个字符") String note) {}
 
   /** 建批量任务：unitIds 为空表示按分组键（仓 / 渠道 / 承运商）取全部候选。 */
   public record ShipmentBatchTaskInput(
@@ -417,9 +408,7 @@ final class PendingShipmentModels {
       ShipmentCarrierChannel carrierChannel,
       @Pattern(regexp = "^[A-Z0-9_\\-]{2,64}$", message = "承运商代码只能是大写字母、数字、下划线或中划线")
           String carrierCode,
-      @NotBlank
-          @Pattern(regexp = ".{4,400}", message = "任务说明至少 4 个字符")
-          String note) {
+      @NotBlank @Pattern(regexp = ".{4,400}", message = "任务说明至少 4 个字符") String note) {
     public ShipmentBatchTaskInput {
       unitIds = unitIds == null ? List.of() : List.copyOf(unitIds);
     }
@@ -428,26 +417,20 @@ final class PendingShipmentModels {
   /** 批量任务里的运单回执（承运商签发结果）。 */
   public record ShipmentWaybillAckInput(
       @NotNull ShipmentWaybillStatus status,
-      @Pattern(
-              regexp = "^$|^[A-Za-z0-9\\-]{6,128}$",
-              message = "运单号 6–128 位字母数字或中划线")
+      @Pattern(regexp = "^$|^[A-Za-z0-9\\-]{6,128}$", message = "运单号 6–128 位字母数字或中划线")
           String waybillNo,
-      @Pattern(regexp = "^$|^[A-Za-z0-9\\-_]{1,128}$", message = "请求凭据 1–128 位")
-          String requestRef,
-      @Pattern(regexp = "^$|^.{4,600}$", message = "失败原因至少 4 个字符")
-          String errorMessage) {}
+      @Pattern(regexp = "^$|^[A-Za-z0-9\\-_]{1,128}$", message = "请求凭据 1–128 位") String requestRef,
+      @Pattern(regexp = "^$|^.{4,600}$", message = "失败原因至少 4 个字符") String errorMessage) {}
 
   /**
- * 面单打印凭据回填（8.3.4.2 渲染出来的真实 jobRef，本模块不渲染 ZPL）。
- *
- * <p>刻意**带模块前缀**：warehouse 服务已经有一个 {@code ParcelLabelInput}
- * （8.3.4.2 面单打印的入参，字段是 labelPrintJobId / printedAt / note）。
- * 两边同名但结构不同，codegen 会在写盘前直接中止并点名「trade 消费端会凭空多出
- * 哪两个字段、独有的 jobRef 拿不到」—— 撞名的后果是另一条车道的事故。
- */
+   * 面单打印凭据回填（8.3.4.2 渲染出来的真实 jobRef，本模块不渲染 ZPL）。
+   *
+   * <p>刻意**带模块前缀**：warehouse 服务已经有一个 {@code ParcelLabelInput} （8.3.4.2 面单打印的入参，字段是 labelPrintJobId
+   * / printedAt / note）。 两边同名但结构不同，codegen 会在写盘前直接中止并点名「trade 消费端会凭空多出 哪两个字段、独有的 jobRef 拿不到」——
+   * 撞名的后果是另一条车道的事故。
+   */
   public record PendingShipmentLabelInput(
-      @NotBlank
-          @Pattern(regexp = "^[A-Za-z0-9\\-_]{3,128}$", message = "打印任务凭据 3–128 位字母数字或中划线")
+      @NotBlank @Pattern(regexp = "^[A-Za-z0-9\\-_]{3,128}$", message = "打印任务凭据 3–128 位字母数字或中划线")
           String jobRef) {}
 
   public record ShipmentCancelInput(

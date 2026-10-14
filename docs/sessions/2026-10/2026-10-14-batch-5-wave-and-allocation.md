@@ -7,12 +7,12 @@
 
 ## 本批台账数字（sync.mjs 实时取值）
 
-| 项 | 值 |
-| --- | --- |
-| 模块总数 | 465 |
-| 已交付 | 140（30.1%） |
-| 进行中 | 0 |
-| 未开发 | 325 |
+| 项       | 值           |
+| -------- | ------------ |
+| 模块总数 | 465          |
+| 已交付   | 140（30.1%） |
+| 进行中   | 0            |
+| 未开发   | 325          |
 
 ---
 
@@ -66,7 +66,7 @@
 
 - 迁移：`V116__trade_warehouse_allocation.sql`（trade，**八张表、零 ALTER V92**）
   - `fulfillment_warehouse_allocation_{rule,warehouse,stock_estimate,shipping_estimate,
-    decision,candidate,hold,event}`
+decision,candidate,hold,event}`
   - **与 9.3.2.2 的 `fulfillment_routing_*` 命名空间彻底分开**：V92 七张表一表未动、
     连 JOIN 都没有；也**刻意不复用** `fulfillment_path_cost_profile`
     （那是「平台 × 路径 × 目的国」费率口径，本模块要「仓 × SKU × 目的国」每单运费，
@@ -116,10 +116,10 @@ merge-union: 走了行级兜底并集，请人工确认这个文件改对了
 `apps/web/src/lib/api-proxy.ts` 的 warehouse 段是**一个单行正则**（约 13KB，第 555 行），
 按「顶层 alternation 分支」组织。两条冲突车道的端点都在 `inventory/(...)` 组**内部**：
 
-| 车道 | 端点 | 新增的组内子分支 |
-| --- | --- | --- |
-| 7.2.2.2 | `/warehouse/inventory/safety-stock/*`（16 条） | `safety-stock` |
-| 7.7.2.1 | `/warehouse/inventory/vmi/*`（23 条） | `vmi` |
+| 车道    | 端点                                           | 新增的组内子分支 |
+| ------- | ---------------------------------------------- | ---------------- |
+| 7.2.2.2 | `/warehouse/inventory/safety-stock/*`（16 条） | `safety-stock`   |
+| 7.7.2.1 | `/warehouse/inventory/vmi/*`（23 条）          | `vmi`            |
 
 两条车道都只改了同一个 `inventory/(...)` 顶层 token，git 自然判冲突。
 **解法在语义上是纯并集**（往同一个 alternation 里各加一支），但 merge 驱动器的
@@ -190,15 +190,15 @@ node .dev-agent/route-behavior.cjs HEAD --unmerged feat/7-2-2-2 feat/7-7-2-1
 
 ## L2 批次闸结果（整批只跑一次）
 
-| 项 | 结果 |
-| --- | --- |
-| `cd backend && ./mvnw verify` | **BUILD SUCCESS**，**3257 例 / 0 失败 / 0 错误**，09:07 |
-| `pnpm typecheck` | 3/3 successful |
-| `pnpm lint` | 3/3 successful（仅既有 warning，均在别车道文件） |
-| `pnpm test` | **134 文件 / 2498 例全绿**，4.07s |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/warehouse/pick-waves` 在路由表内 |
-| `node tools/module-progress/sync.mjs --check` | 一致 |
-| **L2 实测耗时** | **11 分 36 秒**（本地参数文件里按 12 分钟估算，第一次拿到真数据） |
+| 项                                                           | 结果                                                              |
+| ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `cd backend && ./mvnw verify`                                | **BUILD SUCCESS**，**3257 例 / 0 失败 / 0 错误**，09:07           |
+| `pnpm typecheck`                                             | 3/3 successful                                                    |
+| `pnpm lint`                                                  | 3/3 successful（仅既有 warning，均在别车道文件）                  |
+| `pnpm test`                                                  | **134 文件 / 2498 例全绿**，4.07s                                 |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/warehouse/pick-waves` 在路由表内                          |
+| `node tools/module-progress/sync.mjs --check`                | 一致                                                              |
+| **L2 实测耗时**                                              | **11 分 36 秒**（本地参数文件里按 12 分钟估算，第一次拿到真数据） |
 
 新测试类确认在 L2 里真的跑了：
 

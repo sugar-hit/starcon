@@ -17,31 +17,25 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.5.2.2 BOM 展开消费的**批量可用量查询**端点。
  *
- * <p><b>这个端点为什么必须存在</b>（AGENTS.md「模块边界纪律」）：
- * BOM 事实在 catalog，库存事实在 warehouse。catalog 要算「需求量 − 可用 − 在途 = 缺口」，
- * 而 {@code inventory_balance} / {@code inventory_transfer} 是<b>本服务</b>的表。
- * 三条路可选：跨库 JOIN（明令禁止，会让两个服务的部署绑死在一个 PG 实例上）、
- * 跨库 FK / 视图（同上，且破坏「每张事实表只有一个写入所有者」）、授权 API（本文件选的第三条）。
- * 所以 catalog 侧通过 HTTP 调这里取数，<b>不在 catalog 库复制任何库存快照</b>。
+ * <p><b>这个端点为什么必须存在</b>（AGENTS.md「模块边界纪律」）： BOM 事实在 catalog，库存事实在 warehouse。catalog 要算「需求量 − 可用 −
+ * 在途 = 缺口」， 而 {@code inventory_balance} / {@code inventory_transfer} 是<b>本服务</b>的表。 三条路可选：跨库
+ * JOIN（明令禁止，会让两个服务的部署绑死在一个 PG 实例上）、 跨库 FK / 视图（同上，且破坏「每张事实表只有一个写入所有者」）、授权 API（本文件选的第三条）。 所以 catalog
+ * 侧通过 HTTP 调这里取数，<b>不在 catalog 库复制任何库存快照</b>。
  *
  * <p><b>口径全部来自 V1 迁移文件头，Java 侧只做求和，不二次推导</b>：
  *
  * <ul>
- *   <li><b>可用 available</b> = {@code Σ inventory_balance.available}，
- *       而 available 是生成列 {@code on_hand − reserved}，<b>没有第三个来源</b>。
- *       刻意<b>不含</b>在途：未到货的库存拿去预占就是超卖，而超卖不可逆。
+ *   <li><b>可用 available</b> = {@code Σ inventory_balance.available}， 而 available 是生成列 {@code
+ *       on_hand − reserved}，<b>没有第三个来源</b>。 刻意<b>不含</b>在途：未到货的库存拿去预占就是超卖，而超卖不可逆。
  *   <li><b>在途 in_transit</b> = {@code Σ inventory_transfer.quantity WHERE status='IN_TRANSIT'}，
  *       仓库过滤走 {@code to_warehouse_id}（发往这仓的），不是 {@code from_warehouse_id}：
  *       抵扣的是「会到这仓来」的货，发出去的货只会让<b>来源仓</b>变少。
  * </ul>
  *
- * <p><b>租户隔离</b>：本服务不信任任何客户端头。租户由 {@link AccessService} 从已认证
- * 成员关系（identity）解析，再在事务里绑定 {@code app.current_tenant}，
- * 三张被查的表全部 FORCE RLS —— 即使查询漏写 {@code tenant_id=?}，
- * 数据库也会把不属于本租户的行全部挡掉。
+ * <p><b>租户隔离</b>：本服务不信任任何客户端头。租户由 {@link AccessService} 从已认证 成员关系（identity）解析，再在事务里绑定 {@code
+ * app.current_tenant}， 三张被查的表全部 FORCE RLS —— 即使查询漏写 {@code tenant_id=?}， 数据库也会把不属于本租户的行全部挡掉。
  *
- * <p><b>为什么返回零而不是省略</b>：请求的 SKU 里可能有本租户一行的库存都没有。
- * 省略它，调用方看到的就是「少了一个 SKU」，无法区分「没库存」与「不存在」，
+ * <p><b>为什么返回零而不是省略</b>：请求的 SKU 里可能有本租户一行的库存都没有。 省略它，调用方看到的就是「少了一个 SKU」，无法区分「没库存」与「不存在」，
  * 于是只能把缺口当成未知 —— 而缺口正是 06 采购单要用的数。
  */
 @Service
@@ -50,8 +44,7 @@ public class InventoryAvailabilityService {
   /**
    * 一次最多查多少个 SKU。
    *
-   * <p>是<b>可用性</b>上限而不是数据库限制：BOM 展开树的最坏情况是
-   * 每层 50 个组件（3.5.2.1 的上限）× 10 层 = 500 个 SKU，
+   * <p>是<b>可用性</b>上限而不是数据库限制：BOM 展开树的最坏情况是 每层 50 个组件（3.5.2.1 的上限）× 10 层 = 500 个 SKU，
    * 再多就是有人造了一棵没人核得对的树，而领错料要上仓库找回来。
    */
   public static final int MAX_SKUS = 500;
@@ -65,9 +58,8 @@ public class InventoryAvailabilityService {
   /**
    * 批量取可用与在途。
    *
-   * <p>两次聚合查询（余额 + 在途）而不是一次 join：两者的聚合维度不同
-   * （余额按 quality_status 展开、在途按 quality_status 展开但只取 IN_TRANSIT），
-   * 用 left join 相乘会让在途被按质量状态重复计数。
+   * <p>两次聚合查询（余额 + 在途）而不是一次 join：两者的聚合维度不同 （余额按 quality_status 展开、在途按 quality_status 展开但只取
+   * IN_TRANSIT）， 用 left join 相乘会让在途被按质量状态重复计数。
    */
   public AvailabilityView availability(AvailabilityQuery query) {
     UUID tenantId = currentTenantId();
@@ -87,7 +79,8 @@ public class InventoryAvailabilityService {
     UUID warehouseId = query.warehouseId();
     if (warehouseId != null) {
       var exists =
-          sql.fetchOne("select id from warehouse where tenant_id=? and id=?", tenantId, warehouseId);
+          sql.fetchOne(
+              "select id from warehouse where tenant_id=? and id=?", tenantId, warehouseId);
       if (exists == null) {
         throw bad(
             "仓库在本租户不存在：按仓库过滤的可用量必须能指名一个真实存在的仓库，"
@@ -119,7 +112,8 @@ public class InventoryAvailabilityService {
             args);
     Map<UUID, BigDecimal> availableBySku = new LinkedHashMap<>();
     for (Record r : balances) {
-      availableBySku.put(r.get("sku_id", UUID.class), nonNegative(r.get("available", BigDecimal.class)));
+      availableBySku.put(
+          r.get("sku_id", UUID.class), nonNegative(r.get("available", BigDecimal.class)));
     }
 
     // 在途：按 to_warehouse_id 过滤（抵扣的是会到这仓来的货）。
@@ -167,8 +161,7 @@ public class InventoryAvailabilityService {
             + "在途量单独一列（status='IN_TRANSIT' 的调拨之和），"
             + (warehouseId == null
                 ? "本次不限仓库：在途按全租户合计。"
-                : "本次按仓库过滤：在途取的是**发往该仓**（to_warehouse_id）的货，"
-                    + "而不是从该仓发出的货 —— 抵扣的是会到这仓来的量。")
+                : "本次按仓库过滤：在途取的是**发往该仓**（to_warehouse_id）的货，" + "而不是从该仓发出的货 —— 抵扣的是会到这仓来的量。")
             + "没有库存行的 SKU 返回 0 而不是缺席：缺席会让调用方分不清「没库存」与「不存在」，"
             + "而缺口正是 06 采购单要用的数。");
   }
@@ -186,8 +179,7 @@ public class InventoryAvailabilityService {
   /**
    * {@code IN} 列表的占位符，每个都带 {@code ::uuid}。
    *
-   * <p>与 catalog 侧同一条纪律：jOOQ 把 UUID 按 varchar 送过去，
-   * 而 {@code sku_id in (?)} 的单元素列表让 PG 无法反推参数类型。
+   * <p>与 catalog 侧同一条纪律：jOOQ 把 UUID 按 varchar 送过去， 而 {@code sku_id in (?)} 的单元素列表让 PG 无法反推参数类型。
    */
   private static String placeholders(int n) {
     return "(" + String.join(",", java.util.Collections.nCopies(n, "?::uuid")) + ")";

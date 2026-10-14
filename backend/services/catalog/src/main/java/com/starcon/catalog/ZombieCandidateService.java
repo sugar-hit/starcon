@@ -23,12 +23,9 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <p>全部走 jOOQ 显式 SQL（AGENTS.md：不用 JPA 懒加载，关键 SQL 必须可审阅）。
  *
- * <p><b>判定在 SQL 侧完成，不在内存里过滤</b>：候选清单的"僵尸"是一个由四个维度与
- * 时间阈值共同决定的**派生结论**，如果在内存里过滤再分页，就会出现「第 1 页 20 条里
- * 3 条是候选」而总数显示 50 —— 那是假分页，而且运营点第 2 页会看到上一页已经出现的行。
- * 所以 {@link #verdictSql} 把三态判定整体下推到 SQL，分页与计数走同一份表达式。
- * 逐条的"为什么"仍然由 {@link ZombieCandidateRules} 在内存里算 —— 它要产出可读原因，
- * 而原因不参与筛选。
+ * <p><b>判定在 SQL 侧完成，不在内存里过滤</b>：候选清单的"僵尸"是一个由四个维度与 时间阈值共同决定的**派生结论**，如果在内存里过滤再分页，就会出现「第 1 页 20 条里 3
+ * 条是候选」而总数显示 50 —— 那是假分页，而且运营点第 2 页会看到上一页已经出现的行。 所以 {@link #verdictSql} 把三态判定整体下推到
+ * SQL，分页与计数走同一份表达式。 逐条的"为什么"仍然由 {@link ZombieCandidateRules} 在内存里算 —— 它要产出可读原因， 而原因不参与筛选。
  */
 @Service
 public class ZombieCandidateService {
@@ -45,8 +42,7 @@ public class ZombieCandidateService {
   /**
    * 词表：主体类型、引用维度、判定状态与停用目标。
    *
-   * <p>维度的 {@code wired} 标注**当前仓库里是否已有该维度的服务**：
-   * 界面上未接入的维度不允许被启用（会一直判"无法判定"），运营由此知道差的是哪个上游事件，
+   * <p>维度的 {@code wired} 标注**当前仓库里是否已有该维度的服务**： 界面上未接入的维度不允许被启用（会一直判"无法判定"），运营由此知道差的是哪个上游事件，
    * 而不是以为配置没保存成功。
    */
   public ZombieOptions options() {
@@ -61,7 +57,8 @@ public class ZombieCandidateService {
                         m.name(), m.label(), m.owner(), m.source(), upstreamWired(m.source())))
             .toList(),
         List.of(
-            new ZombieVerdictOption(ZombieVerdict.CANDIDATE.name(), ZombieVerdict.CANDIDATE.label(), true),
+            new ZombieVerdictOption(
+                ZombieVerdict.CANDIDATE.name(), ZombieVerdict.CANDIDATE.label(), true),
             new ZombieVerdictOption(
                 ZombieVerdict.NOT_ZOMBIE.name(), ZombieVerdict.NOT_ZOMBIE.label(), false),
             new ZombieVerdictOption(
@@ -78,8 +75,7 @@ public class ZombieCandidateService {
 
   /** 全部三类主体的规则。没配过的返回默认规则（**不落库**，configured=false）。 */
   public List<ZombieCleanupRuleView> rules() {
-    var rows = sql.fetch(
-        "select * from master_data_cleanup_rule order by entity_type");
+    var rows = sql.fetch("select * from master_data_cleanup_rule order by entity_type");
     var byType = new LinkedHashMap<String, org.jooq.Record>();
     for (var row : rows) byType.put(row.get("entity_type", String.class), row);
     var result = new ArrayList<ZombieCleanupRuleView>();
@@ -92,8 +88,7 @@ public class ZombieCandidateService {
 
   public ZombieCleanupRuleView rule(ZombieEntityType type) {
     var row =
-        sql.fetchOne(
-            "select * from master_data_cleanup_rule where entity_type=?", type.name());
+        sql.fetchOne("select * from master_data_cleanup_rule where entity_type=?", type.name());
     return row == null ? defaultRuleView(type) : ruleView(row);
   }
 
@@ -104,7 +99,10 @@ public class ZombieCandidateService {
         type.label(),
         defaults.inactiveDays(),
         defaults.snapshotStaleDays(),
-        false, false, false, false,
+        false,
+        false,
+        false,
+        false,
         defaults.enabled(),
         "按僵尸主数据清理规则批量停用",
         0L,
@@ -130,31 +128,46 @@ public class ZombieCandidateService {
   /** 保存规则（首次保存走 INSERT，之后走带乐观锁的 UPDATE）。 */
   public ZombieCleanupRuleView saveRule(
       AccessService.Access actor, ZombieEntityType type, ZombieCleanupRuleInput input) {
-    var note = input.deactivateNote() == null || input.deactivateNote().isBlank()
-        ? "按僵尸主数据清理规则批量停用"
-        : input.deactivateNote().trim();
+    var note =
+        input.deactivateNote() == null || input.deactivateNote().isBlank()
+            ? "按僵尸主数据清理规则批量停用"
+            : input.deactivateNote().trim();
     var existing =
-        sql.fetchOne("select version from master_data_cleanup_rule where entity_type=?",
-            type.name());
+        sql.fetchOne(
+            "select version from master_data_cleanup_rule where entity_type=?", type.name());
     if (existing == null) {
       sql.execute(
           "insert into master_data_cleanup_rule(tenant_id,entity_type,inactive_days,"
               + "snapshot_stale_days,require_zero_order_reference,require_zero_inventory,"
               + "require_zero_listing,require_zero_cost,enabled,deactivate_note,version)"
               + " values(?,?,?,?,?,?,?,?,?,?,0)",
-          currentTenantId(), type.name(), input.inactiveDays(), input.snapshotStaleDays(),
-          input.requireZeroOrderReference(), input.requireZeroInventory(),
-          input.requireZeroListing(), input.requireZeroCost(), input.enabled(), note);
+          currentTenantId(),
+          type.name(),
+          input.inactiveDays(),
+          input.snapshotStaleDays(),
+          input.requireZeroOrderReference(),
+          input.requireZeroInventory(),
+          input.requireZeroListing(),
+          input.requireZeroCost(),
+          input.enabled(),
+          note);
     } else {
-      var updated = sql.execute(
-          "update master_data_cleanup_rule set inactive_days=?,snapshot_stale_days=?,"
-              + "require_zero_order_reference=?,require_zero_inventory=?,require_zero_listing=?,"
-              + "require_zero_cost=?,enabled=?,deactivate_note=?,version=version+1,"
-              + "updated_at=now() where entity_type=? and version=?",
-          input.inactiveDays(), input.snapshotStaleDays(),
-          input.requireZeroOrderReference(), input.requireZeroInventory(),
-          input.requireZeroListing(), input.requireZeroCost(), input.enabled(), note,
-          type.name(), input.version());
+      var updated =
+          sql.execute(
+              "update master_data_cleanup_rule set inactive_days=?,snapshot_stale_days=?,"
+                  + "require_zero_order_reference=?,require_zero_inventory=?,require_zero_listing=?,"
+                  + "require_zero_cost=?,enabled=?,deactivate_note=?,version=version+1,"
+                  + "updated_at=now() where entity_type=? and version=?",
+              input.inactiveDays(),
+              input.snapshotStaleDays(),
+              input.requireZeroOrderReference(),
+              input.requireZeroInventory(),
+              input.requireZeroListing(),
+              input.requireZeroCost(),
+              input.enabled(),
+              note,
+              type.name(),
+              input.version());
       if (updated == 0) {
         throw conflict("规则已被其他操作改动，请刷新后重试");
       }
@@ -187,9 +200,10 @@ public class ZombieCandidateService {
    * <p>{@code keyword} 覆盖编码与名称，LIKE 通配符转义（与 PartyService 同一份实现）。
    */
   public ZombieCandidatePage list(ZombieCandidateQuery query) {
-    var type = query.entityType() == null || query.entityType().isBlank()
-        ? ZombieEntityType.SKU
-        : ZombieEntityType.parse(query.entityType());
+    var type =
+        query.entityType() == null || query.entityType().isBlank()
+            ? ZombieEntityType.SKU
+            : ZombieEntityType.parse(query.entityType());
     var config = configOf(type);
     int page = query.page() == null || query.page() < 0 ? 0 : query.page();
     int size = query.size() == null || query.size() <= 0 ? 20 : Math.min(query.size(), 200);
@@ -220,19 +234,16 @@ public class ZombieCandidateService {
     var countBinds = new ArrayList<Object>();
     statsCte(countStatement, countBinds, type, config, now);
     scoredCte(countStatement, countBinds, type, config, now, null, query.keyword());
-    countStatement.append(
-        "select verdict,count(*) as n from scored group by verdict");
+    countStatement.append("select verdict,count(*) as n from scored group by verdict");
     for (var row : sql.fetch(countStatement.toString(), countBinds.toArray())) {
-      counts.put(
-          ZombieVerdict.valueOf(row.get("verdict", String.class)),
-          row.get("n", Long.class));
+      counts.put(ZombieVerdict.valueOf(row.get("verdict", String.class)), row.get("n", Long.class));
     }
 
-    var observations = loadObservations(type, rows.stream().map(r -> r.get("id", UUID.class)).toList());
+    var observations =
+        loadObservations(type, rows.stream().map(r -> r.get("id", UUID.class)).toList());
     var items = new ArrayList<ZombieCandidate>(rows.size());
     for (var row : rows) {
-      var evaluation =
-          evaluateInMemory(config, row, observations, now);
+      var evaluation = evaluateInMemory(config, row, observations, now);
       var lastMaintained = row.get("last_maintained_at", OffsetDateTime.class);
       items.add(
           new ZombieCandidate(
@@ -310,8 +321,8 @@ public class ZombieCandidateService {
         unmapped.add(metric.label() + "（归属 " + metric.owner() + "，该服务尚未接入）");
       }
     }
-    return new ZombieCandidateOverview(List.copyOf(rows), coveredEntities, coveredDimensions,
-        List.copyOf(unmapped));
+    return new ZombieCandidateOverview(
+        List.copyOf(rows), coveredEntities, coveredDimensions, List.copyOf(unmapped));
   }
 
   private String activeCountSql(ZombieEntityType type) {
@@ -339,12 +350,10 @@ public class ZombieCandidateService {
   /**
    * 引用统计聚合 CTE。
    *
-   * <p>同时聚合**原始值**（{@code v_*} / {@code t_*}）与**新鲜值**（{@code f_*}）：
-   * 判定只用新鲜值（规则 Z7：过期的当 UNKNOWN），而原始值留给界面显示"过期信息"——
-   * 运营需要分清「从没观测过」与「观测过但太老了」（Z7 明确要求显式返回 stale）。
+   * <p>同时聚合**原始值**（{@code v_*} / {@code t_*}）与**新鲜值**（{@code f_*}）： 判定只用新鲜值（规则 Z7：过期的当
+   * UNKNOWN），而原始值留给界面显示"过期信息"—— 运营需要分清「从没观测过」与「观测过但太老了」（Z7 明确要求显式返回 stale）。
    *
-   * <p>只有规则**启用**的维度才产出 {@code f_*}：未启用的维度不该出现在判定里，
-   * 为它多算一列会让 CTE 宽一倍而没人用。
+   * <p>只有规则**启用**的维度才产出 {@code f_*}：未启用的维度不该出现在判定里， 为它多算一列会让 CTE 宽一倍而没人用。
    */
   private void statsCte(
       StringBuilder statement,
@@ -386,9 +395,8 @@ public class ZombieCandidateService {
   /**
    * 三态判定表达式（SQL 侧）。
    *
-   * <p>与 {@link ZombieCandidateRules#evaluate} 逐字同源，顺序也一样：
-   * <b>违反优先于未知</b>。已观测到"有订单"的主体一定报 NOT_ZOMBIE，
-   * 哪怕它的其它维度缺观测 —— 那种情况下"无法判定"是过度保守且会误导运营。
+   * <p>与 {@link ZombieCandidateRules#evaluate} 逐字同源，顺序也一样： <b>违反优先于未知</b>。已观测到"有订单"的主体一定报
+   * NOT_ZOMBIE， 哪怕它的其它维度缺观测 —— 那种情况下"无法判定"是过度保守且会误导运营。
    */
   private String verdictSql(ZombieCandidateRules.Config config) {
     var violated = new StringBuilder();
@@ -405,7 +413,10 @@ public class ZombieCandidateService {
       // 四个维度全关：判定退化成"只要超出维护阈值就是候选"（第一档治理，合法且常用）。
       return "'CANDIDATE'";
     }
-    return "case when " + violated + " then 'NOT_ZOMBIE' when not (" + observed
+    return "case when "
+        + violated
+        + " then 'NOT_ZOMBIE' when not ("
+        + observed
         + ") then 'INCOMPLETE' else 'CANDIDATE' end";
   }
 
@@ -450,9 +461,7 @@ public class ZombieCandidateService {
       binds.add(type.activeStatus());
       binds.add(type.name());
     } else {
-      statement
-          .append("sku s left join stats st on st.entity_id=s.id")
-          .append(" where s.status=?");
+      statement.append("sku s left join stats st on st.entity_id=s.id").append(" where s.status=?");
       binds.add(type.activeStatus());
     }
     // 时间窗口：Z2 的「长期未维护」。绑定 OffsetDateTime 并显式 ?::timestamptz ——
@@ -492,9 +501,10 @@ public class ZombieCandidateService {
       ZombieEntityType type, List<UUID> ids) {
     var result = new LinkedHashMap<UUID, Map<ZombieMetric, ZombieCandidateRules.Observation>>();
     if (ids.isEmpty()) return result;
-    var statement = new StringBuilder(
-        "select entity_id,metric,metric_value,observed_at from master_data_reference_stats"
-            + " where tenant_id=? and entity_type=? and entity_id in (");
+    var statement =
+        new StringBuilder(
+            "select entity_id,metric,metric_value,observed_at from master_data_reference_stats"
+                + " where tenant_id=? and entity_type=? and entity_id in (");
     statement.append(String.join(",", java.util.Collections.nCopies(ids.size(), "?")));
     statement.append(")");
     var binds = new ArrayList<Object>();
@@ -507,7 +517,8 @@ public class ZombieCandidateService {
           new ZombieCandidateRules.Observation(
               row.get("metric_value", BigDecimal.class),
               row.get("observed_at", OffsetDateTime.class));
-      result.computeIfAbsent(row.get("entity_id", UUID.class), k -> new EnumMap<>(ZombieMetric.class))
+      result
+          .computeIfAbsent(row.get("entity_id", UUID.class), k -> new EnumMap<>(ZombieMetric.class))
           .put(metric, observation);
     }
     return result;
@@ -516,13 +527,11 @@ public class ZombieCandidateService {
   /**
    * 用纯规则重算一条，产出「为什么」。
    *
-   * <p>观测值一律从 {@code observations} 取（候选清单、详情、停用三个出口共用同一份来源），
-   * **不**从 SQL 行里按列名读 —— jOOQ 对 {@code Record.field(String)} 的缺列行为不可靠
-   * （可能返回非 null 的 Field，随后 {@code get} 抛 "Field X is not contained in row type"），
-   * 而那种异常只在某一类查询路径上出现，极难定位。
+   * <p>观测值一律从 {@code observations} 取（候选清单、详情、停用三个出口共用同一份来源）， **不**从 SQL 行里按列名读 —— jOOQ 对 {@code
+   * Record.field(String)} 的缺列行为不可靠 （可能返回非 null 的 Field，随后 {@code get} 抛 "Field X is not contained
+   * in row type"）， 而那种异常只在某一类查询路径上出现，极难定位。
    *
-   * <p>SQL 侧的判定表达式与本方法算的是同一件事（{@link #verdictSql}），但 SQL 那份只用来
-   * 筛选与分页，逐条明细与原因以本方法为准。
+   * <p>SQL 侧的判定表达式与本方法算的是同一件事（{@link #verdictSql}），但 SQL 那份只用来 筛选与分页，逐条明细与原因以本方法为准。
    */
   private ZombieCandidateRules.Evaluation evaluateInMemory(
       ZombieCandidateRules.Config config,
@@ -551,18 +560,18 @@ public class ZombieCandidateService {
           sql.fetchOne(
               "select id,code,name,status,updated_at as last_maintained_at from party"
                   + " where tenant_id=? and id=? and deleted_at is null",
-              currentTenantId(), entityId);
+              currentTenantId(),
+              entityId);
     } else {
       row =
           sql.fetchOne(
               "select id,code,name,status,updated_at as last_maintained_at from sku"
                   + " where tenant_id=? and id=?",
-              currentTenantId(), entityId);
+              currentTenantId(),
+              entityId);
     }
     if (row == null) throw notFound("主数据不存在或不属于当前租户");
-    var evaluation =
-        evaluateInMemory(
-            config, row, loadObservations(type, List.of(entityId)), now);
+    var evaluation = evaluateInMemory(config, row, loadObservations(type, List.of(entityId)), now);
     return new ZombieReferenceEvidence(
         type.name(),
         entityId,
@@ -572,7 +581,8 @@ public class ZombieCandidateService {
         row.get("last_maintained_at", OffsetDateTime.class),
         ZombieCandidateRules.daysSince(row.get("last_maintained_at", OffsetDateTime.class), now) < 0
             ? null
-            : ZombieCandidateRules.daysSince(row.get("last_maintained_at", OffsetDateTime.class), now),
+            : ZombieCandidateRules.daysSince(
+                row.get("last_maintained_at", OffsetDateTime.class), now),
         evaluation.verdict().name(),
         evaluation.dimensions(),
         recentRecords(type, entityId));
@@ -583,17 +593,14 @@ public class ZombieCandidateService {
   /**
    * 上游推送引用观测（授权 API）。
    *
-   * <p>这个端点**现在就是真实可用的生产契约**，不是留给未来的占位：上游接入时
-   * 不需要改本模块的 schema 或规则，只需调它。
+   * <p>这个端点**现在就是真实可用的生产契约**，不是留给未来的占位：上游接入时 不需要改本模块的 schema 或规则，只需调它。
    *
-   * <p>逐条 UPSERT 而非批量写：{@code master_data_reference_stats} 的主键是
-   * (tenant_id, entity_type, entity_id, metric)，重复推送覆盖旧值 ——
-   * 保留旧值只会让"最近有订单了但仍显示 0"这种最危险的错误一直存在。
-   * 逐条 execute 沿用本仓库的写法（{@code ?::jsonb} 那种 cast 上 batch(String) 不可靠）。
+   * <p>逐条 UPSERT 而非批量写：{@code master_data_reference_stats} 的主键是 (tenant_id, entity_type, entity_id,
+   * metric)，重复推送覆盖旧值 —— 保留旧值只会让"最近有订单了但仍显示 0"这种最危险的错误一直存在。 逐条 execute 沿用本仓库的写法（{@code ?::jsonb} 那种
+   * cast 上 batch(String) 不可靠）。
    *
-   * <p>单条失败不吞掉：主体不存在的条目会触发 {@code validate_reference_stat_entity}
-   * 触发器并被拒绝，记入 rejectedReasons 而不是整批静默丢弃 —— 静默丢弃会让上游
-   * 以为推送成功了，而那一维永远停留在"未知"。
+   * <p>单条失败不吞掉：主体不存在的条目会触发 {@code validate_reference_stat_entity} 触发器并被拒绝，记入 rejectedReasons
+   * 而不是整批静默丢弃 —— 静默丢弃会让上游 以为推送成功了，而那一维永远停留在"未知"。
    */
   public ZombieReferenceStatPushResult pushStats(
       AccessService.Access actor, ZombieEntityType type, ZombieReferenceStatPush push) {
@@ -619,8 +626,7 @@ public class ZombieCandidateService {
             item.observedAt());
         written++;
       } catch (DataAccessException e) {
-        rejected.add(
-            item.entityId() + " / " + metric.label() + "：" + rootMessage(e));
+        rejected.add(item.entityId() + " / " + metric.label() + "：" + rootMessage(e));
       }
     }
     if (written > 0) {
@@ -652,9 +658,7 @@ public class ZombieCandidateService {
   /**
    * 批量停用（规则 Z3/Z4/Z5/Z6）。
    *
-   * <p>准入判定重算一遍而不是信任前端传来的 verdict：前端可能拿着上一份清单，
-   * 而上游在这中间推了新快照 —— 「以提交这一刻的真实观测为准」是停用这种不可逆动作
-   * 唯一安全的口径。
+   * <p>准入判定重算一遍而不是信任前端传来的 verdict：前端可能拿着上一份清单， 而上游在这中间推了新快照 —— 「以提交这一刻的真实观测为准」是停用这种不可逆动作 唯一安全的口径。
    *
    * <p>准入失败**整批 409** 而不是逐条跳过（规则 Z4）：跳过会让运营以为这批都处理完了。
    */
@@ -691,9 +695,7 @@ public class ZombieCandidateService {
 
     var view = rule(type);
     var note = view.deactivateNote();
-    var reason = input.reason() == null || input.reason().isBlank()
-        ? note
-        : input.reason().trim();
+    var reason = input.reason() == null || input.reason().isBlank() ? note : input.reason().trim();
     var ruleSnapshot = ruleSnapshot(config, view);
 
     var entriesOut = new ArrayList<ZombieDeactivatedEntry>(ids.size());
@@ -712,13 +714,20 @@ public class ZombieCandidateService {
             sql.execute(
                 "update party set status=?,status_reason=?,status_changed_at=now(),"
                     + "version=version+1,updated_at=now() where tenant_id=? and id=? and status=?",
-                type.inactiveStatus(), reason, currentTenantId(), id, previous);
+                type.inactiveStatus(),
+                reason,
+                currentTenantId(),
+                id,
+                previous);
       } else {
         changed =
             sql.execute(
                 "update sku set status=?,version=version+1,updated_at=now()"
                     + " where tenant_id=? and id=? and status=?",
-                type.inactiveStatus(), currentTenantId(), id, previous);
+                type.inactiveStatus(),
+                currentTenantId(),
+                id,
+                previous);
       }
       if (changed == 0) {
         // Z6 的兜底：并发下另一笔停用刚刚改掉了状态。整批 409 而不是继续写记录 ——
@@ -731,21 +740,33 @@ public class ZombieCandidateService {
               + "entity_name,previous_status,new_status,decided_by,reason,last_maintained_at,"
               + "rule_snapshot,evidence,affected_count,created_at)"
               + " values(?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::jsonb,?::jsonb,?,?::timestamptz)",
-          currentTenantId(), Ids.next(), type.name(), id, code, name, previous,
-          type.inactiveStatus(), actor.userId(), reason, lastMaintained,
-          json(ruleSnapshot), json(evidence), ids.size(), now);
-      entriesOut.add(
-          new ZombieDeactivatedEntry(code, name, previous, type.inactiveStatus()));
+          currentTenantId(),
+          Ids.next(),
+          type.name(),
+          id,
+          code,
+          name,
+          previous,
+          type.inactiveStatus(),
+          actor.userId(),
+          reason,
+          lastMaintained,
+          json(ruleSnapshot),
+          json(evidence),
+          ids.size(),
+          now);
+      entriesOut.add(new ZombieDeactivatedEntry(code, name, previous, type.inactiveStatus()));
     }
     audit(actor, type.name(), "zombie-deactivate");
     return new ZombieDeactivateResult(type.name(), ids.size(), List.copyOf(entriesOut), note);
   }
 
   private List<org.jooq.Record> loadEntities(ZombieEntityType type, List<UUID> ids) {
-    var statement = new StringBuilder(
-        type.partyBacked()
-            ? "select id,code,name,status,updated_at as last_maintained_at from party where tenant_id=? and deleted_at is null and id in ("
-            : "select id,code,name,status,updated_at as last_maintained_at from sku where tenant_id=? and id in (");
+    var statement =
+        new StringBuilder(
+            type.partyBacked()
+                ? "select id,code,name,status,updated_at as last_maintained_at from party where tenant_id=? and deleted_at is null and id in ("
+                : "select id,code,name,status,updated_at as last_maintained_at from sku where tenant_id=? and id in (");
     statement.append(String.join(",", java.util.Collections.nCopies(ids.size(), "?")));
     statement.append(")");
     var binds = new ArrayList<Object>();
@@ -794,9 +815,10 @@ public class ZombieCandidateService {
 
   /** 停用台账：时间倒序 + 主体类型 / 主体 / 操作人筛选。 */
   public ZombieCleanupRecordPage records(ZombieRecordQuery query) {
-    var type = query.entityType() == null || query.entityType().isBlank()
-        ? null
-        : ZombieEntityType.parse(query.entityType());
+    var type =
+        query.entityType() == null || query.entityType().isBlank()
+            ? null
+            : ZombieEntityType.parse(query.entityType());
     int page = query.page() == null || query.page() < 0 ? 0 : query.page();
     int size = query.size() == null || query.size() <= 0 ? 20 : Math.min(query.size(), 200);
 
@@ -854,7 +876,9 @@ public class ZombieCandidateService {
         sql.fetch(
             "select * from master_data_cleanup_record where tenant_id=? and entity_type=?"
                 + " and entity_id=? order by created_at desc, id limit 10",
-            currentTenantId(), type.name(), entityId);
+            currentTenantId(),
+            type.name(),
+            entityId);
     var items = new ArrayList<ZombieCleanupRecord>(rows.size());
     for (var row : rows) {
       items.add(
@@ -880,8 +904,7 @@ public class ZombieCandidateService {
   /**
    * 读回冻结快照。
    *
-   * <p>解析失败返回 null 而不是把原始字符串塞回去：停用记录是审计证据，
-   * 一个解析不出来却"看起来有内容"的字段比空值更危险（运营会以为证据还在）。
+   * <p>解析失败返回 null 而不是把原始字符串塞回去：停用记录是审计证据， 一个解析不出来却"看起来有内容"的字段比空值更危险（运营会以为证据还在）。
    */
   private <T> T readJson(Object value, Class<T> type) {
     if (value == null) return null;
@@ -918,8 +941,7 @@ public class ZombieCandidateService {
   /**
    * LIKE 模式里的通配符转义（与 PartyService / SupplierQuoteService 同一份实现）。
    *
-   * <p>不转义的话运营搜 {@code 100%} 会变成「匹配所有」，而界面上看不出来 ——
-   * 那一页返回几百条看起来还挺像对的。
+   * <p>不转义的话运营搜 {@code 100%} 会变成「匹配所有」，而界面上看不出来 —— 那一页返回几百条看起来还挺像对的。
    */
   private static String escapeLike(String value) {
     return value.replace("!", "!!").replace("%", "!%").replace("_", "!_");
@@ -928,7 +950,10 @@ public class ZombieCandidateService {
   private void audit(AccessService.Access actor, String resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), UUID.nameUUIDFromBytes(resourceId.getBytes()),
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        UUID.nameUUIDFromBytes(resourceId.getBytes()),
         action);
   }
 

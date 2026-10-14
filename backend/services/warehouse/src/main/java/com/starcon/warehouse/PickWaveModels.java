@@ -9,28 +9,22 @@ import java.util.UUID;
 /**
  * 8.3.2.2 波次与合并拣货的传输模型。
  *
- * <p>蓝图 08 卷 8.3.2.2 原文：「<b>把多张出库单按规则合并成拣货波次，提高拣货效率：
- * 按承运商/库区/订单数合并，支持波次进度跟踪。</b>」
- * 输入「出库单集合；合并规则（承运渠道、库区、时段）。」输出「波次任务 + 各出库单在波次中的位置。」
- * 关系段：「上游 = 8.3.2.1；下游 = 8.3.3.1。<b>合并只影响拣货效率，不改变订单粒度</b>：
- * 波次完成后仍需按订单拆分复核与打包。」
+ * <p>蓝图 08 卷 8.3.2.2 原文：「<b>把多张出库单按规则合并成拣货波次，提高拣货效率： 按承运商/库区/订单数合并，支持波次进度跟踪。</b>」
+ * 输入「出库单集合；合并规则（承运渠道、库区、时段）。」输出「波次任务 + 各出库单在波次中的位置。」 关系段：「上游 = 8.3.2.1；下游 =
+ * 8.3.3.1。<b>合并只影响拣货效率，不改变订单粒度</b>： 波次完成后仍需按订单拆分复核与打包。」
  *
- * <p><b>命名空间：全部 {@code PickWave*} 前缀。</b>springdoc 用 record 的<b>简单类名</b>做
- * {@code components.schemas} 的键，重名会被静默覆盖（别人的字段形状被改掉、单测全绿、
- * 只有跨服务契约比对才红）。开工前已 grep 六个服务与四个 library：全仓没有任何
+ * <p><b>命名空间：全部 {@code PickWave*} 前缀。</b>springdoc 用 record 的<b>简单类名</b>做 {@code
+ * components.schemas} 的键，重名会被静默覆盖（别人的字段形状被改掉、单测全绿、 只有跨服务契约比对才红）。开工前已 grep 六个服务与四个 library：全仓没有任何
  * {@code Wave*} record，所以 {@code PickWave} 前缀还多留了一层余量。
  *
  * <p><b>三个刻意不给默认值的地方</b>：
  *
  * <ul>
- *   <li><b>合并不改订单粒度。</b>{@link PickWaveMemberRow} 一行就是<b>一张出库单的一张
- *       拣货任务</b>，波次从不把它们揉成一条记录。{@code PickWaveCapabilities
- *       .taskOrderGranularityUnchanged} 把这句话也变成了契约里可断言的字段。
- *   <li><b>库区没有默认值。</b>库区是从取货库位沿 V105 库位树上行得到的顶层节点，
- *       <b>横跨多个区的拣货任务没有单一库区</b>（{@code crossZone=true}），
- *       只能进「库区不限」的规则 —— 绝不被硬塞进某一个区。
- *   <li><b>进度分母为 0 不给百分比。</b>{@code progress} 为 null 表示「计划量还没有」，
- *       显示 0% 会把「没量过」说成「一件没拣」。
+ *   <li><b>合并不改订单粒度。</b>{@link PickWaveMemberRow} 一行就是<b>一张出库单的一张 拣货任务</b>，波次从不把它们揉成一条记录。{@code
+ *       PickWaveCapabilities .taskOrderGranularityUnchanged} 把这句话也变成了契约里可断言的字段。
+ *   <li><b>库区没有默认值。</b>库区是从取货库位沿 V105 库位树上行得到的顶层节点， <b>横跨多个区的拣货任务没有单一库区</b>（{@code
+ *       crossZone=true}）， 只能进「库区不限」的规则 —— 绝不被硬塞进某一个区。
+ *   <li><b>进度分母为 0 不给百分比。</b>{@code progress} 为 null 表示「计划量还没有」， 显示 0% 会把「没量过」说成「一件没拣」。
  * </ul>
  */
 public final class PickWaveModels {
@@ -41,8 +35,7 @@ public final class PickWaveModels {
    * 波次状态。
    *
    * <p>四态：已排波 / 拣货中 / 已完成 / 已取消。<b>没有「已发货」</b> —— 与 8.3.2.1 同一
-   * 纪律：波次结束只表示这一组拣货任务都拣完了，出库单各自进「待复核」（8.3.3.1），
-   * 发货仍是 8.3.4.1 的事。
+   * 纪律：波次结束只表示这一组拣货任务都拣完了，出库单各自进「待复核」（8.3.3.1）， 发货仍是 8.3.4.1 的事。
    */
   public enum PickWaveStatus {
     /** 已排波：合并已完成、成员已定，还没放行。 */
@@ -107,8 +100,7 @@ public final class PickWaveModels {
    * 新建合并规则。
    *
    * @param ruleCode 规则号，租户内唯一
-   * @param carrierMatch 承运渠道。{@code ""} 或不给 = <b>不限</b>（一等公民的选项，
-   *     不是「没填」）
+   * @param carrierMatch 承运渠道。{@code ""} 或不给 = <b>不限</b>（一等公民的选项， 不是「没填」）
    * @param zoneId 库区。不给 = <b>不限</b>
    * @param timeSlotStart 时段起始（仓本地小时，0–23）。不给 = 0
    * @param timeSlotEnd 时段结束（仓本地小时，左闭右开，1–24）。不给 = 24（整天）
@@ -131,17 +123,14 @@ public final class PickWaveModels {
   /**
    * 建波次。
    *
-   * <p><b>两种建法，二选一</b>（{@code ruleId} 与 {@code pickTaskIds} 都给时以
-   * {@code ruleId} 为准，并按 {@code carrierCode}/{@code zoneId} 收窄到<b>一个</b>
-   * 合并键 —— 波次永远是单键的：同仓、同库区、同承运渠道）。
+   * <p><b>两种建法，二选一</b>（{@code ruleId} 与 {@code pickTaskIds} 都给时以 {@code ruleId} 为准，并按 {@code
+   * carrierCode}/{@code zoneId} 收窄到<b>一个</b> 合并键 —— 波次永远是单键的：同仓、同库区、同承运渠道）。
    *
    * @param ruleId 按规则自动挑候选（可空）
    * @param carrierCode 指定合并键的承运渠道（可空；给了就只取这一组）
    * @param zoneId 指定合并键的库区（可空；给了就只取这一组）
-   * @param pickTaskIds 手工指定成员（可空；给了就必须同仓、同承运渠道，且都不在别的
-   *     未完波次里）
-   * @param plannedPickAt 计划拣货时刻。不给时：按规则从<b>仓本地</b>时段的起始小时
-   *     推出今天那一刻；没有规则时取当前时刻 —— 两者都是真算出来的，不是占位值
+   * @param pickTaskIds 手工指定成员（可空；给了就必须同仓、同承运渠道，且都不在别的 未完波次里）
+   * @param plannedPickAt 计划拣货时刻。不给时：按规则从<b>仓本地</b>时段的起始小时 推出今天那一刻；没有规则时取当前时刻 —— 两者都是真算出来的，不是占位值
    */
   public record PickWaveCreateInput(
       UUID warehouseId,
@@ -166,9 +155,8 @@ public final class PickWaveModels {
   /**
    * 合并规则一行。
    *
-   * @param waitingOrderCount 当前<b>归这条规则管、但因为已有同键未完波次而进不去</b>的
-   *     出库单数。这个数不为 0 就要有人去处理：订单数上限撞顶之后剩下的单会一直等，
-   *     界面上不报出来就只剩一个解释不通的空白。
+   * @param waitingOrderCount 当前<b>归这条规则管、但因为已有同键未完波次而进不去</b>的 出库单数。这个数不为 0
+   *     就要有人去处理：订单数上限撞顶之后剩下的单会一直等， 界面上不报出来就只剩一个解释不通的空白。
    * @param activeTaskCount 当前归这条规则管的候选拣货任务数
    */
   public record PickWaveRuleRow(
@@ -218,8 +206,7 @@ public final class PickWaveModels {
   /**
    * 一张可合并的出库单（= 一张 8.3.2.1 拣货任务）。
    *
-   * @param crossZone 该任务的拣货段<b>横跨多个区</b>：它没有单一库区，只能进「库区不限」
-   *     的规则。硬塞进某一个区会让「按库区合并」这个口径失真。
+   * @param crossZone 该任务的拣货段<b>横跨多个区</b>：它没有单一库区，只能进「库区不限」 的规则。硬塞进某一个区会让「按库区合并」这个口径失真。
    * @param localHour 出库单创建时刻在<b>仓本地</b>的小时（0–23），时段匹配就用它
    * @param matchedRuleId 命中的规则（null = 没有任何 ACTIVE 规则认领它）
    * @param blocked 是否被挡住（已在别的未完波次里）
@@ -247,8 +234,7 @@ public final class PickWaveModels {
   /**
    * 一个合并键（承运渠道 × 库区）的候选组。
    *
-   * <p>波次永远是单键的（V113 的 {@code pick_wave_open_key} 部分唯一索引），
-   * 所以界面按组显示而不是一张混排的清单 —— 一屏里混着四个承运商的订单，
+   * <p>波次永远是单键的（V113 的 {@code pick_wave_open_key} 部分唯一索引）， 所以界面按组显示而不是一张混排的清单 —— 一屏里混着四个承运商的订单，
    * 看的人无法判断「现在该开哪一波」。
    */
   public record PickWaveCandidateGroup(
@@ -275,9 +261,8 @@ public final class PickWaveModels {
       String note) {}
 
   /**
-   * 波次进度。<b>全部由查询时的一次聚合算出来</b>（{@code pick_wave_task ⋈ pick_task}），
-   * 不是一个存在单头上的数 —— 见 V113 文件头 §3：明细的进度住在 8.3.2.1 的表里，
-   * 在本表挂一个「工单变了就刷波次」的触发器等于去 ALTER 别人的表。
+   * 波次进度。<b>全部由查询时的一次聚合算出来</b>（{@code pick_wave_task ⋈ pick_task}）， 不是一个存在单头上的数 —— 见 V113 文件头
+   * §3：明细的进度住在 8.3.2.1 的表里， 在本表挂一个「工单变了就刷波次」的触发器等于去 ALTER 别人的表。
    *
    * @param progress 0..1；{@code plannedLineCount=0} 时为 null（「没量过」不是「0%」）
    * @param fullyPicked 每一张成员工单都拣齐 —— 与「拣了多少件」不是一回事
@@ -401,8 +386,7 @@ public final class PickWaveModels {
   /**
    * 能力声明。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」
-   * 显式报出来，而不是让调用方从 400 或空数组里猜。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」 显式报出来，而不是让调用方从 400 或空数组里猜。
    */
   public record PickWaveCapabilities(
       String refType,

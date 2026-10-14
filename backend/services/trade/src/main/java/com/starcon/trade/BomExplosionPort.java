@@ -16,27 +16,22 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 6.4.1.2 冻结 BOM 展开结果时，读上游 3.5.2.2 的**跨服务端口**。
  *
- * <p>蓝图 6.4.1.2 的关系句把上游写死为「3.5.2.2 展开」，而展开表在 **catalog 服务的库**里。
- * AGENTS.md 模块边界纪律禁止跨服务 SQL / FK / 共享视图，所以本端口
- * **只经 catalog 的授权 HTTP 接口**读，不直连对方库、不建跨库外键。
+ * <p>蓝图 6.4.1.2 的关系句把上游写死为「3.5.2.2 展开」，而展开表在 **catalog 服务的库**里。 AGENTS.md 模块边界纪律禁止跨服务 SQL / FK /
+ * 共享视图，所以本端口 **只经 catalog 的授权 HTTP 接口**读，不直连对方库、不建跨库外键。
  *
  * <p>用的是 catalog V26 第七节**明确留给下游**的那两个接口：
  *
  * <ul>
- *   <li>{@code POST /catalog/bom-explosions} —— 按 BOM 版本 + 产量 + 仓库 + as_of 展开，
- *       返回一棵完整的展开树（{@code BomExplosionRun} 含 {@code lines}）；
- *   <li>{@code GET /catalog/boms/{id}/effective?at=} —— 规则 R4 的时刻查询，
- *       用于回答「此刻生效的是哪一版」（本模块的漂移判定）。
+ *   <li>{@code POST /catalog/bom-explosions} —— 按 BOM 版本 + 产量 + 仓库 + as_of 展开， 返回一棵完整的展开树（{@code
+ *       BomExplosionRun} 含 {@code lines}）；
+ *   <li>{@code GET /catalog/boms/{id}/effective?at=} —— 规则 R4 的时刻查询， 用于回答「此刻生效的是哪一版」（本模块的漂移判定）。
  * </ul>
  *
- * <p><b>本端口不重算任何东西</b>：多层递归展开（规则 E1 的逐层结转）、子 BOM 判定（E3）、
- * 深度截断（E4）、缺口公式（E2）全部是 catalog 的职责。两处各实现一遍必然漂移，
- * 而漂移的后果是「按不同口径冻结的料」—— 那正是本模块要消灭的东西。
+ * <p><b>本端口不重算任何东西</b>：多层递归展开（规则 E1 的逐层结转）、子 BOM 判定（E3）、 深度截断（E4）、缺口公式（E2）全部是 catalog
+ * 的职责。两处各实现一遍必然漂移， 而漂移的后果是「按不同口径冻结的料」—— 那正是本模块要消灭的东西。
  *
- * <p>取不到就**显式失败**，绝不返回一棵空树冒充「这个 BOM 没有组件」：
- * 那会让加工单凭空生成一份零行的冻结快照，而 DB 侧
- * {@code processing_bom_snapshot_has_lines} 会挡下它 —— 但服务层应当先把「为什么失败」
- * 如实报出来，而不是让调用方去读一个 CHECK 约束名。
+ * <p>取不到就**显式失败**，绝不返回一棵空树冒充「这个 BOM 没有组件」： 那会让加工单凭空生成一份零行的冻结快照，而 DB 侧 {@code
+ * processing_bom_snapshot_has_lines} 会挡下它 —— 但服务层应当先把「为什么失败」 如实报出来，而不是让调用方去读一个 CHECK 约束名。
  */
 @Service
 public class BomExplosionPort {
@@ -99,9 +94,8 @@ public class BomExplosionPort {
   /**
    * catalog 规则 R4 的时刻查询结果。
    *
-   * <p>逐字对齐 catalog 的 {@code BomEffectiveView} 里的判定两列：
-   * {@code effective=false} 是**真实业务状态**（草稿未发布、区间有缝、已发布版本全部关闭），
-   * 不是「查不到」，所以 catalog 用显式布尔而不是 404 表达，本端口照此读。
+   * <p>逐字对齐 catalog 的 {@code BomEffectiveView} 里的判定两列： {@code effective=false}
+   * 是**真实业务状态**（草稿未发布、区间有缝、已发布版本全部关闭）， 不是「查不到」，所以 catalog 用显式布尔而不是 404 表达，本端口照此读。
    */
   record EffectiveVersion(boolean effective, String versionNo) {}
 
@@ -120,8 +114,7 @@ public class BomExplosionPort {
    *
    * <p>用 POST：展开会写运行记录与明细行，且一次可能有几百行。
    *
-   * <p>展开超时给得比其它端口长（15s）：多层递归 + 每层一次子版本查询 + 一次
-   * warehouse 可用量调用，比单层 R7 慢得多是正常的。这里放宽的是**读超时**，
+   * <p>展开超时给得比其它端口长（15s）：多层递归 + 每层一次子版本查询 + 一次 warehouse 可用量调用，比单层 R7 慢得多是正常的。这里放宽的是**读超时**，
    * 连接超时仍然是 3s —— catalog 挂了就该立刻失败，不该让加工单页面转 15 秒圈。
    */
   public ExplosionRun explode(
@@ -167,12 +160,10 @@ public class BomExplosionPort {
                 + "请把绕回路径上的某一环删掉再冻结");
       }
       if (e.getStatusCode().value() == 404) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "BOM 版本不存在或无权展开：" + versionId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BOM 版本不存在或无权展开：" + versionId);
       }
       if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN, "当前身份无权展开该 BOM 版本，冻结快照无法进行");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "当前身份无权展开该 BOM 版本，冻结快照无法进行");
       }
       throw unavailable("商品中心返回 " + e.getStatusCode().value() + "，暂时无法展开 BOM");
     } catch (RestClientException e) {
@@ -183,8 +174,7 @@ public class BomExplosionPort {
   /**
    * 规则 R4 的时刻查询：此刻（{@code at}）生效的是哪一版已发布版本。
    *
-   * <p>只用于**漂移提示**：回答「这张单冻结的那一版现在还生效吗」。
-   * 返回 {@code effective=false} 不是错误 —— 已发布版本只能向前关闭（R5），
+   * <p>只用于**漂移提示**：回答「这张单冻结的那一版现在还生效吗」。 返回 {@code effective=false} 不是错误 —— 已发布版本只能向前关闭（R5），
    * 老版本被接替后就不是生效版本了，而这正是要显式告诉运营的那件事。
    */
   public EffectiveVersion effective(UUID bomId, OffsetDateTime at, String bearer) {
@@ -218,8 +208,7 @@ public class BomExplosionPort {
   /**
    * 未接入 / 不可达一律 503，并把「为什么」如实报出。
    *
-   * <p>刻意**不返回空树**：一张零行的冻结快照等于「这批料不用领任何组件」，
-   * 而这恰恰是本模块要消灭的那类静默错误。
+   * <p>刻意**不返回空树**：一张零行的冻结快照等于「这批料不用领任何组件」， 而这恰恰是本模块要消灭的那类静默错误。
    */
   private ResponseStatusException unavailable(String reason) {
     return new ResponseStatusException(

@@ -304,7 +304,12 @@ export function openCriticalAlertCount(alerts: DropshipAlertRow[]): number {
 
 /** 能力维度不可用时的说明（而不是画成 0 或「—」）。 */
 export function dimensionNote(
-  dimensions: { code: string; available: boolean; note: string | null; ownerModule: string | null }[],
+  dimensions: {
+    code: string;
+    available: boolean;
+    note: string | null;
+    ownerModule: string | null;
+  }[],
   code: string,
 ): string | null {
   const found = dimensions.find((d) => d.code === code);
@@ -396,8 +401,10 @@ export function endpointFormError(form: {
 }): string | null {
   if (!form.vendorName.trim()) return '请填写供应商名称';
   if (form.wired && !form.baseUrl.trim()) {
-    return '标记为「已接线」就必须给出网关地址：地址为空时任何调用都不可能成功，'
-      + '而一个声称可用却调不通的集成比明确报未接线更糟';
+    return (
+      '标记为「已接线」就必须给出网关地址：地址为空时任何调用都不可能成功，' +
+      '而一个声称可用却调不通的集成比明确报未接线更糟'
+    );
   }
   if (form.credentialRef.includes('=')) {
     return 'credentialRef 只能是 secret manager 里的键名，不接受 key=value 形态的明文凭证';

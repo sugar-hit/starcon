@@ -57,8 +57,11 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      MEDIA_STORAGE_ROOT: /app/data/media
       WAREHOUSE_URL: http://warehouse:8084
       INTERNAL_KEY: ${INTERNAL_KEY}
+    volumes:
+      - catalog-media-data:/app/data/media
   channel:
     build:
       context: ../..
@@ -79,7 +82,10 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      CHANNEL_SECRET_STORE_DIR: /app/data/channel-secrets
       INTERNAL_KEY: ${INTERNAL_KEY}
+    volumes:
+      - channel-secret-data:/app/data/channel-secrets
   warehouse:
     build:
       context: ../..
@@ -232,4 +238,6 @@ services:
       INTERNAL_KEY: ${INTERNAL_KEY}
       LOCAL_BOOTSTRAP_ENABLED: 'false'
 volumes:
+  catalog-media-data:
+  channel-secret-data:
   catalog-pg-data:

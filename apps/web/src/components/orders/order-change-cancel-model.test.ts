@@ -99,7 +99,10 @@ describe('blockerText / warningText：确认前置条件逐条摊开', () => {
   it('数据完整性提示与阻塞项分开：它必须显示，但不当闸门', () => {
     expect(warningText([])).toBe('');
     const warning = warningText([
-      { description: '本单没有任何履约投影记录，「未发货数量」是**未接入**而不是 0', ownerModule: '9.3.3.1 履约请求' },
+      {
+        description: '本单没有任何履约投影记录，「未发货数量」是**未接入**而不是 0',
+        ownerModule: '9.3.3.1 履约请求',
+      },
     ]);
     expect(warning).toContain('未接入');
     expect(warning).toContain('9.3.3.1');

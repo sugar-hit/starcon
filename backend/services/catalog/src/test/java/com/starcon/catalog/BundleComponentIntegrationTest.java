@@ -2,7 +2,6 @@ package com.starcon.catalog;
 
 import static com.starcon.catalog.CatalogModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -16,21 +15,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.jooq.DSLContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * 3.5.1.2 组件维护：逐行增删改、三条校验、循环引用、SKU↔套装指向、租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS：组件、指向全部真的落库。
- * 「已发布组件不可改」「成环拒绝」都是<b>绕过应用层直接写 SQL 也会被拦</b>的事实。
+ * <p>真实 PostgreSQL 16 + 强制 RLS：组件、指向全部真的落库。 「已发布组件不可改」「成环拒绝」都是<b>绕过应用层直接写 SQL 也会被拦</b>的事实。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
@@ -56,8 +54,13 @@ class BundleComponentIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -67,7 +70,8 @@ class BundleComponentIntegrationTest {
   static {
     pg.start();
     try {
-      try (var conn = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var conn =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = conn.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role catalog_app login password 'test-only' nosuperuser nobypassrls");
@@ -82,7 +86,8 @@ class BundleComponentIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -91,7 +96,8 @@ class BundleComponentIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, null, List.of(grant("ALL", allPermissions()))));
       actors.put("Bearer tenant-b", actor(user, b, null, List.of(grant("ALL", allPermissions()))));
       actors.put(
-          "Bearer reader", actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
+          "Bearer reader",
+          actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -100,8 +106,10 @@ class BundleComponentIntegrationTest {
 
   static List<String> allPermissions() {
     return java.util.stream.Stream.of("spu", "sku", "assets", "attribute")
-        .flatMap(p -> java.util.stream.Stream.of("read", "create", "update", "delete")
-            .map(op -> "catalog." + p + "." + op))
+        .flatMap(
+            p ->
+                java.util.stream.Stream.of("read", "create", "update", "delete")
+                    .map(op -> "catalog." + p + "." + op))
         .toList();
   }
 
@@ -148,30 +156,40 @@ class BundleComponentIntegrationTest {
   }
 
   void writeVoid(AccessService.Access who, Runnable work) {
-    access.run(who, "catalog.spu.update", () -> {
-      work.run();
-      return null;
-    });
+    access.run(
+        who,
+        "catalog.spu.update",
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   // ------------------------------------------------------------ 夹具
 
   String unique(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   UUID spu(AccessService.Access who, String code) {
     return write(
         who,
-        () -> catalog.saveSpu(
-            who, null, new SpuInput(code, "SPU " + code, "", "Brand", "Category", "DRAFT", 0)));
+        () ->
+            catalog.saveSpu(
+                who, null, new SpuInput(code, "SPU " + code, "", "Brand", "Category", "DRAFT", 0)));
   }
 
   UUID sku(AccessService.Access who, UUID spuId, String code, long spuVersion) {
     return write(
         who,
-        () -> catalog.saveSku(
-            who, spuId, null, new SkuInput(code, "SKU " + code, unique("BC"), "PCS", "ACTIVE", List.of(), spuVersion)));
+        () ->
+            catalog.saveSku(
+                who,
+                spuId,
+                null,
+                new SkuInput(
+                    code, "SKU " + code, unique("BC"), "PCS", "ACTIVE", List.of(), spuVersion)));
   }
 
   /** 一个普通 SKU（挂在自己的 SPU 上）。 */
@@ -193,20 +211,29 @@ class BundleComponentIntegrationTest {
                         who,
                         bundleId,
                         new BundleVersionInput(
-                            "v1", "套装 v1", Instant.now().minus(10, ChronoUnit.DAYS).toString(),
-                            null, "", 0)))
+                            "v1",
+                            "套装 v1",
+                            Instant.now().minus(10, ChronoUnit.DAYS).toString(),
+                            null,
+                            "",
+                            0)))
             .id();
     return new Version(bundleId, versionId);
   }
 
   /** 让 skuId 成为 bundleId 的可售 SKU（V24 的指向），返回指向行 id。 */
   UUID link(AccessService.Access who, UUID bundleId, UUID skuId) {
-    return write(who, () -> components.saveLink(who, null, new BundleSkuInput(bundleId, skuId, "", 0))).id();
+    return write(
+            who, () -> components.saveLink(who, null, new BundleSkuInput(bundleId, skuId, "", 0)))
+        .id();
   }
 
   BundleComponentItem add(AccessService.Access who, UUID versionId, UUID skuId, String quantity) {
-    return write(who, () -> components.addComponent(who, versionId,
-        new BundleComponentInput(skuId, new BigDecimal(quantity), "", "")));
+    return write(
+        who,
+        () ->
+            components.addComponent(
+                who, versionId, new BundleComponentInput(skuId, new BigDecimal(quantity), "", "")));
   }
 
   /** 套装的真实编码（夹具用随机唯一编码，报错文案里出现的是它）。 */
@@ -234,14 +261,28 @@ class BundleComponentIntegrationTest {
 
     // 逐行改数量：行级乐观锁，提交当前 rowVersion。
     var edited =
-        write(actor, () -> components.editComponent(actor, first.id(),
-            new BundleComponentEditInput(new BigDecimal("3"), "主机", "备注", first.rowVersion())));
+        write(
+            actor,
+            () ->
+                components.editComponent(
+                    actor,
+                    first.id(),
+                    new BundleComponentEditInput(
+                        new BigDecimal("3"), "主机", "备注", first.rowVersion())));
     assertThat(edited.quantity()).isEqualByComparingTo("3");
     assertThat(edited.role()).isEqualTo("主机");
 
     // 乐观锁：拿旧 rowVersion 再改一次必须被拒（否则会静默覆盖别人的改动）。
-    assertThatThrownBy(() -> write(actor, () -> components.editComponent(actor, first.id(),
-        new BundleComponentEditInput(new BigDecimal("4"), "", "", first.rowVersion()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        components.editComponent(
+                            actor,
+                            first.id(),
+                            new BundleComponentEditInput(
+                                new BigDecimal("4"), "", "", first.rowVersion()))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("刚被别人改过");
 
@@ -249,14 +290,25 @@ class BundleComponentIntegrationTest {
     // 0.5 件是真实场景：NUMERIC(19,6) 不是摆设。
     assertThat(second.quantity()).isEqualByComparingTo("0.5");
 
-    var page = tx(actor, () -> components.components(
-        new BundleComponentQuery(null, v.versionId(), null, null, 0, 20)));
+    var page =
+        tx(
+            actor,
+            () ->
+                components.components(
+                    new BundleComponentQuery(null, v.versionId(), null, null, 0, 20)));
     assertThat(page.total()).isEqualTo(2);
 
     writeVoid(actor, () -> components.deleteComponent(actor, second.id(), second.rowVersion()));
-    assertThat(tx(actor, () -> components.component(first.id())).quantity()).isEqualByComparingTo("3");
-    assertThat(tx(actor, () -> components.components(
-        new BundleComponentQuery(null, v.versionId(), null, null, 0, 20))).total()).isEqualTo(1);
+    assertThat(tx(actor, () -> components.component(first.id())).quantity())
+        .isEqualByComparingTo("3");
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        components.components(
+                            new BundleComponentQuery(null, v.versionId(), null, null, 0, 20)))
+                .total())
+        .isEqualTo(1);
   }
 
   @Test
@@ -291,8 +343,7 @@ class BundleComponentIntegrationTest {
   /**
    * 循环引用：合法嵌套放行，自引用与二元/三元环拒绝，报错点名整条环。
    *
-   * <p>这是本模块对蓝图的唯一「补规则」。若哪天有人把判定换成「只查直接反向边」，
-   * 三元环会被漏掉，而漏掉的环要到对方版本发布、09 订单展开时才显形。
+   * <p>这是本模块对蓝图的唯一「补规则」。若哪天有人把判定换成「只查直接反向边」， 三元环会被漏掉，而漏掉的环要到对方版本发布、09 订单展开时才显形。
    */
   @Test
   void circularReferenceIsRefusedWithTheWholeRing() {
@@ -326,8 +377,12 @@ class BundleComponentIntegrationTest {
         .hasMessageContaining(codeA + " → " + codeB + " → " + codeC + " → " + codeA)
         .hasMessageContaining("无限递归");
     // 一条都没写进去：C 的清单仍然只有那条代表 B 的组件。
-    var cComponents = tx(actor, () -> components.components(
-        new BundleComponentQuery(null, cV.versionId(), null, null, 0, 20)));
+    var cComponents =
+        tx(
+            actor,
+            () ->
+                components.components(
+                    new BundleComponentQuery(null, cV.versionId(), null, null, 0, 20)));
     assertThat(cComponents.total()).isZero();
 
     // 自引用：套装 C 用自己的可售 SKU 当组件，是长度为 1 的环。
@@ -359,23 +414,39 @@ class BundleComponentIntegrationTest {
     // 而 A→B 本来就存在 —— 于是闭合成的是**二元环 A↔B**（C 不在环里：它只是这次被改指向的
     // 套装的原主人，并没有把任何组件指向 A）。
     // 环从「持有者」B 读起（先说「谁的组件出了问题」），再到被指向的 A。
-    assertThatThrownBy(() -> write(actor, () -> components.saveLink(actor, linkForC,
-        new BundleSkuInput(aV.bundleId(), skuForC, "", 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        components.saveLink(
+                            actor, linkForC, new BundleSkuInput(aV.bundleId(), skuForC, "", 0))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("循环引用")
         .hasMessageContaining(codeB + " → " + codeA + " → " + codeB);
 
     // 换一个不闭合的目标就能改成功（证明拦的是「成环」而不是「改指向」这件事本身）。
     var dV = bundleWithDraft(actor, "D");
-    write(actor, () -> components.saveLink(actor, linkForC,
-        new BundleSkuInput(dV.bundleId(), skuForC, "换个套装", 0)));
-    assertThat(tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 200)).items()).stream()
-        .filter(r -> r.id().equals(linkForC)).findFirst().orElseThrow()
-        .bundleId()).isEqualTo(dV.bundleId());
+    write(
+        actor,
+        () ->
+            components.saveLink(
+                actor, linkForC, new BundleSkuInput(dV.bundleId(), skuForC, "换个套装", 0)));
+    assertThat(
+            tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 200)).items()).stream()
+                .filter(r -> r.id().equals(linkForC))
+                .findFirst()
+                .orElseThrow()
+                .bundleId())
+        .isEqualTo(dV.bundleId());
     // 另一条指向不受影响。
-    assertThat(tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 200)).items()).stream()
-        .filter(r -> r.id().equals(linkForB)).findFirst().orElseThrow()
-        .bundleId()).isEqualTo(bV.bundleId());
+    assertThat(
+            tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 200)).items()).stream()
+                .filter(r -> r.id().equals(linkForB))
+                .findFirst()
+                .orElseThrow()
+                .bundleId())
+        .isEqualTo(bV.bundleId());
   }
 
   @Test
@@ -388,8 +459,14 @@ class BundleComponentIntegrationTest {
     add(actor, aV.versionId(), skuForB, "1");
 
     // 直连 SQL 把 skuForB 改指回 A：成环。
-    assertThatThrownBy(() -> rawSql(
-        "update bundle_sku set bundle_id='" + aV.bundleId() + "' where id='" + linkId + "'"))
+    assertThatThrownBy(
+            () ->
+                rawSql(
+                    "update bundle_sku set bundle_id='"
+                        + aV.bundleId()
+                        + "' where id='"
+                        + linkId
+                        + "'"))
         .hasMessageContaining("循环引用");
   }
 
@@ -413,18 +490,33 @@ class BundleComponentIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不可增删改");
     // 改一行：拒。
-    assertThatThrownBy(() -> write(actor, () -> components.editComponent(actor, row.id(),
-        new BundleComponentEditInput(new BigDecimal("5"), "", "", row.rowVersion()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        components.editComponent(
+                            actor,
+                            row.id(),
+                            new BundleComponentEditInput(
+                                new BigDecimal("5"), "", "", row.rowVersion()))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不可增删改");
     // 删一行：拒。
-    assertThatThrownBy(() -> writeVoid(actor,
-        () -> components.deleteComponent(actor, row.id(), row.rowVersion())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor, () -> components.deleteComponent(actor, row.id(), row.rowVersion())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不可增删改");
     // 冻结行在清单里带 editable=false 与「已发布」标记。
-    var list = tx(actor, () -> components.components(
-        new BundleComponentQuery(null, v.versionId(), null, null, 0, 20))).items();
+    var list =
+        tx(
+                actor,
+                () ->
+                    components.components(
+                        new BundleComponentQuery(null, v.versionId(), null, null, 0, 20)))
+            .items();
     assertThat(list).hasSize(1);
     assertThat(list.get(0).editable()).isFalse();
     assertThat(list.get(0).versionStatus()).isEqualTo("PUBLISHED");
@@ -432,7 +524,8 @@ class BundleComponentIntegrationTest {
 
   /** 直连 SQL（不经过服务层），用来证明 DB 层触发器真的拦得住。 */
   private void rawSql(String statement) {
-    try (var conn = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    try (var conn =
+            DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = conn.createStatement()) {
       s.execute("set app.current_tenant='" + a + "'");
       s.execute("set app.actor='" + user + "'");
@@ -451,7 +544,8 @@ class BundleComponentIntegrationTest {
     // 空清单：至少要有一个组件。
     var empty = tx(actor, () -> components.check(v.versionId()));
     assertThat(empty.ok()).isFalse();
-    assertThat(empty.problems()).extracting(BundleComponentProblem::code)
+    assertThat(empty.problems())
+        .extracting(BundleComponentProblem::code)
         .contains("EMPTY_COMPONENT_LIST");
 
     // 合法清单：ok=true 且 problems 为空。
@@ -467,7 +561,8 @@ class BundleComponentIntegrationTest {
     publish(actor, v.versionId());
     var frozen = tx(actor, () -> components.check(v.versionId()));
     assertThat(frozen.ok()).isFalse();
-    assertThat(frozen.problems()).extracting(BundleComponentProblem::code)
+    assertThat(frozen.problems())
+        .extracting(BundleComponentProblem::code)
         .contains("VERSION_FROZEN");
     assertThat(frozen.editable()).isFalse();
   }
@@ -507,13 +602,19 @@ class BundleComponentIntegrationTest {
     UUID skuForB = plainSku(actor, "SKUB");
     link(actor, represented.bundleId(), skuForB);
     add(actor, holder.versionId(), skuForB, "1");
-    var row = tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 20))).items().stream()
-        .filter(r -> r.skuId().equals(skuForB)).findFirst().orElseThrow();
+    var row =
+        tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 20))).items().stream()
+            .filter(r -> r.skuId().equals(skuForB))
+            .findFirst()
+            .orElseThrow();
     assertThat(row.usedByComponentCount()).isEqualTo(1);
     assertThat(row.usedByPublished()).isFalse(); // 还是草稿
     publish(actor, holder.versionId());
-    var published = tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 20))).items().stream()
-        .filter(r -> r.skuId().equals(skuForB)).findFirst().orElseThrow();
+    var published =
+        tx(actor, () -> components.links(new BundleSkuQuery(null, 0, 20))).items().stream()
+            .filter(r -> r.skuId().equals(skuForB))
+            .findFirst()
+            .orElseThrow();
     assertThat(published.usedByPublished()).isTrue();
   }
 
@@ -550,33 +651,49 @@ class BundleComponentIntegrationTest {
     add(actor, represented.versionId(), plain, "1");
 
     // 嵌套标记：nested=true 的那一行带 linkedBundleCode。
-    var nestedOnly = tx(actor, () -> components.components(
-        new BundleComponentQuery(null, null, null, "true", 0, 20))).items();
+    var nestedOnly =
+        tx(
+                actor,
+                () ->
+                    components.components(
+                        new BundleComponentQuery(null, null, null, "true", 0, 20)))
+            .items();
     assertThat(nestedOnly).isNotEmpty();
     assertThat(nestedOnly.get(0).nested()).isTrue();
     assertThat(nestedOnly.get(0).linkedBundleCode()).isNotBlank();
 
     // 关键词搜的是编码/名称/版本号/角色，搜一个 UUID 必然命中 0 行
     // ——证明它真的在过滤，而不是「查不到就返回全部」那种假搜索。
-    var byKeyword = tx(actor, () -> components.components(
-        new BundleComponentQuery(skuForB.toString(), null, null, null, 0, 20)));
+    var byKeyword =
+        tx(
+            actor,
+            () ->
+                components.components(
+                    new BundleComponentQuery(skuForB.toString(), null, null, null, 0, 20)));
     assertThat(byKeyword.total()).isZero();
 
     // 按版本过滤只返回该版本的组件。
-    var byVersion = tx(actor, () -> components.components(
-        new BundleComponentQuery(null, holder.versionId(), null, null, 0, 20)));
-    assertThat(byVersion.items()).extracting(BundleComponentItem::versionId)
+    var byVersion =
+        tx(
+            actor,
+            () ->
+                components.components(
+                    new BundleComponentQuery(null, holder.versionId(), null, null, 0, 20)));
+    assertThat(byVersion.items())
+        .extracting(BundleComponentItem::versionId)
         .containsOnly(holder.versionId());
 
     // HTTP 层同样通。
     http.perform(get("/catalog/components/overview").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.selfReferencingCount").value(0));
-    http.perform(get("/catalog/components/" + nested.id()).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/components/" + nested.id()).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.nested").value(true));
-    http.perform(get("/catalog/versions/" + holder.versionId() + "/component-check")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/versions/" + holder.versionId() + "/component-check")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.ok").value(true));
     http.perform(get("/catalog/bundle-skus").header("Authorization", "Bearer tenant-a"))
@@ -590,10 +707,14 @@ class BundleComponentIntegrationTest {
     add(actor, v.versionId(), skuA, "1");
     http.perform(get("/catalog/components").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
-    http.perform(post("/catalog/versions/" + v.versionId() + "/components")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + UUID.randomUUID() + "\",\"quantity\":1,\"role\":\"\",\"note\":\"\"}"))
+    http.perform(
+            post("/catalog/versions/" + v.versionId() + "/components")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\""
+                        + UUID.randomUUID()
+                        + "\",\"quantity\":1,\"role\":\"\",\"note\":\"\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -633,43 +754,83 @@ class BundleComponentIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     // A 读自己的组件与校验当然是通的（反向断言：防止上面的隔离把谁都给挡了）。
     assertThat(tx(actor, () -> components.component(myRow.id())).skuId()).isEqualTo(mySku);
-    assertThat(tx(actor, () -> components.check(mine.versionId())).versionId()).isEqualTo(mine.versionId());
+    assertThat(tx(actor, () -> components.check(mine.versionId())).versionId())
+        .isEqualTo(mine.versionId());
     // B 看不到 A 的组件、也拿不到 A 的指向。
-    assertThat(tx(actorB, () -> components.components(
-        new BundleComponentQuery(null, mine.versionId(), null, null, 0, 20))).items()).isEmpty();
+    assertThat(
+            tx(
+                    actorB,
+                    () ->
+                        components.components(
+                            new BundleComponentQuery(null, mine.versionId(), null, null, 0, 20)))
+                .items())
+        .isEmpty();
     // 跨租户改我的组件：拒。
-    assertThatThrownBy(() -> write(actorB, () -> components.editComponent(actorB, myRow.id(),
-        new BundleComponentEditInput(new BigDecimal("9"), "", "", myRow.rowVersion()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        components.editComponent(
+                            actorB,
+                            myRow.id(),
+                            new BundleComponentEditInput(
+                                new BigDecimal("9"), "", "", myRow.rowVersion()))))
         .isInstanceOf(ResponseStatusException.class);
     // 跨租户删我的指向：拒。
     assertThatThrownBy(() -> writeVoid(actorB, () -> components.deleteLink(actorB, myLink, 0)))
         .isInstanceOf(ResponseStatusException.class);
     // 反查方向同样隔离：B 拿不到「我的组件被哪些套装引用」。
-    assertThat(tx(actorB, () -> components.components(
-        new BundleComponentQuery(null, null, null, "true", 0, 200))).items())
+    assertThat(
+            tx(
+                    actorB,
+                    () ->
+                        components.components(
+                            new BundleComponentQuery(null, null, null, "true", 0, 200)))
+                .items())
         .noneMatch(i -> i.skuId().equals(mySku));
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(get("/catalog/components/" + myRow.id())
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/components/" + myRow.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
-    http.perform(get("/catalog/versions/" + mine.versionId() + "/component-check")
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/versions/" + mine.versionId() + "/component-check")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 伪造头下写入仍然落在 B 自己名下，与 A 无关。
-    http.perform(post("/catalog/bundle-skus")
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a)
-            .contentType("application/json")
-            .content("{\"bundleId\":\"" + theirs.bundleId() + "\",\"skuId\":\"" + theirSku
-                + "\",\"note\":\"\",\"rowVersion\":0}"))
+    http.perform(
+            post("/catalog/bundle-skus")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a)
+                .contentType("application/json")
+                .content(
+                    "{\"bundleId\":\""
+                        + theirs.bundleId()
+                        + "\",\"skuId\":\""
+                        + theirSku
+                        + "\",\"note\":\"\",\"rowVersion\":0}"))
         .andExpect(status().is4xxClientError());
     // 两个租户各自的组件数互不相干。
-    assertThat(tx(actorB, () -> components.components(
-        new BundleComponentQuery(null, null, null, null, 0, 200)).items()))
+    assertThat(
+            tx(
+                actorB,
+                () ->
+                    components
+                        .components(new BundleComponentQuery(null, null, null, null, 0, 200))
+                        .items()))
         .extracting(BundleComponentItem::skuId)
         .doesNotContain(mySku);
-    assertThat(tx(actor, () -> components.components(
-        new BundleComponentQuery(null, null, null, null, 0, 200)).items()))
+    assertThat(
+            tx(
+                actor,
+                () ->
+                    components
+                        .components(new BundleComponentQuery(null, null, null, null, 0, 200))
+                        .items()))
         .extracting(BundleComponentItem::skuId)
         .doesNotContain(theirSku);
 
@@ -678,9 +839,15 @@ class BundleComponentIntegrationTest {
     // 「A 能不能读到这一行 id」才是有意义的断言（在内层用 A 的上下文查 B 的版本
     // 会得到空列表，那证明的是过滤而不是隔离）。
     UUID theirRow =
-        tx(actorB, () -> components.components(
-                new BundleComponentQuery(null, theirs.versionId(), null, null, 0, 20))
-            .items().get(0).id());
+        tx(
+            actorB,
+            () ->
+                components
+                    .components(
+                        new BundleComponentQuery(null, theirs.versionId(), null, null, 0, 20))
+                    .items()
+                    .get(0)
+                    .id());
     for (int i = 0; i < 5; i++) {
       assertThat(tx(actor, () -> components.component(myRow.id()).quantity()))
           .isEqualByComparingTo("2");
@@ -691,12 +858,26 @@ class BundleComponentIntegrationTest {
       assertThatThrownBy(() -> tx(actor, () -> components.component(theirRow)))
           .isInstanceOf(ResponseStatusException.class);
       // 两边看到的组件集合互不相交。
-      var seenByA = tx(actor, () -> components.components(
-          new BundleComponentQuery(null, null, null, null, 0, 200)).items())
-          .stream().map(BundleComponentItem::skuId).collect(java.util.stream.Collectors.toSet());
-      var seenByB = tx(actorB, () -> components.components(
-          new BundleComponentQuery(null, null, null, null, 0, 200)).items())
-          .stream().map(BundleComponentItem::skuId).collect(java.util.stream.Collectors.toSet());
+      var seenByA =
+          tx(
+                  actor,
+                  () ->
+                      components
+                          .components(new BundleComponentQuery(null, null, null, null, 0, 200))
+                          .items())
+              .stream()
+              .map(BundleComponentItem::skuId)
+              .collect(java.util.stream.Collectors.toSet());
+      var seenByB =
+          tx(
+                  actorB,
+                  () ->
+                      components
+                          .components(new BundleComponentQuery(null, null, null, null, 0, 200))
+                          .items())
+              .stream()
+              .map(BundleComponentItem::skuId)
+              .collect(java.util.stream.Collectors.toSet());
       assertThat(seenByA).isNotEmpty();
       assertThat(seenByB).isNotEmpty();
       assertThat(java.util.Collections.disjoint(seenByA, seenByB)).isTrue();
@@ -711,17 +892,26 @@ class BundleComponentIntegrationTest {
   @Test
   void rlsPoliciesAreInPlaceOnTheLinkTable() {
     var tables =
-        tx(actor, () -> sql.fetch(
-            "select relname,relrowsecurity,relforcerowsecurity from pg_class"
-                + " where relname in ('bundle_sku','bundle_component') and relkind='r'"));
+        tx(
+            actor,
+            () ->
+                sql.fetch(
+                    "select relname,relrowsecurity,relforcerowsecurity from pg_class"
+                        + " where relname in ('bundle_sku','bundle_component') and relkind='r'"));
     assertThat(tables).hasSize(2);
-    assertThat(tables).allMatch(r ->
-        Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class))
-            && Boolean.TRUE.equals(r.get("relrowsecurity", Boolean.class)));
+    assertThat(tables)
+        .allMatch(
+            r ->
+                Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class))
+                    && Boolean.TRUE.equals(r.get("relrowsecurity", Boolean.class)));
     // 数量列仍然是 NUMERIC(19,6)：逐行编辑没有把精度改回 double。
-    var quantityType = tx(actor, () -> sql.fetchOne(
-        "select numeric_precision p, numeric_scale s from information_schema.columns"
-            + " where table_name='bundle_component' and column_name='quantity'"));
+    var quantityType =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                    "select numeric_precision p, numeric_scale s from information_schema.columns"
+                        + " where table_name='bundle_component' and column_name='quantity'"));
     assertThat(quantityType.get("p", Integer.class)).isEqualTo(19);
     assertThat(quantityType.get("s", Integer.class)).isEqualTo(6);
   }

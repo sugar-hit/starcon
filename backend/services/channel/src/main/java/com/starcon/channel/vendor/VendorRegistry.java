@@ -11,9 +11,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>授权服务只按平台码向这里要适配器，平台数量变化不影响调用方。
  *
- * <p>装配时会把适配器自称的 {@link PlatformOAuthAdapter#platformCode()} 与配置表里
- * {@code platform_oauth_profile} 登记的平台做一次双向核对：配置有而没有适配器、适配器有而
- * 没有配置，都让进程起不来。一个平台授权到一半才发现缺适配器，代价是用户在授权页白跳一次。
+ * <p>装配时会把适配器自称的 {@link PlatformOAuthAdapter#platformCode()} 与配置表里 {@code platform_oauth_profile}
+ * 登记的平台做一次双向核对：配置有而没有适配器、适配器有而 没有配置，都让进程起不来。一个平台授权到一半才发现缺适配器，代价是用户在授权页白跳一次。
  */
 @Component
 public class VendorRegistry {
@@ -22,8 +21,7 @@ public class VendorRegistry {
   public VendorRegistry(List<PlatformOAuthAdapter> adapters) {
     for (PlatformOAuthAdapter adapter : adapters) {
       String code = adapter.platformCode().toUpperCase(Locale.ROOT);
-      if (byCode.put(code, adapter) != null)
-        throw new IllegalStateException("平台适配器重复注册：" + code);
+      if (byCode.put(code, adapter) != null) throw new IllegalStateException("平台适配器重复注册：" + code);
     }
   }
 

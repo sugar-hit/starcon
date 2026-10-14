@@ -17,23 +17,19 @@ import java.util.UUID;
  * </ul>
  *
  * <p>DTO 一律带 {@code Tracking}/{@code TransitTrack} 前缀：四个服务的 schema 被 codegen
- * 拍平进同一命名空间，重名会被**静默覆盖且没有任何警告**（AGENTS.md 契约纪律）。
- * 10.4.1.1 已占用 {@code FirstMile*}，本模块**刻意不叫 {@code FirstMileTracking}**
- * 的同义重复，而是用 {@code Tracking} / {@code TransitTrack} / {@code DelayAlert} /
+ * 拍平进同一命名空间，重名会被**静默覆盖且没有任何警告**（AGENTS.md 契约纪律）。 10.4.1.1 已占用 {@code FirstMile*}，本模块**刻意不叫 {@code
+ * FirstMileTracking}** 的同义重复，而是用 {@code Tracking} / {@code TransitTrack} / {@code DelayAlert} /
  * {@code DelayThreshold} 四个前缀，避免与上游的 {@code FirstMile*} 撞名。
  *
  * <p>四条本模块必须自己讲清楚的口径（都随响应返回，不让界面上凭空猜）：
  *
  * <ol>
- *   <li><b>预警按剩余窗口提前分级，不是到港当天才发现晚了</b>：蓝图关系段原文
- *       「头程延误是断货的主要外因，预警必须提前到预计到港前若干天」。
- *       所以分级由「剩余窗口 = 预计到港 − 现在」与阈值表逐级判定，
- *       三档提前量来自 {@code first_mile_delay_threshold} 表，**不是代码里的 if**。
- *   <li><b>外部同步未接入</b>：货代/船司/清关连接器（10.4.2.1）**未交付**，
- *       本模块**没有常驻同步任务**。外部事实靠 {@code sourceSystem} +
+ *   <li><b>预警按剩余窗口提前分级，不是到港当天才发现晚了</b>：蓝图关系段原文 「头程延误是断货的主要外因，预警必须提前到预计到港前若干天」。 所以分级由「剩余窗口 = 预计到港 −
+ *       现在」与阈值表逐级判定， 三档提前量来自 {@code first_mile_delay_threshold} 表，**不是代码里的 if**。
+ *   <li><b>外部同步未接入</b>：货代/船司/清关连接器（10.4.2.1）**未交付**， 本模块**没有常驻同步任务**。外部事实靠 {@code sourceSystem} +
  *       {@code referenceId} + 事件流承载，来源不可为空的约束钉在 DB 层。
- *   <li><b>不建第二张在途账</b>：在途余量、已到、未达一律 join 7.5.1.2 的
- *       {@code inventory_transfer} 现算，本模块的表里**没有数量余额列**。
+ *   <li><b>不建第二张在途账</b>：在途余量、已到、未达一律 join 7.5.1.2 的 {@code inventory_transfer}
+ *       现算，本模块的表里**没有数量余额列**。
  *   <li><b>只记「目的仓确认收到了」，不写库存</b>：入库落账归 7.5.1.2 的 arrive。
  * </ol>
  */
@@ -43,9 +39,8 @@ public final class InTransitTrackingModels {
   /**
    * 「有编码 + 有中文名」的最小约束，供 {@code options()} 一处把枚举摊成词表。
    *
-   * <p>刻意声明成接口而不是 {@code Function<Object,String>}：后者会把枚举擦成 Object，
-   * 编译器再也发现不了「往里传了一个没有 {@code label()} 的类型」。{@link Enum#name()}
-   * 已由 {@code java.lang.Enum} 提供，只需枚举各自实现 {@code label()}。
+   * <p>刻意声明成接口而不是 {@code Function<Object,String>}：后者会把枚举擦成 Object， 编译器再也发现不了「往里传了一个没有 {@code
+   * label()} 的类型」。{@link Enum#name()} 已由 {@code java.lang.Enum} 提供，只需枚举各自实现 {@code label()}。
    */
   public interface Labelled {
     /** 词表编码（等于 {@code name()}）。 */
@@ -58,10 +53,8 @@ public final class InTransitTrackingModels {
   /**
    * 跟踪生命周期状态。与 {@code first_mile_tracking.status} 的 CHECK 逐值对应。
    *
-   * <p>刻意与 {@link TrackingStage} 分成**两个维度**：
-   * {@code status} 是这条跟踪记录自己的生死（TRACKING → CLOSED / CANCELLED），
-   * {@code trackingStage} 是这批货走到哪了。混成一个字段就无法表达
-   * 「跟踪已关闭但清关仍在扣关中」这类真实组合。
+   * <p>刻意与 {@link TrackingStage} 分成**两个维度**： {@code status} 是这条跟踪记录自己的生死（TRACKING → CLOSED /
+   * CANCELLED）， {@code trackingStage} 是这批货走到哪了。混成一个字段就无法表达 「跟踪已关闭但清关仍在扣关中」这类真实组合。
    */
   public enum TrackingStatus implements Labelled {
     /** 在跟踪中。 */
@@ -98,10 +91,8 @@ public final class InTransitTrackingModels {
   /**
    * 跟踪阶段（在途位置状态机）。
    *
-   * <p>顺序即推进顺序，DB 层用 {@code stage_rank()} 钉死「不许倒退」：
-   * 在途是**推进**过程，倒退会让「这批货到过哪」永远答不出来。
-   * {@code EXCEPTION} 是例外分支 —— 它不是推进中的一站，而是
-   * 「这一批货出问题了」的标记，DB 里给了最高序号，所以从任何阶段都能进。
+   * <p>顺序即推进顺序，DB 层用 {@code stage_rank()} 钉死「不许倒退」： 在途是**推进**过程，倒退会让「这批货到过哪」永远答不出来。 {@code
+   * EXCEPTION} 是例外分支 —— 它不是推进中的一站，而是 「这一批货出问题了」的标记，DB 里给了最高序号，所以从任何阶段都能进。
    */
   public enum TrackingStage implements Labelled {
     AT_ORIGIN("在起运地", 1),
@@ -185,9 +176,8 @@ public final class InTransitTrackingModels {
   /**
    * 延误预警档位。
    *
-   * <p>三档与 {@link #ON_TRACK} 的关系：{@code ON_TRACK} 不是一档预警而是
-   * 「三档都没命中」，所以它只出现在**评估结果**里，不落在
-   * {@code first_mile_delay_alert} 表上（表上只有真需要人管的三档）。
+   * <p>三档与 {@link #ON_TRACK} 的关系：{@code ON_TRACK} 不是一档预警而是 「三档都没命中」，所以它只出现在**评估结果**里，不落在 {@code
+   * first_mile_delay_alert} 表上（表上只有真需要人管的三档）。
    */
   public enum DelayLevel implements Labelled {
     ON_TRACK("正常在途", 0),
@@ -220,14 +210,10 @@ public final class InTransitTrackingModels {
   /**
    * 事实来源。
    *
-   * <p>蓝图输入写「货代/船司/清关状态同步；人工更新」——两种来源形状一样
-   * （都是「某时刻、某来源、货到了某个状态」），所以落同一张事件表并用本枚举区分，
-   * 而不是造两张形状雷同的表。
+   * <p>蓝图输入写「货代/船司/清关状态同步；人工更新」——两种来源形状一样 （都是「某时刻、某来源、货到了某个状态」），所以落同一张事件表并用本枚举区分， 而不是造两张形状雷同的表。
    *
-   * <p>{@code FORWARDER} / {@code CARRIER} / {@code CUSTOMS_BROKER} 三者对应的
-   * **真实连接器均未交付**（10.4.2.1 海外仓连接与货代/船司连接器都还没开工），
-   * 当前由人工代录 —— DB 层要求这三者必须带 {@code referenceId}（来源单号），
-   * 写不出出处的外部事实一条都不许入库。
+   * <p>{@code FORWARDER} / {@code CARRIER} / {@code CUSTOMS_BROKER} 三者对应的 **真实连接器均未交付**（10.4.2.1
+   * 海外仓连接与货代/船司连接器都还没开工）， 当前由人工代录 —— DB 层要求这三者必须带 {@code referenceId}（来源单号）， 写不出出处的外部事实一条都不许入库。
    */
   public enum TrackingSource implements Labelled {
     /** 人工登记（actor 必填）。 */
@@ -308,8 +294,7 @@ public final class InTransitTrackingModels {
   @Schema(name = "TransitTrackCapabilities")
   public record TransitTrackCapabilities(
       @Schema(description = "可跟踪的发运单来源（10.4.1.1 已交付）") List<TrackingDimension> sources,
-      @Schema(description = "**未交付依赖**逐条声明：外部连接器未接入，不假装有同步任务")
-          List<TrackingDimension> dependencies,
+      @Schema(description = "**未交付依赖**逐条声明：外部连接器未接入，不假装有同步任务") List<TrackingDimension> dependencies,
       @Schema(description = "跟踪生命周期状态机") List<TrackingTransition> statusTransitions,
       @Schema(description = "跟踪阶段状态机（含推进顺序）") List<TrackingStageTransition> stageTransitions,
       @Schema(description = "清关状态词表") List<TrackingOption> customsStatuses,
@@ -353,8 +338,7 @@ public final class InTransitTrackingModels {
       UUID destinationWarehouseId,
       String destinationCountryCode,
       String transportMode,
-      @Schema(description = "只要有任何延误信号（含 WATCH 提前提示区）：漏斗里最常用的那一刀")
-          Boolean delayedOnly,
+      @Schema(description = "只要有任何延误信号（含 WATCH 提前提示区）：漏斗里最常用的那一刀") Boolean delayedOnly,
       String keyword,
       String sort,
       int page,
@@ -427,8 +411,7 @@ public final class InTransitTrackingModels {
       List<DelayAlertRow> alerts,
       @Schema(description = "当前状态的合法下一步") List<String> allowedNext,
       @Schema(description = "当前阶段的合法下一步") List<String> allowedNextStages,
-      @Schema(description = "当前生效的阈值口径（从阈值表读出，不是代码常量）")
-          EffectiveThreshold threshold) {}
+      @Schema(description = "当前生效的阈值口径（从阈值表读出，不是代码常量）") EffectiveThreshold threshold) {}
 
   /** 当前生效的阈值：来源行 + 三档提前量 + 剩余窗口。 */
   @Schema(name = "EffectiveThreshold")
@@ -461,8 +444,7 @@ public final class InTransitTrackingModels {
   /**
    * 在途腿：读 7.5.1.2 的 {@code inventory_transfer}。
    *
-   * <p>数量三个口径并排返回（发运 / 已了结 / 未达），
-   * 因为「发运 100、到货 60」不并排就会被读成账丢了 40。
+   * <p>数量三个口径并排返回（发运 / 已了结 / 未达）， 因为「发运 100、到货 60」不并排就会被读成账丢了 40。
    */
   @Schema(name = "TrackingLegRow")
   public record TrackingLegRow(
@@ -536,27 +518,23 @@ public final class InTransitTrackingModels {
       @Schema(description = "初始位置", nullable = true) String currentLocation,
       @Schema(nullable = true) OffsetDateTime locationOccurredAt,
       @Schema(description = "初始清关状态", nullable = true) String customsStatus,
-      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true)
-          String customsHoldReason,
+      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true) String customsHoldReason,
       @Schema(description = "初始阶段（默认 AT_ORIGIN）", nullable = true) String trackingStage,
       @Schema(nullable = true) String notes) {}
 
   /** 登记节点事件：位置 / 改期 / 清关 / 阶段推进 / 备注 / 异常，五合一。 */
   @Schema(name = "TrackingEventRequest")
   public record TrackingEventRequest(
-      @Schema(description = "事件类型：LOCATION / ETA_REVISED / CUSTOMS / STAGE / NOTE")
-          String kind,
+      @Schema(description = "事件类型：LOCATION / ETA_REVISED / CUSTOMS / STAGE / NOTE") String kind,
       @Schema(description = "事实来源（默认 MANUAL）") String sourceSystem,
       @Schema(description = "来源单号：外部来源必填", nullable = true) String referenceId,
       @Schema(nullable = true) String locationText,
       @Schema(description = "位置发生时间（LOCATION 必填）", nullable = true)
           OffsetDateTime locationOccurredAt,
-      @Schema(description = "改期后的新预计到港（ETA_REVISED 必填）", nullable = true)
-          OffsetDateTime etaAfter,
+      @Schema(description = "改期后的新预计到港（ETA_REVISED 必填）", nullable = true) OffsetDateTime etaAfter,
       @Schema(description = "改期原因（ETA_REVISED 必填）", nullable = true) String reason,
       @Schema(description = "新的清关状态（CUSTOMS 必填）", nullable = true) String customsStatus,
-      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true)
-          String customsHoldReason,
+      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true) String customsHoldReason,
       @Schema(description = "推进到的阶段（STAGE 必填）", nullable = true) String toStage,
       @Schema(description = "事件正文", nullable = true) String detail,
       @Schema(nullable = true) OffsetDateTime occurredAt) {}
@@ -566,8 +544,7 @@ public final class InTransitTrackingModels {
   public record TrackingReceiptRequest(
       @Schema(description = "目的仓收货回单号", nullable = true) String receiptReference,
       @Schema(nullable = true) OffsetDateTime receivedAt,
-      @Schema(description = "备注：短少/破损等差异如实写，不自动抹平", nullable = true)
-          String notes) {}
+      @Schema(description = "备注：短少/破损等差异如实写，不自动抹平", nullable = true) String notes) {}
 
   /** 关闭跟踪（货已闭环）。 */
   @Schema(name = "TrackingCloseRequest")

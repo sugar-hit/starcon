@@ -35,28 +35,23 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 6.4.1.2 BOM 关联（BOM 冻结快照）。
  *
- * <p><b>本测试是 V98 迁移那些 DB 级不变量的独立复验</b>，并且专门验证本模块的
- * <b>本质</b>：冻结的是<b>快照</b>而不是<b>引用</b>。
+ * <p><b>本测试是 V98 迁移那些 DB 级不变量的独立复验</b>，并且专门验证本模块的 <b>本质</b>：冻结的是<b>快照</b>而不是<b>引用</b>。
  *
- * <p><b>catalog 是一个真起服务的 stub</b>，它<b>按 3.5.2.2 的规则真算</b>一棵
- * 两层展开树（成品 OUT-1 → 半成品 SA → 面料 + 拉链），而不是返回写死的数组：
+ * <p><b>catalog 是一个真起服务的 stub</b>，它<b>按 3.5.2.2 的规则真算</b>一棵 两层展开树（成品 OUT-1 → 半成品 SA → 面料 +
+ * 拉链），而不是返回写死的数组：
  *
  * <ul>
- *   <li><b>E1 逐层结转</b>：顶层 required = 产量 × 单位用量 × (1 + 损耗率/100)；
- *       深层 required = <b>父行缺口</b> × 单位用量 × (1 + 损耗率/100) ——
- *       同一个 R7 公式，但驱动量换成了父行的 gap。这条正是单层快照答不出的部分。
+ *   <li><b>E1 逐层结转</b>：顶层 required = 产量 × 单位用量 × (1 + 损耗率/100)； 深层 required = <b>父行缺口</b> × 单位用量 ×
+ *       (1 + 损耗率/100) —— 同一个 R7 公式，但驱动量换成了父行的 gap。这条正是单层快照答不出的部分。
  *   <li><b>E2 缺口</b>：gap = max(0, required − available − inTransit)，下限 0。
- *   <li><b>R6</b>：scrap_rate 是<b>百分数</b>（5 = 5%），stub 按百分数算，
- *       断言也按百分数算 —— 任何一处当成比率，领料量会静默翻 6 倍。
+ *   <li><b>R6</b>：scrap_rate 是<b>百分数</b>（5 = 5%），stub 按百分数算， 断言也按百分数算 —— 任何一处当成比率，领料量会静默翻 6 倍。
  *   <li><b>R7</b>：6 位小数 HALF_UP，<b>不取整</b>。
  * </ul>
  *
- * <p><b>最关键的一条测试是 {@code snapshotSurvivesBomChange}</b>：冻结之后
- * 让 catalog 改掉整棵 BOM 的组件与损耗率，再读快照 —— 每一个数必须原封不动。
- * 那才是蓝图「冻结与订单冻结组件同理」的验收。
+ * <p><b>最关键的一条测试是 {@code snapshotSurvivesBomChange}</b>：冻结之后 让 catalog 改掉整棵 BOM 的组件与损耗率，再读快照 ——
+ * 每一个数必须原封不动。 那才是蓝图「冻结与订单冻结组件同理」的验收。
  *
- * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定 1 条：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定 1 条： 只有复用同一条连接，才能真正证明归还后不会串租户。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,13 +76,19 @@ class BomBindingIntegrationTest {
           .toList();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-trade-bom-binding-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-trade-bom-binding-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -108,7 +109,8 @@ class BomBindingIntegrationTest {
   /** 规则 R7：单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP，**不取整**。 */
   static BigDecimal r7(BigDecimal driver, BigDecimal unit, BigDecimal scrapPercent) {
     return unit.multiply(driver)
-        .multiply(BigDecimal.ONE.add(scrapPercent.divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP)))
+        .multiply(
+            BigDecimal.ONE.add(scrapPercent.divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP)))
         .setScale(6, RoundingMode.HALF_UP);
   }
 
@@ -121,7 +123,8 @@ class BomBindingIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role trade_app login password 'test-only' nosuperuser nobypassrls");
@@ -175,40 +178,76 @@ class BomBindingIntegrationTest {
                   e,
                   200,
                   map(
-                      "id", versionId, "bomId", meta.get("bomId"), "bomCode", meta.get("bomCode"),
-                      "versionNo", meta.get("versionNo"), "outputSkuId", meta.get("outputSkuId"),
-                      "outputSkuCode", meta.get("outputSkuCode"), "status", meta.get("status")));
+                      "id",
+                      versionId,
+                      "bomId",
+                      meta.get("bomId"),
+                      "bomCode",
+                      meta.get("bomCode"),
+                      "versionNo",
+                      meta.get("versionNo"),
+                      "outputSkuId",
+                      meta.get("outputSkuId"),
+                      "outputSkuCode",
+                      meta.get("outputSkuCode"),
+                      "status",
+                      meta.get("status")));
               return;
             }
             String query = e.getRequestURI().getQuery();
             BigDecimal outputQuantity = new BigDecimal(query.replace("outputQuantity=", ""));
             // 单层：只展开成品版本的直接组件（SA），R7 三元组真算。
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> components = (List<Map<String, Object>>) meta.get("components");
+            List<Map<String, Object>> components =
+                (List<Map<String, Object>>) meta.get("components");
             List<Map<String, Object>> lines = new ArrayList<>();
             for (Map<String, Object> component : components) {
               BigDecimal required =
-                  r7(outputQuantity, decimal(component.get("unitQuantity")),
+                  r7(
+                      outputQuantity,
+                      decimal(component.get("unitQuantity")),
                       decimal(component.get("scrapRate")));
               lines.add(
                   map(
-                      "skuId", component.get("skuId"), "skuCode", component.get("skuCode"),
-                      "unitQuantity", component.get("unitQuantity"), "scrapRate", component.get("scrapRate"),
-                      "requiredQuantity", required));
+                      "skuId",
+                      component.get("skuId"),
+                      "skuCode",
+                      component.get("skuCode"),
+                      "unitQuantity",
+                      component.get("unitQuantity"),
+                      "scrapRate",
+                      component.get("scrapRate"),
+                      "requiredQuantity",
+                      required));
             }
             send(
-                catalog, e, 200,
+                catalog,
+                e,
+                200,
                 map(
-                    "bomId", meta.get("bomId"), "versionId", versionId,
-                    "versionNo", meta.get("versionNo"), "outputSkuId", meta.get("outputSkuId"),
-                    "outputSkuCode", meta.get("outputSkuCode"), "outputQuantity", outputQuantity,
-                    "lines", lines, "singleLevel", true));
+                    "bomId",
+                    meta.get("bomId"),
+                    "versionId",
+                    versionId,
+                    "versionNo",
+                    meta.get("versionNo"),
+                    "outputSkuId",
+                    meta.get("outputSkuId"),
+                    "outputSkuCode",
+                    meta.get("outputSkuCode"),
+                    "outputQuantity",
+                    outputQuantity,
+                    "lines",
+                    lines,
+                    "singleLevel",
+                    true));
           });
 
       catalog.createContext(
           "/catalog/bom-explosions",
           e -> {
-            Map<String, Object> input = json.readValue(e.getRequestBody().readAllBytes(), Map.class);
+            Map<String, Object> input =
+                json.readValue(e.getRequestBody().readAllBytes(), Map.class);
             String versionId = String.valueOf(input.get("versionId"));
             Object registered = catalogBoms.get(versionId);
             if (registered == null) {
@@ -219,7 +258,9 @@ class BomBindingIntegrationTest {
             Map<String, Object> meta = (Map<String, Object>) registered;
             BigDecimal outputQuantity = new BigDecimal(String.valueOf(input.get("outputQuantity")));
             int maxDepth =
-                input.get("maxDepth") == null ? 10 : Integer.parseInt(String.valueOf(input.get("maxDepth")));
+                input.get("maxDepth") == null
+                    ? 10
+                    : Integer.parseInt(String.valueOf(input.get("maxDepth")));
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> children = (List<Map<String, Object>>) meta.get("components");
             String asOf =
@@ -285,7 +326,8 @@ class BomBindingIntegrationTest {
               send(catalog, e, 404, Map.of("message", "接口不存在"));
               return;
             }
-            String bomId = path.substring("/catalog/boms/".length(), path.length() - "/effective".length());
+            String bomId =
+                path.substring("/catalog/boms/".length(), path.length() - "/effective".length());
             String effectiveNo = catalogEffective.get(bomId);
             var response = new LinkedHashMap<String, Object>();
             response.put("bomId", bomId);
@@ -302,7 +344,8 @@ class BomBindingIntegrationTest {
   }
 
   /** lambda 里用：把 write 的受检异常包成 unchecked（夹具坏了必须炸出来）。 */
-  static void send(HttpServer server, com.sun.net.httpserver.HttpExchange e, int code, Object body) {
+  static void send(
+      HttpServer server, com.sun.net.httpserver.HttpExchange e, int code, Object body) {
     try {
       write(server, e, code, body);
     } catch (java.io.IOException failure) {
@@ -335,8 +378,14 @@ class BomBindingIntegrationTest {
       BigDecimal unit = decimal(component.get("unitQuantity"));
       BigDecimal scrap = decimal(component.get("scrapRate"));
       BigDecimal required = r7(driver, unit, scrap);
-      BigDecimal available = component.get("available") == null ? BigDecimal.ZERO : decimal(component.get("available"));
-      BigDecimal inTransit = component.get("inTransit") == null ? BigDecimal.ZERO : decimal(component.get("inTransit"));
+      BigDecimal available =
+          component.get("available") == null
+              ? BigDecimal.ZERO
+              : decimal(component.get("available"));
+      BigDecimal inTransit =
+          component.get("inTransit") == null
+              ? BigDecimal.ZERO
+              : decimal(component.get("inTransit"));
       BigDecimal gap = gapOf(required, available, inTransit);
       BigDecimal surplus =
           available.add(inTransit).subtract(required).signum() < 0
@@ -354,7 +403,11 @@ class BomBindingIntegrationTest {
 
       var line = new LinkedHashMap<String, Object>();
       line.put("id", UUID.nameUUIDFromBytes(("line-" + path).getBytes()));
-      line.put("parentLineId", parentLineId == null ? null : UUID.nameUUIDFromBytes(("line-" + parentLineId).getBytes()));
+      line.put(
+          "parentLineId",
+          parentLineId == null
+              ? null
+              : UUID.nameUUIDFromBytes(("line-" + parentLineId).getBytes()));
       line.put("depth", depth);
       line.put("path", path);
       line.put("skuId", component.get("skuId"));
@@ -430,11 +483,17 @@ class BomBindingIntegrationTest {
   @Autowired MockMvc http;
 
   // 成品 OUT-1、半成品 SA、面料 FABRIC、拉链 ZIPPER（catalog 侧逻辑 ID，本服务不建外键）
-  static final UUID bomId = UUID.randomUUID(), subBomId = UUID.randomUUID(),
-      versionPublished = UUID.randomUUID(), subVersion = UUID.randomUUID(),
-      versionDraft = UUID.randomUUID(), skuOut = UUID.randomUUID(), skuSa = UUID.randomUUID(),
-      skuFabric = UUID.randomUUID(), skuZipper = UUID.randomUUID(),
-      componentSa = UUID.randomUUID(), componentFabric = UUID.randomUUID(),
+  static final UUID bomId = UUID.randomUUID(),
+      subBomId = UUID.randomUUID(),
+      versionPublished = UUID.randomUUID(),
+      subVersion = UUID.randomUUID(),
+      versionDraft = UUID.randomUUID(),
+      skuOut = UUID.randomUUID(),
+      skuSa = UUID.randomUUID(),
+      skuFabric = UUID.randomUUID(),
+      skuZipper = UUID.randomUUID(),
+      componentSa = UUID.randomUUID(),
+      componentFabric = UUID.randomUUID(),
       componentZipper = UUID.randomUUID();
 
   @BeforeEach
@@ -444,8 +503,7 @@ class BomBindingIntegrationTest {
     catalogEffective.put(bomId.toString(), "v1");
     registerBom(versionPublished, "PUBLISHED");
     catalogBoms.put(
-        versionDraft.toString(),
-        bomMeta(versionDraft, "v9", "DRAFT", withScrap("5", "0", "0")));
+        versionDraft.toString(), bomMeta(versionDraft, "v9", "DRAFT", withScrap("5", "0", "0")));
     catalogBoms.put(
         versionDraft.toString() + "-as-published",
         bomMeta(versionDraft, "v9", "PUBLISHED", withScrap("5", "0", "0")));
@@ -465,13 +523,19 @@ class BomBindingIntegrationTest {
             sql.execute(
                 "insert into processing_factory(id,tenant_id,code,name,factory_kind,status,note)"
                     + " values(?,?,?,?,?,'ACTIVE',?)",
-                idFor(tenant, 1), tenant, "F-01", "上海某加工厂", "OUTSOURCED", "");
+                idFor(tenant, 1),
+                tenant,
+                "F-01",
+                "上海某加工厂",
+                "OUTSOURCED",
+                "");
             return null;
           });
     }
   }
 
-  static Map<String, Object> bomMeta(UUID versionId, String versionNo, String status, List<Map<String, Object>> components) {
+  static Map<String, Object> bomMeta(
+      UUID versionId, String versionNo, String status, List<Map<String, Object>> components) {
     return Map.of(
         "bomId", bomId,
         "bomCode", "BOM-001",
@@ -486,35 +550,89 @@ class BomBindingIntegrationTest {
   /**
    * 两层展开树：OUT-1 → 半成品 SA（3 个/件，损耗 5%）→ 面料 + 拉链。
    *
-   * <p>SA 有 4 在手、3 在途（E1：深层按<b>父行缺口</b>结转），
-   * 于是 SA 的 required=30、gap=23，而它下面的料按 23 结转而不是 30 ——
+   * <p>SA 有 4 在手、3 在途（E1：深层按<b>父行缺口</b>结转）， 于是 SA 的 required=30、gap=23，而它下面的料按 23 结转而不是 30 ——
    * 这正是单层领料清单答不出的那一层。
    */
   static List<Map<String, Object>> tree(String saScrap, String fabricScrap, String zipperScrap) {
     return withScrap(saScrap, fabricScrap, zipperScrap);
   }
 
-  static List<Map<String, Object>> withScrap(String saScrap, String fabricScrap, String zipperScrap) {
+  static List<Map<String, Object>> withScrap(
+      String saScrap, String fabricScrap, String zipperScrap) {
     return List.of(
         map(
-            "skuId", skuSa, "skuCode", "SA", "skuName", "半成品外套",
-            "componentId", componentSa, "sourceVersionId", versionPublished,
-            "sourceVersionNo", "v1", "sourceBomCode", "BOM-001",
-            "unitQuantity", "3", "scrapRate", saScrap,
-            "available", "4", "inTransit", "3", "role", "半成品",
-            "subBomId", subBomId, "subBomCode", "BOM-SUB-SA",
+            "skuId",
+            skuSa,
+            "skuCode",
+            "SA",
+            "skuName",
+            "半成品外套",
+            "componentId",
+            componentSa,
+            "sourceVersionId",
+            versionPublished,
+            "sourceVersionNo",
+            "v1",
+            "sourceBomCode",
+            "BOM-001",
+            "unitQuantity",
+            "3",
+            "scrapRate",
+            saScrap,
+            "available",
+            "4",
+            "inTransit",
+            "3",
+            "role",
+            "半成品",
+            "subBomId",
+            subBomId,
+            "subBomCode",
+            "BOM-SUB-SA",
             "children",
-                List.of(
-                    map(
-                        "skuId", skuFabric, "skuCode", "FABRIC", "skuName", "面料",
-                        "componentId", componentFabric, "sourceVersionId", subVersion,
-                        "sourceVersionNo", "v1", "sourceBomCode", "BOM-SUB-SA",
-                        "unitQuantity", "0.5", "scrapRate", fabricScrap, "role", "主料"),
-                    map(
-                        "skuId", skuZipper, "skuCode", "ZIPPER", "skuName", "拉链",
-                        "componentId", componentZipper, "sourceVersionId", subVersion,
-                        "sourceVersionNo", "v1", "sourceBomCode", "BOM-SUB-SA",
-                        "unitQuantity", "2", "scrapRate", zipperScrap, "role", "辅料"))));
+            List.of(
+                map(
+                    "skuId",
+                    skuFabric,
+                    "skuCode",
+                    "FABRIC",
+                    "skuName",
+                    "面料",
+                    "componentId",
+                    componentFabric,
+                    "sourceVersionId",
+                    subVersion,
+                    "sourceVersionNo",
+                    "v1",
+                    "sourceBomCode",
+                    "BOM-SUB-SA",
+                    "unitQuantity",
+                    "0.5",
+                    "scrapRate",
+                    fabricScrap,
+                    "role",
+                    "主料"),
+                map(
+                    "skuId",
+                    skuZipper,
+                    "skuCode",
+                    "ZIPPER",
+                    "skuName",
+                    "拉链",
+                    "componentId",
+                    componentZipper,
+                    "sourceVersionId",
+                    subVersion,
+                    "sourceVersionNo",
+                    "v1",
+                    "sourceBomCode",
+                    "BOM-SUB-SA",
+                    "unitQuantity",
+                    "2",
+                    "scrapRate",
+                    zipperScrap,
+                    "role",
+                    "辅料"))));
   }
 
   /** 可变长 map：{@code Map.of} 最多 10 对，展开树的一行超过这个数。 */
@@ -548,9 +666,14 @@ class BomBindingIntegrationTest {
         () ->
             orders.createOrder(
                 new ProcessingModels.ProcessingOrderInput(
-                    orderNo, idFor(tenant, 1), versionPublished, new BigDecimal("10"),
-                    java.time.LocalDate.now().plusDays(30), "春季外套加工"),
-                user, "Bearer tenant-a"));
+                    orderNo,
+                    idFor(tenant, 1),
+                    versionPublished,
+                    new BigDecimal("10"),
+                    java.time.LocalDate.now().plusDays(30),
+                    "春季外套加工"),
+                user,
+                "Bearer tenant-a"));
   }
 
   BomBindingModels.BomFreezeResult freeze(UUID orderId) {
@@ -581,7 +704,8 @@ class BomBindingIntegrationTest {
     assertThat(snapshot.outputQuantity()).isEqualByComparingTo("10.000000");
     assertThat(snapshot.asOf()).isNotNull();
 
-    var sa = snapshot.lines().stream().filter(l -> l.skuCode().equals("SA")).findFirst().orElseThrow();
+    var sa =
+        snapshot.lines().stream().filter(l -> l.skuCode().equals("SA")).findFirst().orElseThrow();
     // E1 顶层：产量 10 × 单位用量 3 × (1 + 5%) = 31.5
     assertThat(sa.requiredQuantity()).isEqualByComparingTo("31.500000");
     assertThat(sa.depth()).isEqualTo(1);
@@ -592,7 +716,11 @@ class BomBindingIntegrationTest {
     assertThat(sa.gap()).isEqualByComparingTo("24.500000");
     assertThat(sa.subVersionNo()).isEqualTo("v1");
 
-    var fabric = snapshot.lines().stream().filter(l -> l.skuCode().equals("FABRIC")).findFirst().orElseThrow();
+    var fabric =
+        snapshot.lines().stream()
+            .filter(l -> l.skuCode().equals("FABRIC"))
+            .findFirst()
+            .orElseThrow();
     // **E1 逐层结转**：深层按父行缺口 24.5 驱动，不是按父行需求 31.5：
     // 24.5 × 0.5 × (1 + 0%) = 12.25
     assertThat(fabric.requiredQuantity()).isEqualByComparingTo("12.250000");
@@ -602,7 +730,11 @@ class BomBindingIntegrationTest {
     assertThat(fabric.sourceVersionNo()).isEqualTo("v1");
     assertThat(fabric.sourceBomCode()).isEqualTo("BOM-SUB-SA");
 
-    var zipper = snapshot.lines().stream().filter(l -> l.skuCode().equals("ZIPPER")).findFirst().orElseThrow();
+    var zipper =
+        snapshot.lines().stream()
+            .filter(l -> l.skuCode().equals("ZIPPER"))
+            .findFirst()
+            .orElseThrow();
     // 24.5 × 2 × (1 + 0%) = 49
     assertThat(zipper.requiredQuantity()).isEqualByComparingTo("49.000000");
     assertThat(zipper.path()).isEqualTo("1.2");
@@ -618,13 +750,18 @@ class BomBindingIntegrationTest {
     var order = createOrder(a, "PO-R6-001");
     var snapshot = freeze(order.id()).snapshot();
 
-    var sa = snapshot.lines().stream().filter(l -> l.skuCode().equals("SA")).findFirst().orElseThrow();
+    var sa =
+        snapshot.lines().stream().filter(l -> l.skuCode().equals("SA")).findFirst().orElseThrow();
     assertThat(sa.unitQuantity()).isEqualByComparingTo("3.000000");
     // 原样搬运：catalog 给 5 就存 5，绝不除以 100 变成 0.05（那是 R6 禁止的比率化）。
     assertThat(sa.scrapRate()).isEqualByComparingTo("5.0000");
     assertThat(sa.scrapRate().compareTo(new BigDecimal("1"))).isGreaterThan(0);
 
-    var fabric = snapshot.lines().stream().filter(l -> l.skuCode().equals("FABRIC")).findFirst().orElseThrow();
+    var fabric =
+        snapshot.lines().stream()
+            .filter(l -> l.skuCode().equals("FABRIC"))
+            .findFirst()
+            .orElseThrow();
     // 0.5 米面料：NUMERIC(19,6) 保得住小数，整数列会逼运营写假数。
     assertThat(fabric.unitQuantity()).isEqualByComparingTo("0.500000");
     assertThat(fabric.scrapRate()).isEqualByComparingTo("0.0000");
@@ -652,11 +789,14 @@ class BomBindingIntegrationTest {
               .filter(l -> l.path().equals(oldLine.path()))
               .findFirst()
               .orElseThrow(() -> new AssertionError("路径 " + oldLine.path() + " 的行消失了"));
-      assertThat(newLine.unitQuantity()).as("路径 %s 的单位用量", oldLine.path())
+      assertThat(newLine.unitQuantity())
+          .as("路径 %s 的单位用量", oldLine.path())
           .isEqualByComparingTo(oldLine.unitQuantity());
-      assertThat(newLine.scrapRate()).as("路径 %s 的损耗率", oldLine.path())
+      assertThat(newLine.scrapRate())
+          .as("路径 %s 的损耗率", oldLine.path())
           .isEqualByComparingTo(oldLine.scrapRate());
-      assertThat(newLine.requiredQuantity()).as("路径 %s 的需求量", oldLine.path())
+      assertThat(newLine.requiredQuantity())
+          .as("路径 %s 的需求量", oldLine.path())
           .isEqualByComparingTo(oldLine.requiredQuantity());
       assertThat(newLine.available()).isEqualByComparingTo(oldLine.available());
       assertThat(newLine.inTransit()).isEqualByComparingTo(oldLine.inTransit());
@@ -686,12 +826,20 @@ class BomBindingIntegrationTest {
     var second = freeze(order.id());
     assertThat(second.alreadyFrozen()).isTrue();
     assertThat(second.snapshot().id()).isEqualTo(first.snapshot().id());
-    var sa = second.snapshot().lines().stream().filter(l -> l.skuCode().equals("SA")).findFirst().orElseThrow();
+    var sa =
+        second.snapshot().lines().stream()
+            .filter(l -> l.skuCode().equals("SA"))
+            .findFirst()
+            .orElseThrow();
     assertThat(sa.scrapRate()).isEqualByComparingTo("5.0000");
 
     long rows =
-        asA(() -> sql.fetchOne("select count(*) from processing_bom_snapshot where order_id = ?", order.id())
-            .get(0, Long.class));
+        asA(
+            () ->
+                sql.fetchOne(
+                        "select count(*) from processing_bom_snapshot where order_id = ?",
+                        order.id())
+                    .get(0, Long.class));
     assertThat(rows).isEqualTo(1L);
   }
 
@@ -711,8 +859,16 @@ class BomBindingIntegrationTest {
                               + "output_quantity,as_of,max_depth,reached_depth,snapshot_status,"
                               + "line_count,purchase_line_count,frozen_by,frozen_at)"
                               + " values(?,?,?,?,?,?,?,?,?,10,now(),10,1,'COMPLETED',1,1,?,now())",
-                          UUID.randomUUID(), a, order.id(), UUID.randomUUID(), bomId,
-                          versionPublished, "v1", skuOut, "OUT-1", user);
+                          UUID.randomUUID(),
+                          a,
+                          order.id(),
+                          UUID.randomUUID(),
+                          bomId,
+                          versionPublished,
+                          "v1",
+                          skuOut,
+                          "OUT-1",
+                          user);
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
@@ -770,7 +926,8 @@ class BomBindingIntegrationTest {
       assertThatThrownBy(
               () -> {
                 try (var c =
-                        DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                        DriverManager.getConnection(
+                            pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                     var s2 = c.createStatement()) {
                   s2.execute(stmt);
                 }
@@ -875,8 +1032,12 @@ class BomBindingIntegrationTest {
     }
     // 一次失败的冻结不能留下半份快照。
     long rows =
-        asA(() -> sql.fetchOne("select count(*) from processing_bom_snapshot where order_id = ?", order.id())
-            .get(0, Long.class));
+        asA(
+            () ->
+                sql.fetchOne(
+                        "select count(*) from processing_bom_snapshot where order_id = ?",
+                        order.id())
+                    .get(0, Long.class));
     assertThat(rows).isZero();
   }
 
@@ -887,12 +1048,17 @@ class BomBindingIntegrationTest {
     var dead = new BomExplosionPort("http://127.0.0.1:1");
     assertThatThrownBy(
             () ->
-                dead.explode(versionPublished, new BigDecimal("10"), null, null, null, "", "Bearer t"))
+                dead.explode(
+                    versionPublished, new BigDecimal("10"), null, null, null, "", "Bearer t"))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不可达");
     long rows =
-        asA(() -> sql.fetchOne("select count(*) from processing_bom_snapshot where order_id = ?", order.id())
-            .get(0, Long.class));
+        asA(
+            () ->
+                sql.fetchOne(
+                        "select count(*) from processing_bom_snapshot where order_id = ?",
+                        order.id())
+                    .get(0, Long.class));
     assertThat(rows).isZero();
   }
 
@@ -933,8 +1099,7 @@ class BomBindingIntegrationTest {
                 sql.fetchOne(
                     "select as_of, frozen_at from processing_bom_snapshot where id = ?",
                     frozen.snapshot().id()));
-    assertThat(row.get("as_of", OffsetDateTime.class).toInstant())
-        .isEqualTo(instant.toInstant());
+    assertThat(row.get("as_of", OffsetDateTime.class).toInstant()).isEqualTo(instant.toInstant());
   }
 
   @Test
@@ -948,7 +1113,12 @@ class BomBindingIntegrationTest {
                         service.freeze(
                             order.id(),
                             new BomBindingModels.BomFreezeInput(
-                                versionPublished, new BigDecimal("10"), null, "2026-10-10T08:00:00", null, ""),
+                                versionPublished,
+                                new BigDecimal("10"),
+                                null,
+                                "2026-10-10T08:00:00",
+                                null,
+                                ""),
                             user,
                             "Bearer tenant-a")))
         .isInstanceOf(ResponseStatusException.class)

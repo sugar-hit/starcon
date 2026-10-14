@@ -25,9 +25,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 02 渠道与店铺 integration coverage.
  *
- * <p>Beyond CRUD behaviour this pins the three tenancy guarantees AGENTS.md makes
- * non-negotiable: two tenants never see each other, a forged tenant header changes nothing,
- * and returning a connection to the pool never leaks the previous tenant's rows.
+ * <p>Beyond CRUD behaviour this pins the three tenancy guarantees AGENTS.md makes non-negotiable:
+ * two tenants never see each other, a forged tenant header changes nothing, and returning a
+ * connection to the pool never leaks the previous tenant's rows.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,7 +46,8 @@ class ChannelIntegrationTest {
           .toList();
   static final List<String> shopReadOnly = List.of("channel.shop.read", "channel.registry.read");
 
-  static AccessService.Access actor(UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
+  static AccessService.Access actor(
+      UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
         uid,
         tenant,
@@ -64,13 +65,16 @@ class ChannelIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         // 角色可能已存在（服务迁移用条件创建，容器也可能被复用），避免重复建角色报错
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
-            + " then create role starcon_app nologin; end if; end $$");
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
-            + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
+                + " then create role starcon_app nologin; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
+                + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
         s.execute("alter role channel_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
@@ -202,8 +206,8 @@ class ChannelIntegrationTest {
   /**
    * 平台默认是全局只读码表：随平台适配器发布，运行时角色写不了，所以只能用迁移账号落。
    *
-   * <p>这正是"全局默认不可被租户改写"这条纪律的验证方式——如果哪天 V3 的 REVOKE 被去掉，
-   * {@link #globalEnumDefaultsAreNotWritableByTheRuntimeRole} 会先红。
+   * <p>这正是"全局默认不可被租户改写"这条纪律的验证方式——如果哪天 V3 的 REVOKE 被去掉， {@link
+   * #globalEnumDefaultsAreNotWritableByTheRuntimeRole} 会先红。
    */
   private UUID seedPlatformDefault(String enumKind, String external, String internal) {
     UUID platformId =
@@ -229,7 +233,8 @@ class ChannelIntegrationTest {
 
   @Test
   void globalEnumDefaultsAreNotWritableByTheRuntimeRole() {
-    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    UUID platformId =
+        sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
     // 服务以 channel_app 运行；它必须改不了全局默认表，否则一个租户能污染所有租户的状态机
     assertThatThrownBy(
             () ->
@@ -248,19 +253,24 @@ class ChannelIntegrationTest {
   @Test
   void enumOverrideBeatsPlatformDefaultAndDeletionFallsBack() {
     String kind = "ORDER_STATUS_" + UUID.randomUUID();
-    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    UUID platformId =
+        sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
     seedPlatformDefault(kind, "Canceled", "CANCELLED");
 
     // 默认命中：没有覆盖时解析到平台默认
-    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("CANCELLED");
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled")))
+        .isEqualTo("CANCELLED");
 
     // 登记覆盖：生效值改为租户口径，来源标记 TENANT
     UUID override =
         as(
             actorA,
             "channel.registry.update",
-            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "Canceled", "USER_CANCELLED")));
-    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("USER_CANCELLED");
+            () ->
+                service.putEnumOverride(
+                    actorA, "AMAZON", new EnumOverrideInput(kind, "Canceled", "USER_CANCELLED")));
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled")))
+        .isEqualTo("USER_CANCELLED");
 
     List<EnumMappingView> effective = runA(() -> service.enumMappings(a, "AMAZON", kind));
     assertThat(effective).hasSize(1);
@@ -270,13 +280,14 @@ class ChannelIntegrationTest {
 
     // 删除覆盖后回落到平台默认，而不是变成"未映射"
     as(
-            actorA,
-            "channel.registry.delete",
-            () -> {
-              service.deleteEnumOverride(actorA, "AMAZON", override);
-              return null;
-            });
-    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("CANCELLED");
+        actorA,
+        "channel.registry.delete",
+        () -> {
+          service.deleteEnumOverride(actorA, "AMAZON", override);
+          return null;
+        });
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled")))
+        .isEqualTo("CANCELLED");
     assertThat(runA(() -> service.enumMappings(a, "AMAZON", kind)))
         .singleElement()
         .satisfies(m -> assertThat(m.source()).isEqualTo("PLATFORM"));
@@ -285,7 +296,8 @@ class ChannelIntegrationTest {
   @Test
   void unmappedEnumStaysUnmappedInsteadOfFallingBack() {
     String kind = "RETURN_REASON_" + UUID.randomUUID();
-    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    UUID platformId =
+        sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
     // 2.1.2.1 铁律：没有映射就是 null，调用方必须显式报"未映射"，不许兜底
     assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "UNKNOWN_CODE"))).isNull();
   }
@@ -293,21 +305,21 @@ class ChannelIntegrationTest {
   @Test
   void enumOverrideIsTenantScopedAndNeverLeaks() {
     String kind = "ORDER_STATUS_" + UUID.randomUUID();
-    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    UUID platformId =
+        sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
     as(
         actorA,
         "channel.registry.update",
-        () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "Pending", "A_ONLY")));
+        () ->
+            service.putEnumOverride(
+                actorA, "AMAZON", new EnumOverrideInput(kind, "Pending", "A_ONLY")));
 
     // 租户 B 看不到 A 的覆盖，解析也不会命中
     assertThat(runB(() -> service.enumMappings(b, "AMAZON", kind))).isEmpty();
     assertThat(runB(() -> service.resolveEnum(b, platformId, kind, "Pending"))).isNull();
 
     // B 不能删 A 的覆盖：删除带平台与租户双重条件
-    UUID override =
-        runA(
-            () ->
-                service.enumMappings(a, "AMAZON", kind).get(0).id());
+    UUID override = runA(() -> service.enumMappings(a, "AMAZON", kind).get(0).id());
     assertThatThrownBy(
             () ->
                 as(
@@ -328,12 +340,16 @@ class ChannelIntegrationTest {
         as(
             actorA,
             "channel.registry.update",
-            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "x", "FIRST")));
+            () ->
+                service.putEnumOverride(
+                    actorA, "AMAZON", new EnumOverrideInput(kind, "x", "FIRST")));
     UUID second =
         as(
             actorA,
             "channel.registry.update",
-            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "x", "SECOND")));
+            () ->
+                service.putEnumOverride(
+                    actorA, "AMAZON", new EnumOverrideInput(kind, "x", "SECOND")));
     assertThat(second).isEqualTo(first);
     assertThat(runA(() -> service.enumMappings(a, "AMAZON", kind)))
         .singleElement()
@@ -347,37 +363,46 @@ class ChannelIntegrationTest {
   @Test
   void connectionNeverExposesCredentialSecrets() throws Exception {
     String account = "seller-" + UUID.randomUUID() + "@example.com";
-    UUID id = runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "Main")));
+    UUID id =
+        runConn(
+            () -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "Main")));
     runA(
         () -> {
           service.rotateCredential(
               actorA,
               id,
               new CredentialRotateInput(
-                  "vault://starcon/" + UUID.randomUUID(), "orders inventory",
-                  Instant.now(), Instant.now().plus(180, ChronoUnit.DAYS)));
+                  "vault://starcon/" + UUID.randomUUID(),
+                  "orders inventory",
+                  Instant.now(),
+                  Instant.now().plus(180, ChronoUnit.DAYS)));
           return null;
         });
     ConnectionView c =
         runConn(
             () ->
-                service.connections("").stream().filter(v -> v.id().equals(id)).findFirst().orElseThrow());
+                service.connections("").stream()
+                    .filter(v -> v.id().equals(id))
+                    .findFirst()
+                    .orElseThrow());
     assertThat(c.credential()).isNotNull();
     assertThat(c.credential().provider()).isEqualTo("SECRET_MANAGER");
     assertThat(c.credential().grantedScopes()).isEqualTo("orders inventory");
     // 明文令牌既不在模型里也不可能在响应里出现
-    String json = http.perform(get("/channel/connections").header("Authorization", "Bearer tenant-a"))
-        .andExpect(status().isOk())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+    String json =
+        http.perform(get("/channel/connections").header("Authorization", "Bearer tenant-a"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     assertThat(json).doesNotContain("access_token").doesNotContain("refresh_token");
   }
 
   @Test
   void rotationComputesExpiryStatusSoRemindersCanFire() {
     String account = "seller-" + UUID.randomUUID() + "@example.com";
-    UUID id = runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
+    UUID id =
+        runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
     runA(
         () -> {
           service.rotateCredential(
@@ -393,7 +418,10 @@ class ChannelIntegrationTest {
     ConnectionView c =
         runConn(
             () ->
-                service.connections("").stream().filter(v -> v.id().equals(id)).findFirst().orElseThrow());
+                service.connections("").stream()
+                    .filter(v -> v.id().equals(id))
+                    .findFirst()
+                    .orElseThrow());
     assertThat(c.status()).isEqualTo("EXPIRING");
     // 2.2.2.2 临期连接必须进入提醒队列；严重度按剩余天数分级，2 天内为 CRITICAL
     ReauthorizationReminderView reminder =
@@ -408,7 +436,8 @@ class ChannelIntegrationTest {
   @Test
   void reminderSeverityDegradesAsExpiryApproaches() {
     String account = "seller-" + UUID.randomUUID() + "@example.com";
-    UUID id = runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
+    UUID id =
+        runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
     runConn(
         () -> {
           service.rotateCredential(
@@ -422,25 +451,30 @@ class ChannelIntegrationTest {
           return null;
         });
     // 还剩 6 天：提示级别而非紧急
-    assertThat(runConn(() -> service.reauthorizationReminders(7)).stream()
-            .filter(r -> r.connectionId().equals(id))
-            .findFirst()
-            .orElseThrow()
-            .severity())
+    assertThat(
+            runConn(() -> service.reauthorizationReminders(7)).stream()
+                .filter(r -> r.connectionId().equals(id))
+                .findFirst()
+                .orElseThrow()
+                .severity())
         .isEqualTo("NOTICE");
   }
 
   @Test
   void healthExplainsWhySyncCannotProceedAndWhatToDo() {
     String account = "seller-" + UUID.randomUUID() + "@example.com";
-    UUID id = runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
+    UUID id =
+        runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
     runA(
         () -> {
           service.rotateCredential(
               actorA,
               id,
               new CredentialRotateInput(
-                  "vault://starcon/" + UUID.randomUUID(), "orders", Instant.now(), Instant.now().minus(1, ChronoUnit.DAYS)));
+                  "vault://starcon/" + UUID.randomUUID(),
+                  "orders",
+                  Instant.now(),
+                  Instant.now().minus(1, ChronoUnit.DAYS)));
           return null;
         });
     ConnectionHealthView health = runConn(() -> service.health(actorA, id));
@@ -452,16 +486,27 @@ class ChannelIntegrationTest {
   @Test
   void revokeStopsSyncButKeepsHistoryQueryable() {
     String account = "seller-" + UUID.randomUUID() + "@example.com";
-    UUID id = runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
+    UUID id =
+        runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
     ConnectionView before =
-        runConn(() -> service.connections("").stream().filter(v -> v.id().equals(id)).findFirst().orElseThrow());
+        runConn(
+            () ->
+                service.connections("").stream()
+                    .filter(v -> v.id().equals(id))
+                    .findFirst()
+                    .orElseThrow());
     runConn(
         () -> {
           service.revokeConnection(actorA, id, before.version());
           return null;
         });
     ConnectionView after =
-        runConn(() -> service.connections("").stream().filter(v -> v.id().equals(id)).findFirst().orElseThrow());
+        runConn(
+            () ->
+                service.connections("").stream()
+                    .filter(v -> v.id().equals(id))
+                    .findFirst()
+                    .orElseThrow());
     assertThat(after.status()).isEqualTo("REVOKED");
     assertThat(after.syncPaused()).isTrue();
     // 断开不删除历史：记录仍在列表里
@@ -476,8 +521,16 @@ class ChannelIntegrationTest {
   void shopLifecycleCarriesOperatingModeAndEnabledSites() {
     String code = "SHP-" + UUID.randomUUID().toString().substring(0, 8);
     UUID id = shop(a, actorA, code, "FULL_CONSIGNMENT");
-    String mk = runA(() -> service.platforms().stream().filter(p -> p.code().equals("AMAZON")).findFirst().orElseThrow()
-        .marketplaces().get(0).code());
+    String mk =
+        runA(
+            () ->
+                service.platforms().stream()
+                    .filter(p -> p.code().equals("AMAZON"))
+                    .findFirst()
+                    .orElseThrow()
+                    .marketplaces()
+                    .get(0)
+                    .code());
     runA(
         () -> {
           service.enableMarketplace(actorA, id, new ShopMarketplaceInput(mk, "ACTIVE"));
@@ -494,15 +547,29 @@ class ChannelIntegrationTest {
   void shopCannotBeDeletedWhileSitesAreStillEnabled() {
     String code = "SHP-" + UUID.randomUUID().toString().substring(0, 8);
     UUID id = shop(a, actorA, code, null);
-    String mk = runA(() -> service.platforms().stream().filter(p -> p.code().equals("AMAZON")).findFirst().orElseThrow()
-        .marketplaces().get(0).code());
+    String mk =
+        runA(
+            () ->
+                service.platforms().stream()
+                    .filter(p -> p.code().equals("AMAZON"))
+                    .findFirst()
+                    .orElseThrow()
+                    .marketplaces()
+                    .get(0)
+                    .code());
     runA(
         () -> {
           service.enableMarketplace(actorA, id, new ShopMarketplaceInput(mk, "ACTIVE"));
           return null;
         });
     ShopView v = runA(() -> service.shop(a, id));
-    assertThatThrownBy(() -> runA(() -> { service.deleteShop(actorA, id, v.version()); return null; }))
+    assertThatThrownBy(
+            () ->
+                runA(
+                    () -> {
+                      service.deleteShop(actorA, id, v.version());
+                      return null;
+                    }))
         .hasMessageContaining("站点");
     // 停用后即可删除
     UUID mkId = runA(() -> service.shop(a, id).marketplaces().get(0).marketplaceId());
@@ -538,7 +605,8 @@ class ChannelIntegrationTest {
     UUID newOwner = UUID.randomUUID();
     runA(
         () -> {
-          service.transferOwner(actorA, id, new ShopOwnerTransferInput(newOwner, UUID.randomUUID()));
+          service.transferOwner(
+              actorA, id, new ShopOwnerTransferInput(newOwner, UUID.randomUUID()));
           return null;
         });
     assertThat(runA(() -> service.shop(a, id)).ownerId()).isEqualTo(newOwner);
@@ -551,7 +619,13 @@ class ChannelIntegrationTest {
     ShopView v = runA(() -> service.shop(a, id));
     ShopInput edit =
         new ShopInput(
-            v.code(), v.name(), v.platformCode(), v.connectionId(), v.legalEntityId(), "OVERSEAS_WAREHOUSE", v.version());
+            v.code(),
+            v.name(),
+            v.platformCode(),
+            v.connectionId(),
+            v.legalEntityId(),
+            "OVERSEAS_WAREHOUSE",
+            v.version());
     runA(
         () -> {
           service.updateShop(actorA, id, edit);
@@ -615,15 +689,19 @@ class ChannelIntegrationTest {
     String account = "forged-" + UUID.randomUUID() + "@example.com";
     runConn(() -> service.createConnection(actorA, new ConnectionInput("AMAZON", account, "")));
     // 用 A 的令牌 + 伪造的租户头：B 的数据仍然不可见，因为租户来自已认证成员关系
-    http.perform(get("/channel/connections").param("q", account)
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/channel/connections")
+                .param("q", account)
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
     // 换成 B 的令牌，即使带上 A 的租户头也拿不到 A 的数据
-    http.perform(get("/channel/connections").param("q", account)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/channel/connections")
+                .param("q", account)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0));
   }
@@ -649,15 +727,17 @@ class ChannelIntegrationTest {
     String code = "RO-" + UUID.randomUUID().toString().substring(0, 8);
     actors.put("Bearer limited", actor(user, a, null, List.of(grant("ALL", shopReadOnly))));
     // 有读权限：列表可读
-    http.perform(get("/channel/shops").header("Authorization", "Bearer limited")).andExpect(status().isOk());
+    http.perform(get("/channel/shops").header("Authorization", "Bearer limited"))
+        .andExpect(status().isOk());
     // 缺 channel.shop.create：写操作必须被拒，而不是写进去再报错
-    http.perform(post("/channel/shops")
-            .header("Authorization", "Bearer limited")
-            .contentType("application/json")
-            .content(
-                """
+    http.perform(
+            post("/channel/shops")
+                .header("Authorization", "Bearer limited")
+                .contentType("application/json")
+                .content(
+                    """
                 {"code":"%s","name":"n","platformCode":"AMAZON","operatingMode":"SELF_FULFILLED","version":0}"""
-                    .formatted(code)))
+                        .formatted(code)))
         .andExpect(status().isForbidden());
     // 被拒的写入没有留下任何数据
     assertThat(runA(() -> service.shops(code))).isEmpty();
@@ -676,6 +756,7 @@ class ChannelIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].code").exists())
         .andExpect(jsonPath("$[0].marketplaces").isArray());
-    http.perform(get("/channel/shops").header("Authorization", "Bearer tenant-a")).andExpect(status().isOk());
+    http.perform(get("/channel/shops").header("Authorization", "Bearer tenant-a"))
+        .andExpect(status().isOk());
   }
 }

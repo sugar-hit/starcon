@@ -359,12 +359,18 @@ export function KnowledgeWorkspace() {
 
   async function submitRule() {
     if (!ruleEditor) return;
-    if (!ruleEditor.policyKey.trim() || !ruleEditor.versionLabel.trim() || !ruleEditor.title.trim()) {
+    if (
+      !ruleEditor.policyKey.trim() ||
+      !ruleEditor.versionLabel.trim() ||
+      !ruleEditor.title.trim()
+    ) {
       setActionError('平台、政策编码、版本标签与标题都要填');
       return;
     }
     if (!ruleEditor.effectiveFrom) {
-      setActionError('生效起点不能为空：没有生效起点的政策版本无法回答「这条话术当时依据的是哪版」');
+      setActionError(
+        '生效起点不能为空：没有生效起点的政策版本无法回答「这条话术当时依据的是哪版」',
+      );
       return;
     }
     setBusy(true);
@@ -463,7 +469,7 @@ export function KnowledgeWorkspace() {
   if (loading) {
     return (
       <SectionCard title="客服知识库与话术" description="加载中…">
-        <p className="text-muted-foreground flex items-center gap-2 text-copy-13">
+        <p className="text-muted-foreground text-copy-13 flex items-center gap-2">
           <Loader2 className="size-4 animate-spin" /> 正在加载话术库、平台规则版本与待复核任务…
         </p>
       </SectionCard>
@@ -473,7 +479,7 @@ export function KnowledgeWorkspace() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md px-3 py-2">
           {error}
           <Button variant="ghost" size="sm" onClick={() => void load()} className="ml-2">
             <RefreshCw className="size-3" /> 重试
@@ -519,19 +525,24 @@ export function KnowledgeWorkspace() {
             ['usage', '使用效果'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
-          <Button key={key} variant={tab === key ? 'default' : 'outline'} size="sm" onClick={() => setTab(key)}>
+          <Button
+            key={key}
+            variant={tab === key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTab(key)}
+          >
             {label}
           </Button>
         ))}
       </div>
 
       {notice && (
-        <div className="rounded-md border border-success/40 bg-success/5 px-3 py-2 text-copy-13">
+        <div className="border-success/40 bg-success/5 text-copy-13 rounded-md border px-3 py-2">
           {notice}
         </div>
       )}
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md px-3 py-2">
           {actionError}
         </div>
       )}
@@ -617,7 +628,7 @@ export function KnowledgeWorkspace() {
                 description={entryEmptyHint(enabledFilter, reviewFilter, keyword)}
               />
             ) : (
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2">编码</th>
@@ -635,7 +646,10 @@ export function KnowledgeWorkspace() {
                     <tr key={row.id} className="border-t">
                       <td className="py-2 font-mono text-xs">{row.code}</td>
                       <td>
-                        <button className="underline-offset-2 hover:underline" onClick={() => void openDetail(row.id)}>
+                        <button
+                          className="underline-offset-2 hover:underline"
+                          onClick={() => void openDetail(row.id)}
+                        >
                           {row.title}
                         </button>
                       </td>
@@ -645,7 +659,10 @@ export function KnowledgeWorkspace() {
                       <td>
                         {row.sourceLocale}
                         {row.translationCount > 0 && (
-                          <span className="text-muted-foreground"> +{row.translationCount} 译文</span>
+                          <span className="text-muted-foreground">
+                            {' '}
+                            +{row.translationCount} 译文
+                          </span>
                         )}
                       </td>
                       <td className="text-muted-foreground text-xs">
@@ -713,12 +730,17 @@ export function KnowledgeWorkspace() {
           </SectionCard>
 
           {detail && (
-            <SectionCard title={`${detail.code} · ${detail.title}`} description="正文、译文、挂钩的平台规则版本与使用效果">
-              <p className="whitespace-pre-wrap text-copy-13">{detail.body}</p>
+            <SectionCard
+              title={`${detail.code} · ${detail.title}`}
+              description="正文、译文、挂钩的平台规则版本与使用效果"
+            >
+              <p className="text-copy-13 whitespace-pre-wrap">{detail.body}</p>
               <p className="text-muted-foreground mt-1 text-xs">
                 占位符：
                 {placeholdersOf(detail.body).length
-                  ? placeholdersOf(detail.body).map((p) => `{${p}}`).join(' ')
+                  ? placeholdersOf(detail.body)
+                      .map((p) => `{${p}}`)
+                      .join(' ')
                   : '（无）'}
               </p>
 
@@ -728,7 +750,9 @@ export function KnowledgeWorkspace() {
                   {detail.enabled ? '启用' : '停用'}
                 </Badge>
                 <Badge tone="neutral">源语言 {detail.sourceLocale}</Badge>
-                <span className="text-muted-foreground text-xs">被引用 {detail.effect.usageCount} 次</span>
+                <span className="text-muted-foreground text-xs">
+                  被引用 {detail.effect.usageCount} 次
+                </span>
                 {detail.effect.rejectedCount > 0 && (
                   <Badge tone="danger">被驳回 {detail.effect.rejectedCount} 次</Badge>
                 )}
@@ -740,17 +764,20 @@ export function KnowledgeWorkspace() {
               <div className="mt-4 space-y-2">
                 <h3 className="text-copy-13 font-medium">多语言版本</h3>
                 <p className="text-muted-foreground text-xs">
-                  占位符集合必须与源语言正文完全一致 —— 漏一个会在答复里出现裸占位符，多一个则永远填不上。
+                  占位符集合必须与源语言正文完全一致 ——
+                  漏一个会在答复里出现裸占位符，多一个则永远填不上。
                 </p>
                 <ul className="space-y-1">
                   {detail.translations.map((t) => (
-                    <li key={t.id} className="flex flex-wrap items-center gap-2 text-copy-13">
+                    <li key={t.id} className="text-copy-13 flex flex-wrap items-center gap-2">
                       <Badge tone="neutral">{t.locale}</Badge>
                       <span>{t.title}</span>
                       <Badge tone={t.status === 'REVIEWED' ? 'success' : 'warning'}>
                         {t.status === 'REVIEWED' ? '已复核' : '草稿'}
                       </Badge>
-                      <span className="text-muted-foreground text-xs">{t.origin === 'AI' ? 'AI 预填' : '人工撰写'}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {t.origin === 'AI' ? 'AI 预填' : '人工撰写'}
+                      </span>
                       {writable && (
                         <Button
                           size="sm"
@@ -775,7 +802,8 @@ export function KnowledgeWorkspace() {
                   ))}
                   {detail.translations.length === 0 && (
                     <li className="text-muted-foreground text-copy-13">
-                      还没有译文。源语言（{detail.sourceLocale}）可直接使用，其余语言要先补一条译文才能发给对应语言的买家。
+                      还没有译文。源语言（{detail.sourceLocale}
+                      ）可直接使用，其余语言要先补一条译文才能发给对应语言的买家。
                     </li>
                   )}
                 </ul>
@@ -801,14 +829,18 @@ export function KnowledgeWorkspace() {
                 </p>
                 <ul className="space-y-1">
                   {detail.ruleBindings.map((b) => (
-                    <li key={b.id} className="flex flex-wrap items-center gap-2 text-copy-13">
+                    <li key={b.id} className="text-copy-13 flex flex-wrap items-center gap-2">
                       <Badge tone="neutral">{platformLabel(b.platform)}</Badge>
                       <span className="font-mono text-xs">
                         {b.policyKey} / {b.versionLabel}
                       </span>
-                      <Badge tone={ruleStatusTone(b.ruleStatus)}>{ruleStatusLabel(b.ruleStatus)}</Badge>
+                      <Badge tone={ruleStatusTone(b.ruleStatus)}>
+                        {ruleStatusLabel(b.ruleStatus)}
+                      </Badge>
                       <span className="text-muted-foreground text-xs">{b.ruleTitle}</span>
-                      {b.note && <span className="text-muted-foreground text-xs">备注：{b.note}</span>}
+                      {b.note && (
+                        <span className="text-muted-foreground text-xs">备注：{b.note}</span>
+                      )}
                       {writable && (
                         <Button
                           size="sm"
@@ -830,7 +862,11 @@ export function KnowledgeWorkspace() {
                 {writable && (
                   <div className="flex flex-wrap items-end gap-2">
                     <Field label="挂到哪一版规则">
-                      <select className={control} value={bindingRuleId} onChange={(e) => setBindingRuleId(e.target.value)}>
+                      <select
+                        className={control}
+                        value={bindingRuleId}
+                        onChange={(e) => setBindingRuleId(e.target.value)}
+                      >
                         <option value="">选择规则版本…</option>
                         {rules?.items
                           .filter((r) => r.status !== 'SUPERSEDED')
@@ -852,18 +888,23 @@ export function KnowledgeWorkspace() {
                 <h3 className="text-copy-13 font-medium">使用历史（最近引用）</h3>
                 <ul className="space-y-1">
                   {detail.recentUsages.map((u) => (
-                    <li key={u.id} className="flex flex-wrap items-center gap-2 text-copy-13">
+                    <li key={u.id} className="text-copy-13 flex flex-wrap items-center gap-2">
                       <Badge tone={outcomeTone(u.outcome)}>{u.outcomeLabel}</Badge>
                       <span className="text-muted-foreground text-xs">{u.createdAt}</span>
-                      {u.locale && <span className="text-muted-foreground text-xs">语言 {u.locale}</span>}
+                      {u.locale && (
+                        <span className="text-muted-foreground text-xs">语言 {u.locale}</span>
+                      )}
                       {u.conversationRef && (
-                        <span className="text-muted-foreground text-xs">会话 {u.conversationRef}</span>
+                        <span className="text-muted-foreground text-xs">
+                          会话 {u.conversationRef}
+                        </span>
                       )}
                     </li>
                   ))}
                   {detail.recentUsages.length === 0 && (
                     <li className="text-muted-foreground text-copy-13">
-                      还没有引用记录。客服在会话里一键引用后会在这里逐条落库 —— 命中率统计从这些明细行现算，不做累计列。
+                      还没有引用记录。客服在会话里一键引用后会在这里逐条落库 ——
+                      命中率统计从这些明细行现算，不做累计列。
                     </li>
                   )}
                 </ul>
@@ -968,7 +1009,7 @@ export function KnowledgeWorkspace() {
               description={ruleEmptyHint(ruleKeyword, ruleStatus)}
             />
           ) : (
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2">平台</th>
@@ -990,14 +1031,17 @@ export function KnowledgeWorkspace() {
                     <td>
                       {r.title}
                       {r.changeSummary && (
-                        <p className="text-muted-foreground mt-0.5 text-xs">变更：{r.changeSummary}</p>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          变更：{r.changeSummary}
+                        </p>
                       )}
                     </td>
                     <td>
                       <Badge tone={ruleStatusTone(r.status)}>{ruleStatusLabel(r.status)}</Badge>
                     </td>
                     <td className="text-muted-foreground text-xs">
-                      {r.effectiveFrom?.slice(0, 10)} → {r.effectiveTo ? r.effectiveTo.slice(0, 10) : '（至今）'}
+                      {r.effectiveFrom?.slice(0, 10)} →{' '}
+                      {r.effectiveTo ? r.effectiveTo.slice(0, 10) : '（至今）'}
                     </td>
                     <td>{r.bindingCount}</td>
                     <td className="space-x-1 text-right">
@@ -1091,7 +1135,10 @@ export function KnowledgeWorkspace() {
           </div>
 
           {tasks && tasks.items.length === 0 ? (
-            <EmptyState title="没有复核任务" description={reviewEmptyHint(taskStatus, taskPlatform)} />
+            <EmptyState
+              title="没有复核任务"
+              description={reviewEmptyHint(taskStatus, taskPlatform)}
+            />
           ) : (
             <ul className="space-y-2">
               {tasks?.items.map((t) => (
@@ -1107,19 +1154,29 @@ export function KnowledgeWorkspace() {
                       {t.policyKey} / {t.versionLabel}
                     </span>
                   </div>
-                  <p className="mt-1 text-copy-13">{reviewTaskSummary(t)}</p>
+                  <p className="text-copy-13 mt-1">{reviewTaskSummary(t)}</p>
                   {t.ruleChangeSummary && (
                     <p className="text-muted-foreground text-xs">旧版变更：{t.ruleChangeSummary}</p>
                   )}
                   {writable && (
                     <div className="mt-1 space-x-1">
                       {t.reviewStatus === 'PENDING' && (
-                        <Button size="sm" variant="outline" disabled={busy} onClick={() => void claimTask(t.id, 'REVIEWING')}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void claimTask(t.id, 'REVIEWING')}
+                        >
                           认领
                         </Button>
                       )}
                       {t.reviewStatus !== 'DONE' && (
-                        <Button size="sm" variant="outline" disabled={busy} onClick={() => void claimTask(t.id, 'DONE')}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void claimTask(t.id, 'DONE')}
+                        >
                           标记已复核
                         </Button>
                       )}
@@ -1161,7 +1218,7 @@ export function KnowledgeWorkspace() {
                 </select>
               </Field>
             </div>
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted-foreground">
                 <tr>
                   <th className="py-2">编码</th>
@@ -1186,7 +1243,10 @@ export function KnowledgeWorkspace() {
                     <td>{r.hitUsageCount}</td>
                     <td>
                       {r.usageCount === 0 ? (
-                        <span className="text-muted-foreground" title="从没被引用过 —— 不是 0%，是「没有样本」">
+                        <span
+                          className="text-muted-foreground"
+                          title="从没被引用过 —— 不是 0%，是「没有样本」"
+                        >
                           —
                         </span>
                       ) : (
@@ -1196,17 +1256,25 @@ export function KnowledgeWorkspace() {
                     <td>
                       {r.rejectedCount > 0 ? <Badge tone="danger">{r.rejectedCount}</Badge> : '—'}
                     </td>
-                    <td className="text-muted-foreground text-xs">{r.lastUsedAt?.slice(0, 10) ?? '—'}</td>
+                    <td className="text-muted-foreground text-xs">
+                      {r.lastUsedAt?.slice(0, 10) ?? '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {hitRates.length === 0 && (
-              <EmptyState title="还没有可统计的话术" description="新建话术并被引用后，这里才会有数据。" />
+              <EmptyState
+                title="还没有可统计的话术"
+                description="新建话术并被引用后，这里才会有数据。"
+              />
             )}
           </SectionCard>
 
-          <SectionCard title="引用记录" description="每次客服一键引用都真的落一行；命中率统计从这些明细行现算。">
+          <SectionCard
+            title="引用记录"
+            description="每次客服一键引用都真的落一行；命中率统计从这些明细行现算。"
+          >
             <div className="flex flex-wrap items-end gap-2">
               <Field label="结果类型">
                 <select
@@ -1229,7 +1297,7 @@ export function KnowledgeWorkspace() {
             {usages && usages.items.length === 0 ? (
               <EmptyState title="没有引用记录" description={usageEmptyHint(outcomeFilter)} />
             ) : (
-              <table className="w-full text-left text-copy-13">
+              <table className="text-copy-13 w-full text-left">
                 <thead className="text-muted-foreground">
                   <tr>
                     <th className="py-2">话术</th>
@@ -1249,7 +1317,9 @@ export function KnowledgeWorkspace() {
                       </td>
                       <td>
                         <Badge tone={outcomeTone(u.outcome)}>{u.outcomeLabel}</Badge>
-                        <p className="text-muted-foreground mt-0.5 text-xs">{outcomeHint(u.outcome)}</p>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          {outcomeHint(u.outcome)}
+                        </p>
                       </td>
                       <td>{u.countsAsHit ? '是' : '否'}</td>
                       <td>{u.locale ?? '源语言'}</td>
@@ -1317,7 +1387,9 @@ export function KnowledgeWorkspace() {
               <input
                 className={control}
                 value={editing.sourceLocale}
-                onChange={(e) => setEditing({ ...editing, sourceLocale: normalizeLocale(e.target.value) })}
+                onChange={(e) =>
+                  setEditing({ ...editing, sourceLocale: normalizeLocale(e.target.value) })
+                }
               />
             </Field>
             <Field label="触发词" hint="客服检索时打的短词，用英文逗号分隔，例如 退,退货,换货">
@@ -1363,17 +1435,25 @@ export function KnowledgeWorkspace() {
               <input
                 className={control}
                 value={editingTranslation.title}
-                onChange={(e) => setEditingTranslation({ ...editingTranslation, title: e.target.value })}
+                onChange={(e) =>
+                  setEditingTranslation({ ...editingTranslation, title: e.target.value })
+                }
               />
             </Field>
             <Field
               label="译文正文"
-              hint={`源语言占位符：${placeholdersOf(detail.body).map((p) => `{${p}}`).join(' ') || '（无）'}`}
+              hint={`源语言占位符：${
+                placeholdersOf(detail.body)
+                  .map((p) => `{${p}}`)
+                  .join(' ') || '（无）'
+              }`}
             >
               <textarea
                 className={`${control} min-h-28`}
                 value={editingTranslation.body}
-                onChange={(e) => setEditingTranslation({ ...editingTranslation, body: e.target.value })}
+                onChange={(e) =>
+                  setEditingTranslation({ ...editingTranslation, body: e.target.value })
+                }
               />
             </Field>
             {placeholderProblem(detail.body, editingTranslation.body) && (
@@ -1386,7 +1466,9 @@ export function KnowledgeWorkspace() {
                 <select
                   className={control}
                   value={editingTranslation.origin ?? 'MANUAL'}
-                  onChange={(e) => setEditingTranslation({ ...editingTranslation, origin: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTranslation({ ...editingTranslation, origin: e.target.value })
+                  }
                 >
                   {TRANSLATION_ORIGINS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -1399,7 +1481,9 @@ export function KnowledgeWorkspace() {
                 <select
                   className={control}
                   value={editingTranslation.status ?? 'DRAFT'}
-                  onChange={(e) => setEditingTranslation({ ...editingTranslation, status: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTranslation({ ...editingTranslation, status: e.target.value })
+                  }
                 >
                   {TRANSLATION_STATUSES.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -1441,11 +1525,16 @@ export function KnowledgeWorkspace() {
                 ))}
               </select>
             </Field>
-            <Field label="政策编码" hint="政策条目的稳定身份，改版不改它（如 AMAZON_RETURN_POLICY）">
+            <Field
+              label="政策编码"
+              hint="政策条目的稳定身份，改版不改它（如 AMAZON_RETURN_POLICY）"
+            >
               <input
                 className={control}
                 value={ruleEditor.policyKey}
-                onChange={(e) => setRuleEditor({ ...ruleEditor, policyKey: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setRuleEditor({ ...ruleEditor, policyKey: e.target.value.toUpperCase() })
+                }
               />
             </Field>
             <Field label="版本标签" hint="人读的不是 uuid，是它（如 2026-03）">
@@ -1469,7 +1558,10 @@ export function KnowledgeWorkspace() {
                 onChange={(e) => setRuleEditor({ ...ruleEditor, changeSummary: e.target.value })}
               />
             </Field>
-            <Field label="生效起点" hint="必填：没有生效起点的政策版本无法回答「这条话术当时依据的是哪版」">
+            <Field
+              label="生效起点"
+              hint="必填：没有生效起点的政策版本无法回答「这条话术当时依据的是哪版」"
+            >
               <input
                 type="date"
                 className={control}
@@ -1502,7 +1594,7 @@ function Pager({
   onPage: (page: number) => void;
 }) {
   return (
-    <div className="text-muted-foreground mt-2 flex items-center gap-2 text-copy-13">
+    <div className="text-muted-foreground text-copy-13 mt-2 flex items-center gap-2">
       <Button size="sm" variant="outline" disabled={page <= 0} onClick={() => onPage(page - 1)}>
         上一页
       </Button>

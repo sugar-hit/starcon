@@ -16,8 +16,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 /**
  * 3.1.2.1 SKU 列表：分页检索、批量操作与导出。权限沿用 SKU 档案页的 catalog.sku.* 。
  *
- * <p>这是仓储、采购、财务共用的事实入口，因此读权限统一用 {@code catalog.sku.read}，
- * 写操作分别对应 update / delete 之外的批量语义：改状态需要 {@code catalog.sku.update}。
+ * <p>这是仓储、采购、财务共用的事实入口，因此读权限统一用 {@code catalog.sku.read}， 写操作分别对应 update / delete 之外的批量语义：改状态需要
+ * {@code catalog.sku.update}。
  */
 @RestController
 @RequestMapping("/catalog")
@@ -98,8 +98,7 @@ public class SkuListController {
   /**
    * 导出 CSV：StreamingResponseBody 分批写出，峰值内存与结果集大小无关。
    *
-   * <p>每批在流式线程里重新开租户事务——租户上下文是事务级 GUC，controller 那个事务
-   * 在响应开始前就结束了，跨线程复用它的连接会丢掉租户绑定。
+   * <p>每批在流式线程里重新开租户事务——租户上下文是事务级 GUC，controller 那个事务 在响应开始前就结束了，跨线程复用它的连接会丢掉租户绑定。
    */
   @GetMapping(value = "/skus/export", produces = "text/csv")
   public ResponseEntity<StreamingResponseBody> export(
@@ -125,8 +124,7 @@ public class SkuListController {
           service.requireProjections(query);
           return null;
         });
-    StreamingResponseBody body =
-        out -> service.streamCsv(actor, query, chunk -> write(out, chunk));
+    StreamingResponseBody body = out -> service.streamCsv(actor, query, chunk -> write(out, chunk));
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
         .header(

@@ -5,30 +5,23 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * 6.4.1.1 加工单的**仓库侧消费**模型（组件出库 + 成品入库）。
  *
- * <p>蓝图 06 卷 6.4.1.1 关系段的加粗句是本模型的全部理由：
- * 「加工是『消耗组件产生成品』的库存动作，**必须在 warehouse 本地事务完成**，
- * 不能由 trade 直接改库存。」
+ * <p>蓝图 06 卷 6.4.1.1 关系段的加粗句是本模型的全部理由： 「加工是『消耗组件产生成品』的库存动作，**必须在 warehouse 本地事务完成**， 不能由 trade
+ * 直接改库存。」
  *
- * <p>所以加工单的**单据**在 trade（V97），而**库存动作**在这里：
- * 一次 {@code POST /warehouse/processing-orders} 就是一个本地事务，
- * 组件出库与成品入库要么都成、要么都回滚 —— 不允许出现
- * 「组件扣了成品没进」或反之。
+ * <p>所以加工单的**单据**在 trade（V97），而**库存动作**在这里： 一次 {@code POST /warehouse/processing-orders} 就是一个本地事务，
+ * 组件出库与成品入库要么都成、要么都回滚 —— 不允许出现 「组件扣了成品没进」或反之。
  *
- * <p>数量口径：需求数量来自 trade 冻结的 BOM 规则 R7 结果
- * （单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP），
- * 本服务**原样使用**，不重算、不取整 —— 取整是 3.5.2.2 与 06 采购建议的职责。
- * 但**库存余额的刻度是 numeric(19,4)**（V1 已定），
- * 所以入出库前会按 {@link #STOCK_SCALE} 对齐，避免 6 位小数被静默截断。
+ * <p>数量口径：需求数量来自 trade 冻结的 BOM 规则 R7 结果 （单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP），
+ * 本服务**原样使用**，不重算、不取整 —— 取整是 3.5.2.2 与 06 采购建议的职责。 但**库存余额的刻度是 numeric(19,4)**（V1 已定）， 所以入出库前会按
+ * {@link #STOCK_SCALE} 对齐，避免 6 位小数被静默截断。
  */
 public final class ProcessingOrderModels {
 
@@ -56,13 +49,10 @@ public final class ProcessingOrderModels {
   /**
    * 加工单入库执行请求（**一个本地事务**）。
    *
-   * <p>组件出库与成品入库在**同一个事务**里完成：任何一个环节失败（组件不足、
-   * 库位不存在、质量状态非法）都会整体回滚，不留「扣了料没入货」的半截状态。
+   * <p>组件出库与成品入库在**同一个事务**里完成：任何一个环节失败（组件不足、 库位不存在、质量状态非法）都会整体回滚，不留「扣了料没入货」的半截状态。
    */
   public record ProcessingOrderIssueInput(
-      @Schema(
-              description = "加工单 ID（trade V97 的逻辑 ID；跨服务不建外键，只作幂等锚点与追溯引用）")
-          @NotNull
+      @Schema(description = "加工单 ID（trade V97 的逻辑 ID；跨服务不建外键，只作幂等锚点与追溯引用）") @NotNull
           UUID processingOrderId,
       @Schema(nullable = true) @Size(max = 64) String orderNo,
       @NotNull UUID warehouseId,

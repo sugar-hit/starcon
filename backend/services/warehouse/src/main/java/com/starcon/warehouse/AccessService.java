@@ -20,12 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 跨服务访问守卫。
  *
- * <p>租户**绝不**来自客户端头：identity 依据已认证用户的成员关系解析出租户与权限，
- * 本服务再开一个事务，绑定 {@code app.current_tenant} 供 RLS 强制隔离，并绑定
- * actor / department / permission / grants 供数据范围策略使用，然后才执行查询。
+ * <p>租户**绝不**来自客户端头：identity 依据已认证用户的成员关系解析出租户与权限， 本服务再开一个事务，绑定 {@code app.current_tenant} 供 RLS
+ * 强制隔离，并绑定 actor / department / permission / grants 供数据范围策略使用，然后才执行查询。
  *
- * <p>与 catalog / channel 完全同构：权限码前缀是 {@code warehouse.}，归属服务
- * identity 拥有身份与租户（本服务不建用户表、不建租户表）。
+ * <p>与 catalog / channel 完全同构：权限码前缀是 {@code warehouse.}，归属服务 identity 拥有身份与租户（本服务不建用户表、不建租户表）。
  */
 @Service
 public class AccessService {

@@ -176,7 +176,8 @@ export function GoodsReceiptDiscrepancyWorkspace() {
         description="处理收货差异：拍照留证、拒收、部分接收、索赔发起。破损与短少必须拒收或待检入库。"
         actions={
           <Button variant="ghost" onClick={() => void load()} disabled={loading}>
-            <RefreshCw className={loading ? 'animate-spin' : ''} />刷新
+            <RefreshCw className={loading ? 'animate-spin' : ''} />
+            刷新
           </Button>
         }
       />
@@ -203,14 +204,14 @@ export function GoodsReceiptDiscrepancyWorkspace() {
                 className={
                   d.available
                     ? 'rounded-md border px-2 py-1 text-xs'
-                    : 'rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground'
+                    : 'text-muted-foreground rounded-md border border-dashed px-2 py-1 text-xs'
                 }
               >
                 {dependencyCaption(d)}
               </span>
             ))}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">{caps.claimNote}</p>
+          <p className="text-muted-foreground mt-2 text-xs">{caps.claimNote}</p>
         </SectionCard>
       )}
 
@@ -317,7 +318,7 @@ export function GoodsReceiptDiscrepancyWorkspace() {
 
       <SectionCard title="差异处理记录">
         {loading ? (
-          <p className="text-sm text-muted-foreground">正在加载差异处理记录…</p>
+          <p className="text-muted-foreground text-sm">正在加载差异处理记录…</p>
         ) : rows.length === 0 ? (
           <EmptyState
             title="还没有待处理的差异"
@@ -349,7 +350,7 @@ export function GoodsReceiptDiscrepancyWorkspace() {
                       >
                         {row.receiptCode}
                       </button>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         {row.skuCode ? `${row.skuCode} ${row.skuName}` : '单级差异（无 SKU）'}
                       </div>
                     </td>
@@ -374,7 +375,7 @@ export function GoodsReceiptDiscrepancyWorkspace() {
                           '—'
                         ))}
                       {row.inboundQualityStatusName && (
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           去向 {row.inboundQualityStatusName}
                         </div>
                       )}
@@ -386,9 +387,13 @@ export function GoodsReceiptDiscrepancyWorkspace() {
                     </td>
                     <td className="py-2 pr-3 text-right tabular-nums">{row.evidenceCount}</td>
                     <td className="py-2 pr-3 text-xs">
-                      {row.claimed ? row.claimStatus : <span className="text-muted-foreground">未索赔</span>}
+                      {row.claimed ? (
+                        row.claimStatus
+                      ) : (
+                        <span className="text-muted-foreground">未索赔</span>
+                      )}
                     </td>
-                    <td className="py-2 text-xs text-muted-foreground">{moment(row.updatedAt)}</td>
+                    <td className="text-muted-foreground py-2 text-xs">{moment(row.updatedAt)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -482,7 +487,10 @@ export function GoodsReceiptDiscrepancyWorkspace() {
           busy={busy}
           onCancel={() => setClaiming(null)}
           onSubmit={(input) =>
-            void run(() => claimDiscrepancy(claiming.handling.id, input), (d) => setDetail(d))
+            void run(
+              () => claimDiscrepancy(claiming.handling.id, input),
+              (d) => setDetail(d),
+            )
           }
         />
       )}
@@ -537,9 +545,10 @@ function DetailDialog(props: {
             <section>
               <h3 className="mb-1 font-medium">差异事实（8.2.1.1 登记）</h3>
               <p className="text-muted-foreground">
-                原因码 {detail.discrepancy.reasonCode || '—'} · {detail.discrepancy.reasonNote || '—'}
+                原因码 {detail.discrepancy.reasonCode || '—'} ·{' '}
+                {detail.discrepancy.reasonNote || '—'}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 记录于 {moment(detail.discrepancy.recordedAt)}
               </p>
             </section>
@@ -564,10 +573,9 @@ function DetailDialog(props: {
                         {evidenceTypeLabel(e.evidenceType)}
                       </div>
                     )}
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       <p>
-                        {e.evidenceTypeLabel} · {fmt(e.byteSize / 1024)} KB ·{' '}
-                        {moment(e.capturedAt)}
+                        {e.evidenceTypeLabel} · {fmt(e.byteSize / 1024)} KB · {moment(e.capturedAt)}
                       </p>
                       {e.note && <p>{e.note}</p>}
                       <p className="font-mono">{e.sha256.slice(0, 16)}…</p>
@@ -580,7 +588,7 @@ function DetailDialog(props: {
           <section>
             <h3 className="mb-1 font-medium">库存流转（{detail.stockMoves.length}）</h3>
             <p className="text-muted-foreground">{stockEffectText(detail.stockMoves)}</p>
-            <ul className="mt-1 flex flex-col gap-1 text-xs text-muted-foreground">
+            <ul className="text-muted-foreground mt-1 flex flex-col gap-1 text-xs">
               {detail.stockMoves.map((m) => (
                 <li key={m.id}>
                   {stockMoveDirectionLabels[m.direction] ?? m.direction} {fmt(m.quantity)}
@@ -589,12 +597,12 @@ function DetailDialog(props: {
                 </li>
               ))}
             </ul>
-            <p className="mt-1 text-xs text-muted-foreground">{detail.notPostedNote}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{detail.notPostedNote}</p>
           </section>
           <section>
             <h3 className="mb-1 font-medium">索赔</h3>
             {detail.claim ? (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-muted-foreground text-xs">
                 <p>
                   {detail.claim.claimCode} · {detail.claim.claimTypeLabel} ·{' '}
                   {detail.claim.statusLabel} ·{' '}
@@ -615,17 +623,20 @@ function DetailDialog(props: {
         <ModalFooter>
           {actions.includes('evidence') && (
             <Button variant="ghost" onClick={props.onEvidence} disabled={props.busy}>
-              <Camera />拍照留证
+              <Camera />
+              拍照留证
             </Button>
           )}
           {actions.includes('decide') && (
             <Button onClick={props.onDecide} disabled={props.busy}>
-              <FileCheck2 />给出处理决定
+              <FileCheck2 />
+              给出处理决定
             </Button>
           )}
           {actions.includes('claim') && (
             <Button variant="ghost" onClick={props.onClaim} disabled={props.busy}>
-              <Gavel />发起索赔
+              <Gavel />
+              发起索赔
             </Button>
           )}
           {actions.includes('close') && (
@@ -749,13 +760,15 @@ function DecideDialog(props: {
                   onChange={(e) => setRejected(e.target.value)}
                 />
               </label>
-              <p className={`col-span-2 text-xs ${sumOk ? 'text-muted-foreground' : 'text-red-600'}`}>
+              <p
+                className={`col-span-2 text-xs ${sumOk ? 'text-muted-foreground' : 'text-red-600'}`}
+              >
                 差异 {fmt(quantity)} = 接受 {fmt(acceptedNum)} + 拒收 {fmt(rejectedNum)}
                 {sumOk ? '' : '（必须恰好等于差异数量）'}
               </p>
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {disposition === 'REJECT'
                 ? `全部 ${fmt(quantity)} 拒收。`
                 : `全部 ${fmt(quantity)} 按下列去向入库。`}
@@ -777,7 +790,7 @@ function DecideDialog(props: {
                 ))}
               </select>
               {risk && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   风险差异不提供「可售」去向：直接入可售会把问题货卖出去。
                 </span>
               )}
@@ -785,9 +798,7 @@ function DecideDialog(props: {
           )}
 
           <label className="flex flex-col gap-1">
-            <span className="text-muted-foreground">
-              落库库位（拒收时留空 = 这批货从未进过库）
-            </span>
+            <span className="text-muted-foreground">落库库位（拒收时留空 = 这批货从未进过库）</span>
             <select
               className="rounded-md border px-3 py-2"
               value={location}
@@ -804,7 +815,9 @@ function DecideDialog(props: {
 
           {location && (
             <label className="flex flex-col gap-1">
-              <span className="text-muted-foreground">货当前所在的���质状态（留空 = 尚未入库）</span>
+              <span className="text-muted-foreground">
+                货当前所在的���质状态（留空 = 尚未入库）
+              </span>
               <select
                 className="rounded-md border px-3 py-2"
                 value={from}
@@ -901,13 +914,13 @@ function EvidenceDialog(props: {
               className="rounded-md border px-3 py-2 text-xs"
               onChange={(e) => void onFile(e.target.files?.[0])}
             />
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               会在浏览器里压到长边 1280px 的 JPEG 再上传，原始时刻与 sha256 一并留痕。
             </span>
           </label>
           {fileError && <p className="text-xs text-red-600">{fileError}</p>}
           {payload && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               已压缩至 {fmt(Math.round((payload.contentBase64.length * 3) / 4 / 1024))} KB。
             </p>
           )}

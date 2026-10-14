@@ -61,10 +61,10 @@ FOREIGN KEY (tenant_id, warehouse_id, parent_id)
 
 ## 踩到并修掉的坑
 
-1. **`springdoc 会丢掉自引用的 record 属性。** 运行时树确实是嵌套的（前端按 `depth` 缩进渲染），
-   但 `List<LocationNode> children` 在生成的 OpenAPI spec 里**整个字段消失**，codegen 出来的 TS 类型也没有它 ——
-   前端按类型写了 `children` 却收不到。identity 的 `DepartmentView.children` 能进契约是因为它在 Controller 里
-   被 springdoc 当作根类型扫描。**决策**：DTO 改成输出**扁平 `levels` + `depth`**（父先于子、同层按 code），
+1. **`springdoc 会丢掉自引用的 record 属性。** 运行时树确实是嵌套的（前端按 `depth`缩进渲染），
+但`List<LocationNode> children`在生成的 OpenAPI spec 里**整个字段消失**，codegen 出来的 TS 类型也没有它 ——
+前端按类型写了`children`却收不到。identity 的`DepartmentView.children`能进契约是因为它在 Controller 里
+被 springdoc 当作根类型扫描。**决策**：DTO 改成输出**扁平`levels`+`depth`**（父先于子、同层按 code），
    契约 / 运行时 / 前端三者从此说同一件事，而不是让契约与运行时不一致。
 2. **jOOQ 绑定无类型的 `null` 会抛**
    `SQLDialectNotSupportedException: Type class java.lang.Class is not supported in dialect POSTGRES`。

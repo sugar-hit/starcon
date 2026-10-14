@@ -72,8 +72,8 @@ public class AdministrationController {
   /**
    * 17.2.1.1 部门树。
    *
-   * <p>部门是**组织维度**，与法人（法律主体维度）分离：{@code legalEntityId} 只是部门的一条归属引用，
-   * 不代表这个部门就是那个法人。输出 = 整棵树 + 每个节点的成员分布，children 递归嵌套根节点列表。
+   * <p>部门是**组织维度**，与法人（法律主体维度）分离：{@code legalEntityId} 只是部门的一条归属引用， 不代表这个部门就是那个法人。输出 = 整棵树 +
+   * 每个节点的成员分布，children 递归嵌套根节点列表。
    */
   public record DepartmentView(
       UUID id,
@@ -89,8 +89,7 @@ public class AdministrationController {
 
   /** 层级调整单独走 {@code PUT /departments/{id}/parent}，所以这里刻意不含 parentId。 */
   public record DepartmentInput(
-      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "部门编码只允许大写字母数字下划线中划线")
-          String code,
+      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "部门编码只允许大写字母数字下划线中划线") String code,
       @NotBlank @Size(max = 100) String name,
       @Schema(nullable = true) UUID parentId,
       @Schema(nullable = true) UUID legalEntityId,
@@ -116,8 +115,7 @@ public class AdministrationController {
   /**
    * 17.1.2.1 法人档案。
    *
-   * <p>法人是货权、收付款与记账主体，不等于租户。本位币与舍入规则挂在法人上，
-   * 决定 12 财务总账的记账基准——租户默认币种只是展示默认，两者不能混。
+   * <p>法人是货权、收付款与记账主体，不等于租户。本位币与舍入规则挂在法人上， 决定 12 财务总账的记账基准——租户默认币种只是展示默认，两者不能混。
    */
   public record LegalEntityView(
       UUID id,
@@ -136,8 +134,7 @@ public class AdministrationController {
       int referenceCount) {}
 
   public record LegalEntityInput(
-      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "法人编码只允许大写字母数字下划线中划线")
-          String code,
+      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "法人编码只允许大写字母数字下划线中划线") String code,
       @NotBlank @Size(max = 200) String legalName,
       @Pattern(regexp = "[A-Z]{2}", message = "注册国家需为两位大写国家代码") String registrationCountry,
       @Size(max = 64) String registrationNo,
@@ -151,7 +148,9 @@ public class AdministrationController {
 
   /** 引用登记：channel 等服务登记"这个法人被我用着"，让删除保护有真实依据。 */
   public record LegalEntityReferenceInput(
-      @NotNull UUID legalEntityId, @NotBlank @Pattern(regexp = "[a-z_]{2,32}") String source, @NotNull UUID referenceId) {}
+      @NotNull UUID legalEntityId,
+      @NotBlank @Pattern(regexp = "[a-z_]{2,32}") String source,
+      @NotNull UUID referenceId) {}
 
   // ------------------------------------------------------------------
   // 17.2.1.2 部门负责人
@@ -161,8 +160,7 @@ public class AdministrationController {
    * 负责人记录。
    *
    * <p>{@code leaderId} / {@code membershipId} / {@code username} 全部可空：蓝图点名
-   * 「负责人可为空」，没有负责人的部门要在审批流里指定兜底人。所以这类部门**必须出现在列表里**
-   * （前端标「未指定负责人」），把它过滤掉等于让运营看不见自己漏配了审批人。
+   * 「负责人可为空」，没有负责人的部门要在审批流里指定兜底人。所以这类部门**必须出现在列表里** （前端标「未指定负责人」），把它过滤掉等于让运营看不见自己漏配了审批人。
    */
   public record DepartmentLeaderView(
       @Schema(nullable = true) UUID leaderId,
@@ -183,8 +181,8 @@ public class AdministrationController {
   /**
    * 设置负责人。
    *
-   * <p>{@code approvalLimit} 与 {@code approvalCurrency} 同进同出：只有额度没有币种的话，
-   * 「1000」在 USD 与 JPY 下是两回事，17.4 无从判断该批多少。两者要么都填要么都留空。
+   * <p>{@code approvalLimit} 与 {@code approvalCurrency} 同进同出：只有额度没有币种的话， 「1000」在 USD 与 JPY
+   * 下是两回事，17.4 无从判断该批多少。两者要么都填要么都留空。
    */
   public record DepartmentLeaderInput(
       @NotNull UUID membershipId,
@@ -193,14 +191,14 @@ public class AdministrationController {
           @Digits(integer = 13, fraction = 6)
           @DecimalMin(value = "0", inclusive = false)
           BigDecimal approvalLimit,
-      @Schema(nullable = true) @Pattern(regexp = "[A-Z]{3}", message = "审批额度币种需为三位大写币种代码") String approvalCurrency,
+      @Schema(nullable = true) @Pattern(regexp = "[A-Z]{3}", message = "审批额度币种需为三位大写币种代码")
+          String approvalCurrency,
       @Size(max = 500) String note) {}
 
   /**
    * 代管：负责人不在时由谁代行。
    *
-   * <p>{@code endsAt} 可空表示长期代管（授权副总代管是真实业务形态），强行要求截止时间
-   * 只会逼出「填一个假截止日」的数据。
+   * <p>{@code endsAt} 可空表示长期代管（授权副总代管是真实业务形态），强行要求截止时间 只会逼出「填一个假截止日」的数据。
    */
   public record LeaderProxyInput(
       @NotNull UUID membershipId,
@@ -211,14 +209,11 @@ public class AdministrationController {
   /**
    * 临时授权：把审批权限在有界区间内借给别人。
    *
-   * <p>额度必填且有上界——没有上界的「临时授权」等于凭空多出一个负责人，
-   * 那是「改负责人」该做的事。区间也必填：临时就是有界，不设终点会退化成第二份长期负责人。
+   * <p>额度必填且有上界——没有上界的「临时授权」等于凭空多出一个负责人， 那是「改负责人」该做的事。区间也必填：临时就是有界，不设终点会退化成第二份长期负责人。
    */
   public record LeaderGrantInput(
       @NotNull UUID membershipId,
-      @NotNull
-          @Digits(integer = 13, fraction = 6)
-          @DecimalMin(value = "0", inclusive = false)
+      @NotNull @Digits(integer = 13, fraction = 6) @DecimalMin(value = "0", inclusive = false)
           BigDecimal approvalLimit,
       @NotNull @Pattern(regexp = "[A-Z]{3}", message = "审批额度币种需为三位大写币种代码") String approvalCurrency,
       @NotNull OffsetDateTime startsAt,
@@ -279,12 +274,10 @@ public class AdministrationController {
   /**
    * 17.1.1.1 租户上下文的读路径：不挂页面权限码。
    *
-   * <p>与 {@link #call} 的区别是少了权限码这道闸——「我属于哪些租户」对每个成员都必须可读，
-   * 否则普通成员连自己在哪个租户都看不到。能读到哪些租户仍由 {@code switchable_tenants}
-   * 从会话成员关系推导，不是这里放开的。
+   * <p>与 {@link #call} 的区别是少了权限码这道闸——「我属于哪些租户」对每个成员都必须可读， 否则普通成员连自己在哪个租户都看不到。能读到哪些租户仍由 {@code
+   * switchable_tenants} 从会话成员关系推导，不是这里放开的。
    *
-   * <p>仍然要在租户事务里跑（而不是裸调）：会话锁定与租户二次校验要和写路径同口径，
-   * 否则切换租户与读取会撞在一起，读到切换一半的上下文。
+   * <p>仍然要在租户事务里跑（而不是裸调）：会话锁定与租户二次校验要和写路径同口径， 否则切换租户与读取会撞在一起，读到切换一半的上下文。
    */
   private <T> T context(String auth, Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
@@ -314,9 +307,8 @@ public class AdministrationController {
   /**
    * 记录一条审计。
    *
-   * <p>资源类型 + 可读标题 + 变更前后值 + 授权上下文都经 {@link AuditLog} 落库，
-   * 且在写入侧脱敏（见 {@link AuditRedactor}）。三个参数任一为 null 都合法：
-   * 新建没有 before，删除没有 after。
+   * <p>资源类型 + 可读标题 + 变更前后值 + 授权上下文都经 {@link AuditLog} 落库， 且在写入侧脱敏（见 {@link AuditRedactor}）。三个参数任一为
+   * null 都合法： 新建没有 before，删除没有 after。
    */
   private void audit(
       IdentityController.Access a,
@@ -352,12 +344,11 @@ public class AdministrationController {
   /**
    * 成员快照。
    *
-   * <p>刻意不含密码或密码哈希：凭证在 app_user，identity_audit 不该、也不需要看到它。
-   * 这里同时依赖 {@link AuditRedactor} 做第二道拦截——即使将来有人把 password 字段
-   * 加进快照，写入侧也会把它打成 {@code ***}。
+   * <p>刻意不含密码或密码哈希：凭证在 app_user，identity_audit 不该、也不需要看到它。 这里同时依赖 {@link AuditRedactor}
+   * 做第二道拦截——即使将来有人把 password 字段 加进快照，写入侧也会把它打成 {@code ***}。
    *
-   * <p>用户名经 {@code member_names(hash)} 解析：它以会话成员关系为条件解析，不采信调用方
-   * 传入的 tenant 头，所以伪造 {@code X-Tenant-Id} 拿不到别人的用户名。
+   * <p>用户名经 {@code member_names(hash)} 解析：它以会话成员关系为条件解析，不采信调用方 传入的 tenant 头，所以伪造 {@code
+   * X-Tenant-Id} 拿不到别人的用户名。
    */
   private Map<String, Object> memberSnapshot(UUID id, String auth) {
     var row = sql.fetchOne("select * from membership where id=?", id);
@@ -430,9 +421,8 @@ public class AdministrationController {
   /**
    * 子租户快照。
    *
-   * <p>刻意不直接查 {@code tenant} 表：identity_app 对它没有 GRANT（V3 只给了
-   * {@code child_tenants} 这个 SECURITY DEFINER 函数），直查会以 42501 失败，
-   * 连带整个「创建子租户」操作失败。审计快照不是绕过授权边界的理由。
+   * <p>刻意不直接查 {@code tenant} 表：identity_app 对它没有 GRANT（V3 只给了 {@code child_tenants} 这个 SECURITY
+   * DEFINER 函数），直查会以 42501 失败， 连带整个「创建子租户」操作失败。审计快照不是绕过授权边界的理由。
    *
    * <p>{@code child_tenants(hash)} 以会话成员关系为条件解析租户，不采信调用方传入的 tenant 头。
    */
@@ -566,15 +556,7 @@ public class AdministrationController {
           "管理权限只能绑定租户内全部范围");
     for (String p : input.permissions())
       sql.execute("insert into role_permission values(?,?,?)", a.tenantId(), id, p);
-    audit(
-        a,
-        auth,
-        "identity.role",
-        id,
-        input.code(),
-        "RoleSaved",
-        before,
-        roleSnapshot(id));
+    audit(a, auth, "identity.role", id, input.code(), "RoleSaved", before, roleSnapshot(id));
     return id;
   }
 
@@ -607,15 +589,7 @@ public class AdministrationController {
           sql.execute("delete from role_assignment where role_id=?", id);
           sql.execute("delete from role_permission where role_id=?", id);
           sql.execute("delete from role where id=?", id);
-          audit(
-              a,
-              auth,
-              "identity.role",
-              id,
-              str(before.get("code")),
-              "RoleDeleted",
-              before,
-              null);
+          audit(a, auth, "identity.role", id, str(before.get("code")), "RoleDeleted", before, null);
           return null;
         });
   }
@@ -696,7 +670,8 @@ public class AdministrationController {
             id,
             input.roleId(),
             department,
-            sql.fetchOne("select code from department where id=?", department).get("code", String.class));
+            sql.fetchOne("select code from department where id=?", department)
+                .get("code", String.class));
     }
   }
 
@@ -937,22 +912,14 @@ public class AdministrationController {
     return sql.fetchOne(statement, bindings) != null;
   }
 
-  /**
-   * 引用存在性校验。租户上下文由 RLS 决定，所以跨租户 ID 在这里表现为「不存在」——
-   * 应用层给出可读错误，DB 层的复合外键再兜一道。
-   */
+  /** 引用存在性校验。租户上下文由 RLS 决定，所以跨租户 ID 在这里表现为「不存在」—— 应用层给出可读错误，DB 层的复合外键再兜一道。 */
   private void references(UUID parentId, UUID legalEntityId, UUID leaderMembershipId) {
     if (parentId != null)
-      check(
-          exists("select 1 from department where id=?", parentId), "上级部门不存在或不属于当前租户");
+      check(exists("select 1 from department where id=?", parentId), "上级部门不存在或不属于当前租户");
     if (legalEntityId != null)
-      check(
-          exists("select 1 from legal_entity where id=?", legalEntityId),
-          "所属法人不存在或不属于当前租户");
+      check(exists("select 1 from legal_entity where id=?", legalEntityId), "所属法人不存在或不属于当前租户");
     if (leaderMembershipId != null)
-      check(
-          exists("select 1 from membership where id=?", leaderMembershipId),
-          "负责人不存在或不属于当前租户");
+      check(exists("select 1 from membership where id=?", leaderMembershipId), "负责人不存在或不属于当前租户");
   }
 
   @PostMapping("/departments")
@@ -1071,10 +1038,7 @@ public class AdministrationController {
         });
   }
 
-  /**
-   * 删除语义：有子部门或仍有成员挂靠就拒绝，并说明具体数量——不静默级联。
-   * 组织树一旦被级联删掉，成员的部门归属和 17.3.2.2 的数据范围都会失去依据。
-   */
+  /** 删除语义：有子部门或仍有成员挂靠就拒绝，并说明具体数量——不静默级联。 组织树一旦被级联删掉，成员的部门归属和 17.3.2.2 的数据范围都会失去依据。 */
   @DeleteMapping("/departments/{id}")
   public void deleteDepartment(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -1089,8 +1053,7 @@ public class AdministrationController {
           int children =
               sql.fetchOne("select count(*) from department where parent_id=?", id)
                   .get(0, Integer.class);
-          if (children > 0)
-            reject("该部门下仍有 " + children + " 个子部门，请先移动或删除这些子部门");
+          if (children > 0) reject("该部门下仍有 " + children + " 个子部门，请先移动或删除这些子部门");
           int members =
               sql.fetchOne("select count(*) from membership where department_id=?", id)
                   .get(0, Integer.class);
@@ -1200,7 +1163,8 @@ public class AdministrationController {
         LEGAL_ENTITY_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select e.id,e.code,e.legal_name,e.registration_country,e.registration_no,e.tax_no,"
                         + " e.base_currency,e.address,e.amount_scale,e.quantity_scale,e.rounding,e.status,e.version,"
                         + " (select count(*) from legal_entity_reference r where r.tenant_id=e.tenant_id"
@@ -1313,12 +1277,12 @@ public class AdministrationController {
   /**
    * 删除法人。
    *
-   * <p>仍被业务对象引用时拒绝并提示先停用——货权与记账主体不能凭空消失，
-   * 而停用是可逆且不会破坏历史单据的处置方式。
+   * <p>仍被业务对象引用时拒绝并提示先停用——货权与记账主体不能凭空消失， 而停用是可逆且不会破坏历史单据的处置方式。
    */
   @DeleteMapping("/legal-entities/{id}")
   public void legalEntityDelete(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     call(
         auth,
         "identity.legal_entity.delete",
@@ -1326,11 +1290,12 @@ public class AdministrationController {
         a -> {
           var before = legalEntitySnapshot(id);
           try {
-            int deleted = sql.execute("delete from legal_entity where tenant_id=? and id=?", a.tenantId(), id);
+            int deleted =
+                sql.execute(
+                    "delete from legal_entity where tenant_id=? and id=?", a.tenantId(), id);
             check(deleted == 1, "法人不存在或不属于当前租户");
           } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw IdentityController.error(
-                HttpStatus.CONFLICT, "该法人仍被业务对象引用，请先停用而不是删除");
+            throw IdentityController.error(HttpStatus.CONFLICT, "该法人仍被业务对象引用，请先停用而不是删除");
           }
           audit(
               a,
@@ -1365,7 +1330,9 @@ public class AdministrationController {
           sql.execute(
               "insert into legal_entity_reference(tenant_id,legal_entity_id,source,reference_id)"
                   + " values (?,?,?,?) on conflict do nothing",
-              new Object[] {a.tenantId(), input.legalEntityId(), input.source(), input.referenceId()});
+              new Object[] {
+                a.tenantId(), input.legalEntityId(), input.source(), input.referenceId()
+              });
           return null;
         });
   }
@@ -1394,9 +1361,7 @@ public class AdministrationController {
 
   /** 负责人快照：授权口径（范围 + 额度 + 币种）必须进审计，否则事后无法解释「当时谁能批多少」。 */
   private Map<String, Object> leaderSnapshot(UUID departmentId) {
-    var row =
-        sql.fetchOne(
-            "select * from department_leader where department_id=?", departmentId);
+    var row = sql.fetchOne("select * from department_leader where department_id=?", departmentId);
     if (row == null) return null;
     var snapshot = new LinkedHashMap<String, Object>();
     snapshot.put("membershipId", str(row.get("membership_id", UUID.class)));
@@ -1427,9 +1392,9 @@ public class AdministrationController {
   /**
    * 负责人清单。
    *
-   * <p>走 {@code department_leaders(hash)}：{@code identity_app} 对这些表只有租户内的读写权，
-   * 用户名必须在 SECURITY DEFINER 里经 {@code member_names} 解析，否则查询会以 42501 被拒
-   * （与 17.2.1.1 的 {@code department_tree} 同一套约定）。
+   * <p>走 {@code department_leaders(hash)}：{@code identity_app} 对这些表只有租户内的读写权， 用户名必须在 SECURITY
+   * DEFINER 里经 {@code member_names} 解析，否则查询会以 42501 被拒 （与 17.2.1.1 的 {@code department_tree}
+   * 同一套约定）。
    */
   @GetMapping("/department-leaders")
   public List<DepartmentLeaderView> departmentLeaders(
@@ -1439,8 +1404,7 @@ public class AdministrationController {
         LEADER_READ,
         false,
         a ->
-            sql.fetch("select * from department_leaders(?)", hash(auth))
-                .stream()
+            sql.fetch("select * from department_leaders(?)", hash(auth)).stream()
                 .map(
                     r ->
                         new DepartmentLeaderView(
@@ -1464,8 +1428,7 @@ public class AdministrationController {
   /**
    * 指定 / 更换部门负责人，并同时设定管理范围与审批权限。
    *
-   * <p>同一个端点同时做三件事（谁负责、管多大、能批多少），因为这三者是一次授权决定：
-   * 分成三个端点就会出现「先把权限开大、再补人」这种中间态，审批链会在那个窗口里放行。
+   * <p>同一个端点同时做三件事（谁负责、管多大、能批多少），因为这三者是一次授权决定： 分成三个端点就会出现「先把权限开大、再补人」这种中间态，审批链会在那个窗口里放行。
    *
    * <p>唯一键 (tenant_id, department_id) 决定这是 upsert 而不是新建。
    */
@@ -1539,16 +1502,16 @@ public class AdministrationController {
           // 先报数量再拒绝，而不是静默级联：撤销负责人会让已配置的审批链立刻失去归属，
           // 运营需要知道「连带作废了几条代管 / 临时授权」再决定。
           int proxies =
-              sql.fetchOne(
-                      "select count(*) from department_leader_proxy where department_id=?", id)
+              sql.fetchOne("select count(*) from department_leader_proxy where department_id=?", id)
                   .get(0, Integer.class);
           int grants =
-              sql.fetchOne(
-                      "select count(*) from department_leader_grant where department_id=?", id)
+              sql.fetchOne("select count(*) from department_leader_grant where department_id=?", id)
                   .get(0, Integer.class);
           sql.execute("delete from department_leader_proxy where department_id=?", id);
           sql.execute("delete from department_leader_grant where department_id=?", id);
-          check(sql.execute("delete from department_leader where department_id=?", id) == 1, "负责人已被撤销");
+          check(
+              sql.execute("delete from department_leader where department_id=?", id) == 1,
+              "负责人已被撤销");
           audit(
               a,
               auth,
@@ -1565,8 +1528,7 @@ public class AdministrationController {
   /**
    * 代管：负责人不在时由谁代行。
    *
-   * <p>区间允许开口（长期代管），但不允许闭区间——起止相同的「代管」在任何时刻都不生效，
-   * 却会在列表里占一行，看起来像配了个授权其实没有。
+   * <p>区间允许开口（长期代管），但不允许闭区间——起止相同的「代管」在任何时刻都不生效， 却会在列表里占一行，看起来像配了个授权其实没有。
    */
   @PostMapping("/departments/{id}/leader/proxies")
   public UUID createLeaderProxy(
@@ -1639,8 +1601,7 @@ public class AdministrationController {
   /**
    * 临时授权：把审批权限在有界区间内借给别人。
    *
-   * <p>额度必须有上界（DB 的 NOT NULL + CHECK 兜住），且不得超过负责人的额度——
-   * 借出去比本人还大的权限等于凭空造出一个上级，绕过负责人这道闸。
+   * <p>额度必须有上界（DB 的 NOT NULL + CHECK 兜住），且不得超过负责人的额度—— 借出去比本人还大的权限等于凭空造出一个上级，绕过负责人这道闸。
    */
   @PostMapping("/departments/{id}/leader/grants")
   public UUID createLeaderGrant(
@@ -1658,9 +1619,7 @@ public class AdministrationController {
           check(input.endsAt().isAfter(input.startsAt()), "临时授权结束时间必须晚于开始时间");
           var leaderLimit = (BigDecimal) decimal(leader.get("approvalLimit"));
           var leaderCurrency = (String) leader.get("approvalCurrency");
-          check(
-              leaderLimit != null && leaderCurrency != null,
-              "负责人未设置审批额度，无法派生临时授权额度");
+          check(leaderLimit != null && leaderCurrency != null, "负责人未设置审批额度，无法派生临时授权额度");
           check(
               leaderCurrency.equals(input.approvalCurrency()),
               "临时授权币种必须与负责人审批额度币种一致（" + leaderCurrency + "）");
@@ -1723,8 +1682,7 @@ public class AdministrationController {
   /**
    * 审批链引用：某一时刻该部门的审批权落在谁身上。
    *
-   * <p>{@code asOf} 可空（取当前时刻），给了就能回答「上周三这条单该谁批」——
-   * 这是临时授权与代管存在的意义：权限随时间变化，历史单据必须能还原当时的归属。
+   * <p>{@code asOf} 可空（取当前时刻），给了就能回答「上周三这条单该谁批」—— 这是临时授权与代管存在的意义：权限随时间变化，历史单据必须能还原当时的归属。
    *
    * <p>{@code requiresFallback} 在链为空时为 true：蓝图要求没有负责人的部门由审批流指定兜底人，
    * 这里把信号显式给下游，而不是让它拿到空数组后以为「这条单不需要审批」。
@@ -1744,7 +1702,8 @@ public class AdministrationController {
           var department = sql.fetchOne("select code,name from department where id=?", id);
           check(department != null, "部门不存在");
           var entries =
-              sql.fetch(
+              sql
+                  .fetch(
                       "select * from department_approval_chain(?,?,?::timestamptz)",
                       hash(auth),
                       id,
@@ -1800,9 +1759,8 @@ public class AdministrationController {
   /**
    * 可切换租户的一行：名称、标识、状态、角色、最后登录。
    *
-   * <p>{@code membershipId} 而不是 {@code tenantId} 才是切换时该传的东西——切换的是「我在这个
-   * 租户的身份」，租户 id 是被成员关系带着走的，单独传租户 id 等于允许在没有成员关系的租户
-   * 上建立会话。
+   * <p>{@code membershipId} 而不是 {@code tenantId} 才是切换时该传的东西——切换的是「我在这个 租户的身份」，租户 id
+   * 是被成员关系带着走的，单独传租户 id 等于允许在没有成员关系的租户 上建立会话。
    */
   public record TenantSummaryView(
       UUID membershipId,
@@ -1817,8 +1775,7 @@ public class AdministrationController {
   /**
    * 当前租户上下文档案。
    *
-   * <p>{@code managed} 表示当前身份能不能维护基本信息（Owner + ALL），由会话授权直接得出，
-   * 前端用它决定要不要渲染表单——服务端仍然会再判一次。
+   * <p>{@code managed} 表示当前身份能不能维护基本信息（Owner + ALL），由会话授权直接得出， 前端用它决定要不要渲染表单——服务端仍然会再判一次。
    */
   public record TenantContextView(
       UUID tenantId,
@@ -1839,9 +1796,8 @@ public class AdministrationController {
   /**
    * 可切换租户列表。
    *
-   * <p>全系统唯一允许的跨租户列表查询路径，租户集合只由 {@code switchable_tenants} 从当前用户的
-   * membership 关系推导：端点签名里没有 tenantId 参数，{@code X-Tenant-Id} 头也没有任何读取点，
-   * 管理员同样只能看到自己有成员关系的租户。
+   * <p>全系统唯一允许的跨租户列表查询路径，租户集合只由 {@code switchable_tenants} 从当前用户的 membership 关系推导：端点签名里没有 tenantId
+   * 参数，{@code X-Tenant-Id} 头也没有任何读取点， 管理员同样只能看到自己有成员关系的租户。
    */
   @GetMapping("/tenants")
   public List<TenantSummaryView> tenants(
@@ -1891,12 +1847,10 @@ public class AdministrationController {
    * <p>归属判定在 {@code update_tenant_profile} 内部走 {@code administration_tenant}（Owner + ALL），
    * 与成员管理、子租户同一道闸；非管理员会拿到 403 而不是静默成功。
    *
-   * <p>把本租户停用会同时让该租户所有现存会话失效（{@code memberships_for} 会把它从可切换集合里
-   * 剔除），所以停用是不可逆的一步，界面上必须先讲清楚。
+   * <p>把本租户停用会同时让该租户所有现存会话失效（{@code memberships_for} 会把它从可切换集合里 剔除），所以停用是不可逆的一步，界面上必须先讲清楚。
    *
-   * <p>因此变更后的快照直接由入参拼出，而不是再查一次：一旦把本租户停用，会话当场失效，
-   * 再经会话去读 {@code tenant_context} 只会拿到「会话不可用」，并把这次停用一起回滚——
-   * 结果就是停用永远存不下来。code 不可改，所以只有 name/status 变化。
+   * <p>因此变更后的快照直接由入参拼出，而不是再查一次：一旦把本租户停用，会话当场失效， 再经会话去读 {@code tenant_context}
+   * 只会拿到「会话不可用」，并把这次停用一起回滚—— 结果就是停用永远存不下来。code 不可改，所以只有 name/status 变化。
    */
   @PutMapping("/tenants/current")
   public void updateTenantProfile(
@@ -1930,8 +1884,8 @@ public class AdministrationController {
   /**
    * 租户基本信息快照：名称与状态进审计，否则事后答不出「当时这个租户叫什么、是否启用」。
    *
-   * <p>刻意经 {@code tenant_context} 而不是直查 {@code tenant} 表：运行时角色本来就没有
-   * {@code tenant} 的读权限（租户目录不允许被枚举），这条窄权限路径是它唯一的读法。
+   * <p>刻意经 {@code tenant_context} 而不是直查 {@code tenant} 表：运行时角色本来就没有 {@code tenant}
+   * 的读权限（租户目录不允许被枚举），这条窄权限路径是它唯一的读法。
    */
   private Map<String, Object> tenantSnapshot(String auth) {
     var r = sql.fetchOne("select * from tenant_context(?)", hash(auth));

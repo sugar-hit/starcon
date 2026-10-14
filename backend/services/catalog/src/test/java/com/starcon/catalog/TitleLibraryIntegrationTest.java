@@ -2,73 +2,67 @@ package com.starcon.catalog;
 
 import static com.starcon.catalog.CatalogModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.jooq.DSLContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.4.2.1 标题库：模板与变量占位、词根字典、批量生成的重复度控制、候选选用与导出、
- * 以及租户隔离三断言。
+ * 3.4.2.1 标题库：模板与变量占位、词根字典、批量生成的重复度控制、候选选用与导出、 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS：相似度、模板、词根、候选全部真的落库，
- * 「重复度受控」是从库里读出来的事实而不是内存里的计数器。
+ * <p>真实 PostgreSQL 16 + 强制 RLS：相似度、模板、词根、候选全部真的落库， 「重复度受控」是从库里读出来的事实而不是内存里的计数器。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>开发中实测修掉的真缺陷（都是这轮实测里抓出来的，不是预防性想象）：
  *
  * <ol>
- *   <li><b>导出 CSV 只有表头，一行数据都没有</b>——{@code streamCsv} 跑在流式线程上，
- *       那条连接上没有 {@code app.current_tenant}（controller 那个事务在响应开始前就结束了），
- *       FORCE RLS 于是把全部行藏起来；而初版只把 {@code actor.tenantId()} 塞进 WHERE 子句，
- *       设不了 GUC，于是查出来 0 行**还不报错**。修法：每批用 {@code access.run} 重新开租户事务
+ *   <li><b>导出 CSV 只有表头，一行数据都没有</b>——{@code streamCsv} 跑在流式线程上， 那条连接上没有 {@code
+ *       app.current_tenant}（controller 那个事务在响应开始前就结束了）， FORCE RLS 于是把全部行藏起来；而初版只把 {@code
+ *       actor.tenantId()} 塞进 WHERE 子句， 设不了 GUC，于是查出来 0 行**还不报错**。修法：每批用 {@code access.run} 重新开租户事务
  *       （与 {@code SkuListService.streamCsv} 同一形状）。
- *   <li><b>词根「被引用数」永远是 0，删除保护形同虚设</b>——{@code referenceCount} 的绑定参数
- *       误传成 {@code (id, text)}，于是 {@code tenant_id=?} 拿词根 id 去比，
- *       永远返回 0 行。症状很隐蔽：DB 触发器照常拦住删除（所以服务端那条断言看见的是
- *       {@code DataIntegrityViolationException} 而不是可读的 400），
- *       而列表页上的引用数一直是 0。修法：传 {@code (currentTenantId(), text)}。
- *   <li><b>{@code select s.name, p.name} 两列同名被后一列覆盖</b>——jOOQ 按列名取值，
- *       {@code sku.name} 与 {@code spu.name} 都落在 {@code "name"} 上，于是
- *       {@code {sku_name}} 与 {@code {spu_name}} 渲染出来是同一句话，
+ *   <li><b>词根「被引用数」永远是 0，删除保护形同虚设</b>——{@code referenceCount} 的绑定参数 误传成 {@code (id, text)}，于是
+ *       {@code tenant_id=?} 拿词根 id 去比， 永远返回 0 行。症状很隐蔽：DB 触发器照常拦住删除（所以服务端那条断言看见的是 {@code
+ *       DataIntegrityViolationException} 而不是可读的 400）， 而列表页上的引用数一直是 0。修法：传 {@code
+ *       (currentTenantId(), text)}。
+ *   <li><b>{@code select s.name, p.name} 两列同名被后一列覆盖</b>——jOOQ 按列名取值， {@code sku.name} 与 {@code
+ *       spu.name} 都落在 {@code "name"} 上，于是 {@code {sku_name}} 与 {@code {spu_name}} 渲染出来是同一句话，
  *       差异化凭空少了一个轴，而只看「标题非空」的断言完全发现不了。修法：{@code p.name as spu_name}。
  *   <li><b>CSV 的 SPU 名写进了 SKU 名的格子</b>——CSV 的 SELECT 同样漏了别名，
  *       而表头是「SKU编码,SPU名称,品牌…」，于是第二、三列整体错位一格，导出来给人看的表是错的。
- *   <li><b>空词池让整批生成 500</b>——{@code Math.floorMod(t, poolSize)} 在 {@code poolSize==0} 时抛
- *       {@link ArithmeticException}。而「租户只建了核心词、没建卖点词」是完全正常的初始状态，
- *       本该表现为「绑定空池子的变量渲染成空、其余照常」。修法：{@code poolAt} 空池返回空串。
- *   <li><b>V20 迁移里把 {@code CREATE UNIQUE INDEX} 写进了 {@code CREATE TABLE} 括号内</b>——
- *       Flyway 直接 {@code syntax error at or near "CREATE"}，整个应用上下文起不来。
- *   <li><b>混合类型的绑定参数推不出泛型</b>——{@code concat(List.of(tenantId, keywordType), codes)}
- *       编译失败（jOOQ 绑定参数必须是同一种 List）；改成显式 ArrayList 逐个 add。
- *   <li><b>切换选用的两步顺序</b>——同一 SKU 同平台换一条选用时，若不先把旧的降级，
- *       {@code title_record_one_selected} 部分唯一索引会直接撞约束。
+ *   <li><b>空词池让整批生成 500</b>——{@code Math.floorMod(t, poolSize)} 在 {@code poolSize==0} 时抛 {@link
+ *       ArithmeticException}。而「租户只建了核心词、没建卖点词」是完全正常的初始状态， 本该表现为「绑定空池子的变量渲染成空、其余照常」。修法：{@code
+ *       poolAt} 空池返回空串。
+ *   <li><b>V20 迁移里把 {@code CREATE UNIQUE INDEX} 写进了 {@code CREATE TABLE} 括号内</b>—— Flyway 直接 {@code
+ *       syntax error at or near "CREATE"}，整个应用上下文起不来。
+ *   <li><b>混合类型的绑定参数推不出泛型</b>——{@code concat(List.of(tenantId, keywordType), codes)} 编译失败（jOOQ
+ *       绑定参数必须是同一种 List）；改成显式 ArrayList 逐个 add。
+ *   <li><b>切换选用的两步顺序</b>——同一 SKU 同平台换一条选用时，若不先把旧的降级， {@code title_record_one_selected}
+ *       部分唯一索引会直接撞约束。
  * </ol>
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 class TitleLibraryIntegrationTest {
   static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
-  static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), c = UUID.randomUUID(),
+  static final UUID a = UUID.randomUUID(),
+      b = UUID.randomUUID(),
+      c = UUID.randomUUID(),
       user = UUID.randomUUID();
   static HttpServer identity;
   static final java.util.Map<String, AccessService.Access> actors =
@@ -77,8 +71,13 @@ class TitleLibraryIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -88,7 +87,8 @@ class TitleLibraryIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role catalog_app login password 'test-only' nosuperuser nobypassrls");
@@ -103,7 +103,8 @@ class TitleLibraryIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -113,7 +114,8 @@ class TitleLibraryIntegrationTest {
       actors.put("Bearer tenant-b", actor(user, b, null, List.of(grant("ALL", allPermissions()))));
       actors.put("Bearer tenant-c", actor(user, c, null, List.of(grant("ALL", allPermissions()))));
       actors.put(
-          "Bearer reader", actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
+          "Bearer reader",
+          actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -123,8 +125,10 @@ class TitleLibraryIntegrationTest {
   /** 与 3.4.1.x 同口径：spu + sku + assets（V3 的 data_scope 策略在 spu 上是 RESTRICTIVE）。 */
   static List<String> allPermissions() {
     return java.util.stream.Stream.of("spu", "sku", "assets", "attribute")
-        .flatMap(p -> java.util.stream.Stream.of("read", "create", "update", "delete")
-            .map(op -> "catalog." + p + "." + op))
+        .flatMap(
+            p ->
+                java.util.stream.Stream.of("read", "create", "update", "delete")
+                    .map(op -> "catalog." + p + "." + op))
         .toList();
   }
 
@@ -154,6 +158,7 @@ class TitleLibraryIntegrationTest {
 
   AccessService.Access actor;
   AccessService.Access actorB;
+
   /** 专供「词池很小」的用例：用独立租户，避免与其它用例共享的词池互相污染。 */
   AccessService.Access actorC;
 
@@ -173,52 +178,64 @@ class TitleLibraryIntegrationTest {
   }
 
   void writeVoid(AccessService.Access who, Runnable work) {
-    access.run(who, "catalog.spu.update", () -> { work.run(); return null; });
+    access.run(
+        who,
+        "catalog.spu.update",
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   // ------------------------------------------------------------ 夹具
 
   String unique(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   /** 建 SPU（3.1.1.1 的写入所有权），带品牌与分类——标题模板的事实变量来源。 */
   UUID spu(AccessService.Access who, String code, String brand, String category) {
     return write(
         who,
-        () -> catalog.saveSpu(
-            who, null, new SpuInput(code, "SPU " + code, "", brand, category, "DRAFT", 0)));
+        () ->
+            catalog.saveSpu(
+                who, null, new SpuInput(code, "SPU " + code, "", brand, category, "DRAFT", 0)));
   }
 
   UUID sku(AccessService.Access who, UUID spuId, String code, String name) {
     return write(
         who,
-        () -> catalog.saveSku(
-            who, spuId, null,
-            new SkuInput(code, name, unique("BC"), "PCS", "ACTIVE", List.of(), 0)));
+        () ->
+            catalog.saveSku(
+                who,
+                spuId,
+                null,
+                new SkuInput(code, name, unique("BC"), "PCS", "ACTIVE", List.of(), 0)));
   }
 
   /**
    * 建词根；已存在同样（类型 + 内容）的词根时直接复用。
    *
-   * <p>幂等是必需的：所有用例共用同一个 PostgreSQL 容器，而
-   * {@code UNIQUE(tenant_id,keyword_type,text)} 是刻意的产品约束——
-   * 同一个词写成两条会让词池「看起来更大」，生成的候选却还是那几种，
-   * 重复度控制因此被绕过而没人发现。夹具不去重就会撞这个约束，
-   * 所以复用已存在的那条，而不是往库里塞同义词。
+   * <p>幂等是必需的：所有用例共用同一个 PostgreSQL 容器，而 {@code UNIQUE(tenant_id,keyword_type,text)} 是刻意的产品约束——
+   * 同一个词写成两条会让词池「看起来更大」，生成的候选却还是那几种， 重复度控制因此被绕过而没人发现。夹具不去重就会撞这个约束， 所以复用已存在的那条，而不是往库里塞同义词。
    */
   TitleKeywordRow keyword(AccessService.Access who, String code, String text, String type) {
     String typeUpper = type.toUpperCase(Locale.ROOT);
-    return write(who, () -> titles.saveKeyword(who, null,
-        new TitleKeywordInput(code, text, typeUpper, true, 0)));
+    return write(
+        who,
+        () -> titles.saveKeyword(who, null, new TitleKeywordInput(code, text, typeUpper, true, 0)));
   }
 
   /** 按（类型 + 内容）找已存在的词根，找不到返回 null。 */
   TitleKeywordRow findKeyword(AccessService.Access who, String text, String type) {
     // 显式类型：lambda 返回类型在 var 链上会退化成 Object（与 recordsOf 同一原因）。
     TitleKeywordPage page =
-        tx(who, () -> titles.keywords(
-            new TitleKeywordQuery(null, type.toUpperCase(Locale.ROOT), 0, 200)));
+        tx(
+            who,
+            () ->
+                titles.keywords(
+                    new TitleKeywordQuery(null, type.toUpperCase(Locale.ROOT), 0, 200)));
     List<TitleKeywordListRow> rows = page.items() == null ? List.of() : page.items();
     return rows.stream()
         .map(TitleKeywordListRow::keyword)
@@ -243,33 +260,54 @@ class TitleLibraryIntegrationTest {
 
   /** 标准模板：品牌 + 品类 + 核心词 + 卖点 + 修饰词，三个平台各有长度上限。 */
   TitleTemplateSaved template(AccessService.Access who, String code, int maxSimilarity) {
-    return write(who, () -> titles.saveTemplate(who, null,
-        new TitleTemplateInput(
-            code, code, "标准标题模板", "{brand} {category} {core} {selling} {modifier}",
-            maxSimilarity, 3,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1),
-                new TitleTemplateVariableInput("core", "KEYWORD_CORE", 2),
-                new TitleTemplateVariableInput("selling", "KEYWORD_SELLING", 3),
-                new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 4)),
-            List.of(
-                new TitleTemplatePlatformInput("AMAZON", 200),
-                new TitleTemplatePlatformInput("EBAY", 80),
-                new TitleTemplatePlatformInput("SHOPIFY", 120)),
-            true, 0)));
+    return write(
+        who,
+        () ->
+            titles.saveTemplate(
+                who,
+                null,
+                new TitleTemplateInput(
+                    code,
+                    code,
+                    "标准标题模板",
+                    "{brand} {category} {core} {selling} {modifier}",
+                    maxSimilarity,
+                    3,
+                    List.of(
+                        new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                        new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1),
+                        new TitleTemplateVariableInput("core", "KEYWORD_CORE", 2),
+                        new TitleTemplateVariableInput("selling", "KEYWORD_SELLING", 3),
+                        new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 4)),
+                    List.of(
+                        new TitleTemplatePlatformInput("AMAZON", 200),
+                        new TitleTemplatePlatformInput("EBAY", 80),
+                        new TitleTemplatePlatformInput("SHOPIFY", 120)),
+                    true,
+                    0)));
   }
 
   /** 精简模板：只要两个变量与一个平台，用来测「池子太小会拒」。 */
   TitleTemplateSaved thinTemplate(AccessService.Access who, String code) {
-    return write(who, () -> titles.saveTemplate(who, null,
-        new TitleTemplateInput(
-            code, code, "", "{brand} {modifier}", 500, 3,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 1)),
-            List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
-            true, 0)));
+    return write(
+        who,
+        () ->
+            titles.saveTemplate(
+                who,
+                null,
+                new TitleTemplateInput(
+                    code,
+                    code,
+                    "",
+                    "{brand} {modifier}",
+                    500,
+                    3,
+                    List.of(
+                        new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                        new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 1)),
+                    List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
+                    true,
+                    0)));
   }
 
   /** 当前租户的模板编码列表（显式类型，避免 lambda 泛型推断退化）。 */
@@ -280,8 +318,13 @@ class TitleLibraryIntegrationTest {
 
   /** 某 SKU 在某平台上的候选（显式类型同上）。 */
   List<TitleRecord> recordsOf(AccessService.Access who, UUID skuId, String platform) {
-    List<TitleRecord> rows = tx(who, () -> titles.listRecords(
-        new TitleRecordQuery(skuId, platform, null, null, null, 0, 200)).items());
+    List<TitleRecord> rows =
+        tx(
+            who,
+            () ->
+                titles
+                    .listRecords(new TitleRecordQuery(skuId, platform, null, null, null, 0, 200))
+                    .items());
     return rows;
   }
 
@@ -299,59 +342,133 @@ class TitleLibraryIntegrationTest {
     assertThat(row.pattern()).isEqualTo("{brand} {category} {core} {selling} {modifier}");
     assertThat(row.maxSimilarityPermille()).isEqualTo(850);
     assertThat(row.candidateCount()).isEqualTo(3);
-    assertThat(row.variables()).extracting(TitleTemplateVariable::name)
+    assertThat(row.variables())
+        .extracting(TitleTemplateVariable::name)
         .containsExactly("brand", "category", "core", "selling", "modifier");
-    assertThat(row.variables()).extracting(TitleTemplateVariable::source)
-        .containsExactly("SPU_BRAND", "SPU_CATEGORY", "KEYWORD_CORE", "KEYWORD_SELLING", "KEYWORD_MODIFIER");
+    assertThat(row.variables())
+        .extracting(TitleTemplateVariable::source)
+        .containsExactly(
+            "SPU_BRAND", "SPU_CATEGORY", "KEYWORD_CORE", "KEYWORD_SELLING", "KEYWORD_MODIFIER");
     // 绑定源有中文标签，前端直接显示，不让用户对着枚举名猜。
     assertThat(row.variables().get(0).sourceLabel()).isEqualTo("SPU 品牌");
     assertThat(row.variables().get(2).sourceLabel()).isEqualTo("核心词池");
-    assertThat(row.platforms()).extracting(TitleTemplatePlatform::platform)
+    assertThat(row.platforms())
+        .extracting(TitleTemplatePlatform::platform)
         .containsExactlyInAnyOrder("AMAZON", "EBAY", "SHOPIFY");
-    assertThat(row.platforms()).extracting(TitleTemplatePlatform::maxLength)
+    assertThat(row.platforms())
+        .extracting(TitleTemplatePlatform::maxLength)
         .containsExactlyInAnyOrder(200, 80, 120);
 
     // 没有变量的模板：渲染出来每条候选都一样，正是本模块要消灭的重复。
-    assertThatThrownBy(() -> write(actor, () -> titles.saveTemplate(actor, null,
-        new TitleTemplateInput(unique("TPL"), "坏模板", "", "星云蓝牙音箱", 850, 2,
-            List.of(), List.of(new TitleTemplatePlatformInput("AMAZON", 200)), true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.saveTemplate(
+                            actor,
+                            null,
+                            new TitleTemplateInput(
+                                unique("TPL"),
+                                "坏模板",
+                                "",
+                                "星云蓝牙音箱",
+                                850,
+                                2,
+                                List.of(),
+                                List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("至少要有一个变量占位"));
 
     // 占位符与变量声明对不上。
-    assertThatThrownBy(() -> write(actor, () -> titles.saveTemplate(actor, null,
-        new TitleTemplateInput(unique("TPL"), "坏绑定", "", "{brand} {core}", 850, 2,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("selling", "KEYWORD_SELLING", 1)),
-            List.of(new TitleTemplatePlatformInput("AMAZON", 200)), true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.saveTemplate(
+                            actor,
+                            null,
+                            new TitleTemplateInput(
+                                unique("TPL"),
+                                "坏绑定",
+                                "",
+                                "{brand} {core}",
+                                850,
+                                2,
+                                List.of(
+                                    new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                                    new TitleTemplateVariableInput(
+                                        "selling", "KEYWORD_SELLING", 1)),
+                                List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("没有声明绑定源"));
 
     // 只绑事实字段：每个 SKU 只有一种文本，候选必然彼此雷同。
-    assertThatThrownBy(() -> write(actor, () -> titles.saveTemplate(actor, null,
-        new TitleTemplateInput(unique("TPL"), "无词根", "", "{brand} {category}", 850, 2,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1)),
-            List.of(new TitleTemplatePlatformInput("AMAZON", 200)), true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.saveTemplate(
+                            actor,
+                            null,
+                            new TitleTemplateInput(
+                                unique("TPL"),
+                                "无词根",
+                                "",
+                                "{brand} {category}",
+                                850,
+                                2,
+                                List.of(
+                                    new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                                    new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1)),
+                                List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("至少要有一个词根变量"));
 
     // 重复度阈值不能配成 1000（那等于允许完全一样）。
-    assertThatThrownBy(() -> write(actor, () -> titles.saveTemplate(actor, null,
-        new TitleTemplateInput(unique("TPL"), "阈值", "", "{brand} {core}", 1000, 2,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("core", "KEYWORD_CORE", 1)),
-            List.of(new TitleTemplatePlatformInput("AMAZON", 200)), true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.saveTemplate(
+                            actor,
+                            null,
+                            new TitleTemplateInput(
+                                unique("TPL"),
+                                "阈值",
+                                "",
+                                "{brand} {core}",
+                                1000,
+                                2,
+                                List.of(
+                                    new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                                    new TitleTemplateVariableInput("core", "KEYWORD_CORE", 1)),
+                                List.of(new TitleTemplatePlatformInput("AMAZON", 200)),
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("999"));
 
     // 模板没配的平台不允许生成（平台标题有硬上限，没配就没法裁）。
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "音箱"), unique("SKU"), "商品");
-    assertThatThrownBy(() -> write(actor, () -> titles.generate(actor, new TitleGenerationInput(
-        saved.id(), List.of(product), List.of("WALMART"), List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.generate(
+                            actor,
+                            new TitleGenerationInput(
+                                saved.id(), List.of(product), List.of("WALMART"), List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("WALMART").contains("长度上限"));
 
@@ -366,20 +483,33 @@ class TitleLibraryIntegrationTest {
     String code = unique("TPL");
     var saved = template(actor, code, 850);
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "音箱"), unique("SKU"), "桌面款");
-    write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    write(
+        actor,
+        () ->
+            titles.generate(
+                actor,
+                new TitleGenerationInput(
+                    saved.id(), List.of(product), List.of("AMAZON"), List.of())));
 
     // 被批次引用时不可删（V20 的 refuse_title_template_delete 兜底）。
     long version = tx(actor, () -> titles.template(saved.id())).version();
-    assertThatThrownBy(() -> writeVoid(actor, () -> titles.deleteTemplate(actor, saved.id(), version)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> titles.deleteTemplate(actor, saved.id(), version)))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("停用"));
 
     // 停用后不能再新建批次，历史候选照常可读。
     writeVoid(actor, () -> titles.setTemplateEnabled(actor, saved.id(), false));
     UUID other = sku(actor, spu(actor, unique("SPU"), "星云", "音箱"), unique("SKU"), "便携款");
-    assertThatThrownBy(() -> write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(other), List.of("AMAZON"), List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        titles.generate(
+                            actor,
+                            new TitleGenerationInput(
+                                saved.id(), List.of(other), List.of("AMAZON"), List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("停用"));
     assertThat(recordsOf(actor, product, "AMAZON")).isNotEmpty();
@@ -406,14 +536,24 @@ class TitleLibraryIntegrationTest {
     String tplCode = unique("TPL");
     var saved = template(actor, tplCode, 850);
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "音箱"), unique("SKU"), "桌面款");
-    var generation = write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var generation =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     assertThat(generation.candidateCount()).isEqualTo(3);
 
     // 被引用过的词根不可删（V20 的 refuse_title_keyword_delete 兜底）。
-    long version = tx(actor, () -> titles.keywords(new TitleKeywordQuery(code, null, 0, 10)))
-        .items().stream().filter(i -> i.keyword().code().equals(code)).findFirst().orElseThrow()
-        .keyword().version();
+    long version =
+        tx(actor, () -> titles.keywords(new TitleKeywordQuery(code, null, 0, 10))).items().stream()
+            .filter(i -> i.keyword().code().equals(code))
+            .findFirst()
+            .orElseThrow()
+            .keyword()
+            .version();
     assertThatThrownBy(() -> writeVoid(actor, () -> titles.deleteKeyword(actor, kw.id(), version)))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("停用"));
@@ -421,8 +561,11 @@ class TitleLibraryIntegrationTest {
     writeVoid(actor, () -> titles.setKeywordEnabled(actor, kw.id(), false));
 
     // 引用数在列表上可见：至少有一条候选用到了这个词根。
-    var used = tx(actor, () -> titles.keywords(new TitleKeywordQuery(code, null, 0, 10)))
-        .items().stream().filter(i -> i.keyword().code().equals(code)).findFirst().orElseThrow();
+    var used =
+        tx(actor, () -> titles.keywords(new TitleKeywordQuery(code, null, 0, 10))).items().stream()
+            .filter(i -> i.keyword().code().equals(code))
+            .findFirst()
+            .orElseThrow();
     assertThat(used.referenceCount()).isGreaterThan(0);
 
     // 词根内容不能带花括号：它是直接填进标题的文本，不是另一个模板。
@@ -443,8 +586,14 @@ class TitleLibraryIntegrationTest {
     var saved = template(actor, code, 850);
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), unique("SKU"), "桌面款");
 
-    var generation = write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var generation =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     assertThat(generation.status()).isEqualTo("SUCCEEDED");
     assertThat(generation.candidateCount()).isEqualTo(3);
     assertThat(generation.rejectedCount()).isZero();
@@ -452,16 +601,18 @@ class TitleLibraryIntegrationTest {
     List<TitleRecord> records = recordsOf(actor, product, "AMAZON");
     assertThat(records).hasSize(3);
     // 落库的相似度是库里可查的事实：这一列就是重复度控制的证据。
-    assertThat(records).allSatisfy(
-        r -> {
-          assertThat(r.similarityPermille()).isBetween(0, 850);
-          assertThat(r.charLength()).isEqualTo(TitleRules.charLength(r.title()));
-        });
+    assertThat(records)
+        .allSatisfy(
+            r -> {
+              assertThat(r.similarityPermille()).isBetween(0, 850);
+              assertThat(r.charLength()).isEqualTo(TitleRules.charLength(r.title()));
+            });
     // 两两相似度真的不超过上限（用后端同一份算法重算，不是看某个字段就信了）。
     for (int i = 0; i < records.size(); i++)
       for (int j = i + 1; j < records.size(); j++)
         assertThat(TitleRules.similarityPermille(records.get(i).title(), records.get(j).title()))
-            .as("第 %d 与第 %d 条候选：%s / %s",
+            .as(
+                "第 %d 与第 %d 条候选：%s / %s",
                 i + 1, j + 1, records.get(i).title(), records.get(j).title())
             .isLessThanOrEqualTo(850);
     // 标题互不相同（没有硬凑出来的重复）。
@@ -472,13 +623,14 @@ class TitleLibraryIntegrationTest {
       assertThat(r.title()).doesNotContain("{").doesNotContain("}");
     }
     // 词根快照可溯源：改了词库也能解释这条标题当时用了哪个词。
-    assertThat(records).allSatisfy(
-        r -> {
-          assertThat(r.coreKeyword()).isNotEmpty();
-          assertThat(r.sellingKeyword()).isNotEmpty();
-          assertThat(r.modifierKeyword()).isNotEmpty();
-          assertThat(r.title()).contains(r.coreKeyword()).contains(r.modifierKeyword());
-        });
+    assertThat(records)
+        .allSatisfy(
+            r -> {
+              assertThat(r.coreKeyword()).isNotEmpty();
+              assertThat(r.sellingKeyword()).isNotEmpty();
+              assertThat(r.modifierKeyword()).isNotEmpty();
+              assertThat(r.title()).contains(r.coreKeyword()).contains(r.modifierKeyword());
+            });
   }
 
   @Test
@@ -488,14 +640,24 @@ class TitleLibraryIntegrationTest {
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), unique("SKU"), "桌面款");
 
     // 先发一批到 eBay。
-    write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("EBAY"), List.of())));
+    write(
+        actor,
+        () ->
+            titles.generate(
+                actor,
+                new TitleGenerationInput(
+                    saved.id(), List.of(product), List.of("EBAY"), List.of())));
     List<TitleRecord> first = recordsOf(actor, product, "EBAY");
     assertThat(first).hasSize(3);
     // 再发一批到亚马逊：新候选必须与**已发的 eBay 标题**也拉开距离，
     // 这才是「同一商品在多平台不同标题以避重复铺货判定」的落点。
-    write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    write(
+        actor,
+        () ->
+            titles.generate(
+                actor,
+                new TitleGenerationInput(
+                    saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     List<TitleRecord> second = recordsOf(actor, product, "AMAZON");
     // 批次候选数**可以少于** candidateCount：已发的 eBay 标题占掉了组合空间，
     // 剩下的组合过不了闸就被拒（PARTIAL）——那正是「相似但不雷同」的代价，
@@ -523,8 +685,14 @@ class TitleLibraryIntegrationTest {
     var saved = thinTemplate(actorC, unique("TPL"));
     UUID product = sku(actorC, spu(actorC, unique("SPU"), "星云", "音箱"), unique("SKU"), "桌面款");
 
-    var generation = write(actorC, () -> titles.generate(actorC,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var generation =
+        write(
+            actorC,
+            () ->
+                titles.generate(
+                    actorC,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     // 产出了一条，另外两条被拒——但**不是**返回两条雷同的。
     assertThat(generation.candidateCount()).isEqualTo(1);
     assertThat(generation.rejectedCount()).isEqualTo(2);
@@ -550,22 +718,47 @@ class TitleLibraryIntegrationTest {
     // 紧上限是这条用例的重点：这些标题本来 20 字左右，平台上限 12 时
     // 必须被按码点边界裁到 12 个字并标记 truncated=true，
     // 否则发到平台上就是超长标题。
-    var tight = write(actor, () -> titles.saveTemplate(actor, null,
-        new TitleTemplateInput(unique("TPL"), "紧上限", "", "{brand} {category} {core} {selling} {modifier}",
-            999, 2,
-            List.of(
-                new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
-                new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1),
-                new TitleTemplateVariableInput("core", "KEYWORD_CORE", 2),
-                new TitleTemplateVariableInput("selling", "KEYWORD_SELLING", 3),
-                new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 4)),
-            List.of(new TitleTemplatePlatformInput("TIGHT", 12)), true, 0)));
+    var tight =
+        write(
+            actor,
+            () ->
+                titles.saveTemplate(
+                    actor,
+                    null,
+                    new TitleTemplateInput(
+                        unique("TPL"),
+                        "紧上限",
+                        "",
+                        "{brand} {category} {core} {selling} {modifier}",
+                        999,
+                        2,
+                        List.of(
+                            new TitleTemplateVariableInput("brand", "SPU_BRAND", 0),
+                            new TitleTemplateVariableInput("category", "SPU_CATEGORY", 1),
+                            new TitleTemplateVariableInput("core", "KEYWORD_CORE", 2),
+                            new TitleTemplateVariableInput("selling", "KEYWORD_SELLING", 3),
+                            new TitleTemplateVariableInput("modifier", "KEYWORD_MODIFIER", 4)),
+                        List.of(new TitleTemplatePlatformInput("TIGHT", 12)),
+                        true,
+                        0)));
     // 同一批里两条路径都要跑：宽上限（AMAZON 200，不裁）与紧上限（TIGHT 12，裁）。
-    var wideGeneration = write(actor, () -> titles.generate(actor, new TitleGenerationInput(
-        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var wideGeneration =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     assertThat(wideGeneration.candidateCount()).isEqualTo(3);
-    var generation = write(actor, () -> titles.generate(actor, new TitleGenerationInput(
-        tight.id(), List.of(product), List.of("TIGHT"), List.of())));
+    var generation =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        tight.id(), List.of(product), List.of("TIGHT"), List.of())));
     assertThat(generation.candidateCount()).isEqualTo(2);
 
     for (TitleRecord r : recordsOf(actor, product, "AMAZON")) {
@@ -594,10 +787,22 @@ class TitleLibraryIntegrationTest {
     var saved = template(actor, unique("TPL"), 850);
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), unique("SKU"), "桌面款");
 
-    var first = write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
-    var second = write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var first =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    var second =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     // 第二次生成会把第一次的候选也算进比较里，所以两次的标题集**不要求**逐字相同；
     // 但每一条自己与已有标题的相似度都必须受控，且库里存的相似度都是真实算出来的。
     for (TitleRecord record : recordsOf(actor, product, "AMAZON"))
@@ -613,8 +818,13 @@ class TitleLibraryIntegrationTest {
     seedPools(actor);
     var saved = template(actor, unique("TPL"), 999);
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), unique("SKU"), "桌面款");
-    write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    write(
+        actor,
+        () ->
+            titles.generate(
+                actor,
+                new TitleGenerationInput(
+                    saved.id(), List.of(product), List.of("AMAZON"), List.of())));
     List<TitleRecord> records = recordsOf(actor, product, "AMAZON");
     assertThat(records).hasSize(3);
 
@@ -625,20 +835,30 @@ class TitleLibraryIntegrationTest {
     // 同一 SKU 同一平台换一条选用：旧的自动降级，不会撞「只能选用一条」的唯一索引。
     var switched = write(actor, () -> titles.select(actor, records.get(1).id()));
     assertThat(switched.status()).isEqualTo("SELECTED");
-    var afterSwitch = recordsOf(actor, product, "AMAZON").stream()
-        .filter(r -> "SELECTED".equals(r.status())).toList();
+    var afterSwitch =
+        recordsOf(actor, product, "AMAZON").stream()
+            .filter(r -> "SELECTED".equals(r.status()))
+            .toList();
     assertThat(afterSwitch).hasSize(1);
     assertThat(afterSwitch.get(0).id()).isEqualTo(records.get(1).id());
 
     // 已选用的内容不可改（V20 的 guard_title_record_selected_immutable 钉死），
     // 绕过服务层直接 UPDATE 也一样被拒。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "update title_record set title='篡改' where id=?", records.get(1).id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update title_record set title='篡改' where id=?", records.get(1).id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .satisfies(e -> assertThat(rootMessageOf(e)).contains("已被选用").contains("不可修改"));
     // 已选用的不可删。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "delete from title_record where id=?", records.get(1).id())))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () -> sql.execute("delete from title_record where id=?", records.get(1).id())))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .satisfies(e -> assertThat(rootMessageOf(e)).contains("已被选用").contains("不可删除"));
     // 未选用的候选可以删。
@@ -661,17 +881,27 @@ class TitleLibraryIntegrationTest {
     var saved = template(actor, code, 850);
     String skuCode = unique("SKU");
     UUID product = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), skuCode, "桌面款");
-    write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(saved.id(), List.of(product), List.of("AMAZON"), List.of())));
+    write(
+        actor,
+        () ->
+            titles.generate(
+                actor,
+                new TitleGenerationInput(
+                    saved.id(), List.of(product), List.of("AMAZON"), List.of())));
 
-    var result = http.perform(get("/catalog/titles/records/export")
-            .param("skuId", product.toString())
-            .header("Authorization", "Bearer tenant-a"))
-        .andExpect(status().isOk())
-        .andExpect(header().string("Content-Type", "text/csv; charset=UTF-8"))
-        .andExpect(header().string("Content-Disposition",
-            org.hamcrest.Matchers.containsString("catalog-titles-")))
-        .andReturn();
+    var result =
+        http.perform(
+                get("/catalog/titles/records/export")
+                    .param("skuId", product.toString())
+                    .header("Authorization", "Bearer tenant-a"))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Type", "text/csv; charset=UTF-8"))
+            .andExpect(
+                header()
+                    .string(
+                        "Content-Disposition",
+                        org.hamcrest.Matchers.containsString("catalog-titles-")))
+            .andReturn();
     // StreamingResponseBody 是**异步**写出的：不 getAsyncResult() 等它跑完，
     // 读到的响应体只有表头（数据行还在流式线程上写）。
     result.getAsyncResult();
@@ -708,10 +938,22 @@ class TitleLibraryIntegrationTest {
     var templateB = template(actorB, codeB, 700);
     UUID mine = sku(actor, spu(actor, unique("SPU"), "星云", "蓝牙音箱"), unique("SKU"), "我的");
     UUID theirs = sku(actorB, spu(actorB, unique("SPU"), "极光", "台灯"), unique("SKU"), "他们的");
-    var genA = write(actor, () -> titles.generate(actor,
-        new TitleGenerationInput(templateA.id(), List.of(mine), List.of("AMAZON"), List.of())));
-    var genB = write(actorB, () -> titles.generate(actorB,
-        new TitleGenerationInput(templateB.id(), List.of(theirs), List.of("EBAY"), List.of())));
+    var genA =
+        write(
+            actor,
+            () ->
+                titles.generate(
+                    actor,
+                    new TitleGenerationInput(
+                        templateA.id(), List.of(mine), List.of("AMAZON"), List.of())));
+    var genB =
+        write(
+            actorB,
+            () ->
+                titles.generate(
+                    actorB,
+                    new TitleGenerationInput(
+                        templateB.id(), List.of(theirs), List.of("EBAY"), List.of())));
 
     // 1) 两租户互不可见
     assertThat(templateCodes(actor)).contains(codeA).doesNotContain(codeB);
@@ -728,7 +970,8 @@ class TitleLibraryIntegrationTest {
     // 词根也不串。
     var myKeywords = tx(actor, () -> titles.keywords(new TitleKeywordQuery(null, "CORE", 0, 200)));
     assertThat(myKeywords.total()).isGreaterThan(0);
-    var theirKeywordRows = tx(actorB, () -> titles.keywords(new TitleKeywordQuery(null, "CORE", 0, 200)));
+    var theirKeywordRows =
+        tx(actorB, () -> titles.keywords(new TitleKeywordQuery(null, "CORE", 0, 200)));
     assertThat(theirKeywordRows.total()).isGreaterThan(0);
     // 按 **code** 比而不是文本：两个租户 seedPools 建的是同一批文本
     // （词根文本是可复用的行业词，不该被租户隔离挡住），
@@ -736,16 +979,19 @@ class TitleLibraryIntegrationTest {
     // 在 B 租户里建一条专属词根，A 租户绝不该看到它。
     String bOnly = "极光专属词";
     keyword(actorB, unique("K"), bOnly, "CORE");
-    assertThat(tx(actor, () -> titles.keywords(new TitleKeywordQuery(bOnly, null, 0, 20))).total()).isZero();
+    assertThat(tx(actor, () -> titles.keywords(new TitleKeywordQuery(bOnly, null, 0, 20))).total())
+        .isZero();
     assertThat(tx(actorB, () -> titles.keywords(new TitleKeywordQuery(bOnly, null, 0, 20))).total())
         .isEqualTo(1);
     // A 租户建的那条也别让 B 看见。
     keyword(actor, unique("K"), "星云专属词", "CORE");
-    assertThat(tx(actorB, () -> titles.keywords(new TitleKeywordQuery("星云专属词", null, 0, 20))).total())
+    assertThat(
+            tx(actorB, () -> titles.keywords(new TitleKeywordQuery("星云专属词", null, 0, 20))).total())
         .isZero();
     // B 租户不能删 A 租户的模板/词根。
     long versionA = tx(actor, () -> titles.template(templateA.id())).version();
-    assertThatThrownBy(() -> writeVoid(actorB, () -> titles.deleteTemplate(actorB, templateA.id(), versionA)))
+    assertThatThrownBy(
+            () -> writeVoid(actorB, () -> titles.deleteTemplate(actorB, templateA.id(), versionA)))
         .isInstanceOf(ResponseStatusException.class);
     // B 租户不能选用 A 租户的标题。
     List<TitleRecord> recordsA = recordsOf(actor, mine, "AMAZON");
@@ -754,18 +1000,29 @@ class TitleLibraryIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(get("/catalog/titles/generations/" + genA.id())
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/titles/generations/" + genA.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     var submitted =
-        http.perform(post("/catalog/titles/generations")
-                .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a)
-                .contentType("application/json")
-                .content("{\"templateId\":\"" + templateB.id() + "\",\"skuIds\":[\"" + theirs
-                    + "\"],\"platforms\":[\"EBAY\"],\"keywordCodes\":[]}"))
+        http.perform(
+                post("/catalog/titles/generations")
+                    .header("Authorization", "Bearer tenant-b")
+                    .header("X-Tenant-Id", a)
+                    .contentType("application/json")
+                    .content(
+                        "{\"templateId\":\""
+                            + templateB.id()
+                            + "\",\"skuIds\":[\""
+                            + theirs
+                            + "\"],\"platforms\":[\"EBAY\"],\"keywordCodes\":[]}"))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
-    String forgedId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String forgedId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
     // 伪造头写入的批次进的是 B 租户（凭据说的那个）。
     assertThat(recordsOf(actorB, theirs, "EBAY")).isNotEmpty();
     // A 租户用同一个 id 查不到它。
@@ -774,8 +1031,10 @@ class TitleLibraryIntegrationTest {
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(tx(actor, () -> titles.generationDetail(genA.id())).generation().id()).isEqualTo(genA.id());
-      assertThat(tx(actorB, () -> titles.generationDetail(genB.id())).generation().id()).isEqualTo(genB.id());
+      assertThat(tx(actor, () -> titles.generationDetail(genA.id())).generation().id())
+          .isEqualTo(genA.id());
+      assertThat(tx(actorB, () -> titles.generationDetail(genB.id())).generation().id())
+          .isEqualTo(genB.id());
       assertThatThrownBy(() -> tx(actorB, () -> titles.generationDetail(genA.id())))
           .isInstanceOf(ResponseStatusException.class);
       assertThat(templateCodes(actor)).contains(codeA).doesNotContain(codeB);
@@ -794,31 +1053,43 @@ class TitleLibraryIntegrationTest {
     var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
     // 建词根
-    http.perform(post("/catalog/titles/keywords").header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"" + unique("C") + "\",\"text\":\"骨传导耳机\",\"keywordType\":\"CORE\","
-                + "\"enabled\":true,\"version\":0}"))
+    http.perform(
+            post("/catalog/titles/keywords")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"code\":\""
+                        + unique("C")
+                        + "\",\"text\":\"骨传导耳机\",\"keywordType\":\"CORE\","
+                        + "\"enabled\":true,\"version\":0}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.keywordTypeLabel").value("核心词"));
 
     // 建模板
     var created =
-        http.perform(post("/catalog/titles/templates").header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"code\":\"" + unique("TPL") + "\",\"name\":\"HTTP 模板\","
-                    + "\"note\":\"端到端\",\"pattern\":\"{brand} {category} {core} {selling}\","
-                    + "\"maxSimilarityPermille\":850,\"candidateCount\":2,"
-                    + "\"variables\":["
-                    + "{\"name\":\"brand\",\"source\":\"SPU_BRAND\",\"slotNo\":0},"
-                    + "{\"name\":\"category\",\"source\":\"SPU_CATEGORY\",\"slotNo\":1},"
-                    + "{\"name\":\"core\",\"source\":\"KEYWORD_CORE\",\"slotNo\":2},"
-                    + "{\"name\":\"selling\",\"source\":\"KEYWORD_SELLING\",\"slotNo\":3}],"
-                    + "\"platforms\":[{\"platform\":\"AMAZON\",\"maxLength\":200}],"
-                    + "\"enabled\":true,\"version\":0}"))
+        http.perform(
+                post("/catalog/titles/templates")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"code\":\""
+                            + unique("TPL")
+                            + "\",\"name\":\"HTTP 模板\","
+                            + "\"note\":\"端到端\",\"pattern\":\"{brand} {category} {core} {selling}\","
+                            + "\"maxSimilarityPermille\":850,\"candidateCount\":2,"
+                            + "\"variables\":["
+                            + "{\"name\":\"brand\",\"source\":\"SPU_BRAND\",\"slotNo\":0},"
+                            + "{\"name\":\"category\",\"source\":\"SPU_CATEGORY\",\"slotNo\":1},"
+                            + "{\"name\":\"core\",\"source\":\"KEYWORD_CORE\",\"slotNo\":2},"
+                            + "{\"name\":\"selling\",\"source\":\"KEYWORD_SELLING\",\"slotNo\":3}],"
+                            + "\"platforms\":[{\"platform\":\"AMAZON\",\"maxLength\":200}],"
+                            + "\"enabled\":true,\"version\":0}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.variableCount").value(4))
             .andExpect(jsonPath("$.platformCount").value(1))
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     String templateId = objectMapper.readTree(created).get("id").asText();
 
     // 造商品（3.1.1.1 的写入所有权）
@@ -826,19 +1097,27 @@ class TitleLibraryIntegrationTest {
 
     // 批量生成（同步：返回即已完成）
     var submitted =
-        http.perform(post("/catalog/titles/generations")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"templateId\":\"" + templateId + "\",\"skuIds\":[\"" + product
-                    + "\"],\"platforms\":[\"AMAZON\"],\"keywordCodes\":[]}"))
+        http.perform(
+                post("/catalog/titles/generations")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"templateId\":\""
+                            + templateId
+                            + "\",\"skuIds\":[\""
+                            + product
+                            + "\"],\"platforms\":[\"AMAZON\"],\"keywordCodes\":[]}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("SUCCEEDED"))
             .andExpect(jsonPath("$.candidateCount").value(2))
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     String generationId = objectMapper.readTree(submitted).get("id").asText();
 
-    http.perform(get("/catalog/titles/generations/" + generationId)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/titles/generations/" + generationId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.generation.statusLabel").value("已生成"))
         .andExpect(jsonPath("$.skus[0].outcome").value("GENERATED"))
@@ -847,38 +1126,48 @@ class TitleLibraryIntegrationTest {
         .andExpect(jsonPath("$.records[0].title").isString())
         .andExpect(jsonPath("$.records[0].statusLabel").value("待选用"));
 
-    http.perform(get("/catalog/titles/generations/" + generationId + "/skus")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/titles/generations/" + generationId + "/skus")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].candidateCount").value(2));
 
     var records =
-        http.perform(get("/catalog/titles/records").param("skuId", product.toString())
-                .header("Authorization", "Bearer tenant-a"))
+        http.perform(
+                get("/catalog/titles/records")
+                    .param("skuId", product.toString())
+                    .header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.items").isArray())
             .andExpect(jsonPath("$.total").value(2))
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     String recordId = objectMapper.readTree(records).get("items").get(0).get("id").asText();
 
     // 选用 → 取消选用 → 淘汰
-    http.perform(post("/catalog/titles/records/" + recordId + "/select")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/catalog/titles/records/" + recordId + "/select")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statusLabel").value("已选用"));
-    http.perform(post("/catalog/titles/records/" + recordId + "/deselect")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/catalog/titles/records/" + recordId + "/deselect")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statusLabel").value("待选用"));
-    http.perform(post("/catalog/titles/records/" + recordId + "/reject")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/catalog/titles/records/" + recordId + "/reject")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statusLabel").value("已淘汰"));
 
     http.perform(get("/catalog/titles/templates").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
-    http.perform(get("/catalog/titles/templates/" + templateId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/titles/templates/" + templateId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.variables[0].sourceLabel").value("SPU 品牌"));
     http.perform(get("/catalog/titles/keywords").header("Authorization", "Bearer tenant-a"))
@@ -895,19 +1184,26 @@ class TitleLibraryIntegrationTest {
     http.perform(get("/catalog/titles/templates")).andExpect(status().isUnauthorized());
     http.perform(get("/catalog/titles/templates").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
-    http.perform(post("/catalog/titles/keywords").header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"code\":\"X\",\"text\":\"词\",\"keywordType\":\"CORE\",\"enabled\":true,\"version\":0}"))
+    http.perform(
+            post("/catalog/titles/keywords")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(
+                    "{\"code\":\"X\",\"text\":\"词\",\"keywordType\":\"CORE\",\"enabled\":true,\"version\":0}"))
         .andExpect(status().isForbidden());
-    http.perform(delete("/catalog/titles/templates/" + templateId + "?version=0")
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            delete("/catalog/titles/templates/" + templateId + "?version=0")
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isForbidden());
     // 非法模板是 400 不是 500。
-    http.perform(post("/catalog/titles/templates").header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"BAD\",\"name\":\"坏模板\",\"pattern\":\"没有变量\","
-                + "\"platforms\":[{\"platform\":\"AMAZON\",\"maxLength\":200}],"
-                + "\"enabled\":true,\"version\":0}"))
+    http.perform(
+            post("/catalog/titles/templates")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"code\":\"BAD\",\"name\":\"坏模板\",\"pattern\":\"没有变量\","
+                        + "\"platforms\":[{\"platform\":\"AMAZON\",\"maxLength\":200}],"
+                        + "\"enabled\":true,\"version\":0}"))
         .andExpect(status().isBadRequest());
   }
 

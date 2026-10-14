@@ -3,6 +3,7 @@
 ## 用户输入
 
 用户提供 AI ERP 总功能地图:
+
 ```
 AI ERP
 └─ AI Business OS (Agent / Copilot)
@@ -28,6 +29,7 @@ AI ERP
 ```
 
 用户在浏览器截图里**圈出红色区域**作为新标题栏位置,说明:
+
 - 功能 / 子功能 → 左侧菜单
 - 系统 → 顶部 header (替换原 page title)
 - 红框区域 → 新 PageHeader,放当前页 title
@@ -37,6 +39,7 @@ AI ERP
 ### 1. nav-config.ts — 单一真相源
 
 `packages/ui/src/lib/nav-config.ts` 定义:
+
 - `SystemDef` / `NavItem` 类型
 - 4 个 system (`overview` / `product` / `trade` / `manage`)
 - 15 个 domain + 2 个 overview item (工作台 / AI Copilot)
@@ -48,6 +51,7 @@ AI ERP
 ### 2. AppShell v2 — header 改为系统切换器
 
 `packages/ui/src/components/layout/app-shell.tsx`:
+
 - header 高度 `h-14` → `h-16` 给 Segmented 视觉舒展
 - 移走 page title (放到 PageHeader)
 - 左/中放 `<Segmented>` 4 个 system tab,选中态 `bg-background shadow-sm`
@@ -59,12 +63,14 @@ AI ERP
 ### 3. PageHeader 组件 — 新标题栏
 
 `packages/ui/src/components/common/page-header.tsx`:
+
 - sticky `top-16` 紧贴顶栏下方
 - h-14 + `bg-background/95 backdrop-blur`
 - **只显示当前页 title,绝对不带系统前缀** (用户硬规则 #1)
 - 右侧 actions 槽
 
 反面例子:
+
 - ❌ "交易履约 / 订单中心"
 - ❌ "订单中心 / 订单列表"
 - ✅ "订单列表"
@@ -72,6 +78,7 @@ AI ERP
 ### 4. catch-all 兜底路由
 
 `apps/web/src/app/[...slug]/page.tsx`:
+
 - 14 个还没实现具体页的 domain 统一渲染 EmptyState
 - title = `feature.label`,description = `feature.description + "当前正在搭建,先用 styleguide 看设计令牌"`
 - 不覆盖 `/` `/styleguide` `/api/*`
@@ -79,6 +86,7 @@ AI ERP
 ### 5. visual-spec V1.1
 
 `docs/design/visual-spec.md` §2 整体重写:
+
 - 顶层布局图更新为 3 段式 (Sidebar / Header-with-Segmented / PageHeader + Main)
 - §2.1 侧栏加 "当前系统" 标识 + 完整 3 系统 × 15 Domain 树
 - §2.2 顶栏改为系统切换器配置表
@@ -89,13 +97,13 @@ AI ERP
 
 ## 验证 (Playwright)
 
-| 路由 | Top Segmented 高亮 | Left Nav | h1 |
-|---|---|---|---|
-| `/` | 全部 | 工作台, AI Copilot | 工作台 |
-| `/products` | 商品供应链 | 商品中心, 刊登中心, 定价中心, 采购中心, 供应中心 | 商品中心 |
-| `/orders` | 交易履约 | 订单中心, 库存中心, 仓储中心, 物流中心, 售后中心 | 订单中心 |
-| `/finance` | 经营管理 | 财务中心, 利润中心, 数据中心, CRM / 客服, 组织 / 权限 | 财务中心 |
-| `/styleguide` | 全部 | 工作台, AI Copilot | 设计系统总览 |
+| 路由          | Top Segmented 高亮 | Left Nav                                              | h1           |
+| ------------- | ------------------ | ----------------------------------------------------- | ------------ |
+| `/`           | 全部               | 工作台, AI Copilot                                    | 工作台       |
+| `/products`   | 商品供应链         | 商品中心, 刊登中心, 定价中心, 采购中心, 供应中心      | 商品中心     |
+| `/orders`     | 交易履约           | 订单中心, 库存中心, 仓储中心, 物流中心, 售后中心      | 订单中心     |
+| `/finance`    | 经营管理           | 财务中心, 利润中心, 数据中心, CRM / 客服, 组织 / 权限 | 财务中心     |
+| `/styleguide` | 全部               | 工作台, AI Copilot                                    | 设计系统总览 |
 
 切换交互: 在 `/styleguide` 点 "商品供应链" tab → URL 跳到 `/products` ✓
 所有 14 个 domain 路由 200 (catch-all 接管)

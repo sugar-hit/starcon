@@ -108,9 +108,7 @@ export function integrityFailing(status: string): boolean {
  * <p>返回值直接用 `@starcon/ui` 的 Badge tone 词表（neutral / success / danger），
  * 不自造一套：自造的名字在这个组件上编译不过，而且改 UI 包时只会多一处要同步的地方。
  */
-export function integrityTone(
-  status: string,
-): 'neutral' | 'success' | 'danger' | 'warning' {
+export function integrityTone(status: string): 'neutral' | 'success' | 'danger' | 'warning' {
   if (status === 'VERIFIED') return 'success';
   if (status === 'UNKNOWN') return 'neutral';
   return 'danger';
@@ -195,11 +193,7 @@ export async function uploadMedia(file: File, input: MediaUpload): Promise<Media
 }
 
 /** 追加一个新版本（旧版本永远保留：3.4.1.2 要求原图不被覆盖）。 */
-export async function addVersion(
-  id: string,
-  file: File,
-  note: string | null,
-): Promise<MediaSaved> {
+export async function addVersion(id: string, file: File, note: string | null): Promise<MediaSaved> {
   const form = new FormData();
   form.append('file', file);
   form.append('meta', new Blob([JSON.stringify({ note })], { type: 'application/json' }));
@@ -384,10 +378,7 @@ export function emptyUploadInput(): MediaUpload {
 }
 
 /** 详情 → 编辑表单初值。 */
-export function toMediaUpdate(
-  detail: MediaDetail,
-  tagCodes: string[],
-): MediaUpdate {
+export function toMediaUpdate(detail: MediaDetail, tagCodes: string[]): MediaUpdate {
   return {
     name: detail.asset.name,
     purpose: detail.asset.purpose,

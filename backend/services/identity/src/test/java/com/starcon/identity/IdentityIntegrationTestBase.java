@@ -21,11 +21,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * identity 集成测试的共享底座。
  *
- * <p>只放**跨测试类共用**的东西：真实 PostgreSQL 16 容器、Flyway 迁移、登录与请求辅助。
- * 每个被测模块的断言留在自己的测试类里，避免一个类膨胀到几千行后没人敢改。
+ * <p>只放**跨测试类共用**的东西：真实 PostgreSQL 16 容器、Flyway 迁移、登录与请求辅助。 每个被测模块的断言留在自己的测试类里，避免一个类膨胀到几千行后没人敢改。
  *
- * <p>容器是 {@code static} 且只启动一次；两个测试类共享同一个数据库，靠 {@code suffix()}
- * 生成的随机标记隔开各自的测试数据。
+ * <p>容器是 {@code static} 且只启动一次；两个测试类共享同一个数据库，靠 {@code suffix()} 生成的随机标记隔开各自的测试数据。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -79,8 +77,7 @@ abstract class IdentityIntegrationTestBase {
   /**
    * 发一次请求并断言状态码，返回解析后的响应体。
    *
-   * <p>每次都带一个随机 {@code X-Tenant-Id}：租户必须来自已认证成员关系，
-   * 这个头对判定没有任何影响，测试里保留它正是为了证明这一点。
+   * <p>每次都带一个随机 {@code X-Tenant-Id}：租户必须来自已认证成员关系， 这个头对判定没有任何影响，测试里保留它正是为了证明这一点。
    */
   JsonNode request(String token, String method, String path, Object body, int expected)
       throws Exception {
@@ -101,7 +98,8 @@ abstract class IdentityIntegrationTestBase {
   String login() throws Exception {
     var result =
         http.perform(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/auth/login")
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/auth/login")
                     .contentType("application/json")
                     .content("{\"username\":\"local-admin\",\"password\":\"test-admin-password\"}"))
             .andExpect(status().isOk())

@@ -30,23 +30,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 15.4.2.1 客服知识库的集成测试。
  *
- * <p>跑的是 AGENTS.md 要求的**真实 PostgreSQL 16 + FORCE RLS**，租户断言在
- * {@link CrmTenancyIntegrationTest} 里（同一套夹具思路），本类专攻业务不变量：
+ * <p>跑的是 AGENTS.md 要求的**真实 PostgreSQL 16 + FORCE RLS**，租户断言在 {@link CrmTenancyIntegrationTest}
+ * 里（同一套夹具思路），本类专攻业务不变量：
  *
  * <ul>
  *   <li><b>半开区间 {@code [from, to)}（规则 R1）</b>：在终点那一刻<b>旧版本必须已经失效</b>，
- *       在起点那一刻新版本<b>必须已经生效</b>。用两个相邻区间在同一个时刻各查一次，
- *       断言命中的版本号正好换人 —— 这是整条时间语义的验收点。</li>
- *   <li><b>时区不静默偏移（硬性要求 6）</b>：用 {@code +08:00} 的偏移量写入，
- *       再<b>断言写回的值</b>等于同一个绝对时刻（而不是偏了 −28800 秒的东八区墙钟）。
- *       缺偏移量的输入直接 400。</li>
- *   <li><b>重叠一律拒绝（规则 R2 / R3）</b>：草稿区间随便重叠，<b>发布那一刻</b>才被拒。</li>
- *   <li><b>已发布版本只能向前关闭（规则 R5）</b>：关回 null、往后延、关到过去，三条都拒绝。</li>
- *   <li><b>「平台改版 → 定位过期条目」</b>（蓝图粗体句）：改版时刻之前写下、且至今仍无
- *       接替版本的条目要被列出；已经被接替过的、别的平台的，都要<b>不</b>被列出。</li>
- *   <li><b>引用记录真实落库</b>：谁、什么时候、引用了哪一版都要能查回来；
- *       引用行<b>不可改不可删</b>（否则「没人用过」可以被做出来）。</li>
- *   <li><b>按店铺/类目/语言组织</b>：三个维度都是真过滤，不是摆设。</li>
+ *       在起点那一刻新版本<b>必须已经生效</b>。用两个相邻区间在同一个时刻各查一次， 断言命中的版本号正好换人 —— 这是整条时间语义的验收点。
+ *   <li><b>时区不静默偏移（硬性要求 6）</b>：用 {@code +08:00} 的偏移量写入， 再<b>断言写回的值</b>等于同一个绝对时刻（而不是偏了 −28800
+ *       秒的东八区墙钟）。 缺偏移量的输入直接 400。
+ *   <li><b>重叠一律拒绝（规则 R2 / R3）</b>：草稿区间随便重叠，<b>发布那一刻</b>才被拒。
+ *   <li><b>已发布版本只能向前关闭（规则 R5）</b>：关回 null、往后延、关到过去，三条都拒绝。
+ *   <li><b>「平台改版 → 定位过期条目」</b>（蓝图粗体句）：改版时刻之前写下、且至今仍无 接替版本的条目要被列出；已经被接替过的、别的平台的，都要<b>不</b>被列出。
+ *   <li><b>引用记录真实落库</b>：谁、什么时候、引用了哪一版都要能查回来； 引用行<b>不可改不可删</b>（否则「没人用过」可以被做出来）。
+ *   <li><b>按店铺/类目/语言组织</b>：三个维度都是真过滤，不是摆设。
  * </ul>
  */
 @SpringBootTest
@@ -64,6 +60,7 @@ class KnowledgeBaseIntegrationTest {
 
   /** 固定的判定时刻，避免测试依赖「此刻」。 */
   static final String V1_FROM = "2026-01-01T00:00:00Z";
+
   static final String HANDOFF = "2026-06-01T00:00:00Z";
 
   static {
@@ -85,8 +82,7 @@ class KnowledgeBaseIntegrationTest {
             UUID.randomUUID(),
             null,
             permissions,
-            List.of(
-                new AccessService.Grant(UUID.randomUUID(), "TEST", "ALL", permissions))));
+            List.of(new AccessService.Grant(UUID.randomUUID(), "TEST", "ALL", permissions))));
     try {
       identity = HttpServer.create(new InetSocketAddress(0), 0);
       identity.createContext(
@@ -129,10 +125,9 @@ class KnowledgeBaseIntegrationTest {
   /**
    * 每个用例前清空三张表。
    *
-   * <p>本类共享同一个容器与同一个库且<b>不回滚</b>，所以「三个组织维度」建出来的
-   * {@code scope-en} 会留在库里，让别的用例的 {@code containsExactly} 与
-   * {@code hasSize(1)} 变成永远失败 —— 那是夹具的脏，不是业务被破坏。
-   * 用迁移用户（超管）连接 TRUNCATE：RLS 对超管不生效。
+   * <p>本类共享同一个容器与同一个库且<b>不回滚</b>，所以「三个组织维度」建出来的 {@code scope-en} 会留在库里，让别的用例的 {@code
+   * containsExactly} 与 {@code hasSize(1)} 变成永远失败 —— 那是夹具的脏，不是业务被破坏。 用迁移用户（超管）连接 TRUNCATE：RLS
+   * 对超管不生效。
    */
   @BeforeEach
   void resetDatabase() throws Exception {
@@ -160,9 +155,7 @@ class KnowledgeBaseIntegrationTest {
 
   private MockHttpResponse getJson(String path) throws Exception {
     var response =
-        http.perform(get(path).header("Authorization", "session"))
-            .andReturn()
-            .getResponse();
+        http.perform(get(path).header("Authorization", "session")).andReturn().getResponse();
     return new MockHttpResponse(response.getStatus(), response.getContentAsString());
   }
 
@@ -178,8 +171,8 @@ class KnowledgeBaseIntegrationTest {
   }
 
   /** 建档案 → 建草稿版本 → 发布，返回版本 id。 */
-  private String publishedVersion(String topicKey, String platform, String versionNo, String from,
-      String to) throws Exception {
+  private String publishedVersion(
+      String topicKey, String platform, String versionNo, String from, String to) throws Exception {
     var entry = postJson("/crm/knowledge/entries", entryJson(topicKey, platform, "zh-CN"));
     assertThat(entry.status()).as("建档案：%s", entry.body()).isEqualTo(200);
     String entryId = json.readTree(entry.body()).get("id").asText();
@@ -189,7 +182,7 @@ class KnowledgeBaseIntegrationTest {
         {"versionNo":%s,"question":"问题 %s","answer":"答法 %s",
          "effectiveFrom":"%s","effectiveTo":%s}
         """
-        .formatted(versionNo, topicKey, topicKey, from, to == null ? "null" : "\"" + to + "\"");
+            .formatted(versionNo, topicKey, topicKey, from, to == null ? "null" : "\"" + to + "\"");
     var draft = postJson("/crm/knowledge/entries/" + entryId + "/versions", body);
     assertThat(draft.status()).as("建草稿：%s", draft.body()).isEqualTo(200);
     String versionId = json.readTree(draft.body()).get("id").asText();
@@ -210,8 +203,13 @@ class KnowledgeBaseIntegrationTest {
   /** 读某格子在 at 时刻生效的版本号（null = 无生效版本）。 */
   private Integer effectiveVersionNo(String topicKey, String at) throws Exception {
     var response =
-        getJson("/crm/knowledge/entries/effective?shopId=" + shop + "&categoryId=" + category
-            + "&locale=zh-CN&at=" + at);
+        getJson(
+            "/crm/knowledge/entries/effective?shopId="
+                + shop
+                + "&categoryId="
+                + category
+                + "&locale=zh-CN&at="
+                + at);
     assertThat(response.status()).as("effective 查询：%s", response.body()).isEqualTo(200);
     for (var node : json.readTree(response.body())) {
       if (node.get("topicKey").asText().equals(topicKey)) {
@@ -225,10 +223,7 @@ class KnowledgeBaseIntegrationTest {
   // 规则 R1：半开区间 [from, to)
   // ==========================================================================
 
-  /**
-   * 半开区间的**边界**才是验收点：区间内部的点谁都能猜对，边界上差一毫秒就会让
-   * 客服在换版那一瞬间答错。
-   */
+  /** 半开区间的**边界**才是验收点：区间内部的点谁都能猜对，边界上差一毫秒就会让 客服在换版那一瞬间答错。 */
   @Test
   void 半开区间_终点那一刻旧版本失效起点那一刻新版本生效() throws Exception {
     // 同一条知识上先发 v1（[2026-01-01, 2026-06-01)），再发 v2（[2026-06-01, +∞)）。
@@ -246,10 +241,12 @@ class KnowledgeBaseIntegrationTest {
 
     // 交班前：v1 生效。
     assertThat(effectiveVersionNo("half-open", "2026-05-31T23:59:59Z"))
-        .as("交接前必须命中 v1").isEqualTo(1);
+        .as("交接前必须命中 v1")
+        .isEqualTo(1);
     // **恰好在交班那一刻**：半开区间右端不含 —— 命中 v2，不是 v1。
     assertThat(effectiveVersionNo("half-open", HANDOFF))
-        .as("半开区间 [from,to)：在 to 那一刻 v1 已失效").isEqualTo(2);
+        .as("半开区间 [from,to)：在 to 那一刻 v1 已失效")
+        .isEqualTo(2);
     // 交班后：仍然是 v2。
     assertThat(effectiveVersionNo("half-open", "2026-07-01T00:00:00Z")).isEqualTo(2);
 
@@ -263,7 +260,8 @@ class KnowledgeBaseIntegrationTest {
   void 生效终点为空等于正无穷() throws Exception {
     publishedVersion("open-ended", "AMAZON", "1", V1_FROM, null);
     assertThat(effectiveVersionNo("open-ended", "2030-01-01T00:00:00Z"))
-        .as("to 为空 = 一直有效").isEqualTo(1);
+        .as("to 为空 = 一直有效")
+        .isEqualTo(1);
   }
 
   // ==========================================================================
@@ -273,8 +271,8 @@ class KnowledgeBaseIntegrationTest {
   /**
    * 用东八区偏移量写入，再<b>断言写回的值</b>是同一个绝对时刻。
    *
-   * <p>如果任何一层用 {@code Timestamp.valueOf(LocalDateTime)} 解析，这里会偏 −28800 秒
-   * —— 页面看上去一切正常，只是所有生效时间都错了 8 小时。
+   * <p>如果任何一层用 {@code Timestamp.valueOf(LocalDateTime)} 解析，这里会偏 −28800 秒 —— 页面看上去一切正常，只是所有生效时间都错了 8
+   * 小时。
    */
   @Test
   void 生效时间带偏移量写入后往返不变() throws Exception {
@@ -299,7 +297,8 @@ class KnowledgeBaseIntegrationTest {
 
     // 读接口回来的字符串也必须是同一个绝对时刻。
     var read = getJson("/crm/knowledge/entries/" + entryIdOf("tz-round-trip"));
-    String effectiveFrom = json.readTree(read.body()).get("versions").get(0).get("effectiveFrom").asText();
+    String effectiveFrom =
+        json.readTree(read.body()).get("versions").get(0).get("effectiveFrom").asText();
     assertThat(OffsetDateTime.parse(effectiveFrom).toInstant())
         .isEqualTo(OffsetDateTime.parse("2026-06-01T00:00:00Z").toInstant());
   }
@@ -315,8 +314,7 @@ class KnowledgeBaseIntegrationTest {
             """
             {"versionNo":1,"question":"q","answer":"a","effectiveFrom":"2026-06-01T00:00:00"}
             """);
-    assertThat(response.status())
-        .as("缺偏移量会被当成某个默认时区猜，静默偏 8 小时").isEqualTo(400);
+    assertThat(response.status()).as("缺偏移量会被当成某个默认时区猜，静默偏 8 小时").isEqualTo(400);
   }
 
   // ==========================================================================
@@ -343,9 +341,7 @@ class KnowledgeBaseIntegrationTest {
 
     // **发布那一刻**必须被拒（规则 R2）：同一时刻不能有两个生效版本。
     var published = postJson("/crm/knowledge/versions/" + versionId + "/publish", "{}");
-    assertThat(published.status())
-        .as("重叠区间在发布那一刻必须被拒，不能自动裁决")
-        .isEqualTo(409);
+    assertThat(published.status()).as("重叠区间在发布那一刻必须被拒，不能自动裁决").isEqualTo(409);
 
     // 旧版本仍然完好——拒的是新版本，不是把旧的也弄坏。
     assertThat(effectiveVersionNo("overlap", "2026-04-01T00:00:00Z")).isEqualTo(1);
@@ -381,11 +377,13 @@ class KnowledgeBaseIntegrationTest {
 
     // 关回 null = 重开：拒。
     assertThat(postJson(base, "{\"effectiveTo\":null}").status())
-        .as("重开会让接替它的版本与它同时生效").isEqualTo(400);
+        .as("重开会让接替它的版本与它同时生效")
+        .isEqualTo(400);
 
     // 关到已经过去的时刻：拒。
     assertThat(postJson(base, "{\"effectiveTo\":\"2020-01-01T00:00:00Z\"}").status())
-        .as("关到过去会追溯改写历史").isEqualTo(400);
+        .as("关到过去会追溯改写历史")
+        .isEqualTo(400);
 
     // 往前关到仍在未来的时刻：允许。
     assertThat(postJson(base, "{\"effectiveTo\":\"2099-01-01T00:00:00Z\"}").status())
@@ -394,7 +392,8 @@ class KnowledgeBaseIntegrationTest {
 
     // 往后延（比当前终点更晚）：拒。
     assertThat(postJson(base, "{\"effectiveTo\":\"2099-06-01T00:00:00Z\"}").status())
-        .as("往后延会与接替版本重叠").isEqualTo(409);
+        .as("往后延会与接替版本重叠")
+        .isEqualTo(409);
   }
 
   /** 已发布版本的正文不可改（服务层没有改版本的端点，这里直接绕到 DB 层验证触发器仍然拦得住）。 */
@@ -425,13 +424,10 @@ class KnowledgeBaseIntegrationTest {
                 return rootMessage(e);
               }
             });
-    assertThat(message)
-        .as("已发布版本的正文必须由触发器挡住")
-        .contains("已发布的知识版本不能改答法正文");
+    assertThat(message).as("已发布版本的正文必须由触发器挡住").contains("已发布的知识版本不能改答法正文");
 
     // 正文确实还是原来那句。
-    var current =
-        getJson("/crm/knowledge/entries/" + entryIdOf("immutable"));
+    var current = getJson("/crm/knowledge/entries/" + entryIdOf("immutable"));
     assertThat(json.readTree(current.body()).get("versions").get(0).get("answer").asText())
         .isEqualTo("答法 immutable");
   }
@@ -473,16 +469,15 @@ class KnowledgeBaseIntegrationTest {
     // 另一个平台：同样开放区间，但查的是 AMAZON → **不该**出现。
     publishedVersion("stale-shopify", "SHOPIFY", "1", V1_FROM, null);
 
-    var report = getJson("/crm/knowledge/review-due?platformCode=AMAZON&policyChangedAt=" + HANDOFF);
+    var report =
+        getJson("/crm/knowledge/review-due?platformCode=AMAZON&policyChangedAt=" + HANDOFF);
     assertThat(report.status()).as("review-due：%s", report.body()).isEqualTo(200);
     var node = json.readTree(report.body());
 
     var topicKeys = new java.util.ArrayList<String>();
     node.get("entries").forEach(n -> topicKeys.add(n.get("topicKey").asText()));
 
-    assertThat(topicKeys)
-        .as("只应列出「当前生效版写于改版之前且仍无接替版本」的 AMAZON 条目")
-        .containsExactly("stale-amazon");
+    assertThat(topicKeys).as("只应列出「当前生效版写于改版之前且仍无接替版本」的 AMAZON 条目").containsExactly("stale-amazon");
     assertThat(topicKeys).as("已经被接替过的条目不是过期内容").doesNotContain("revised-amazon");
     assertThat(topicKeys).as("别的平台不受本次改版影响").doesNotContain("stale-shopify");
 
@@ -493,7 +488,8 @@ class KnowledgeBaseIntegrationTest {
     assertThat(node.get("platformCode").asText()).isEqualTo("AMAZON");
 
     // 换 SHOPIFY 查，命中的是另一条 —— 证明过滤真的按平台走。
-    var shopify = getJson("/crm/knowledge/review-due?platformCode=SHOPIFY&policyChangedAt=" + HANDOFF);
+    var shopify =
+        getJson("/crm/knowledge/review-due?platformCode=SHOPIFY&policyChangedAt=" + HANDOFF);
     assertThat(json.readTree(shopify.body()).get("entries").get(0).get("topicKey").asText())
         .isEqualTo("stale-shopify");
   }
@@ -520,10 +516,10 @@ class KnowledgeBaseIntegrationTest {
             tenant,
             () ->
                 sql.fetch(
-                        "select referenced_by, referenced_at, consumer, source_ref"
-                            + " from crm_knowledge_reference where tenant_id = ? and version_id = ?",
-                        tenant,
-                        UUID.fromString(versionId)));
+                    "select referenced_by, referenced_at, consumer, source_ref"
+                        + " from crm_knowledge_reference where tenant_id = ? and version_id = ?",
+                    tenant,
+                    UUID.fromString(versionId)));
     assertThat(rows).as("引用必须真的落库").hasSize(1);
     assertThat(rows.get(0).get("referenced_by", UUID.class))
         .as("引用人取自已认证成员，不接受客户端自称")
@@ -611,22 +607,27 @@ class KnowledgeBaseIntegrationTest {
     var other = postJson("/crm/knowledge/entries", entryJson("scope-en", "AMAZON", "en-US"));
     assertThat(other.status()).isEqualTo(200);
 
-    var zh = getJson("/crm/knowledge/entries?shopId=" + shop + "&categoryId=" + category
-        + "&locale=zh-CN");
+    var zh =
+        getJson(
+            "/crm/knowledge/entries?shopId=" + shop + "&categoryId=" + category + "&locale=zh-CN");
     var zhKeys = new java.util.ArrayList<String>();
     json.readTree(zh.body()).forEach(n -> zhKeys.add(n.get("topicKey").asText()));
     assertThat(zhKeys).containsExactlyInAnyOrder("scope-a", "scope-b");
 
-    var en = getJson("/crm/knowledge/entries?shopId=" + shop + "&categoryId=" + category
-        + "&locale=en-US");
+    var en =
+        getJson(
+            "/crm/knowledge/entries?shopId=" + shop + "&categoryId=" + category + "&locale=en-US");
     assertThat(json.readTree(en.body()).get(0).get("topicKey").asText()).isEqualTo("scope-en");
 
     // 换一个类目 → 中文那两条都不该出现（证明类目是真过滤而不是摆设）。
-    var otherCategory = getJson("/crm/knowledge/entries?shopId=" + shop
-        + "&categoryId=" + UUID.randomUUID() + "&locale=zh-CN");
-    assertThat(json.readTree(otherCategory.body()).size())
-        .as("换一个类目就必须没有结果，类目维度不能是摆设")
-        .isZero();
+    var otherCategory =
+        getJson(
+            "/crm/knowledge/entries?shopId="
+                + shop
+                + "&categoryId="
+                + UUID.randomUUID()
+                + "&locale=zh-CN");
+    assertThat(json.readTree(otherCategory.body()).size()).as("换一个类目就必须没有结果，类目维度不能是摆设").isZero();
 
     // 组织范围列表来自真实数据（页面上三个下拉框的数据源）。
     var scopes = getJson("/crm/knowledge/scopes");

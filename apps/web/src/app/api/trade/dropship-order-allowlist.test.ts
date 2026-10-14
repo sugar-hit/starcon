@@ -73,7 +73,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了三个」也算通过。
@@ -109,7 +111,9 @@ it('写形状被放行，且真的转发到 8085', async () => {
     `trade/fulfillment/dropship-orders/alerts/${ID}/acknowledge`,
   ]) {
     const segments = path.split('/');
-    const response = await POST(request(path, 'POST'), { params: { path: segments } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: segments }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -143,7 +147,9 @@ it('未交付的形状仍然被拒', async () => {
     // alerts 只有集合读 + 处置，没有单条详情。
     `trade/fulfillment/dropship-orders/alerts/${ID}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -157,7 +163,7 @@ it('裸路径 fulfillment/dropship-orders 被拒：既不转发，也不冒充�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/fulfillment/dropship-orders';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status, '裸路径不应被白名单放行').toBe(404);
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
 });
@@ -181,7 +187,9 @@ it('兄弟车道的 dropship / routing / allocation 组未被本车道挤掉或�
     'trade/fulfillment/allocation/capabilities',
     `trade/fulfillment/routing/decisions/${ID}/status`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 是兄弟车道的形状，不该被本车道挤掉`).toBe(200);
   }
   // 反向：9.6.1.1 的组**不能**吞掉本模块的路径（两组是并列的，不存在前缀包含关系）
@@ -189,7 +197,9 @@ it('兄弟车道的 dropship / routing / allocation 组未被本车道挤掉或�
     // 9.6.1.1 白名单自己的测试钉住了这条：dropship 组不得放行 dropship-orders
     'trade/fulfillment/dropship/dropship-orders',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 属于本模块命名空间，不应走 9.6.1.1 那一组`).toBe(404);
   }
 });

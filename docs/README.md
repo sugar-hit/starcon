@@ -4,19 +4,19 @@ starcon 的**单一信息源**。所有架构、产品、运维、决策、AI �
 
 ## 子目录索引
 
-| 路径 | 作用 | 谁维护 |
-|---|---|---|
-| [`architecture/`](architecture/) | 系统架构设计（活文档，随演进更新） | 人 + AI |
-| [`decisions/`](decisions/) | 架构决策记录 ADR（永久，不可逆追溯） | 人 + AI |
-| [`product/`](product/) | 产品 PRD / 用户故事 / 用户画像 / [系统功能蓝图](product/capability-blueprint/) | 产品 + AI |
-| [`operations/`](operations/) | 运维 Runbook / 故障复盘 / On-call 指南 | SRE |
-| [`onboarding/`](onboarding/) | 新人入职指南 / 约定 / 术语表 | 所有人 |
-| [`api/`](api/) | 自动生成的 API 文档 | CI |
-| [`compliance/`](compliance/) | 合规（GDPR / 数据出境 / SOC2） | 法务 + SRE |
-| [`design/`](design/) | 视觉规范 / 设计令牌 / 组件调性（前端落地用） | 前端 + AI |
-| [`sessions/`](sessions/) | **AI 会话日志**（项目级可检索） | AI |
-| [`backlog/`](backlog/) | 跨模块 TODO 集中地 | AI |
-| [`investment/`](investment/) | 调研 / 探索笔记（一次性） | AI |
+| 路径                             | 作用                                                                           | 谁维护     |
+| -------------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| [`architecture/`](architecture/) | 系统架构设计（活文档，随演进更新）                                             | 人 + AI    |
+| [`decisions/`](decisions/)       | 架构决策记录 ADR（永久，不可逆追溯）                                           | 人 + AI    |
+| [`product/`](product/)           | 产品 PRD / 用户故事 / 用户画像 / [系统功能蓝图](product/capability-blueprint/) | 产品 + AI  |
+| [`operations/`](operations/)     | 运维 Runbook / 故障复盘 / On-call 指南                                         | SRE        |
+| [`onboarding/`](onboarding/)     | 新人入职指南 / 约定 / 术语表                                                   | 所有人     |
+| [`api/`](api/)                   | 自动生成的 API 文档                                                            | CI         |
+| [`compliance/`](compliance/)     | 合规（GDPR / 数据出境 / SOC2）                                                 | 法务 + SRE |
+| [`design/`](design/)             | 视觉规范 / 设计令牌 / 组件调性（前端落地用）                                   | 前端 + AI  |
+| [`sessions/`](sessions/)         | **AI 会话日志**（项目级可检索）                                                | AI         |
+| [`backlog/`](backlog/)           | 跨模块 TODO 集中地                                                             | AI         |
+| [`investment/`](investment/)     | 调研 / 探索笔记（一次性）                                                      | AI         |
 
 ## 写入规范
 
@@ -29,6 +29,7 @@ starcon 的**单一信息源**。所有架构、产品、运维、决策、AI �
 ## 给 AI agent
 
 新会话开工前，按这个顺序读：
+
 1. `AGENTS.md`（仓库级纪律）
 2. `docs/sessions/` 下最近 3 篇（看上次决定）
 3. `docs/decisions/` 下所有（看不可逆约束）

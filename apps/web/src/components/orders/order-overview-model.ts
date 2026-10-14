@@ -179,7 +179,9 @@ export function allocationBanner(
  */
 export function actionDisabled(
   code: string,
-  action: { ownerModule?: string | null; precondition?: string | null; reason?: string | null } | undefined,
+  action:
+    | { ownerModule?: string | null; precondition?: string | null; reason?: string | null }
+    | undefined,
 ): { disabled: true; title: string } {
   const owner = action?.ownerModule ?? '待定';
   const precondition = action?.precondition ? `前置条件：${action.precondition}` : '';

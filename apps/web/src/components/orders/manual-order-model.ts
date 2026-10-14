@@ -281,7 +281,9 @@ export interface OrderTotals {
  * 而真提交上去之后 DB 还会独立复算一次。
  */
 export function previewTotals(
-  lines: Array<Pick<SalesOrderLineInput, 'unitPrice' | 'quantity' | 'discountAmount' | 'taxAmount'>>,
+  lines: Array<
+    Pick<SalesOrderLineInput, 'unitPrice' | 'quantity' | 'discountAmount' | 'taxAmount'>
+  >,
   charges: Array<{ chargeType: string; amount: number }>,
 ): OrderTotals {
   let subtotal = 0;
@@ -362,7 +364,8 @@ export function submitBlockers(detail: {
   customer: unknown | null;
 }): string[] {
   const blockers: string[] = [];
-  if (detail.lines.length === 0) blockers.push('至少要有一行商品：没有商品行的单在审单队列里无事可审');
+  if (detail.lines.length === 0)
+    blockers.push('至少要有一行商品：没有商品行的单在审单队列里无事可审');
   if (!detail.addresses.some((a) => a.addressRole === 'SHIPPING')) {
     blockers.push('必须有收货地址：收货地址是下单当时冻结的那一份，没有它无法发货');
   }
@@ -373,9 +376,7 @@ export function submitBlockers(detail: {
 /** 费用行按类型分组的汇总文案（详情页展示用）。 */
 export function chargeSummary(charges: SalesOrderChargeRow[]): string {
   if (charges.length === 0) return '无费用';
-  return charges
-    .map((c) => `${chargeTypeLabel(c.chargeType)} ${money(c.amount)}`)
-    .join(' · ');
+  return charges.map((c) => `${chargeTypeLabel(c.chargeType)} ${money(c.amount)}`).join(' · ');
 }
 
 /** 未交付下游的说明文案（禁用按钮时写清归属模块，而不是让用户猜）。 */

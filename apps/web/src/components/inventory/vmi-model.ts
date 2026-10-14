@@ -72,7 +72,8 @@ export const fetchVmiAgreements = (params: AgreementParams = {}) =>
 export const fetchVmiAgreement = (agreementId: string) =>
   api<VmiAgreementDetail>(`${base}/agreements/${agreementId}`);
 
-export const createVmiAgreement = (body: unknown) => api<VmiAgreementDetail>(`${base}/agreements`, 'POST', body);
+export const createVmiAgreement = (body: unknown) =>
+  api<VmiAgreementDetail>(`${base}/agreements`, 'POST', body);
 
 export const activateVmiAgreement = (agreementId: string, note?: string) =>
   api<VmiAgreement>(`${base}/agreements/${agreementId}/activate`, 'POST', { note: note ?? '' });
@@ -97,10 +98,14 @@ export const fetchVmiSignals = (params: SignalParams = {}) =>
   api<VmiSignalPage>(`${base}/replenishment-signals${query(params)}`);
 
 export const acknowledgeVmiSignal = (signalId: string, note?: string) =>
-  api<VmiSignal>(`${base}/replenishment-signals/${signalId}/acknowledge`, 'POST', { note: note ?? '' });
+  api<VmiSignal>(`${base}/replenishment-signals/${signalId}/acknowledge`, 'POST', {
+    note: note ?? '',
+  });
 
 export const dispatchVmiSignal = (signalId: string, note?: string) =>
-  api<VmiSignal>(`${base}/replenishment-signals/${signalId}/dispatch`, 'POST', { note: note ?? '' });
+  api<VmiSignal>(`${base}/replenishment-signals/${signalId}/dispatch`, 'POST', {
+    note: note ?? '',
+  });
 
 export const fulfilVmiSignal = (signalId: string, fulfilledQuantity: number, note?: string) =>
   api<VmiSignal>(`${base}/replenishment-signals/${signalId}/fulfil`, 'POST', {
@@ -115,18 +120,32 @@ export const recordVmiSnapshot = (agreementId: string, body: unknown) =>
   api<unknown>(`${base}/agreements/${agreementId}/snapshots`, 'POST', body);
 
 export const fetchVmiSnapshots = (agreementId: string, lineId?: string, page = 0, size = 20) =>
-  api<VmiSnapshotPage>(`${base}/agreements/${agreementId}/snapshots${query({ lineId, page, size })}`);
+  api<VmiSnapshotPage>(
+    `${base}/agreements/${agreementId}/snapshots${query({ lineId, page, size })}`,
+  );
 
 export const recordVmiSale = (agreementId: string, lineId: string, body: unknown) =>
   api<unknown>(`${base}/agreements/${agreementId}/lines/${lineId}/sales`, 'POST', body);
 
-export const fetchVmiSales = (agreementId: string, unsettleableOnly?: boolean, page = 0, size = 20) =>
-  api<VmiSalePage>(`${base}/agreements/${agreementId}/sales${query({ unsettleableOnly, page, size })}`);
+export const fetchVmiSales = (
+  agreementId: string,
+  unsettleableOnly?: boolean,
+  page = 0,
+  size = 20,
+) =>
+  api<VmiSalePage>(
+    `${base}/agreements/${agreementId}/sales${query({ unsettleableOnly, page, size })}`,
+  );
 
 export const fetchVmiSettlementWindow = (agreementId: string) =>
   api<VmiSettlementWindow>(`${base}/agreements/${agreementId}/settlement-window`);
 
-export const createVmiSettlement = (agreementId: string, periodStart: string, periodEnd: string, note?: string) =>
+export const createVmiSettlement = (
+  agreementId: string,
+  periodStart: string,
+  periodEnd: string,
+  note?: string,
+) =>
   api<unknown>(`${base}/agreements/${agreementId}/settlements`, 'POST', {
     periodStart,
     periodEnd,
@@ -174,9 +193,7 @@ export function formatAmount(
  * <p>null 表示**这个口径不存在**（VMI 货值不计入我方自有资产），显示成 0 会被读成
  * 「这些货值 0 元」，那是谎报。所以这里显式返回「—（不计入自有资产）」。
  */
-export function formatOwnedAssetValue(
-  value: number | string | null | undefined,
-): string {
+export function formatOwnedAssetValue(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === '') return '—（不计入自有资产）';
   const n = typeof value === 'string' ? Number(value) : value;
   if (!Number.isFinite(n)) return '—（不计入自有资产）';
@@ -308,7 +325,10 @@ export function missingStockHint(): string {
  * 只讲一半的话，使用者一定会把 VMI 的量当成我方资产。
  */
 export function ownershipSplitNote(
-  split: Pick<VmiOwnershipSplit, 'sellableQuantity' | 'sellableValue' | 'ownedAssetValue' | 'countsAsOwnedAsset'>,
+  split: Pick<
+    VmiOwnershipSplit,
+    'sellableQuantity' | 'sellableValue' | 'ownedAssetValue' | 'countsAsOwnedAsset'
+  >,
   currency: string,
 ): string {
   const qty = formatQty(split.sellableQuantity);
@@ -329,8 +349,8 @@ export function separationWarning(
   selfOwnedQuantity: number | string | null | undefined,
 ): string {
   return (
-    `VMI 可售 ${formatQty(vmiQuantity)} 件与我方自有 ${formatQty(selfOwnedQuantity)} 件**不可相加**：`
-    + '两者货主不同，相加就等于把供应商的货算成我们的资产。'
+    `VMI 可售 ${formatQty(vmiQuantity)} 件与我方自有 ${formatQty(selfOwnedQuantity)} 件**不可相加**：` +
+    '两者货主不同，相加就等于把供应商的货算成我们的资产。'
   );
 }
 
@@ -366,7 +386,9 @@ export function signalTone(status: string): Tone {
 
 /** 信号是否仍在推进中（未了结）。未了结时不允许再出第二条。 */
 export function isSignalOpen(signal: Pick<VmiSignal, 'status'>): boolean {
-  return signal.status === 'OPEN' || signal.status === 'ACKNOWLEDGED' || signal.status === 'DISPATCHED';
+  return (
+    signal.status === 'OPEN' || signal.status === 'ACKNOWLEDGED' || signal.status === 'DISPATCHED'
+  );
 }
 
 /** 该信号此刻能不能登记到货（只有已下发的才能）。 */
@@ -383,7 +405,9 @@ export function signalTargetHint(target: string): string {
 }
 
 /** 建议补货量的展示文本，并说明它是怎么算出来的。 */
-export function projectedHint(line: Pick<VmiLine, 'safetyLevel' | 'replenishmentMultiple' | 'projectedQuantity'>): string {
+export function projectedHint(
+  line: Pick<VmiLine, 'safetyLevel' | 'replenishmentMultiple' | 'projectedQuantity'>,
+): string {
   return `建议补 ${formatQty(line.projectedQuantity)} 件 =（安全水位 ${formatQty(line.safetyLevel)} − 当前可售）× 补货倍数 ${formatQty(line.replenishmentMultiple)}，向上取整`;
 }
 

@@ -21,10 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-/**
- * 3.1.1.3 SPU 生命周期：转换矩阵、变更历史、批量规则求值，以及租户隔离三断言。
- * 真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
- */
+/** 3.1.1.3 SPU 生命周期：转换矩阵、变更历史、批量规则求值，以及租户隔离三断言。 真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。 */
 @SpringBootTest
 @AutoConfigureMockMvc
 class SpuLifecycleIntegrationTest {
@@ -154,7 +151,9 @@ class SpuLifecycleIntegrationTest {
         "catalog.spu.create",
         () ->
             catalog.saveSpu(
-                actor(tenant), null, new SpuInput(code, "Lifecycle phone", "", "Brand", "", "DRAFT", 0)));
+                actor(tenant),
+                null,
+                new SpuInput(code, "Lifecycle phone", "", "Brand", "", "DRAFT", 0)));
   }
 
   Detail detail(UUID id) {
@@ -172,8 +171,18 @@ class SpuLifecycleIntegrationTest {
               p,
               null,
               new AttributeInput(
-                  "VIDEO", "VIDEO", "TEXT", "COMMON_LOCKED", true, false, false, "", "参数", List.of(),
-                  List.of("4K"), detail(p).product().version()));
+                  "VIDEO",
+                  "VIDEO",
+                  "TEXT",
+                  "COMMON_LOCKED",
+                  true,
+                  false,
+                  false,
+                  "",
+                  "参数",
+                  List.of(),
+                  List.of("4K"),
+                  detail(p).product().version()));
           return null;
         });
     call(
@@ -185,7 +194,12 @@ class SpuLifecycleIntegrationTest {
                 p,
                 null,
                 new SkuInput(
-                    "S-" + UUID.randomUUID(), "SKU", "", "件", "ACTIVE", List.of(),
+                    "S-" + UUID.randomUUID(),
+                    "SKU",
+                    "",
+                    "件",
+                    "ACTIVE",
+                    List.of(),
                     detail(p).product().version())));
   }
 
@@ -208,12 +222,7 @@ class SpuLifecycleIntegrationTest {
     // V4 已把四值域换成五态，旧值不能再写入。
     UUID p = product();
     assertThatThrownBy(
-            () ->
-                tx(
-                    a,
-                    () ->
-                        sql.execute(
-                            "update spu set status='ACTIVE' where id=?", p)))
+            () -> tx(a, () -> sql.execute("update spu set status='ACTIVE' where id=?", p)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     // 五态与映射目标都在域内。
     var allowed =
@@ -233,8 +242,7 @@ class SpuLifecycleIntegrationTest {
     assertThatThrownBy(() -> change(p, "SUSPENDED", "停售")).hasMessageContaining("不允许的状态流转");
     assertThatThrownBy(() -> change(p, "PENDING_LISTING", "")).hasMessageContaining("必须填写变更原因");
     // 没有可用 SKU 时不能进入待上架（前置条件）。
-    assertThatThrownBy(() -> change(p, "PENDING_LISTING", "资料已补齐"))
-        .hasMessageContaining("SKU");
+    assertThatThrownBy(() -> change(p, "PENDING_LISTING", "资料已补齐")).hasMessageContaining("SKU");
     assertThat(detail(p).product().status()).isEqualTo("DRAFT");
   }
 
@@ -255,7 +263,8 @@ class SpuLifecycleIntegrationTest {
     assertThat(view.status()).isEqualTo("DISCONTINUED");
     assertThat(view.transitions()).isEmpty();
     assertThat(view.history()).hasSize(6);
-    assertThat(view.history()).extracting(LifecycleEvent::toStatus)
+    assertThat(view.history())
+        .extracting(LifecycleEvent::toStatus)
         .containsExactly(
             "DISCONTINUED", "SUSPENDED", "ON_SALE", "SUSPENDED", "ON_SALE", "PENDING_LISTING");
     assertThat(view.history()).allMatch(e -> e.source().equals("MANUAL"));
@@ -271,7 +280,8 @@ class SpuLifecycleIntegrationTest {
                 sql.fetch(
                     "select payload->>'toStatus' as to from outbox_event where aggregate_id=? and event_type='SpuLifecycleChanged' order by occurred_at",
                     p));
-    assertThat(outbox).extracting(r -> r.get("to", String.class))
+    assertThat(outbox)
+        .extracting(r -> r.get("to", String.class))
         .containsExactly(
             "PENDING_LISTING", "ON_SALE", "SUSPENDED", "ON_SALE", "SUSPENDED", "DISCONTINUED");
   }
@@ -281,8 +291,7 @@ class SpuLifecycleIntegrationTest {
     UUID p = product();
     readySku(p);
     var event = change(p, "PENDING_LISTING", "指定业务时间提交");
-    var row =
-        tx(a, () -> sql.fetchOne("select * from spu_lifecycle_event where id=?", event.id()));
+    var row = tx(a, () -> sql.fetchOne("select * from spu_lifecycle_event where id=?", event.id()));
     assertThat(row.get("from_status", String.class)).isEqualTo("DRAFT");
     assertThat(row.get("to_status", String.class)).isEqualTo("PENDING_LISTING");
     assertThat(row.get("occurred_at", java.time.OffsetDateTime.class)).isNotNull();
@@ -301,7 +310,10 @@ class SpuLifecycleIntegrationTest {
                     "catalog.spu.update",
                     () ->
                         lifecycle.transition(
-                            actor(a), p, new TransitionInput("PENDING_LISTING", "提交", null, version - 1), null)))
+                            actor(a),
+                            p,
+                            new TransitionInput("PENDING_LISTING", "提交", null, version - 1),
+                            null)))
         .hasMessageContaining("请刷新后重试");
   }
 
@@ -334,7 +346,8 @@ class SpuLifecycleIntegrationTest {
                         0)));
     var ruleView = call(actor(a), "catalog.spu.read", () -> lifecycle.rule(rule));
     assertThat(ruleView.conditions()).hasSize(2);
-    assertThat(ruleView.conditions()).extracting(RuleCondition::metric)
+    assertThat(ruleView.conditions())
+        .extracting(RuleCondition::metric)
         .containsExactly("ACTIVE_SKU_COUNT", "READY_SKU_COUNT");
 
     change(ready, "PENDING_LISTING", "提交");
@@ -356,9 +369,11 @@ class SpuLifecycleIntegrationTest {
     assertThat(detail(ready).product().status()).isEqualTo("SUSPENDED");
     assertThat(detail(bare).product().status()).isEqualTo("DRAFT");
     // 规则来源的变更同样入历史。
-    assertThat(call(actor(a), "catalog.spu.read", () -> lifecycle.history(ready)).getFirst().source())
+    assertThat(
+            call(actor(a), "catalog.spu.read", () -> lifecycle.history(ready)).getFirst().source())
         .isEqualTo("RULE");
-    assertThat(call(actor(a), "catalog.spu.read", () -> lifecycle.history(ready)).getFirst().reason())
+    assertThat(
+            call(actor(a), "catalog.spu.read", () -> lifecycle.history(ready)).getFirst().reason())
         .isEqualTo("批量规则：长尾商品转停售");
     // 已产生变更记录的规则不能删除，只能停用。
     assertThatThrownBy(
@@ -367,7 +382,10 @@ class SpuLifecycleIntegrationTest {
                     actor(a),
                     "catalog.spu.delete",
                     () -> {
-                      lifecycle.deleteRule(actor(a), rule, call(actor(a), "catalog.spu.read", () -> lifecycle.rule(rule)).version());
+                      lifecycle.deleteRule(
+                          actor(a),
+                          rule,
+                          call(actor(a), "catalog.spu.read", () -> lifecycle.rule(rule)).version());
                       return null;
                     }))
         .hasMessageContaining("不能删除");
@@ -375,8 +393,7 @@ class SpuLifecycleIntegrationTest {
 
   @Test
   void unpublishedMetricsAreRejectedInsteadOfFaked() {
-    for (String metric :
-        List.of("INVENTORY_ON_HAND", "SALES_QTY_30D", "LISTING_PUBLISHED_COUNT")) {
+    for (String metric : List.of("INVENTORY_ON_HAND", "SALES_QTY_30D", "LISTING_PUBLISHED_COUNT")) {
       UUID rule =
           call(
               actor(a),
@@ -409,11 +426,11 @@ class SpuLifecycleIntegrationTest {
     // 指标元数据如实标注可用性与拒绝原因。
     var metrics = call(actor(a), "catalog.spu.read", () -> lifecycle.metrics());
     assertThat(metrics).hasSize(LifecycleMetric.values().length);
-    assertThat(metrics).filteredOn(MetricInfo::available)
+    assertThat(metrics)
+        .filteredOn(MetricInfo::available)
         .extracting(MetricInfo::code)
         .containsExactlyInAnyOrder("SKU_COUNT", "ACTIVE_SKU_COUNT", "READY_SKU_COUNT");
-    assertThat(metrics).filteredOn(m -> !m.available())
-        .allMatch(m -> m.note().contains("上游投影未接入"));
+    assertThat(metrics).filteredOn(m -> !m.available()).allMatch(m -> m.note().contains("上游投影未接入"));
   }
 
   @Test
@@ -527,7 +544,8 @@ class SpuLifecycleIntegrationTest {
                 + " where n.nspname='public' and relkind='r' and relname like 'spu_lifecycle%'"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    var role = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var role =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(role.get("rolsuper", Boolean.class)).isFalse();
     assertThat(role.get("rolbypassrls", Boolean.class)).isFalse();
   }
@@ -541,7 +559,8 @@ class SpuLifecycleIntegrationTest {
     http.perform(get("/catalog/lifecycle/metrics").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].code").exists());
-    http.perform(get("/catalog/products/" + p + "/lifecycle").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/products/" + p + "/lifecycle").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("DRAFT"))
         .andExpect(jsonPath("$.transitions[0].toStatus").value("PENDING_LISTING"))
@@ -572,7 +591,8 @@ class SpuLifecycleIntegrationTest {
                         "SUSPENDED",
                         "规则原因",
                         List.of(
-                            new RuleCondition("INVENTORY_ON_HAND", "GTE", new BigDecimal("1"), null)),
+                            new RuleCondition(
+                                "INVENTORY_ON_HAND", "GTE", new BigDecimal("1"), null)),
                         0)));
     http.perform(
             get("/catalog/lifecycle/rules/" + rule + "/preview")

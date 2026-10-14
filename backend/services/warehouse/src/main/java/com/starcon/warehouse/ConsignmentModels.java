@@ -10,28 +10,21 @@ import java.util.UUID;
 /**
  * 7.7.1.2 寄售与代销的传输模型。
  *
- * <p>蓝图原话：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、
- * 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
- * 输入：「寄售协议（供应商、SKU、寄售量、结算价、结算周期、期末处理约定）；销售事实。」
- * 输出：「寄售库存视图（寄售量/已售/剩余）；结算触发单（→ 12 应付）；期末退回或转入采购的单据。」
+ * <p>蓝图原话：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
+ * 输入：「寄售协议（供应商、SKU、寄售量、结算价、结算周期、期末处理约定）；销售事实。」 输出：「寄售库存视图（寄售量/已售/剩余）；结算触发单（→ 12 应付）；期末退回或转入采购的单据。」
  *
- * <p><b>本模块只有一条不可让步的财务语义</b>：寄售未售出不产生采购成本与应付。
- * 它在 V71 里是四道数据库不变量（剩余量守恒、应付额由「已售 × 结算价」生成、
+ * <p><b>本模块只有一条不可让步的财务语义</b>：寄售未售出不产生采购成本与应付。 它在 V71 里是四道数据库不变量（剩余量守恒、应付额由「已售 × 结算价」生成、
  * 一条销售事实最多进一张结算单、未售退回不产生应付），这里只是把它讲给人听的口径。
  *
- * <p><b>货主建模是自落地的，不寄生在 {@code stock_bucket} 上</b>：兄弟模块 7.7.1.1
- * 「货主与所有权」尚未交付，{@code stock_bucket} 目前没有 {@code stock_owner} 列。
- * 本模块的寄售事实自成一体（{@code consignment_agreement_line} 自带
- * {@code stockOwnerType} 与恒为 false 的 {@code countsAsOwnedAsset}），
- * 因此与 7.7.1.1 将来给 bucket 加列的工作**不存在 DDL 冲突**。
- * 07-inventory.md:24 的硬约束「寄售货主是供应商，我方只记持有位置与可销售权，
- * 不记为自有资产」由一个 {@code CHECK(counts_as_owned_asset = false)} 强制。
+ * <p><b>货主建模是自落地的，不寄生在 {@code stock_bucket} 上</b>：兄弟模块 7.7.1.1 「货主与所有权」尚未交付，{@code stock_bucket}
+ * 目前没有 {@code stock_owner} 列。 本模块的寄售事实自成一体（{@code consignment_agreement_line} 自带 {@code
+ * stockOwnerType} 与恒为 false 的 {@code countsAsOwnedAsset}）， 因此与 7.7.1.1 将来给 bucket 加列的工作**不存在 DDL
+ * 冲突**。 07-inventory.md:24 的硬约束「寄售货主是供应商，我方只记持有位置与可销售权， 不记为自有资产」由一个 {@code
+ * CHECK(counts_as_owned_asset = false)} 强制。
  *
- * <p><b>销售事实为什么在本服务自落地</b>：9 订单尚未交付，而「销售触发结算数量」是本模块的
- * 职责，不能因为上游没交付就停摆。所以本模块自落地 {@code consignment_sale} 记事实，
- * 交接键是 {@code saleRef} + {@code sourceSystem}，9 交付后由它推 —— 不建跨服务 FK、
- * 不查对方的表（AGENTS.md 同一纪律）。9 订单、12 应付、10 物流、6 采购均未交付，
- * 本模块一律只出单据 + 留定位键，不替它们写数据。
+ * <p><b>销售事实为什么在本服务自落地</b>：9 订单尚未交付，而「销售触发结算数量」是本模块的 职责，不能因为上游没交付就停摆。所以本模块自落地 {@code
+ * consignment_sale} 记事实， 交接键是 {@code saleRef} + {@code sourceSystem}，9 交付后由它推 —— 不建跨服务 FK、
+ * 不查对方的表（AGENTS.md 同一纪律）。9 订单、12 应付、10 物流、6 采购均未交付， 本模块一律只出单据 + 留定位键，不替它们写数据。
  */
 public final class ConsignmentModels {
 
@@ -82,8 +75,8 @@ public final class ConsignmentModels {
   /**
    * 结算周期。按**售出时刻**归期（蓝图「结算按实际售出」）。
    *
-   * <p>WEEKLY / SEMI_MONTHLY / MONTHLY 由服务层按 UTC 日历算出区间并显式落到结算单的
-   * {@code periodStart/periodEnd}；ON_DEMAND 允许随时手动出一张按需触发单。
+   * <p>WEEKLY / SEMI_MONTHLY / MONTHLY 由服务层按 UTC 日历算出区间并显式落到结算单的 {@code
+   * periodStart/periodEnd}；ON_DEMAND 允许随时手动出一张按需触发单。
    */
   public enum ConsignmentSettlementCycle {
     WEEKLY("每周", "按自然周（周一至周日）归期"),
@@ -206,8 +199,7 @@ public final class ConsignmentModels {
    * 寄售与代销能力说明。前端据此渲染选项与提示，而不是把规则硬编码在界面上。
    *
    * @param payableBasis 应付口径原文：<b>只有「已售数量 × 结算价」会产生应付</b>
-   * @param costBasisAvailable 采购入库成本口径是否可算。**恒为 false**：
-   *     寄售按设计就不进我方采购入库成本，因此本模块没有任何采购成本列可算
+   * @param costBasisAvailable 采购入库成本口径是否可算。**恒为 false**： 寄售按设计就不进我方采购入库成本，因此本模块没有任何采购成本列可算
    * @param costBasisNote 如实说明为什么算不出采购成本（不是「还没做」，而是「按设计就不该有」）
    * @param ownershipNote 货主口径原文：货主恒为供应商，永不计入我方自有资产
    * @param saleFactNote 销售事实的来源与交接方式（9 订单未交付）
@@ -249,8 +241,8 @@ public final class ConsignmentModels {
   /**
    * 协议明细行（寄售量 + 结算价）。
    *
-   * <p>{@code consignedQuantity} 是供应商交给我方代销的**上限**，它不是成本也不是负债；
-   * {@code settlementPrice} 是**售出时**付给供应商的单价，应付额只由它 × 已售数生成。
+   * <p>{@code consignedQuantity} 是供应商交给我方代销的**上限**，它不是成本也不是负债； {@code settlementPrice}
+   * 是**售出时**付给供应商的单价，应付额只由它 × 已售数生成。
    */
   public record ConsignmentLineInput(
       UUID skuId, UUID warehouseId, BigDecimal consignedQuantity, BigDecimal settlementPrice) {}
@@ -270,9 +262,7 @@ public final class ConsignmentModels {
 
   /** 出结算触发单：把区间内已售事实收成一张交给 12 的应付单。 */
   public record ConsignmentSettlementInput(
-      LocalDate periodStart,
-      LocalDate periodEnd,
-      @Schema(nullable = true) String note) {}
+      LocalDate periodStart, LocalDate periodEnd, @Schema(nullable = true) String note) {}
 
   /** 退货/清理单明细（未售数量）。 */
   public record ConsignmentReturnLineInput(UUID agreementLineId, BigDecimal quantity) {}
@@ -290,8 +280,7 @@ public final class ConsignmentModels {
   // ------------------------------------------------------------ 读模型
 
   /**
-   * 一行寄售明细 = 寄售量 / 已售 / 退回 / 转采购 / 剩余。这是蓝图输出里的
-   * 「寄售库存视图（寄售量/已售/剩余）」。
+   * 一行寄售明细 = 寄售量 / 已售 / 退回 / 转采购 / 剩余。这是蓝图输出里的 「寄售库存视图（寄售量/已售/剩余）」。
    *
    * @param remainingQuantity 剩余 = 寄售 − 已售 − 已退回 − 已转采购（DB 生成列，恒等式成立）
    * @param countsAsOwnedAsset 恒为 false：寄售货不是自有资产（DB CHECK 钉死）
@@ -374,8 +363,8 @@ public final class ConsignmentModels {
   /**
    * 寄售库存视图：蓝图的「寄售量/已售/剩余」，并如实标注它**不是**自有库存。
    *
-   * @param ownedAssetValue 恒为 null：本模块没有库存成本列，寄售按设计也不该有自有货值。
-   *     报一个 0 会被读成「这些货值 0 元」，那是谎报；null 才是「这个口径不存在」
+   * @param ownedAssetValue 恒为 null：本模块没有库存成本列，寄售按设计也不该有自有货值。 报一个 0 会被读成「这些货值 0 元」，那是谎报；null
+   *     才是「这个口径不存在」
    */
   public record ConsignmentStockView(
       UUID agreementId,
@@ -499,10 +488,12 @@ public final class ConsignmentModels {
       BigDecimal payableAmount) {}
 
   /** 退货/清理单列表（真分页）。 */
-  public record ConsignmentReturnPage(List<ConsignmentReturn> returns, long total, int page, int size) {}
+  public record ConsignmentReturnPage(
+      List<ConsignmentReturn> returns, long total, int page, int size) {}
 
   /** 退货/清理单详情 = 头部 + 全部明细。 */
-  public record ConsignmentReturnDetail(ConsignmentReturn returnOrder, List<ConsignmentReturnLine> lines) {}
+  public record ConsignmentReturnDetail(
+      ConsignmentReturn returnOrder, List<ConsignmentReturnLine> lines) {}
 
   /** 审计时间线上的一条：谁在什么时候把这份协议怎么样了。 */
   public record ConsignmentAuditEntry(
@@ -511,8 +502,8 @@ public final class ConsignmentModels {
   /**
    * 按协议的结算周期算出的**当前默认结算区间**。
    *
-   * <p>它是真算出来的（WEEKLY 取周一至周日、SEMI_MONTHLY 按上下半月、MONTHLY 按自然月），
-   * 不是写死的字符串。ON_DEMAND 没有固定周期，给出今天到明天的一日窗口作为可编辑起点。
+   * <p>它是真算出来的（WEEKLY 取周一至周日、SEMI_MONTHLY 按上下半月、MONTHLY 按自然月）， 不是写死的字符串。ON_DEMAND
+   * 没有固定周期，给出今天到明天的一日窗口作为可编辑起点。
    *
    * <p>出单时允许显式改期（补结算、跨期合并都要用得到），所以这里只是默认值，不是闸门。
    */

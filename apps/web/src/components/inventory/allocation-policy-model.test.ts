@@ -10,7 +10,10 @@ import {
   qty,
   sumAllocated,
 } from './allocation-policy-model';
-import type { AllocationLine, AllocationResult } from '../../../../../packages/api-contracts/src/index';
+import type {
+  AllocationLine,
+  AllocationResult,
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 7.8.1.1 分配策略配置前端纯函数。

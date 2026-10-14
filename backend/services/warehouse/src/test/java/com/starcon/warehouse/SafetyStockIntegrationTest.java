@@ -32,19 +32,16 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.2.2.2 安全库存：阈值分档生效、<b>平台断货 vs 自有仓耗尽</b>、日均销量与可售天数推算、
- * 补货建议关联、销量区间重叠、时区零漂移，以及租户隔离三断言。
+ * 7.2.2.2 安全库存：阈值分档生效、<b>平台断货 vs 自有仓耗尽</b>、日均销量与可售天数推算、 补货建议关联、销量区间重叠、时区零漂移，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link SellablePolicyIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link SellablePolicyIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>本测试的核心是蓝图那句加粗红线</b>：「安全库存要区分『平台断货风险』和『自有仓耗尽』：
- * FBA 断货造成的损失远大于自有仓」。分开的两个用例都不够 —— 必须是<b>同一个 SKU、同样配 INFO、
- * 一个挂自有仓一个挂 FBA</b>，然后断言 FBA 侧的 effectiveSeverity 被提了一级且排在前面。
- * 只测「FBA 会产生一种预警」是把红线读成了分类；「损失更大」这半句必须由排序与提级兑现。
+ * <p><b>本测试的核心是蓝图那句加粗红线</b>：「安全库存要区分『平台断货风险』和『自有仓耗尽』： FBA 断货造成的损失远大于自有仓」。分开的两个用例都不够 —— 必须是<b>同一个
+ * SKU、同样配 INFO、 一个挂自有仓一个挂 FBA</b>，然后断言 FBA 侧的 effectiveSeverity 被提了一级且排在前面。 只测「FBA
+ * 会产生一种预警」是把红线读成了分类；「损失更大」这半句必须由排序与提级兑现。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -55,7 +52,10 @@ class SafetyStockIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID le = idFor(a, 1);
@@ -64,11 +64,13 @@ class SafetyStockIntegrationTest {
   static final UUID whFba = idFor(a, 4);
   static final UUID qSellable = idFor(a, 5);
   static final UUID qDefective = idFor(a, 6);
+
   /** 分类属 catalog 服务：这里只造一个逻辑 id，warehouse 侧不建外键也不查它的表。 */
   static final UUID categoryOne = UUID.randomUUID();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-safety-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-safety-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -89,7 +91,8 @@ class SafetyStockIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -104,7 +107,8 @@ class SafetyStockIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -169,22 +173,46 @@ class SafetyStockIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 3), tenant, "WH-OWN", "自有仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 3),
+                tenant,
+                "WH-OWN",
+                "自有仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-FBA", "美国 FBA", "US", "America/Los_Angeles");
+                idFor(tenant, 4),
+                tenant,
+                "WH-FBA",
+                "美国 FBA",
+                "US",
+                "America/Los_Angeles");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "DEFECTIVE", "残次", "DEFECTIVE");
+                idFor(tenant, 6),
+                tenant,
+                "DEFECTIVE",
+                "残次",
+                "DEFECTIVE");
             return null;
           });
     }
@@ -208,8 +236,14 @@ class SafetyStockIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-              UUID.randomUUID(), tenant, idFor(tenant, 2), warehouse, idFor(tenant, 1), quality,
-              new BigDecimal(onHand), new BigDecimal(reserved));
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 2),
+              warehouse,
+              idFor(tenant, 1),
+              quality,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved));
           return null;
         });
   }
@@ -231,7 +265,9 @@ class SafetyStockIntegrationTest {
 
   /** SKU 档阈值：{@code scope} 默认 SKU。 */
   SafetyStockPolicyInput skuPolicy(
-      String threshold, String severity, List<SafetyStockPolicyInput.SafetyStockWarehouseBinding> warehouses) {
+      String threshold,
+      String severity,
+      List<SafetyStockPolicyInput.SafetyStockWarehouseBinding> warehouses) {
     return skuPolicy(threshold, severity, warehouses, null, false, null);
   }
 
@@ -243,8 +279,16 @@ class SafetyStockIntegrationTest {
       boolean autoSuggest,
       OffsetDateTime from) {
     return new SafetyStockPolicyInput(
-        "SKU", null, sku, "商品一", new BigDecimal(threshold), severity,
-        coverageDays == null ? null : new BigDecimal(coverageDays), autoSuggest, from, "夹具",
+        "SKU",
+        null,
+        sku,
+        "商品一",
+        new BigDecimal(threshold),
+        severity,
+        coverageDays == null ? null : new BigDecimal(coverageDays),
+        autoSuggest,
+        from,
+        "夹具",
         warehouses);
   }
 
@@ -252,20 +296,24 @@ class SafetyStockIntegrationTest {
     return save(null, input, actorA);
   }
 
-  SafetyStockPolicySaved save(UUID supersedeId, SafetyStockPolicyInput input, AccessService.Access who) {
+  SafetyStockPolicySaved save(
+      UUID supersedeId, SafetyStockPolicyInput input, AccessService.Access who) {
     return access.run(
         who, "warehouse.inventory.update", () -> service.save(supersedeId, input, who.userId()));
   }
 
-  SafetyStockSalesSaved sales(
-      String from, String to, String units, AccessService.Access who) {
+  SafetyStockSalesSaved sales(String from, String to, String units, AccessService.Access who) {
     return access.run(
         who,
         "warehouse.inventory.update",
         () ->
             service.recordSales(
                 new SafetyStockSalesInput(
-                    "MANUAL", sku, "商品一", LocalDate.parse(from), LocalDate.parse(to),
+                    "MANUAL",
+                    sku,
+                    "商品一",
+                    LocalDate.parse(from),
+                    LocalDate.parse(to),
                     new BigDecimal(units)),
                 who.userId()));
   }
@@ -278,22 +326,29 @@ class SafetyStockIntegrationTest {
     return evaluate(actorA, new SafetyStockEvaluationRequest(List.of(), null, null));
   }
 
-  SafetyStockEvaluationRow evaluate(AccessService.Access who, SafetyStockEvaluationRequest request) {
-    return access.run(who, "warehouse.inventory.update", () -> service.evaluate(request, who.userId()));
+  SafetyStockEvaluationRow evaluate(
+      AccessService.Access who, SafetyStockEvaluationRequest request) {
+    return access.run(
+        who, "warehouse.inventory.update", () -> service.evaluate(request, who.userId()));
   }
 
   SafetyStockEvaluationRequest withSkuContext(UUID categoryId) {
     return new SafetyStockEvaluationRequest(
-        List.of(new SafetyStockEvaluationRequest.SafetyStockEvaluationSkuContext(sku, categoryId)), null, null);
+        List.of(new SafetyStockEvaluationRequest.SafetyStockEvaluationSkuContext(sku, categoryId)),
+        null,
+        null);
   }
 
   /** 未处置的预警（与工作台默认视图一致）。要查已处置的用各自显式构造的查询。 */
   List<SafetyStockAlertRow> alerts() {
-    return access.run(
+    return access
+        .run(
             actorA,
             "warehouse.inventory.read",
-            () -> service.alerts(new SafetyStockAlertQuery(
-                null, null, null, null, null, null, null, false, null, 0, 50)))
+            () ->
+                service.alerts(
+                    new SafetyStockAlertQuery(
+                        null, null, null, null, null, null, null, false, null, 0, 50)))
         .alerts();
   }
 
@@ -313,12 +368,16 @@ class SafetyStockIntegrationTest {
     var rows = alerts();
     assertThat(rows).hasSize(2);
 
-    var platform = rows.stream()
-        .filter(r -> r.alertType() == SafetyStockAlertType.PLATFORM_STOCKOUT_RISK)
-        .findFirst().orElseThrow();
-    var own = rows.stream()
-        .filter(r -> r.alertType() == SafetyStockAlertType.OWN_WAREHOUSE_DEPLETION)
-        .findFirst().orElseThrow();
+    var platform =
+        rows.stream()
+            .filter(r -> r.alertType() == SafetyStockAlertType.PLATFORM_STOCKOUT_RISK)
+            .findFirst()
+            .orElseThrow();
+    var own =
+        rows.stream()
+            .filter(r -> r.alertType() == SafetyStockAlertType.OWN_WAREHOUSE_DEPLETION)
+            .findFirst()
+            .orElseThrow();
 
     // 类型确实被区分开了 —— 这是红线的前半句。alertType 与 warehouseKind 一一对应
     // （PLATFORM_STOCKOUT_RISK ⇔ PLATFORM_FBA），所以看类型就等于看仓的归属。
@@ -342,11 +401,14 @@ class SafetyStockIntegrationTest {
 
     // 只看平台风险时过滤得出来。
     var onlyPlatform =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.read",
-                () -> service.alerts(new SafetyStockAlertQuery(
-                    null, null, null, null, null, null, null, true, null, 0, 50)))
+                () ->
+                    service.alerts(
+                        new SafetyStockAlertQuery(
+                            null, null, null, null, null, null, null, true, null, 0, 50)))
             .alerts();
     assertThat(onlyPlatform).hasSize(1);
     assertThat(onlyPlatform.get(0).alertType())
@@ -389,12 +451,14 @@ class SafetyStockIntegrationTest {
                     actorA,
                     "warehouse.inventory.update",
                     () -> {
-                      sql.execute(
-                          "set constraints all immediate");
+                      sql.execute("set constraints all immediate");
                       sql.execute(
                           "insert into safety_stock_policy_warehouse"
                               + " (tenant_id,policy_id,warehouse_id,warehouse_kind) values (?,?,?,?)",
-                          a, saved.policyId(), whFba, "PLATFORM_FBA");
+                          a,
+                          saved.policyId(),
+                          whFba,
+                          "PLATFORM_FBA");
                       return null;
                     }))
         .hasMessageContaining("不能同时挂自有仓与平台仓");
@@ -442,10 +506,8 @@ class SafetyStockIntegrationTest {
     assertThat(alert.suggestedQuantity()).isEqualByComparingTo("120");
 
     var suggestion =
-        access.run(
-                actorA,
-                "warehouse.inventory.read",
-                () -> service.alert(alert.id()))
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.alert(alert.id()))
             .suggestion();
     assertThat(suggestion).isNotNull();
     assertThat(suggestion.suggestedQuantity()).isEqualByComparingTo("120");
@@ -472,8 +534,10 @@ class SafetyStockIntegrationTest {
     assertThat(alert.reviewNote()).contains("尚未登记销量");
 
     // 建议仍然生成，但明确写清为什么算不出量 —— 拿 0 会被读成「不用补货」。
-    var suggestion = access.run(actorA, "warehouse.inventory.read", () -> service.alert(alert.id()))
-        .suggestion();
+    var suggestion =
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.alert(alert.id()))
+            .suggestion();
     assertThat(suggestion).isNotNull();
     assertThat(suggestion.suggestedQuantity()).isNull();
     assertThat(suggestion.targetStockQuantity()).isNull();
@@ -481,11 +545,13 @@ class SafetyStockIntegrationTest {
 
     // 「只看算不出量的」这一批要能被筛出来。
     var unquantified =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.read",
-                () -> service.suggestions(
-                    new SafetyStockSuggestionQuery(null, null, null, true, 0, 50)))
+                () ->
+                    service.suggestions(
+                        new SafetyStockSuggestionQuery(null, null, null, true, 0, 50)))
             .suggestions();
     assertThat(unquantified).hasSize(1);
   }
@@ -517,7 +583,8 @@ class SafetyStockIntegrationTest {
   void 不重叠的销量区间可以并存并汇总() {
     sales("2026-09-01", "2026-09-15", "150");
     sales("2026-09-16", "2026-09-30", "150");
-    var page = access.run(actorA, "warehouse.inventory.read", () -> service.sales(sku, null, 0, 50));
+    var page =
+        access.run(actorA, "warehouse.inventory.read", () -> service.sales(sku, null, 0, 50));
     assertThat(page.total()).isEqualTo(1);
     var row = page.sales().get(0);
     assertThat(row.records()).isEqualTo(2);
@@ -534,8 +601,11 @@ class SafetyStockIntegrationTest {
     var result = evaluate();
     assertThat(result.alertsOpened()).isEqualTo(1);
     assertThat(result.suggestionsCreated()).isZero();
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.alert(
-        alerts().get(0).id())).suggestion()).isNull();
+    assertThat(
+            access
+                .run(actorA, "warehouse.inventory.read", () -> service.alert(alerts().get(0).id()))
+                .suggestion())
+        .isNull();
   }
 
   @Test
@@ -549,9 +619,11 @@ class SafetyStockIntegrationTest {
     var id = detail.suggestion().id();
 
     assertThatThrownBy(
-            () -> access.run(
-                actorA, "warehouse.inventory.update",
-                () -> service.dismissSuggestion(id, "  ", actorA.userId())))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.dismissSuggestion(id, "  ", actorA.userId())))
         .hasMessageContaining("必须写理由");
 
     var dismissed =
@@ -563,9 +635,11 @@ class SafetyStockIntegrationTest {
 
     // 已忽略的建议不能被重复忽略（状态机单向）。
     assertThatThrownBy(
-            () -> access.run(
-                actorA, "warehouse.inventory.update",
-                () -> service.dismissSuggestion(id, "再忽略一次", actorA.userId())))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.dismissSuggestion(id, "再忽略一次", actorA.userId())))
         .hasMessageContaining("只有待处理的建议可以忽略");
   }
 
@@ -575,15 +649,19 @@ class SafetyStockIntegrationTest {
     sales("2026-09-01", "2026-09-30", "300");
     save(skuPolicy("150", "WARNING", own(), "7", true, null));
     evaluate();
-    var id = access.run(actorA, "warehouse.inventory.read", () -> service.alert(alerts().get(0).id()))
-        .suggestion().id();
-    var ok = access.run(
-        actorA, "warehouse.inventory.update", () -> service.acknowledgeSuggestion(id));
+    var id =
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.alert(alerts().get(0).id()))
+            .suggestion()
+            .id();
+    var ok =
+        access.run(actorA, "warehouse.inventory.update", () -> service.acknowledgeSuggestion(id));
     assertThat(ok.status()).isEqualTo(SafetyStockSuggestionStatus.ACKNOWLEDGED);
     assertThat(ok.message()).contains("6.2.1.2");
     assertThatThrownBy(
-            () -> access.run(
-                actorA, "warehouse.inventory.update", () -> service.acknowledgeSuggestion(id)))
+            () ->
+                access.run(
+                    actorA, "warehouse.inventory.update", () -> service.acknowledgeSuggestion(id)))
         .hasMessageContaining("只有待处理的建议可以采纳");
   }
 
@@ -597,16 +675,21 @@ class SafetyStockIntegrationTest {
     var id = alerts().get(0).id();
 
     // 未认领不能直接处置。
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.update", () -> service.resolve(id)))
+    assertThatThrownBy(
+            () -> access.run(actorA, "warehouse.inventory.update", () -> service.resolve(id)))
         .hasMessageContaining("只有已认领的预警可以标记为已处置");
 
-    access.run(actorA, "warehouse.inventory.update", () -> service.acknowledge(id, actorA.userId()));
+    access.run(
+        actorA, "warehouse.inventory.update", () -> service.acknowledge(id, actorA.userId()));
     access.run(actorA, "warehouse.inventory.update", () -> service.resolve(id));
 
     // 已处置是终态：不能复活。
     assertThatThrownBy(
-            () -> access.run(
-                actorA, "warehouse.inventory.update", () -> service.acknowledge(id, actorA.userId())))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.acknowledge(id, actorA.userId())))
         .hasMessageContaining("只有待处理的预警可以认领");
   }
 
@@ -625,7 +708,8 @@ class SafetyStockIntegrationTest {
                     "warehouse.inventory.update",
                     () -> {
                       sql.execute(
-                          "update safety_stock_alert set available_quantity = 9999 where id = ?", id);
+                          "update safety_stock_alert set available_quantity = 9999 where id = ?",
+                          id);
                       return null;
                     }))
         .hasMessageContaining("预警读数快照不可修改");
@@ -637,16 +721,20 @@ class SafetyStockIntegrationTest {
     save(skuPolicy("150", "WARNING", own()));
     evaluate();
     var id = alerts().get(0).id();
-    access.run(actorA, "warehouse.inventory.update", () -> service.acknowledge(id, actorA.userId()));
+    access.run(
+        actorA, "warehouse.inventory.update", () -> service.acknowledge(id, actorA.userId()));
     access.run(actorA, "warehouse.inventory.update", () -> service.resolve(id));
 
     assertThat(alerts()).isEmpty();
     var resolved =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.read",
-                () -> service.alerts(new SafetyStockAlertQuery(
-                    null, null, null, null, "RESOLVED", null, null, false, null, 0, 50)))
+                () ->
+                    service.alerts(
+                        new SafetyStockAlertQuery(
+                            null, null, null, null, "RESOLVED", null, null, false, null, 0, 50)))
             .alerts();
     assertThat(resolved).hasSize(1);
     assertThat(resolved.get(0).resolvedAt()).isNotNull();
@@ -659,27 +747,36 @@ class SafetyStockIntegrationTest {
     standardStock();
     var at = now().minusDays(10);
     var first = save(skuPolicy("150", "WARNING", own(), null, false, at));
-    var second = save(first.policyId(), skuPolicy("300", "CRITICAL", own(), null, false, now()), actorA);
+    var second =
+        save(first.policyId(), skuPolicy("300", "CRITICAL", own(), null, false, now()), actorA);
 
     // 换版前 → 第一档
-    var before = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.SKU, null, sku, at));
+    var before =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.SKU, null, sku, at));
     assertThat(before.policy().id()).isEqualTo(first.policyId());
     assertThat(before.policy().thresholdQuantity()).isEqualByComparingTo("150");
     assertThat(before.usedFallback()).isFalse();
 
     // 换版后 → 第二档
-    var after = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.SKU, null, sku, now().plusMinutes(1)));
+    var after =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.SKU, null, sku, now().plusMinutes(1)));
     assertThat(after.policy().id()).isEqualTo(second.policyId());
     assertThat(after.policy().thresholdQuantity()).isEqualByComparingTo("300");
 
     // 旧档仍可查：它是「当时那条预警依据长什么样」的唯一凭据。
-    var page = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, sku, null, null, false, null, 0, 50)));
+    var page =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, sku, null, null, false, null, 0, 50)));
     assertThat(page.total()).isEqualTo(2);
     assertThat(page.policies().stream().filter(p -> p.id().equals(first.policyId())).count())
         .isEqualTo(1);
@@ -717,13 +814,16 @@ class SafetyStockIntegrationTest {
   void 作废后如实报未配置而不是按零处理() {
     standardStock();
     var saved = save(skuPolicy("150", "WARNING", own()));
-    var retired = access.run(
-        actorA, "warehouse.inventory.update", () -> service.retire(saved.policyId(), now()));
+    var retired =
+        access.run(
+            actorA, "warehouse.inventory.update", () -> service.retire(saved.policyId(), now()));
     assertThat(retired.effectiveTo()).isNotNull();
 
-    var effective = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.SKU, null, sku, now().plusMinutes(1)));
+    var effective =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.SKU, null, sku, now().plusMinutes(1)));
     assertThat(effective.policy()).isNull();
     assertThat(effective.note()).contains("不受任何安全库存保护");
   }
@@ -731,25 +831,50 @@ class SafetyStockIntegrationTest {
   @Test
   void 优先级是SKU高于分类高于兜底() {
     standardStock();
-    save(new SafetyStockPolicyInput(
-        "DEFAULT", null, null, "", new BigDecimal("10"), "INFO", null, false, null, "兜底", own()));
-    save(new SafetyStockPolicyInput(
-        "CATEGORY", categoryOne, null, "", new BigDecimal("200"), "WARNING", null, false, null,
-        "分类档", own()));
+    save(
+        new SafetyStockPolicyInput(
+            "DEFAULT",
+            null,
+            null,
+            "",
+            new BigDecimal("10"),
+            "INFO",
+            null,
+            false,
+            null,
+            "兜底",
+            own()));
+    save(
+        new SafetyStockPolicyInput(
+            "CATEGORY",
+            categoryOne,
+            null,
+            "",
+            new BigDecimal("200"),
+            "WARNING",
+            null,
+            false,
+            null,
+            "分类档",
+            own()));
 
     // 按 SKU 解析：SKU 档没配，但给了分类 → 下探命中分类档 200（而不是直接跳到兜底档 10）。
-    var asSku = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.SKU, categoryOne, sku, now()));
+    var asSku =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.SKU, categoryOne, sku, now()));
     assertThat(asSku.policy().thresholdQuantity()).isEqualByComparingTo("200");
     assertThat(asSku.resolvedScopeType()).isEqualTo(SafetyStockScopeType.CATEGORY);
     assertThat(asSku.usedFallback()).isFalse();
 
     // 同一个 SKU 但分类不在那档分类里 → 回退到兜底档，如实标 usedFallback。
     var otherCategory = UUID.randomUUID();
-    var fallback = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.CATEGORY, otherCategory, sku, now()));
+    var fallback =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.CATEGORY, otherCategory, sku, now()));
     assertThat(fallback.policy().thresholdQuantity()).isEqualByComparingTo("10");
     assertThat(fallback.usedFallback()).isTrue();
   }
@@ -761,17 +886,21 @@ class SafetyStockIntegrationTest {
     var ownPolicy = save(skuPolicy("150", "WARNING", own()));
     var fbaPolicy = save(skuPolicy("80", "CRITICAL", fba()));
 
-    var page = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, sku, null, null, true, null, 0, 50)));
+    var page =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(new SafetyStockQuery(null, null, sku, null, null, true, null, 0, 50)));
     assertThat(page.total()).isEqualTo(2);
-    assertThat(page.policies()).extracting(SafetyStockPolicyRow::id)
+    assertThat(page.policies())
+        .extracting(SafetyStockPolicyRow::id)
         .containsExactlyInAnyOrder(ownPolicy.policyId(), fbaPolicy.policyId());
 
     // **建档后立刻按 effectiveOnly 查就必须两档都在**：这一条同时守着「同一 SKU 的自有仓档与
     // FBA 档可以并存」（槽位是「范围 × 仓」而不是「范围」）与「刚配好的阈值立刻生效」。
-    assertThat(page.policies()).allSatisfy(
-        p -> assertThat(p.effectiveTo()).as("两档都应仍在生效").isNull());
+    assertThat(page.policies())
+        .allSatisfy(p -> assertThat(p.effectiveTo()).as("两档都应仍在生效").isNull());
 
     // 但同一个仓上不能有两档同时在效（区间重叠与槽位两道延迟约束任一拦下，错误信息同源）。
     assertThatThrownBy(() -> save(skuPolicy("200", "INFO", own())))
@@ -781,11 +910,32 @@ class SafetyStockIntegrationTest {
   @Test
   void 分类档没有SKU清单时如实报未扫描() {
     standardStock();
-    save(new SafetyStockPolicyInput(
-        "DEFAULT", null, null, "", new BigDecimal("150"), "WARNING", null, false, null, "兜底", own()));
-    save(new SafetyStockPolicyInput(
-        "CATEGORY", categoryOne, null, "", new BigDecimal("150"), "WARNING", null, false, null,
-        "分类档", own()));
+    save(
+        new SafetyStockPolicyInput(
+            "DEFAULT",
+            null,
+            null,
+            "",
+            new BigDecimal("150"),
+            "WARNING",
+            null,
+            false,
+            null,
+            "兜底",
+            own()));
+    save(
+        new SafetyStockPolicyInput(
+            "CATEGORY",
+            categoryOne,
+            null,
+            "",
+            new BigDecimal("150"),
+            "WARNING",
+            null,
+            false,
+            null,
+            "分类档",
+            own()));
     save(skuPolicy("150", "WARNING", own()));
 
     // 不带清单：SKU 档照扫，分类/兜底档计入未扫描。
@@ -832,14 +982,17 @@ class SafetyStockIntegrationTest {
     assertThat(saved.effectiveFrom().toInstant()).isEqualTo(written.toInstant());
     assertThat(saved.effectiveFrom().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
 
-    var detail = access.run(actorA, "warehouse.inventory.read", () -> service.detail(saved.policyId()));
+    var detail =
+        access.run(actorA, "warehouse.inventory.read", () -> service.detail(saved.policyId()));
     assertThat(detail.policy().effectiveFrom().toInstant()).isEqualTo(written.toInstant());
     assertThat(detail.policy().effectiveFrom().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
 
     // 按时刻解析也必须落在同一瞬间。
-    var effective = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.effective(SafetyStockScopeType.SKU, null, sku, written.plusDays(1)));
+    var effective =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.effective(SafetyStockScopeType.SKU, null, sku, written.plusDays(1)));
     assertThat(effective.policy().id()).isEqualTo(saved.policyId());
   }
 
@@ -879,33 +1032,80 @@ class SafetyStockIntegrationTest {
         .hasMessageContaining("必须给 reorderCoverageDays");
     // 一个仓都不挂。
     assertThatThrownBy(
-            () -> save(new SafetyStockPolicyInput(
-                "SKU", null, sku, "商品一", new BigDecimal("150"), "WARNING", null, false, null,
-                "", List.of())))
+            () ->
+                save(
+                    new SafetyStockPolicyInput(
+                        "SKU",
+                        null,
+                        sku,
+                        "商品一",
+                        new BigDecimal("150"),
+                        "WARNING",
+                        null,
+                        false,
+                        null,
+                        "",
+                        List.of())))
         .hasMessageContaining("至少要挂一个仓库");
     // 挂不存在的仓。
     assertThatThrownBy(
-            () -> save(new SafetyStockPolicyInput(
-                "SKU", null, sku, "商品一", new BigDecimal("150"), "WARNING", null, false, null, "",
-                List.of(new SafetyStockPolicyInput.SafetyStockWarehouseBinding(UUID.randomUUID(), "OWN")))))
+            () ->
+                save(
+                    new SafetyStockPolicyInput(
+                        "SKU",
+                        null,
+                        sku,
+                        "商品一",
+                        new BigDecimal("150"),
+                        "WARNING",
+                        null,
+                        false,
+                        null,
+                        "",
+                        List.of(
+                            new SafetyStockPolicyInput.SafetyStockWarehouseBinding(
+                                UUID.randomUUID(), "OWN")))))
         .hasMessageContaining("不属于当前租户");
     // 负阈值。
-    assertThatThrownBy(() -> save(skuPolicy("-1", "WARNING", own())))
-        .hasMessageContaining("不能为负数");
+    assertThatThrownBy(() -> save(skuPolicy("-1", "WARNING", own()))).hasMessageContaining("不能为负数");
     // 未知级别。
     assertThatThrownBy(() -> save(skuPolicy("150", "URGENT", own())))
         .hasMessageContaining("未知的预警级别");
     // SKU 档却不给 skuId。
     assertThatThrownBy(
-            () -> save(new SafetyStockPolicyInput(
-                "SKU", null, null, "", new BigDecimal("150"), "WARNING", null, false, null, "",
-                own())))
+            () ->
+                save(
+                    new SafetyStockPolicyInput(
+                        "SKU",
+                        null,
+                        null,
+                        "",
+                        new BigDecimal("150"),
+                        "WARNING",
+                        null,
+                        false,
+                        null,
+                        "",
+                        own())))
         .hasMessageContaining("必须给 skuId");
     // 坏的 warehouseKind。
     assertThatThrownBy(
-            () -> save(new SafetyStockPolicyInput(
-                "SKU", null, sku, "商品一", new BigDecimal("150"), "WARNING", null, false, null, "",
-                List.of(new SafetyStockPolicyInput.SafetyStockWarehouseBinding(whOwn, "THIRD_PARTY")))))
+            () ->
+                save(
+                    new SafetyStockPolicyInput(
+                        "SKU",
+                        null,
+                        sku,
+                        "商品一",
+                        new BigDecimal("150"),
+                        "WARNING",
+                        null,
+                        false,
+                        null,
+                        "",
+                        List.of(
+                            new SafetyStockPolicyInput.SafetyStockWarehouseBinding(
+                                whOwn, "THIRD_PARTY")))))
         .hasMessageContaining("分不出这两件事");
   }
 
@@ -917,16 +1117,34 @@ class SafetyStockIntegrationTest {
       // 五个分类档各配一个不同的分类，避免同槽位冲突。分类档**不带 sku_label**
       // （DB 的 chk_label_needs_sku 挡住：留了标签就会指向一个不存在的 SKU 对象），
       // 要检索的那段文字放进 note。
-      save(new SafetyStockPolicyInput(
-          "CATEGORY", UUID.randomUUID(), null, "", new BigDecimal(100 + i), "INFO",
-          null, false, at, "分类 " + i, own()));
+      save(
+          new SafetyStockPolicyInput(
+              "CATEGORY",
+              UUID.randomUUID(),
+              null,
+              "",
+              new BigDecimal(100 + i),
+              "INFO",
+              null,
+              false,
+              at,
+              "分类 " + i,
+              own()));
     }
-    var first = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, null, null, null, false, null, 0, 2)));
-    var second = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, null, null, null, false, null, 1, 2)));
+    var first =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, null, null, null, false, null, 0, 2)));
+    var second =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, null, null, null, false, null, 1, 2)));
     assertThat(first.total()).isEqualTo(5);
     assertThat(first.policies()).hasSize(2);
     assertThat(second.policies()).hasSize(2);
@@ -937,15 +1155,23 @@ class SafetyStockIntegrationTest {
     assertThat(ids).doesNotHaveDuplicates();
 
     // 按关键字过滤。
-    var hit = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, null, null, null, false, "分类 3", 0, 50)));
+    var hit =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, null, null, null, false, "分类 3", 0, 50)));
     assertThat(hit.total()).isEqualTo(1);
 
     // 按仓过滤（仓挂在阈值档上，要过挂仓表）。
-    var byWarehouse = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, null, null, whOwn, false, null, 0, 50)));
+    var byWarehouse =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, null, null, whOwn, false, null, 0, 50)));
     assertThat(byWarehouse.total()).isEqualTo(5);
   }
 
@@ -955,16 +1181,21 @@ class SafetyStockIntegrationTest {
   void 端点权限码复用已注册的warehouse_inventory一族() throws Exception {
     standardStock();
     // 只有读权限时，写动作一律 403 —— 阈值与预警级别是经营决策，不能挂在读权限上。
-    http.perform(post("/warehouse/inventory/safety-stock/policies")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"scopeType\":\"SKU\",\"thresholdQuantity\":150,\"alertSeverity\":\"WARNING\","
-                + "\"warehouses\":[{\"warehouseId\":\"" + whOwn + "\",\"warehouseKind\":\"OWN\"}]}"))
+    http.perform(
+            post("/warehouse/inventory/safety-stock/policies")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"SKU\",\"thresholdQuantity\":150,\"alertSeverity\":\"WARNING\","
+                        + "\"warehouses\":[{\"warehouseId\":\""
+                        + whOwn
+                        + "\",\"warehouseKind\":\"OWN\"}]}"))
         .andExpect(status().isForbidden());
 
     // 读动作正常放行。
-    http.perform(get("/warehouse/inventory/safety-stock/capabilities")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/capabilities")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.salesSourceDerived").value(false))
         .andExpect(jsonPath("$.platformStockoutEscalation").exists());
@@ -978,40 +1209,50 @@ class SafetyStockIntegrationTest {
   void 端点能跑通评估到预警到建议的完整链路() throws Exception {
     standardStock();
     sales("2026-09-01", "2026-09-30", "300");
-    http.perform(post("/warehouse/inventory/safety-stock/policies")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"scopeType\":\"SKU\",\"skuId\":\"" + sku + "\",\"skuLabel\":\"商品一\","
-                + "\"thresholdQuantity\":150,\"alertSeverity\":\"WARNING\","
-                + "\"reorderCoverageDays\":7,\"autoSuggestReplenishment\":true,"
-                + "\"warehouses\":[{\"warehouseId\":\"" + whOwn + "\",\"warehouseKind\":\"OWN\"}]}"))
+    http.perform(
+            post("/warehouse/inventory/safety-stock/policies")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"SKU\",\"skuId\":\""
+                        + sku
+                        + "\",\"skuLabel\":\"商品一\","
+                        + "\"thresholdQuantity\":150,\"alertSeverity\":\"WARNING\","
+                        + "\"reorderCoverageDays\":7,\"autoSuggestReplenishment\":true,"
+                        + "\"warehouses\":[{\"warehouseId\":\""
+                        + whOwn
+                        + "\",\"warehouseKind\":\"OWN\"}]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.policyId").exists());
 
-    http.perform(post("/warehouse/inventory/safety-stock/evaluate")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/safety-stock/evaluate")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.alertsOpened").value(1))
         .andExpect(jsonPath("$.suggestionsCreated").value(1));
 
-    http.perform(get("/warehouse/inventory/safety-stock/alerts")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/alerts")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.alerts[0].alertType").value("OWN_WAREHOUSE_DEPLETION"))
         .andExpect(jsonPath("$.alerts[0].daysOfCover").value(10.0))
         .andExpect(jsonPath("$.alerts[0].suggestedQuantity").value(120));
 
-    http.perform(get("/warehouse/inventory/safety-stock/suggestions")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/suggestions")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.suggestions[0].targetStockQuantity").value(220));
 
-    http.perform(get("/warehouse/inventory/safety-stock/evaluations")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/evaluations")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1));
   }
@@ -1044,43 +1285,74 @@ class SafetyStockIntegrationTest {
         "warehouse.inventory.update",
         () -> {
           balance(b, idFor(b, 3), idFor(b, 5), "5", "0");
-          var input = new SafetyStockPolicyInput(
-              "SKU", null, idFor(b, 2), "B 的商品", new BigDecimal("80"), "CRITICAL", null, false,
-              null, "B 夹具",
-              List.of(new SafetyStockPolicyInput.SafetyStockWarehouseBinding(idFor(b, 3), "OWN")));
+          var input =
+              new SafetyStockPolicyInput(
+                  "SKU",
+                  null,
+                  idFor(b, 2),
+                  "B 的商品",
+                  new BigDecimal("80"),
+                  "CRITICAL",
+                  null,
+                  false,
+                  null,
+                  "B 夹具",
+                  List.of(
+                      new SafetyStockPolicyInput.SafetyStockWarehouseBinding(idFor(b, 3), "OWN")));
           var saved = service.save(null, input, actorB.userId());
-          return service.evaluate(new SafetyStockEvaluationRequest(List.of(), null, null), actorB.userId());
+          return service.evaluate(
+              new SafetyStockEvaluationRequest(List.of(), null, null), actorB.userId());
         });
 
-    var pageA = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.page(new SafetyStockQuery(null, null, sku, null, null, false, null, 0, 50)));
+    var pageA =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new SafetyStockQuery(null, null, sku, null, null, false, null, 0, 50)));
     assertThat(pageA.total()).isEqualTo(1);
     assertThat(pageA.policies().get(0).id()).isEqualTo(policyA.policyId());
     assertThat(pageA.policies().get(0).thresholdQuantity()).isEqualByComparingTo("150");
 
-    var alertsA = access.run(
-            actorA, "warehouse.inventory.read",
-            () -> service.alerts(new SafetyStockAlertQuery(
-                null, null, null, null, null, null, null, false, null, 0, 50)))
-        .alerts();
+    var alertsA =
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.read",
+                () ->
+                    service.alerts(
+                        new SafetyStockAlertQuery(
+                            null, null, null, null, null, null, null, false, null, 0, 50)))
+            .alerts();
     assertThat(alertsA).hasSize(1);
     assertThat(alertsA.get(0).skuId()).isEqualTo(sku);
 
-    var alertsB = access.run(
-            actorB, "warehouse.inventory.read",
-            () -> service.alerts(new SafetyStockAlertQuery(
-                null, null, null, null, null, null, null, false, null, 0, 50)))
-        .alerts();
+    var alertsB =
+        access
+            .run(
+                actorB,
+                "warehouse.inventory.read",
+                () ->
+                    service.alerts(
+                        new SafetyStockAlertQuery(
+                            null, null, null, null, null, null, null, false, null, 0, 50)))
+            .alerts();
     assertThat(alertsB).hasSize(1);
     assertThat(alertsB.get(0).skuId()).isEqualTo(idFor(b, 2));
     assertThat(alertsB.get(0).severity()).isEqualTo(AlertSeverity.CRITICAL);
 
     // 拿 A 的预警 id 去 B 那里读 → 404（RLS 下查不到），不泄露「这条存在」。
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.alert(alertsA.get(0).id())))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.alert(alertsA.get(0).id())))
         .isInstanceOf(ResponseStatusException.class);
     // 拿 A 的阈值 id 去 B 那里读 → 404。
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.detail(policyA.policyId())))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.detail(policyA.policyId())))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -1091,38 +1363,46 @@ class SafetyStockIntegrationTest {
     evaluate();
 
     // 身份是 B、伪造 X-Tenant-Id 指向 A → B 什么都看不到（B 自己没配任何阈值）。
-    http.perform(get("/warehouse/inventory/safety-stock/alerts")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/alerts")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
 
     // 身份是 A、伪造 B 的头 → A 仍然只看得到自己那一条。
-    http.perform(get("/warehouse/inventory/safety-stock/alerts")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/alerts")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.alerts[0].skuCode").value("SKU-1"));
 
     // 写入路径同样不受伪造头影响：B 带 A 的头建阈值，落的仍然是 B 的租户。
-    http.perform(post("/warehouse/inventory/safety-stock/policies")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content("{\"scopeType\":\"DEFAULT\",\"thresholdQuantity\":999,\"alertSeverity\":\"CRITICAL\","
-                + "\"warehouses\":[{\"warehouseId\":\"" + idFor(b, 3) + "\",\"warehouseKind\":\"OWN\"}]}"))
+    http.perform(
+            post("/warehouse/inventory/safety-stock/policies")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"DEFAULT\",\"thresholdQuantity\":999,\"alertSeverity\":\"CRITICAL\","
+                        + "\"warehouses\":[{\"warehouseId\":\""
+                        + idFor(b, 3)
+                        + "\",\"warehouseKind\":\"OWN\"}]}"))
         .andExpect(status().isOk());
 
     // A 的阈值列表里仍然只有自己那一条（没有阈值 999 的兜底档）。
-    http.perform(get("/warehouse/inventory/safety-stock/policies?effectiveOnly=true")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/policies?effectiveOnly=true")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(jsonPath("$.policies[?(@.thresholdQuantity==999)]").isEmpty())
         .andExpect(jsonPath("$.total").value(1));
 
     // B 自己的列表里才看得到那条 999。
-    http.perform(get("/warehouse/inventory/safety-stock/policies?effectiveOnly=true")
-            .header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/warehouse/inventory/safety-stock/policies?effectiveOnly=true")
+                .header("Authorization", "Bearer tenant-b"))
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.policies[0].thresholdQuantity").value(999));
   }
@@ -1140,21 +1420,39 @@ class SafetyStockIntegrationTest {
           return service.save(
               null,
               new SafetyStockPolicyInput(
-                  "SKU", null, idFor(b, 2), "B 的商品", new BigDecimal("80"), "WARNING", null,
-                  false, null, "B 夹具",
-                  List.of(new SafetyStockPolicyInput.SafetyStockWarehouseBinding(idFor(b, 3), "OWN"))),
+                  "SKU",
+                  null,
+                  idFor(b, 2),
+                  "B 的商品",
+                  new BigDecimal("80"),
+                  "WARNING",
+                  null,
+                  false,
+                  null,
+                  "B 夹具",
+                  List.of(
+                      new SafetyStockPolicyInput.SafetyStockWarehouseBinding(idFor(b, 3), "OWN"))),
               actorB.userId());
         });
 
     // 池大小为 1，同一条连接被反复借还：交替跑两个租户 20 轮，
     // 每一轮都要同时校验配置写入、回查、评估与预警生成四条路径都不串租户。
     for (int i = 0; i < 20; i++) {
-      var pageA = access.run(
-          actorA, "warehouse.inventory.read",
-          () -> service.page(new SafetyStockQuery(null, null, sku, null, null, true, null, 0, 50)));
-      var pageB = access.run(
-          actorB, "warehouse.inventory.read",
-          () -> service.page(new SafetyStockQuery(null, null, idFor(b, 2), null, null, true, null, 0, 50)));
+      var pageA =
+          access.run(
+              actorA,
+              "warehouse.inventory.read",
+              () ->
+                  service.page(
+                      new SafetyStockQuery(null, null, sku, null, null, true, null, 0, 50)));
+      var pageB =
+          access.run(
+              actorB,
+              "warehouse.inventory.read",
+              () ->
+                  service.page(
+                      new SafetyStockQuery(
+                          null, null, idFor(b, 2), null, null, true, null, 0, 50)));
       assertThat(pageA.policies()).hasSize(1);
       assertThat(pageB.policies()).hasSize(1);
       assertThat(pageA.policies().get(0).id()).isEqualTo(a1.policyId());
@@ -1162,26 +1460,40 @@ class SafetyStockIntegrationTest {
       assertThat(pageB.policies().get(0).thresholdQuantity()).isEqualByComparingTo("80");
 
       // 生效解析路径：同名 SKU 在两个租户解析到各自的档。
-      assertThat(access.run(
-              actorA, "warehouse.inventory.read",
-              () -> service.effective(SafetyStockScopeType.SKU, null, sku, null))
-          .policy().thresholdQuantity()).isEqualByComparingTo("150");
-      assertThat(access.run(
-              actorB, "warehouse.inventory.read",
-              () -> service.effective(SafetyStockScopeType.SKU, null, idFor(b, 2), null))
-          .policy().thresholdQuantity()).isEqualByComparingTo("80");
+      assertThat(
+              access
+                  .run(
+                      actorA,
+                      "warehouse.inventory.read",
+                      () -> service.effective(SafetyStockScopeType.SKU, null, sku, null))
+                  .policy()
+                  .thresholdQuantity())
+          .isEqualByComparingTo("150");
+      assertThat(
+              access
+                  .run(
+                      actorB,
+                      "warehouse.inventory.read",
+                      () -> service.effective(SafetyStockScopeType.SKU, null, idFor(b, 2), null))
+                  .policy()
+                  .thresholdQuantity())
+          .isEqualByComparingTo("80");
 
       // 评估路径：A 报一条（100<150），B 也报一条（5<80），但各自只看到自己那一条。
       var runA = evaluate();
-      var runB = evaluate(
-          actorB, new SafetyStockEvaluationRequest(List.of(), null, null));
+      var runB = evaluate(actorB, new SafetyStockEvaluationRequest(List.of(), null, null));
       assertThat(runA.alertsOpened()).isEqualTo(1);
       assertThat(runB.alertsOpened()).isEqualTo(1);
-      var alertsA = access.run(
-              actorA, "warehouse.inventory.read",
-              () -> service.alerts(new SafetyStockAlertQuery(
-                  null, sku, null, null, null, null, null, false, null, 0, 50)))
-          .alerts();
+      var alertsA =
+          access
+              .run(
+                  actorA,
+                  "warehouse.inventory.read",
+                  () ->
+                      service.alerts(
+                          new SafetyStockAlertQuery(
+                              null, sku, null, null, null, null, null, false, null, 0, 50)))
+              .alerts();
       assertThat(alertsA).allSatisfy(alert -> assertThat(alert.skuId()).isEqualTo(sku));
     }
   }
@@ -1192,15 +1504,20 @@ class SafetyStockIntegrationTest {
     // 没有 app.current_tenant 时直查表为空：RLS 真的在生效，不是应用层自觉过滤。
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), "warehouse_app", "test-only");
         var s = c.createStatement()) {
-      for (var table : List.of(
-          "safety_stock_policy", "safety_stock_policy_warehouse", "safety_stock_sales",
-          "safety_stock_evaluation", "safety_stock_alert",
-          "safety_stock_replenishment_suggestion")) {
+      for (var table :
+          List.of(
+              "safety_stock_policy",
+              "safety_stock_policy_warehouse",
+              "safety_stock_sales",
+              "safety_stock_evaluation",
+              "safety_stock_alert",
+              "safety_stock_replenishment_suggestion")) {
         var rs = s.executeQuery("select count(*) from " + table);
         rs.next();
         assertThat(rs.getLong(1)).as(table + " 在无租户上下文时必须为空").isZero();
-        var meta = s.executeQuery(
-            "select relforcerowsecurity from pg_class where relname = '" + table + "'");
+        var meta =
+            s.executeQuery(
+                "select relforcerowsecurity from pg_class where relname = '" + table + "'");
         meta.next();
         assertThat(meta.getBoolean(1)).as(table + " 必须 FORCE RLS").isTrue();
       }
@@ -1216,19 +1533,21 @@ class SafetyStockIntegrationTest {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), "warehouse_app", "test-only");
         var s = c.createStatement()) {
       // 被引用的表在 key_column_usage / constraint_column_usage 上，不在 table_constraints 上。
-      var fks = s.executeQuery(
-          "select count(*) from information_schema.constraint_column_usage ccu"
-              + " join information_schema.table_constraints tc"
-              + "   on tc.constraint_name = ccu.constraint_name"
-              + "  and tc.constraint_schema = ccu.constraint_schema"
-              + " where tc.constraint_type = 'FOREIGN KEY'"
-              + "   and tc.table_name like 'safety_stock%'"
-              + "   and ccu.table_name in ('spu','sku','category','product','shop','channel')");
+      var fks =
+          s.executeQuery(
+              "select count(*) from information_schema.constraint_column_usage ccu"
+                  + " join information_schema.table_constraints tc"
+                  + "   on tc.constraint_name = ccu.constraint_name"
+                  + "  and tc.constraint_schema = ccu.constraint_schema"
+                  + " where tc.constraint_type = 'FOREIGN KEY'"
+                  + "   and tc.table_name like 'safety_stock%'"
+                  + "   and ccu.table_name in ('spu','sku','category','product','shop','channel')");
       fks.next();
       assertThat(fks.getLong(1)).isZero();
 
-      var views = s.executeQuery(
-          "select count(*) from information_schema.views where table_name like 'safety_stock%'");
+      var views =
+          s.executeQuery(
+              "select count(*) from information_schema.views where table_name like 'safety_stock%'");
       views.next();
       assertThat(views.getLong(1)).isZero();
     } catch (java.sql.SQLException e) {

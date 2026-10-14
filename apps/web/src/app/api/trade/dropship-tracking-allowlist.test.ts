@@ -21,9 +21,7 @@ import { GET, POST } from './[...path]/route';
  */
 
 const SOURCE = readFileSync(
-  fileURLToPath(
-    new URL('../../../components/orders/dropship-tracking-model.ts', import.meta.url),
-  ),
+  fileURLToPath(new URL('../../../components/orders/dropship-tracking-model.ts', import.meta.url)),
   'utf8',
 );
 
@@ -51,8 +49,7 @@ function request(path: string, method = 'GET') {
  * 「源码加了新形状、白名单忘了登记」—— 所以这里从源码反向抽。
  */
 function realCallSites(): string[] {
-  const base =
-    SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/fulfillment/dropship-tracking';
+  const base = SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/fulfillment/dropship-tracking';
   const found = new Set<string>();
   for (const match of SOURCE.matchAll(/`([^`]*)`/g)) {
     const raw = match[1];
@@ -75,7 +72,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了三个」也算通过。
@@ -117,7 +116,9 @@ it('写形状被放行，且真的转发到 8085', async () => {
     `trade/fulfillment/dropship-tracking/tasks/${ID}/complete`,
   ]) {
     const segments = path.split('/');
-    const response = await POST(request(path, 'POST'), { params: { path: segments } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: segments }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -159,7 +160,9 @@ it('未交付的形状仍然被拒', async () => {
     // 非 UUID 段不应被 [0-9a-f-]+ 分支吃掉。
     'trade/fulfillment/dropship-tracking/trackings/not-a-uuid',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -173,7 +176,7 @@ it('裸路径 fulfillment/dropship-tracking 被拒：既不转发，也不冒充
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/fulfillment/dropship-tracking';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status, '裸路径不应被白名单放行').toBe(404);
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
 });
@@ -202,7 +205,9 @@ it('兄弟车道的 dropship / dropship-orders / routing 组未被本车道挤�
     'trade/fulfillment/routing/capabilities',
     'trade/fulfillment/allocation/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 是兄弟车道的形状，不该被本车道挤掉`).toBe(200);
   }
   // 反向：兄弟两组的正则**不得**吞掉本模块的路径（两组并列，不存在前缀包含关系）
@@ -211,7 +216,9 @@ it('兄弟车道的 dropship / dropship-orders / routing 组未被本车道挤�
     'trade/fulfillment/dropship-orders/tracking',
     'trade/fulfillment/dropship/dropship-tracking',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不属于兄弟车道的命名空间`).toBe(404);
   }
 });

@@ -13,13 +13,10 @@ import org.springframework.stereotype.Component;
 /**
  * Temu 授权（全托管）。
  *
- * <p>Temu 的授权粒度是"应用 × 商家"，没有传统意义的店铺列表接口，
- * 所以它也是这里唯一 {@code requiresShopDomain == false} 却把账号当作店铺的平台：
- * {@link #readAccount} 在拿不到店铺数组时，会用账号本身补出一个店铺，
- * 让向导第 5 步仍然有真实的东西可确认，而不是退化成"跳过这一步"。
+ * <p>Temu 的授权粒度是"应用 × 商家"，没有传统意义的店铺列表接口， 所以它也是这里唯一 {@code requiresShopDomain == false} 却把账号当作店铺的平台：
+ * {@link #readAccount} 在拿不到店铺数组时，会用账号本身补出一个店铺， 让向导第 5 步仍然有真实的东西可确认，而不是退化成"跳过这一步"。
  *
- * <p>全托管的店铺在 2.3.2.1 里是 {@code FULL_CONSIGNMENT} 经营模式——货权与结算口径和
- * 自发货完全不同，这里固化的默认模式会写进向导建出来的 shop 行。
+ * <p>全托管的店铺在 2.3.2.1 里是 {@code FULL_CONSIGNMENT} 经营模式——货权与结算口径和 自发货完全不同，这里固化的默认模式会写进向导建出来的 shop 行。
  */
 @Component
 public class TemuOAuthAdapter extends AbstractOAuthAdapter {
@@ -49,7 +46,8 @@ public class TemuOAuthAdapter extends AbstractOAuthAdapter {
   public OAuthFailure translatePlatformError(String errorCode, String description) {
     return switch (errorCode == null ? "" : errorCode) {
       case "invalid_client" ->
-          new OAuthFailure("CREDENTIAL_REJECTED", "Temu 拒绝了应用凭据，请联系管理员检查 client_id / client_secret。");
+          new OAuthFailure(
+              "CREDENTIAL_REJECTED", "Temu 拒绝了应用凭据，请联系管理员检查 client_id / client_secret。");
       case "999016", "40301" ->
           new OAuthFailure("INSUFFICIENT_SCOPE", "该应用未被授权此权限范围，请在 Temu 开放平台调整后重试。");
       default -> super.translatePlatformError(errorCode, description);

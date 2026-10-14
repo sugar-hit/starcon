@@ -25,12 +25,12 @@
 
 **没有手改那行 15k 字符的正则**，写了脚本解析顶层 alternation：
 
-| 版本 | 外层分支数 |
-| --- | --- |
-| 合并基 `e44c62c` | 36 |
-| 本车道 `434939c` | 37（+`kb`） |
-| 集成头 `f53b918` | 37（+`description-templates`） |
-| **求并结果** | **38（36 + 两个新分支，一个没丢）** |
+| 版本             | 外层分支数                          |
+| ---------------- | ----------------------------------- |
+| 合并基 `e44c62c` | 36                                  |
+| 本车道 `434939c` | 37（+`kb`）                         |
+| 集成头 `f53b918` | 37（+`description-templates`）      |
+| **求并结果**     | **38（36 + 两个新分支，一个没丢）** |
 
 求并 = 取集成头那行正则 + 把 `kb` 分支插到同一锚点（`sku-merges` 之后、闭括号之前）。
 另核对：6 个 service prefix 全部存活，集成头相对求并结果**只少了我那 19 行 `kb` 注释**。
@@ -88,16 +88,16 @@ python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi
 
 ## 蓝图自检（八条逐条）
 
-| # | 项 | 结论 |
-| --- | --- | --- |
-| 1 | 多语言版本是真实表行 | ✅ `kb_entry_translation` 独立表；测试 `多语言版本是真实表行而不是json挂一列` |
-| 2 | 使用效果/命中率真实落库 | ✅ `kb_usage` append-only（触发器 + REVOKE 双重兜底），端点 POST /entries/{id}/usages + GET /hit-rates；测试 `引用记录真的落库且页面上查得到` |
-| 3 | 话术与平台规则版本挂钩 | ✅ `kb_rule_version` + `kb_entry_rule` + `kb_review_task`；规则被接替（SUPERSEDED）自动给挂在上面的话术生成 PENDING 复核任务，有端点与测试 |
-| 4 | 无硬编码/占位页/假分页假搜索 | ✅ 词表常量（ENTRY_TYPES 等）对应 DB CHECK 约束，业务数据全走 API；`listEntries` 是真 `limit/offset` + `LIKE` + `exists` 子查询 |
-| 5 | 真落 PG16，jOOQ 显式 SQL | ✅ Testcontainers PG16，jOOQ 拼接显式 SQL，无 JPA |
-| 6 | 多租户 + RLS 三断言 | ✅ 六表 `tenant_id uuid NOT NULL` + ENABLE/FORCE RLS；租户只取 `AccessService.Access`；三断言见下 |
-| 7 | 金额数量 BigDecimal/NUMERIC，时间 OffsetDateTime + `?::timestamptz` | ✅ 十个时间列全 `timestamptz`；命中率经 `KnowledgeBaseRules.hitRate` 走 BigDecimal 无浮点；两个测试断言写回值零漂移 |
-| 8 | V100 既定不改 | ✅ |
+| #   | 项                                                                  | 结论                                                                                                                                          |
+| --- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 多语言版本是真实表行                                                | ✅ `kb_entry_translation` 独立表；测试 `多语言版本是真实表行而不是json挂一列`                                                                 |
+| 2   | 使用效果/命中率真实落库                                             | ✅ `kb_usage` append-only（触发器 + REVOKE 双重兜底），端点 POST /entries/{id}/usages + GET /hit-rates；测试 `引用记录真的落库且页面上查得到` |
+| 3   | 话术与平台规则版本挂钩                                              | ✅ `kb_rule_version` + `kb_entry_rule` + `kb_review_task`；规则被接替（SUPERSEDED）自动给挂在上面的话术生成 PENDING 复核任务，有端点与测试    |
+| 4   | 无硬编码/占位页/假分页假搜索                                        | ✅ 词表常量（ENTRY_TYPES 等）对应 DB CHECK 约束，业务数据全走 API；`listEntries` 是真 `limit/offset` + `LIKE` + `exists` 子查询               |
+| 5   | 真落 PG16，jOOQ 显式 SQL                                            | ✅ Testcontainers PG16，jOOQ 拼接显式 SQL，无 JPA                                                                                             |
+| 6   | 多租户 + RLS 三断言                                                 | ✅ 六表 `tenant_id uuid NOT NULL` + ENABLE/FORCE RLS；租户只取 `AccessService.Access`；三断言见下                                             |
+| 7   | 金额数量 BigDecimal/NUMERIC，时间 OffsetDateTime + `?::timestamptz` | ✅ 十个时间列全 `timestamptz`；命中率经 `KnowledgeBaseRules.hitRate` 走 BigDecimal 无浮点；两个测试断言写回值零漂移                           |
+| 8   | V100 既定不改                                                       | ✅                                                                                                                                            |
 
 ### 第 6 条的三个断言（实跑，不是走过场）
 

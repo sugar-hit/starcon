@@ -3,14 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CircleSlash, RefreshCw, TriangleAlert } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   OrderChangeCancelCancellationDetail,
   OrderChangeCancelCapabilities,
@@ -149,7 +142,7 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
 
       {h.status === 'REJECTED' && h.rejectionReason ? (
         <SectionCard title="拒绝原因">
-          <p className="text-sm text-muted-foreground">{h.rejectionReason}</p>
+          <p className="text-muted-foreground text-sm">{h.rejectionReason}</p>
         </SectionCard>
       ) : null}
 
@@ -164,7 +157,7 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left text-xs">
                   <th className="p-2">SKU</th>
                   <th className="p-2">原量</th>
                   <th className="p-2">已发货</th>
@@ -184,12 +177,12 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
                         {quantityCell(line.shippedQuantityAtRequest, verified)}
                       </td>
                       <td className="p-2">{quantityCell(line.cancelQuantity, true)}</td>
-                      <td className="p-2">
-                        {quantityCell(line.cancelledQuantity, true)}
-                      </td>
+                      <td className="p-2">{quantityCell(line.cancelledQuantity, true)}</td>
                       <td className="p-2">
                         <span
-                          className={cancelable.verified ? '' : 'text-amber-600 dark:text-amber-400'}
+                          className={
+                            cancelable.verified ? '' : 'text-amber-600 dark:text-amber-400'
+                          }
                         >
                           {cancelable.value}
                         </span>
@@ -229,13 +222,11 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
                   <span className="font-medium">
                     {task.warehouseRef} · {holdTaskStageLabels[task.taskStage] ?? task.taskStage}
                   </span>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     目标 {quantityCell(task.targetQuantity, true)} · 已完成{' '}
                     {quantityCell(task.completedQuantity, true)} · {task.targetApi}
                   </p>
-                  {task.resultNote ? (
-                    <p className="mt-1 text-xs">{task.resultNote}</p>
-                  ) : null}
+                  {task.resultNote ? <p className="mt-1 text-xs">{task.resultNote}</p> : null}
                   {task.failureReason ? (
                     <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
                       {task.failureReason}
@@ -285,9 +276,10 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
               >
                 <div>
                   <span className="font-medium">
-                    {task.platformCode || '—'} · {changeKindLabels[task.changeKind] ?? task.changeKind}
+                    {task.platformCode || '—'} ·{' '}
+                    {changeKindLabels[task.changeKind] ?? task.changeKind}
                   </span>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     平台单号 {task.platformOrderRef || '—'} · 尝试 {task.attemptCount} 次 ·{' '}
                     {task.ownerModule}
                   </p>
@@ -307,7 +299,10 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
       </SectionCard>
 
       {/* 六、时间线 */}
-      <SectionCard title="处理时间线" description="事件流不可改写：它是「谁在什么时候把这张单推到哪一步」的举证凭据。">
+      <SectionCard
+        title="处理时间线"
+        description="事件流不可改写：它是「谁在什么时候把这张单推到哪一步」的举证凭据。"
+      >
         {detail.timeline.length === 0 ? (
           <EmptyState title="还没有事件" description="申请提交后会记录第一条事件。" />
         ) : (
@@ -318,8 +313,10 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
                   {event.eventType}
                   {event.toStatus ? ` → ${statusLabel(event.toStatus)}` : ''}
                 </p>
-                {event.detail ? <p className="text-xs text-muted-foreground">{event.detail}</p> : null}
-                <p className="text-xs text-muted-foreground">{event.occurredAt}</p>
+                {event.detail ? (
+                  <p className="text-muted-foreground text-xs">{event.detail}</p>
+                ) : null}
+                <p className="text-muted-foreground text-xs">{event.occurredAt}</p>
               </li>
             ))}
           </ol>
@@ -332,10 +329,10 @@ export function OrderChangeCancelWorkspace({ cancellationId }: { cancellationId:
           <ul className="space-y-2 text-sm">
             {caps.unavailableCapabilities.map((item) => (
               <li key={item.code} className="flex items-start gap-2">
-                <CircleSlash className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <CircleSlash className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
                 <div>
                   <p className="font-medium">{item.code}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     归属 {item.ownerModule} —— {item.description}
                   </p>
                 </div>

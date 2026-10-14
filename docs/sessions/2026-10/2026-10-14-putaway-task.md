@@ -15,11 +15,11 @@
 
 **2. 三条不变量都放在数据库层，且刻意带回账本分录。**
 
-| | 内容 | 为什么不够/为什么够 |
-|---|---|---|
-| P1 | 该任务那条 transaction 的全部分录 `on_hand_delta` 之和 **= 0** | 抓「有人塞了不成对的分录」 |
-| P2 | 完成时每行 `putaway_quantity` **恰好 =** `planned_quantity` | 抓「半张单说完成」 |
-| P3 | 账上负向分录绝对值之和 **=** 明细实上架量 | 抓「少搬」 |
+|     | 内容                                                           | 为什么不够/为什么够        |
+| --- | -------------------------------------------------------------- | -------------------------- |
+| P1  | 该任务那条 transaction 的全部分录 `on_hand_delta` 之和 **= 0** | 抓「有人塞了不成对的分录」 |
+| P2  | 完成时每行 `putaway_quantity` **恰好 =** `planned_quantity`    | 抓「半张单说完成」         |
+| P3  | 账上负向分录绝对值之和 **=** 明细实上架量                      | 抓「少搬」                 |
 
 P3 独立于 P1 不是冗余：源位减 90、目标位加 90 时 **P1 照样成立**，只有核对「搬了多少」才抓得住。
 三条都靠 `guard_putaway_task()` 在转 COMPLETED 时**回读 `inventory_entry`**裁决，
@@ -42,7 +42,7 @@ P3 独立于 P1 不是冗余：源位减 90、目标位加 90 时 **P1 照样成
 一对反向分录，成对的两条加起来恒为 0，所以**任务没做完时净额同样是 0**。
 P1 抓的是「不成对的分录」，做没做完看 P2/P3 与明细的 `putaway_quantity`。
 前端与 `capabilities` 的文案都按这个口径改了，并在界面上明写「净额为 0 不代表任务做完了」。
-*代价*：P1 单独看比较弱；*收益*：文案不再骗人。
+_代价_：P1 单独看比较弱；_收益_：文案不再骗人。
 
 **② 幂等必须单独立一道。** 同一个 `scan_reference` 重复提交撞部分唯一索引。
 少了这道，**PDA 网络抖动重发会把同一批货搬两遍，而 P1 的净额仍然是 0** ——
@@ -74,6 +74,7 @@ V2 的 `guard_bucket_movement_time` 要求该列严格前进。现实里两种�
 ## 文件清单
 
 **新增（backend）**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V109__warehouse_putaway_task.sql`
   —— 三张表 + 三个派生量触发器 + 守卫触发器 + append-only + RLS/FORCE/GRANT
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/PutawayTaskModels.java`
@@ -82,12 +83,14 @@ V2 的 `guard_bucket_movement_time` 要求该列严格前进。现实里两种�
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/PutawayTaskIntegrationTest.java`（33 例）
 
 **新增（frontend）**
+
 - `apps/web/src/components/warehouse/putaway-task-model.ts` / `-model.test.ts`（32 例）
 - `apps/web/src/components/warehouse/putaway-task-workspace.tsx`
 - `apps/web/src/app/warehouse/putaway-tasks/page.tsx`
 - `apps/web/src/app/api/warehouse/putaway-task-allowlist.test.ts`（8 例，双向断言）
 
 **修改（求并相关，务必注意）**
+
 - `apps/web/src/lib/api-proxy.ts` —— **只在 `warehouse/` 那条正则尾部追加了一个顶层分支**
   `putaway-tasks`，**插在 `disassembly-orders` 之后（当前最末）**，未重排任何既有分支。
   下一轮求并按这个位置定位。
@@ -95,13 +98,13 @@ V2 的 `guard_bucket_movement_time` 要求该列严格前进。现实里两种�
 
 ## 验证
 
-| 闸 | 命令 | 结果 |
-|---|---|---|
-| L0 编译 | `cd backend && ./mvnw -q compile` | 绿 |
-| L0 类型 | `pnpm typecheck` | 绿（3/3 tasks） |
-| L1 后端 | `./mvnw -pl services/warehouse -am test` | **1183 例绿** |
-| L1 本模块 | `-Dtest=PutawayTaskIntegrationTest` | **33 例绿** |
-| L1 前端 | `pnpm vitest run <本车道两个测试文件> + 全部 warehouse 代理测试` | **113 例绿** |
+| 闸        | 命令                                                             | 结果            |
+| --------- | ---------------------------------------------------------------- | --------------- |
+| L0 编译   | `cd backend && ./mvnw -q compile`                                | 绿              |
+| L0 类型   | `pnpm typecheck`                                                 | 绿（3/3 tasks） |
+| L1 后端   | `./mvnw -pl services/warehouse -am test`                         | **1183 例绿**   |
+| L1 本模块 | `-Dtest=PutawayTaskIntegrationTest`                              | **33 例绿**     |
+| L1 前端   | `pnpm vitest run <本车道两个测试文件> + 全部 warehouse 代理测试` | **113 例绿**    |
 
 `StockOwnershipIntegrationTest`（7.7.1.1，非本车道）在首轮全量跑里失败过一次，
 单独跑 40/40 绿、全量复跑也绿 —— 判定为既有的执行顺序偶发，**与本车道无关**。

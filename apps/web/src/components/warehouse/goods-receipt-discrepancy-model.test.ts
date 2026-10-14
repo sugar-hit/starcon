@@ -207,9 +207,9 @@ describe('词表', () => {
   });
 
   it('未交付的下游带归属模块后缀，界面上直接禁用', () => {
-    expect(dependencyCaption({ label: '对账索赔受理与结算', available: false, ownerModule: '6.5.1' })).toBe(
-      '对账索赔受理与结算（6.5.1 未交付）',
-    );
+    expect(
+      dependencyCaption({ label: '对账索赔受理与结算', available: false, ownerModule: '6.5.1' }),
+    ).toBe('对账索赔受理与结算（6.5.1 未交付）');
     expect(dependencyCaption({ label: '已交付', available: true, ownerModule: '6.5.1' })).toBe(
       '已交付',
     );

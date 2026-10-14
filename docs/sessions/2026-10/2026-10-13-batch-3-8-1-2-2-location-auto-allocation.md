@@ -64,15 +64,15 @@ d6c882c HEAD@{4}: merge feat/8-1-2-2: Merge made by the 'ort' strategy.
 
 ## L2 全量验证记录
 
-| 项 | 结果 |
-| --- | --- |
-| `./mvnw verify` | **BUILD SUCCESS**，7 模块全绿，7:18 |
-| 后端用例 | **2974 例，0 失败 0 错误** |
-| `pnpm typecheck` | EXIT=0 |
-| `pnpm lint` | EXIT=0（1 条 react-hooks warning，非阻塞） |
-| `pnpm test` | **2230 例全绿**，118 个测试文件 |
-| Next production build | EXIT=0 |
-| `sync.mjs --check` | ✅ 台账与蓝图一致 |
+| 项                    | 结果                                       |
+| --------------------- | ------------------------------------------ |
+| `./mvnw verify`       | **BUILD SUCCESS**，7 模块全绿，7:18        |
+| 后端用例              | **2974 例，0 失败 0 错误**                 |
+| `pnpm typecheck`      | EXIT=0                                     |
+| `pnpm lint`           | EXIT=0（1 条 react-hooks warning，非阻塞） |
+| `pnpm test`           | **2230 例全绿**，118 个测试文件            |
+| Next production build | EXIT=0                                     |
+| `sync.mjs --check`    | ✅ 台账与蓝图一致                          |
 
 ### 两次假红：既有测试在全量并发下 flake
 

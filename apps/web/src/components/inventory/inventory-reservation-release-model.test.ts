@@ -44,7 +44,10 @@ function urls(fetcher: { mock: { calls: unknown[][] } }, n: number): string {
   return String(fetcher.mock.calls[n]?.[0]);
 }
 
-function bodyOf(fetcher: { mock: { calls: unknown[][] } }, n: number): { body?: string } | undefined {
+function bodyOf(
+  fetcher: { mock: { calls: unknown[][] } },
+  n: number,
+): { body?: string } | undefined {
   return fetcher.mock.calls[n]?.[1] as { body?: string } | undefined;
 }
 
@@ -190,9 +193,9 @@ describe('运行摘要', () => {
 
   it('干跑与真跑的摘要一眼可分', () => {
     // 「干跑了但没执行」被当成已清理是最贵的错
-    expect(runSummaryText({ ...base, dryRun: true, processedCount: 0, restoredQuantity: 0 })).toContain(
-      '未做任何变更',
-    );
+    expect(
+      runSummaryText({ ...base, dryRun: true, processedCount: 0, restoredQuantity: 0 }),
+    ).toContain('未做任何变更');
     expect(runSummaryText(base)).toContain('回收 3 条');
     expect(runSummaryText(base)).toContain('还回可用量 30');
   });

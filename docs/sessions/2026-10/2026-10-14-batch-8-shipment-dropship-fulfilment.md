@@ -23,7 +23,7 @@
   / `{id}/waybills` / `{id}/confirm` / `{id}/cancel`
 - 页面：`/warehouse/shipment-handovers`（`handover-workspace.tsx` + `handover-model.ts`）
 - 测试：`ShipmentHandoverIntegrationTest` 21 例 + `handover-model.test.ts` 21 例
-  + `shipment-handover-allowlist.test.ts` 8 例
+  - `shipment-handover-allowlist.test.ts` 8 例
 
 **关键设计决策**：
 
@@ -33,7 +33,7 @@
      `available >= 0` 守卫拒掉 —— **那正是「预占悬空」在 DB 层的形态**。
   2. `reservation_allocation`（V107）= 7.2.1.2 **承诺账**，V112 文件头明确写了它不碰 balance。
      处理是 `COMMITTED → CONSUMED` + `reservation_entry` + 父预占回写。
-  漏掉任何一本都会导致库存账实不符，而两条车道的单跑测试**都不会**发现这一点。
+     漏掉任何一本都会导致库存账实不符，而两条车道的单跑测试**都不会**发现这一点。
 - **实发扣减与预占消费在同一事务**：这是蓝图点名的硬要求。实现上把状态守卫做成 **DB 硬约束** ——
   置 `HANDED_OVER` 时逐行核对「实扣量恰好等于应发量 + 每行落到具体库存行 + 挂着台账流水」，
   应用层**写不出**更小的数。幂等锚点是台账的 `(ref_type, ref_id)`，重复投递撞 UNIQUE 而不是二次扣库存。
@@ -59,7 +59,7 @@
   `units/{id}/sla`、`units/{id}/cancel`、批量任务的建/查/执行/取消、运单回执、面单）
 - 页面：`/orders/fulfillment/pending-shipment`
 - 测试：`PendingShipmentIntegrationTest` 21 例 + `pending-shipment-model.test.ts` 18 例
-  + `pending-shipment-allowlist.test.ts` 5 例
+  - `pending-shipment-allowlist.test.ts` 5 例
 
 **关键设计决策**：
 
@@ -126,14 +126,15 @@
 
 - **两段物流在数据模型上就是两组互不相干的列**，状态枚举刻意用两个不同词表：
 
-  | | 供应商段 `supplier_leg_*` | 我方段 `own_leg_*` |
-  |---|---|---|
-  | 状态 | `NOT_SHIPMENT / SHIPPED / IN_TRANSIT / DELIVERED / LOST / ABANDONED` | `NOT_HANDED_OVER / HANDED_OVER / IN_TRANSIT / DELIVERED / RETURNED` |
-  | 承运商 / 运单号 | `supplier_carrier_code` / `supplier_tracking_no` | `own_carrier_code` / `own_tracking_no` |
+  |                 | 供应商段 `supplier_leg_*`                                            | 我方段 `own_leg_*`                                                  |
+  | --------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+  | 状态            | `NOT_SHIPMENT / SHIPPED / IN_TRANSIT / DELIVERED / LOST / ABANDONED` | `NOT_HANDED_OVER / HANDED_OVER / IN_TRANSIT / DELIVERED / RETURNED` |
+  | 承运商 / 运单号 | `supplier_carrier_code` / `supplier_tracking_no`                     | `own_carrier_code` / `own_tracking_no`                              |
 
   我方段以「**交运**」而非「发货」为起点，且没有 `ABANDONED`。
   DB 层钉死：触发器拒绝两段同时在途；切到 OWN 必须与「供应商段落 ABANDONED」**在同一行完成** ——
   ABANDONED 是凭据不是删除。
+
 - **三类异常是真 SQL 检出，不是手标**：
   1. `DELAYED_SHIPMENT` 超时未发货 — 已超过 `supplier_promised_ship_at + delay_tolerance_hours`
   2. `PARCEL_LOST` 丢件（轨迹停滞） — 已发货/在途**且有运单号**，
@@ -215,11 +216,11 @@
 **验证（反向对照实验）** —— 关键在于「绿一次」不能证明修好了，
 因为此刻本就该是红的：
 
-| 步骤 | pinned 值 | 墙上时钟 | 结果 | 输出里的 `local_hour` |
-|---|---|---|---|---|
-| 1 不改 | 无（走 `now()`） | 19:21 | 红 | 19 |
-| 2 钉时段外 | 仓本地 20:00 | **19:22** | 红 | 20 |
-| 3 钉时段内 | 仓本地 10:00 | **19:22** | 绿 | — |
+| 步骤       | pinned 值        | 墙上时钟  | 结果 | 输出里的 `local_hour` |
+| ---------- | ---------------- | --------- | ---- | --------------------- |
+| 1 不改     | 无（走 `now()`） | 19:21     | 红   | 19                    |
+| 2 钉时段外 | 仓本地 20:00     | **19:22** | 红   | 20                    |
+| 3 钉时段内 | 仓本地 10:00     | **19:22** | 绿   | —                     |
 
 步骤 2、3 墙上时钟**相同**却结果相反 ⇒ 成败只由 pinned 值决定，依赖已解除。
 同批全量 warehouse 1422 例绿。
@@ -239,7 +240,7 @@
 ```ts
 children: IMPLEMENTED_TASK_PAGES.filter(
   (page) => page.domain === item.href.slice(1) && !isAccountDomain(page.domain),
-)
+);
 ```
 
 对 `/orders/b2b` 来说 `href.slice(1)` 是 `orders/b2b`，
@@ -271,10 +272,10 @@ children: IMPLEMENTED_TASK_PAGES.filter(
 
 本批实测命中两次：
 
-| 服务 | 冲突的两条车道 | 结果 |
-|---|---|---|
+| 服务      | 冲突的两条车道     | 结果         |
+| --------- | ------------------ | ------------ |
 | warehouse | 8.3.4.1 + 10.2.2.1 | 手工求并解开 |
-| trade | 9.4.1.1 + 9.6.1.3 | 手工求并解开 |
+| trade     | 9.4.1.1 + 9.6.1.3  | 手工求并解开 |
 
 加上早先遗留的 9.1.1.3 + 9.7.1.1（同样卡在这个文件），一度有 **4 条车道**堵死。
 按 `--lanes 4` 的派发密度，这几乎每批都会复发。
@@ -309,14 +310,14 @@ catalog 40 条、identity 16 条、warehouse 4 条、channel 3 条、internal 1 
 
 ## L2 验证结果
 
-| 项 | 结果 |
-|---|---|
-| `backend && ./mvnw verify` | **BUILD SUCCESS**，3578 例，0 失败 0 错误 |
-| `pnpm typecheck` | 通过（3 packages） |
-| `pnpm lint` | 通过 |
-| `pnpm test` | **153 文件 / 2796 例全通过** |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过 |
-| `sync.mjs --check` | ✓ 台账与蓝图一致 |
+| 项                                                           | 结果                                      |
+| ------------------------------------------------------------ | ----------------------------------------- |
+| `backend && ./mvnw verify`                                   | **BUILD SUCCESS**，3578 例，0 失败 0 错误 |
+| `pnpm typecheck`                                             | 通过（3 packages）                        |
+| `pnpm lint`                                                  | 通过                                      |
+| `pnpm test`                                                  | **153 文件 / 2796 例全通过**              |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过                                      |
+| `sync.mjs --check`                                           | ✓ 台账与蓝图一致                          |
 
 后端分模块耗时：warehouse 8:09 / catalog 1:39 / trade 35s / identity 45s / channel 9s / crm 6s。
 

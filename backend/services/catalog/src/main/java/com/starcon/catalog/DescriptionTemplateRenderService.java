@@ -16,28 +16,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 4.2.2.2 描述模板的渲染服务：把五段骨架 + 变量绑定 + 多语言 + 图片插入位
- * 拼成**一份可以直接上传的描述 HTML**，并把它与缺失报告一起落库。
+ * 4.2.2.2 描述模板的渲染服务：把五段骨架 + 变量绑定 + 多语言 + 图片插入位 拼成**一份可以直接上传的描述 HTML**，并把它与缺失报告一起落库。
  *
- * <p>蓝图输出：「描述模板 + <b>渲染后的描述 HTML</b>（供编辑器与平台上传）」。
- * 所以这里返回的不是模板字符串，而�� {@link DescriptionRenderProduct#getHtml()}——
- * 五段 {@code <section data-section-type="…">} 按 {@code sort_order} 串起来，
- * 段落内的 {@code <img data-position="…">} 落成可解析的位置。
+ * <p>蓝图输出：「描述模板 + <b>渲染后的描述 HTML</b>（供编辑器与平台上传）」。 所以这里返回的不是模板字符串，而�� {@link
+ * DescriptionRenderProduct#getHtml()}—— 五段 {@code <section data-section-type="…">} 按 {@code
+ * sort_order} 串起来， 段落内的 {@code <img data-position="…">} 落成可解析的位置。
  *
- * <p><b>与 3.4.2.2 的批量填充刻意分开</b>（理由见 V96 文件头差异 C）：
- * 那边是「一批 N 个 SKU × 一种文案类型 → 填充后的描述文本」，
- * 这边是「一个模板 × 一个 SKU × 一种语言 → 一整份详情页 HTML」。
- * 两者只共用 content_template 与同一套变量取值代码（{@link DescriptionRenderer}）。
+ * <p><b>与 3.4.2.2 的批量填充刻意分开</b>（理由见 V96 文件头差异 C）： 那边是「一批 N 个 SKU × 一种文案类型 → 填充后的描述文本」， 这边是「一个模板 ×
+ * 一个 SKU × 一种语言 → 一整份详情页 HTML」。 两者只共用 content_template 与同一套变量取值代码（{@link DescriptionRenderer}）。
  *
  * <p>「变量未绑定必须显式提示」在这里有三重落点：
  *
  * <ol>
  *   <li>{@link DescriptionTemplateRenderer} 剥空占位符 + 逐条产 Issue；
- *   <li>缺变量的段落落成 {@code status='INCOMPLETE'}（V96 的 CHECK 与触发器从 DB 层
- *       保证「既缺变量又标成填好了」这个组合不存在）；
- *   <li>批次只要有一段不完整就落成 {@code PARTIAL}，且
- *       {@code description_render} 上有 CHECK：{@code SUCCEEDED} 的整份 HTML
- *       里不许出现任何花括号。
+ *   <li>缺变量的段落落成 {@code status='INCOMPLETE'}（V96 的 CHECK 与触发器从 DB 层 保证「既缺变量又标成填好了」这个组合不存在）；
+ *   <li>批次只要有一段不完整就落成 {@code PARTIAL}，且 {@code description_render} 上有 CHECK：{@code SUCCEEDED} 的整份
+ *       HTML 里不许出现任何花括号。
  * </ol>
  */
 @Service
@@ -63,11 +57,9 @@ public class DescriptionTemplateRenderService {
   /**
    * 渲染一次描述 HTML（同步，返回即已完成）。
    *
-   * <p>同步而不是异步任务：成本只与「段落数 × 变量数」成正比（几个字符串替换），
-   * 做成异步只会让运营为几十毫秒去盯进度条（与 3.4.2.2 同一判断）。
+   * <p>同步而不是异步任务：成本只与「段落数 × 变量数」成正比（几个字符串替换）， 做成异步只会让运营为几十毫秒去盯进度条（与 3.4.2.2 同一判断）。
    *
-   * <p>缺译文**不整批拒**：本模块一次渲染的是一个 SKU，缺一段译文按
-   * 「该段落报 TRANSLATION_MISSING 并降级 INCOMPLETE」处理更有用——
+   * <p>缺译文**不整批拒**：本模块一次渲染的是一个 SKU，缺一段译文按 「该段落报 TRANSLATION_MISSING 并降级 INCOMPLETE」处理更有用——
    * 运营立刻看到「就差英文规格参数段」，而不是提交失败后不知道差在哪。
    */
   public DescriptionRenderProduct render(AccessService.Access actor, DescriptionRenderInput input) {
@@ -90,9 +82,7 @@ public class DescriptionTemplateRenderService {
     var template = templates.templateRow(input.templateId());
     CatalogService.check(
         Boolean.TRUE.equals(template.get("enabled", Boolean.class)),
-        "描述模板「"
-            + template.get("code", String.class)
-            + "」已停用，不能发起渲染：停用后不能新建渲染，历史渲染照常可读。请先启用它");
+        "描述模板「" + template.get("code", String.class) + "」已停用，不能发起渲染：停用后不能新建渲染，历史渲染照常可读。请先启用它");
     String sourceLocale = template.get("source_locale", String.class);
     String templateCode = template.get("code", String.class);
 
@@ -103,7 +93,8 @@ public class DescriptionTemplateRenderService {
                 + "c.source_locale from description_template_section s"
                 + " join content_template c on c.tenant_id=s.tenant_id and c.id=s.content_template_id"
                 + " where s.tenant_id=? and s.template_id=? order by s.sort_order,s.id",
-            tenantId, input.templateId());
+            tenantId,
+            input.templateId());
     CatalogService.check(
         !sectionRows.isEmpty(),
         "描述模板「"
@@ -113,8 +104,10 @@ public class DescriptionTemplateRenderService {
     List<UUID> sectionIds = sectionRows.stream().map(r -> r.get("id", UUID.class)).toList();
     List<UUID> contentTemplateIds =
         sectionRows.stream().map(r -> r.get("content_template_id", UUID.class)).toList();
-    Map<UUID, List<ContentTemplateVariable>> variables = descriptions.variablesOf(contentTemplateIds);
-    Map<UUID, List<ContentTranslation>> translations = descriptions.translationRows(contentTemplateIds);
+    Map<UUID, List<ContentTemplateVariable>> variables =
+        descriptions.variablesOf(contentTemplateIds);
+    Map<UUID, List<ContentTranslation>> translations =
+        descriptions.translationRows(contentTemplateIds);
     Map<UUID, List<DescriptionImageSlotRow>> slots = templates.imageSlotsOf(sectionIds);
 
     // ---- SKU 事实与短语池（3.4.2.2 的取值口径，直接复用）
@@ -135,7 +128,8 @@ public class DescriptionTemplateRenderService {
       UUID sectionId = r.get("id", UUID.class);
       for (DescriptionImageSlotRow slot : slots.getOrDefault(sectionId, List.of())) {
         DescriptionTemplateRenderer.ImageSlotSpec spec = toSlotSpec(slot);
-        DescriptionTemplateRenderer.ResolvedImage image = resolveImage(spec, sku, given, assetCache);
+        DescriptionTemplateRenderer.ResolvedImage image =
+            resolveImage(spec, sku, given, assetCache);
         if (image != null) resolved.put(DescriptionTemplateRenderer.key(spec, sectionId), image);
       }
     }
@@ -159,7 +153,8 @@ public class DescriptionTemplateRenderService {
       List<DescriptionRenderer.VariableSpec> variableSpecs = new ArrayList<>();
       for (ContentTemplateVariable variable : variables.getOrDefault(contentTemplateId, List.of()))
         variableSpecs.add(
-            new DescriptionRenderer.VariableSpec(variable.name(), variable.source(), variable.slotNo()));
+            new DescriptionRenderer.VariableSpec(
+                variable.name(), variable.source(), variable.slotNo()));
       List<DescriptionTemplateRenderer.ImageSlotSpec> slotSpecs = new ArrayList<>();
       for (DescriptionImageSlotRow slot : slots.getOrDefault(sectionId, List.of()))
         slotSpecs.add(toSlotSpec(slot));
@@ -184,10 +179,8 @@ public class DescriptionTemplateRenderService {
     boolean complete = document.complete();
     int completeSections = 0;
     for (var section : document.sections()) if (section.complete()) completeSections++;
-    String status =
-        complete ? "SUCCEEDED" : (completeSections > 0 ? "PARTIAL" : "FAILED");
-    int imageCount =
-        document.sections().stream().mapToInt(s -> s.images().size()).sum();
+    String status = complete ? "SUCCEEDED" : (completeSections > 0 ? "PARTIAL" : "FAILED");
+    int imageCount = document.sections().stream().mapToInt(s -> s.images().size()).sum();
     int issueCount = document.issues().size();
 
     UUID renderId = Ids.next();
@@ -281,29 +274,40 @@ public class DescriptionTemplateRenderService {
 
   // ============================================================ 图片解析
 
-  private record MediaAsset(UUID id, String storageKey, String altText, java.math.BigDecimal widthPx,
+  private record MediaAsset(
+      UUID id,
+      String storageKey,
+      String altText,
+      java.math.BigDecimal widthPx,
       java.math.BigDecimal heightPx) {}
 
   private record DescriptionTranslationHit(String body) {}
 
-  private static DescriptionTranslationHit translationHit(List<ContentTranslation> translations, String locale) {
+  private static DescriptionTranslationHit translationHit(
+      List<ContentTranslation> translations, String locale) {
     if (translations == null) return null;
     for (ContentTranslation translation : translations)
-      if (translation.locale().equals(locale)) return new DescriptionTranslationHit(translation.body());
+      if (translation.locale().equals(locale))
+        return new DescriptionTranslationHit(translation.body());
     return null;
   }
 
-  private static DescriptionTemplateRenderer.ImageSlotSpec toSlotSpec(DescriptionImageSlotRow slot) {
+  private static DescriptionTemplateRenderer.ImageSlotSpec toSlotSpec(
+      DescriptionImageSlotRow slot) {
     return new DescriptionTemplateRenderer.ImageSlotSpec(
-        slot.id(), slot.slotNo(), slot.bindSource(), slot.caption(), slot.assetId(), slot.required());
+        slot.id(),
+        slot.slotNo(),
+        slot.bindSource(),
+        slot.caption(),
+        slot.assetId(),
+        slot.required());
   }
 
   /**
    * 解析一个插图位。
    *
-   * <p>三种来源都落成同一件事：一个真实的 media_asset + 一个能进 {@code <img src>} 的地址。
-   * 没有素材时返回 null（渲染器据此产出 {@code IMAGE_UNBOUND} 报告），
-   * **绝不**返回一张占位图——一张假图发到平台上比缺图更糟。
+   * <p>三种来源都落成同一件事：一个真实的 media_asset + 一个能进 {@code <img src>} 的地址。 没有素材时返回 null（渲染器据此产出 {@code
+   * IMAGE_UNBOUND} 报告）， **绝不**返回一张占位图——一张假图发到平台上比缺图更糟。
    */
   private DescriptionTemplateRenderer.ResolvedImage resolveImage(
       DescriptionTemplateRenderer.ImageSlotSpec slot,
@@ -311,7 +315,8 @@ public class DescriptionTemplateRenderService {
       Map<Integer, DescriptionRenderInputImage> given,
       Map<UUID, MediaAsset> cache) {
     DescriptionRenderInputImage provided = given.get(slot.slotNo());
-    UUID assetId = slot.assetId() != null ? slot.assetId() : (provided == null ? null : provided.assetId());
+    UUID assetId =
+        slot.assetId() != null ? slot.assetId() : (provided == null ? null : provided.assetId());
     MediaAsset asset = null;
     if (assetId != null) {
       asset = asset(assetId, cache);
@@ -376,11 +381,16 @@ public class DescriptionTemplateRenderService {
                 + " where r.tenant_id=? and r.owner_type='SKU' and r.sku_id=?"
                 + "  and a.purpose=? and a.media_type='IMAGE' and a.enabled"
                 + " order by a.id offset ? limit 1",
-            templates.currentTenantId(), sku.skuId(), purpose, Math.max(0, ordinal));
+            templates.currentTenantId(),
+            sku.skuId(),
+            purpose,
+            Math.max(0, ordinal));
     return row == null ? null : asset(row.get("id", UUID.class), cache);
   }
 
-  private static int positionOf(DescriptionTemplateRenderer.RenderedDocument document, DescriptionTemplateRenderer.ResolvedImage image) {
+  private static int positionOf(
+      DescriptionTemplateRenderer.RenderedDocument document,
+      DescriptionTemplateRenderer.ResolvedImage image) {
     int position = 0;
     for (var section : document.sections())
       for (var candidate : section.images()) {
@@ -402,10 +412,10 @@ public class DescriptionTemplateRenderService {
                 + "  as sibling_codes"
                 + " from sku s join spu p on p.tenant_id=s.tenant_id and p.id=s.spu_id"
                 + " where s.tenant_id=? and s.id=?",
-            templates.currentTenantId(), skuId);
+            templates.currentTenantId(),
+            skuId);
     if (row == null)
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "SKU 不存在或不属于当前租户：" + skuId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "SKU 不存在或不属于当前租户：" + skuId);
     String siblings = row.get("sibling_codes", String.class);
     return new DescriptionRenderer.SkuFacts(
         row.get("id", UUID.class),
@@ -453,7 +463,8 @@ public class DescriptionTemplateRenderService {
             "select id,section_type,sort_order,heading,html,image_count,status"
                 + " from description_render_section where tenant_id=? and render_id=?"
                 + " order by sort_order,id",
-            tenantId, renderId);
+            tenantId,
+            renderId);
     List<UUID> sectionRenderIds = sectionRows.stream().map(r -> r.get("id", UUID.class)).toList();
     Map<UUID, List<DescriptionRenderImageRow>> images = renderImagesOf(sectionRenderIds);
     Map<UUID, List<DescriptionRenderIssueRow>> issues = renderIssuesOf(sectionRenderIds);
@@ -579,8 +590,7 @@ public class DescriptionTemplateRenderService {
         total,
         page,
         size,
-        "列表只给摘要，不带 HTML（一份详情页 HTML 动辄几 KB，列表页全带会卡）。"
-            + "点开看详情时才会取那份 HTML。只有「五段全填好」的结果可以直接交给平台上传。");
+        "列表只给摘要，不带 HTML（一份详情页 HTML 动辄几 KB，列表页全带会卡）。" + "点开看详情时才会取那份 HTML。只有「五段全填好」的结果可以直接交给平台上传。");
   }
 
   private Record renderRow(UUID renderId) {
@@ -645,8 +655,7 @@ public class DescriptionTemplateRenderService {
         sql.fetch(
             "select id,render_section_id,variable_name,issue_kind,detail,created_at"
                 + " from description_render_issue where render_id=? order by variable_name",
-            renderId))
-      out.add(toIssue(r));
+            renderId)) out.add(toIssue(r));
     return out;
   }
 

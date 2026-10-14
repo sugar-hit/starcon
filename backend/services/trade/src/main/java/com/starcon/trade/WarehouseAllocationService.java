@@ -7,9 +7,9 @@ import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -25,29 +25,21 @@ import org.springframework.web.server.ResponseStatusException;
  * <p><b>五条实现纪律</b>（照抄 9.3.2.2 的写法，不另起风格）：
  *
  * <ol>
- *   <li><b>判定只有一处</b>：{@link #simulate} 是唯一的判定实现，
- *       {@link #allocate} 落库时也调它 —— 页面预览与实际落库结论不一致时，
+ *   <li><b>判定只有一处</b>：{@link #simulate} 是唯一的判定实现， {@link #allocate} 落库时也调它 —— 页面预览与实际落库结论不一致时，
  *       运营看到的和系统做的是两件事，这是最不能容忍的一种不一致。
- *   <li><b>候选落库而不是查询时联算</b>：库存会被补上、运费估算会被改、
- *       规则权重会被调，联算会让「当时为什么分了 A 仓」永远答不出来。
- *   <li><b>金额只有一处口径</b>：结算一律 {@code setScale(2, HALF_UP)}，
- *       DB 侧 {@code round(x,2)} 复核（照抄 10.5.1.3）。
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上，
- *       cast 不出现在绑定序列末位。
+ *   <li><b>候选落库而不是查询时联算</b>：库存会被补上、运费估算会被改、 规则权重会被调，联算会让「当时为什么分了 A 仓」永远答不出来。
+ *   <li><b>金额只有一处口径</b>：结算一律 {@code setScale(2, HALF_UP)}， DB 侧 {@code round(x,2)} 复核（照抄 10.5.1.3）。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上， cast 不出现在绑定序列末位。
  *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。
  * </ol>
  *
- * <p><b>判定顺序与 9.3.2.2 自洽</b>：「资格 → 库存 → 成本」在��里展开成
- * <b>资格（启用 / 规则排除 / <b>货权硬闸</b>）→ 库存（有记录且够）→ 成本（有运费与时效估算）
- * → 打分排序（库存 / 成本 / 时效 / <b>货权</b> / 地区 五维加权）</b>。
- * 货权进第 1 层做闸、进第 4 层做权重：与「资质进第 1 层、库存进第 2 层、成本进第 3 层」
- * 是同一种纪律 —— 不合规的先出局，合规的再比好。
+ * <p><b>判定顺序与 9.3.2.2 自洽</b>：「资格 → 库存 → 成本」在��里展开成 <b>资格（启用 / 规则排除 / <b>货权硬闸</b>）→ 库存（有记录且够）→
+ * 成本（有运费与时效估算） → 打分排序（库存 / 成本 / 时效 / <b>货权</b> / 地区 五维加权）</b>。 货权进第 1 层做闸、进第 4 层做权重：与「资质进第 1 层、库存进第
+ * 2 层、成本进第 3 层」 是同一种纪律 —— 不合规的先出局，合规的再比好。
  *
- * <p><b>货权为什么是闸而不只是分</b>：蓝图加粗句「从 A 法人的仓发货意味着收入记在 A 法人，
- * 不能只看运费便宜」。「收入记在哪个法人」是<b>记账正确性</b>，不是可权衡项 ——
- * 所以它先是资格闸（{@code require_legal_entity_match}），再是排序权重
- * （{@code weight_legal_entity}）。即便开了硬闸，同属订单法人的多个仓之间仍靠权重排序：
- * 「都合法」不等于「一样好」。
+ * <p><b>货权为什么是闸而不只是分</b>：蓝图加粗句「从 A 法人的仓发货意味着收入记在 A 法人， 不能只看运费便宜」。「收入记在哪个法人」是<b>记账正确性</b>，不是可权衡项 ——
+ * 所以它先是资格闸（{@code require_legal_entity_match}），再是排序权重 （{@code
+ * weight_legal_entity}）。即便开了硬闸，同属订单法人的多个仓之间仍靠权重排序： 「都合法」不等于「一样好」。
  */
 @Service
 public class WarehouseAllocationService {
@@ -82,33 +74,23 @@ public class WarehouseAllocationService {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>{@code crossServiceReadAvailable=false} 与 {@code reservesUpstreamStock=false}
-   * 都是如实报出：7.1.1.3 在 warehouse 的数据库里，按 AGENTS.md 禁止跨库读取；
-   * 下游 9.3.3.1 / 8 出库单尚未交付，本模块只产出分配结果，**不预占上游库存** ——
+   * <p>{@code crossServiceReadAvailable=false} 与 {@code reservesUpstreamStock=false} 都是如实报出：7.1.1.3
+   * 在 warehouse 的数据库里，按 AGENTS.md 禁止跨库读取； 下游 9.3.3.1 / 8 出库单尚未交付，本模块只产出分配结果，**不预占上游库存** ——
    * 现在假装预占，等下游落地时会出现「两边都以为占了同一批货」。
    */
   public WarehouseAllocationCapabilities capabilities() {
     return new WarehouseAllocationCapabilities(
         List.of(
             new WarehouseAllocationCapabilities.WarehouseAllocationDimension(
-                "WAREHOUSE_STOCK",
-                "各仓可用量",
-                true,
-                "7.1.1.3 可用量（warehouse 服务）→ 本服务自维护估算表",
-                null),
+                "WAREHOUSE_STOCK", "各仓可用量", true, "7.1.1.3 可用量（warehouse 服务）→ 本服务自维护估算表", null),
             new WarehouseAllocationCapabilities.WarehouseAllocationDimension(
                 "SHIPPING_COST",
                 "运费与时效估算",
                 true,
                 "10 运费试算（**未开发**）→ 本服务租户维护估算表",
-                "10 运费试算尚未交付，运费与时效由租户在本模块登记；"
-                    + "本模块只在**同币种（USD）**下比较各仓，不做跨币种换算"),
+                "10 运费试算尚未交付，运费与时效由租户在本模块登记；" + "本模块只在**同币种（USD）**下比较各仓，不做跨币种换算"),
             new WarehouseAllocationCapabilities.WarehouseAllocationDimension(
-                "LEGAL_ENTITY",
-                "货权归属（法人）",
-                true,
-                "2.1.1.1 法人档案 → 本服务按仓登记 legal_entity_code",
-                null),
+                "LEGAL_ENTITY", "货权归属（法人）", true, "2.1.1.1 法人档案 → 本服务按仓登记 legal_entity_code", null),
             new WarehouseAllocationCapabilities.WarehouseAllocationDimension(
                 "ORDER_DESTINATION",
                 "订单收货信息（分配对象）",
@@ -122,8 +104,7 @@ public class WarehouseAllocationService {
                 "下发到履约请求 / 出库单",
                 false,
                 "9.3.3.1 履约批次、8 出库单（均未开发）",
-                "分配可确认，但尚未下发；且本模块**不预占 warehouse 库存**，"
-                    + "预占要调 warehouse 的授权 API，属下游车道职责")),
+                "分配可确认，但尚未下发；且本模块**不预占 warehouse 库存**，" + "预占要调 warehouse 的授权 API，属下游车道职责")),
         List.of(WarehouseSelectionPolicy.values()),
         List.of(WarehouseFallbackPolicy.values()),
         List.of(WarehouseLegalEntityPolicy.values()),
@@ -181,7 +162,9 @@ public class WarehouseAllocationService {
             .get("c", Long.class);
     List<WarehouseAllocationRuleRow> items =
         sql.fetch(
-                "select " + RULE_COLUMNS + " from fulfillment_warehouse_allocation_rule"
+                "select "
+                    + RULE_COLUMNS
+                    + " from fulfillment_warehouse_allocation_rule"
                     + sqlWhere
                     + " order by priority, id limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
@@ -213,11 +196,13 @@ public class WarehouseAllocationService {
             input.weightLegalEntity() == null ? BigDecimal.ZERO : input.weightLegalEntity(),
             "weightLegalEntity");
     BigDecimal wr =
-        weight(input.weightRegion() == null ? BigDecimal.ZERO : input.weightRegion(), "weightRegion");
+        weight(
+            input.weightRegion() == null ? BigDecimal.ZERO : input.weightRegion(), "weightRegion");
     BigDecimal sum = ws.add(wc).add(wl).add(wle).add(wr).setScale(4, RoundingMode.HALF_UP);
     if (sum.compareTo(ONE.setScale(4)) != 0) {
       throw bad(
-          "五个维度权重合计必须等于 1.0000，当前是 " + sum
+          "五个维度权重合计必须等于 1.0000，当前是 "
+              + sum
               + "：权重不是随便给的大数，合计不为 1 时同样输入在不同租户口径下不可比，"
               + "也说不清到底是哪一维更重要");
     }
@@ -238,7 +223,8 @@ public class WarehouseAllocationService {
     if (!country.equals("*") && country.length() != 2) {
       throw bad("适用范围的目的国必须是两位国家码，或用 * 表示不限");
     }
-    OffsetDateTime from = input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
+    OffsetDateTime from =
+        input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
     OffsetDateTime to = input.effectiveTo();
     if (to != null && !to.isAfter(from)) {
       throw bad("失效时间必须晚于生效时间");
@@ -263,7 +249,10 @@ public class WarehouseAllocationService {
     boolean created = existing == null;
     if (created && clash != null) {
       throw bad(
-          "优先级 " + priority + " 已被规则「" + clash.get(0, String.class)
+          "优先级 "
+              + priority
+              + " 已被规则「"
+              + clash.get(0, String.class)
               + "」占用：两条规则同优先级时「谁生效」取决于查询顺序，"
               + "同样输入在不同时候会算出不同结果");
     }
@@ -278,10 +267,31 @@ public class WarehouseAllocationService {
               + "effective_from,effective_to,notes,created_by_membership_id,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'USD',?,?::timestamptz,"
               + "?::timestamptz,?,?,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), input.ruleCode().trim(), nz(input.ruleName()), priority,
-          blankTo(input.scopePlatformCode(), "*"), country, selection.name(), fallback.name(),
-          ws, wc, wl, wle, wr, requireMatch, lePolicy.name(), preferred, maxLead,
-          nz(input.excludedWarehouseRefs()), from, to, nz(input.notes()), null, now, now);
+          id,
+          currentTenant(),
+          input.ruleCode().trim(),
+          nz(input.ruleName()),
+          priority,
+          blankTo(input.scopePlatformCode(), "*"),
+          country,
+          selection.name(),
+          fallback.name(),
+          ws,
+          wc,
+          wl,
+          wle,
+          wr,
+          requireMatch,
+          lePolicy.name(),
+          preferred,
+          maxLead,
+          nz(input.excludedWarehouseRefs()),
+          from,
+          to,
+          nz(input.notes()),
+          null,
+          now,
+          now);
     } else {
       id = existing.get(0, UUID.class);
       sql.execute(
@@ -294,14 +304,30 @@ public class WarehouseAllocationService {
               + " excluded_warehouse_refs = ?, effective_from = ?::timestamptz,"
               + " effective_to = ?::timestamptz, notes = ?, version = version + 1,"
               + " updated_at = ?::timestamptz where id = ?",
-          nz(input.ruleName()), priority, blankTo(input.scopePlatformCode(), "*"), country,
-          selection.name(), fallback.name(), ws, wc, wl, wle, wr, requireMatch, lePolicy.name(),
-          preferred, maxLead, nz(input.excludedWarehouseRefs()), from, to, nz(input.notes()),
-          now, id);
+          nz(input.ruleName()),
+          priority,
+          blankTo(input.scopePlatformCode(), "*"),
+          country,
+          selection.name(),
+          fallback.name(),
+          ws,
+          wc,
+          wl,
+          wle,
+          wr,
+          requireMatch,
+          lePolicy.name(),
+          preferred,
+          maxLead,
+          nz(input.excludedWarehouseRefs()),
+          from,
+          to,
+          nz(input.notes()),
+          now,
+          id);
     }
     return new WarehouseAllocationRuleSaved(
-        id, input.ruleCode().trim(), priority,
-        created ? "规则已创建" : "规则已更新（权重合计 " + sum + "）");
+        id, input.ruleCode().trim(), priority, created ? "规则已创建" : "规则已更新（权重合计 " + sum + "）");
   }
 
   // ================================================================ 仓库档案
@@ -338,7 +364,9 @@ public class WarehouseAllocationService {
             .get("c", Long.class);
     List<WarehouseAllocationWarehouseRow> items =
         sql.fetch(
-                "select " + WAREHOUSE_COLUMNS + " from fulfillment_warehouse_allocation_warehouse"
+                "select "
+                    + WAREHOUSE_COLUMNS
+                    + " from fulfillment_warehouse_allocation_warehouse"
                     + sqlWhere
                     + " order by legal_entity_code, default_priority, warehouse_ref"
                     + " limit ? offset ?",
@@ -359,7 +387,8 @@ public class WarehouseAllocationService {
     OffsetDateTime now = OffsetDateTime.now();
     var existing =
         sql.fetchOne(
-            "select id from fulfillment_warehouse_allocation_warehouse where warehouse_ref = ?", ref);
+            "select id from fulfillment_warehouse_allocation_warehouse where warehouse_ref = ?",
+            ref);
     boolean created = existing == null;
     if (created) {
       sql.execute(
@@ -367,19 +396,32 @@ public class WarehouseAllocationService {
               + "(id,tenant_id,warehouse_ref,warehouse_name,legal_entity_code,region_code,"
               + "default_priority,active,notes,created_by_membership_id,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), ref, nz(input.warehouseName()), entity,
+          id,
+          currentTenant(),
+          ref,
+          nz(input.warehouseName()),
+          entity,
           blankTo(input.regionCode(), "*"),
           input.defaultPriority() == null ? 100 : input.defaultPriority(),
-          input.active() == null || input.active(), nz(input.notes()), null, now, now);
+          input.active() == null || input.active(),
+          nz(input.notes()),
+          null,
+          now,
+          now);
     } else {
       id = existing.get(0, UUID.class);
       sql.execute(
           "update fulfillment_warehouse_allocation_warehouse set warehouse_name = ?,"
               + " legal_entity_code = ?, region_code = ?, default_priority = ?, active = ?,"
               + " notes = ?, updated_at = ?::timestamptz where id = ?",
-          nz(input.warehouseName()), entity, blankTo(input.regionCode(), "*"),
+          nz(input.warehouseName()),
+          entity,
+          blankTo(input.regionCode(), "*"),
           input.defaultPriority() == null ? 100 : input.defaultPriority(),
-          input.active() == null || input.active(), nz(input.notes()), now, id);
+          input.active() == null || input.active(),
+          nz(input.notes()),
+          now,
+          id);
     }
     return new WarehouseAllocationWarehouseSaved(
         id, ref, entity, (created ? "仓库档案已创建" : "仓库档案已更新") + "，货权法人 " + entity);
@@ -450,9 +492,7 @@ public class WarehouseAllocationService {
     }
     String sourceRef = nz(input.sourceReference());
     if (source.equals("MODULE_7_1_1_3") && sourceRef.isBlank()) {
-      throw bad(
-          "来源标为 MODULE_7_1_1_3 时必须给出处单号：7.1.1.3 是同步来的快照，"
-              + "没有出处的库存快照等于凭空捏一个数去决定从哪个仓发货");
+      throw bad("来源标为 MODULE_7_1_1_3 时必须给出处单号：7.1.1.3 是同步来的快照，" + "没有出处的库存快照等于凭空捏一个数去决定从哪个仓发货");
     }
     BigDecimal qty = qty(input.availableQty());
     UUID id = UUID.randomUUID();
@@ -460,7 +500,8 @@ public class WarehouseAllocationService {
         sql.fetchOne(
             "select id from fulfillment_warehouse_allocation_stock_estimate"
                 + " where warehouse_ref = ? and sku_ref = ?",
-            ref, sku);
+            ref,
+            sku);
     boolean created = existing == null;
     if (created) {
       sql.execute(
@@ -468,18 +509,31 @@ public class WarehouseAllocationService {
               + "(id,tenant_id,warehouse_ref,sku_ref,available_qty,collected_at,stock_source,"
               + "source_reference,notes,created_by_membership_id,created_at)"
               + " values (?,?,?,?,?,?::timestamptz,?,?,?,?,?::timestamptz)",
-          id, currentTenant(), ref, sku, qty, input.collectedAt(), source, sourceRef,
-          nz(input.notes()), actorId, OffsetDateTime.now());
+          id,
+          currentTenant(),
+          ref,
+          sku,
+          qty,
+          input.collectedAt(),
+          source,
+          sourceRef,
+          nz(input.notes()),
+          actorId,
+          OffsetDateTime.now());
     } else {
       id = existing.get(0, UUID.class);
       sql.execute(
           "update fulfillment_warehouse_allocation_stock_estimate set available_qty = ?,"
               + " collected_at = ?::timestamptz, stock_source = ?, source_reference = ?,"
               + " notes = ? where id = ?",
-          qty, input.collectedAt(), source, sourceRef, nz(input.notes()), id);
+          qty,
+          input.collectedAt(),
+          source,
+          sourceRef,
+          nz(input.notes()),
+          id);
     }
-    return new WarehouseAllocationStockSaved(
-        id, ref, sku, qty, created ? "可用量估算已登记" : "可用量估算已更新");
+    return new WarehouseAllocationStockSaved(id, ref, sku, qty, created ? "可用量估算已登记" : "可用量估算已更新");
   }
 
   // ================================================================ 运费与时效估算
@@ -519,7 +573,8 @@ public class WarehouseAllocationService {
             .get("c", Long.class);
     List<WarehouseAllocationShippingRow> items =
         sql.fetch(
-                "select " + SHIPPING_COLUMNS
+                "select "
+                    + SHIPPING_COLUMNS
                     + " from fulfillment_warehouse_allocation_shipping_estimate"
                     + sqlWhere
                     + " order by sku_ref, destination_country_code, warehouse_ref"
@@ -558,13 +613,13 @@ public class WarehouseAllocationService {
     }
     String sourceRef = nz(input.sourceReference());
     if (source.equals("MODULE_10_1_2_1") && sourceRef.isBlank()) {
-      throw bad(
-          "来源标为 MODULE_10_1_2_1 时必须给出处单号：10 运费试算尚未交付，"
-              + "标成模块来源却没有出处，等于伪造一个上游");
+      throw bad("来源标为 MODULE_10_1_2_1 时必须给出处单号：10 运费试算尚未交付，" + "标成模块来源却没有出处，等于伪造一个上游");
     }
     BigDecimal cost = money(input.shippingCost());
     BigDecimal lead =
-        input.leadTimeDays() == null ? null : input.leadTimeDays().setScale(2, RoundingMode.HALF_UP);
+        input.leadTimeDays() == null
+            ? null
+            : input.leadTimeDays().setScale(2, RoundingMode.HALF_UP);
     OffsetDateTime from =
         input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
     OffsetDateTime to = input.effectiveTo();
@@ -577,7 +632,9 @@ public class WarehouseAllocationService {
         sql.fetchOne(
             "select id from fulfillment_warehouse_allocation_shipping_estimate"
                 + " where warehouse_ref = ? and sku_ref = ? and destination_country_code = ?",
-            ref, sku, country);
+            ref,
+            sku,
+            country);
     boolean created = existing == null;
     if (created) {
       sql.execute(
@@ -587,8 +644,21 @@ public class WarehouseAllocationService {
               + "effective_to,notes,version,created_by_membership_id,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,'USD',?,?,?::timestamptz,?::timestamptz,?,0,?,"
               + "?::timestamptz,?::timestamptz)",
-          id, currentTenant(), ref, sku, country, cost, lead, source, sourceRef, from, to,
-          nz(input.notes()), actorId, now, now);
+          id,
+          currentTenant(),
+          ref,
+          sku,
+          country,
+          cost,
+          lead,
+          source,
+          sourceRef,
+          from,
+          to,
+          nz(input.notes()),
+          actorId,
+          now,
+          now);
     } else {
       id = existing.get(0, UUID.class);
       sql.execute(
@@ -596,7 +666,15 @@ public class WarehouseAllocationService {
               + " lead_time_days = ?, cost_source = ?, source_reference = ?,"
               + " effective_from = ?::timestamptz, effective_to = ?::timestamptz, notes = ?,"
               + " version = version + 1, updated_at = ?::timestamptz where id = ?",
-          cost, lead, source, sourceRef, from, to, nz(input.notes()), now, id);
+          cost,
+          lead,
+          source,
+          sourceRef,
+          from,
+          to,
+          nz(input.notes()),
+          now,
+          id);
     }
     return new WarehouseAllocationShippingSaved(
         id, ref, country, cost, created ? "运费估算已登记" : "运费估算已更新");
@@ -607,17 +685,21 @@ public class WarehouseAllocationService {
   /**
    * 只读试算：给一组输入，算出「应该从哪个仓发、为什么、每个仓分别如何」。
    *
-   * <p><b>不落库</b>：页面用它做预演。执行分配走 {@link #allocate}，那里也调本方法 ——
-   * 预览与落库结论必须同源，否则运营看到的和系统做的是两件事。
+   * <p><b>不落库</b>：页面用它做预演。执行分配走 {@link #allocate}，那里也调本方法 —— 预览与落库结论必须同源，否则运营看到的和系统做的是两件事。
    */
   public WarehouseAllocationSimulation simulate(WarehouseAllocationSimulationRequest request) {
     if (request == null) {
       throw bad("请求体不能为空");
     }
     return judge(
-        request.skuRef(), request.requestedQty(), request.destinationCountryCode(),
-        request.destinationRegionCode(), request.orderLegalEntityCode(), request.platformCode(),
-        request.ruleCode(), request.at());
+        request.skuRef(),
+        request.requestedQty(),
+        request.destinationCountryCode(),
+        request.destinationRegionCode(),
+        request.orderLegalEntityCode(),
+        request.platformCode(),
+        request.ruleCode(),
+        request.at());
   }
 
   /**
@@ -655,9 +737,7 @@ public class WarehouseAllocationService {
     // CHECK(excluded_warehouse_count>0) 就是这条纪律的落点。
     List<WarehouseProfile> profiles = warehouseProfiles();
     if (profiles.isEmpty()) {
-      throw bad(
-          "本租户还没有任何仓库档案，无法执行分仓：先到「仓库档案」登记发货仓与它的货权法人，"
-              + "再登记可用量与运费估算");
+      throw bad("本租户还没有任何仓库档案，无法执行分仓：先到「仓库档案」登记发货仓与它的货权法人，" + "再登记可用量与运费估算");
     }
 
     Set<String> excludedByRule = parseExclusions(rule);
@@ -669,8 +749,17 @@ public class WarehouseAllocationService {
     for (WarehouseProfile profile : profiles) {
       candidates.add(
           buildCandidate(
-              profile, rule, sku, requested, country, region, orderEntity, excludedByRule,
-              legalGate, now, warnings));
+              profile,
+              rule,
+              sku,
+              requested,
+              country,
+              region,
+              orderEntity,
+              excludedByRule,
+              legalGate,
+              now,
+              warnings));
     }
 
     // ---- 打分（只对可行候选；不可行候选各维记 0，"没测过"在求和里不该消失）
@@ -701,22 +790,48 @@ public class WarehouseAllocationService {
     if (feasible.isEmpty()) {
       WarehouseHoldReason holdReason = aggregateHoldReason(candidates);
       String detail = exclusionDetail(candidates);
-      if (candidates.stream().allMatch(c -> c.blockCode().equals(
-          WarehouseCandidateBlockReason.LEGAL_ENTITY_MISMATCH.name()))) {
+      if (candidates.stream()
+          .allMatch(
+              c ->
+                  c.blockCode()
+                      .equals(WarehouseCandidateBlockReason.LEGAL_ENTITY_MISMATCH.name()))) {
         warnings.add(
-            "全部候选仓的货权法人都与订单主体「" + orderEntity
+            "全部候选仓的货权法人都与订单主体「"
+                + orderEntity
                 + "」不符：从别的法人的仓发货意味着收入记在那个法人名下。"
                 + "确实要跨法人发货时，请把规则的兜底策略显式设为 CROSS_LEGAL_ENTITY");
       }
       return new WarehouseAllocationSimulation(
-          "", sku, requested, country, region, orderEntity, rule.ruleCode(),
-          rule.selectionPolicy, rule.fallbackPolicy, rule.legalEntityPolicy,
-          rule.requireLegalEntityMatch, rule.weightStock(), rule.weightCost(),
-          rule.weightLeadTime(), rule.weightLegalEntity(), rule.weightRegion(), 0,
-          null, null, false, null, null, null, null,
+          "",
+          sku,
+          requested,
+          country,
+          region,
+          orderEntity,
+          rule.ruleCode(),
+          rule.selectionPolicy,
+          rule.fallbackPolicy,
+          rule.legalEntityPolicy,
+          rule.requireLegalEntityMatch,
+          rule.weightStock(),
+          rule.weightCost(),
+          rule.weightLeadTime(),
+          rule.weightLegalEntity(),
+          rule.weightRegion(),
+          0,
+          null,
+          null,
+          false,
+          null,
+          null,
+          null,
+          null,
           WarehouseAllocationReasonCode.NO_ELIGIBLE_WAREHOUSE,
           "无可行仓，已挂起。" + (detail.isEmpty() ? "" : "被排除的候选：" + detail),
-          holdReason, rows(candidates, null, requested, null), warnings, now);
+          holdReason,
+          rows(candidates, null, requested, null),
+          warnings,
+          now);
     }
 
     Candidate chosen = feasible.get(0);
@@ -727,8 +842,12 @@ public class WarehouseAllocationService {
       // 走到这里说明该仓被 INSUFFICIENT_STOCK 挡住了，不该出现在可行集里。
       // 兜底策略不是 ALLOW_PARTIAL 时，库存不足就是不可行 —— 不做隐式放宽。
       throw bad(
-          "判定内部不一致：仓「" + chosen.profile().warehouseRef() + "」可用量 "
-              + chosen.availableQty() + " 不足 " + requested
+          "判定内部不一致：仓「"
+              + chosen.profile().warehouseRef()
+              + "」可用量 "
+              + chosen.availableQty()
+              + " 不足 "
+              + requested
               + " 却进了可行集。兜底策略为 ALLOW_PARTIAL 时才允许部分分配");
     }
     boolean cross = !chosen.profile().legalEntityCode().equals(orderEntity);
@@ -738,14 +857,21 @@ public class WarehouseAllocationService {
       // 所以只有闸门仍开着时才该报 —— 否则「不要求货权一致」这条配置会形同虚设。
       // DB 侧 guard_warehouse_allocation_candidate_legal_entity 用同一把尺子。
       throw bad(
-          "选中的仓「" + chosen.profile().warehouseRef() + "」货权法人是「"
-              + chosen.profile().legalEntityCode() + "」，与订单主体「" + orderEntity
+          "选中的仓「"
+              + chosen.profile().warehouseRef()
+              + "」货权法人是「"
+              + chosen.profile().legalEntityCode()
+              + "」，与订单主体「"
+              + orderEntity
               + "」不符，且本规则要求货权一致");
     }
     if (cross) {
       warnings.add(
-          "本次分配跨法人发货：收入将记在法人「" + chosen.profile().legalEntityCode()
-              + "」名下，而不是订单主体「" + orderEntity + "」");
+          "本次分配跨法人发货：收入将记在法人「"
+              + chosen.profile().legalEntityCode()
+              + "」名下，而不是订单主体「"
+              + orderEntity
+              + "」");
     }
 
     WarehouseAllocationReasonCode reasonCode =
@@ -757,13 +883,36 @@ public class WarehouseAllocationService {
               case HIGHEST_SCORE -> WarehouseAllocationReasonCode.SCORE_BASED;
             };
     return new WarehouseAllocationSimulation(
-        "", sku, requested, country, region, orderEntity, rule.ruleCode(), rule.selectionPolicy,
-        rule.fallbackPolicy, rule.legalEntityPolicy, rule.requireLegalEntityMatch, rule.weightStock(),
-        rule.weightCost(), rule.weightLeadTime(), rule.weightLegalEntity(), rule.weightRegion(),
-        feasible.size(), chosen.profile().warehouseRef(), chosen.profile().legalEntityCode(), cross,
-        allocatable, settle(chosen.shippingCost()), chosen.leadTimeDays(), chosen.totalScore(),
-        reasonCode, reasonOf(chosen, rule, requested, cross, feasible.size()), null,
-        rows(candidates, chosen, requested, allocatable), warnings, now);
+        "",
+        sku,
+        requested,
+        country,
+        region,
+        orderEntity,
+        rule.ruleCode(),
+        rule.selectionPolicy,
+        rule.fallbackPolicy,
+        rule.legalEntityPolicy,
+        rule.requireLegalEntityMatch,
+        rule.weightStock(),
+        rule.weightCost(),
+        rule.weightLeadTime(),
+        rule.weightLegalEntity(),
+        rule.weightRegion(),
+        feasible.size(),
+        chosen.profile().warehouseRef(),
+        chosen.profile().legalEntityCode(),
+        cross,
+        allocatable,
+        settle(chosen.shippingCost()),
+        chosen.leadTimeDays(),
+        chosen.totalScore(),
+        reasonCode,
+        reasonOf(chosen, rule, requested, cross, feasible.size()),
+        null,
+        rows(candidates, chosen, requested, allocatable),
+        warnings,
+        now);
   }
 
   // ================================================================ 执行分配
@@ -771,12 +920,10 @@ public class WarehouseAllocationService {
   /**
    * 执行一次分仓分配：落决策 + 逐仓候选 + （挂起或差额）留痕 + 事件。
    *
-   * <p><b>写入顺序</b>：头 → 候选 → 挂起 → 事件。头先落是因为候选与挂起都要对它建外键；
-   * 而延迟约束触发器在**提交时**回表读当前行，所以「头先落、候选后补」这个顺序
+   * <p><b>写入顺序</b>：头 → 候选 → 挂起 → 事件。头先落是因为候选与挂起都要对它建外键； 而延迟约束触发器在**提交时**回表读当前行，所以「头先落、候选后补」这个顺序
    * 不会被中途的半成品状态误判 —— 换成即时触发器就会在写候选之前先报「没有候选依据」。
    *
-   * <p><b>挂起不是错误</b>：无法分配时本方法正常返回一条 SUSPENDED 分配，
-   * 而不是抛 400。把「这单发不出去」当成请求失败，调用方就分不清
+   * <p><b>挂起不是错误</b>：无法分配时本方法正常返回一条 SUSPENDED 分配， 而不是抛 400。把「这单发不出去」当成请求失败，调用方就分不清
    * 「系统坏了」与「业务上真的没仓可发」—— 前者要重试，后者要人介入。
    */
   @Transactional
@@ -788,12 +935,21 @@ public class WarehouseAllocationService {
     OffsetDateTime now = request.at() == null ? OffsetDateTime.now() : request.at();
     WarehouseAllocationSimulation simulation =
         judge(
-            request.skuRef(), request.requestedQty(), request.destinationCountryCode(),
-            request.destinationRegionCode(), request.orderLegalEntityCode(),
-            request.platformCode(), request.ruleCode(), now);
+            request.skuRef(),
+            request.requestedQty(),
+            request.destinationCountryCode(),
+            request.destinationRegionCode(),
+            request.orderLegalEntityCode(),
+            request.platformCode(),
+            request.ruleCode(),
+            now);
 
-    Rule rule = resolveRule(request.ruleCode(), request.platformCode(),
-        request.destinationCountryCode().trim().toUpperCase(Locale.ROOT), now);
+    Rule rule =
+        resolveRule(
+            request.ruleCode(),
+            request.platformCode(),
+            request.destinationCountryCode().trim().toUpperCase(Locale.ROOT),
+            now);
     String country = request.destinationCountryCode().trim().toUpperCase(Locale.ROOT);
     String region = blankTo(request.destinationRegionCode(), "*");
     String orderEntity = request.orderLegalEntityCode().trim();
@@ -811,21 +967,45 @@ public class WarehouseAllocationService {
             ? request.reason().trim()
             : (suspended
                 ? simulation.reason()
-                : simulation.reason() + (status == WarehouseAllocationStatus.PARTIAL
-                    ? "；按 ALLOW_PARTIAL 只分出 " + simulation.allocatedQty() + "，"
-                        + "尚缺 " + simulation.requestedQty().subtract(simulation.allocatedQty())
-                    : ""));
+                : simulation.reason()
+                    + (status == WarehouseAllocationStatus.PARTIAL
+                        ? "；按 ALLOW_PARTIAL 只分出 "
+                            + simulation.allocatedQty()
+                            + "，"
+                            + "尚缺 "
+                            + simulation.requestedQty().subtract(simulation.allocatedQty())
+                        : ""));
 
     UUID decisionId = UUID.randomUUID();
     sql.execute(
         DECISION_INSERT,
-        decisionId, currentTenant(), request.orderRef().trim(), nz(request.orderLineRef()),
-        request.skuRef().trim(), simulation.requestedQty(), rule.id(), rule.selectionPolicy.name(),
-        rule.fallbackPolicy.name(), rule.legalEntityPolicy.name(), rule.requireLegalEntityMatch,
-        country, region, orderEntity, status.name(), chosenRef.isEmpty() ? null : chosenRef,
-        chosenEntity.isEmpty() ? null : chosenEntity, simulation.crossLegalEntity(),
-        simulation.allocatedQty(), simulation.unitShippingCost(), simulation.leadTimeDays(),
-        simulation.chosenTotalScore(), "USD", simulation.reasonCode().name(), reason, now, actorId);
+        decisionId,
+        currentTenant(),
+        request.orderRef().trim(),
+        nz(request.orderLineRef()),
+        request.skuRef().trim(),
+        simulation.requestedQty(),
+        rule.id(),
+        rule.selectionPolicy.name(),
+        rule.fallbackPolicy.name(),
+        rule.legalEntityPolicy.name(),
+        rule.requireLegalEntityMatch,
+        country,
+        region,
+        orderEntity,
+        status.name(),
+        chosenRef.isEmpty() ? null : chosenRef,
+        chosenEntity.isEmpty() ? null : chosenEntity,
+        simulation.crossLegalEntity(),
+        simulation.allocatedQty(),
+        simulation.unitShippingCost(),
+        simulation.leadTimeDays(),
+        simulation.chosenTotalScore(),
+        "USD",
+        simulation.reasonCode().name(),
+        reason,
+        now,
+        actorId);
 
     // 候选行：把每个仓当时的库存、运费、货权与五维得分抄进来。
     // 不可行的仓也要落 —— 「为什么没选它」是本模块最核心的一问。
@@ -844,12 +1024,29 @@ public class WarehouseAllocationService {
               + "score_legal_entity,score_region,total_score,legal_entity_match,feasible,"
               + "infeasible_reason_code,infeasible_reason,selected)"
               + " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          candidateId, currentTenant(), decisionId, row.warehouseRef(), row.legalEntityCode(),
-          row.regionCode(), row.warehousePriority(), row.availableQty(), row.shippingCost(),
-          row.leadTimeDays(), stockId, shippingId, row.scoreStock(), row.scoreCost(),
-          row.scoreLeadTime(), row.scoreLegalEntity(), row.scoreRegion(), row.totalScore(),
-          row.legalEntityMatch(), row.feasible(), nz(row.infeasibleReasonCode()),
-          nz(row.infeasibleReason()), row.chosen());
+          candidateId,
+          currentTenant(),
+          decisionId,
+          row.warehouseRef(),
+          row.legalEntityCode(),
+          row.regionCode(),
+          row.warehousePriority(),
+          row.availableQty(),
+          row.shippingCost(),
+          row.leadTimeDays(),
+          stockId,
+          shippingId,
+          row.scoreStock(),
+          row.scoreCost(),
+          row.scoreLeadTime(),
+          row.scoreLegalEntity(),
+          row.scoreRegion(),
+          row.totalScore(),
+          row.legalEntityMatch(),
+          row.feasible(),
+          nz(row.infeasibleReasonCode()),
+          nz(row.infeasibleReason()),
+          row.chosen());
       // 差额挂起要指到「选中的是哪个仓的那条候选」，让界面能从差额直接跳回依据。
       if (row.chosen()) {
         holdCandidateId = candidateId;
@@ -869,8 +1066,17 @@ public class WarehouseAllocationService {
               + "excluded_warehouse_count,hold_candidate_id,shortfall_qty,held_at,hold_source,"
               + "created_by_membership_id,created_at)"
               + " values (?,?,?,?,?,?,?,?,NULL,?::timestamptz,'SYSTEM',?,?::timestamptz)",
-          holdId, currentTenant(), decisionId, holdReason.name(), reason, detail,
-          (int) rows.stream().filter(r -> !r.feasible()).count(), null, now, actorId, now);
+          holdId,
+          currentTenant(),
+          decisionId,
+          holdReason.name(),
+          reason,
+          detail,
+          (int) rows.stream().filter(r -> !r.feasible()).count(),
+          null,
+          now,
+          actorId,
+          now);
     } else if (status == WarehouseAllocationStatus.PARTIAL) {
       holdId = UUID.randomUUID();
       holdReason = WarehouseHoldReason.PARTIAL_SHORTFALL;
@@ -882,34 +1088,70 @@ public class WarehouseAllocationService {
               + "created_by_membership_id,created_at)"
               + " values (?,?,?,'PARTIAL_SHORTFALL',?,?,?,?,?,?::timestamptz,'SYSTEM',?,"
               + "?::timestamptz)",
-          holdId, currentTenant(), decisionId,
-          "按 ALLOW_PARTIAL 从仓「" + chosenRef + "」分出 " + simulation.allocatedQty()
-              + "，尚缺 " + shortfall + "，差额已挂起等待补货或改派",
-          "选中仓可用量 " + simulation.allocatedQty() + " 小于需求 "
-              + simulation.requestedQty() + "；差额由本记录承载，不显示为已全部分配",
-          1, holdCandidateId, shortfall, now, actorId, now);
+          holdId,
+          currentTenant(),
+          decisionId,
+          "按 ALLOW_PARTIAL 从仓「"
+              + chosenRef
+              + "」分出 "
+              + simulation.allocatedQty()
+              + "，尚缺 "
+              + shortfall
+              + "，差额已挂起等待补货或改派",
+          "选中仓可用量 "
+              + simulation.allocatedQty()
+              + " 小于需求 "
+              + simulation.requestedQty()
+              + "；差额由本记录承载，不显示为已全部分配",
+          1,
+          holdCandidateId,
+          shortfall,
+          now,
+          actorId,
+          now);
     }
 
     sql.execute(
         "insert into fulfillment_warehouse_allocation_event"
             + "(id,tenant_id,decision_id,event_kind,from_status,to_status,detail,actor_id,occurred_at)"
             + " values (?,?,?,?,'',?,?,?,?::timestamptz)",
-        UUID.randomUUID(), currentTenant(), decisionId,
-        suspended ? "SUSPENDED" : (status == WarehouseAllocationStatus.PARTIAL ? "PARTIAL" : "ALLOCATED"),
-        status.name(), reason, actorId, now);
+        UUID.randomUUID(),
+        currentTenant(),
+        decisionId,
+        suspended
+            ? "SUSPENDED"
+            : (status == WarehouseAllocationStatus.PARTIAL ? "PARTIAL" : "ALLOCATED"),
+        status.name(),
+        reason,
+        actorId,
+        now);
 
     return new WarehouseAllocationDecisionSaved(
-        decisionId, request.orderRef().trim(), status, simulation.reasonCode(),
-        chosenRef.isEmpty() ? null : chosenRef, chosenEntity.isEmpty() ? null : chosenEntity,
-        simulation.crossLegalEntity(), simulation.allocatedQty(), holdId, holdReason, rows.size(),
+        decisionId,
+        request.orderRef().trim(),
+        status,
+        simulation.reasonCode(),
+        chosenRef.isEmpty() ? null : chosenRef,
+        chosenEntity.isEmpty() ? null : chosenEntity,
+        simulation.crossLegalEntity(),
+        simulation.allocatedQty(),
+        holdId,
+        holdReason,
+        rows.size(),
         suspended
             ? "无可行仓，已挂起并逐条记录每个仓被排除的原因（" + holdReason.label() + "）"
             : (status == WarehouseAllocationStatus.PARTIAL
-                ? "已部分分配 " + simulation.allocatedQty() + " / " + simulation.requestedQty()
+                ? "已部分分配 "
+                    + simulation.allocatedQty()
+                    + " / "
+                    + simulation.requestedQty()
                     + "，差额已挂起"
-                : "已分配到仓「" + chosenRef + "」" + (simulation.crossLegalEntity()
-                    ? "（跨法人：收入记在「" + chosenEntity + "」名下）"
-                    : "（货权法人与订单主体一致）")));
+                : "已分配到仓「"
+                    + chosenRef
+                    + "」"
+                    + (simulation.crossLegalEntity()
+                        ? "（跨法人：收入记在「" + chosenEntity + "」名下）"
+                        : "（货权法人与订单主体一致）")));
   }
 
   // ================================================================ 分配读
@@ -929,15 +1171,16 @@ public class WarehouseAllocationService {
             .get("c", Long.class);
     List<WarehouseAllocationDecisionRow> items =
         sql.fetch(
-                "select " + DECISION_COLUMNS + " from fulfillment_warehouse_allocation_decision"
+                "select "
+                    + DECISION_COLUMNS
+                    + " from fulfillment_warehouse_allocation_decision"
                     + sqlWhere
                     + " order by decided_at desc, id limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
             .map(WarehouseAllocationService::decisionRow);
 
     // 汇总与筛选条件一致但**不受分页影响**：看板上的数字不能因为翻页而变。
-    long allocated =
-        countWhere(sqlWhere, "status in ('ALLOCATED','CONFIRMED','RELEASED')", binds);
+    long allocated = countWhere(sqlWhere, "status in ('ALLOCATED','CONFIRMED','RELEASED')", binds);
     long suspended = countWhere(sqlWhere, "status = 'SUSPENDED'", binds);
     long cross = countWhere(sqlWhere, "cross_legal_entity", binds);
     long partial = countWhere(sqlWhere, "status = 'PARTIAL'", binds);
@@ -948,23 +1191,21 @@ public class WarehouseAllocationService {
   /**
    * 在**同一组筛选条件**上追加一个固定条件再计数。
    *
-   * <p>拼接时必须分「有没有 where」两种情况：直接 {@code sqlWhere + " and ..."} 在
-   * 无筛选条件时会拼出 {@code from t and cross_legal_entity} —— 一条语法错误 SQL，
-   * 报错还指向一个完全无关的地方（9.3.2.2 踩过同类坑）。
+   * <p>拼接时必须分「有没有 where」两种情况：直接 {@code sqlWhere + " and ..."} 在 无筛选条件时会拼出 {@code from t and
+   * cross_legal_entity} —— 一条语法错误 SQL， 报错还指向一个完全无关的地方（9.3.2.2 踩过同类坑）。
    */
   private long countWhere(String sqlWhere, String extraCondition, List<Object> binds) {
     String tail = sqlWhere.isEmpty() ? " where " : " and ";
     return sql.fetchOne(
-            "select count(*) c from fulfillment_warehouse_allocation_decision" + sqlWhere + tail
+            "select count(*) c from fulfillment_warehouse_allocation_decision"
+                + sqlWhere
+                + tail
                 + extraCondition,
             binds.toArray())
         .get("c", Long.class);
   }
 
-  /**
-   * 分配筛选条件（列表与四组汇总共用 —— 抽出来是因为五处条件必须永远一致：
-   * 汇总少一个条件，看板上的数字就会与列表筛出来的条数对不上，而这种错位极难排查）。
-   */
+  /** 分配筛选条件（列表与四组汇总共用 —— 抽出来是因为五处条件必须永远一致： 汇总少一个条件，看板上的数字就会与列表筛出来的条数对不上，而这种错位极难排查）。 */
   private static void decisionConditions(
       WarehouseAllocationDecisionQuery query, List<String> where, List<Object> binds) {
     if (notBlank(query.orderRef())) {
@@ -995,8 +1236,9 @@ public class WarehouseAllocationService {
       where.add(query.crossLegalEntity() ? "cross_legal_entity" : "not cross_legal_entity");
     }
     if (notBlank(query.keyword())) {
-      where.add("(order_ref ilike ? or order_line_ref ilike ? or sku_ref ilike ?"
-          + " or chosen_warehouse_ref ilike ? or reason ilike ?)");
+      where.add(
+          "(order_ref ilike ? or order_line_ref ilike ? or sku_ref ilike ?"
+              + " or chosen_warehouse_ref ilike ? or reason ilike ?)");
       String k = "%" + query.keyword().trim() + "%";
       for (int i = 0; i < 5; i++) {
         binds.add(k);
@@ -1008,7 +1250,9 @@ public class WarehouseAllocationService {
   public WarehouseAllocationDecisionDetail decision(UUID decisionId) {
     var head =
         sql.fetchOne(
-            "select " + DECISION_COLUMNS + " from fulfillment_warehouse_allocation_decision"
+            "select "
+                + DECISION_COLUMNS
+                + " from fulfillment_warehouse_allocation_decision"
                 + " where id = ?",
             decisionId);
     if (head == null) {
@@ -1025,9 +1269,11 @@ public class WarehouseAllocationService {
                 decisionId)
             .map(WarehouseAllocationService::eventRow);
     return new WarehouseAllocationDecisionDetail(
-        decisionRow(head), candidates, holds, events,
-        "候选行是分配当时各仓的库存、运费、货权与五维得分快照："
-            + "库存会被补上、运费估算会被改、规则权重会被调，历史候选不会被回算。");
+        decisionRow(head),
+        candidates,
+        holds,
+        events,
+        "候选行是分配当时各仓的库存、运费、货权与五维得分快照：" + "库存会被补上、运费估算会被改、规则权重会被调，历史候选不会被回算。");
   }
 
   private List<WarehouseAllocationCandidateRow> candidatesOf(
@@ -1053,18 +1299,26 @@ public class WarehouseAllocationService {
                           .get("allocated_qty", BigDecimal.class)
                       : null;
               return new WarehouseAllocationCandidateRow(
-                  ref, warehouseName(ref), r.get("legal_entity_code", String.class),
-                  r.get("region_code", String.class), r.get("warehouse_priority", Integer.class),
+                  ref,
+                  warehouseName(ref),
+                  r.get("legal_entity_code", String.class),
+                  r.get("region_code", String.class),
+                  r.get("warehouse_priority", Integer.class),
                   r.get("available_qty", BigDecimal.class),
                   r.get("unit_shipping_cost", BigDecimal.class),
-                  r.get("lead_time_days", BigDecimal.class), r.get("score_stock", BigDecimal.class),
+                  r.get("lead_time_days", BigDecimal.class),
+                  r.get("score_stock", BigDecimal.class),
                   r.get("score_cost", BigDecimal.class),
                   r.get("score_lead_time", BigDecimal.class),
                   r.get("score_legal_entity", BigDecimal.class),
-                  r.get("score_region", BigDecimal.class), r.get("total_score", BigDecimal.class),
-                  r.get("legal_entity_match", Boolean.class), r.get("feasible", Boolean.class),
+                  r.get("score_region", BigDecimal.class),
+                  r.get("total_score", BigDecimal.class),
+                  r.get("legal_entity_match", Boolean.class),
+                  r.get("feasible", Boolean.class),
                   nz(r.get("infeasible_reason_code", String.class)),
-                  nz(r.get("infeasible_reason", String.class)), chosen, alloc);
+                  nz(r.get("infeasible_reason", String.class)),
+                  chosen,
+                  alloc);
             });
   }
 
@@ -1092,39 +1346,54 @@ public class WarehouseAllocationService {
     String current = head.get("status", String.class);
     if (WarehouseAllocationStatus.SUSPENDED.name().equals(current)
         || WarehouseAllocationStatus.RELEASED.name().equals(current)) {
-      throw bad("分配当前状态「" + current + "」是终态，不允许再改状态：挂起的分配要重跑一次分配，"
-          + "已下发的分配已经被下游取走");
+      throw bad("分配当前状态「" + current + "」是终态，不允许再改状态：挂起的分配要重跑一次分配，" + "已下发的分配已经被下游取走");
     }
     String module = nz(input.releasedToModule());
     if (target == WarehouseAllocationStatus.RELEASED
-        && !module.equals("MODULE_9_3_3_1") && !module.equals("MODULE_8_OUTBOUND")) {
-      throw bad("下发给哪个模块必须显式说明（MODULE_9_3_3_1 履约批次 / MODULE_8_OUTBOUND 出库单），"
-          + "收到「" + module + "」");
+        && !module.equals("MODULE_9_3_3_1")
+        && !module.equals("MODULE_8_OUTBOUND")) {
+      throw bad(
+          "下发给哪个模块必须显式说明（MODULE_9_3_3_1 履约批次 / MODULE_8_OUTBOUND 出库单），" + "收到「" + module + "」");
     }
     if (target == WarehouseAllocationStatus.RELEASED
         && !WarehouseAllocationStatus.CONFIRMED.name().equals(current)) {
-      throw bad("分配当前状态是「" + current + "」，必须先确认才能下发："
-          + "未确认就把货放给下游，下游无法判断这批货是不是已经被人改过主意");
+      throw bad("分配当前状态是「" + current + "」，必须先确认才能下发：" + "未确认就把货放给下游，下游无法判断这批货是不是已经被人改过主意");
     }
     // 状态推进走 SECURITY DEFINER 窄函数：决策表对 trade_app 已 REVOKE UPDATE/DELETE，
     // append-only 才是真的（见迁移第 9.9 节）。
     sql.execute(
         "select advance_warehouse_allocation_status(?::uuid, ?, ?::uuid, ?)",
-        decisionId, target.name(), actorId, module);
+        decisionId,
+        target.name(),
+        actorId,
+        module);
     sql.execute(
         "insert into fulfillment_warehouse_allocation_event"
             + "(id,tenant_id,decision_id,event_kind,from_status,to_status,detail,actor_id,occurred_at)"
             + " values (?,?,?,?,?,?,?,?,?::timestamptz)",
-        UUID.randomUUID(), currentTenant(), decisionId, target.name(), current, target.name(),
+        UUID.randomUUID(),
+        currentTenant(),
+        decisionId,
+        target.name(),
+        current,
+        target.name(),
         target == WarehouseAllocationStatus.CONFIRMED
             ? "分配已确认"
             : "分配已下发给 " + module + "（本模块不预占上游库存，预占由下游走 warehouse 授权 API）",
-        actorId, OffsetDateTime.now());
+        actorId,
+        OffsetDateTime.now());
     return new WarehouseAllocationDecisionSaved(
-        decisionId, head.get("order_ref", String.class), target,
-        reasonCode(head.get("reason_code", String.class)), head.get("chosen_warehouse_ref", String.class),
-        head.get("chosen_legal_entity_code", String.class), head.get("cross_legal_entity", Boolean.class),
-        head.get("allocated_qty", BigDecimal.class), null, null, 0,
+        decisionId,
+        head.get("order_ref", String.class),
+        target,
+        reasonCode(head.get("reason_code", String.class)),
+        head.get("chosen_warehouse_ref", String.class),
+        head.get("chosen_legal_entity_code", String.class),
+        head.get("cross_legal_entity", Boolean.class),
+        head.get("allocated_qty", BigDecimal.class),
+        null,
+        null,
+        0,
         target == WarehouseAllocationStatus.CONFIRMED ? "分配已确认" : "分配已下发");
   }
 
@@ -1133,8 +1402,7 @@ public class WarehouseAllocationService {
   /**
    * 挂起清单（真分页）。这是「哪几单发不出去」与「该去补什么」的查询入口。
    *
-   * <p>每一行都带整体挂起原因与**全量**的逐仓排除清单 ——
-   * 运营从这里能直接看出是货权不符、缺库存估算、还是运费没配。
+   * <p>每一行都带整体挂起原因与**全量**的逐仓排除清单 —— 运营从这里能直接看出是货权不符、缺库存估算、还是运费没配。
    */
   public WarehouseAllocationHoldPage pageHolds(WarehouseAllocationHoldQuery query) {
     int size = pageSize(query.size());
@@ -1165,7 +1433,8 @@ public class WarehouseAllocationService {
         " from fulfillment_warehouse_allocation_hold h"
             + " join fulfillment_warehouse_allocation_decision d"
             + " on d.tenant_id = h.tenant_id and d.id = h.decision_id";
-    long total = sql.fetchOne("select count(*) c" + from + sqlWhere, binds.toArray()).get("c", Long.class);
+    long total =
+        sql.fetchOne("select count(*) c" + from + sqlWhere, binds.toArray()).get("c", Long.class);
     List<WarehouseAllocationHoldRow> items =
         sql.fetch(
                 "select h.id,h.decision_id,d.order_ref,h.hold_reason,h.reason,h.exclusion_detail,"
@@ -1317,7 +1586,7 @@ public class WarehouseAllocationService {
           switch (policy) {
             case LOWEST_COST -> shippingCost;
             case CLOSEST_LEAD_TIME -> leadTimeDays;
-            // HIGHEST_SCORE 用负分：升序比较下负分大的（即分小的）排后面。
+              // HIGHEST_SCORE 用负分：升序比较下负分大的（即分小的）排后面。
             case HIGHEST_SCORE -> totalScore == null ? BigDecimal.ZERO : totalScore.negate();
           };
       return value == null ? BigDecimal.ZERO : value;
@@ -1327,6 +1596,7 @@ public class WarehouseAllocationService {
      * 五维打分。
      *
      * <p>归一化口径（都要能向运营解释，所以刻意不用「拍脑袋的整数」）：
+     *
      * <ul>
      *   <li>库存 = min(1, 可用量 / 需求量)；
      *   <li>成本 = 本次最低运费 / 本仓运费（最便宜的那个拿满分，其余按比例）；
@@ -1366,8 +1636,8 @@ public class WarehouseAllocationService {
                 profile.legalEntityCode().equals(orderEntity)
                     ? BigDecimal.ONE.setScale(SCORE_SCALE)
                     : BigDecimal.ZERO.setScale(SCORE_SCALE);
-            // 指定法人优先：不匹配的仓拿 0.4 而不是 0 —— 运营显式指定了偏好法人，
-            // 但没说过「非它一律不可发」，给 0 会让偏好变成硬性排他。
+              // 指定法人优先：不匹配的仓拿 0.4 而不是 0 —— 运营显式指定了偏好法人，
+              // 但没说过「非它一律不可发」，给 0 会让偏好变成硬性排他。
             case PREFERRED_FIRST ->
                 profile.legalEntityCode().equals(rule.preferredLegalEntityCode())
                     ? BigDecimal.ONE.setScale(SCORE_SCALE)
@@ -1395,10 +1665,13 @@ public class WarehouseAllocationService {
         return BigDecimal.ONE.setScale(SCORE_SCALE);
       }
       BigDecimal ratio = best.divide(value, SCORE_SCALE + 2, RoundingMode.HALF_UP);
-      return ratio.min(BigDecimal.ONE.setScale(SCORE_SCALE)).setScale(SCORE_SCALE, RoundingMode.HALF_UP);
+      return ratio
+          .min(BigDecimal.ONE.setScale(SCORE_SCALE))
+          .setScale(SCORE_SCALE, RoundingMode.HALF_UP);
     }
 
-    WarehouseAllocationCandidateRow toRow(boolean chosen, BigDecimal requested, BigDecimal allocated) {
+    WarehouseAllocationCandidateRow toRow(
+        boolean chosen, BigDecimal requested, BigDecimal allocated) {
       return new WarehouseAllocationCandidateRow(
           profile.warehouseRef(),
           profile.warehouseName(),
@@ -1449,8 +1722,14 @@ public class WarehouseAllocationService {
       reason = "仓「" + profile.warehouseName() + "」在本规则的排除清单里";
     } else if (legalGate && !entityMatch) {
       block = WarehouseCandidateBlockReason.LEGAL_ENTITY_MISMATCH.name();
-      reason = "仓「" + profile.warehouseName() + "」货权法人是「" + profile.legalEntityCode()
-          + "」，与订单货权主体「" + orderEntity + "」不符：从别的法人的仓发货意味着收入记在那个法人名下";
+      reason =
+          "仓「"
+              + profile.warehouseName()
+              + "」货权法人是「"
+              + profile.legalEntityCode()
+              + "」，与订单货权主体「"
+              + orderEntity
+              + "」不符：从别的法人的仓发货意味着收入记在那个法人名下";
     }
 
     // ---- 第 2 层：库存
@@ -1458,18 +1737,22 @@ public class WarehouseAllocationService {
     if (block.isEmpty()) {
       if (latest.id() == null) {
         block = WarehouseCandidateBlockReason.NO_STOCK_RECORD.name();
-        reason = latest.future()
-            ? "仓「" + profile.warehouseName() + "」的库存估算采集于 " + latest.collectedAt()
-                + "，晚于决策时刻：那是未来数据，拿不到当前值不等于有货"
-            : "仓「" + profile.warehouseName() + "」没有库存估算：0 与「没测过」在决策上不等价";
+        reason =
+            latest.future()
+                ? "仓「"
+                    + profile.warehouseName()
+                    + "」的库存估算采集于 "
+                    + latest.collectedAt()
+                    + "，晚于决策时刻：那是未来数据，拿不到当前值不等于有货"
+                : "仓「" + profile.warehouseName() + "」没有库存估算：0 与「没测过」在决策上不等价";
       } else if (latest.availableQty().signum() == 0) {
         block = WarehouseCandidateBlockReason.STOCK_ZERO.name();
         reason = "仓「" + profile.warehouseName() + "」可用量为 0";
       } else if (latest.availableQty().compareTo(requested) < 0
           && rule.fallbackPolicy != WarehouseFallbackPolicy.ALLOW_PARTIAL) {
         block = WarehouseCandidateBlockReason.INSUFFICIENT_STOCK.name();
-        reason = "仓「" + profile.warehouseName() + "」可用量 " + latest.availableQty()
-            + " 不足需求 " + requested;
+        reason =
+            "仓「" + profile.warehouseName() + "」可用量 " + latest.availableQty() + " 不足需求 " + requested;
       }
     }
 
@@ -1477,24 +1760,33 @@ public class WarehouseAllocationService {
     Shipping shipping = effectiveShipping(profile.warehouseRef(), sku, country, at);
     if (block.isEmpty() && shipping.id() == null) {
       block = WarehouseCandidateBlockReason.NO_SHIPPING_ESTIMATE.name();
-      reason = "仓「" + profile.warehouseName() + "」没有发往 " + country
-          + " 的运费与时效估算：没有成本口径就不能参与分仓比较";
+      reason = "仓「" + profile.warehouseName() + "」没有发往 " + country + " 的运费与时效估算：没有成本口径就不能参与分仓比较";
     }
-    if (block.isEmpty() && rule.maxLeadTimeDays() != null && shipping.leadTimeDays() != null
+    if (block.isEmpty()
+        && rule.maxLeadTimeDays() != null
+        && shipping.leadTimeDays() != null
         && shipping.leadTimeDays().compareTo(rule.maxLeadTimeDays()) > 0) {
       block = WarehouseCandidateBlockReason.LEAD_TIME_EXCEEDED.name();
-      reason = "仓「" + profile.warehouseName() + "」时效 " + shipping.leadTimeDays()
-          + " 天超出本规则的时效承诺 " + rule.maxLeadTimeDays() + " 天";
+      reason =
+          "仓「"
+              + profile.warehouseName()
+              + "」时效 "
+              + shipping.leadTimeDays()
+              + " 天超出本规则的时效承诺 "
+              + rule.maxLeadTimeDays()
+              + " 天";
     }
     if (block.isEmpty() && shipping.leadTimeDays() == null) {
-      warnings.add(
-          "仓「" + profile.warehouseName() + "」的时效未知，本模块按 0 分计入（不当 0 天，"
-              + "也不当最优）");
+      warnings.add("仓「" + profile.warehouseName() + "」的时效未知，本模块按 0 分计入（不当 0 天，" + "也不当最优）");
     }
     if (block.isEmpty() && !entityMatch) {
       warnings.add(
-          "仓「" + profile.warehouseName() + "」货权法人「" + profile.legalEntityCode()
-              + "」与订单主体「" + orderEntity
+          "仓「"
+              + profile.warehouseName()
+              + "」货权法人「"
+              + profile.legalEntityCode()
+              + "」与订单主体「"
+              + orderEntity
               + "」不符：本次按规则 CROSS_LEGAL_ENTITY 放行，收入将记在该法人名下");
     }
     if (orderRegion.equals("*")) {
@@ -1522,7 +1814,9 @@ public class WarehouseAllocationService {
     if (notBlank(ruleCode)) {
       row =
           sql.fetchOne(
-              "select " + RULE_COLUMNS + " from fulfillment_warehouse_allocation_rule"
+              "select "
+                  + RULE_COLUMNS
+                  + " from fulfillment_warehouse_allocation_rule"
                   + " where rule_code = ?",
               ruleCode.trim());
       if (row == null) {
@@ -1532,17 +1826,25 @@ public class WarehouseAllocationService {
       String platform = blankTo(platformCode, "*");
       row =
           sql.fetchOne(
-              "select " + RULE_COLUMNS + " from fulfillment_warehouse_allocation_rule"
+              "select "
+                  + RULE_COLUMNS
+                  + " from fulfillment_warehouse_allocation_rule"
                   + " where (scope_platform_code = '*' or scope_platform_code = ?)"
                   + "   and (scope_destination_country_code = '*'"
                   + "        or scope_destination_country_code = ?)"
                   + "   and effective_from <= ?::timestamptz"
                   + "   and (effective_to is null or effective_to > ?::timestamptz)"
                   + " order by priority limit 1",
-              platform, country, at, at);
+              platform,
+              country,
+              at,
+              at);
       if (row == null) {
         throw bad(
-            "没有命中任何生效的分仓规则（平台 " + platform + " / 目的国 " + country
+            "没有命中任何生效的分仓规则（平台 "
+                + platform
+                + " / 目的国 "
+                + country
                 + "）：先到「分仓规则」配一条，规则不存在时执行分配等于凭空决定从哪个仓发");
       }
     }
@@ -1568,8 +1870,7 @@ public class WarehouseAllocationService {
         nz(row.get("excluded_warehouse_refs", String.class)));
   }
 
-  /** 规则里的排除清单。**去空白 + 大写去重**：手打的清单里多个空格与空项很常见，
-   *  不去重会让「排除清单里没写的那个仓」被误伤。 */
+  /** 规则里的排除清单。**去空白 + 大写去重**：手打的清单里多个空格与空项很常见， 不去重会让「排除清单里没写的那个仓」被误伤。 */
   private static Set<String> parseExclusions(Rule rule) {
     Set<String> excluded = new LinkedHashSet<>();
     if (rule.excludedWarehouseRefs.isBlank()) {
@@ -1603,13 +1904,12 @@ public class WarehouseAllocationService {
                 + " where warehouse_ref = ?",
             ref);
     if (row == null) {
-      throw bad(
-          "仓库「" + ref + "」不在档案里：货权归属是仓库的属性，没有档案就没有货权可依据，"
-              + "先建档再登记库存或运费");
+      throw bad("仓库「" + ref + "」不在档案里：货权归属是仓库的属性，没有档案就没有货权可依据，" + "先建档再登记库存或运费");
     }
   }
 
-  private record Stock(UUID id, BigDecimal availableQty, OffsetDateTime collectedAt, boolean future) {}
+  private record Stock(
+      UUID id, BigDecimal availableQty, OffsetDateTime collectedAt, boolean future) {}
 
   private Stock latestStock(String warehouseRef, String sku, OffsetDateTime at) {
     Record row =
@@ -1617,7 +1917,8 @@ public class WarehouseAllocationService {
             "select id,available_qty,collected_at"
                 + " from fulfillment_warehouse_allocation_stock_estimate"
                 + " where warehouse_ref = ? and sku_ref = ?",
-            warehouseRef, sku);
+            warehouseRef,
+            sku);
     if (row == null) {
       return new Stock(null, null, null, false);
     }
@@ -1628,14 +1929,14 @@ public class WarehouseAllocationService {
     if (collected.isAfter(at)) {
       return new Stock(null, null, collected, true);
     }
-    return new Stock(row.get("id", UUID.class), row.get("available_qty", BigDecimal.class),
-        collected, false);
+    return new Stock(
+        row.get("id", UUID.class), row.get("available_qty", BigDecimal.class), collected, false);
   }
 
   private record Shipping(UUID id, BigDecimal cost, BigDecimal leadTimeDays) {}
 
-  private Shipping effectiveShipping(String warehouseRef, String sku, String country,
-      OffsetDateTime at) {
+  private Shipping effectiveShipping(
+      String warehouseRef, String sku, String country, OffsetDateTime at) {
     Record row =
         sql.fetchOne(
             "select id,shipping_cost,lead_time_days"
@@ -1644,12 +1945,17 @@ public class WarehouseAllocationService {
                 + "   and effective_from <= ?::timestamptz"
                 + "   and (effective_to is null or effective_to > ?::timestamptz)"
                 + " order by effective_from desc limit 1",
-            warehouseRef, sku, country, at, at);
+            warehouseRef,
+            sku,
+            country,
+            at,
+            at);
     if (row == null) {
       return new Shipping(null, null, null);
     }
     return new Shipping(
-        row.get("id", UUID.class), row.get("shipping_cost", BigDecimal.class),
+        row.get("id", UUID.class),
+        row.get("shipping_cost", BigDecimal.class),
         row.get("lead_time_days", BigDecimal.class));
   }
 
@@ -1658,7 +1964,8 @@ public class WarehouseAllocationService {
         sql.fetchOne(
             "select id from fulfillment_warehouse_allocation_stock_estimate"
                 + " where warehouse_ref = ? and sku_ref = ?",
-            warehouseRef, sku);
+            warehouseRef,
+            sku);
     return row == null ? null : row.get(0, UUID.class);
   }
 
@@ -1671,7 +1978,11 @@ public class WarehouseAllocationService {
                 + "   and effective_from <= ?::timestamptz"
                 + "   and (effective_to is null or effective_to > ?::timestamptz)"
                 + " order by effective_from desc limit 1",
-            warehouseRef, sku, country, at, at);
+            warehouseRef,
+            sku,
+            country,
+            at,
+            at);
     return row == null ? null : row.get(0, UUID.class);
   }
 
@@ -1688,41 +1999,68 @@ public class WarehouseAllocationService {
   /**
    * 「为什么选了 A 仓」—— 含货权维度的贡献。
    *
-   * <p>刻意把每一维的「得分×权重」都写出来：运营追问「为什么不是 B 仓」时，
-   * 能直接照这句话去比，而不是反过来问系统「你到底怎么算的」。
+   * <p>刻意把每一维的「得分×权重」都写出来：运营追问「为什么不是 B 仓」时， 能直接照这句话去比，而不是反过来问系统「你到底怎么算的」。
    */
   private String reasonOf(
       Candidate chosen, Rule rule, BigDecimal requested, boolean cross, int feasibleCount) {
     StringBuilder sb = new StringBuilder();
-    sb.append("按「").append(rule.selectionPolicy.label()).append("」策略（规则 ")
-        .append(rule.ruleCode()).append("）在 ").append(feasibleCount).append(" 个可行仓中选定 ")
-        .append(chosen.profile().warehouseRef()).append("：");
-    sb.append("可用量 ").append(chosen.availableQty()).append(" 覆盖需求 ").append(requested)
-        .append("（库存 ").append(chosen.scoreStock()).append("×权重 ")
-        .append(rule.weightStock()).append("）");
-    sb.append("；运费 ").append(chosen.shippingCost()).append("（成本 ").append(chosen.scoreCost())
-        .append("×权重 ").append(rule.weightCost()).append("）");
-    sb.append("；时效 ").append(chosen.leadTimeDays() == null ? "未知" : chosen.leadTimeDays())
-        .append(" 天（时效 ").append(chosen.scoreLeadTime()).append("×权重 ")
-        .append(rule.weightLeadTime()).append("）");
-    sb.append("；货权法人 ").append(chosen.profile().legalEntityCode())
+    sb.append("按「")
+        .append(rule.selectionPolicy.label())
+        .append("」策略（规则 ")
+        .append(rule.ruleCode())
+        .append("）在 ")
+        .append(feasibleCount)
+        .append(" 个可行仓中选定 ")
+        .append(chosen.profile().warehouseRef())
+        .append("：");
+    sb.append("可用量 ")
+        .append(chosen.availableQty())
+        .append(" 覆盖需求 ")
+        .append(requested)
+        .append("（库存 ")
+        .append(chosen.scoreStock())
+        .append("×权重 ")
+        .append(rule.weightStock())
+        .append("）");
+    sb.append("；运费 ")
+        .append(chosen.shippingCost())
+        .append("（成本 ")
+        .append(chosen.scoreCost())
+        .append("×权重 ")
+        .append(rule.weightCost())
+        .append("）");
+    sb.append("；时效 ")
+        .append(chosen.leadTimeDays() == null ? "未知" : chosen.leadTimeDays())
+        .append(" 天（时效 ")
+        .append(chosen.scoreLeadTime())
+        .append("×权重 ")
+        .append(rule.weightLeadTime())
+        .append("）");
+    sb.append("；货权法人 ")
+        .append(chosen.profile().legalEntityCode())
         .append(chosen.legalEntityMatch ? "（与订单主体一致" : "（与订单主体不符")
-        .append("，货权得分 ").append(chosen.scoreLegalEntity()).append("×权重 ")
-        .append(rule.weightLegalEntity()).append("）");
-    sb.append("；区域 ").append(chosen.profile().regionCode()).append("（地区 ")
-        .append(chosen.scoreRegion()).append("×权重 ").append(rule.weightRegion()).append("）");
+        .append("，货权得分 ")
+        .append(chosen.scoreLegalEntity())
+        .append("×权重 ")
+        .append(rule.weightLegalEntity())
+        .append("）");
+    sb.append("；区域 ")
+        .append(chosen.profile().regionCode())
+        .append("（地区 ")
+        .append(chosen.scoreRegion())
+        .append("×权重 ")
+        .append(rule.weightRegion())
+        .append("）");
     sb.append("；综合分 ").append(chosen.totalScore()).append("。");
     if (cross) {
-      sb.append("注意：本次为跨法人发货，收入将记在「").append(chosen.profile().legalEntityCode())
-          .append("」名下。");
+      sb.append("注意：本次为跨法人发货，收入将记在「").append(chosen.profile().legalEntityCode()).append("」名下。");
     }
     return sb.toString();
   }
 
   /** 整体挂起原因：按「全体一致的排除原因」归纳，否则归到笼统的无可行仓。 */
   private WarehouseHoldReason aggregateHoldReason(List<Candidate> candidates) {
-    List<String> codes =
-        candidates.stream().map(Candidate::blockCode).distinct().sorted().toList();
+    List<String> codes = candidates.stream().map(Candidate::blockCode).distinct().sorted().toList();
     if (codes.size() == 1) {
       String only = codes.get(0);
       if (only.equals(WarehouseCandidateBlockReason.LEGAL_ENTITY_MISMATCH.name())) {
@@ -1798,12 +2136,33 @@ public class WarehouseAllocationService {
 
   /** 列清单与需 cast 的列。cast 由列名推导，不手写等长数组 —— 手写的那份曾经差一位。 */
   private static final String[] DECISION_COLUMNS_IN = {
-    "id", "tenant_id", "order_ref", "order_line_ref", "sku_ref", "requested_qty", "rule_id",
-    "selection_policy", "fallback_policy", "legal_entity_policy", "require_legal_entity_match",
-    "destination_country_code", "destination_region_code", "order_legal_entity_code", "status",
-    "chosen_warehouse_ref", "chosen_legal_entity_code", "cross_legal_entity", "allocated_qty",
-    "unit_shipping_cost", "lead_time_days", "chosen_total_score", "currency_code",
-    "reason_code", "reason", "decided_at", "created_by_membership_id"
+    "id",
+    "tenant_id",
+    "order_ref",
+    "order_line_ref",
+    "sku_ref",
+    "requested_qty",
+    "rule_id",
+    "selection_policy",
+    "fallback_policy",
+    "legal_entity_policy",
+    "require_legal_entity_match",
+    "destination_country_code",
+    "destination_region_code",
+    "order_legal_entity_code",
+    "status",
+    "chosen_warehouse_ref",
+    "chosen_legal_entity_code",
+    "cross_legal_entity",
+    "allocated_qty",
+    "unit_shipping_cost",
+    "lead_time_days",
+    "chosen_total_score",
+    "currency_code",
+    "reason_code",
+    "reason",
+    "decided_at",
+    "created_by_membership_id"
   };
 
   /** 需要 {@code ?::timestamptz} 的列（其余是普通绑定）。 */
@@ -1820,10 +2179,15 @@ public class WarehouseAllocationService {
         values.append(',');
       }
       columns.append(DECISION_COLUMNS_IN[i]);
-      values.append('?').append(DECISION_TS_COLUMNS.contains(DECISION_COLUMNS_IN[i]) ? "::timestamptz" : "");
+      values
+          .append('?')
+          .append(DECISION_TS_COLUMNS.contains(DECISION_COLUMNS_IN[i]) ? "::timestamptz" : "");
     }
-    return "insert into fulfillment_warehouse_allocation_decision (" + columns + ") values ("
-        + values + ")";
+    return "insert into fulfillment_warehouse_allocation_decision ("
+        + columns
+        + ") values ("
+        + values
+        + ")";
   }
 
   // ================================================================ 映射与工具
@@ -1846,22 +2210,30 @@ public class WarehouseAllocationService {
 
   private static WarehouseAllocationRuleRow ruleRow(Record r) {
     return new WarehouseAllocationRuleRow(
-        r.get("id", UUID.class), r.get("rule_code", String.class),
-        r.get("rule_name", String.class), r.get("priority", Integer.class),
+        r.get("id", UUID.class),
+        r.get("rule_code", String.class),
+        r.get("rule_name", String.class),
+        r.get("priority", Integer.class),
         r.get("scope_platform_code", String.class),
         r.get("scope_destination_country_code", String.class),
         selectionPolicy(r.get("selection_policy", String.class)),
         fallbackPolicy(r.get("fallback_policy", String.class)),
-        r.get("weight_stock", BigDecimal.class), r.get("weight_cost", BigDecimal.class),
-        r.get("weight_lead_time", BigDecimal.class), r.get("weight_legal_entity", BigDecimal.class),
+        r.get("weight_stock", BigDecimal.class),
+        r.get("weight_cost", BigDecimal.class),
+        r.get("weight_lead_time", BigDecimal.class),
+        r.get("weight_legal_entity", BigDecimal.class),
         r.get("weight_region", BigDecimal.class),
         r.get("require_legal_entity_match", Boolean.class),
         legalEntityPolicy(r.get("legal_entity_policy", String.class)),
         r.get("preferred_legal_entity_code", String.class),
-        r.get("max_lead_time_days", BigDecimal.class), r.get("currency_code", String.class),
-        r.get("excluded_warehouse_refs", String.class), r.get("effective_from", OffsetDateTime.class),
-        r.get("effective_to", OffsetDateTime.class), r.get("notes", String.class),
-        r.get("created_at", OffsetDateTime.class), r.get("updated_at", OffsetDateTime.class));
+        r.get("max_lead_time_days", BigDecimal.class),
+        r.get("currency_code", String.class),
+        r.get("excluded_warehouse_refs", String.class),
+        r.get("effective_from", OffsetDateTime.class),
+        r.get("effective_to", OffsetDateTime.class),
+        r.get("notes", String.class),
+        r.get("created_at", OffsetDateTime.class),
+        r.get("updated_at", OffsetDateTime.class));
   }
 
   private static WarehouseAllocationWarehouseRow warehouseRow(Record r) {
@@ -1875,10 +2247,14 @@ public class WarehouseAllocationService {
 
   private static WarehouseAllocationStockRow stockRow(Record r) {
     return new WarehouseAllocationStockRow(
-        r.get("id", UUID.class), r.get("warehouse_ref", String.class),
-        r.get("sku_ref", String.class), r.get("available_qty", BigDecimal.class),
-        r.get("collected_at", OffsetDateTime.class), r.get("stock_source", String.class),
-        r.get("source_reference", String.class), r.get("notes", String.class),
+        r.get("id", UUID.class),
+        r.get("warehouse_ref", String.class),
+        r.get("sku_ref", String.class),
+        r.get("available_qty", BigDecimal.class),
+        r.get("collected_at", OffsetDateTime.class),
+        r.get("stock_source", String.class),
+        r.get("source_reference", String.class),
+        r.get("notes", String.class),
         r.get("created_at", OffsetDateTime.class));
   }
 
@@ -1895,41 +2271,57 @@ public class WarehouseAllocationService {
 
   private static WarehouseAllocationDecisionRow decisionRow(Record r) {
     return new WarehouseAllocationDecisionRow(
-        r.get("id", UUID.class), r.get("order_ref", String.class),
-        r.get("order_line_ref", String.class), r.get("sku_ref", String.class),
+        r.get("id", UUID.class),
+        r.get("order_ref", String.class),
+        r.get("order_line_ref", String.class),
+        r.get("sku_ref", String.class),
         r.get("requested_qty", BigDecimal.class),
         r.get("destination_country_code", String.class),
         r.get("destination_region_code", String.class),
         r.get("order_legal_entity_code", String.class),
         r.get("chosen_warehouse_ref", String.class),
         r.get("chosen_legal_entity_code", String.class),
-        r.get("cross_legal_entity", Boolean.class), r.get("allocated_qty", BigDecimal.class),
-        r.get("unit_shipping_cost", BigDecimal.class), r.get("lead_time_days", BigDecimal.class),
-        r.get("chosen_total_score", BigDecimal.class), r.get("currency_code", String.class),
+        r.get("cross_legal_entity", Boolean.class),
+        r.get("allocated_qty", BigDecimal.class),
+        r.get("unit_shipping_cost", BigDecimal.class),
+        r.get("lead_time_days", BigDecimal.class),
+        r.get("chosen_total_score", BigDecimal.class),
+        r.get("currency_code", String.class),
         selectionPolicy(r.get("selection_policy", String.class)),
         fallbackPolicy(r.get("fallback_policy", String.class)),
         legalEntityPolicy(r.get("legal_entity_policy", String.class)),
-        reasonCode(r.get("reason_code", String.class)), r.get("reason", String.class),
-        allocationStatus(r.get("status", String.class)), r.get("decided_at", OffsetDateTime.class),
-        r.get("confirmed_at", OffsetDateTime.class), r.get("released_at", OffsetDateTime.class),
+        reasonCode(r.get("reason_code", String.class)),
+        r.get("reason", String.class),
+        allocationStatus(r.get("status", String.class)),
+        r.get("decided_at", OffsetDateTime.class),
+        r.get("confirmed_at", OffsetDateTime.class),
+        r.get("released_at", OffsetDateTime.class),
         r.get("created_at", OffsetDateTime.class));
   }
 
   private static WarehouseAllocationHoldRow holdRow(Record r) {
     return new WarehouseAllocationHoldRow(
-        r.get("id", UUID.class), r.get("decision_id", UUID.class),
-        r.get("order_ref", String.class), holdReason(r.get("hold_reason", String.class)),
-        r.get("reason", String.class), r.get("exclusion_detail", String.class),
+        r.get("id", UUID.class),
+        r.get("decision_id", UUID.class),
+        r.get("order_ref", String.class),
+        holdReason(r.get("hold_reason", String.class)),
+        r.get("reason", String.class),
+        r.get("exclusion_detail", String.class),
         r.get("excluded_warehouse_count", Integer.class),
-        r.get("hold_candidate_id", UUID.class), r.get("shortfall_qty", BigDecimal.class),
-        r.get("held_at", OffsetDateTime.class), r.get("hold_source", String.class));
+        r.get("hold_candidate_id", UUID.class),
+        r.get("shortfall_qty", BigDecimal.class),
+        r.get("held_at", OffsetDateTime.class),
+        r.get("hold_source", String.class));
   }
 
   private static WarehouseAllocationEventRow eventRow(Record r) {
     return new WarehouseAllocationEventRow(
-        r.get("id", UUID.class), r.get("event_kind", String.class),
-        r.get("from_status", String.class), r.get("to_status", String.class),
-        r.get("detail", String.class), r.get("actor_id", UUID.class),
+        r.get("id", UUID.class),
+        r.get("event_kind", String.class),
+        r.get("from_status", String.class),
+        r.get("to_status", String.class),
+        r.get("detail", String.class),
+        r.get("actor_id", UUID.class),
         r.get("occurred_at", OffsetDateTime.class));
   }
 
@@ -2020,7 +2412,8 @@ public class WarehouseAllocationService {
     try {
       return WarehouseAllocationStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (RuntimeException e) {
-      throw bad("未知的分配状态「" + value + "」：只能是 ALLOCATED / PARTIAL / SUSPENDED / CONFIRMED / RELEASED");
+      throw bad(
+          "未知的分配状态「" + value + "」：只能是 ALLOCATED / PARTIAL / SUSPENDED / CONFIRMED / RELEASED");
     }
   }
 
@@ -2039,8 +2432,8 @@ public class WarehouseAllocationService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义
-   * GUC **复位成空串**而不是「回到未设置」，直接 cast 会报 uuid 语法错。
+   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义 GUC **复位成空串**而不是「回到未设置」，直接 cast 会报
+   * uuid 语法错。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")

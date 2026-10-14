@@ -86,10 +86,12 @@
 **关键设计决策**：
 
 1. **生成列把「该不该占我方库存」钉死在数据层。**
+
    ```sql
    counts_against_own_inventory = fulfillment_path <> 'SUPPLIER_DIRECT' OR ownership_mode <> 'PURE_AGENCY'
    pure_agency_exempt           = fulfillment_path =  'SUPPLIER_DIRECT' AND ownership_mode = 'PURE_AGENCY'
    ```
+
    应用层改不了，也就没有「服务层忘了判」这条路。服务层只读出来如实报给下游 9.6.1.2，不另算第二份；
    前端同样只读 `pureAgencyExempt`，不重算 —— 两份算法迟早漂移，
    漂移后界面显示的「不占我方库存」就会和下游实际预占与否对不上。
@@ -117,14 +119,14 @@
 
 ## L2 执行记录
 
-| 项 | 结果 |
-| --- | --- |
-| 静态预检 | **无命中**（`ADD COLUMN` 无 DEFAULT / `SET NOT NULL` / `ADD CONSTRAINT CHECK` 三项均为空） |
-| 后端 `mvnw verify` | 首跑 **BUILD FAILURE**（见下），补跑后 **绿** |
-| `pnpm typecheck` / `lint` | 绿 / 绿 |
-| `pnpm test` | 绿，**2599 例 / 139 文件** |
-| Next production build | 绿（`NEXT_TELEMETRY_DISABLED=1`） |
-| `sync.mjs --check` | ✓ 台账与蓝图一致 |
+| 项                        | 结果                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| 静态预检                  | **无命中**（`ADD COLUMN` 无 DEFAULT / `SET NOT NULL` / `ADD CONSTRAINT CHECK` 三项均为空） |
+| 后端 `mvnw verify`        | 首跑 **BUILD FAILURE**（见下），补跑后 **绿**                                              |
+| `pnpm typecheck` / `lint` | 绿 / 绿                                                                                    |
+| `pnpm test`               | 绿，**2599 例 / 139 文件**                                                                 |
+| Next production build     | 绿（`NEXT_TELEMETRY_DISABLED=1`）                                                          |
+| `sync.mjs --check`        | ✓ 台账与蓝图一致                                                                           |
 
 ### 首跑失败是 flake，不是回归 —— 证据链
 

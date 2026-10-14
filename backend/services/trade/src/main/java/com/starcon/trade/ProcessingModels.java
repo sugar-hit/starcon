@@ -1,8 +1,6 @@
 package com.starcon.trade;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,29 +9,24 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * 6.4.1.1 加工单的传输模型。
  *
- * <p>蓝图原话：「发起委外/自有工厂加工：选择成品 SKU 与 BOM 版本、指定组件领用量与加工厂、
- * 约定完工数量与交期，跟踪加工进度与入库。」输出是
- * 「加工单（组件领用记录 + 完工数量）；入库需求通知 8」。
+ * <p>蓝图原话：「发起委外/自有工厂加工：选择成品 SKU 与 BOM 版本、指定组件领用量与加工厂、 约定完工数量与交期，跟踪加工进度与入库。」输出是 「加工单（组件领用记录 +
+ * 完工数量）；入库需求通知 8」。
  *
  * <p><b>四条建模纪律</b>：
  *
  * <ul>
- *   <li><b>BOM 口径不重新定义</b>：{@link ProcessingComponentLine} 的
- *       {@code unitQuantity} / {@code scrapRate} / {@code requiredQuantity}
- *       逐字对应 catalog V25 的规则 R6（损耗率是百分数，5 = 5%）与
- *       规则 R7（需求量 = 单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP）。
- *       本模块**不**另立一套换算，也不把需求量取整成采购量 ——
- *       取整是 3.5.2.2 与 06 采购建议的职责。
- *   <li><b>完工数量与实收数量分开</b>：{@code completedQuantity} 是工厂**报**的，
- *       {@code receivedQuantity} 是仓库**收**的。合成一个数就等于允许
- *       「报完工即视同已入库」，那是仓库账实不符的起点。
+ *   <li><b>BOM 口径不重新定义</b>：{@link ProcessingComponentLine} 的 {@code unitQuantity} / {@code
+ *       scrapRate} / {@code requiredQuantity} 逐字对应 catalog V25 的规则 R6（损耗率是百分数，5 = 5%）与 规则 R7（需求量 =
+ *       单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP）。 本模块**不**另立一套换算，也不把需求量取整成采购量 —— 取整是 3.5.2.2 与 06
+ *       采购建议的职责。
+ *   <li><b>完工数量与实收数量分开</b>：{@code completedQuantity} 是工厂**报**的， {@code receivedQuantity}
+ *       是仓库**收**的。合成一个数就等于允许 「报完工即视同已入库」，那是仓库账实不符的起点。
  *   <li><b>状态词表只有一处</b>：{@link ProcessingStatus} 一字不改地对应 DB 的 CHECK。
  *   <li><b>数量全程 BigDecimal</b>，禁浮点；数量列一律 NUMERIC(19,6)。
  * </ul>
@@ -47,8 +40,7 @@ public final class ProcessingModels {
   /**
    * 加工单生命周期（DB 词表，一字不改）。
    *
-   * <p>{@code CANCELLED} 之外的每一支都要有时间戳自洽（DB CHECK 已钉）：
-   * 已下达要有下达时刻，已完工要有完工时刻，已入库要有入库时刻。
+   * <p>{@code CANCELLED} 之外的每一支都要有时间戳自洽（DB CHECK 已钉）： 已下达要有下达时刻，已完工要有完工时刻，已入库要有入库时刻。
    */
   public enum ProcessingStatus {
     DRAFT("草稿"),
@@ -173,8 +165,7 @@ public final class ProcessingModels {
       @Schema(nullable = true) @Size(max = 64) String code,
       @NotBlank @Size(max = 200) String name,
       @NotBlank String factoryKind,
-      @Schema(nullable = true, description = "启用 / 停用；不传表示保持当前状态")
-          String status,
+      @Schema(nullable = true, description = "启用 / 停用；不传表示保持当前状态") String status,
       @Schema(nullable = true) @Size(max = 2000) String note,
       @PositiveOrZero long version) {}
 
@@ -195,8 +186,8 @@ public final class ProcessingModels {
   /**
    * 组件领用记录（蓝图输出的硬输出之一）。
    *
-   * <p>{@code requiredQuantity} 与 {@code issuedQuantity} 的差额就是「还欠多少料」——
-   * 这才是进度跟踪的真身，比一个 status 字段能回答的问题多得多。
+   * <p>{@code requiredQuantity} 与 {@code issuedQuantity} 的差额就是「还欠多少料」—— 这才是进度跟踪的真身，比一个 status
+   * 字段能回答的问题多得多。
    */
   public record ProcessingComponentLine(
       UUID id,
@@ -211,12 +202,10 @@ public final class ProcessingModels {
               maximum = "100")
           @Digits(integer = 3, fraction = 4)
           BigDecimal scrapRate,
-      @Schema(
-              description = "需求量 = 单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP，不取整（V25 R7）")
+      @Schema(description = "需求量 = 单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP，不取整（V25 R7）")
           @Digits(integer = 13, fraction = 6)
           BigDecimal requiredQuantity,
-      @Schema(description = "已领数量（仓库实际发出去了多少）")
-          @Digits(integer = 13, fraction = 6)
+      @Schema(description = "已领数量（仓库实际发出去了多少）") @Digits(integer = 13, fraction = 6)
           BigDecimal issuedQuantity,
       @Schema(description = "还欠多少料 = requiredQuantity − issuedQuantity")
           @Digits(integer = 13, fraction = 6)
@@ -316,10 +305,8 @@ public final class ProcessingModels {
   /**
    * 新建加工单。
    *
-   * <p>{@code components} 刻意**不**由调用方逐行提交数量：组件与需求量必须由
-   * 本服务按 catalog 的 R7 从 BOM 版本算出来（{@code bomVersionId} + 产量），
-   * 否则「领用量要能从 BOM 算出来」这条硬要求就退化成了「调用方自称」，
-   * 而加工单恰恰是**要照着领料去仓库**的凭据。
+   * <p>{@code components} 刻意**不**由调用方逐行提交数量：组件与需求量必须由 本服务按 catalog 的 R7 从 BOM 版本算出来（{@code
+   * bomVersionId} + 产量）， 否则「领用量要能从 BOM 算出来」这条硬要求就退化成了「调用方自称」， 而加工单恰恰是**要照着领料去仓库**的凭据。
    */
   public record ProcessingOrderInput(
       @NotBlank @Size(max = 64) String orderNo,
@@ -336,25 +323,18 @@ public final class ProcessingModels {
   /**
    * 组件领用登记：把「这次发了多少料」记到某一条组件领用记录上。
    *
-   * <p>本模块**不**改库存（那是 warehouse 在它自己的本地事务里做的事），
-   * 这里记的是**领用进度**：仓库那边发料成功后回写已领数量，
-   * 加工单因此能算出「还欠多少料」。
+   * <p>本模块**不**改库存（那是 warehouse 在它自己的本地事务里做的事）， 这里记的是**领用进度**：仓库那边发料成功后回写已领数量， 加工单因此能算出「还欠多少料」。
    */
   public record IssueInput(
       @NotNull UUID componentId,
-      @NotNull
-          @Positive
-          @Digits(integer = 13, fraction = 6)
-          BigDecimal issuedQuantity,
+      @NotNull @Positive @Digits(integer = 13, fraction = 6) BigDecimal issuedQuantity,
       @Schema(nullable = true) @Size(max = 2000) String note,
       @PositiveOrZero long version) {}
 
   /** 状态推进请求。 */
   public record ProcessingStatusInput(
       @NotBlank @Size(max = 16) String status,
-      @Schema(
-              description = "本次推进涉及的成品数量（完工报数时必填且 > 0）",
-              nullable = true)
+      @Schema(description = "本次推进涉及的成品数量（完工报数时必填且 > 0）", nullable = true)
           @Positive
           @Digits(integer = 13, fraction = 6)
           BigDecimal quantity,
@@ -364,10 +344,7 @@ public final class ProcessingModels {
 
   /** 进度登记（不改生命周期，只记「推进到哪、报了多少」）。 */
   public record ProcessingProgressInput(
-      @Schema(nullable = true)
-          @Positive
-          @Digits(integer = 13, fraction = 6)
-          BigDecimal quantity,
+      @Schema(nullable = true) @Positive @Digits(integer = 13, fraction = 6) BigDecimal quantity,
       @NotBlank @Size(max = 2000) String note,
       @PositiveOrZero long version) {}
 
@@ -376,8 +353,8 @@ public final class ProcessingModels {
   /**
    * 本模块的能力与上下游可用性声明。
    *
-   * @param upstreamNote 上游依赖实查结论：BOM 属 catalog（V25 已交付，走授权 API
-   *     读，不跨库）；库存属 warehouse（组件出库与成品入库在 warehouse 本地事务完成）
+   * @param upstreamNote 上游依赖实查结论：BOM 属 catalog（V25 已交付，走授权 API 读，不跨库）；库存属 warehouse（组件出库与成品入库在
+   *     warehouse 本地事务完成）
    * @param downstreamGaps 未交付的下游模块与其对本模块的实际影响
    */
   public record ProcessingCapabilities(
@@ -394,12 +371,10 @@ public final class ProcessingModels {
     /**
      * 一个未交付下游。
      *
-     * <p><b>刻意带 {@code Processing} 前缀，不叫 {@code DownstreamGap}。</b>
-     * 全仓契约被 codegen 合并进<b>一个扁平文件</b>，同名 key 后者覆盖前者且不报冲突；
-     * {@code ProcessingModels.DownstreamGap} 与 warehouse
-     * {@code ProcessingOrderModels.DownstreamGap} 撞过名，trade 排在 warehouse 之后，
-     * 于是 warehouse 的那份被静默顶掉。现在 tools/codegen/catalog-contracts.py 会在写出文件前
-     * 拦下这类字段级覆盖，但撞名本身仍要靠改名根治。
+     * <p><b>刻意带 {@code Processing} 前缀，不叫 {@code DownstreamGap}。</b> 全仓契约被 codegen
+     * 合并进<b>一个扁平文件</b>，同名 key 后者覆盖前者且不报冲突； {@code ProcessingModels.DownstreamGap} 与 warehouse
+     * {@code ProcessingOrderModels.DownstreamGap} 撞过名，trade 排在 warehouse 之后， 于是 warehouse
+     * 的那份被静默顶掉。现在 tools/codegen/catalog-contracts.py 会在写出文件前 拦下这类字段级覆盖，但撞名本身仍要靠改名根治。
      *
      * @param available 该下游是否已交付
      * @param ownerModule 归属模块（页面据此写清「为什么这个按钮不能按」）
@@ -416,15 +391,11 @@ public final class ProcessingModels {
   /**
    * 组件需求量试算输入（读 catalog 的 R7，不落库）。
    *
-   * <p>刻意**不返回**「建议采购量」：蓝图原话「展开结果是建议不是事实」，
-   * 取整与补安全库存是 3.5.2.2 与 06 的决定。
+   * <p>刻意**不返回**「建议采购量」：蓝图原话「展开结果是建议不是事实」， 取整与补安全库存是 3.5.2.2 与 06 的决定。
    */
   public record RequirementPreviewInput(
       @NotNull UUID bomVersionId,
-      @NotNull
-          @Positive
-          @Digits(integer = 13, fraction = 6)
-          BigDecimal outputQuantity) {}
+      @NotNull @Positive @Digits(integer = 13, fraction = 6) BigDecimal outputQuantity) {}
 
   /** 组件需求量试算结果（与落库的组件领用记录同口径）。 */
   public record RequirementPreview(

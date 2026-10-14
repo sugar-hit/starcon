@@ -22,11 +22,11 @@ HEAD `87b271e`，工作区干净，领先集成头 4 个 commit（V85 828 行 + 
 任务书假设「3 个红都源于 `submitted_at` 守卫」。实跑下来**不是**，逐个定位后是三个不同的根因。
 这条要记下来：前一轮 worker 按纪律拒绝 land 是对的，但阻塞点被归错了因。
 
-| 用例 | 真实根因 | 处置 |
-| --- | --- | --- |
-| `amendmentCountComesFromResultRowsNotHandFilled` | **就是**裁决说的 `submitted_at` 守卫 | 改 V85 守卫 |
-| `clearedRejectedAmendedAllAudited` | **夹具 bug**：`reviewed()` 硬编码同一张发运单，循环 3 次撞唯一约束 `customs_declaration_tenant_id_source_shipment_id_key` | 改测试夹具：备三票货 |
-| `submitRequiresAllThreeDocumentsFinal` | **断言写错了**：断言「必须人工复核」，但单子已复核过，真正拦它的是三单据齐备闸 | 改测试断言 |
+| 用例                                             | 真实根因                                                                                                                  | 处置                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `amendmentCountComesFromResultRowsNotHandFilled` | **就是**裁决说的 `submitted_at` 守卫                                                                                      | 改 V85 守卫          |
+| `clearedRejectedAmendedAllAudited`               | **夹具 bug**：`reviewed()` 硬编码同一张发运单，循环 3 次撞唯一约束 `customs_declaration_tenant_id_source_shipment_id_key` | 改测试夹具：备三票货 |
+| `submitRequiresAllThreeDocumentsFinal`           | **断言写错了**：断言「必须人工复核」，但单子已复核过，真正拦它的是三单据齐备闸                                            | 改测试断言           |
 
 ## 关键 trade-off
 
@@ -59,17 +59,17 @@ DRAFT/PENDING_REVIEW/REVIEWED/REJECTED 加进允许集合）—— 因为「这�
 
 ## 文件清单
 
-| 类别 | 位置 |
-| --- | --- |
-| 迁移 | `backend/services/warehouse/src/main/resources/db/migration/V85__warehouse_customs_declaration.sql`（改 2 处守卫：submitted_at 回退、amendment_count 漏校验） |
-| 端点 | `backend/services/warehouse/src/main/java/com/starcon/warehouse/CustomsDeclarationController.java` + `CustomsDeclarationService.java` + `CustomsDeclarationModels.java`（本轮未改） |
-| 集成测试 | `backend/services/warehouse/src/test/java/com/starcon/warehouse/CustomsDeclarationIntegrationTest.java`（夹具三票货 + 一处断言纠正） |
-| 前端模型 | `apps/web/src/components/logistics/customs-declaration-model.ts`（新） |
-| 前端页面 | `apps/web/src/components/logistics/customs-declaration.tsx`（新）、`apps/web/src/app/logistics/customs/page.tsx`（新） |
-| 白名单 | `apps/web/src/lib/api-proxy.ts`（放行 customs-declarations 全形状 + 注释） |
-| 前端测试 | `.../customs-declaration-model.test.ts`（27 例）、`apps/web/src/app/api/warehouse/customs-declaration-allowlist.test.ts`（7 例） |
-| 契约 | `packages/api-contracts/src/catalog.ts` + `warehouse.openapi.json`（**codegen 重生成，禁手改**） |
-| 台账 | `docs/product/capability-blueprint/module-progress.md` 第 352 行（仅本车道那一行） |
+| 类别     | 位置                                                                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 迁移     | `backend/services/warehouse/src/main/resources/db/migration/V85__warehouse_customs_declaration.sql`（改 2 处守卫：submitted_at 回退、amendment_count 漏校验）                       |
+| 端点     | `backend/services/warehouse/src/main/java/com/starcon/warehouse/CustomsDeclarationController.java` + `CustomsDeclarationService.java` + `CustomsDeclarationModels.java`（本轮未改） |
+| 集成测试 | `backend/services/warehouse/src/test/java/com/starcon/warehouse/CustomsDeclarationIntegrationTest.java`（夹具三票货 + 一处断言纠正）                                                |
+| 前端模型 | `apps/web/src/components/logistics/customs-declaration-model.ts`（新）                                                                                                              |
+| 前端页面 | `apps/web/src/components/logistics/customs-declaration.tsx`（新）、`apps/web/src/app/logistics/customs/page.tsx`（新）                                                              |
+| 白名单   | `apps/web/src/lib/api-proxy.ts`（放行 customs-declarations 全形状 + 注释）                                                                                                          |
+| 前端测试 | `.../customs-declaration-model.test.ts`（27 例）、`apps/web/src/app/api/warehouse/customs-declaration-allowlist.test.ts`（7 例）                                                    |
+| 契约     | `packages/api-contracts/src/catalog.ts` + `warehouse.openapi.json`（**codegen 重生成，禁手改**）                                                                                    |
+| 台账     | `docs/product/capability-blueprint/module-progress.md` 第 352 行（仅本车道那一行）                                                                                                  |
 
 ## 验证（真实结果）
 

@@ -24,8 +24,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  *   <li><b>期间设置可用</b>——期间粒度、起始月、首期起点能推出当前会计年度区间，且首期必须对齐期界。
  * </ol>
  *
- * <p>时间字段全部按值断言：{@code firstPeriodStart} 用 +08:00 偏移写入，读回必须是同一个瞬时，
- * 否则用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 的写法会静默偏 −28800 秒。
+ * <p>时间字段全部按值断言：{@code firstPeriodStart} 用 +08:00 偏移写入，读回必须是同一个瞬时， 否则用 {@code
+ * Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 的写法会静默偏 −28800 秒。
  */
 class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -40,9 +40,15 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
             .asText());
   }
 
-  private UUID createBook(String token, UUID entityId, String code, String currency) throws Exception {
+  private UUID createBook(String token, UUID entityId, String code, String currency)
+      throws Exception {
     return UUID.fromString(
-        request(token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", bookInput(code, currency), 200)
+        request(
+                token,
+                "POST",
+                "/identity/legal-entities/" + entityId + "/accounting-books",
+                bookInput(code, currency),
+                200)
             .asText());
   }
 
@@ -100,8 +106,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 账簿币种必须等于法人的本位币。
    *
-   * <p>这是本模块最容易被做漏的一条：租户也有默认币种，如果按租户默认币种放行，
-   * "这个法人按哪个币记账"就会有两个答案，12 财务总账也就无从起算。
+   * <p>这是本模块最容易被做漏的一条：租户也有默认币种，如果按租户默认币种放行， "这个法人按哪个币记账"就会有两个答案，12 财务总账也就无从起算。
    */
   @Test
   void bookCurrencyMustEqualTheLegalEntityCurrency() throws Exception {
@@ -133,8 +138,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 法人本位币改动后，旧账簿必须显式暴露为未对齐，而不是继续假装一致。
    *
-   * <p>{@code currencyAligned} 就是为这个场景存在的：法人是唯一真相源，改了它，
-   * 账簿上的副本就落后了，下游据此提示用户去同步账簿。
+   * <p>{@code currencyAligned} 就是为这个场景存在的：法人是唯一真相源，改了它， 账簿上的副本就落后了，下游据此提示用户去同步账簿。
    */
   @Test
   void changingTheEntityCurrencyExposesMisalignedBooks() throws Exception {
@@ -197,8 +201,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 金额精度/舍入与数量精度/舍入各自独立，并真的落库。
    *
-   * <p>把两套量纲合成一把尺子是 12 财务试算不平的常见原因：金额按 2 位、数量按 3 位，
-   * 用同一个 scale 去舍入，数量尾数就会被吃掉。
+   * <p>把两套量纲合成一把尺子是 12 财务试算不平的常见原因：金额按 2 位、数量按 3 位， 用同一个 scale 去舍入，数量尾数就会被吃掉。
    */
   @Test
   void amountAndQuantityPrecisionAreIndependentAndPersisted() throws Exception {
@@ -223,8 +226,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 直查数据库：不是内存里 round-trip 出来的假一致
     var row =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(tenantId),
                 () ->
                     sql.fetchOne(
@@ -251,7 +253,8 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 自然年度：起始月 1
     var january = bookInput(calendar, "USD");
-    request(token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", january, 200);
+    request(
+        token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", january, 200);
 
     // 起始月 4 的非总账（一个法人只能一本总账，所以用现金账簿）
     var april = new java.util.LinkedHashMap<>(bookInput(fiscal, "USD"));
@@ -259,7 +262,8 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
     april.put("name", "四月起算的现金账");
     april.put("fiscalYearStartMonth", 4);
     april.put("firstPeriodStart", "2026-04-01T00:00:00Z");
-    request(token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", april, 200);
+    request(
+        token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", april, 200);
 
     var books = request(token, "GET", "/identity/accounting-books", null, 200);
     var calendarBook = find(books, calendar);
@@ -273,9 +277,14 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 起始月 4：当前日期落在起始月之后时，年度从当年 4 月 1 日起、次年 3 月 31 日止。
     // fiscalYearStart/End 是日历日期（LocalDate），不是时刻。
-    assertThat(LocalDate.parse(fiscalBook.get("fiscalYearStart").asText()).getMonthValue()).isEqualTo(4);
+    assertThat(LocalDate.parse(fiscalBook.get("fiscalYearStart").asText()).getMonthValue())
+        .isEqualTo(4);
     assertThat(fiscalBook.get("fiscalYearEnd").asText())
-        .isEqualTo(LocalDate.parse(fiscalBook.get("fiscalYearStart").asText()).plusYears(1).minusDays(1).toString());
+        .isEqualTo(
+            LocalDate.parse(fiscalBook.get("fiscalYearStart").asText())
+                .plusYears(1)
+                .minusDays(1)
+                .toString());
     // 当前日期若早于起始月，本年度应归属上一年
     assertThat(fiscalBook.get("currentFiscalYear").asInt())
         .isBetween(
@@ -286,8 +295,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 首期起点必须落在期界上，对不上就拒绝。
    *
-   * <p>月度起始月 4 却在 3 月开账，12.5 按起始月切年度时会切出一个不存在的期界。
-   * 周粒度不对齐月份（ISO 周跨月），所以不检查。
+   * <p>月度起始月 4 却在 3 月开账，12.5 按起始月切年度时会切出一个不存在的期界。 周粒度不对齐月份（ISO 周跨月），所以不检查。
    */
   @Test
   void misalignedFirstPeriodIsRejected() throws Exception {
@@ -323,8 +331,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * firstPeriodStart 是真实写入并原样读回的 timestamptz。
    *
-   * <p>用 +08:00 偏移写入，读回必须是同一个**瞬时**：若绑定时走
-   * {@code Timestamp.valueOf(LocalDateTime)}，库里会静默偏 −28800 秒，
+   * <p>用 +08:00 偏移写入，读回必须是同一个**瞬时**：若绑定时走 {@code Timestamp.valueOf(LocalDateTime)}，库里会静默偏 −28800 秒，
    * 而断言只检查"没抛异常"是发现不了的。
    */
   @Test
@@ -336,7 +343,8 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
     var input = new java.util.LinkedHashMap<>(bookInput(code, "USD"));
     // 09:30 +08:00 == 01:30Z，同一个瞬时，两种写法结果必须一致
     input.put("firstPeriodStart", "2026-01-01T09:30:00+08:00");
-    request(token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", input, 200);
+    request(
+        token, "POST", "/identity/legal-entities/" + entityId + "/accounting-books", input, 200);
 
     UUID id = byCode(token, code);
     var book = find(request(token, "GET", "/identity/accounting-books", null, 200), code);
@@ -346,8 +354,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
         .isEqualTo(expected);
 
     var stored =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(tenantId),
                 () ->
                     sql.fetchOne("select first_period_start from accounting_book where id=?", id)
@@ -415,10 +422,12 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     assertThat(request(token, "GET", "/identity/accounting-books?legalEntityId=" + a, null, 200))
         .hasSize(1);
-    var filtered = request(token, "GET", "/identity/accounting-books?legalEntityId=" + a, null, 200);
+    var filtered =
+        request(token, "GET", "/identity/accounting-books?legalEntityId=" + a, null, 200);
     assertThat(filtered.get(0).get("code").asText()).isEqualTo("A_" + tag);
     // 另一个租户的法人 id 在本租户读不到任何东西
-    request(token, "GET", "/identity/accounting-books?legalEntityId=" + UUID.randomUUID(), null, 200);
+    request(
+        token, "GET", "/identity/accounting-books?legalEntityId=" + UUID.randomUUID(), null, 200);
   }
 
   /** 记账规则变更进审计：事后要能答出当时是几套规则。按 resourceId 过滤，不依赖全租户条数。 */
@@ -436,17 +445,23 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     var entries =
         request(
-                token,
-                "GET",
-                "/identity/audit?resourceType=identity.accounting_book&resourceId=" + bookId,
-                null,
-                200);
+            token,
+            "GET",
+            "/identity/audit?resourceType=identity.accounting_book&resourceId=" + bookId,
+            null,
+            200);
     assertThat(entries.get("total").asInt()).isEqualTo(2);
-    assertThat(entries.get("items").get(0).get("action").asText()).isEqualTo("AccountingBookUpdated");
+    assertThat(entries.get("items").get(0).get("action").asText())
+        .isEqualTo("AccountingBookUpdated");
 
     // 变更前后值都要留痕：改前的 3 位与改后的 6 位（数量是数字，不是字符串）
     var detail =
-        request(token, "GET", "/identity/audit/" + entries.get("items").get(0).get("id").asText(), null, 200);
+        request(
+            token,
+            "GET",
+            "/identity/audit/" + entries.get("items").get(0).get("id").asText(),
+            null,
+            200);
     assertThat(detail.toString()).contains("\"quantityScale\":6").contains("\"quantityScale\":3");
     // 只改数量精度不该被记成本位币切换
     assertThat(detail.toString()).contains("\"baseCurrency\":\"USD\"");
@@ -502,8 +517,7 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 租户隔离三断言：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
    *
-   * <p>基类把连接池压到 1，所以每个请求必然复用同一条物理连接——租户设置泄漏到连接上，
-   * 第二个租户就会读到第一个租户的账簿。
+   * <p>基类把连接池压到 1，所以每个请求必然复用同一条物理连接——租户设置泄漏到连接上， 第二个租户就会读到第一个租户的账簿。
    */
   @Test
   void tenantIsolationHoldsAcrossConnectionReuse() throws Exception {
@@ -536,7 +550,8 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
                         "/identity/accounting-books")
                     .header("Authorization", "Bearer " + ownerToken)
                     .header("X-Tenant-Id", childId.toString()))
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -544,16 +559,21 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 3) 连接归还后不串租户：直连表按当前租户设置过滤，池里只有一条连接
     var parentRows =
-        tx().run(parentId, () -> sql.fetch("select id from accounting_book").getValues("id", UUID.class));
+        tx().run(
+                parentId,
+                () -> sql.fetch("select id from accounting_book").getValues("id", UUID.class));
     var childRows =
-        tx().run(childId, () -> sql.fetch("select id from accounting_book").getValues("id", UUID.class));
+        tx().run(
+                childId,
+                () -> sql.fetch("select id from accounting_book").getValues("id", UUID.class));
     assertThat(parentRows).isNotEmpty().doesNotContainAnyElementsOf(childRows);
     assertThat(childRows).isNotEmpty();
     // 没有 app.current_tenant 时一条都读不到：租户判定不在连接上残留
     assertThat(sql.fetch("select id from accounting_book")).isEmpty();
 
     // 运行时角色绕不过 FORCE RLS
-    var runtime = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var runtime =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(runtime.get("rolsuper", Boolean.class)).isFalse();
     assertThat(runtime.get("rolbypassrls", Boolean.class)).isFalse();
     assertThat(

@@ -7,7 +7,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -20,32 +19,23 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.4.2.1 标题库：标题模板（变量占位）、标题词根字典、批量生成批次、生成的标题候选。
  *
- * <p>蓝图原文：「沉淀可复用的标题模板与标题记录，支持变量占位（品牌+品类+核心词+卖点），
- * 批量生成差异化标题（同一商品在多平台不同标题以避重复铺货判定）。」
- * 「输入：标题模板；批量生成参数（SKU 范围、平台、词根）。」
- * 「输出：生成的标题候选集；供 04 选用或导出。」
- * 「上游 = 3.1.1.1；下游 = 04 刊登。」
+ * <p>蓝图原文：「沉淀可复用的标题模板与标题记录，支持变量占位（品牌+品类+核心词+卖点）， 批量生成差异化标题（同一商品在多平台不同标题以避重复铺货判定）。」
+ * 「输入：标题模板；批量生成参数（SKU 范围、平台、词根）。」 「输出：生成的标题候选集；供 04 选用或导出。」 「上游 = 3.1.1.1；下游 = 04 刊登。」
  *
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>重复度控制在算法里，不在调用方手里。</b>候选由
- *       {@link TitleGenerator}（纯函数）产出，本类只负责喂齐它需要的三类词池、
- *       SKU 事实快照与「该 SKU 已有标题」。相似度一旦超限是**拒绝并给出原因**，
- *       不是放宽阈值凑数——3.4.2.1 的存在理由就是「不要雷同」。
- *   <li><b>SKU 范围与词池在提交时快照。</b>批量跑到一半商品改名、词库被改，
- *       这一批候选的口径都必须仍是提交那一刻的，否则「这批标题为什么长这样」答不出来。
- *   <li><b>重复度比较范围限定在单个 SKU 内</b>（已有 + 本次新生成）。
- *       平台判重复铺货看的是同一个商品在不同站点的标题，而不是两个不同商品之间
- *       （后者是品类共性）。范围收在单 SKU 也让耗时与 SKU 总数无关。
- *   <li><b>生成是同步的。</b>与 3.4.1.2 不同，那里的长耗时来自逐像素加工；
- *       这里的成本只与「单个 SKU 内的候选数」有关，几百个 SKU 是几十毫秒。
+ *   <li><b>重复度控制在算法里，不在调用方手里。</b>候选由 {@link TitleGenerator}（纯函数）产出，本类只负责喂齐它需要的三类词池、 SKU 事实快照与「该 SKU
+ *       已有标题」。相似度一旦超限是**拒绝并给出原因**， 不是放宽阈值凑数——3.4.2.1 的存在理由就是「不要雷同」。
+ *   <li><b>SKU 范围与词池在提交时快照。</b>批量跑到一半商品改名、词库被改， 这一批候选的口径都必须仍是提交那一刻的，否则「这批标题为什么长这样」答不出来。
+ *   <li><b>重复度比较范围限定在单个 SKU 内</b>（已有 + 本次新生成）。 平台判重复铺货看的是同一个商品在不同站点的标题，而不是两个不同商品之间 （后者是品类共性）。范围收在单
+ *       SKU 也让耗时与 SKU 总数无关。
+ *   <li><b>生成是同步的。</b>与 3.4.1.2 不同，那里的长耗时来自逐像素加工； 这里的成本只与「单个 SKU 内的候选数」有关，几百个 SKU 是几十毫秒。
  *       做成异步任务只会让运营为一个几百毫秒的操作去盯进度条。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 标题是挂在 SKU 上的商品文案、上游是 3.1.1.1 的 SPU/SKU，所以沿用 spu 词表
- * （不新造——新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 标题是挂在 SKU 上的商品文案、上游是 3.1.1.1 的
+ * SPU/SKU，所以沿用 spu 词表 （不新造——新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  */
 @Service
 public class TitleService {
@@ -65,8 +55,7 @@ public class TitleService {
   /**
    * 标题库概览：模板数、词根数、批次与候选规模、以及全局最严的重复度上限。
    *
-   * <p>{@code maxSimilarityPermille} 取所有启用模板里**最严**的那个（最小值）：
-   * 概览页上写的应该是「你这个租户现在管得最严的是什么」，
+   * <p>{@code maxSimilarityPermille} 取所有启用模板里**最严**的那个（最小值）： 概览页上写的应该是「你这个租户现在管得最严的是什么」，
    * 而不是随便挑一个模板的阈值。
    */
   public TitleOverview overview() {
@@ -80,7 +69,8 @@ public class TitleService {
                 + " from title_generation where tenant_id=?",
             tenantId);
     long templateCount =
-        sql.fetchOne("select count(*) from title_template where tenant_id=?", tenantId).get(0, Long.class);
+        sql.fetchOne("select count(*) from title_template where tenant_id=?", tenantId)
+            .get(0, Long.class);
     long enabledTemplates =
         sql.fetchOne("select count(*) from title_template where tenant_id=? and enabled", tenantId)
             .get(0, Long.class);
@@ -177,13 +167,13 @@ public class TitleService {
   /**
    * 建模板或改模板（id 为空即新建）。变量与平台上限**整体替换**。
    *
-   * <p>整体替换而不是增量增删：变量集合与平台上限集合是「这条标题怎么拼、每个平台能有多长」
-   * 的完整口径，增删式会让「当前有哪些变量」这个问题有两个答案。
+   * <p>整体替换而不是增量增删：变量集合与平台上限集合是「这条标题怎么拼、每个平台能有多长」 的完整口径，增删式会让「当前有哪些变量」这个问题有两个答案。
    *
-   * <p>编码建后不可改：历史候选按模板解释，改编码会让旧批次的溯源对不上——
-   * 与 {@code MediaService.saveTag} / {@code ImageProcessService.saveRecipe} 同一纪律。
+   * <p>编码建后不可改：历史候选按模板解释，改编码会让旧批次的溯源对不上—— 与 {@code MediaService.saveTag} / {@code
+   * ImageProcessService.saveRecipe} 同一纪律。
    */
-  public TitleTemplateSaved saveTemplate(AccessService.Access actor, UUID id, TitleTemplateInput input) {
+  public TitleTemplateSaved saveTemplate(
+      AccessService.Access actor, UUID id, TitleTemplateInput input) {
     String problem =
         firstNonNull(
             TitleRules.templateCodeProblem(input.code()),
@@ -191,7 +181,8 @@ public class TitleService {
             TitleRules.patternProblem(input.pattern()),
             TitleRules.maxSimilarityProblem(input.maxSimilarityPermille()),
             TitleRules.candidateCountProblem(input.candidateCount()),
-            TitleRules.variablesSizeProblem(input.variables() == null ? 0 : input.variables().size()),
+            TitleRules.variablesSizeProblem(
+                input.variables() == null ? 0 : input.variables().size()),
             TitleRules.templatePlatformsSizeProblem(
                 input.platforms() == null ? 0 : input.platforms().size()),
             variablesProblem(input.pattern(), input.variables()),
@@ -215,9 +206,15 @@ public class TitleService {
         sql.execute(
             "insert into title_template(id,tenant_id,code,name,note,pattern,"
                 + "max_similarity_permille,candidate_count,enabled) values(?,?,?,?,?,?,?,?,?)",
-            newId, currentTenantId(), code, MediaRules.normalize(input.name()),
-            MediaRules.normalize(input.note()), TitleRules.normalizePattern(input.pattern()),
-            maxSimilarity, candidateCount, input.enabled());
+            newId,
+            currentTenantId(),
+            code,
+            MediaRules.normalize(input.name()),
+            MediaRules.normalize(input.note()),
+            TitleRules.normalizePattern(input.pattern()),
+            maxSimilarity,
+            candidateCount,
+            input.enabled());
         replaceVariables(newId, input.variables());
         replaceTemplatePlatforms(newId, input.platforms());
       } catch (DataAccessException e) {
@@ -238,14 +235,18 @@ public class TitleService {
               "update title_template set name=?,note=?,pattern=?,max_similarity_permille=?,"
                   + "candidate_count=?,enabled=?,version=version+1,updated_at=now()"
                   + " where id=? and version=?",
-              MediaRules.normalize(input.name()), MediaRules.normalize(input.note()),
-              TitleRules.normalizePattern(input.pattern()), maxSimilarity, candidateCount,
-              input.enabled(), id, input.version());
+              MediaRules.normalize(input.name()),
+              MediaRules.normalize(input.note()),
+              TitleRules.normalizePattern(input.pattern()),
+              maxSimilarity,
+              candidateCount,
+              input.enabled(),
+              id,
+              input.version());
     } catch (DataAccessException e) {
       throw conflict("模板保存失败：" + rootMessage(e));
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "模板已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "模板已被他人修改，请刷新后重试");
     replaceVariables(id, input.variables());
     replaceTemplatePlatforms(id, input.platforms());
     audit(actor, id, "TitleTemplateSaved", code);
@@ -255,9 +256,7 @@ public class TitleService {
   /**
    * 变量校验：模板文本里的占位符与声明的变量必须互相对得上，且至少有一个词根变量。
    *
-   * <p>「至少一个词根变量」不是形式主义：只绑 SPU/SKU 事实字段的模板每个 SKU
-   * 只有一种文本，候选之间的差异只能来自词序轮转（上限 = 变量个数），
-   * 批量生成产出的候选会彼此雷同。
+   * <p>「至少一个词根变量」不是形式主义：只绑 SPU/SKU 事实字段的模板每个 SKU 只有一种文本，候选之间的差异只能来自词序轮转（上限 = 变量个数）， 批量生成产出的候选会彼此雷同。
    */
   private String variablesProblem(String pattern, List<TitleTemplateVariableInput> variables) {
     if (variables == null || variables.isEmpty()) return "模板至少要声明一个变量占位";
@@ -308,7 +307,9 @@ public class TitleService {
       sql.execute(
           "insert into title_template_variable(id,tenant_id,template_id,slot_no,variable_name,source)"
               + " values(?,?,?,?,?,?)",
-          Ids.next(), currentTenantId(), templateId,
+          Ids.next(),
+          currentTenantId(),
+          templateId,
           variable.slotNo() == null ? i : variable.slotNo(),
           MediaRules.normalize(variable.name()),
           MediaRules.normalizeUpper(variable.source()));
@@ -316,40 +317,45 @@ public class TitleService {
   }
 
   /** 整体替换模板的平台长度上限。 */
-  private void replaceTemplatePlatforms(UUID templateId, List<TitleTemplatePlatformInput> platforms) {
+  private void replaceTemplatePlatforms(
+      UUID templateId, List<TitleTemplatePlatformInput> platforms) {
     sql.execute("delete from title_template_platform where template_id=?", templateId);
     List<TitleTemplatePlatformInput> list = platforms == null ? List.of() : platforms;
     for (TitleTemplatePlatformInput platform : list)
       sql.execute(
           "insert into title_template_platform(id,tenant_id,template_id,platform,max_length)"
               + " values(?,?,?,?,?)",
-          Ids.next(), currentTenantId(), templateId,
-          MediaRules.normalize(platform.platform()), platform.maxLength());
+          Ids.next(),
+          currentTenantId(),
+          templateId,
+          MediaRules.normalize(platform.platform()),
+          platform.maxLength());
   }
 
   /** 模板启用停用。停用后不能再用它新建批次，历史批次与候选照常可读。 */
-  public TitleTemplateSaved setTemplateEnabled(AccessService.Access actor, UUID id, boolean enabled) {
+  public TitleTemplateSaved setTemplateEnabled(
+      AccessService.Access actor, UUID id, boolean enabled) {
     int updated =
         sql.execute(
             "update title_template set enabled=?,version=version+1,updated_at=now() where id=?",
-            enabled, id);
+            enabled,
+            id);
     if (updated != 1) throw CatalogService.missing();
     audit(actor, id, "TitleTemplateEnabledChanged", null);
     return templateSaved(id);
   }
 
-  /**
-   * 删除模板。仍被生成批次引用时被拒（V20 的 refuse_title_template_delete 兜底），
-   * 服务层先给可读原因：要清理请改用停用。
-   */
+  /** 删除模板。仍被生成批次引用时被拒（V20 的 refuse_title_template_delete 兜底）， 服务层先给可读原因：要清理请改用停用。 */
   public void deleteTemplate(AccessService.Access actor, UUID id, long version) {
     var row = templateRow(id);
-    CatalogService.check(
-        row.get("version", Long.class) == version, "模板已被他人修改，请刷新后重试");
+    CatalogService.check(row.get("version", Long.class) == version, "模板已被他人修改，请刷新后重试");
     long runs = templateGenerationCount(id);
     CatalogService.check(
         runs == 0,
-        "模板「" + row.get("code", String.class) + "」已被 " + runs
+        "模板「"
+            + row.get("code", String.class)
+            + "」已被 "
+            + runs
             + " 次批量生成引用，不可删除：请改用停用（停用后不能再用它新建批次，历史标题与候选照常可读）");
     sql.execute("delete from title_template where id=?", id);
     audit(actor, id, "TitleTemplateDeleted", null);
@@ -389,7 +395,8 @@ public class TitleService {
     var rows =
         sql.fetch(
             "select id,code,text,keyword_type,enabled,version,created_at,updated_at from title_keyword"
-                + " where tenant_id=?" + sqlWhere
+                + " where tenant_id=?"
+                + sqlWhere
                 + " order by keyword_type,code limit ? offset ?",
             concat(List.of(tenantId), concat(binds, List.of(size, (long) page * size))).toArray());
     var counts =
@@ -414,7 +421,8 @@ public class TitleService {
                   r.get("version", Long.class),
                   instant(r.get("created_at", OffsetDateTime.class)),
                   instant(r.get("updated_at", OffsetDateTime.class))),
-              referenceCount(id, r.get("keyword_type", String.class), r.get("text", String.class))));
+              referenceCount(
+                  id, r.get("keyword_type", String.class), r.get("text", String.class))));
     }
     return new TitleKeywordPage(
         items,
@@ -444,7 +452,8 @@ public class TitleService {
     // 列表上的「被引用数」永远是 0，删除保护也形同虚设（实测修掉的真缺陷）。
     return sql.fetchOne(
             "select count(*) from title_record where tenant_id=? and " + column + "=?",
-            currentTenantId(), text)
+            currentTenantId(),
+            text)
         .get(0, Long.class);
   }
 
@@ -469,7 +478,12 @@ public class TitleService {
         sql.execute(
             "insert into title_keyword(id,tenant_id,code,text,keyword_type,enabled)"
                 + " values(?,?,?,?,?,?)",
-            newId, currentTenantId(), code, text, type, input.enabled());
+            newId,
+            currentTenantId(),
+            code,
+            text,
+            type,
+            input.enabled());
       } catch (DataAccessException e) {
         throw conflict("词根保存失败：请检查参数后重试（" + rootMessage(e) + "）");
       }
@@ -487,12 +501,15 @@ public class TitleService {
           sql.execute(
               "update title_keyword set text=?,keyword_type=?,enabled=?,version=version+1,"
                   + "updated_at=now() where id=? and version=?",
-              text, type, input.enabled(), id, input.version());
+              text,
+              type,
+              input.enabled(),
+              id,
+              input.version());
     } catch (DataAccessException e) {
       throw conflict("词根保存失败：" + rootMessage(e));
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "词根已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "词根已被他人修改，请刷新后重试");
     audit(actor, id, "TitleKeywordSaved", code);
     return toKeywordRow(keywordRow(id));
   }
@@ -515,24 +532,25 @@ public class TitleService {
     int updated =
         sql.execute(
             "update title_keyword set enabled=?,version=version+1,updated_at=now() where id=?",
-            enabled, id);
+            enabled,
+            id);
     if (updated != 1) throw CatalogService.missing();
     audit(actor, id, "TitleKeywordEnabledChanged", null);
     return toKeywordRow(keywordRow(id));
   }
 
-  /**
-   * 删除词根。被标题引用时不可删（V20 的 refuse_title_keyword_delete 兜底），
-   * 服务层先给可读原因：要清理请改用停用。
-   */
+  /** 删除词根。被标题引用时不可删（V20 的 refuse_title_keyword_delete 兜底）， 服务层先给可读原因：要清理请改用停用。 */
   public void deleteKeyword(AccessService.Access actor, UUID id, long version) {
     var row = keywordRow(id);
-    CatalogService.check(
-        row.get("version", Long.class) == version, "词根已被他人修改，请刷新后重试");
-    long refs = referenceCount(id, row.get("keyword_type", String.class), row.get("text", String.class));
+    CatalogService.check(row.get("version", Long.class) == version, "词根已被他人修改，请刷新后重试");
+    long refs =
+        referenceCount(id, row.get("keyword_type", String.class), row.get("text", String.class));
     CatalogService.check(
         refs == 0,
-        "词根「" + row.get("text", String.class) + "」已被 " + refs
+        "词根「"
+            + row.get("text", String.class)
+            + "」已被 "
+            + refs
             + " 条生成的标题引用，不可删除：标题记录上快照的是它的文本，删掉词库行那条文本就成了没有出处的孤儿。请改用停用");
     sql.execute("delete from title_keyword where id=?", id);
     audit(actor, id, "TitleKeywordDeleted", null);
@@ -545,14 +563,14 @@ public class TitleService {
    *
    * <p>提交参数就是蓝图点名的三样：**SKU 范围、平台、词根**。
    *
-   * <p>流程刻意是「先把输入查齐并校验，再开始渲染」：用户点了提交之后才发现
-   * 「8 个平台里有 3 个模板没配长度上限」，而批次已经建好了，这体验很糟。
+   * <p>流程刻意是「先把输入查齐并校验，再开始渲染」：用户点了提交之后才发现 「8 个平台里有 3 个模板没配长度上限」，而批次已经建好了，这体验很糟。
    */
   public TitleGeneration generate(AccessService.Access actor, TitleGenerationInput input) {
     String problem =
         firstNonNull(
             TitleRules.skusSizeProblem(input.skuIds() == null ? 0 : input.skuIds().size()),
-            TitleRules.platformsSizeProblem(input.platforms() == null ? 0 : input.platforms().size()),
+            TitleRules.platformsSizeProblem(
+                input.platforms() == null ? 0 : input.platforms().size()),
             TitleRules.keywordFilterSizeProblem(
                 input.keywordCodes() == null ? 0 : input.keywordCodes().size()));
     CatalogService.check(problem == null, problem);
@@ -587,8 +605,9 @@ public class TitleService {
 
     UUID generationId = Ids.next();
     List<String> normalizedCodes =
-        input.keywordCodes() == null ? List.of() : input.keywordCodes().stream()
-            .map(MediaRules::normalizeUpper).sorted().toList();
+        input.keywordCodes() == null
+            ? List.of()
+            : input.keywordCodes().stream().map(MediaRules::normalizeUpper).sorted().toList();
 
     // 一个 SKU 一行结果，逐平台汇总。同一个 SKU 的多个平台合并成一行，
     // 否则「这个 SKU 产出几条」要跨行加总才能回答。
@@ -618,21 +637,34 @@ public class TitleService {
     int totalCandidates = bySku.values().stream().mapToInt(a -> a.candidateCount).sum();
     int totalRejected = bySku.values().stream().mapToInt(a -> a.rejectedCount).sum();
     String status =
-        totalCandidates == 0 ? "FAILED" : (bySku.values().stream().anyMatch(a -> !a.complete()) ? "PARTIAL" : "SUCCEEDED");
+        totalCandidates == 0
+            ? "FAILED"
+            : (bySku.values().stream().anyMatch(a -> !a.complete()) ? "PARTIAL" : "SUCCEEDED");
 
     sql.execute(
         "insert into title_generation(id,tenant_id,template_id,requested_by,status,sku_count,"
             + "candidate_count,rejected_count,keyword_filter,error) values(?,?,?,?,?,?,?,?,?,?)",
-        generationId, currentTenantId(), input.templateId(), actor.userId(), status,
-        skus.size(), totalCandidates, totalRejected,
+        generationId,
+        currentTenantId(),
+        input.templateId(),
+        actor.userId(),
+        status,
+        skus.size(),
+        totalCandidates,
+        totalRejected,
         String.join(",", normalizedCodes),
         errors.isEmpty() ? "" : String.join("；", errors));
     for (SkuAccumulator accumulator : bySku.values()) {
       sql.execute(
           "insert into title_generation_sku(id,tenant_id,generation_id,sku_id,outcome,"
               + "candidate_count,rejected_count,reason) values(?,?,?,?,?,?,?,?)",
-          Ids.next(), currentTenantId(), generationId, accumulator.sku.skuId(), accumulator.outcome(),
-          accumulator.candidateCount, accumulator.rejectedCount,
+          Ids.next(),
+          currentTenantId(),
+          generationId,
+          accumulator.sku.skuId(),
+          accumulator.outcome(),
+          accumulator.candidateCount,
+          accumulator.rejectedCount,
           accumulator.reasons.isEmpty() ? "" : String.join("；", accumulator.reasons));
       // 候选逐条落库。生成时算出的相似度与词根快照原样写入，不在落库时重算——
       // 重算就等于「落库的值」与「生成时决定它过没过闸的值」可能不是一回事。
@@ -640,9 +672,19 @@ public class TitleService {
         insertRecord(generationId, input.templateId(), candidate);
     }
 
-    audit(actor, generationId, "TitleGenerationSubmitted",
-        "模板 " + template.get("code", String.class) + "，" + skus.size() + " 个 SKU，"
-            + input.platforms().size() + " 个平台，" + totalCandidates + " 条候选");
+    audit(
+        actor,
+        generationId,
+        "TitleGenerationSubmitted",
+        "模板 "
+            + template.get("code", String.class)
+            + "，"
+            + skus.size()
+            + " 个 SKU，"
+            + input.platforms().size()
+            + " 个平台，"
+            + totalCandidates
+            + " 条候选");
     return generation(generationId);
   }
 
@@ -680,16 +722,28 @@ public class TitleService {
   }
 
   /** 一条候选落库。生成时算出的相似度与词根快照原样写入，不在落库时重算。 */
-  private void insertRecord(UUID generationId, UUID templateId, TitleGenerator.Candidate candidate) {
+  private void insertRecord(
+      UUID generationId, UUID templateId, TitleGenerator.Candidate candidate) {
     sql.execute(
         "insert into title_record(id,tenant_id,generation_id,template_id,sku_id,platform,variant_no,"
             + "title,char_length,truncated,rotation,similarity_permille,core_keyword,"
             + "selling_keyword,modifier_keyword,status) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        Ids.next(), currentTenantId(), generationId, templateId,
-        candidate.skuId(), candidate.platform(), candidate.variantNo(),
-        candidate.title(), candidate.charLength(), candidate.truncated(), candidate.rotation(),
-        candidate.similarityPermille(), candidate.coreKeyword(), candidate.sellingKeyword(),
-        candidate.modifierKeyword(), "CANDIDATE");
+        Ids.next(),
+        currentTenantId(),
+        generationId,
+        templateId,
+        candidate.skuId(),
+        candidate.platform(),
+        candidate.variantNo(),
+        candidate.title(),
+        candidate.charLength(),
+        candidate.truncated(),
+        candidate.rotation(),
+        candidate.similarityPermille(),
+        candidate.coreKeyword(),
+        candidate.sellingKeyword(),
+        candidate.modifierKeyword(),
+        "CANDIDATE");
   }
 
   // ============================================================ 批次查询
@@ -733,7 +787,8 @@ public class TitleService {
                 + "t.name as template_name,t.code as template_code"
                 + " from title_generation g join title_template t"
                 + " on t.tenant_id=g.tenant_id and t.id=g.template_id"
-                + " where g.tenant_id=?" + sqlWhere
+                + " where g.tenant_id=?"
+                + sqlWhere
                 + " order by g.created_at desc,g.id desc limit ? offset ?",
             concat(List.of(tenantId), concat(binds, List.of(size, (long) page * size))).toArray());
     var counts =
@@ -793,7 +848,8 @@ public class TitleService {
 
   /** 某个批次的逐 SKU 结果。 */
   public List<TitleGenerationSkuRow> generationSkus(UUID generationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select i.id,i.generation_id,i.sku_id,i.outcome,i.candidate_count,i.rejected_count,i.reason,"
                 + "s.code as sku_code,s.name as sku_name,p.name as spu_name,p.brand,p.category"
                 + " from title_generation_sku i"
@@ -869,14 +925,17 @@ public class TitleService {
             + " where r.tenant_id=?";
 
     long total =
-        sql.fetchOne("select count(*)" + from + sqlWhere, concat(List.of(tenantId), binds).toArray())
+        sql.fetchOne(
+                "select count(*)" + from + sqlWhere, concat(List.of(tenantId), binds).toArray())
             .get(0, Long.class);
     var rows =
         sql.fetch(
             "select r.id,r.generation_id,r.template_id,r.sku_id,r.platform,r.variant_no,r.title,"
                 + "r.char_length,r.truncated,r.rotation,r.similarity_permille,r.core_keyword,"
                 + "r.selling_keyword,r.modifier_keyword,r.status,r.created_at,r.updated_at,r.version,"
-                + "s.code as sku_code,s.name as sku_name,p.name as spu_name,p.brand,p.category" + from + sqlWhere
+                + "s.code as sku_code,s.name as sku_name,p.name as spu_name,p.brand,p.category"
+                + from
+                + sqlWhere
                 + " order by r.created_at desc,r.id desc limit ? offset ?",
             concat(List.of(tenantId), concat(binds, List.of(size, (long) page * size))).toArray());
     var stats =
@@ -932,7 +991,8 @@ public class TitleService {
 
   /** 一个批次的候选（按 SKU → 平台 → 候选序号，运营对比同一商品各平台标题时最顺的顺序）。 */
   private List<TitleRecord> recordsOfGeneration(UUID generationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select r.id,r.generation_id,r.template_id,r.sku_id,r.platform,r.variant_no,r.title,"
                 + "r.char_length,r.truncated,r.rotation,r.similarity_permille,r.core_keyword,"
                 + "r.selling_keyword,r.modifier_keyword,r.status,r.created_at,r.updated_at,r.version,"
@@ -948,22 +1008,19 @@ public class TitleService {
   }
 
   /**
-   * 导出 CSV（供 04 选用或人工核对）。StreamingResponseBody 分批写出，
-   * 峰值内存与结果集大小无关。
+   * 导出 CSV（供 04 选用或人工核对）。StreamingResponseBody 分批写出， 峰值内存与结果集大小无关。
    *
-   * <p><b>每批在流式线程里重新开租户事务</b>：租户上下文是事务级 GUC，
-   * controller 那个事务在响应开始前就结束了，而流式写发生在另一个线程上——
-   * 那条连接上没有 {@code app.current_tenant}，FORCE RLS 会把所有行藏起来，
-   * 于是导出只有一个表头（初版就踩了这个坑：{@code streamCsv} 直接用注入的
-   * {@code sql} 查，而 {@code actor.tenantId()} 只进了 WHERE 子句、
-   * 设不了 GUC，于是查出来 0 行还不报错）。
+   * <p><b>每批在流式线程里重新开租户事务</b>：租户上下文是事务级 GUC， controller 那个事务在响应开始前就结束了，而流式写发生在另一个线程上—— 那条连接上没有
+   * {@code app.current_tenant}，FORCE RLS 会把所有行藏起来， 于是导出只有一个表头（初版就踩了这个坑：{@code streamCsv} 直接用注入的
+   * {@code sql} 查，而 {@code actor.tenantId()} 只进了 WHERE 子句、 设不了 GUC，于是查出来 0 行还不报错）。
    */
-  public void streamCsv(AccessService.Access actor, TitleRecordQuery query, java.util.function.Consumer<String> emit) {
+  public void streamCsv(
+      AccessService.Access actor,
+      TitleRecordQuery query,
+      java.util.function.Consumer<String> emit) {
     int size = 200;
     int offset = 0;
-    emit.accept(
-        "SKU编码,SPU名称,品牌,分类,平台,候选序号,标题,字符数,已截断,词序档位,相似度‰,"
-            + "核心词,卖点,修饰词,状态\n");
+    emit.accept("SKU编码,SPU名称,品牌,分类,平台,候选序号,标题,字符数,已截断,词序档位,相似度‰," + "核心词,卖点,修饰词,状态\n");
     while (true) {
       // offset 必须在进 lambda 前定格成 final 局部变量：lambda 只能捕获
       // 实际 final 的变量，而 offset 每轮循环都在推进。
@@ -982,8 +1039,12 @@ public class TitleService {
                           + " join spu p on p.tenant_id=s.tenant_id and p.id=s.spu_id"
                           + " where r.tenant_id=?"
                           + (query.skuId() == null ? "" : " and r.sku_id=?")
-                          + (query.platform() == null || query.platform().isBlank() ? "" : " and r.platform=?")
-                          + (query.status() == null || query.status().isBlank() ? "" : " and r.status=?")
+                          + (query.platform() == null || query.platform().isBlank()
+                              ? ""
+                              : " and r.platform=?")
+                          + (query.status() == null || query.status().isBlank()
+                              ? ""
+                              : " and r.status=?")
                           + " order by r.sku_id,r.platform,r.variant_no limit ? offset ?",
                       csvBinds(actor.tenantId(), query, size, at)));
       if (batch.isEmpty()) break;
@@ -1017,7 +1078,8 @@ public class TitleService {
     var binds = new ArrayList<Object>();
     binds.add(tenantId);
     if (query.skuId() != null) binds.add(query.skuId());
-    if (query.platform() != null && !query.platform().isBlank()) binds.add(MediaRules.normalize(query.platform()));
+    if (query.platform() != null && !query.platform().isBlank())
+      binds.add(MediaRules.normalize(query.platform()));
     if (query.status() != null && !query.status().isBlank())
       binds.add(MediaRules.normalizeUpper(query.status()));
     binds.add(size);
@@ -1037,19 +1099,19 @@ public class TitleService {
   /**
    * 选用一条标题（供 04 刊登使用）。
    *
-   * <p>同一 SKU 同一平台只能选用一条：两个平台上架的是同一个商品，
-   * 两条都「已选用」意味着 04 不知道该发哪条。撞这个约束时把该 SKU 同平台的其它
+   * <p>同一 SKU 同一平台只能选用一条：两个平台上架的是同一个商品， 两条都「已选用」意味着 04 不知道该发哪条。撞这个约束时把该 SKU 同平台的其它
    * 选用项**降级为待选用**并给出说明，而不是默默失败——用户以为自己选中了。
    */
   public TitleRecordSelected select(AccessService.Access actor, UUID id) {
     var row = recordRow(id);
-    CatalogService.check(
-        !"SELECTED".equals(row.get("status", String.class)), "这条标题已经被选用了");
+    CatalogService.check(!"SELECTED".equals(row.get("status", String.class)), "这条标题已经被选用了");
     UUID tenantId = currentTenantId();
     sql.execute(
         "update title_record set status='CANDIDATE',version=version+1,updated_at=now()"
             + " where tenant_id=? and sku_id=? and platform=? and status='SELECTED'",
-        tenantId, row.get("sku_id", UUID.class), row.get("platform", String.class));
+        tenantId,
+        row.get("sku_id", UUID.class),
+        row.get("platform", String.class));
     sql.execute(
         "update title_record set status='SELECTED',version=version+1,updated_at=now()"
             + " where id=? and status<>'SELECTED'",
@@ -1061,15 +1123,13 @@ public class TitleService {
   /** 取消选用。已选用的标题不可改内容（V20 的 guard_title_record_selected_immutable 钉死）。 */
   public TitleRecordSelected deselect(AccessService.Access actor, UUID id) {
     var row = recordRow(id);
-    CatalogService.check(
-        "SELECTED".equals(row.get("status", String.class)), "这条标题当前没有被选用，无需取消");
+    CatalogService.check("SELECTED".equals(row.get("status", String.class)), "这条标题当前没有被选用，无需取消");
     int updated =
         sql.execute(
             "update title_record set status='CANDIDATE',version=version+1,updated_at=now()"
                 + " where id=? and status='SELECTED'",
             id);
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "这条标题已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "这条标题已被他人修改，请刷新后重试");
     audit(actor, id, "TitleRecordDeselected", null);
     return selected(id);
   }
@@ -1078,16 +1138,19 @@ public class TitleService {
     var row = recordRow(id);
     String status = row.get("status", String.class);
     return new TitleRecordSelected(
-        id, status, TitleRules.recordStatusLabel(status), row.get("title", String.class),
-        row.get("platform", String.class), row.get("version", Long.class));
+        id,
+        status,
+        TitleRules.recordStatusLabel(status),
+        row.get("title", String.class),
+        row.get("platform", String.class),
+        row.get("version", Long.class));
   }
 
   /** 手动把一条候选标成已淘汰（批量生成里被闸门拒的候选也要能人工淘汰）。 */
   public TitleRecordSelected reject(AccessService.Access actor, UUID id) {
     var row = recordRow(id);
     CatalogService.check(
-        !"SELECTED".equals(row.get("status", String.class)),
-        "已选用的标题不能淘汰：04 刊登可能已照它发布。请先取消选用");
+        !"SELECTED".equals(row.get("status", String.class)), "已选用的标题不能淘汰：04 刊登可能已照它发布。请先取消选用");
     sql.execute(
         "update title_record set status='REJECTED',version=version+1,updated_at=now() where id=?",
         id);
@@ -1114,7 +1177,9 @@ public class TitleService {
         row.get("error", String.class),
         "FAILED".equals(status)
             ? "这一批一个候选都没产出：看批次详情里逐 SKU 的原因，通常是词根池太小或商品的品牌/分类为空。"
-            : "已生成 " + candidateCount + " 条候选"
+            : "已生成 "
+                + candidateCount
+                + " 条候选"
                 + (rejectedCount > 0 ? "，另有 " + rejectedCount + " 条因重复度超限被拒（原因见批次详情）" : "")
                 + "。可以逐条选用，或导出 CSV 交给 04 刊登。");
   }
@@ -1167,7 +1232,9 @@ public class TitleService {
     for (Record r :
         sql.fetch(
             "select id,template_id,variable_name,source,slot_no from title_template_variable"
-                + " where template_id in (" + placeholders(templateIds) + ") order by template_id,slot_no,id",
+                + " where template_id in ("
+                + placeholders(templateIds)
+                + ") order by template_id,slot_no,id",
             templateIds.toArray()))
       byTemplate
           .computeIfAbsent(r.get("template_id", UUID.class), k -> new ArrayList<>())
@@ -1188,7 +1255,9 @@ public class TitleService {
     for (Record r :
         sql.fetch(
             "select id,template_id,platform,max_length from title_template_platform"
-                + " where template_id in (" + placeholders(templateIds) + ") order by template_id,platform",
+                + " where template_id in ("
+                + placeholders(templateIds)
+                + ") order by template_id,platform",
             templateIds.toArray()))
       byTemplate
           .computeIfAbsent(r.get("template_id", UUID.class), k -> new ArrayList<>())
@@ -1208,22 +1277,21 @@ public class TitleService {
         .forEach(
             v ->
                 out.put(
-                    v.name(),
-                    new TitleGenerator.VariableSpec(v.name(), v.source(), v.slotNo())));
+                    v.name(), new TitleGenerator.VariableSpec(v.name(), v.source(), v.slotNo())));
     return out;
   }
 
   /** 生成用：本次要用的平台上限。平台没配就直接拒——不悄悄用默认值。 */
   private Map<String, Integer> templatePlatformLimits(UUID templateId, List<String> platforms) {
     Map<String, Integer> limits = new LinkedHashMap<>();
-    for (TitleTemplatePlatform p : platformsOf(List.of(templateId)).getOrDefault(templateId, List.of()))
+    for (TitleTemplatePlatform p :
+        platformsOf(List.of(templateId)).getOrDefault(templateId, List.of()))
       limits.put(p.platform(), p.maxLength());
     for (String platform : platforms) {
       String name = MediaRules.normalize(platform);
       CatalogService.check(
           limits.containsKey(name),
-          "模板没有配置平台「" + name + "」的标题长度上限："
-              + "平台标题有硬字符上限，不配就没法判断该裁到多少字。请先在模板的「平台长度上限」里加上这个平台");
+          "模板没有配置平台「" + name + "」的标题长度上限：" + "平台标题有硬字符上限，不配就没法判断该裁到多少字。请先在模板的「平台长度上限」里加上这个平台");
     }
     return limits;
   }
@@ -1240,7 +1308,8 @@ public class TitleService {
               "select s.id,s.code,s.name,s.variant_signature,p.name as spu_name,p.brand,p.category"
                   + " from sku s join spu p on p.tenant_id=s.tenant_id and p.id=s.spu_id"
                   + " where s.tenant_id=? and s.id=?",
-              currentTenantId(), skuId);
+              currentTenantId(),
+              skuId);
       if (row == null)
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "SKU 不存在或不属于当前租户：" + skuId);
       out.add(
@@ -1258,9 +1327,11 @@ public class TitleService {
 
   /** 生成用：该 SKU 已有的全部标题（历史批次 + 其它平台）——重复度比较的基线。 */
   private List<String> existingTitlesOf(UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select title from title_record where tenant_id=? and sku_id=? order by created_at,id",
-            currentTenantId(), skuId)
+            currentTenantId(),
+            skuId)
         .stream()
         .map(r -> r.get(0, String.class))
         .toList();
@@ -1269,12 +1340,10 @@ public class TitleService {
   /**
    * 生成用：三类词池。
    *
-   * <p>{@code keywordCodes} 是「词根」这个批量参数：非空时**只**取这些编码的核心词，
-   * 空时取全部启用的核心词。卖点与修饰词不受它限制——限定的是主体词，
+   * <p>{@code keywordCodes} 是「词根」这个批量参数：非空时**只**取这些编码的核心词， 空时取全部启用的核心词。卖点与修饰词不受它限制——限定的是主体词，
    * 而差异化素材永远来自完整的卖点/修饰词池。
    *
-   * <p>顺序按 code 排，所以「下标」在同一次生成里是确定的：同一份输入两次生成
-   * 得到同样的候选，这是「重复度受控」可被断言的前提。
+   * <p>顺序按 code 排，所以「下标」在同一次生成里是确定的：同一份输入两次生成 得到同样的候选，这是「重复度受控」可被断言的前提。
    */
   private TitleGenerator.KeywordPools keywordPools(List<String> keywordCodes) {
     List<String> core =
@@ -1284,9 +1353,11 @@ public class TitleService {
 
   private List<String> poolOf(String keywordType, List<String> codes) {
     if (codes == null || codes.isEmpty())
-      return sql.fetch(
+      return sql
+          .fetch(
               "select text from title_keyword where tenant_id=? and keyword_type=? and enabled order by code",
-              currentTenantId(), keywordType)
+              currentTenantId(),
+              keywordType)
           .stream()
           .map(r -> r.get(0, String.class))
           .toList();
@@ -1296,9 +1367,12 @@ public class TitleService {
     binds.add(currentTenantId());
     binds.add(keywordType);
     binds.addAll(codes);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select text from title_keyword where tenant_id=? and keyword_type=? and enabled"
-                + " and code in (" + placeholders(codes) + ") order by code",
+                + " and code in ("
+                + placeholders(codes)
+                + ") order by code",
             binds.toArray())
         .stream()
         .map(r -> r.get(0, String.class))
@@ -1347,7 +1421,11 @@ public class TitleService {
   private void audit(AccessService.Access actor, UUID resourceId, String action, String detail) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   static String escapeLike(String value) {
@@ -1369,6 +1447,5 @@ public class TitleService {
     return message == null ? e.getClass().getSimpleName() : message.replace('\n', ' ');
   }
 
-  private static final org.slf4j.Logger log =
-      org.slf4j.LoggerFactory.getLogger(TitleService.class);
+  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TitleService.class);
 }

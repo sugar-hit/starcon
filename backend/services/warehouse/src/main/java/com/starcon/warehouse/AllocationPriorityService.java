@@ -17,7 +17,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -31,32 +30,28 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.8.1.2 优先级与保底：把「货不够分的时候先保住谁」变成可配置、可解释、可复盘的一件事。
  *
- * <p>蓝图：「在分摊冲突时按优先级裁决，并为高价值店铺设置保底可用量与安全垫，防止低优先级店铺长期断货影响其
- * 店铺绩效与平台考核。输出：分摊结果（含被压低店铺的提示）；保底生效记录。」
+ * <p>蓝图：「在分摊冲突时按优先级裁决，并为高价值店铺设置保底可用量与安全垫，防止低优先级店铺长期断货影响其 店铺绩效与平台考核。输出：分摊结果（含被压低店铺的提示）；保底生效记录。」
  *
  * <p><b>五条实现纪律</b>：
  *
  * <ul>
- *   <li><b>算法只有一处</b>：{@link #compute} 是纯函数（不碰 DB、不碰租户上下文），
- *       试算与落库跑的是**同一个**它。真正的纯函数也让单测不必拉 Testcontainers。
+ *   <li><b>算法只有一处</b>：{@link #compute} 是纯函数（不碰 DB、不碰租户上下文）， 试算与落库跑的是**同一个**它。真正的纯函数也让单测不必拉
+ *       Testcontainers。
  *   <li><b>保底先划池、余量再分</b>：上界静态、可复现，见 {@link AllocationPriorityModels} 的算式块。
  *   <li><b>区间 + 不可变</b>：保底内容写定后不可改（V76 触发器），改保底 = 收口 + 新开。
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 只出现在语句最前面的 {@code win} CTE 里，
- *       后面全是普通绑定，cast 永远不在绑定序列末位（与 7.8.1.1、7.1.2.2 同一条纪律）。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 只出现在语句最前面的 {@code win} CTE 里， 后面全是普通绑定，cast 永远不在绑定序列末位（与
+ *       7.8.1.1、7.1.2.2 同一条纪律）。
  *   <li><b>数量一律 numeric(19,6) + BigDecimal</b>，比较一律 {@code compareTo} 不用 {@code equals}。
  * </ul>
  *
- * <p><b>为什么复用 7.8.1.1 的 {@code effective()} 而不是自己解析生效档</b>：分档解析有三层约定
- * （SKU &gt; SHOP &gt; DEFAULT、左闭右开、区间不重叠），那套约定已经在
- * {@code AllocationPolicyService} 里被 V68 的触发器钉住了。再写一份解析器，
- * 两份迟早在某次换档时给出不同答案，而「当时到底听谁的」这个问题没有第二个答案。
- * 所以这里直接调它，成员与销量则自己读（读不构成重复实现，写才是）。
+ * <p><b>为什么复用 7.8.1.1 的 {@code effective()} 而不是自己解析生效档</b>：分档解析有三层约定 （SKU &gt; SHOP &gt;
+ * DEFAULT、左闭右开、区间不重叠），那套约定已经在 {@code AllocationPolicyService} 里被 V68 的触发器钉住了。再写一份解析器，
+ * 两份迟早在某次换档时给出不同答案，而「当时到底听谁的」这个问题没有第二个答案。 所以这里直接调它，成员与销量则自己读（读不构成重复实现，写才是）。
  *
- * <p><b>为什么余量分配要自己算一遍</b>：本模块的余量分配跑在
- * {@code residual = allocatable − 保底池} 上、且只在**未被保底足额满足**的店铺之间归一化份额 ——
- * 那是 7.8.1.1 没有的输入形态，它的 {@code allocate()} 无参可表达。
- * 代价是两处算式形状相同、必须同步演进；本轮按「只碰自己新增的文件」的纪律没有去改
- * {@code AllocationPolicyService}，统一成一个共享计算器是后续该做的事，已写进会话日志。
+ * <p><b>为什么余量分配要自己算一遍</b>：本模块的余量分配跑在 {@code residual = allocatable − 保底池}
+ * 上、且只在**未被保底足额满足**的店铺之间归一化份额 —— 那是 7.8.1.1 没有的输入形态，它的 {@code allocate()} 无参可表达。
+ * 代价是两处算式形状相同、必须同步演进；本轮按「只碰自己新增的文件」的纪律没有去改 {@code
+ * AllocationPolicyService}，统一成一个共享计算器是后续该做的事，已写进会话日志。
  */
 @Service
 public class AllocationPriorityService {
@@ -94,13 +89,23 @@ public class AllocationPriorityService {
   /**
    * 保底写入的列与每列的绑定 cast，<b>由同一个数组生成 SQL</b>。
    *
-   * <p>与 7.8.1.1 同一道防线：列顺序与 cast 顺序各写一遍时，错开一位就会让整条语句绑定错位，
-   * 而 PG 报的是「invalid input syntax for type numeric」—— 没有一条指向真正的原因。
+   * <p>与 7.8.1.1 同一道防线：列顺序与 cast 顺序各写一遍时，错开一位就会让整条语句绑定错位， 而 PG 报的是「invalid input syntax for type
+   * numeric」—— 没有一条指向真正的原因。
    */
   private static final String[] FLOOR_INSERT_COLUMNS = {
-    "id", "tenant_id", "policy_id", "source_system", "reference_id", "reference_label",
-    "floor_mode", "floor_ratio", "floor_quantity", "safety_quantity",
-    "effective_from", "note", "created_by_membership_id"
+    "id",
+    "tenant_id",
+    "policy_id",
+    "source_system",
+    "reference_id",
+    "reference_label",
+    "floor_mode",
+    "floor_ratio",
+    "floor_quantity",
+    "safety_quantity",
+    "effective_from",
+    "note",
+    "created_by_membership_id"
   };
 
   private static final String[] FLOOR_INSERT_CASTS = {
@@ -134,30 +139,37 @@ public class AllocationPriorityService {
   /**
    * 保底能力清单。
    *
-   * <p>三条必须如实讲清楚的说明：绩效依据为什么不可用、可用量为什么必须由调用方传入、
-   * 保底池与另两个「缓冲」的区别。前端据此渲染提示，而不是把规则硬编码在界面上。
+   * <p>三条必须如实讲清楚的说明：绩效依据为什么不可用、可用量为什么必须由调用方传入、 保底池与另两个「缓冲」的区别。前端据此渲染提示，而不是把规则硬编码在界面上。
    */
   public PriorityCapabilities capabilities() {
-    var modes = List.of(
-        new FloorCapabilityOption(
-            "QUANTITY", FloorMode.QUANTITY.label(), true,
-            "按件数保底。高价值店铺的真实诉求通常是「无论卖多少，至少给 N 件」—— "
-                + "平台考核看的是断货天数而不是占比。"),
-        new FloorCapabilityOption(
-            "RATIO", FloorMode.RATIO.label(), true,
-            "按可分配量的比例保底，适合「任何时候至少给它两成」这种与货量无关的承诺。"));
-    var suppress = List.of(
-        new FloorCapabilityOption(
-            "RESERVED_FOR_FLOOR", SuppressionReason.RESERVED_FOR_FLOOR.label(), true,
-            "这台机器上原本没有你的事，是别家店的保底把货占走了 —— "
-                + "处置是调保底或调优先级，与「本来就轮不到它」完全不同。"),
-        new FloorCapabilityOption(
-            "POOL_EXHAUSTED", SuppressionReason.POOL_EXHAUSTED.label(), true, "货被排在它前面的店铺分完了。"),
-        new FloorCapabilityOption(
-            "MEMBER_DISABLED", SuppressionReason.MEMBER_DISABLED.label(), true, "该成员已被停用，不参与分摊。"),
-        new FloorCapabilityOption(
-            "NO_SALES", SuppressionReason.NO_SALES.label(), true,
-            "登记销量为 0，比例分配下必然分不到货（如实如此，不是 bug）。"));
+    var modes =
+        List.of(
+            new FloorCapabilityOption(
+                "QUANTITY",
+                FloorMode.QUANTITY.label(),
+                true,
+                "按件数保底。高价值店铺的真实诉求通常是「无论卖多少，至少给 N 件」—— " + "平台考核看的是断货天数而不是占比。"),
+            new FloorCapabilityOption(
+                "RATIO", FloorMode.RATIO.label(), true, "按可分配量的比例保底，适合「任何时候至少给它两成」这种与货量无关的承诺。"));
+    var suppress =
+        List.of(
+            new FloorCapabilityOption(
+                "RESERVED_FOR_FLOOR",
+                SuppressionReason.RESERVED_FOR_FLOOR.label(),
+                true,
+                "这台机器上原本没有你的事，是别家店的保底把货占走了 —— " + "处置是调保底或调优先级，与「本来就轮不到它」完全不同。"),
+            new FloorCapabilityOption(
+                "POOL_EXHAUSTED", SuppressionReason.POOL_EXHAUSTED.label(), true, "货被排在它前面的店铺分完了。"),
+            new FloorCapabilityOption(
+                "MEMBER_DISABLED",
+                SuppressionReason.MEMBER_DISABLED.label(),
+                true,
+                "该成员已被停用，不参与分摊。"),
+            new FloorCapabilityOption(
+                "NO_SALES",
+                SuppressionReason.NO_SALES.label(),
+                true,
+                "登记销量为 0，比例分配下必然分不到货（如实如此，不是 bug）。"));
     return new PriorityCapabilities(
         modes,
         suppress,
@@ -183,37 +195,48 @@ public class AllocationPriorityService {
 
   /** 保底列表（真分页）。{@code effectiveOnly=true} 只看此刻仍在生效的档。 */
   public AllocationFloorPage page(FloorQuery query) {
-    FloorQuery q = query == null
-        ? new FloorQuery(null, null, false, null, 0, 50)
-        : query;
+    FloorQuery q = query == null ? new FloorQuery(null, null, false, null, 0, 50) : query;
     int page = Math.max(0, q.page());
     int size = Math.min(Math.max(1, q.size()), MAX_PAGE_SIZE);
     String keyword = q.keyword() == null || q.keyword().isBlank() ? null : q.keyword().trim();
 
-    String from = " from allocation_floor f, win"
-        + " where f.tenant_id = current_setting('app.current_tenant')::uuid"
-        + " and (?::uuid is null or f.policy_id = ?::uuid)"
-        + " and (?::uuid is null or f.reference_id = ?::uuid)"
-        + " and (not ? or " + FLOOR_LIVE_AT + ")"
-        + " and (?::text is null or lower(f.reference_label) like lower('%' || ?::text || '%'))";
+    String from =
+        " from allocation_floor f, win"
+            + " where f.tenant_id = current_setting('app.current_tenant')::uuid"
+            + " and (?::uuid is null or f.policy_id = ?::uuid)"
+            + " and (?::uuid is null or f.reference_id = ?::uuid)"
+            + " and (not ? or "
+            + FLOOR_LIVE_AT
+            + ")"
+            + " and (?::text is null or lower(f.reference_label) like lower('%' || ?::text || '%'))";
     Object[] bind = {
-        OffsetDateTime.now(),
-        q.policyId(), q.policyId(), q.referenceId(), q.referenceId(), q.effectiveOnly(),
-        keyword, keyword
+      OffsetDateTime.now(),
+      q.policyId(),
+      q.policyId(),
+      q.referenceId(),
+      q.referenceId(),
+      q.effectiveOnly(),
+      keyword,
+      keyword
     };
     // total 与列表**分别**成句：不带 ORDER BY 的 count 与带 ORDER BY 的列表共用一段 SQL 时，
     // `select count(*) from (… order by …) t` 在 PG 里是非法语法，报的却是语法错误而不是意图。
     long total = count(WIN + " select count(*) as c" + from, bind);
-    var rows = sql.fetch(
-        WIN + " select " + FLOOR_COLUMNS + from + " order by f.created_at desc, f.id limit ? offset ?",
-        bindings(bind, size, page * size));
-    return new AllocationFloorPage(rows.map(AllocationPriorityService::floorRow), total, page, size);
+    var rows =
+        sql.fetch(
+            WIN
+                + " select "
+                + FLOOR_COLUMNS
+                + from
+                + " order by f.created_at desc, f.id limit ? offset ?",
+            bindings(bind, size, page * size));
+    return new AllocationFloorPage(
+        rows.map(AllocationPriorityService::floorRow), total, page, size);
   }
 
   /** 保底详情。跨租户在 RLS 下查不到 → 404，不泄露存在性。 */
   public AllocationFloorRow detail(UUID id) {
-    var r = sql.fetchOne(
-        "select " + FLOOR_COLUMNS + " from allocation_floor f where f.id = ?", id);
+    var r = sql.fetchOne("select " + FLOOR_COLUMNS + " from allocation_floor f where f.id = ?", id);
     if (r == null) {
       throw notFound(id);
     }
@@ -224,8 +247,7 @@ public class AllocationPriorityService {
    * 新建一档保底（{@code supersedeId} 为 null）或换版（收口旧档 + 开新档）。
    *
    * <p>店铺必须是该策略的**启用成员** —— 由 V76 的 {@code allocation_floor_member} 触发器在 DB 层挡住，
-   * 不靠这里自觉。给不在名册里的店铺配保底，货一多就会以保底的名义凭空抢走别人的货，
-   * 而界面上查不到是谁拿走的。
+   * 不靠这里自觉。给不在名册里的店铺配保底，货一多就会以保底的名义凭空抢走别人的货， 而界面上查不到是谁拿走的。
    */
   @Transactional
   public AllocationFloorSaved save(UUID supersedeId, AllocationFloorInput input, UUID actorId) {
@@ -238,12 +260,12 @@ public class AllocationPriorityService {
     BigDecimal safety = input.safetyQuantity() == null ? ZERO_QTY : whole(input.safetyQuantity());
 
     if (mode == FloorMode.RATIO && quantity.signum() > 0) {
-      throw bad("floorMode=RATIO 时不能同时给 floorQuantity：「到底保底保多少」这个问题"
-          + "没有唯一答案。请只给 floorRatio，或把口径改成 QUANTITY。");
+      throw bad(
+          "floorMode=RATIO 时不能同时给 floorQuantity：「到底保底保多少」这个问题"
+              + "没有唯一答案。请只给 floorRatio，或把口径改成 QUANTITY。");
     }
     if (mode == FloorMode.QUANTITY && ratio.signum() > 0) {
-      throw bad("floorMode=QUANTITY 时不能同时给 floorRatio：「到底保底保多少」这个问题"
-          + "没有唯一答案。两个口径只能选一个。");
+      throw bad("floorMode=QUANTITY 时不能同时给 floorRatio：「到底保底保多少」这个问题" + "没有唯一答案。两个口径只能选一个。");
     }
     if (ratio.signum() < 0 || ratio.compareTo(ONE) > 0) {
       throw bad("floorRatio 必须在 0 ~ 1 之间，收到 " + ratio);
@@ -257,8 +279,7 @@ public class AllocationPriorityService {
     // 「以为自己配了保底」的形态：两个口径都是 0。算法里它与「没配」完全等价，
     // 而界面上看起来配了 —— 这是最坏的一种错配，在写入这一刻就该拒。
     if (ratio.signum() == 0 && quantity.signum() == 0 && safety.signum() == 0) {
-      throw bad("保底数量、比例与安全垫不能同时为 0：这样的保底在算法里与「没配」完全等价，"
-          + "但界面上看起来配了。要取消保底请走作废（retire），不要留一档空的。");
+      throw bad("保底数量、比例与安全垫不能同时为 0：这样的保底在算法里与「没配」完全等价，" + "但界面上看起来配了。要取消保底请走作废（retire），不要留一档空的。");
     }
 
     AllocationFloorRow superseded = null;
@@ -266,17 +287,26 @@ public class AllocationPriorityService {
       superseded = detail(supersedeId);
     }
     if (superseded != null && !superseded.policyId().equals(input.policyId())) {
-      throw bad("换版不能跨策略：原保底挂在策略 " + superseded.policyId()
-          + " 上，请求指向 " + input.policyId() + "。两家店的保底承诺属于两批不同的货。");
+      throw bad(
+          "换版不能跨策略：原保底挂在策略 "
+              + superseded.policyId()
+              + " 上，请求指向 "
+              + input.policyId()
+              + "。两家店的保底承诺属于两批不同的货。");
     }
 
-    OffsetDateTime from = input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
+    OffsetDateTime from =
+        input.effectiveFrom() == null ? OffsetDateTime.now() : input.effectiveFrom();
     OffsetDateTime retireAt = null;
     if (superseded != null) {
-      retireAt = from.isAfter(superseded.effectiveFrom()) ? from : superseded.effectiveFrom().plusSeconds(1);
+      retireAt =
+          from.isAfter(superseded.effectiveFrom())
+              ? from
+              : superseded.effectiveFrom().plusSeconds(1);
       sql.execute(
           "update allocation_floor set effective_to = ?::timestamptz where id = ?",
-          retireAt, superseded.id());
+          retireAt,
+          superseded.id());
     }
 
     UUID id = UUID.randomUUID();
@@ -328,12 +358,21 @@ public class AllocationPriorityService {
     // 界面上显示「已作废」，裁决却还在给它发货，而这种不一致只在一秒的窗口里出现，
     // 事后根本查不出来。+1s 只在「传入时刻早于生效起点」时才用得上（那时它必须晚于起点）。
     OffsetDateTime now = at == null ? OffsetDateTime.now() : at;
-    OffsetDateTime closeAt = now.isAfter(row.effectiveFrom()) ? now : row.effectiveFrom().plusSeconds(1);
+    OffsetDateTime closeAt =
+        now.isAfter(row.effectiveFrom()) ? now : row.effectiveFrom().plusSeconds(1);
     sql.execute(
         "update allocation_floor set effective_to = ?::timestamptz where id = ?", closeAt, id);
     return new AllocationFloorSaved(
-        id, row.policyId(), row.referenceId(), row.floorMode(), row.floorQuantity(), row.floorRatio(),
-        row.safetyQuantity(), row.effectiveFrom(), closeAt, null,
+        id,
+        row.policyId(),
+        row.referenceId(),
+        row.floorMode(),
+        row.floorQuantity(),
+        row.floorRatio(),
+        row.safetyQuantity(),
+        row.effectiveFrom(),
+        closeAt,
+        null,
         "保底已作废（生效至 " + closeAt + "）。它之后不再参与分摊裁决，但这一行永远保留。");
   }
 
@@ -342,8 +381,7 @@ public class AllocationPriorityService {
   /**
    * 分摊**试算**。一行都不写。
    *
-   * <p>与 7.8.1.1 的 {@code /calculation} 同一口径：试算看到的数与落库后的数**逐字相同**，
-   * 因为它们跑的是同一个 {@link #compute}。
+   * <p>与 7.8.1.1 的 {@code /calculation} 同一口径：试算看到的数与落库后的数**逐字相同**， 因为它们跑的是同一个 {@link #compute}。
    */
   public List<PriorityAllocationResult> preview(PriorityAllocationRequest request, UUID actorId) {
     return allocate(request, actorId, false);
@@ -352,8 +390,7 @@ public class AllocationPriorityService {
   /**
    * 分摊并落库。
    *
-   * <p>与 {@link #preview} 分成两个端点而不是一个 {@code persist} 布尔：「看一眼」和
-   * 「写一笔事实」的风险等级不同、权限也不同。
+   * <p>与 {@link #preview} 分成两个端点而不是一个 {@code persist} 布尔：「看一眼」和 「写一笔事实」的风险等级不同、权限也不同。
    */
   @Transactional
   public List<PriorityAllocationResult> runOnce(PriorityAllocationRequest request, UUID actorId) {
@@ -371,9 +408,10 @@ public class AllocationPriorityService {
     }
     OffsetDateTime at = request.at() == null ? OffsetDateTime.now() : request.at();
 
-    AllocationPolicyRow policy = request.policyId() == null
-        ? resolveDefault(request.skuId(), at)
-        : loadPolicy(request.policyId());
+    AllocationPolicyRow policy =
+        request.policyId() == null
+            ? resolveDefault(request.skuId(), at)
+            : loadPolicy(request.policyId());
 
     LocalDate windowEnd = at.toLocalDate();
     LocalDate windowStart = windowEnd.minusDays(policy.salesWindowDays());
@@ -387,37 +425,38 @@ public class AllocationPriorityService {
     var roster = roster(policy.id());
     if (roster.isEmpty()) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          "策略 " + policy.id() + " 没有成员店铺：没有名册就没有分摊，保底也无从裁决。");
+          HttpStatus.NOT_FOUND, "策略 " + policy.id() + " 没有成员店铺：没有名册就没有分摊，保底也无从裁决。");
     }
     Map<UUID, BigDecimal> sales = salesIndex(request.skuId(), windowStart, windowEnd);
     String skuCode = skuCode(request.skuId());
 
-    Outcome outcome = compute(policy, roster, sales, grants(floors), available, windowStart, windowEnd);
+    Outcome outcome =
+        compute(policy, roster, sales, grants(floors), available, windowStart, windowEnd);
 
-    PriorityAllocationResult result = new PriorityAllocationResult(
-        policy.id(),
-        policyLabel(policy),
-        policy.method().name(),
-        null,
-        request.skuId(),
-        skuCode,
-        outcome.lines(),
-        outcome.available(),
-        outcome.buffer(),
-        outcome.allocatable(),
-        outcome.floorPool(),
-        outcome.residualPool(),
-        outcome.allocated(),
-        outcome.unallocated(),
-        outcome.baseAllocated(),
-        roster.size(),
-        floors.size(),
-        outcome.suppressed(),
-        outcome.shortfall(),
-        windowStart,
-        windowEnd,
-        outcome.note(persist));
+    PriorityAllocationResult result =
+        new PriorityAllocationResult(
+            policy.id(),
+            policyLabel(policy),
+            policy.method().name(),
+            null,
+            request.skuId(),
+            skuCode,
+            outcome.lines(),
+            outcome.available(),
+            outcome.buffer(),
+            outcome.allocatable(),
+            outcome.floorPool(),
+            outcome.residualPool(),
+            outcome.allocated(),
+            outcome.unallocated(),
+            outcome.baseAllocated(),
+            roster.size(),
+            floors.size(),
+            outcome.suppressed(),
+            outcome.shortfall(),
+            windowStart,
+            windowEnd,
+            outcome.note(persist));
 
     if (!persist) {
       return List.of(result);
@@ -431,12 +470,10 @@ public class AllocationPriorityService {
    * 写一次分摊的头 + 逐店行 + 逐店保底生效记录（一个事务）。
    *
    * <p>头与行写进 <b>7.8.1.1 的 {@code allocation_run} / {@code allocation_run_line}</b>，
-   * 不是另建一套：本模块不发明第二种「分摊」概念 —— 两个 run id 拼起来的记录迟早对不上，
-   * 而 7.8.2.1 要读的正是那一张表。
+   * 不是另建一套：本模块不发明第二种「分摊」概念 —— 两个 run id 拼起来的记录迟早对不上， 而 7.8.2.1 要读的正是那一张表。
    */
   private PriorityAllocationResult persistRun(
-      PriorityAllocationResult result, Outcome outcome,
-      AllocationPolicyRow policy, UUID actorId) {
+      PriorityAllocationResult result, Outcome outcome, AllocationPolicyRow policy, UUID actorId) {
     UUID runId = UUID.randomUUID();
     sql.execute(
         "insert into allocation_run (id,tenant_id,policy_id,method,sku_id,allocated_at,"
@@ -468,8 +505,14 @@ public class AllocationPriorityService {
               + "reference_label,shop_operating_mode,allocation_order,sales_units,sales_share,"
               + "allocated_qty,outcome) values (?,?,?,?,?,?,?,?::numeric,?::numeric,"
               + "?::numeric,?)",
-          tenant(), runId, line.sourceSystem(), line.referenceId(), line.referenceLabel(),
-          line.shopOperatingMode(), order, outcome.salesUnits().getOrDefault(line.referenceId(), ZERO),
+          tenant(),
+          runId,
+          line.sourceSystem(),
+          line.referenceId(),
+          line.referenceLabel(),
+          line.shopOperatingMode(),
+          order,
+          outcome.salesUnits().getOrDefault(line.referenceId(), ZERO),
           outcome.salesShare().get(line.referenceId()),
           line.allocatedQty(),
           // 7.8.1.1 的 outcome 词表里没有「被保底挤下去」这一项，所以复用最接近的两项：
@@ -485,23 +528,51 @@ public class AllocationPriorityService {
               + "base_allocated_qty,allocated_qty,suppressed,suppression_reason) "
               + "values (?,?,?,?,?,?,?,?::numeric,?::numeric,?::numeric,?::numeric,?::numeric,"
               + "?::numeric,?,?,?::numeric,?::numeric,?::numeric,?,?)",
-          tenant(), runId, line.referenceId(), line.sourceSystem(), line.referenceLabel(),
-          line.floorOrder(), line.floorMode().name(), line.floorRatio(), line.floorQuantity(),
-          line.safetyQuantity(), line.floorRequested(), line.floorGranted(), line.floorShortfall(),
+          tenant(),
+          runId,
+          line.referenceId(),
+          line.sourceSystem(),
+          line.referenceLabel(),
+          line.floorOrder(),
+          line.floorMode().name(),
+          line.floorRatio(),
+          line.floorQuantity(),
+          line.safetyQuantity(),
+          line.floorRequested(),
+          line.floorGranted(),
+          line.floorShortfall(),
           line.floorStatus().name(),
           line.shortfallReason() == null ? null : line.shortfallReason().name(),
-          line.residualQty(), line.baseAllocatedQty(), line.allocatedQty(),
+          line.residualQty(),
+          line.baseAllocatedQty(),
+          line.allocatedQty(),
           line.suppressed(),
           line.suppressionReason() == null ? null : line.suppressionReason().name());
     }
 
     return new PriorityAllocationResult(
-        result.policyId(), result.policyLabel(), result.method(), runId, result.skuId(), result.skuCode(),
-        result.lines(), result.availableQuantity(), result.bufferQuantity(), result.allocatableQuantity(),
-        result.floorPool(), result.residualPool(), result.allocatedTotal(), result.unallocatedQuantity(),
-        result.baseAllocatedTotal(), result.memberCount(), result.floorMemberCount(),
-        result.suppressedMemberCount(), result.shortfallMemberCount(),
-        result.salesWindowStart(), result.salesWindowEnd(), outcome.note(true));
+        result.policyId(),
+        result.policyLabel(),
+        result.method(),
+        runId,
+        result.skuId(),
+        result.skuCode(),
+        result.lines(),
+        result.availableQuantity(),
+        result.bufferQuantity(),
+        result.allocatableQuantity(),
+        result.floorPool(),
+        result.residualPool(),
+        result.allocatedTotal(),
+        result.unallocatedQuantity(),
+        result.baseAllocatedTotal(),
+        result.memberCount(),
+        result.floorMemberCount(),
+        result.suppressedMemberCount(),
+        result.shortfallMemberCount(),
+        result.salesWindowStart(),
+        result.salesWindowEnd(),
+        outcome.note(true));
   }
 
   // ------------------------------------------------------------ 保底生效记录
@@ -509,33 +580,41 @@ public class AllocationPriorityService {
   /**
    * 保底生效记录列表（真分页）。
    *
-   * <p>7.8.2.2 饥饿预警会直接用它做聚合：{@code shortfallOnly} 只看保底没兑现的，
-   * {@code suppressedOnly} 只看被别家保底挤下去的。两者是不同的病，
-   * 蓝图那句「『没货卖』和『没分到货』是两种问题」在这里先分成两个查询参数。
+   * <p>7.8.2.2 饥饿预警会直接用它做聚合：{@code shortfallOnly} 只看保底没兑现的， {@code suppressedOnly}
+   * 只看被别家保底挤下去的。两者是不同的病， 蓝图那句「『没货卖』和『没分到货』是两种问题」在这里先分成两个查询参数。
    */
   public ResolutionPage resolutions(
-      UUID runId, UUID referenceId, boolean shortfallOnly, boolean suppressedOnly,
-      int page, int size) {
+      UUID runId,
+      UUID referenceId,
+      boolean shortfallOnly,
+      boolean suppressedOnly,
+      int page,
+      int size) {
     int p = Math.max(0, page);
     int s = Math.min(Math.max(1, size), MAX_PAGE_SIZE);
-    String from = " from allocation_priority_resolution r"
-        + " where r.tenant_id = current_setting('app.current_tenant')::uuid"
-        + " and (?::uuid is null or r.run_id = ?::uuid)"
-        + " and (?::uuid is null or r.reference_id = ?::uuid)"
-        + " and (not ? or r.shortfall_qty > 0)"
-        + " and (not ? or r.suppressed)";
+    String from =
+        " from allocation_priority_resolution r"
+            + " where r.tenant_id = current_setting('app.current_tenant')::uuid"
+            + " and (?::uuid is null or r.run_id = ?::uuid)"
+            + " and (?::uuid is null or r.reference_id = ?::uuid)"
+            + " and (not ? or r.shortfall_qty > 0)"
+            + " and (not ? or r.suppressed)";
     Object[] bind = {runId, runId, referenceId, referenceId, shortfallOnly, suppressedOnly};
     long total = count("select count(*) as c" + from, bind);
-    var rows = sql.fetch(
-        "select r.*" + from + " order by r.created_at desc, r.run_id desc, r.floor_order limit ? offset ?",
-        bindings(bind, s, p * s));
+    var rows =
+        sql.fetch(
+            "select r.*"
+                + from
+                + " order by r.created_at desc, r.run_id desc, r.floor_order limit ? offset ?",
+            bindings(bind, s, p * s));
     return new ResolutionPage(rows.map(AllocationPriorityService::resolutionRow), total, p, s);
   }
 
   // ============================================================ 核心算法（纯函数）
 
   /** 保底请求：把一档保底读成算法需要的三个数。 */
-  record Grant(UUID referenceId, FloorMode mode, BigDecimal quantity, BigDecimal ratio, BigDecimal safety) {}
+  record Grant(
+      UUID referenceId, FloorMode mode, BigDecimal quantity, BigDecimal ratio, BigDecimal safety) {}
 
   /** 一次带保底分摊的中间结果。 */
   record Outcome(
@@ -556,11 +635,15 @@ public class AllocationPriorityService {
 
     String note(boolean persisted) {
       StringBuilder sb = new StringBuilder();
-      sb.append("保底池 ").append(plain(floorPool)).append(" 件 + 余量池 ").append(plain(residualPool))
-          .append(" 件 = 可分配量 ").append(plain(allocatable)).append(" 件。");
+      sb.append("保底池 ")
+          .append(plain(floorPool))
+          .append(" 件 + 余量池 ")
+          .append(plain(residualPool))
+          .append(" 件 = 可分配量 ")
+          .append(plain(allocatable))
+          .append(" 件。");
       if (suppressed > 0) {
-        sb.append("有 ").append(suppressed)
-            .append(" 家店被压低（拿到的比「没有保底时」少），明细见下方被压低提示列；");
+        sb.append("有 ").append(suppressed).append(" 家店被压低（拿到的比「没有保底时」少），明细见下方被压低提示列；");
       }
       if (shortfall > 0) {
         sb.append("有 ").append(shortfall).append(" 家店的保底**没有足额兑现**，差额与原因逐店列出；");
@@ -577,8 +660,7 @@ public class AllocationPriorityService {
   /**
    * 算一次带保底的分摊。<b>纯函数</b>：不碰 DB、不碰租户上下文、不读系统时间。
    *
-   * <p>单测直接调它，不必拉 Testcontainers；试算与落库也跑的是同一个它。
-   * 算式见 {@link AllocationPriorityModels} 的类注释。
+   * <p>单测直接调它，不必拉 Testcontainers；试算与落库也跑的是同一个它。 算式见 {@link AllocationPriorityModels} 的类注释。
    *
    * @param floors 该策略此刻生效的保底（算法内部会按仲裁次序重排，顺序由它自己定）
    */
@@ -594,10 +676,12 @@ public class AllocationPriorityService {
     BigDecimal available = whole(availableIn);
 
     // ① 缓冲口径是 7.8.1.1 的，本模块只算一次、不重新解释「留多少」。
-    BigDecimal buffer = policy.bufferMode() == com.starcon.warehouse.AllocationPolicyModels
-            .AllocationBufferMode.RATIO
-        ? whole(available.multiply(nz(policy.bufferRatio())).setScale(QTY_SCALE, RoundingMode.DOWN))
-        : whole(nz(policy.bufferQuantity()).min(available));
+    BigDecimal buffer =
+        policy.bufferMode()
+                == com.starcon.warehouse.AllocationPolicyModels.AllocationBufferMode.RATIO
+            ? whole(
+                available.multiply(nz(policy.bufferRatio())).setScale(QTY_SCALE, RoundingMode.DOWN))
+            : whole(nz(policy.bufferQuantity()).min(available));
     if (buffer.compareTo(available) > 0) {
       buffer = available;
     }
@@ -608,11 +692,12 @@ public class AllocationPriorityService {
     Map<String, Integer> typeRanks = typeRanks(policy.shopTypeOrder());
     boolean byType = policy.method() == AllocationMethod.SHOP_TYPE_PRIORITY;
     List<AllocationPolicyMember> ordered = new ArrayList<>(roster);
-    ordered.sort(Comparator
-        .comparingInt((AllocationPolicyMember m) ->
-            byType ? typeRanks.getOrDefault(m.shopOperatingMode(), Integer.MAX_VALUE) : 0)
-        .thenComparingInt(AllocationPolicyMember::priority)
-        .thenComparing(m -> m.referenceId().toString()));
+    ordered.sort(
+        Comparator.comparingInt(
+                (AllocationPolicyMember m) ->
+                    byType ? typeRanks.getOrDefault(m.shopOperatingMode(), Integer.MAX_VALUE) : 0)
+            .thenComparingInt(AllocationPolicyMember::priority)
+            .thenComparing(m -> m.referenceId().toString()));
 
     Map<UUID, Grant> grantByShop = new LinkedHashMap<>();
     for (Grant g : floors) {
@@ -624,7 +709,8 @@ public class AllocationPriorityService {
     // 基线：同一批货在「完全没有保底」时按 7.8.1.1 的算式算出来的数。
     // 它是「被压低提示」的唯一依据 —— 没有它，界面上只能显示一个绝对分摊额，
     // 而答不出「这个数是被谁挤下去的」。
-    Map<UUID, BigDecimal> base = distribute(policy, ordered, sales, allocatable, allEnabled(ordered));
+    Map<UUID, BigDecimal> base =
+        distribute(policy, ordered, sales, allocatable, allEnabled(ordered));
     BigDecimal baseTotal = base.values().stream().reduce(ZERO_QTY, BigDecimal::add);
 
     // ② 保底池上界：逐店请求之和，再夹到可分配量。夹在这里而不是最后，
@@ -676,8 +762,7 @@ public class AllocationPriorityService {
     BigDecimal residualPool = allocatable.subtract(actuallyGranted);
     if (residualPool.signum() < 0) {
       throw new IllegalStateException(
-          "保底发放合计 " + actuallyGranted + " 超过可分配量 " + allocatable
-              + "。这是算法 bug，不是输入问题 —— 余量池不能是负数。");
+          "保底发放合计 " + actuallyGranted + " 超过可分配量 " + allocatable + "。这是算法 bug，不是输入问题 —— 余量池不能是负数。");
     }
 
     // ⑤ 余量分配：只让**未被保底足额满足**的店铺参与。
@@ -693,9 +778,10 @@ public class AllocationPriorityService {
         participants.add(m.referenceId());
       }
     }
-    Map<UUID, BigDecimal> residual = residualPool.signum() > 0 && !participants.isEmpty()
-        ? distribute(policy, ordered, sales, residualPool, participants)
-        : Map.of();
+    Map<UUID, BigDecimal> residual =
+        residualPool.signum() > 0 && !participants.isEmpty()
+            ? distribute(policy, ordered, sales, residualPool, participants)
+            : Map.of();
 
     // ⑥ 汇总逐店行。输出顺序 = 仲裁次序，「谁先拿到」一眼可见。
     List<PriorityAllocationLine> lines = new ArrayList<>(ordered.size());
@@ -717,12 +803,14 @@ public class AllocationPriorityService {
       BigDecimal baseQty = base.getOrDefault(m.referenceId(), ZERO_QTY);
       BigDecimal gap = req.subtract(got);
 
-      FloorShortfallReason shortReason = gap.signum() > 0
-          ? shortfallReasons.getOrDefault(m.referenceId(), FloorShortfallReason.POOL_EXHAUSTED)
-          : null;
-      FloorStatus status = gap.signum() == 0
-          ? FloorStatus.FULFILLED
-          : (got.signum() == 0 ? FloorStatus.UNFULFILLED : FloorStatus.PARTIAL);
+      FloorShortfallReason shortReason =
+          gap.signum() > 0
+              ? shortfallReasons.getOrDefault(m.referenceId(), FloorShortfallReason.POOL_EXHAUSTED)
+              : null;
+      FloorStatus status =
+          gap.signum() == 0
+              ? FloorStatus.FULFILLED
+              : (got.signum() == 0 ? FloorStatus.UNFULFILLED : FloorStatus.PARTIAL);
 
       boolean suppressed = total.compareTo(baseQty) < 0;
       SuppressionReason suppressReason = null;
@@ -752,34 +840,34 @@ public class AllocationPriorityService {
       }
       allocatedTotal = allocatedTotal.add(total);
 
-      lines.add(new PriorityAllocationLine(
-          m.sourceSystem(),
-          m.referenceId(),
-          m.referenceLabel(),
-          m.shopOperatingMode(),
-          floorOrderOf(ordered, m),
-          g == null ? FloorMode.QUANTITY : g.mode(),
-          g == null ? ZERO_QTY : g.quantity(),
-          g == null ? ZERO : g.ratio(),
-          g == null ? ZERO_QTY : g.safety(),
-          req,
-          got,
-          gap,
-          status,
-          shortReason,
-          res,
-          baseQty,
-          total,
-          suppressed,
-          suppressReason));
+      lines.add(
+          new PriorityAllocationLine(
+              m.sourceSystem(),
+              m.referenceId(),
+              m.referenceLabel(),
+              m.shopOperatingMode(),
+              floorOrderOf(ordered, m),
+              g == null ? FloorMode.QUANTITY : g.mode(),
+              g == null ? ZERO_QTY : g.quantity(),
+              g == null ? ZERO : g.ratio(),
+              g == null ? ZERO_QTY : g.safety(),
+              req,
+              got,
+              gap,
+              status,
+              shortReason,
+              res,
+              baseQty,
+              total,
+              suppressed,
+              suppressReason));
     }
 
     BigDecimal unallocated = allocatable.subtract(allocatedTotal);
     if (unallocated.signum() < 0) {
       // 走到这里说明算法错了，绝不能让它以负数的样子提交成功（超卖）。
       throw new IllegalStateException(
-          "保底分配后总账不平：Σ各店分摊 " + allocatedTotal + " 超过可分配量 " + allocatable
-              + "。这是算法 bug，不是输入问题。");
+          "保底分配后总账不平：Σ各店分摊 " + allocatedTotal + " 超过可分配量 " + allocatable + "。这是算法 bug，不是输入问题。");
     }
 
     return new Outcome(
@@ -802,8 +890,7 @@ public class AllocationPriorityService {
   /**
    * 按 7.8.1.1 的同一套算式在 {@code pool} 上分配，只给 {@code participants} 里的店铺。
    *
-   * <p>比例分配在**参与店铺之间**重新归一化份额：被保底足额满足的店铺已经拿够了，
-   * 它的销量仍然算在分母里的话，余量就会被稀释到不该稀释的地方。
+   * <p>比例分配在**参与店铺之间**重新归一化份额：被保底足额满足的店铺已经拿够了， 它的销量仍然算在分母里的话，余量就会被稀释到不该稀释的地方。
    * 先到先得与按店铺类型优先级则是次序问题，按原次序跳过不参与的店铺。
    */
   private static Map<UUID, BigDecimal> distribute(
@@ -832,7 +919,8 @@ public class AllocationPriorityService {
       List<Share> shares = new ArrayList<>();
       int seq = 0;
       for (UUID shop : participants) {
-        BigDecimal exact = pool.multiply(nz(sales.get(shop))).divide(totalSales, 12, RoundingMode.DOWN);
+        BigDecimal exact =
+            pool.multiply(nz(sales.get(shop))).divide(totalSales, 12, RoundingMode.DOWN);
         BigDecimal floor = exact.setScale(QTY_SCALE, RoundingMode.DOWN);
         shares.add(new Share(shop, floor, exact.subtract(floor), seq++));
         out.put(shop, floor);
@@ -840,8 +928,8 @@ public class AllocationPriorityService {
       BigDecimal handed = shares.stream().map(Share::exact).reduce(ZERO_QTY, BigDecimal::add);
       BigDecimal remainder = pool.subtract(handed);
       List<Share> byFrac = new ArrayList<>(shares);
-      byFrac.sort(Comparator.comparing(Share::frac).reversed()
-          .thenComparing(s -> s.shop().toString()));
+      byFrac.sort(
+          Comparator.comparing(Share::frac).reversed().thenComparing(s -> s.shop().toString()));
       int i = 0;
       while (remainder.signum() > 0 && i < byFrac.size()) {
         UUID shop = byFrac.get(i % byFrac.size()).shop();
@@ -858,9 +946,10 @@ public class AllocationPriorityService {
       if (!participants.contains(m.referenceId())) {
         continue;
       }
-      BigDecimal cap = m.shareLimit() == null
-          ? remaining
-          : whole(pool.multiply(m.shareLimit()).setScale(QTY_SCALE, RoundingMode.DOWN));
+      BigDecimal cap =
+          m.shareLimit() == null
+              ? remaining
+              : whole(pool.multiply(m.shareLimit()).setScale(QTY_SCALE, RoundingMode.DOWN));
       BigDecimal take = cap.min(remaining);
       out.put(m.referenceId(), take);
       remaining = remaining.subtract(take);
@@ -874,15 +963,14 @@ public class AllocationPriorityService {
   /**
    * 保底请求 = 保底 + 安全垫。
    *
-   * <p><b>刻意不夹到可分配量</b>：一夹，「要 6 件、货只有 0 件」就会变成
-   * 「要 0 件、给了 0 件、欠账 0」—— 承诺明明存在过，记录里却看不出它没兑现，
-   * 而那正是 {@code shortfall_reason} 这几列存在的全部理由。
-   * 超发由别处保证：保底池上界是 {@code min(allocatable, Σ请求)}，逐店发放时又只从池里拿。
+   * <p><b>刻意不夹到可分配量</b>：一夹，「要 6 件、货只有 0 件」就会变成 「要 0 件、给了 0 件、欠账 0」—— 承诺明明存在过，记录里却看不出它没兑现， 而那正是
+   * {@code shortfall_reason} 这几列存在的全部理由。 超发由别处保证：保底池上界是 {@code min(allocatable, Σ请求)}，逐店发放时又只从池里拿。
    */
   private static BigDecimal requestFor(Grant g, BigDecimal allocatable) {
-    BigDecimal floor = g.mode() == FloorMode.RATIO
-        ? whole(allocatable.multiply(nz(g.ratio())).setScale(QTY_SCALE, RoundingMode.DOWN))
-        : nz(g.quantity());
+    BigDecimal floor =
+        g.mode() == FloorMode.RATIO
+            ? whole(allocatable.multiply(nz(g.ratio())).setScale(QTY_SCALE, RoundingMode.DOWN))
+            : nz(g.quantity());
     BigDecimal want = floor.add(nz(g.safety()));
     return want.signum() < 0 ? ZERO_QTY : want;
   }
@@ -890,8 +978,7 @@ public class AllocationPriorityService {
   /**
    * 一店在仲裁次序里的名次（1 = 最先保住）。
    *
-   * <p><b>每个成员都有名次，包括没配保底的那几家</b>：名次本身是「它当时排在第几」的凭据，
-   * 对没配保底的店来说它回答的是「它<b>本该</b>排第几却没货保」——
+   * <p><b>每个成员都有名次，包括没配保底的那几家</b>：名次本身是「它当时排在第几」的凭据， 对没配保底的店来说它回答的是「它<b>本该</b>排第几却没货保」——
    * 这正是复盘被压低时最想知道的一句话。留 0 会让这两种情形长得一模一样。
    */
   private static int floorOrderOf(List<AllocationPolicyMember> ordered, AllocationPolicyMember m) {
@@ -933,9 +1020,8 @@ public class AllocationPriorityService {
   /** 店铺类型优先级顺序 → 名次。未列出的类型排最后（而不是排最前）。 */
   private static Map<String, Integer> typeRanks(String order) {
     Map<String, Integer> ranks = new LinkedHashMap<>();
-    String raw = order == null || order.isBlank()
-        ? AllocationPolicyService.DEFAULT_SHOP_TYPE_ORDER
-        : order;
+    String raw =
+        order == null || order.isBlank() ? AllocationPolicyService.DEFAULT_SHOP_TYPE_ORDER : order;
     String[] parts = raw.split(",");
     for (int i = 0; i < parts.length; i++) {
       ranks.put(parts[i].trim().toUpperCase(Locale.ROOT), i);
@@ -947,15 +1033,15 @@ public class AllocationPriorityService {
 
   /** 显式指定策略时的按 id 取档。跨租户 → 404。 */
   private AllocationPolicyRow loadPolicy(UUID policyId) {
-    var r = sql.fetchOne(
-        "select p.id,p.scope_type,p.source_system,p.reference_id,p.reference_label,p.method,"
-            + "p.buffer_mode,p.buffer_ratio,p.buffer_quantity,p.shop_type_order,p.sales_window_days,"
-            + "p.effective_from,p.effective_to,p.note,p.created_by_membership_id,p.created_at"
-            + " from allocation_policy p where p.id = ?",
-        policyId);
+    var r =
+        sql.fetchOne(
+            "select p.id,p.scope_type,p.source_system,p.reference_id,p.reference_label,p.method,"
+                + "p.buffer_mode,p.buffer_ratio,p.buffer_quantity,p.shop_type_order,p.sales_window_days,"
+                + "p.effective_from,p.effective_to,p.note,p.created_by_membership_id,p.created_at"
+                + " from allocation_policy p where p.id = ?",
+            policyId);
     if (r == null) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "分摊策略不存在或不属于当前租户：" + policyId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "分摊策略不存在或不属于当前租户：" + policyId);
     }
     return policyOf(r);
   }
@@ -966,8 +1052,7 @@ public class AllocationPriorityService {
     if (resolved.policy() == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND,
-          "没有解析到任何生效的分摊策略：保底是分摊之上的裁决，没有分摊就没有保底可言。"
-              + "请先在 7.8.1.1 建一档策略（含成员），再回来配保底。");
+          "没有解析到任何生效的分摊策略：保底是分摊之上的裁决，没有分摊就没有保底可言。" + "请先在 7.8.1.1 建一档策略（含成员），再回来配保底。");
     }
     return resolved.policy();
   }
@@ -978,31 +1063,45 @@ public class AllocationPriorityService {
                 + "m.priority,m.share_limit,m.enabled from allocation_policy_member m"
                 + " where m.policy_id = ?",
             policyId)
-        .map(r -> new AllocationPolicyMember(
-            policyId,
-            r.get("source_system", String.class),
-            r.get("reference_id", UUID.class),
-            nullToEmpty(r.get("reference_label", String.class)),
-            r.get("shop_operating_mode", String.class),
-            r.get("priority", Integer.class),
-            r.get("share_limit", BigDecimal.class),
-            Boolean.TRUE.equals(r.get("enabled", Boolean.class))));
+        .map(
+            r ->
+                new AllocationPolicyMember(
+                    policyId,
+                    r.get("source_system", String.class),
+                    r.get("reference_id", UUID.class),
+                    nullToEmpty(r.get("reference_label", String.class)),
+                    r.get("shop_operating_mode", String.class),
+                    r.get("priority", Integer.class),
+                    r.get("share_limit", BigDecimal.class),
+                    Boolean.TRUE.equals(r.get("enabled", Boolean.class))));
   }
 
   /** 该策略此刻仍在生效的保底。 */
   private List<AllocationFloorRow> liveFloors(UUID policyId, OffsetDateTime at) {
-    var rows = sql.fetch(
-        WIN + " select " + FLOOR_COLUMNS + " from allocation_floor f, win"
-            + " where f.policy_id = ? and " + FLOOR_LIVE_AT
-            + " order by f.effective_from desc, f.id",
-        at, policyId);
+    var rows =
+        sql.fetch(
+            WIN
+                + " select "
+                + FLOOR_COLUMNS
+                + " from allocation_floor f, win"
+                + " where f.policy_id = ? and "
+                + FLOOR_LIVE_AT
+                + " order by f.effective_from desc, f.id",
+            at,
+            policyId);
     return rows.map(AllocationPriorityService::floorRow);
   }
 
   private List<Grant> grants(List<AllocationFloorRow> floors) {
     List<Grant> out = new ArrayList<>(floors.size());
     for (AllocationFloorRow f : floors) {
-      out.add(new Grant(f.referenceId(), f.floorMode(), f.floorQuantity(), f.floorRatio(), f.safetyQuantity()));
+      out.add(
+          new Grant(
+              f.referenceId(),
+              f.floorMode(),
+              f.floorQuantity(),
+              f.floorRatio(),
+              f.safetyQuantity()));
     }
     return out;
   }
@@ -1010,10 +1109,13 @@ public class AllocationPriorityService {
   /** 窗口内按店铺汇总的登记销量（7.8.1.1 的 allocation_shop_sales 是本服务唯一的销量真相来源）。 */
   private Map<UUID, BigDecimal> salesIndex(UUID skuId, LocalDate from, LocalDate to) {
     Map<UUID, BigDecimal> out = new LinkedHashMap<>();
-    for (Record r : sql.fetch(
-        "select reference_id, coalesce(sum(units_sold),0) as units from allocation_shop_sales"
-            + " where sku_id = ? and period_end >= ? and period_start <= ? group by reference_id",
-        skuId, from, to)) {
+    for (Record r :
+        sql.fetch(
+            "select reference_id, coalesce(sum(units_sold),0) as units from allocation_shop_sales"
+                + " where sku_id = ? and period_end >= ? and period_start <= ? group by reference_id",
+            skuId,
+            from,
+            to)) {
       out.put(r.get("reference_id", UUID.class), decimal(r, "units"));
     }
     return out;
@@ -1025,11 +1127,12 @@ public class AllocationPriorityService {
   }
 
   private String policyLabel(AllocationPolicyRow policy) {
-    String label = switch (policy.scopeType()) {
-      case DEFAULT -> "全租户兜底档";
-      case SHOP -> "按店铺档 " + policy.referenceLabel();
-      case SKU -> "按 SKU 档 " + policy.referenceLabel();
-    };
+    String label =
+        switch (policy.scopeType()) {
+          case DEFAULT -> "全租户兜底档";
+          case SHOP -> "按店铺档 " + policy.referenceLabel();
+          case SKU -> "按 SKU 档 " + policy.referenceLabel();
+        };
     return label + "（" + policy.method().label() + "）";
   }
 
@@ -1068,26 +1171,28 @@ public class AllocationPriorityService {
         whole(decimal(r, "shortfall_qty")),
         FloorStatus.valueOf(r.get("status", String.class)),
         r.get("shortfall_reason", String.class) == null
-            ? null : FloorShortfallReason.valueOf(r.get("shortfall_reason", String.class)),
+            ? null
+            : FloorShortfallReason.valueOf(r.get("shortfall_reason", String.class)),
         whole(decimal(r, "residual_qty")),
         whole(decimal(r, "base_allocated_qty")),
         whole(decimal(r, "allocated_qty")),
         Boolean.TRUE.equals(r.get("suppressed", Boolean.class)),
         r.get("suppression_reason", String.class) == null
-            ? null : SuppressionReason.valueOf(r.get("suppression_reason", String.class)),
+            ? null
+            : SuppressionReason.valueOf(r.get("suppression_reason", String.class)),
         r.get("created_at", OffsetDateTime.class));
   }
 
   private static AllocationPolicyRow policyOf(Record r) {
     return new AllocationPolicyRow(
         r.get("id", UUID.class),
-        com.starcon.warehouse.AllocationPolicyModels.AllocationScopeType
-            .valueOf(r.get("scope_type", String.class)),
+        com.starcon.warehouse.AllocationPolicyModels.AllocationScopeType.valueOf(
+            r.get("scope_type", String.class)),
         r.get("reference_id", UUID.class),
         nullToEmpty(r.get("reference_label", String.class)),
         AllocationMethod.valueOf(r.get("method", String.class)),
-        com.starcon.warehouse.AllocationPolicyModels.AllocationBufferMode
-            .valueOf(r.get("buffer_mode", String.class)),
+        com.starcon.warehouse.AllocationPolicyModels.AllocationBufferMode.valueOf(
+            r.get("buffer_mode", String.class)),
         decimal(r, "buffer_ratio"),
         decimal(r, "buffer_quantity"),
         nullToEmpty(r.get("shop_type_order", String.class)),
@@ -1100,9 +1205,8 @@ public class AllocationPriorityService {
   }
 
   /**
-   * 数总数。<b>调用方必须传完整的 {@code select count(*) as c …}</b>：
-   * 包一层子查询（{@code from (select … order by …) t}）在 PG 里是非法语法，
-   * 而它报的错是语法错误，不会提示「你把排序带进计数里了」。
+   * 数总数。<b>调用方必须传完整的 {@code select count(*) as c …}</b>： 包一层子查询（{@code from (select … order by …)
+   * t}）在 PG 里是非法语法， 而它报的错是语法错误，不会提示「你把排序带进计数里了」。
    */
   private long count(String select, Object[] bind) {
     var r = sql.fetchOne(select, bind);
@@ -1158,12 +1262,12 @@ public class AllocationPriorityService {
   }
 
   private static ResponseStatusException notFound(UUID id) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "保底分档不存在或不属于当前租户：" + id);
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "保底分档不存在或不属于当前租户：" + id);
   }
 
   /** 租户来自 RLS 的同一个来源，绝不来自任何请求参数或客户端头。 */
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 }

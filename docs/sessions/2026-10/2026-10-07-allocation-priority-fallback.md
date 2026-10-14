@@ -31,14 +31,14 @@
 
 ## 关键 trade-off
 
-| 决策 | 取舍 |
-|---|---|
-| `floor_order` 每个成员都有（含没配保底的） | 留 0 会让「排在最后」与「压根不在这次裁决里」长得一样。它回答的是「它本该排第几却没货保」 |
-| 请求量**不**夹到可分配量 | 一夹，「要 6 件、货只有 0 件」就变成「要 0 件、给了 0 件、欠账 0」，承诺明明存在过却看不出没兑现。超发由保底池上界保证 |
-| `floorSafety` 只支持件数，不支持比例 | 7.2.2.1 的 `buffer_ratio` 已经是比例口径，再造一个比例口径的安全垫，界面上就有两个都叫「比例」的百分比 |
-| 落库写 7.8.1.1 的 `allocation_run` / `allocation_run_line` | 不发明第二种「分摊」概念——两个 run id 拼起来的记录迟早对不上，而 7.8.2.1 要读的正是那一张 |
-| `availableQuantity` 必填 | 7.2.2.1 的池容量口径是 7.8.1.1 服务里的私有实现，复制一份只会得到一个迟早漂移的副本 |
-| 不新增权限码 | 保底是分摊算法的一部分，看保底与看分摊是同一份配置的事实。拆成两个权限码只会让人以为存在「能改分摊但改不了保底」这种中间状态 |
+| 决策                                                       | 取舍                                                                                                                         |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `floor_order` 每个成员都有（含没配保底的）                 | 留 0 会让「排在最后」与「压根不在这次裁决里」长得一样。它回答的是「它本该排第几却没货保」                                    |
+| 请求量**不**夹到可分配量                                   | 一夹，「要 6 件、货只有 0 件」就变成「要 0 件、给了 0 件、欠账 0」，承诺明明存在过却看不出没兑现。超发由保底池上界保证       |
+| `floorSafety` 只支持件数，不支持比例                       | 7.2.2.1 的 `buffer_ratio` 已经是比例口径，再造一个比例口径的安全垫，界面上就有两个都叫「比例」的百分比                       |
+| 落库写 7.8.1.1 的 `allocation_run` / `allocation_run_line` | 不发明第二种「分摊」概念——两个 run id 拼起来的记录迟早对不上，而 7.8.2.1 要读的正是那一张                                    |
+| `availableQuantity` 必填                                   | 7.2.2.1 的池容量口径是 7.8.1.1 服务里的私有实现，复制一份只会得到一个迟早漂移的副本                                          |
+| 不新增权限码                                               | 保底是分摊算法的一部分，看保底与看分摊是同一份配置的事实。拆成两个权限码只会让人以为存在「能改分摊但改不了保底」这种中间状态 |
 
 ## 过程中查出的三个真 bug（都是自己写的）
 
@@ -56,26 +56,29 @@
 
 ## 未交付的上游（如实标注，未臆造）
 
-| 上游 | 状态 | 处理 |
-|---|---|---|
-| 店铺绩效（17 绩效域） | 未交付，仓库服务内既无表也无授权 API | `performanceBasisAvailable=false`，页面上常驻提示「保底是人为承诺的底线，不是系统按绩效算出来的下限」。不接绩效、不算绩效分 |
-| 7.2.2.1 池容量口径 | 是 7.8.1.1 服务内的私有实现 | `availableQuantity` 必填，capabilities 说明原因 |
-| 「被保底挤下去」的 outcome 枚举 | 7.8.1.1 的表与 CHECK 不能改 | 复用 `OK` / `DEMAND_EXHAUSTED`，精细原因在 resolution 表逐店留痕 |
-| 7.8.2.1 / 7.8.2.2 | 未交付 | 本模块已建好索引（`WHERE suppressed` / `WHERE shortfall_qty > 0`），它们可直接聚合，不需要重算分摊 |
+| 上游                            | 状态                                 | 处理                                                                                                                        |
+| ------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| 店铺绩效（17 绩效域）           | 未交付，仓库服务内既无表也无授权 API | `performanceBasisAvailable=false`，页面上常驻提示「保底是人为承诺的底线，不是系统按绩效算出来的下限」。不接绩效、不算绩效分 |
+| 7.2.2.1 池容量口径              | 是 7.8.1.1 服务内的私有实现          | `availableQuantity` 必填，capabilities 说明原因                                                                             |
+| 「被保底挤下去」的 outcome 枚举 | 7.8.1.1 的表与 CHECK 不能改          | 复用 `OK` / `DEMAND_EXHAUSTED`，精细原因在 resolution 表逐店留痕                                                            |
+| 7.8.2.1 / 7.8.2.2               | 未交付                               | 本模块已建好索引（`WHERE suppressed` / `WHERE shortfall_qty > 0`），它们可直接聚合，不需要重算分摊                          |
 
 ## 文件清单
 
 **后端**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V76__warehouse_allocation_priority_floor.sql`（新建，两张表 + 6 道 DB 约束 + RLS/授权）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/AllocationPriorityModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/AllocationPriorityService.java`（`compute` 是纯函数）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/AllocationPriorityController.java`
 
 **测试**
+
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/AllocationPriorityModelTest.java`（14 例纯函数）
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/AllocationPriorityIntegrationTest.java`（22 例 Testcontainers，含多租户三断言）
 
 **前端**
+
 - `apps/web/src/components/inventory/allocation-priority-model.ts`
 - `apps/web/src/components/inventory/allocation-priority-model.test.ts`（27 例）
 - `apps/web/src/components/inventory/allocation-priority-workspace.tsx`
@@ -83,6 +86,7 @@
 - `apps/web/src/app/api/warehouse/allocation-priority-allowlist.test.ts`（4 例）
 
 **生成物**
+
 - `packages/api-contracts/src/catalog.ts` + `*.openapi.json`（新增 11 个 DTO，消失 0）
 
 ## 验证

@@ -92,15 +92,25 @@ export function ComponentWorkspace() {
   const [pageIndex, setPageIndex] = useState(0);
   const [checkVersionId, setCheckVersionId] = useState('');
 
-  const [adding, setAdding] = useState<{ versionId: string; skuId: string; quantity: string } | null>(null);
+  const [adding, setAdding] = useState<{
+    versionId: string;
+    skuId: string;
+    quantity: string;
+  } | null>(null);
   const [editing, setEditing] = useState<{
     row: BundleComponentItem;
     quantity: string;
     role: string;
     note: string;
   } | null>(null);
-  const [linking, setLinking] = useState<{ bundleId: string; skuId: string; note: string } | null>(null);
-  const [relinking, setRelinking] = useState<{ id: string; bundleId: string; rowVersion: number } | null>(null);
+  const [linking, setLinking] = useState<{ bundleId: string; skuId: string; note: string } | null>(
+    null,
+  );
+  const [relinking, setRelinking] = useState<{
+    id: string;
+    bundleId: string;
+    rowVersion: number;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -108,7 +118,14 @@ export function ComponentWorkspace() {
     try {
       const [o, p, l] = await Promise.all([
         fetchComponentOverview(),
-        fetchComponents({ keyword, nested, versionId: null, bundleId: null, page: pageIndex, size: PAGE_SIZE }),
+        fetchComponents({
+          keyword,
+          nested,
+          versionId: null,
+          bundleId: null,
+          page: pageIndex,
+          size: PAGE_SIZE,
+        }),
         fetchLinks({ keyword: null, page: 0, size: 200 }),
       ]);
       setOverview(o);
@@ -130,9 +147,7 @@ export function ComponentWorkspace() {
     void (async () => {
       try {
         const [skuResult] = await Promise.all([fetchSkuPage(emptySkuFilters, 0, 200)]);
-        setSkus(
-          skuResult.items.map((s) => ({ id: s.id, code: s.code, name: s.name })),
-        );
+        setSkus(skuResult.items.map((s) => ({ id: s.id, code: s.code, name: s.name })));
       } catch {
         setSkus([]);
       }
@@ -184,10 +199,7 @@ export function ComponentWorkspace() {
   }, []);
 
   const problemGroups = useMemo(() => (check ? groupProblems(check.problems) : []), [check]);
-  const nestedCount = useMemo(
-    () => (page?.items ?? []).filter((i) => i.nested).length,
-    [page],
-  );
+  const nestedCount = useMemo(() => (page?.items ?? []).filter((i) => i.nested).length, [page]);
   const totalQuantity = useMemo(
     () => (page?.items ?? []).reduce((sum, i) => sum + i.quantity, 0),
     [page],
@@ -251,7 +263,12 @@ export function ComponentWorkspace() {
       return;
     }
     await guard(async () => {
-      await createLink({ bundleId: linking.bundleId, skuId: linking.skuId, note: linking.note, rowVersion: 0 });
+      await createLink({
+        bundleId: linking.bundleId,
+        skuId: linking.skuId,
+        note: linking.note,
+        rowVersion: 0,
+      });
       setLinking(null);
     }, '指向已建立：这个 SKU 现在代表该套装，别的套装可以把它当组件');
   }
@@ -272,7 +289,7 @@ export function ComponentWorkspace() {
 
   if (loading && !page) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground text-copy-13">
+      <div className="text-muted-foreground text-copy-13 flex items-center gap-2">
         <Loader2 className="size-4 animate-spin" />
         正在读取组件清单…
       </div>
@@ -300,12 +317,14 @@ export function ComponentWorkspace() {
   return (
     <div className="space-y-4">
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md border px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md border px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md border px-3 py-2">
+          {notice}
+        </div>
       )}
 
       {/* 概览：两个健康指标正常恒为 0，摆在页面上是为了可核对 */}
@@ -370,9 +389,7 @@ export function ComponentWorkspace() {
             )}
             {selectedVersion?.editable && writable && (
               <Button
-                onClick={() =>
-                  setAdding({ versionId: checkVersionId, skuId: '', quantity: '1' })
-                }
+                onClick={() => setAdding({ versionId: checkVersionId, skuId: '', quantity: '1' })}
               >
                 <Plus className="mr-2 size-4" />
                 加组件
@@ -387,18 +404,18 @@ export function ComponentWorkspace() {
               description="组件挂在版本上（已发布版本的组件不可改，只能新建版本），所以校验也是按版本跑的。"
             />
           ) : !check ? (
-            <div className="text-muted-foreground flex items-center gap-2 text-copy-13">
+            <div className="text-muted-foreground text-copy-13 flex items-center gap-2">
               <Loader2 className="size-4 animate-spin" />
               正在校验…
             </div>
           ) : check.ok ? (
-            <div className="border-success/40 bg-success/5 text-success rounded-md border px-3 py-2 text-copy-13">
+            <div className="border-success/40 bg-success/5 text-success text-copy-13 rounded-md border px-3 py-2">
               {checkSummary(check)}（{check.componentCount} 个组件，每件合计{' '}
               {quantityText(check.totalQuantity)}）
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-copy-13">
+              <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md border px-3 py-2">
                 {checkSummary(check)}
               </div>
               {problemGroups.map((group) => (
@@ -472,22 +489,18 @@ export function ComponentWorkspace() {
                   <li key={row.id} className="space-y-1.5 py-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">{row.skuCode}</span>
-                      <span className="truncate text-copy-13">{row.skuName}</span>
+                      <span className="text-copy-13 truncate">{row.skuName}</span>
                       <Badge tone={row.versionStatus === 'PUBLISHED' ? 'success' : 'warning'}>
                         {row.versionStatusLabel}
                       </Badge>
-                      {row.nested && (
-                        <Badge tone="info">嵌套套装：{row.linkedBundleCode}</Badge>
-                      )}
+                      {row.nested && <Badge tone="info">嵌套套装：{row.linkedBundleCode}</Badge>}
                     </div>
                     <div className="text-muted-foreground text-copy-12">
                       {componentOrigin(row)} · 每件 {quantityText(row.quantity)}
                       {row.role ? ` · ${row.role}` : ''}
                       {row.note ? ` · ${row.note}` : ''}
                     </div>
-                    {row.nested && (
-                      <p className="text-info text-copy-12">{nestedHint(row)}</p>
-                    )}
+                    {row.nested && <p className="text-info text-copy-12">{nestedHint(row)}</p>}
                     <div className="flex flex-wrap gap-2">
                       {canEditComponent(row) && writable ? (
                         <>
@@ -601,7 +614,11 @@ export function ComponentWorkspace() {
                           size="sm"
                           variant="secondary"
                           onClick={() =>
-                            setRelinking({ id: row.id, bundleId: row.bundleId, rowVersion: row.rowVersion })
+                            setRelinking({
+                              id: row.id,
+                              bundleId: row.bundleId,
+                              rowVersion: row.rowVersion,
+                            })
                           }
                         >
                           改指向
@@ -768,9 +785,7 @@ export function ComponentWorkspace() {
               <select
                 className={control}
                 value={relinking.bundleId}
-                onChange={(e) =>
-                  setRelinking((r) => (r ? { ...r, bundleId: e.target.value } : r))
-                }
+                onChange={(e) => setRelinking((r) => (r ? { ...r, bundleId: e.target.value } : r))}
               >
                 <option value="">请选择套装</option>
                 {bundleOptions.map((b) => (

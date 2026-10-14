@@ -269,7 +269,7 @@ export function WarehouseAllocationWorkspace() {
         description="货权归属是仓库的属性：从别的法人的仓发货意味着收入记在那个法人名下"
       >
         {loading && !warehouses ? (
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         ) : warehouses && warehouses.items.length === 0 ? (
           <EmptyState
             title="还没有仓库档案"
@@ -311,7 +311,7 @@ export function WarehouseAllocationWorkspace() {
         description="优先级决定哪条规则生效；兜底策略决定首选仓不可行时怎么办"
       >
         {loading && !rules ? (
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         ) : rules && rules.items.length === 0 ? (
           <EmptyState
             title="还没有分仓规则"
@@ -337,9 +337,7 @@ export function WarehouseAllocationWorkspace() {
                     <td>{row.ruleName || row.ruleCode}</td>
                     <td>{row.selectionPolicy}</td>
                     <td>{fallbackPolicyLabel(row.fallbackPolicy)}</td>
-                    <td>
-                      {row.requireLegalEntityMatch ? '要求货权一致' : '不要求货权一致'}
-                    </td>
+                    <td>{row.requireLegalEntityMatch ? '要求货权一致' : '不要求货权一致'}</td>
                     <td className="font-mono text-xs">
                       {row.weightStock} / {row.weightCost} / {row.weightLeadTime} /{' '}
                       {row.weightLegalEntity} / {row.weightRegion}
@@ -356,14 +354,24 @@ export function WarehouseAllocationWorkspace() {
       <SectionCard title="分仓试算与执行" description="试算只读不落库；执行分配才写决策与候选">
         <div className="grid gap-3 md:grid-cols-3">
           <FormField id="wa-orderRef" label="订单号">
-            <Input value={orderRef} id="wa-orderRef" onChange={(e) => setOrderRef(e.target.value)} />
+            <Input
+              value={orderRef}
+              id="wa-orderRef"
+              onChange={(e) => setOrderRef(e.target.value)}
+            />
           </FormField>
           <FormField id="wa-skuRef" label="SKU">
-            <Input value={skuRef} id="wa-skuRef" onChange={(e) => setSkuRef(e.target.value)} placeholder="SKU-1" />
+            <Input
+              value={skuRef}
+              id="wa-skuRef"
+              onChange={(e) => setSkuRef(e.target.value)}
+              placeholder="SKU-1"
+            />
           </FormField>
           <FormField id="wa-requestedQty" label="需求数量">
             <Input
-              value={requestedQty} id="wa-requestedQty"
+              value={requestedQty}
+              id="wa-requestedQty"
               onChange={(e) => setRequestedQty(e.target.value)}
               inputMode="decimal"
             />
@@ -372,11 +380,17 @@ export function WarehouseAllocationWorkspace() {
             <Input value={country} id="wa-country" onChange={(e) => setCountry(e.target.value)} />
           </FormField>
           <FormField id="wa-region" label="买家地区">
-            <Input value={region} id="wa-region" onChange={(e) => setRegion(e.target.value)} placeholder="US-WEST" />
+            <Input
+              value={region}
+              id="wa-region"
+              onChange={(e) => setRegion(e.target.value)}
+              placeholder="US-WEST"
+            />
           </FormField>
           <FormField id="wa-orderEntity" label="订单货权主体">
             <Input
-              value={orderEntity} id="wa-orderEntity"
+              value={orderEntity}
+              id="wa-orderEntity"
               onChange={(e) => setOrderEntity(e.target.value)}
               placeholder="CN-ENT-A"
             />
@@ -415,7 +429,7 @@ export function WarehouseAllocationWorkspace() {
             )}
             <CandidateTable candidates={simulation.candidates} />
             {(simulation.warnings ?? []).map((w) => (
-              <p key={w} className="text-xs text-muted">
+              <p key={w} className="text-muted text-xs">
                 {w}
               </p>
             ))}
@@ -424,10 +438,7 @@ export function WarehouseAllocationWorkspace() {
       </SectionCard>
 
       {/* 区块 4：分配记录 */}
-      <SectionCard
-        title="分配记录"
-        description="分配结果是举证凭据：候选行不会被回算"
-      >
+      <SectionCard title="分配记录" description="分配结果是举证凭据：候选行不会被回算">
         <div className="mb-3 flex gap-2">
           <Input
             value={keyword}
@@ -444,7 +455,7 @@ export function WarehouseAllocationWorkspace() {
           </Button>
         </div>
         {loading && !allocations ? (
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         ) : allocations && allocations.items.length === 0 ? (
           <EmptyState
             title="还没有分配记录"
@@ -498,12 +509,9 @@ export function WarehouseAllocationWorkspace() {
       </SectionCard>
 
       {/* 区块 5：挂起清单（蓝图输出的第二项） */}
-      <SectionCard
-        title="无法分配的挂起"
-        description="挂起是终态：不会悄悄回落到某个默认仓"
-      >
+      <SectionCard title="无法分配的挂起" description="挂起是终态：不会悄悄回落到某个默认仓">
         {loading && !holds ? (
-          <p className="text-sm text-muted">加载中…</p>
+          <p className="text-muted text-sm">加载中…</p>
         ) : holds && holds.items.length === 0 ? (
           <EmptyState title="没有挂起记录" description="当前没有发不出去的订单。" />
         ) : (
@@ -564,7 +572,7 @@ export function WarehouseAllocationWorkspace() {
               ))}
             </div>
           )}
-          <div className="mt-3 space-y-1 text-xs text-muted">
+          <div className="text-muted mt-3 space-y-1 text-xs">
             {detail.events.map((e) => (
               <p key={e.id}>
                 {timeText(e.occurredAt)} · {e.eventKind} · {e.detail}
@@ -582,9 +590,9 @@ export function WarehouseAllocationWorkspace() {
                 <span className={d.available ? 'text-foreground' : 'text-warning'}>
                   {d.available ? '可用' : '不可用'}
                 </span>{' '}
-                · {d.label} · <span className="text-xs text-muted">{d.source}</span>
+                · {d.label} · <span className="text-muted text-xs">{d.source}</span>
                 {!d.available && (
-                  <span className="text-xs text-warning">
+                  <span className="text-warning text-xs">
                     {' '}
                     {dimensionUnavailableReason(capabilities.dimensions, d.code)}
                   </span>
@@ -592,7 +600,7 @@ export function WarehouseAllocationWorkspace() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-muted">{capabilities.legalEntityNote}</p>
+          <p className="text-muted mt-2 text-xs">{capabilities.legalEntityNote}</p>
         </SectionCard>
       )}
     </div>
@@ -628,9 +636,9 @@ function CandidateTable({
               <td>
                 <span className="font-mono">{c.legalEntityCode}</span>
                 {c.legalEntityMatch ? (
-                  <span className="ml-1 text-xs text-muted">与订单一致</span>
+                  <span className="text-muted ml-1 text-xs">与订单一致</span>
                 ) : (
-                  <span className="ml-1 text-xs text-warning">与订单主体不同</span>
+                  <span className="text-warning ml-1 text-xs">与订单主体不同</span>
                 )}
               </td>
               <td>{qtyText(c.availableQty)}</td>
@@ -677,7 +685,7 @@ function AllocationRowView({
       <td>{row.chosenWarehouseRef ?? '—'}</td>
       <td>
         <span className="font-mono text-xs">{row.chosenLegalEntityCode ?? '—'}</span>
-        {cross && <span className="ml-1 text-xs text-warning">跨法人</span>}
+        {cross && <span className="text-warning ml-1 text-xs">跨法人</span>}
       </td>
       <td>
         {qtyText(row.allocatedQty)} / {qtyText(row.requestedQty)}
@@ -685,7 +693,7 @@ function AllocationRowView({
       <td>{moneyText(row.unitShippingCost, row.currencyCode)}</td>
       <td>
         {allocationStatusLabel(row.status)}
-        <span className="block text-xs text-muted">{reasonCodeLabel(row.reasonCode)}</span>
+        <span className="text-muted block text-xs">{reasonCodeLabel(row.reasonCode)}</span>
       </td>
       <td className="text-xs">{timeText(row.decidedAt)}</td>
       <td className="whitespace-nowrap text-right">

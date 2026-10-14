@@ -6,15 +6,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.util.List;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 
 /**
  * {@link ImageProcessor} 的纯单元测试：六项加工能力逐项断言**像素真的变了**。
  *
- * <p>不碰数据库、不碰对象存储：加工逻辑的可信度不该依赖 Testcontainers 起一次 PG。
- * 断言方式是读回产物的像素，而不是「方法没抛异常」——后者会让一个什么都没做的
+ * <p>不碰数据库、不碰对象存储：加工逻辑的可信度不该依赖 Testcontainers 起一次 PG。 断言方式是读回产物的像素，而不是「方法没抛异常」——后者会让一个什么都没做的
  * 空实现也通过。
  */
 class ImageProcessorTest {
@@ -67,8 +65,7 @@ class ImageProcessorTest {
     assertThatThrownBy(() -> decode("这不是图片".getBytes(java.nio.charset.StandardCharsets.UTF_8)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("无法解析");
-    assertThatThrownBy(() -> decode(new byte[0]))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> decode(new byte[0])).isInstanceOf(IllegalArgumentException.class);
   }
 
   // ------------------------------------------------------------ 1. 去背景
@@ -85,8 +82,7 @@ class ImageProcessorTest {
     assertThat(alphaAt(out, 79, 59)).isZero();
     // 主体原样保留：居中方块的 alpha 与颜色都没变。
     assertThat(alphaAt(out, 40, 30)).isEqualTo(255);
-    assertThat(out.getRGB(40, 30) & 0xFFFFFF)
-        .isEqualTo(new Color(20, 60, 200).getRGB() & 0xFFFFFF);
+    assertThat(out.getRGB(40, 30) & 0xFFFFFF).isEqualTo(new Color(20, 60, 200).getRGB() & 0xFFFFFF);
   }
 
   @Test
@@ -130,8 +126,11 @@ class ImageProcessorTest {
   @Test
   void watermarkActuallyDrawsAndIsPositionAware() throws Exception {
     BufferedImage image = solid(200, 120, new Color(30, 30, 30));
-    BufferedImage plain = bytes(image, "png") == null ? null : ImageProcessor.applyWatermark(
-        ImageProcessor.decode(bytes(image, "png")), "店铺名", "BOTTOM_RIGHT", 90);
+    BufferedImage plain =
+        bytes(image, "png") == null
+            ? null
+            : ImageProcessor.applyWatermark(
+                ImageProcessor.decode(bytes(image, "png")), "店铺名", "BOTTOM_RIGHT", 90);
 
     // 画了水印的图与原图不一样（像素真的变了，不是空操作）。
     BufferedImage bare = ImageProcessor.decode(bytes(image, "png"));
@@ -141,14 +140,16 @@ class ImageProcessorTest {
     assertThat(hasBrightPixelInRegion(plain, 0, 0, 99, 59)).isFalse();
 
     // TOP_LEFT 则相反。
-    BufferedImage topLeft = ImageProcessor.applyWatermark(
-        ImageProcessor.decode(bytes(image, "png")), "店铺名", "TOP_LEFT", 90);
+    BufferedImage topLeft =
+        ImageProcessor.applyWatermark(
+            ImageProcessor.decode(bytes(image, "png")), "店铺名", "TOP_LEFT", 90);
     assertThat(hasBrightPixelInRegion(topLeft, 0, 0, 99, 59)).isTrue();
     assertThat(hasBrightPixelInRegion(topLeft, 100, 60, 199, 119)).isFalse();
 
     // 平铺：四个角区域都能看到水印。
-    BufferedImage tiled = ImageProcessor.applyWatermark(
-        ImageProcessor.decode(bytes(image, "png")), "店铺名", "TILED", 90);
+    BufferedImage tiled =
+        ImageProcessor.applyWatermark(
+            ImageProcessor.decode(bytes(image, "png")), "店铺名", "TILED", 90);
     assertThat(hasBrightPixelInRegion(tiled, 0, 0, 99, 59)).isTrue();
     assertThat(hasBrightPixelInRegion(tiled, 100, 60, 199, 119)).isTrue();
 
@@ -175,13 +176,15 @@ class ImageProcessorTest {
     assertThat((fit.getRGB(50, 50) & 0xFF000000) != 0).isTrue();
 
     // CROP_FILL：填满 100×100 → 缩放后裁掉两侧，画面中央是主体。
-    BufferedImage fill = ImageProcessor.resize(image, new ImageProcessor.Canvas(100, 100, "CROP_FILL"));
+    BufferedImage fill =
+        ImageProcessor.resize(image, new ImageProcessor.Canvas(100, 100, "CROP_FILL"));
     assertThat(fill.getWidth()).isEqualTo(100);
     assertThat(fill.getHeight()).isEqualTo(100);
     assertThat(fill.getRGB(50, 50) & 0xFFFFFF).isEqualTo(new Color(10, 20, 30).getRGB() & 0xFFFFFF);
 
     // 面积上限必须在分配画布之前就拒（12000×12000 = 144MP > 80MP）。
-    assertThatThrownBy(() -> ImageProcessor.resize(image, new ImageProcessor.Canvas(12000, 12000, "FIT")))
+    assertThatThrownBy(
+            () -> ImageProcessor.resize(image, new ImageProcessor.Canvas(12000, 12000, "FIT")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("超出单张处理上限");
     assertThatThrownBy(() -> new ImageProcessor.Canvas(0, 10, "FIT"))
@@ -282,8 +285,7 @@ class ImageProcessorTest {
   /**
    * 区域里有没有明显变亮的像素。
    *
-   * <p>用亮度阈值而不是比 0xFFFFFF：水印按不透明度与深色底混合后是 ~0xE8，
-   * 抗锯齿边缘还会更暗。判「有没有白点」会漏掉半透明与抗锯齿的字，
+   * <p>用亮度阈值而不是比 0xFFFFFF：水印按不透明度与深色底混合后是 ~0xE8， 抗锯齿边缘还会更暗。判「有没有白点」会漏掉半透明与抗锯齿的字，
    * 判「亮度是否显著高于底色」才是水印真的画上去了。
    */
   private boolean hasBrightPixelInRegion(BufferedImage image, int x0, int y0, int x1, int y1) {

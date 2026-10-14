@@ -125,13 +125,29 @@ describe('货权法人的三种状态要分开说', () => {
   });
 
   it('没绑定但有货：这是最危险的一种，必须说出来', () => {
-    expect(legalEntityText(row({ legalEntityId: null, legalEntityCode: null, legalEntityName: null, legalEntityCount: 2 })))
-      .toBe('未绑定法人（已持有 2 个法人的货）');
+    expect(
+      legalEntityText(
+        row({
+          legalEntityId: null,
+          legalEntityCode: null,
+          legalEntityName: null,
+          legalEntityCount: 2,
+        }),
+      ),
+    ).toBe('未绑定法人（已持有 2 个法人的货）');
   });
 
   it('没绑定且没货：如实说未绑定', () => {
-    expect(legalEntityText(row({ legalEntityId: null, legalEntityCode: null, legalEntityName: null, legalEntityCount: 0 })))
-      .toBe('未绑定法人');
+    expect(
+      legalEntityText(
+        row({
+          legalEntityId: null,
+          legalEntityCode: null,
+          legalEntityName: null,
+          legalEntityCount: 0,
+        }),
+      ),
+    ).toBe('未绑定法人');
   });
 });
 
@@ -141,7 +157,9 @@ describe('时区', () => {
   });
 
   it('库里时区无法识别时说清楚，而不是静默显示一个错的时刻', () => {
-    expect(localTimeText(row({ timezone: 'Not/AZone', localTime: null }))).toBe('时区 Not/AZone 无法识别');
+    expect(localTimeText(row({ timezone: 'Not/AZone', localTime: null }))).toBe(
+      '时区 Not/AZone 无法识别',
+    );
   });
 
   it('填偏移量而不是 IANA ID 时在表单层就拦住', () => {

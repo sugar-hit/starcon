@@ -21,27 +21,23 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 9.7.1.1 批发订单与账期。
  *
- * <p><b>「未发货不产生应收，发货才确认应收」是本类的中心规则</b>，且它有三重表达，
- * 任何一重单独存在都不够：
+ * <p><b>「未发货不产生应收，发货才确认应收」是本类的中心规则</b>，且它有三重表达， 任何一重单独存在都不够：
  *
  * <ol>
  *   <li><b>结构</b>：{@code b2b_receivable.shipment_id} 是 NOT NULL 外键。
- *       应收行在数据层<b>挂不到发货单就写不出来</b>，因此「下单即生成应收」不是一条
- *       没写的代码路径，而是一条走不通的路径。
+ *       应收行在数据层<b>挂不到发货单就写不出来</b>，因此「下单即生成应收」不是一条 没写的代码路径，而是一条走不通的路径。
  *   <li><b>数值</b>：{@code b2b_order.receivable_amount ≤ b2b_order.total_amount} 是 CHECK，
  *       且订单头的这个数由触发器按 {@code SUM(应收)} 复算。
  *   <li><b>算术</b>：本类只在 {@link #ship} 这一个方法里产生应收。其它写方法里没有第二条路径。
  * </ol>
  *
- * <p><b>阶梯价是算出来的，不是填进来的。</b>{@link B2BOrderLineInput} 没有 unitPrice 字段：
- * 服务层按 {@code min_quantity ≤ quantity} 取最高档，DB 的 {@code guard_b2b_line_tier}
- * 独立复算一遍落档与单价是否真的属于那一档 —— 算错时提交被挡下，而不是等到对账时才发现
+ * <p><b>阶梯价是算出来的，不是填进来的。</b>{@link B2BOrderLineInput} 没有 unitPrice 字段： 服务层按 {@code min_quantity ≤
+ * quantity} 取最高档，DB 的 {@code guard_b2b_line_tier} 独立复算一遍落档与单价是否真的属于那一档 —— 算错时提交被挡下，而不是等到对账时才发现
  * 「这批货到底按哪一档算的钱」没人答得上来。
  *
- * <p><b>不跨库读上游。</b>客户分级与账期取自 {@link #upsertCustomerTerms} 维护的
- * trade 侧只读投影，阶梯价取自 {@link #upsertPriceBook} 维护的 trade 侧投影。
- * 一次 catalog / 价目服务的回查都不发生（集成测试里刻意不提供这两个服务的 stub：
- * 测试里出现 catalog 客户端反而说明边界纪律破了）。
+ * <p><b>不跨库读上游。</b>客户分级与账期取自 {@link #upsertCustomerTerms} 维护的 trade 侧只读投影，阶梯价取自 {@link
+ * #upsertPriceBook} 维护的 trade 侧投影。 一次 catalog / 价目服务的回查都不发生（集成测试里刻意不提供这两个服务的 stub： 测试里出现 catalog
+ * 客户端反而说明边界纪律破了）。
  */
 @Service
 public class B2BOrderService {
@@ -86,8 +82,7 @@ public class B2BOrderService {
   /**
    * 能力与上下游可用性。
    *
-   * <p>存在的理由与 9.1.2.2 / 7.7.2.1 一致：把「哪些输入真有依据」「下游有没有接上」
-   * 显式报出来，而不是让调用方从 404 或空数组里猜哪一环没通。
+   * <p>存在的理由与 9.1.2.2 / 7.7.2.1 一致：把「哪些输入真有依据」「下游有没有接上」 显式报出来，而不是让调用方从 404 或空数组里猜哪一环没通。
    */
   public B2BCapabilities capabilities() {
     return new B2BCapabilities(
@@ -103,10 +98,8 @@ public class B2BOrderService {
                 + "三者都写在 b2b_order 上，零售走 sales_order，两边互不覆盖、互不 JOIN。",
             "**起订量是硬校验**：数量低于价目表的 moq_quantity 直接 400，落库侧还有 "
                 + "b2b_order_line 的 CHECK 与订单确认时的延迟约束触发器各拦一次。",
-            "**阶梯价按数量落档**：区间是 (上一档下界, 本档下界]，数量恰好等于某档下界时落在该档；"
-                + "单价不接受调用方传值，由系统落档算出并冻结进订单行。",
-            "**未发货不产生应收，发货才确认**：应收必须挂在一张发货单上（NOT NULL 外键），"
-                + "下单 / 确认两个动作都不产生任何应收行。",
+            "**阶梯价按数量落档**：区间是 (上一档下界, 本档下界]，数量恰好等于某档下界时落在该档；" + "单价不接受调用方传值，由系统落档算出并冻结进订单行。",
+            "**未发货不产生应收，发货才确认**：应收必须挂在一张发货单上（NOT NULL 外键），" + "下单 / 确认两个动作都不产生任何应收行。",
             "**账期结算不即时收款**：ORDER_SETTLEMENT 下单结算（款项已收，不产生应收）、"
                 + "ON_RECEIPT 确认收货后结算、CREDIT_TERM 账期（到期日 = 发货确认时刻 + 账期天数）。",
             "**开票需求只标记不跨库**：invoice_state 由本服务维护，12.6.2 发票交付后由它读这张表。",
@@ -136,8 +129,7 @@ public class B2BOrderService {
                 "finance",
                 false,
                 "12.1 应收与资金",
-                "应收未交付：b2b_receivable 目前是 trade 侧的应收事实，"
-                    + "财务总账与账龄分析还没有出口；核销动作本模块不提供。"),
+                "应收未交付：b2b_receivable 目前是 trade 侧的应收事实，" + "财务总账与账龄分析还没有出口；核销动作本模块不提供。"),
             new B2BDownstreamGap(
                 "12.6.2",
                 "发票",
@@ -161,16 +153,14 @@ public class B2BOrderService {
                 "trade",
                 false,
                 "9.3 履约编排",
-                "履约未接入：确认后的 b2b_order 不会自动进入拣货与发货编排，"
-                    + "发货由本模块自己的 POST /{id}/shipments 端点登记。"),
+                "履约未接入：确认后的 b2b_order 不会自动进入拣货与发货编排，" + "发货由本模块自己的 POST /{id}/shipments 端点登记。"),
             new B2BDownstreamGap(
                 "5.1.1.2",
                 "价目项批量维护",
                 "pricing",
                 false,
                 "05 价目",
-                "阶梯价上游未交付：当前由本服务的投影端点维护，"
-                    + "交付后由事件同步接管 b2b_price_book / b2b_price_tier。")));
+                "阶梯价上游未交付：当前由本服务的投影端点维护，" + "交付后由事件同步接管 b2b_price_book / b2b_price_tier。")));
   }
 
   // ================================================================ 上游投影：客户
@@ -178,8 +168,7 @@ public class B2BOrderService {
   /**
    * 客户档案投影 upsert（3.6.1.2 → b2b_customer_terms）。
    *
-   * <p>幂等键是 customerPartyId；版本号必须单调不减（DB 触发器再拦一次，
-   * 因为乱序到达的事件是真实存在的，不该靠调用方保证顺序）。
+   * <p>幂等键是 customerPartyId；版本号必须单调不减（DB 触发器再拦一次， 因为乱序到达的事件是真实存在的，不该靠调用方保证顺序）。
    */
   @Transactional
   public B2BCustomerTermsRow upsertCustomerTerms(B2BCustomerTermsInput in) {
@@ -222,7 +211,9 @@ public class B2BOrderService {
             customerPartyId);
     if (r == null) {
       throw notFound(
-          "客户 " + customerPartyId + " 没有投影档案：3.6.1.2 的客户档案尚未同步到 trade 侧，"
+          "客户 "
+              + customerPartyId
+              + " 没有投影档案：3.6.1.2 的客户档案尚未同步到 trade 侧，"
               + "B2B 下单需要客户分级与账期，请先同步该客户的投影");
     }
     return termsRow(r);
@@ -255,7 +246,8 @@ public class B2BOrderService {
         sql.fetch(
                 "select id,customer_party_id,customer_code,customer_name,customer_level,"
                     + "payment_terms_days,default_currency,credit_limit,source_version,synced_at"
-                    + " from b2b_customer_terms" + clause
+                    + " from b2b_customer_terms"
+                    + clause
                     + " order by customer_level, customer_name, id limit ? offset ?",
                 pageBinds.toArray())
             .map(B2BOrderService::termsRow);
@@ -267,8 +259,7 @@ public class B2BOrderService {
   /**
    * 阶梯价投影 upsert（05 价目 → b2b_price_book + b2b_price_tier）。
    *
-   * <p>档位整体替换（先删后插）：阶梯是**一档集合**，不是可以逐档追加的独立行 ——
-   * 追加语义会让「删掉一档」无法表达，而删档是调价时最常见的动作。
+   * <p>档位整体替换（先删后插）：阶梯是**一档集合**，不是可以逐档追加的独立行 —— 追加语义会让「删掉一档」无法表达，而删档是调价时最常见的动作。
    * 起订量与档位的自洽（阶梯必须覆盖得起订量）由 DB 触发器在每次写入后复核。
    */
   @Transactional
@@ -282,7 +273,8 @@ public class B2BOrderService {
       if (sorted.get(i).minQuantity().compareTo(sorted.get(i - 1).minQuantity()) == 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "阶梯价档位下界重复：" + sorted.get(i).minQuantity().toPlainString()
+            "阶梯价档位下界重复："
+                + sorted.get(i).minQuantity().toPlainString()
                 + " 件出现了两次；档位是按数量区间划分的，同一个下界只能有一档");
       }
     }
@@ -320,12 +312,15 @@ public class B2BOrderService {
     // 否则 (MOQ, 最低档) 这一段数量过了起订量却落不进任何档。
     // 在服务层先拦一次是为了给调用方一个能直接读的 400 —— DB 的 guard_b2b_tier_ladder
     // 是同一判据的第二道防线，它触发时只会变成一个完全没有信息量的 409。
-    if (in.moqQuantity().signum() > 0 && !sorted.isEmpty()
+    if (in.moqQuantity().signum() > 0
+        && !sorted.isEmpty()
         && sorted.get(0).minQuantity().compareTo(in.moqQuantity()) > 0) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "阶梯价覆盖不起订量：起订量是 " + in.moqQuantity().toPlainString()
-              + " 件，而最低档是 " + sorted.get(0).minQuantity().toPlainString()
+          "阶梯价覆盖不起订量：起订量是 "
+              + in.moqQuantity().toPlainString()
+              + " 件，而最低档是 "
+              + sorted.get(0).minQuantity().toPlainString()
               + " 件，会存在「过了起订量却落不进任何档」的空洞");
     }
     for (B2BPriceTierInput t : sorted) {
@@ -370,14 +365,16 @@ public class B2BOrderService {
     }
     String clause = where.isEmpty() ? "" : " where " + String.join(" and ", where);
     long total =
-        sql.fetchOne("select count(*) from b2b_price_book" + clause, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(*) from b2b_price_book" + clause, binds.toArray())
+            .get(0, Long.class);
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(s);
     pageBinds.add(p * s);
     List<B2BPriceBookRow> items =
         sql.fetch(
                 "select id,sku_id,sku_code,sku_name,customer_level,currency,moq_quantity,"
-                    + "source_version,synced_at from b2b_price_book" + clause
+                    + "source_version,synced_at from b2b_price_book"
+                    + clause
                     + " order by customer_level, sku_code, id limit ? offset ?",
                 pageBinds.toArray())
             .map(this::priceBookRow);
@@ -389,9 +386,8 @@ public class B2BOrderService {
   /**
    * 阶梯价试算（只读，不落库）。
    *
-   * <p>存在的理由是业务性的：批发下单要问「买 120 件多少钱、便宜多少、再买多少进下一档」，
-   * 而下单接口是<b>先校验 MOQ 再落档</b>的 —— 在下单页每改一次数量就打一次 400 是坏体验。
-   * 试算走的是与建单**完全相同**的落档函数，两者不会算出两个答案。
+   * <p>存在的理由是业务性的：批发下单要问「买 120 件多少钱、便宜多少、再买多少进下一档」， 而下单接口是<b>先校验 MOQ 再落档</b>的 —— 在下单页每改一次数量就打一次 400
+   * 是坏体验。 试算走的是与建单**完全相同**的落档函数，两者不会算出两个答案。
    */
   public List<B2BPriceQuoteRow> quote(B2BPriceQuoteRequest request) {
     List<B2BPriceQuoteRow> out = new ArrayList<>();
@@ -403,8 +399,7 @@ public class B2BOrderService {
                   line.quantity(),
                   request.customerLevel(),
                   1,
-                  new B2BOrderLineInput(
-                      line.skuId(), "", "", line.quantity(), "")),
+                  new B2BOrderLineInput(line.skuId(), "", "", line.quantity(), "")),
               request.customerLevel()));
     }
     return out;
@@ -449,7 +444,8 @@ public class B2BOrderService {
     }
     String clause = where.isEmpty() ? "" : " where " + String.join(" and ", where);
     long total =
-        sql.fetchOne("select count(*) from b2b_order o" + clause, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(*) from b2b_order o" + clause, binds.toArray())
+            .get(0, Long.class);
     Record summary =
         sql.fetchOne(
             "select count(*) filter (where status='DRAFT') as draft,"
@@ -467,7 +463,8 @@ public class B2BOrderService {
     pageBinds.add(s);
     pageBinds.add(p * s);
     List<B2BOrderRow> items =
-        sql.fetch(ORDER_SELECT + clause + " order by o.created_at desc, o.id desc limit ? offset ?",
+        sql.fetch(
+                ORDER_SELECT + clause + " order by o.created_at desc, o.id desc limit ? offset ?",
                 pageBinds.toArray())
             .map(B2BOrderService::orderRow);
     return new B2BOrderPage(
@@ -490,8 +487,9 @@ public class B2BOrderService {
       throw notFound("批发订单 " + orderId + " 不存在或无权查看");
     }
     B2BCustomerTermsRow terms = null;
-    UUID partyId = sql.fetchOne("select customer_party_id from b2b_order where id = ?", orderId)
-        .get(0, UUID.class);
+    UUID partyId =
+        sql.fetchOne("select customer_party_id from b2b_order where id = ?", orderId)
+            .get(0, UUID.class);
     Record t =
         sql.fetchOne(
             "select id,customer_party_id,customer_code,customer_name,customer_level,"
@@ -529,8 +527,7 @@ public class B2BOrderService {
                 });
 
     List<B2BReceivableRow> receivables =
-        sql.fetch(
-                RECEIVABLE_SELECT + " where r.order_id = ? order by r.due_date, r.id", orderId)
+        sql.fetch(RECEIVABLE_SELECT + " where r.order_id = ? order by r.due_date, r.id", orderId)
             .map(
                 r ->
                     new B2BReceivableRow(
@@ -554,8 +551,7 @@ public class B2BOrderService {
 
     Map<UUID, UUID> receivableByShipment = new LinkedHashMap<>();
     for (Record r :
-        sql.fetch(
-            "select id, shipment_id from b2b_receivable where order_id = ?", orderId)) {
+        sql.fetch("select id, shipment_id from b2b_receivable where order_id = ?", orderId)) {
       receivableByShipment.put(r.get("shipment_id", UUID.class), r.get("id", UUID.class));
     }
 
@@ -616,8 +612,8 @@ public class B2BOrderService {
   /**
    * 创建批发订单（草稿）。
    *
-   * <p>行小计与落档全部由系统算：先 {@link #resolveTier} 定档（它顺带把起订量这一关守住），
-   * 再落库。DB 的 {@code guard_b2b_line_tier} 会独立复算一遍落档与单价。
+   * <p>行小计与落档全部由系统算：先 {@link #resolveTier} 定档（它顺带把起订量这一关守住）， 再落库。DB 的 {@code guard_b2b_line_tier}
+   * 会独立复算一遍落档与单价。
    */
   @Transactional
   public B2BSaved create(B2BOrderCreateInput in, AccessService.Access actor) {
@@ -670,8 +666,13 @@ public class B2BOrderService {
         B2BEventType.CREATED,
         "",
         B2BStatus.DRAFT.name(),
-        "创建批发订单（类型 " + in.orderType().name() + " / 收款 " + method.name()
-            + " / 成本口径 " + in.costBasis().name() + "）",
+        "创建批发订单（类型 "
+            + in.orderType().name()
+            + " / 收款 "
+            + method.name()
+            + " / 成本口径 "
+            + in.costBasis().name()
+            + "）",
         actor.membershipId(),
         OffsetDateTime.now());
     return new B2BSaved(
@@ -691,11 +692,9 @@ public class B2BOrderService {
     if (!B2BStatus.DRAFT.name().equals(current.get("status", String.class))) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "订单已确认，明细与阶梯落档已冻结：阶梯价与起订量是下单当时的判定依据，"
-              + "改它们等于让「当时按哪一档算的钱」在历史里出现两个答案");
+          "订单已确认，明细与阶梯落档已冻结：阶梯价与起订量是下单当时的判定依据，" + "改它们等于让「当时按哪一档算的钱」在历史里出现两个答案");
     }
-    B2BCustomerLevel level =
-        B2BCustomerLevel.valueOf(current.get("customer_level", String.class));
+    B2BCustomerLevel level = B2BCustomerLevel.valueOf(current.get("customer_level", String.class));
     List<Priced> priced = new ArrayList<>();
     int no = 0;
     for (B2BOrderLineInput line : in.lines()) {
@@ -725,8 +724,13 @@ public class B2BOrderService {
         "草稿更新：行与阶梯落档已重算",
         actor.membershipId(),
         OffsetDateTime.now());
-    return new B2BSaved(orderId, current.get("order_no", String.class), B2BStatus.DRAFT, total,
-        BigDecimal.ZERO.setScale(MONEY_SCALE), "草稿已更新");
+    return new B2BSaved(
+        orderId,
+        current.get("order_no", String.class),
+        B2BStatus.DRAFT,
+        total,
+        BigDecimal.ZERO.setScale(MONEY_SCALE),
+        "草稿已更新");
   }
 
   /** 确认订单：DRAFT → CONFIRMED，明细与落档随即冻结。 */
@@ -770,12 +774,10 @@ public class B2BOrderService {
    * <p>「未发货不产生应收」在本方法里有三种收款方式的分支，每一分支都写明理由：
    *
    * <ul>
-   *   <li>{@code ORDER_SETTLEMENT}：款项在下单时已收讫，<b>不产生应收</b>
-   *       （收进来的是预收，不是别人欠我们的钱）。返回值里明确说明原因，
-   *       而不是返回 {@code receivableId=null} 让人猜。</li>
-   *   <li>{@code ON_RECEIPT}：应收在发货确认时产生，到期日 = 发货确认时刻。</li>
-   *   <li>{@code CREDIT_TERM}：应收在发货确认时产生，
-   *       到期日 = 发货确认时刻 + 账期天数（DB 触发器独立复算同一公式）。</li>
+   *   <li>{@code ORDER_SETTLEMENT}：款项在下单时已收讫，<b>不产生应收</b> （收进来的是预收，不是别人欠我们的钱）。返回值里明确说明原因， 而不是返回
+   *       {@code receivableId=null} 让人猜。
+   *   <li>{@code ON_RECEIPT}：应收在发货确认时产生，到期日 = 发货确认时刻。
+   *   <li>{@code CREDIT_TERM}：应收在发货确认时产生， 到期日 = 发货确认时刻 + 账期天数（DB 触发器独立复算同一公式）。
    * </ul>
    */
   @Transactional
@@ -786,9 +788,7 @@ public class B2BOrderService {
     if (!B2BStatus.CONFIRMED.name().equals(status)
         && !B2BStatus.PARTIALLY_SHIPPED.name().equals(status)) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "只有已确认或部分发货的订单能发货；本单当前状态是 " + status
-              + "（草稿要先确认，确认不会产生应收）");
+          HttpStatus.CONFLICT, "只有已确认或部分发货的订单能发货；本单当前状态是 " + status + "（草稿要先确认，确认不会产生应收）");
     }
 
     OffsetDateTime shippedAt = in.shippedAt() == null ? OffsetDateTime.now() : in.shippedAt();
@@ -806,7 +806,8 @@ public class B2BOrderService {
 
     Map<UUID, Record> orderLines = new LinkedHashMap<>();
     for (Record r :
-        sql.fetch("select id,sku_code,quantity,unit_price,line_amount from b2b_order_line"
+        sql.fetch(
+            "select id,sku_code,quantity,unit_price,line_amount from b2b_order_line"
                 + " where order_id = ?",
             orderId)) {
       orderLines.put(r.get("id", UUID.class), r);
@@ -823,8 +824,7 @@ public class B2BOrderService {
     for (Map.Entry<UUID, BigDecimal> e : perLine.entrySet()) {
       Record line = orderLines.get(e.getKey());
       if (line == null) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST, "发货明细引用的订单行不属于本单：" + e.getKey());
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "发货明细引用的订单行不属于本单：" + e.getKey());
       }
       BigDecimal ordered = line.get("quantity", BigDecimal.class);
       BigDecimal shipped = alreadyShipped.getOrDefault(e.getKey(), qty(BigDecimal.ZERO));
@@ -832,16 +832,23 @@ public class B2BOrderService {
         // 超发是最容易出的错，而且直接放大应收，所以在这里就挡住并说清楚是哪一行。
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "发货量超过订单量：SKU " + line.get("sku_code", String.class) + " 已发 "
-                + shipped.toPlainString() + " 件，本次再发 " + e.getValue().toPlainString()
-                + " 件，订单量只有 " + ordered.toPlainString() + " 件");
+            "发货量超过订单量：SKU "
+                + line.get("sku_code", String.class)
+                + " 已发 "
+                + shipped.toPlainString()
+                + " 件，本次再发 "
+                + e.getValue().toPlainString()
+                + " 件，订单量只有 "
+                + ordered.toPlainString()
+                + " 件");
       }
     }
     for (B2BShipmentLineInput sl : in.lines()) {
       Record line = orderLines.get(sl.orderLineId());
       BigDecimal q = qty(sl.quantity());
       BigDecimal price = line.get("unit_price", BigDecimal.class);
-      shippedAmount = shippedAmount.add(q.multiply(price).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
+      shippedAmount =
+          shippedAmount.add(q.multiply(price).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
       sql.execute(
           "insert into b2b_shipment_line(id,tenant_id,shipment_id,order_line_id,quantity,unit_price)"
               + " values(?,?,?,?,?,?)",
@@ -902,9 +909,13 @@ public class B2BOrderService {
             price);
       }
       note =
-          "已登记发货，并按账期确认应收 " + receivableNo + "（"
+          "已登记发货，并按账期确认应收 "
+              + receivableNo
+              + "（"
               + (termsDays > 0 ? "账期 " + termsDays + " 天" : "确认收货即到期")
-              + "，到期日 " + dueDate.toLocalDate() + "）。开票需求可在应收列表里提出";
+              + "，到期日 "
+              + dueDate.toLocalDate()
+              + "）。开票需求可在应收列表里提出";
     }
 
     // 状态推进：全部发完 → SHIPPED，否则 PARTIALLY_SHIPPED。
@@ -912,8 +923,8 @@ public class B2BOrderService {
     BigDecimal remaining = remainingQuantity(orderId);
     String newStatus = remaining.signum() <= 0 ? "SHIPPED" : "PARTIALLY_SHIPPED";
     BigDecimal receivableAmount =
-        head.get("receivable_amount", BigDecimal.class).add(
-            receivableId == null ? BigDecimal.ZERO.setScale(MONEY_SCALE) : shippedAmount);
+        head.get("receivable_amount", BigDecimal.class)
+            .add(receivableId == null ? BigDecimal.ZERO.setScale(MONEY_SCALE) : shippedAmount);
     receivableAmount = scale(receivableAmount);
     sql.execute(
         "update b2b_order set status = ?, receivable_amount = ?, version = version + 1,"
@@ -928,7 +939,8 @@ public class B2BOrderService {
         B2BEventType.SHIPPED,
         status,
         newStatus,
-        "发货确认 " + in.shipmentNo().trim()
+        "发货确认 "
+            + in.shipmentNo().trim()
             + (receivableId == null
                 ? "；未产生应收（下单结算）"
                 : "；确认应收 " + receivableNo + " 金额 " + shippedAmount.toPlainString()),
@@ -1038,12 +1050,11 @@ public class B2BOrderService {
   /**
    * 阶梯落档：给定 SKU、数量与客户分级，返回命中的档位。
    *
-   * <p>区间语义是 {@code (上一档下界, 本档下界]}，用一条 {@code min_quantity <= quantity
-   * ORDER BY min_quantity DESC LIMIT 1} 表达 —— <b>「恰好等于阈值」不需要任何特殊分支</b>，
-   * 它是 {@code <=} 的自然结果。这正是最容易被写成 {@code <} 然后在边界上算错一档的地方。
+   * <p>区间语义是 {@code (上一档下界, 本档下界]}，用一条 {@code min_quantity <= quantity ORDER BY min_quantity DESC
+   * LIMIT 1} 表达 —— <b>「恰好等于阈值」不需要任何特殊分支</b>， 它是 {@code <=} 的自然结果。这正是最容易被写成 {@code <} 然后在边界上算错一档的地方。
    *
-   * <p>起订量在这里一并守住（{@code moq = 0} 表示不限起订量）。落在服务层而不是只靠 DB
-   * CHECK，是为了让调用方拿到一句能直接展示的 400，而不是一条 CHECK 约束名。
+   * <p>起订量在这里一并守住（{@code moq = 0} 表示不限起订量）。落在服务层而不是只靠 DB CHECK，是为了让调用方拿到一句能直接展示的 400，而不是一条 CHECK
+   * 约束名。
    */
   private Priced resolveTier(
       UUID skuId, BigDecimal quantity, B2BCustomerLevel level, int lineNo, B2BOrderLineInput in) {
@@ -1056,7 +1067,11 @@ public class B2BOrderService {
     if (book == null) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "SKU " + skuId + " 没有 " + level.name() + " 分级的阶梯价："
+          "SKU "
+              + skuId
+              + " 没有 "
+              + level.name()
+              + " 分级的阶梯价："
               + "B2B 单价由分级阶梯价算出（不接受手工填价），"
               + "请先为该 SKU 维护对应分级的阶梯价（05 价目未交付时由本服务的价目投影端点维护）");
     }
@@ -1065,8 +1080,14 @@ public class B2BOrderService {
     if (moq.signum() > 0 && q.compareTo(moq) < 0) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "起订量不足：SKU " + book.get("sku_code", String.class) + " 在 " + level.name()
-              + " 分级下的起订量是 " + moq.toPlainString() + " 件，本次下单 " + q.toPlainString()
+          "起订量不足：SKU "
+              + book.get("sku_code", String.class)
+              + " 在 "
+              + level.name()
+              + " 分级下的起订量是 "
+              + moq.toPlainString()
+              + " 件，本次下单 "
+              + q.toPlainString()
               + " 件。**起订量是硬校验**，低于它不能下单");
     }
     Record tier =
@@ -1081,8 +1102,11 @@ public class B2BOrderService {
       // 这里仍给出可读报错：价目表被并发改过，或数据被手工插过。
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "SKU " + book.get("sku_code", String.class) + " 的阶梯价没有覆盖数量 "
-              + q.toPlainString() + " 件：最低档下界高于该数量，"
+          "SKU "
+              + book.get("sku_code", String.class)
+              + " 的阶梯价没有覆盖数量 "
+              + q.toPlainString()
+              + " 件：最低档下界高于该数量，"
               + "请检查价目表档位与起订量是否自洽");
     }
     Record next =
@@ -1194,10 +1218,12 @@ public class B2BOrderService {
           + " and t.customer_party_id = r.customer_party_id";
 
   private Record orderHead(UUID orderId) {
-    Record r = sql.fetchOne("select order_no,status,customer_level,payment_method,"
-            + "payment_terms_days,total_amount,receivable_amount,customer_party_id,currency"
-            + " from b2b_order where id = ?",
-        orderId);
+    Record r =
+        sql.fetchOne(
+            "select order_no,status,customer_level,payment_method,"
+                + "payment_terms_days,total_amount,receivable_amount,customer_party_id,currency"
+                + " from b2b_order where id = ?",
+            orderId);
     if (r == null) {
       throw notFound("批发订单 " + orderId + " 不存在或无权操作");
     }
@@ -1250,8 +1276,7 @@ public class B2BOrderService {
   /**
    * 单据号。
    *
-   * <p>刻意用<b>随机后缀</b>而不是 {@code max(id)+1} 那类方案：多车道并行提交时两个服务
-   * 抢同一个序列会撞号，而撞号在这里的表现是「409 但其实该成功」。
+   * <p>刻意用<b>随机后缀</b>而不是 {@code max(id)+1} 那类方案：多车道并行提交时两个服务 抢同一个序列会撞号，而撞号在这里的表现是「409 但其实该成功」。
    */
   private String nextReference(String prefix) {
     return prefix
@@ -1367,8 +1392,7 @@ public class B2BOrderService {
   /**
    * 账期天数与收款方式必须自洽。
    *
-   * <p>非账期带账期天数**直接拒**，而不是默默抹成 0：抹掉之后调用方会以为自己配了
-   * 30 天账期，而单据上其实写着 0 —— 到对账日才会发现「这单怎么没有账期」。
+   * <p>非账期带账期天数**直接拒**，而不是默默抹成 0：抹掉之后调用方会以为自己配了 30 天账期，而单据上其实写着 0 —— 到对账日才会发现「这单怎么没有账期」。
    */
   private static int termsDays(B2BPaymentMethod method, Integer days) {
     int d = days == null ? 0 : days;
@@ -1376,7 +1400,10 @@ public class B2BOrderService {
       if (d != 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "收款方式是「" + method.name() + "」时不能带账期天数（收到 " + d
+            "收款方式是「"
+                + method.name()
+                + "」时不能带账期天数（收到 "
+                + d
                 + " 天）。下单结算与确认收货后结算是即时结算，不占账期；"
                 + "要账期请把收款方式选成 CREDIT_TERM");
       }
@@ -1385,8 +1412,7 @@ public class B2BOrderService {
     if (d <= 0) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "账期结算必须给出账期天数（1–365）：账期为 0 等于「下单即时收款」，"
-              + "那与账期结算是两种业务，收款方式应选「下单结算」或「确认收货后结算」");
+          "账期结算必须给出账期天数（1–365）：账期为 0 等于「下单即时收款」，" + "那与账期结算是两种业务，收款方式应选「下单结算」或「确认收货后结算」");
     }
     return d;
   }

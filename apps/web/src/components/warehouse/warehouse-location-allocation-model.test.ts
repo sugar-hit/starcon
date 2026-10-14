@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { LocationAllocationCandidate, LocationAllocationLinePlan } from '../../../../../packages/api-contracts/src/index';
+import type {
+  LocationAllocationCandidate,
+  LocationAllocationLinePlan,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   allocationStatusLabel,
   capabilityGaps,
@@ -169,7 +172,9 @@ describe('8.1.2.2 库位自动分配前端模型', () => {
   });
 
   it('目标类型标签缺失时回落到词表中文名', () => {
-    expect(requiredTypeText(plan({ requiredTypeLabel: null, requiredType: 'QUARANTINE' }))).toBe('待检');
+    expect(requiredTypeText(plan({ requiredTypeLabel: null, requiredType: 'QUARANTINE' }))).toBe(
+      '待检',
+    );
     expect(locationTypeLabel('RECEIVING')).toBe('收货暂存');
     expect(locationTypeLabel('UNKNOWN_TYPE')).toBe('UNKNOWN_TYPE');
   });
@@ -178,7 +183,9 @@ describe('8.1.2.2 库位自动分配前端模型', () => {
     expect(isFullyAllocated(plan({ outstandingQuantity: 0 }))).toBe(true);
     expect(isFullyAllocated(plan({ outstandingQuantity: 0.0001 }))).toBe(false);
     // 数量为 0 但候选非空是矛盾形状，也要判成「已全部指派」
-    expect(isFullyAllocated(plan({ outstandingQuantity: 0, candidates: [candidate()] }))).toBe(true);
+    expect(isFullyAllocated(plan({ outstandingQuantity: 0, candidates: [candidate()] }))).toBe(
+      true,
+    );
   });
 
   it('未交付的维度列出来并带上归属模块，不假装已接入', () => {

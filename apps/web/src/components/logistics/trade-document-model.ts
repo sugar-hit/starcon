@@ -62,10 +62,14 @@ export type TradeDocumentCreateInput = Nullable<'templateId' | 'documentNo', str
   Nullable<'quantityTotal', number> &
   Nullable<'packageCount', number> &
   Nullable<'content', Record<string, unknown>> &
-  Omit<TradeDocumentCreateRequest, 'templateId' | 'documentNo' | 'quantityTotal' | 'packageCount' | 'content'>;
+  Omit<
+    TradeDocumentCreateRequest,
+    'templateId' | 'documentNo' | 'quantityTotal' | 'packageCount' | 'content'
+  >;
 export type TradePreferenceClaimInput = Nullable<'confirmed', boolean> &
   Omit<TradePreferenceClaimRequest, 'confirmed'>;
-export type TradeRuleCreateInput = Nullable<'validTo', string> & Omit<TradeRuleCreateRequest, 'validTo'>;
+export type TradeRuleCreateInput = Nullable<'validTo', string> &
+  Omit<TradeRuleCreateRequest, 'validTo'>;
 export type TradePreferenceRuleCreateInput = Nullable<'validTo', string> &
   Omit<TradePreferenceRuleCreateRequest, 'validTo'>;
 export type TradeCertificationCreateInput = Nullable<
@@ -151,8 +155,10 @@ export function tradeQuery(params: TradeSetParams): string {
 export function tradeRuleQuery(params: TradeRuleParams): string {
   const text = (value: string | undefined) => value?.trim() ?? '';
   const parts: string[] = [];
-  if (text(params.countryCode)) parts.push(`countryCode=${encodeURIComponent(text(params.countryCode))}`);
-  if (text(params.documentKind)) parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
+  if (text(params.countryCode))
+    parts.push(`countryCode=${encodeURIComponent(text(params.countryCode))}`);
+  if (text(params.documentKind))
+    parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
   if (text(params.requirementLevel)) {
     parts.push(`requirementLevel=${encodeURIComponent(text(params.requirementLevel))}`);
   }
@@ -221,8 +227,10 @@ export function fetchTradeTemplates(params: {
 }) {
   const text = (value: string | undefined) => value?.trim() ?? '';
   const parts: string[] = [];
-  if (text(params.documentKind)) parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
-  if (text(params.countryCode)) parts.push(`countryCode=${encodeURIComponent(text(params.countryCode))}`);
+  if (text(params.documentKind))
+    parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
+  if (text(params.countryCode))
+    parts.push(`countryCode=${encodeURIComponent(text(params.countryCode))}`);
   if (text(params.status)) parts.push(`status=${encodeURIComponent(text(params.status))}`);
   if (text(params.keyword)) parts.push(`keyword=${encodeURIComponent(text(params.keyword))}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
@@ -268,7 +276,11 @@ export function createTradeCertification(input: TradeCertificationCreateInput) {
 }
 
 export function updateTradeCertification(id: string, input: TradeCertificationUpdateRequest) {
-  return api<TradeCertificationSaved>(`${BASE}/certifications/${encodeURIComponent(id)}`, 'PUT', input);
+  return api<TradeCertificationSaved>(
+    `${BASE}/certifications/${encodeURIComponent(id)}`,
+    'PUT',
+    input,
+  );
 }
 
 // ================================================================ FTA 优惠规则
@@ -298,7 +310,11 @@ export function createTradePreferenceRule(input: TradePreferenceRuleCreateInput)
 }
 
 export function updateTradePreferenceRule(id: string, input: TradePreferenceRuleUpdateRequest) {
-  return api<TradePreferenceRuleSaved>(`${BASE}/preference-rules/${encodeURIComponent(id)}`, 'PUT', input);
+  return api<TradePreferenceRuleSaved>(
+    `${BASE}/preference-rules/${encodeURIComponent(id)}`,
+    'PUT',
+    input,
+  );
 }
 
 /** 优惠主张清单：谁主张了优惠、确认到哪一步、按哪一版规则确认的。 */
@@ -314,7 +330,9 @@ export function fetchTradePreferenceConfirmations(params: {
   const parts: string[] = [];
   if (params.setId) parts.push(`setId=${encodeURIComponent(params.setId)}`);
   if (text(params.substantiveChangeStatus)) {
-    parts.push(`substantiveChangeStatus=${encodeURIComponent(text(params.substantiveChangeStatus))}`);
+    parts.push(
+      `substantiveChangeStatus=${encodeURIComponent(text(params.substantiveChangeStatus))}`,
+    );
   }
   if (text(params.ftaScheme)) parts.push(`ftaScheme=${encodeURIComponent(text(params.ftaScheme))}`);
   if (params.claimedOnly) parts.push('claimedOnly=true');
@@ -346,8 +364,10 @@ export function fetchTradeReminders(params: {
   if (params.setId) parts.push(`setId=${encodeURIComponent(params.setId)}`);
   if (text(params.status)) parts.push(`status=${encodeURIComponent(text(params.status))}`);
   if (text(params.severity)) parts.push(`severity=${encodeURIComponent(text(params.severity))}`);
-  if (text(params.reminderType)) parts.push(`reminderType=${encodeURIComponent(text(params.reminderType))}`);
-  if (text(params.documentKind)) parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
+  if (text(params.reminderType))
+    parts.push(`reminderType=${encodeURIComponent(text(params.reminderType))}`);
+  if (text(params.documentKind))
+    parts.push(`documentKind=${encodeURIComponent(text(params.documentKind))}`);
   if (text(params.keyword)) parts.push(`keyword=${encodeURIComponent(text(params.keyword))}`);
   if (params.sort) parts.push(`sort=${encodeURIComponent(params.sort)}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
@@ -358,7 +378,11 @@ export function fetchTradeReminders(params: {
 }
 
 export function resolveTradeReminder(id: string, input: TradeReminderResolveRequest) {
-  return api<TradeReminderSaved>(`${BASE}/reminders/${encodeURIComponent(id)}/resolve`, 'POST', input);
+  return api<TradeReminderSaved>(
+    `${BASE}/reminders/${encodeURIComponent(id)}/resolve`,
+    'POST',
+    input,
+  );
 }
 
 // ================================================================ 单证包写动作
@@ -414,7 +438,11 @@ export function generateTradeDocument(setId: string, input: TradeDocumentCreateI
   return api<TradeDocumentSaved>(`${BASE}/${encodeURIComponent(setId)}/documents`, 'POST', input);
 }
 
-export function finalizeTradeDocument(setId: string, documentId: string, input: TradeDocumentFinalizeRequest) {
+export function finalizeTradeDocument(
+  setId: string,
+  documentId: string,
+  input: TradeDocumentFinalizeRequest,
+) {
   return api<TradeDocumentSaved>(
     `${BASE}/${encodeURIComponent(setId)}/documents/${encodeURIComponent(documentId)}/finalize`,
     'POST',
@@ -423,7 +451,11 @@ export function finalizeTradeDocument(setId: string, documentId: string, input: 
 }
 
 /** 登记 FTA 优惠主张。只登记主张，不判定成立。 */
-export function claimTradePreference(setId: string, documentId: string, input: TradePreferenceClaimInput) {
+export function claimTradePreference(
+  setId: string,
+  documentId: string,
+  input: TradePreferenceClaimInput,
+) {
   return api<TradeDocumentSaved>(
     `${BASE}/${encodeURIComponent(setId)}/documents/${encodeURIComponent(documentId)}/preference-claim`,
     'POST',
@@ -432,7 +464,11 @@ export function claimTradePreference(setId: string, documentId: string, input: T
 }
 
 /** 业务确认（或确认不成立）。系统只留痕，不代替业务判断「实质性改变」是否成立。 */
-export function confirmTradePreference(setId: string, documentId: string, input: TradePreferenceClaimInput) {
+export function confirmTradePreference(
+  setId: string,
+  documentId: string,
+  input: TradePreferenceClaimInput,
+) {
   return api<TradeDocumentSaved>(
     `${BASE}/${encodeURIComponent(setId)}/documents/${encodeURIComponent(documentId)}/preference-confirm`,
     'POST',
@@ -468,7 +504,10 @@ export const tradeDocumentKindLabels: Record<string, string> = {
 };
 
 /** 唯一可以主张 FTA 优惠的单证类型。与后端 `TradeDocumentKind.isOriginCertificate()` 同口径。 */
-export const originCertificateKinds = ['CERTIFICATE_OF_ORIGIN', 'RCEP_CERTIFICATE_OF_ORIGIN'] as const;
+export const originCertificateKinds = [
+  'CERTIFICATE_OF_ORIGIN',
+  'RCEP_CERTIFICATE_OF_ORIGIN',
+] as const;
 
 export function isOriginCertificate(documentKind: string | null | undefined): boolean {
   return !!documentKind && (originCertificateKinds as readonly string[]).includes(documentKind);
@@ -655,7 +694,10 @@ export const tradeSetSortOptions = [
 /** 数值展示。数量与金额来自 NUMERIC，后端给的是 number，这里只做展示格式化。 */
 export function fmt(value: number | null | undefined, digits = 2): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—';
-  return value.toLocaleString('zh-CN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return value.toLocaleString('zh-CN', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
 export function money(value: number | null | undefined, currency?: string | null): string {

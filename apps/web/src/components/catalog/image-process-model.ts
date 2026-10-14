@@ -132,7 +132,12 @@ export function deleteRecipe(id: string, version: number) {
   );
 }
 
-export function fetchJobs(params: { keyword?: string; status?: string; page: number; size: number }) {
+export function fetchJobs(params: {
+  keyword?: string;
+  status?: string;
+  page: number;
+  size: number;
+}) {
   const query = new URLSearchParams();
   if (params.keyword?.trim()) query.set('keyword', params.keyword.trim());
   if (params.status) query.set('status', params.status);
@@ -214,10 +219,7 @@ export function targetSizeProblem(width: number | null, height: number | null): 
  * <p>只有 png 有真正的 alpha 通道，gif 只有 1 位透明，bmp / jpeg 没有 alpha。
  * 这条校验在提交前就给出来，而不是等后端 400——用户填完 200 张图才被拒太晚了。
  */
-export function backgroundFormatProblem(
-  removeBackground: boolean,
-  format: string,
-): string | null {
+export function backgroundFormatProblem(removeBackground: boolean, format: string): string | null {
   if (!removeBackground) return null;
   if (format.trim().toLowerCase() === 'png') return null;
   return `去背景会把背景抠成透明，而目标格式 ${format.trim().toLowerCase()} 不支持透明（jpeg/bmp 没有 alpha 通道，gif 只有 1 位）。请改用 png 目标格式，或勾选白底（先抠背景再铺白底）`;
@@ -235,8 +237,8 @@ export function ratiosProblem(
 ): string | null {
   // 契约里 ratios 可空（Jackson 没标 @NotNull），所以这里先滤掉 null 再判：
   // 让 null 参与后面的 .label 会在运行时炸，而不是给出一句人话。
-  const list = (ratios ?? []).filter((r): r is { label: string; widthPx: number; heightPx: number } =>
-    r !== null,
+  const list = (ratios ?? []).filter(
+    (r): r is { label: string; widthPx: number; heightPx: number } => r !== null,
   );
   if (list.length > 8) return '一个配方最多 8 个比例档';
   const seen = new Set<string>();
@@ -401,7 +403,8 @@ export function submittedHint(job: MediaProcessJob): string {
 /** 失败原因：后端给的是可执行的中文原因，这里只在没有原因时补一句兜底。 */
 export function itemErrorText(item: { status: string; error: string | null }): string | null {
   if (item.error && item.error.trim()) return item.error;
-  if (item.status === 'FAILED') return '处理失败，但后端没有给出原因。请重新提交一次，若仍失败请联系管理员。';
+  if (item.status === 'FAILED')
+    return '处理失败，但后端没有给出原因。请重新提交一次，若仍失败请联系管理员。';
   if (item.status === 'CANCELLED') return '任务已取消，这个素材没有处理。';
   return null;
 }
@@ -411,9 +414,4 @@ export function errorText(error: unknown, fallback = '图片处理数据加载�
   return fallback;
 }
 
-export type {
-  MediaProcessJob,
-  MediaProcessJobDetail,
-  MediaProcessJobRow,
-  MediaProcessRecipeRow,
-};
+export type { MediaProcessJob, MediaProcessJobDetail, MediaProcessJobRow, MediaProcessRecipeRow };

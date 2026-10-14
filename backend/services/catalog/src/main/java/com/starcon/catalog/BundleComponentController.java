@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.5.1.2 组件维护：套装组件的逐行增删改、跨版本组件清单、循环检测与结构化校验结果。
  *
- * <p>路由挂在 {@code /catalog/components} 与 {@code /catalog/bundle-skus} 之下，
- * 与 3.5.1.1 的 {@code /catalog/bundles}、{@code /catalog/versions} <b>并列</b>：
- * 3.5.1.1 管的是「套装与版本」这两层档案，本模块管的是「组件」这一层。
- * 把组件端点挂在 {@code /versions/{id}/components} 下会和 3.5.1.1 的整体替换撞名，
- * 那是两条不同的语义（整体替换 vs 逐行改），必须能被 URL 区分开。
+ * <p>路由挂在 {@code /catalog/components} 与 {@code /catalog/bundle-skus} 之下， 与 3.5.1.1 的 {@code
+ * /catalog/bundles}、{@code /catalog/versions} <b>并列</b>： 3.5.1.1 管的是「套装与版本」这两层档案，本模块管的是「组件」这一层。
+ * 把组件端点挂在 {@code /versions/{id}/components} 下会和 3.5.1.1 的整体替换撞名， 那是两条不同的语义（整体替换 vs 逐行改），必须能被 URL
+ * 区分开。
  *
  * <p><b>与 3.5.1.1 端点的分工</b>：
  *
@@ -25,8 +24,7 @@ import org.springframework.web.bind.annotation.*;
  *   <li>{@code PUT|DELETE /catalog/components/{id}}（本模块）：改/删<b>一</b>行，带行级乐观锁。
  * </ul>
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：组件是套装版本的一部分，
- * 同一份商品数据不该有两套权限。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：组件是套装版本的一部分， 同一份商品数据不该有两套权限。
  */
 @RestController
 @RequestMapping("/catalog")
@@ -49,8 +47,7 @@ public class BundleComponentController {
   /**
    * 组件工作台概览。
    *
-   * <p>「自引用」与「数量非法」正常恒为 0：它们是纪律的体检指标，
-   * 摆出来是为了让「一条都没坏」可核对，而不是靠「约束建了就一定对」。
+   * <p>「自引用」与「数量非法」正常恒为 0：它们是纪律的体检指标， 摆出来是为了让「一条都没坏」可核对，而不是靠「约束建了就一定对」。
    */
   @GetMapping("/components/overview")
   public BundleComponentOverview overview(
@@ -63,8 +60,7 @@ public class BundleComponentController {
   /**
    * 跨版本组件清单：分页 + 关键词（SKU 编码/名称、套装编码、版本号、角色）+ 版本/套装/是否嵌套。
    *
-   * <p>这是 3.5.1.1 没有的读形状：那边只能「按版本读」，这边是「按组件读」——
-   * 运营问「这个 SKU 被哪些套装用着」时走的是反查方向，07 预占组件与 09 展开也读这个方向。
+   * <p>这是 3.5.1.1 没有的读形状：那边只能「按版本读」，这边是「按组件读」—— 运营问「这个 SKU 被哪些套装用着」时走的是反查方向，07 预占组件与 09 展开也读这个方向。
    */
   @GetMapping("/components")
   public BundleComponentPage components(
@@ -78,7 +74,9 @@ public class BundleComponentController {
     return call(
         auth,
         "spu.read",
-        a -> components.components(new BundleComponentQuery(keyword, versionId, bundleId, nested, page, size)));
+        a ->
+            components.components(
+                new BundleComponentQuery(keyword, versionId, bundleId, nested, page, size)));
   }
 
   @GetMapping("/components/{id}")
@@ -91,9 +89,7 @@ public class BundleComponentController {
   /**
    * 校验结果：把一个版本上的组件问题一次列全。
    *
-   * <p>与保存时报错分开：保存被拒只给一条原因，而这个接口让运营在动手之前
-   * 就看到「一个环 + 三个数量非法 + 一个 SKU 不存在」，改一次改完，
-   * 不用反复提交试错。
+   * <p>与保存时报错分开：保存被拒只给一条原因，而这个接口让运营在动手之前 就看到「一个环 + 三个数量非法 + 一个 SKU 不存在」，改一次改完， 不用反复提交试错。
    */
   @GetMapping("/versions/{id}/component-check")
   public BundleComponentCheck check(
@@ -107,8 +103,7 @@ public class BundleComponentController {
   /**
    * 给草稿版本加一个组件。
    *
-   * <p>已发布版本一律拒绝（蓝图：「已发布版本的组件不可改，只能新建版本」），
-   * 报错说清为什么，并指出唯一正确的动作是新建版本。
+   * <p>已发布版本一律拒绝（蓝图：「已发布版本的组件不可改，只能新建版本」）， 报错说清为什么，并指出唯一正确的动作是新建版本。
    */
   @PostMapping("/versions/{id}/components")
   public BundleComponentItem addComponent(
@@ -152,8 +147,7 @@ public class BundleComponentController {
   /**
    * 指向列表：「哪些 SKU 代表哪些套装」。
    *
-   * <p>嵌套套装在数据上就靠这一层表达（V24 文件头第二节）：没有它，
-   * 「套装 A 含套装 B」无法表达，循环也就无从发生。
+   * <p>嵌套套装在数据上就靠这一层表达（V24 文件头第二节）：没有它， 「套装 A 含套装 B」无法表达，循环也就无从发生。
    */
   @GetMapping("/bundle-skus")
   public BundleSkuPage links(
@@ -167,8 +161,7 @@ public class BundleComponentController {
   /**
    * 新建指向，或改一个 SKU 代表哪个套装。
    *
-   * <p>改指向会一次性改掉所有把该 SKU 当组件的套装的出边，所以同样要过循环检测 ——
-   * 否则「先建好 A 含 B，再把 B 的可售 SKU 改指回 A」是一条绕过组件侧检测的成环路径。
+   * <p>改指向会一次性改掉所有把该 SKU 当组件的套装的出边，所以同样要过循环检测 —— 否则「先建好 A 含 B，再把 B 的可售 SKU 改指回 A」是一条绕过组件侧检测的成环路径。
    */
   @PostMapping("/bundle-skus")
   public BundleSkuRow createLink(
@@ -188,8 +181,7 @@ public class BundleComponentController {
   /**
    * 解开指向。
    *
-   * <p>已发布版本里的组件引用过这个 SKU 时拒绝：解开后那些冻结的组件会从
-   * 「套装 B 的可售 SKU」静默降级成普通 SKU，09 订单冻结的展开结果就变了。
+   * <p>已发布版本里的组件引用过这个 SKU 时拒绝：解开后那些冻结的组件会从 「套装 B 的可售 SKU」静默降级成普通 SKU，09 订单冻结的展开结果就变了。
    */
   @DeleteMapping("/bundle-skus/{id}")
   public Map<String, Boolean> deleteLink(

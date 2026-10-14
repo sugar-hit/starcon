@@ -1,12 +1,15 @@
 # Starcon Styleguide 审查记录 — 2026-09-26
 
 ## 范围与方法
+
 检查 localhost:3000/styleguide 实际页面、390px 响应式布局、弹窗及时间切换交互；阅读 /Users/tommy/Project/starcon 的 AGENTS.md、architecture/overview.md、data-flow.md、multi-tenancy.md、security.md、design/visual-spec.md、四系统及品牌修订记录，并核对页面、共享 UI 和 token 源码。审查未修改产品源码。启动了已有本地开发服务。
 
 ## 结论
+
 基础视觉方向适合专业 ERP：中性色、克制装饰、统一导航、等宽数字、共享组件和指标趋势 polarity 均值得保留。当前仍是基础组件展示，尚不足以作为完整 ERP 交互规范。产品目录目前只发现 README 模板，缺少实际 PRD、persona、user story，业务判断以架构文档为依据，不能视为已确认的细分需求。
 
 ## 已验证问题
+
 - 页面版本 v1.0，视觉文档 v1.5；文档仍含占位 Logo、没有前端代码等过期描述，与后文品牌规范和实际代码冲突。
 - 三个语义色块将 rose-600 / emerald-700 / amber-600 当 CSS background，实际为空白；其他色块也用手填色值而非 token。
 - brand token 为 HSL 217 91% 50%，约 #0B64F4，说明及品牌 SVG 用 #1D4ED8。
@@ -20,13 +23,17 @@
 - 共享 UI lint 脚本是 echo skip；规范没有对应自动约束。common/badge.tsx 内容实际为 SectionCard，存在组件文件名漂移。
 
 ## 优先级建议
+
 ### P0：接入真实资金、库存和多租户数据前的门槛
+
 这些是设计缺项导致的上线风险，不代表已发现线上事故。
+
 1. Money/ExchangeRate：明确原币、结算币、基准币、汇率时间与来源；禁止 USD 外都显示 ¥ 的示例逻辑进入业务代码。空值、零值、负数、JPY 等精度分别规范。
 2. TenantScope/PermissionState：显示当前租户、资源范围；区分无数据、无查看权限、只读和敏感字段脱敏。切换租户时重置选择及缓存上下文；后端仍负责授权。
 3. BulkAction/JobStatus：批量操作明确当前页与全筛选范围，提交预览影响数量/仓库/金额；异步展示已提交、处理中、部分成功、失败、完成，重试只针对失败项并依赖服务端幂等。
 
 ### P1：下一轮开发应修复
+
 1. 修正色块、品牌色、版本及过期规范；从 token 元数据生成展示。
 2. 修复 KPI polarity、时间切换和弹窗取消；为示例补加载、失败、重试、成功反馈。
 3. DataTable：列排序/显隐/固定、分页、批量选择、行权限、长文本、加载与错误、局部横向滚动。FilterBar：平台→店铺、仓库、日期类型/时区、状态、清空、保存视图及 URL 恢复。
@@ -39,6 +46,7 @@
 10. 工程：统一状态 token 的 fg/bg/border；规范 spacing/density；完成 UI lint，并为响应式、取消、键盘和状态映射加行为回归。
 
 ### P2：体系化完善
+
 - Brand 区增加 Logo 三种 tone、全部尺寸、深浅底、16/24px 识别、安全区、最小尺寸、禁用示例和资产下载。
 - 保留 Star connection 的节点汇聚表达；将四节点与四个当前部门的关系作为产品叙事而非永久品牌约束。
 - 增加页面模板：订单工作台、库存异常、财务对账、平台连接、批量任务。
@@ -47,6 +55,7 @@
 - Styleguide 增加目录锚点、使用边界、API、状态矩阵、可操作示例及变更记录。
 
 ## 与业务文档的直接关联
+
 - overview.md：多平台订单、库存、履约、多币种结算闭环 → 多维状态、跨模块入口、平台/店铺筛选。
 - data-flow.md：异步事件、幂等、库存版本锁、汇率快照 → 处理中/部分成功、失败项重试、冲突提示、数据新鲜度与汇率明细。
 - multi-tenancy.md 和 security.md：租户隔离、RBAC、资源范围、审计 → 租户上下文、权限态、脱敏、操作记录。
@@ -54,8 +63,10 @@
 - visual-spec.md §9：单色品牌及中心负空间 → 保留现有方向，补完整品牌使用规范。
 
 ## 验证限制
+
 没有实际业务数据或完整业务页联调，未做完整读屏、全部断点或后端安全测试。P0 是上线门槛而非已确认事故。此记录为建议，未实施设计或源码变更。
 
 ## 标准参考
+
 - https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
 - https://www.w3.org/WAI/ARIA/apg/patterns/tabs/

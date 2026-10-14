@@ -39,13 +39,14 @@ import { useIdentity } from '../iam/identity-shell';
 
 type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations';
 
-const sections: readonly { id: Section; label: string; permission: string; icon: typeof Globe2 }[] = [
-  { id: 'shops', label: '店铺与站点', permission: 'channel.shop.read', icon: Store },
-  { id: 'connections', label: '授权连接', permission: 'channel.connection.read', icon: Link2 },
-  { id: 'sync', label: '同步运行', permission: 'channel.sync.read', icon: RefreshCw },
-  { id: 'operations', label: '平台回写', permission: 'channel.operation.read', icon: Send },
-  { id: 'platforms', label: '平台目录', permission: 'channel.registry.read', icon: Globe2 },
-];
+const sections: readonly { id: Section; label: string; permission: string; icon: typeof Globe2 }[] =
+  [
+    { id: 'shops', label: '店铺与站点', permission: 'channel.shop.read', icon: Store },
+    { id: 'connections', label: '授权连接', permission: 'channel.connection.read', icon: Link2 },
+    { id: 'sync', label: '同步运行', permission: 'channel.sync.read', icon: RefreshCw },
+    { id: 'operations', label: '平台回写', permission: 'channel.operation.read', icon: Send },
+    { id: 'platforms', label: '平台目录', permission: 'channel.registry.read', icon: Globe2 },
+  ];
 
 const operatingModes: readonly { value: string; label: string; hint: string }[] = [
   { value: 'SELF_FULFILLED', label: '自发货 FBM', hint: '自有库存发货，成本与库存全部进自己账' },
@@ -144,21 +145,24 @@ export function ChannelWorkspace() {
     setNotice('');
     setDetail(null);
     try {
-      if (can('channel.registry.read')) setPlatforms(await api<PlatformView[]>('channel/platforms'));
+      if (can('channel.registry.read'))
+        setPlatforms(await api<PlatformView[]>('channel/platforms'));
       if (can('channel.connection.read')) {
         setConnections(await api<ConnectionView[]>('channel/connections'));
-        setReminders(await api<ReauthorizationReminderView[]>('channel/connections/reminders?withinDays=7'));
+        setReminders(
+          await api<ReauthorizationReminderView[]>('channel/connections/reminders?withinDays=7'),
+        );
       }
       if (can('channel.shop.read')) setShops(await api<ShopView[]>('channel/shops'));
       if (can('channel.sync.read')) {
         setCursors(await api<SyncCursorView[]>('channel/sync-cursors'));
         setFailures(await api<SyncFailureView[]>('channel/sync-failures?limit=50'));
-        setFailureSummary(
-          await api<SyncFailureSummary[]>('channel/sync-failures/summary'),
+        setFailureSummary(await api<SyncFailureSummary[]>('channel/sync-failures/summary'));
+        setRuns(
+          await api<SyncRunView[]>(
+            `channel/sync-runs?limit=30${runCursorId ? `&cursorId=${runCursorId}` : ''}`,
+          ),
         );
-        setRuns(await api<SyncRunView[]>(
-          `channel/sync-runs?limit=30${runCursorId ? `&cursorId=${runCursorId}` : ''}`,
-        ));
       }
       if (can('channel.operation.read'))
         setOperations(await api<PlatformOperationView[]>('channel/platform-operations?limit=50'));
@@ -189,10 +193,7 @@ export function ChannelWorkspace() {
     [platforms],
   );
 
-  const visibleSections = useMemo(
-    () => sections.filter((s) => can(s.permission)),
-    [can],
-  );
+  const visibleSections = useMemo(() => sections.filter((s) => can(s.permission)), [can]);
 
   if (!ready)
     return (
@@ -271,7 +272,10 @@ export function ChannelWorkspace() {
           </p>
           <ul className="mt-2 space-y-1">
             {reminders.map((r) => (
-              <li key={r.connectionId} className="text-copy-13 text-muted-foreground flex items-center gap-2">
+              <li
+                key={r.connectionId}
+                className="text-copy-13 text-muted-foreground flex items-center gap-2"
+              >
                 <Badge tone={r.severity === 'CRITICAL' ? 'danger' : 'warning'}>
                   {r.severity === 'CRITICAL' ? '紧急' : '待处理'}
                 </Badge>
@@ -311,9 +315,7 @@ export function ChannelWorkspace() {
           onNotice={setNotice}
         />
       )}
-      {section === 'platforms' && (
-        <PlatformDirectory platforms={platforms} term={term} can={can} />
-      )}
+      {section === 'platforms' && <PlatformDirectory platforms={platforms} term={term} can={can} />}
       {section === 'connections' && (
         <ConnectionList
           connections={connections}
@@ -331,7 +333,8 @@ export function ChannelWorkspace() {
         <>
           {dictionaryError && (
             <p role="alert" className="text-warning text-copy-13">
-              关联数据（法人、成员、部门）加载失败：{dictionaryError}。店铺仍可维护，只是暂时无法选择这些关联项。
+              关联数据（法人、成员、部门）加载失败：{dictionaryError}
+              。店铺仍可维护，只是暂时无法选择这些关联项。
             </p>
           )}
           {detail ? (
@@ -399,7 +402,12 @@ function PlatformDirectory({
             </Badge>
           </div>
           <p className="text-copy-12 text-muted-foreground mt-2">
-            接入方式：{p.integration === 'OFFICIAL_API' ? '官方 API' : p.integration === 'THIRD_PARTY_ISV' ? '第三方 ISV' : '中介服务'}
+            接入方式：
+            {p.integration === 'OFFICIAL_API'
+              ? '官方 API'
+              : p.integration === 'THIRD_PARTY_ISV'
+                ? '第三方 ISV'
+                : '中介服务'}
           </p>
           {p.capabilities.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1">
@@ -473,7 +481,12 @@ function ConnectionList({
   // 同步的连接；向导把跳转、换令牌、建店铺都收在一个流程里。
   const [wizardOpen, setWizardOpen] = useState(false);
   const [rotating, setRotating] = useState<ConnectionView | null>(null);
-  const [health, setHealth] = useState<{ id: string; diagnosis: string; recommendation: string; canSync: boolean } | null>(null);
+  const [health, setHealth] = useState<{
+    id: string;
+    diagnosis: string;
+    recommendation: string;
+    canSync: boolean;
+  } | null>(null);
 
   const filtered = connections.filter((c) =>
     `${c.displayName} ${c.authorizedAccount} ${c.platformName}`.toLowerCase().includes(term),
@@ -482,17 +495,29 @@ function ConnectionList({
   async function diagnose(c: ConnectionView) {
     try {
       setHealth(null);
-      const h = await api<{ connectionId: string; diagnosis: string; recommendation: string; canSync: boolean }>(
-        `channel/connections/${c.id}/health`,
-      );
-      setHealth({ id: h.connectionId, diagnosis: h.diagnosis, recommendation: h.recommendation, canSync: h.canSync });
+      const h = await api<{
+        connectionId: string;
+        diagnosis: string;
+        recommendation: string;
+        canSync: boolean;
+      }>(`channel/connections/${c.id}/health`);
+      setHealth({
+        id: h.connectionId,
+        diagnosis: h.diagnosis,
+        recommendation: h.recommendation,
+        canSync: h.canSync,
+      });
     } catch (e) {
       onError(e);
     }
   }
 
   async function revoke(c: ConnectionView) {
-    if (!window.confirm(`断开「${c.displayName || c.authorizedAccount}」后同步将停止，历史数据仍可查看。继续？`))
+    if (
+      !window.confirm(
+        `断开「${c.displayName || c.authorizedAccount}」后同步将停止，历史数据仍可查看。继续？`,
+      )
+    )
       return;
     setBusy(true);
     try {
@@ -523,12 +548,7 @@ function ConnectionList({
   return (
     <div className="space-y-3">
       {wizardOpen && (
-        <OAuthWizard
-          platforms={platforms}
-          can={can}
-          onDone={onDone}
-          onError={onError}
-        />
+        <OAuthWizard platforms={platforms} can={can} onDone={onDone} onError={onError} />
       )}
       {filtered.length === 0 && !wizardOpen ? (
         <Empty text="还没有授权连接" />
@@ -546,7 +566,12 @@ function ConnectionList({
                         <Button size="sm" variant="ghost" onClick={() => setRotating(c)}>
                           轮换凭据
                         </Button>
-                        <Button size="sm" variant="ghost" disabled={busy} onClick={() => void revoke(c)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={busy}
+                          onClick={() => void revoke(c)}
+                        >
                           断开
                         </Button>
                       </>
@@ -614,12 +639,16 @@ function ConnectionRow({
       <div className="min-w-0">
         <p className="text-copy-14 flex items-center gap-2 font-medium">
           {c.displayName || c.authorizedAccount}
-          <Badge tone={statusTone[c.status] ?? 'neutral'}>{statusLabel[c.status] ?? c.status}</Badge>
+          <Badge tone={statusTone[c.status] ?? 'neutral'}>
+            {statusLabel[c.status] ?? c.status}
+          </Badge>
           {c.syncPaused && <Badge tone="neutral">同步已暂停</Badge>}
         </p>
         <p className="text-copy-12 text-muted-foreground mt-1 break-all">
           {c.platformName} · {c.authorizedAccount} · 店铺 {c.shopCount} 个
-          {c.credential ? ` · 凭据 ${statusLabel[c.credential.status] ?? c.credential.status}` : ' · 未配置凭据'}
+          {c.credential
+            ? ` · 凭据 ${statusLabel[c.credential.status] ?? c.credential.status}`
+            : ' · 未配置凭据'}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -725,10 +754,19 @@ function ShopList({
   onNotice: (v: string) => void;
 }) {
   const [creating, setCreating] = useState(false);
-  const filtered = shops.filter((s) => `${s.code} ${s.name} ${s.platformName}`.toLowerCase().includes(term));
+  const filtered = shops.filter((s) =>
+    `${s.code} ${s.name} ${s.platformName}`.toLowerCase().includes(term),
+  );
   const canReadMembers = can('identity.member.read');
   const ownerLabel = (userId: string | null) =>
-    linkedName(userId, members, (m) => m.userId, (m) => m.username, canReadMembers, '未指定');
+    linkedName(
+      userId,
+      members,
+      (m) => m.userId,
+      (m) => m.username,
+      canReadMembers,
+      '未指定',
+    );
 
   async function remove(s: ShopView) {
     if (!window.confirm(`删除店铺「${s.name}」？此操作不可撤销。`)) return;
@@ -779,7 +817,9 @@ function ShopList({
                 <div className="min-w-0">
                   <p className="text-copy-14 flex items-center gap-2 font-medium">
                     {s.name}
-                    <Badge tone={statusTone[s.status] ?? 'neutral'}>{statusLabel[s.status] ?? s.status}</Badge>
+                    <Badge tone={statusTone[s.status] ?? 'neutral'}>
+                      {statusLabel[s.status] ?? s.status}
+                    </Badge>
                     <Badge tone="neutral">{modeLabel(s.operatingMode)}</Badge>
                   </p>
                   <p className="text-copy-12 text-muted-foreground mt-1 break-all">
@@ -793,7 +833,12 @@ function ShopList({
                     详情
                   </Button>
                   {can('channel.shop.delete') && (
-                    <Button size="sm" variant="ghost" disabled={busy} onClick={() => void remove(s)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => void remove(s)}
+                    >
                       删除
                     </Button>
                   )}
@@ -855,7 +900,11 @@ function ShopDetail({
   async function toggleMarketplace(code: string, isOn: boolean) {
     setBusy(true);
     try {
-      if (isOn) await api(`channel/shops/${shop.id}/marketplaces`, 'POST', { marketplaceCode: code, status: 'ACTIVE' });
+      if (isOn)
+        await api(`channel/shops/${shop.id}/marketplaces`, 'POST', {
+          marketplaceCode: code,
+          status: 'ACTIVE',
+        });
       else
         await api(
           `channel/shops/${shop.id}/marketplaces/${available.find((m) => m.code === code)?.id ?? ''}`,
@@ -948,7 +997,9 @@ function ShopDetail({
         <div>
           <dt className="text-copy-12 text-muted-foreground">经营模式</dt>
           <dd className="text-copy-14 mt-1">{modeLabel(shop.operatingMode)}</dd>
-          <dd className="text-copy-12 text-muted-foreground mt-1">{modeHint(shop.operatingMode)}</dd>
+          <dd className="text-copy-12 text-muted-foreground mt-1">
+            {modeHint(shop.operatingMode)}
+          </dd>
         </div>
         <div>
           <dt className="text-copy-12 text-muted-foreground">平台店铺 ID</dt>
@@ -1566,9 +1617,7 @@ function SyncRuntime({
                       <Badge tone={statusTone[c.status] ?? 'neutral'}>
                         {statusLabel[c.status] ?? c.status}
                       </Badge>
-                      {c.openFailures > 0 && (
-                        <Badge tone="warning">{c.openFailures} 条失败</Badge>
-                      )}
+                      {c.openFailures > 0 && <Badge tone="warning">{c.openFailures} 条失败</Badge>}
                     </p>
                     <p className="text-copy-12 text-muted-foreground mt-1 break-all">
                       游标 {c.cursorValue || '（初始位置）'} · 账号 {c.connectionAccount}
@@ -1607,7 +1656,9 @@ function SyncRuntime({
                         size="sm"
                         variant="ghost"
                         disabled={busy}
-                        onClick={() => void act(`channel/sync-cursors/${c.id}/resume`, '同步已恢复')}
+                        onClick={() =>
+                          void act(`channel/sync-cursors/${c.id}/resume`, '同步已恢复')
+                        }
                       >
                         恢复
                       </Button>
@@ -1658,7 +1709,10 @@ function SyncRuntime({
           <p className="text-copy-14 font-medium">运行日志</p>
           <ul className="mt-3 space-y-2">
             {runs.map((r) => (
-              <li key={r.id} className="border-border flex flex-wrap items-center gap-2 rounded-md border p-2 text-copy-13">
+              <li
+                key={r.id}
+                className="border-border text-copy-13 flex flex-wrap items-center gap-2 rounded-md border p-2"
+              >
                 <Badge tone={statusTone[r.status] ?? 'neutral'}>
                   {statusLabel[r.status] ?? r.status}
                 </Badge>
@@ -1796,16 +1850,21 @@ function OperationQueue({
                         {statusLabel[o.status] ?? o.status}
                       </Badge>
                       {o.status === 'UNKNOWN' && (
-                        <Badge tone="neutral">{statusLabel[o.verification] ?? o.verification}</Badge>
+                        <Badge tone="neutral">
+                          {statusLabel[o.verification] ?? o.verification}
+                        </Badge>
                       )}
                     </p>
                     <p className="text-copy-12 text-muted-foreground mt-1 break-all">
                       {o.shopName} · {o.platformCode}
-                      {o.marketplaceCode ? ` · ${o.marketplaceCode}` : ''} · 幂等键 {o.idempotencyKey}
+                      {o.marketplaceCode ? ` · ${o.marketplaceCode}` : ''} · 幂等键{' '}
+                      {o.idempotencyKey}
                       {o.platformRequestId ? ` · 平台请求 ${o.platformRequestId}` : ''}
                     </p>
                     {o.lastError && (
-                      <p className="text-copy-12 text-muted-foreground mt-1 break-all">{o.lastError}</p>
+                      <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                        {o.lastError}
+                      </p>
                     )}
                   </div>
                   {o.status === 'UNKNOWN' && can('channel.operation.update') && (
@@ -1815,11 +1874,7 @@ function OperationQueue({
                         variant="ghost"
                         disabled={busy}
                         onClick={() =>
-                          void verify(
-                            o.id,
-                            'CONFIRMED_APPLIED',
-                            '已确认平台执行成功，不会重复发送',
-                          )
+                          void verify(o.id, 'CONFIRMED_APPLIED', '已确认平台执行成功，不会重复发送')
                         }
                       >
                         已执行

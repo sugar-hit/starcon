@@ -76,7 +76,9 @@ describe('completeness-score-model', () => {
     });
 
     it('未就绪时把阻塞原因列出来', () => {
-      expect(readinessLabel(false, ['报关属性', '包装尺寸重量'])).toBe('未就绪：报关属性、包装尺寸重量');
+      expect(readinessLabel(false, ['报关属性', '包装尺寸重量'])).toBe(
+        '未就绪：报关属性、包装尺寸重量',
+      );
       // 没有具体原因时也要说"未就绪"，不能给一个空串
       expect(readinessLabel(false, [])).toBe('未就绪');
     });
@@ -99,9 +101,9 @@ describe('completeness-score-model', () => {
     });
 
     it('HELD 必须有证书编号，NOT_REQUIRED 不能有编号与有效期', () => {
-      expect(
-        certificationProblem({ certificationCode: 'CE', status: 'HELD' }),
-      ).toContain('证书编号');
+      expect(certificationProblem({ certificationCode: 'CE', status: 'HELD' })).toContain(
+        '证书编号',
+      );
       expect(
         certificationProblem({ certificationCode: 'CE', status: 'HELD', certificateNo: 'CE-1' }),
       ).toBeNull();
@@ -123,7 +125,9 @@ describe('completeness-score-model', () => {
 
     it('状态必须显式选一个，缺省不放行', () => {
       expect(certificationProblem({ certificationCode: 'CE' })).toContain('认证状态必填');
-      expect(certificationProblem({ certificationCode: 'CE', status: 'MAYBE' })).toContain('不在词表');
+      expect(certificationProblem({ certificationCode: 'CE', status: 'MAYBE' })).toContain(
+        '不在词表',
+      );
     });
 
     it('认证代码只含大写字母数字', () => {

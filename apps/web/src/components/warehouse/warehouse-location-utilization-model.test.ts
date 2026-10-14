@@ -110,7 +110,12 @@ describe('利用率三态', () => {
   });
 
   it('容量量出来是 0 时说「容量为 0」，不给 0.0% 也不给 100%', () => {
-    const r = row({ capacity: 0, capacityUtilization: null, capacityMeasured: true, capacityZero: true });
+    const r = row({
+      capacity: 0,
+      capacityUtilization: null,
+      capacityMeasured: true,
+      capacityZero: true,
+    });
     expect(utilizationText(r)).toBe('容量为 0');
     expect(utilizationText(r)).not.toBe('0.0%');
     expect(utilizationText(r)).not.toBe('100.0%');

@@ -23,16 +23,13 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.1.1.1 仓库列表。
  *
- * <p>蓝图：「展示租户下所有仓库：类型（自营/三方/海外仓/平台仓/监管仓）、所属法人、国家地区、
- * 时区、启用状态、库存量与作业量，支持筛选与新增。」
+ * <p>蓝图：「展示租户下所有仓库：类型（自营/三方/海外仓/平台仓/监管仓）、所属法人、国家地区、 时区、启用状态、库存量与作业量，支持筛选与新增。」
  *
- * <p>**纯聚合视图，不存任何独立数据** —— 与 7.1.1.1 库存总览同一条纪律。
- * 合计、每页行、能力声明全部从 {@code warehouse} 与事实表上重算，
+ * <p>**纯聚合视图，不存任何独立数据** —— 与 7.1.1.1 库存总览同一条纪律。 合计、每页行、能力声明全部从 {@code warehouse} 与事实表上重算，
  * 没有「列表专用汇总表」，所以「合计 == 逐行求和」不是靠约定成立而是结构上无从违反。
  *
- * <p><b>两个数不相加</b>：自有账本（{@code inventory_balance}）与平台仓观测值
- * （{@code platform_stock_observation}）在响应里是**两个字段**。V55 用两条触发器在 DB 层
- * 挡住「平台仓记自有账本」和「自有仓记观测值」，这里在类型层再钉一次。
+ * <p><b>两个数不相加</b>：自有账本（{@code inventory_balance}）与平台仓观测值 （{@code
+ * platform_stock_observation}）在响应里是**两个字段**。V55 用两条触发器在 DB 层 挡住「平台仓记自有账本」和「自有仓记观测值」，这里在类型层再钉一次。
  */
 @Service
 public class WarehouseFacilityService {
@@ -41,14 +38,14 @@ public class WarehouseFacilityService {
   static final int MAX_PAGE_SIZE = 200;
 
   /** 排序键白名单：排序键来自 query string，只允许这五个。 */
-  static final List<String> SORTS =
-      List.of("CODE", "NAME", "KIND", "STOCK", "WORK");
+  static final List<String> SORTS = List.of("CODE", "NAME", "KIND", "STOCK", "WORK");
 
   /** 状态词表与 V1 的 CHECK 逐字一致。ARCHIVED 是终态，本模块没有回退动作（属 8.1.1.2）。 */
   private static final List<String> STATUSES = List.of("ACTIVE", "INACTIVE", "ARCHIVED");
 
   /** 墙面上时间的固定格式；时区本身单独给一个字段，不靠这个串反推。 */
-  private static final DateTimeFormatter LOCAL_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+  private static final DateTimeFormatter LOCAL_TIME =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
   private final DSLContext sql;
   private final Clock clock;
@@ -72,7 +69,9 @@ public class WarehouseFacilityService {
     filters(q, where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
-    long total = sql.fetchOne("select count(*) from warehouse w" + sqlWhere, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from warehouse w" + sqlWhere, binds.toArray())
+            .get(0, Long.class);
 
     List<WarehouseRow> rows =
         sql.fetch(
@@ -89,12 +88,11 @@ public class WarehouseFacilityService {
   /**
    * 行查询。
    *
-   * <p>四个聚合各自来自**一个**标量子查询，而不是 join 出四张事实表再 group by ——
-   * 后者在库位与批次维度展开后会变成笛卡尔积，四个 count 与三个 sum 会互相放大。
-   * 这里每个子查询自己先按 warehouse_id 收口，再被引用一次。
+   * <p>四个聚合各自来自**一个**标量子查询，而不是 join 出四张事实表再 group by —— 后者在库位与批次维度展开后会变成笛卡尔积，四个 count 与三个 sum
+   * 会互相放大。 这里每个子查询自己先按 warehouse_id 收口，再被引用一次。
    *
-   * <p>租户谓词出现两次是刻意的：RLS 策略（{@code app.current_tenant}）是第一道防线，
-   * 显式 {@code tenant_id=} 是第二道。忘了绑定上下文时第二道让查询当场返回空而不是全表。
+   * <p>租户谓词出现两次是刻意的：RLS 策略（{@code app.current_tenant}）是第一道防线， 显式 {@code tenant_id=}
+   * 是第二道。忘了绑定上下文时第二道让查询当场返回空而不是全表。
    */
   private String selectRows() {
     return """
@@ -113,26 +111,40 @@ public class WarehouseFacilityService {
         left join legal_entity_ref le on le.tenant_id=w.tenant_id and le.id=w.default_legal_entity_id
         """
         .formatted(
-            stockSubquery("count(distinct b.legal_entity_id)", """
+            stockSubquery(
+                "count(distinct b.legal_entity_id)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
-            stockSubquery("count(distinct l.id)", """
+            stockSubquery(
+                "count(distinct l.id)",
+                """
                 from warehouse_location l
                  where l.tenant_id=w.tenant_id and l.warehouse_id=w.id"""),
-            stockSubquery("count(distinct b.sku_id)", """
+            stockSubquery(
+                "count(distinct b.sku_id)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
-            stockSubquery("coalesce(sum(b.on_hand),0)", """
+            stockSubquery(
+                "coalesce(sum(b.on_hand),0)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
-            stockSubquery("coalesce(sum(b.reserved),0)", """
+            stockSubquery(
+                "coalesce(sum(b.reserved),0)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
             // available 只能来自生成列，没有第三个来源。
-            stockSubquery("coalesce(sum(b.available),0)", """
+            stockSubquery(
+                "coalesce(sum(b.available),0)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
-            stockSubquery("count(*)", """
+            stockSubquery(
+                "count(*)",
+                """
                 from inventory_balance b
                  where b.tenant_id=w.tenant_id and b.warehouse_id=w.id"""),
             // 库存变动笔数：entry → balance → warehouse。作业量里唯一「逐笔」的维度。
@@ -144,7 +156,7 @@ public class WarehouseFacilityService {
   }
 
   private static String stockSubquery(String aggregate, String from) {
-    return "(select %s %s)" .formatted(aggregate, from.stripLeading());
+    return "(select %s %s)".formatted(aggregate, from.stripLeading());
   }
 
   private static void filters(FacilityQuery q, List<String> where, List<Object> binds) {
@@ -203,11 +215,17 @@ public class WarehouseFacilityService {
   /**
    * 作业单合计表达式：盘点任务 + 调入 + 调出。
    *
-   * <p>三个子查询各自按仓库收口后相加，**不** join 起来 —— join 会让一张调拨单同时
-   * 命中 from 与 to 两行而翻倍（from_warehouse_id 与 to_warehouse_id 在同一张表上）。
+   * <p>三个子查询各自按仓库收口后相加，**不** join 起来 —— join 会让一张调拨单同时 命中 from 与 to 两行而翻倍（from_warehouse_id 与
+   * to_warehouse_id 在同一张表上）。
    */
   private static String workTotalExpr() {
-    return "(" + stocktakeTasks("count(*)") + "+" + transferCount("to") + "+" + transferCount("from") + ")";
+    return "("
+        + stocktakeTasks("count(*)")
+        + "+"
+        + transferCount("to")
+        + "+"
+        + transferCount("from")
+        + ")";
   }
 
   /** 盘点任务：按仓发起的盘点单 + 按该仓库位发起的盘点单，两种范围都算这个仓的作业。 */
@@ -228,19 +246,18 @@ public class WarehouseFacilityService {
   private static String transferCount(String side) {
     String column = side.equals("to") ? "to_warehouse_id" : "from_warehouse_id";
     return "(select count(*) from transfer_order o"
-        + " where o.tenant_id=w.tenant_id and o." + column + "=w.id)";
+        + " where o.tenant_id=w.tenant_id and o."
+        + column
+        + "=w.id)";
   }
 
   // ================================================================ 合计
 
-  /**
-   * 全量合计。**不受分页与筛选影响** —— 它回答「我名下总共有多少货、多少作业」，
-   * 拿筛选后的数当合计会让「切了个筛选条件，怎么总量变了」看起来像数据丢了。
-   */
+  /** 全量合计。**不受分页与筛选影响** —— 它回答「我名下总共有多少货、多少作业」， 拿筛选后的数当合计会让「切了个筛选条件，怎么总量变了」看起来像数据丢了。 */
   private FacilitySummary summary() {
     var counts =
         sql.fetchOne(
-                """
+            """
                 select count(*) as warehouse_count,
                        count(*) filter (where status='ACTIVE') as active_count,
                        count(*) filter (where kind='PLATFORM_FBA') as platform_count
@@ -250,7 +267,7 @@ public class WarehouseFacilityService {
 
     var stock =
         sql.fetchOne(
-                """
+            """
                 select coalesce(sum(on_hand),0) as on_hand,
                        coalesce(sum(reserved),0) as reserved,
                        coalesce(sum(available),0) as available
@@ -289,7 +306,7 @@ public class WarehouseFacilityService {
   private long[] workTotals() {
     var row =
         sql.fetchOne(
-                """
+            """
                 select (select count(*) from stocktake_task t
                           where t.tenant_id = current_setting('app.current_tenant', true)::uuid)
                      + (select count(*) from transfer_order o
@@ -345,11 +362,11 @@ public class WarehouseFacilityService {
   }
 
   /**
-   * 平台仓观测值。每个 {@code (仓库, SKU, 来源)} 只取最新一条 ——
-   * platform_stock_observation 是 append-only 的历史序列（V55），求和会把历史观测叠加进去。
+   * 平台仓观测值。每个 {@code (仓库, SKU, 来源)} 只取最新一条 —— platform_stock_observation 是 append-only
+   * 的历史序列（V55），求和会把历史观测叠加进去。
    */
   private PlatformStock platformStock(UUID warehouseId, WarehouseKind kind) {
-    if (!kind.platformObserved()) return null;   // 自有仓恒为 null：不是「0」，是「这个来源不存在」
+    if (!kind.platformObserved()) return null; // 自有仓恒为 null：不是「0」，是「这个来源不存在」
     var r =
         sql.fetchOne(
             """
@@ -367,7 +384,8 @@ public class WarehouseFacilityService {
                                and warehouse_id = ?
                              order by sku_id,source,collected_at desc)
             """,
-            warehouseId, warehouseId);
+            warehouseId,
+            warehouseId);
     if (r == null || r.get("source_count", Long.class) == 0L) return null;
     return new PlatformStock(
         r.get("source_count", Long.class),
@@ -416,8 +434,15 @@ public class WarehouseFacilityService {
                      where e.tenant_id = current_setting('app.current_tenant', true)::uuid
                        and b.warehouse_id=?) as movement_count
             """,
-            warehouseId, warehouseId, warehouseId, warehouseId,
-            warehouseId, warehouseId, warehouseId, warehouseId, warehouseId);
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId);
 
     long taskCount = r.get("task_count", Long.class);
     long transferIn = r.get("transfer_in", Long.class);
@@ -438,11 +463,10 @@ public class WarehouseFacilityService {
   /**
    * 仓库当地墙上时间。
    *
-   * <p>时区**不能**只给一个裸字符串让前端猜：偏移量不表达夏令时规则，
-   * 「+08:00」无法回答「纽约这周几号该切夏令时」。所以行上给 IANA ID + 算好的当地时刻两个字段。
+   * <p>时区**不能**只给一个裸字符串让前端猜：偏移量不表达夏令时规则， 「+08:00」无法回答「纽约这周几号该切夏令时」。所以行上给 IANA ID + 算好的当地时刻两个字段。
    *
-   * <p>库里存了一个 JDK 不认识的时区串时**如实报出来**（返回 null + 说明），
-   * 而不是静默退化成 UTC —— 退化成 UTC 会让运营看到一个看起来正常但错了 8 小时的时刻。
+   * <p>库里存了一个 JDK 不认识的时区串时**如实报出来**（返回 null + 说明）， 而不是静默退化成 UTC —— 退化成 UTC 会让运营看到一个看起来正常但错了 8
+   * 小时的时刻。
    */
   private String localTime(String timezone) {
     try {
@@ -458,9 +482,8 @@ public class WarehouseFacilityService {
   /**
    * 作业量维度接入情况。
    *
-   * <p>蓝图 8.1.1.1 要「作业量」，而 8.2 收货 / 8.3 出库 / 8.4 组装三条作业链尚未交付。
-   * 这里逐条报出哪些已接入、哪些没接入、归哪个模块 —— 前端据此禁用不可用的维度，
-   * 而不是显示一个永远为 0 的数字让用户以为「这个仓不作业」。
+   * <p>蓝图 8.1.1.1 要「作业量」，而 8.2 收货 / 8.3 出库 / 8.4 组装三条作业链尚未交付。 这里逐条报出哪些已接入、哪些没接入、归哪个模块 ——
+   * 前端据此禁用不可用的维度， 而不是显示一个永远为 0 的数字让用户以为「这个仓不作业」。
    */
   public List<WorkVolumeCapability> workCapabilities() {
     return List.of(
@@ -471,14 +494,19 @@ public class WarehouseFacilityService {
         new WorkVolumeCapability(
             "INVENTORY_MOVEMENT", "库存变动", true, "7.1.2.1", "已接入 inventory_entry 的带符号分录条数"),
         new WorkVolumeCapability(
-            "RECEIVING", "收货作业", false, "8.2",
+            "RECEIVING",
+            "收货作业",
+            false,
+            "8.2",
             "8.2.1.1 收货单 / 8.2.2.1 上架任务尚未交付，goods_receipt 表不存在，作业量里没有这一项"),
         new WorkVolumeCapability(
-            "PICKING", "拣货与出库", false, "8.3",
+            "PICKING",
+            "拣货与出库",
+            false,
+            "8.3",
             "8.3.1.1 出库单 / 8.3.2.1 拣货任务 / 8.3.3.1 复核 / 8.3.4.1 发货交接尚未交付，作业量里没有这一项"),
         new WorkVolumeCapability(
-            "ASSEMBLY", "组装作业", false, "8.4",
-            "8.4.1.1 组装单 / 8.4.2.1 拆解单尚未交付，作业量里没有这一项"));
+            "ASSEMBLY", "组装作业", false, "8.4", "8.4.1.1 组装单 / 8.4.2.1 拆解单尚未交付，作业量里没有这一项"));
   }
 
   /** 筛选与录入下拉项。 */
@@ -495,11 +523,13 @@ public class WarehouseFacilityService {
                 "select id,code,name,status from legal_entity_ref"
                     + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                     + " order by code")
-            .map(r -> new LegalEntityOption(
-                r.get("id", UUID.class),
-                r.get("code", String.class),
-                r.get("name", String.class),
-                r.get("status", String.class)));
+            .map(
+                r ->
+                    new LegalEntityOption(
+                        r.get("id", UUID.class),
+                        r.get("code", String.class),
+                        r.get("name", String.class),
+                        r.get("status", String.class)));
 
     return new FacilityOptions(
         Arrays.stream(WarehouseKind.values())
@@ -512,8 +542,7 @@ public class WarehouseFacilityService {
             new WarehouseFacilityStatusOption("INACTIVE", "已停用"),
             new WarehouseFacilityStatusOption("ARCHIVED", "已归档")),
         "时区填 IANA ID（如 Asia/Shanghai / America/Los_Angeles），由服务端按它算当地时间",
-        "国家地区是 ISO-3166-1 alpha-2 两位码；下拉只列本租户真实在用的国家，"
-            + "系统不内置国别表以免与法务口径漂移");
+        "国家地区是 ISO-3166-1 alpha-2 两位码；下拉只列本租户真实在用的国家，" + "系统不内置国别表以免与法务口径漂移");
   }
 
   // ================================================================ 新增
@@ -521,8 +550,7 @@ public class WarehouseFacilityService {
   /**
    * 新增仓库。
    *
-   * <p>校验在应用层做（给出可读的错误），DB 层仍有 CHECK 与唯一索引兜底 ——
-   * 「应用层校验 + DB 约束」两层都要在，各挡各的：前者挡用户，后者和别的车道一样挡 SQL。
+   * <p>校验在应用层做（给出可读的错误），DB 层仍有 CHECK 与唯一索引兜底 —— 「应用层校验 + DB 约束」两层都要在，各挡各的：前者挡用户，后者和别的车道一样挡 SQL。
    */
   public WarehouseCreated create(WarehouseCreateInput input) {
     String code = input.code().trim().toUpperCase(Locale.ROOT);
@@ -530,11 +558,12 @@ public class WarehouseFacilityService {
     WarehouseKind kind = kind(input.kind());
     String country = normalizeCountry(input.countryCode());
     String timezone = input.timezone().trim();
-    ZoneId.of(timezone);   // 抛 DateTimeException 即拒绝：错时区会让当地时间永远算错
+    ZoneId.of(timezone); // 抛 DateTimeException 即拒绝：错时区会让当地时间永远算错
     UUID legalEntityId = input.defaultLegalEntityId();
-    String status = input.status() == null || input.status().isBlank()
-        ? "ACTIVE"
-        : input.status().toUpperCase(Locale.ROOT).trim();
+    String status =
+        input.status() == null || input.status().isBlank()
+            ? "ACTIVE"
+            : input.status().toUpperCase(Locale.ROOT).trim();
     if (!STATUSES.contains(status)) throw new IllegalArgumentException("不支持的状态：" + input.status());
 
     // 所属法人必须存在且启用：货权绑到一个停用法人上会让「这批货算谁的」无法回答。
@@ -548,10 +577,11 @@ public class WarehouseFacilityService {
       throw new IllegalArgumentException("所选法人已停用，不能作为仓库的货权法人");
 
     if (Boolean.TRUE.equals(input.isDefault())) {
-      long current = sql.fetchOne(
-              "select count(*) from warehouse where tenant_id = current_setting('app.current_tenant', true)::uuid"
-                  + " and is_default and status='ACTIVE'")
-          .get(0, Long.class);
+      long current =
+          sql.fetchOne(
+                  "select count(*) from warehouse where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                      + " and is_default and status='ACTIVE'")
+              .get(0, Long.class);
       if (current > 0) throw new IllegalArgumentException("该租户已有启用中的默认发货仓，请先取消原默认仓");
     }
 
@@ -561,8 +591,15 @@ public class WarehouseFacilityService {
           "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
               + "default_legal_entity_id,is_default,status)"
               + " values(?,current_setting('app.current_tenant', true)::uuid,?,?,?,?,?,?,?,?)",
-          id, code, name, kind.name(), country, timezone, legalEntityId,
-          Boolean.TRUE.equals(input.isDefault()), status);
+          id,
+          code,
+          name,
+          kind.name(),
+          country,
+          timezone,
+          legalEntityId,
+          Boolean.TRUE.equals(input.isDefault()),
+          status);
     } catch (org.springframework.dao.DuplicateKeyException e) {
       // Spring Boot 的 DefaultExceptionTranslatorExecuteListener 会把 jOOQ 的异常翻成
       // org.springframework.dao.* ，所以这里接 Spring 的类型而不是 org.jooq 的

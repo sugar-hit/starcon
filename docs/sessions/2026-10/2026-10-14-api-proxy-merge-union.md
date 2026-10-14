@@ -26,14 +26,14 @@
 
 本轮 19:00 批次派了 4 条车道，命中两次（warehouse × 2、trade × 3）：
 
-| 车道 | 分组 | 分支点 | 状态 |
-|---|---|---|---|
-| 8.3.4.1 发货交接 | warehouse | f002cc8f | 早前已并入 `bc23ecb3` |
-| 9.4.1.1 待发货 | trade | f002cc8f | 早前已并入 `b168414c` |
-| **10.2.2.1 包裹详情** | warehouse | f002cc8f | 本轮并入 `30849652` |
-| **9.6.1.3 代发履约跟踪** | trade | f002cc8f | 本轮并入 `ab2359ee` |
-| **9.1.1.3 订单变更与取消** | trade | cbd78408 | 本轮并入 `27bed2e0` |
-| **9.7.1.1 批发订单与账期** | trade | cbd78408 | 本轮并入 `10ff5291` |
+| 车道                       | 分组      | 分支点   | 状态                  |
+| -------------------------- | --------- | -------- | --------------------- |
+| 8.3.4.1 发货交接           | warehouse | f002cc8f | 早前已并入 `bc23ecb3` |
+| 9.4.1.1 待发货             | trade     | f002cc8f | 早前已并入 `b168414c` |
+| **10.2.2.1 包裹详情**      | warehouse | f002cc8f | 本轮并入 `30849652`   |
+| **9.6.1.3 代发履约跟踪**   | trade     | f002cc8f | 本轮并入 `ab2359ee`   |
+| **9.1.1.3 订单变更与取消** | trade     | cbd78408 | 本轮并入 `27bed2e0`   |
+| **9.7.1.1 批发订单与账期** | trade     | cbd78408 | 本轮并入 `10ff5291`   |
 
 ## 二、4 条车道各自的路由增量
 
@@ -41,12 +41,12 @@
 `新增分支 = 车道契约相对 merge-base 多出来的分支`，追加到集成分支既有分支之后，
 既有分支逐字不动。
 
-| 车道 | 分组 | 新增分支（原文） | 分组分支数 |
-|---|---|---|---|
-| 10.2.2.1 | warehouse | `parcels(?:\/capabilities\|\/[0-9a-f-]+)` | 31 → 32 |
-| 9.6.1.3 | trade | `fulfillment\/dropship-tracking\/(?:capabilities\|policy\|events\|exceptions\/evaluate\|exceptions(?:\/[0-9a-f-]+\/(?:dispose\|dismiss))?\|dispositions\/[0-9a-f-]+\/status\|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg\|own-leg))?)?\|tasks(?:\/[0-9a-f-]+\/(?:claim\|complete))?)` | 9 → 10 |
-| 9.1.1.3 | trade | `sales-orders\/change\/(?:capabilities\|platform-rules(?:\/[0-9a-f-]+)?\|fulfillment-progress\|requests(?:\/[0-9a-f-]+(?:\/(?:status\|writeback-tasks))?)?\|cancellations(?:\/[0-9a-f-]+(?:\/(?:status\|warehouse-tasks(?:\/[0-9a-f-]+\/status)?\|writeback-tasks))?)?\|writeback-tasks\/[0-9a-f-]+\/status)` | 10 → 11 |
-| 9.7.1.1 | trade | `b2b-orders(?:\/(?:capabilities\|receivables\|customer-terms\|price-quote\|price-books(?:\/[0-9a-f-]+)?\|[0-9a-f-]+(?:\/(?:confirm\|shipments\|invoice-requests))?))?` | 11 → 12 |
+| 车道     | 分组      | 新增分支（原文）                                                                                                                                                                                                                                                                                              | 分组分支数 |
+| -------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 10.2.2.1 | warehouse | `parcels(?:\/capabilities\|\/[0-9a-f-]+)`                                                                                                                                                                                                                                                                     | 31 → 32    |
+| 9.6.1.3  | trade     | `fulfillment\/dropship-tracking\/(?:capabilities\|policy\|events\|exceptions\/evaluate\|exceptions(?:\/[0-9a-f-]+\/(?:dispose\|dismiss))?\|dispositions\/[0-9a-f-]+\/status\|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg\|own-leg))?)?\|tasks(?:\/[0-9a-f-]+\/(?:claim\|complete))?)`                        | 9 → 10     |
+| 9.1.1.3  | trade     | `sales-orders\/change\/(?:capabilities\|platform-rules(?:\/[0-9a-f-]+)?\|fulfillment-progress\|requests(?:\/[0-9a-f-]+(?:\/(?:status\|writeback-tasks))?)?\|cancellations(?:\/[0-9a-f-]+(?:\/(?:status\|warehouse-tasks(?:\/[0-9a-f-]+\/status)?\|writeback-tasks))?)?\|writeback-tasks\/[0-9a-f-]+\/status)` | 10 → 11    |
+| 9.7.1.1  | trade     | `b2b-orders(?:\/(?:capabilities\|receivables\|customer-terms\|price-quote\|price-books(?:\/[0-9a-f-]+)?\|[0-9a-f-]+(?:\/(?:confirm\|shipments\|invoice-requests))?))?`                                                                                                                                        | 11 → 12    |
 
 **判别顺序逐条核对过，没有踩「宽通配吃掉具体分支」的坑：**
 
@@ -86,36 +86,36 @@
 
 **结果（4 条车道各多少条 path）**：
 
-| 车道 | 服务 | 契约 path 数 | 放行 |
-|---|---|---|---|
-| 10.2.2.1 | warehouse | 29 | **29 / 29** |
-| 9.6.1.3 | trade | 37 | **37 / 37** |
-| 9.1.1.3 | trade | 15 | **15 / 15** |
-| 9.7.1.1 | trade | 11 | **11 / 11** |
+| 车道     | 服务      | 契约 path 数 | 放行        |
+| -------- | --------- | ------------ | ----------- |
+| 10.2.2.1 | warehouse | 29           | **29 / 29** |
+| 9.6.1.3  | trade     | 37           | **37 / 37** |
+| 9.1.1.3  | trade     | 15           | **15 / 15** |
+| 9.7.1.1  | trade     | 11           | **11 / 11** |
 
 并入前单独跑 10.2.2.1 的同一用例集：`warehouse/parcels/{id}` 与
 `warehouse/parcels/capabilities` 两条判为未放行 —— 正是这次求并要补的缺口。
 
 ### 并入前后全量回归对比
 
-| 服务 | 并入前 | 并入后 |
-|---|---|---|
-| identity | 82 / 99 | 82 / 99 |
-| catalog | 299 / 339 | 299 / 339 |
-| channel | 46 / 49 | 46 / 49 |
+| 服务      | 并入前    | 并入后        |
+| --------- | --------- | ------------- |
+| identity  | 82 / 99   | 82 / 99       |
+| catalog   | 299 / 339 | 299 / 339     |
+| channel   | 46 / 49   | 46 / 49       |
 | warehouse | 439 / 443 | **441 / 445** |
-| trade | 75 / 75 | **116 / 116** |
-| crm | 11 / 11 | 11 / 11 |
+| trade     | 75 / 75   | **116 / 116** |
+| crm       | 11 / 11   | 11 / 11       |
 
 未放行集合做差集：**新增 0 条**（`comm -13` 空）。warehouse / trade 的
 「未放行绝对数」也没有变化（各 4 / 0），只是契约新增的 path 全部被放行。
 
 ### 全量 vitest（并入前后各跑一次）
 
-| | 测试文件 | 测试用例 |
-|---|---|---|
-| 并入前 `integration/module-dev` @ `18322418` | 146 全绿 | 2701 全绿 |
-| 并入后 `fix/merge-lanes-api-proxy` | 153 个，**2 失败** | 2796 个，2794 通过 |
+|                                              | 测试文件           | 测试用例           |
+| -------------------------------------------- | ------------------ | ------------------ |
+| 并入前 `integration/module-dev` @ `18322418` | 146 全绿           | 2701 全绿          |
+| 并入后 `fix/merge-lanes-api-proxy`           | 153 个，**2 失败** | 2796 个，2794 通过 |
 
 失败的 2 个是 `packages/ui/src/lib/nav-routes.test.ts` 与 `task-pages.test.ts`，
 详见第五节。
@@ -129,13 +129,13 @@
 
 并入前后都放行不了、**本次合并没有碰**的 path，共 **64 条**：
 
-| 服务 | 条数 | 形态 |
-|---|---|---|
-| catalog | 40 | 散落多处 |
-| identity | 16 | 主要是 `dict-items` / `role-assignments` 整族 + `operation-log/purge` |
-| warehouse | 4 | `inventory/availability`、`inventory/consignments/{id}/sales`、`inventory/printing/devices/{id}` |
-| channel | 3 | `platforms/{id}/enums` 族 + `sync-failures/{id}/replay` |
-| internal | 1 | `internal/access` |
+| 服务      | 条数 | 形态                                                                                             |
+| --------- | ---- | ------------------------------------------------------------------------------------------------ |
+| catalog   | 40   | 散落多处                                                                                         |
+| identity  | 16   | 主要是 `dict-items` / `role-assignments` 整族 + `operation-log/purge`                            |
+| warehouse | 4    | `inventory/availability`、`inventory/consignments/{id}/sales`、`inventory/printing/devices/{id}` |
+| channel   | 3    | `platforms/{id}/enums` 族 + `sync-failures/{id}/replay`                                          |
+| internal  | 1    | `internal/access`                                                                                |
 
 这些是本任务范围外的既成缺口，建议单独立项，不要混进并入批次。
 

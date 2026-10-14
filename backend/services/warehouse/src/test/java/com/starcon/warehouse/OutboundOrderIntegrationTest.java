@@ -32,19 +32,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.1.1 出库单列表：四类来源、七态状态机、三项批量操作、真分页与真筛选，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本测试要钉死的是三件容易糊过去的事</b>：
  *
  * <ol>
- *   <li><b>状态机只有一处真相。</b> {@link OutboundOrderStatus} 的转换矩阵与 V72 触发器白名单
- *       必须没有分叉 —— 有一条 {@link #状态机矩阵与数据库触发器白名单没有分叉()} 专门比对
- *       两者，并把非法跃迁真的打到数据库上去撞一次。
- *   <li><b>一订单可多出库单</b>（蓝图点名的那条关系）。同一个外部订单号下必须能并排挂
- *       多张出库单 —— 上一条唯一索引就把它禁掉了。
- *   <li><b>时间口径。</b> {@link #时间筛选按带偏移量的ISO8601解析()} 用同一个瞬间的两种
- *       偏移量表达去筛，朴素本地时间解析会让其中一个偏 8 小时而漏掉刚建的单。
+ *   <li><b>状态机只有一处真相。</b> {@link OutboundOrderStatus} 的转换矩阵与 V72 触发器白名单 必须没有分叉 —— 有一条 {@link
+ *       #状态机矩阵与数据库触发器白名单没有分叉()} 专门比对 两者，并把非法跃迁真的打到数据库上去撞一次。
+ *   <li><b>一订单可多出库单</b>（蓝图点名的那条关系）。同一个外部订单号下必须能并排挂 多张出库单 —— 上一条唯一索引就把它禁掉了。
+ *   <li><b>时间口径。</b> {@link #时间筛选按带偏移量的ISO8601解析()} 用同一个瞬间的两种 偏移量表达去筛，朴素本地时间解析会让其中一个偏 8 小时而漏掉刚建的单。
  * </ol>
  */
 @SpringBootTest
@@ -57,7 +53,10 @@ class OutboundOrderIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID leA = idFor(a, 1);
@@ -69,7 +68,8 @@ class OutboundOrderIntegrationTest {
   static final UUID transferA = idFor(a, 7);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-outbound-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-outbound-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -90,7 +90,8 @@ class OutboundOrderIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -105,7 +106,8 @@ class OutboundOrderIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -113,7 +115,9 @@ class OutboundOrderIntegrationTest {
           });
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
-      actors.put("Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+      actors.put(
+          "Bearer read-only",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
       // SELF 数据范围：只能看到自己创建的出库单。
       actors.put("Bearer self-scope", actor(user, a, List.of(grant("SELF", allPermissions))));
       identity.start();
@@ -169,19 +173,46 @@ class OutboundOrderIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             // SKU 与仓库 id 必须按租户派生：用租户 A 的常量去插租户 B 会撞主键。
-            sql.execute("insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", idFor(tenant, 2), tenant, "SKU-1", "商品一");
-            sql.execute("insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", idFor(tenant, 3), tenant, "SKU-2", "商品二");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-ONE", "一仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-ONE",
+                "一仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-TWO", "二仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-TWO",
+                "二仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -193,11 +224,22 @@ class OutboundOrderIntegrationTest {
           sql.execute(
               "insert into transfer_order(id,tenant_id,order_code,from_warehouse_id,to_warehouse_id,"
                   + "legal_entity_id,status,confirmed_at,created_by) values(?,?,?,?,?,?,'PENDING_SHIPMENT',now(),?)",
-              transferA, a, "TR-1", whOne, whTwo, leA, user);
+              transferA,
+              a,
+              "TR-1",
+              whOne,
+              whTwo,
+              leA,
+              user);
           sql.execute(
               "insert into transfer_order_line(id,tenant_id,order_id,sku_id,quality_status_id,"
                   + "requested_quantity) values(?,?,?,?,?,?)",
-              UUID.randomUUID(), a, transferA, skuOne, qSellable, new BigDecimal("10.000000"));
+              UUID.randomUUID(),
+              a,
+              transferA,
+              skuOne,
+              qSellable,
+              new BigDecimal("10.000000"));
           return null;
         });
   }
@@ -213,7 +255,8 @@ class OutboundOrderIntegrationTest {
   // ================================================================ 夹具
 
   OutboundOrderSummary sales(String ref, UUID warehouse, String skuCode, String qty) {
-    return salesRef(ref, warehouse, List.of(new OutboundOrderLineInput(skuOf(skuCode), new BigDecimal(qty))));
+    return salesRef(
+        ref, warehouse, List.of(new OutboundOrderLineInput(skuOf(skuCode), new BigDecimal(qty))));
   }
 
   OutboundOrderSummary salesRef(String ref, UUID warehouse, List<OutboundOrderLineInput> lines) {
@@ -280,18 +323,29 @@ class OutboundOrderIntegrationTest {
     sales("SO-2", whOne, "SKU-2", "2");
     sales("SO-3", whTwo, "SKU-1", "3");
 
-    assertThat(list(List.of(whOne), List.of(), List.of(), null, null, null, 0, 50, actorA).total()).isEqualTo(2);
-    assertThat(list(List.of(whTwo), List.of(), List.of(), null, null, null, 0, 50, actorA).total()).isEqualTo(1);
-    assertThat(list(List.of(), List.of("SALES"), List.of(), null, null, null, 0, 50, actorA).total()).isEqualTo(3);
-    assertThat(list(List.of(), List.of(), List.of("PENDING_PICKING"), null, null, null, 0, 50, actorA).total())
+    assertThat(list(List.of(whOne), List.of(), List.of(), null, null, null, 0, 50, actorA).total())
+        .isEqualTo(2);
+    assertThat(list(List.of(whTwo), List.of(), List.of(), null, null, null, 0, 50, actorA).total())
+        .isEqualTo(1);
+    assertThat(
+            list(List.of(), List.of("SALES"), List.of(), null, null, null, 0, 50, actorA).total())
+        .isEqualTo(3);
+    assertThat(
+            list(List.of(), List.of(), List.of("PENDING_PICKING"), null, null, null, 0, 50, actorA)
+                .total())
         .isEqualTo(3);
     // 已发货一张都还没有：这条筛选必须真的空，而不是把「没筛」当成「全中」。
-    assertThat(list(List.of(), List.of(), List.of("SHIPPED"), null, null, null, 0, 50, actorA).total()).isZero();
+    assertThat(
+            list(List.of(), List.of(), List.of("SHIPPED"), null, null, null, 0, 50, actorA).total())
+        .isZero();
     // 关键字跨单号 / 外部单号 / 仓库名三处匹配。
-    assertThat(list(List.of(), List.of(), List.of(), null, null, "SO-2", 0, 50, actorA).total()).isEqualTo(1);
-    assertThat(list(List.of(), List.of(), List.of(), null, null, "WH-TWO", 0, 50, actorA).total()).isEqualTo(1);
+    assertThat(list(List.of(), List.of(), List.of(), null, null, "SO-2", 0, 50, actorA).total())
+        .isEqualTo(1);
+    assertThat(list(List.of(), List.of(), List.of(), null, null, "WH-TWO", 0, 50, actorA).total())
+        .isEqualTo(1);
     // 命中不到的关键字必须真的落空。
-    assertThat(list(List.of(), List.of(), List.of(), null, null, "SO-不存在", 0, 50, actorA).total()).isZero();
+    assertThat(list(List.of(), List.of(), List.of(), null, null, "SO-不存在", 0, 50, actorA).total())
+        .isZero();
   }
 
   @Test
@@ -425,7 +479,8 @@ class OutboundOrderIntegrationTest {
                     a,
                     () ->
                         orders.create(
-                            new OutboundOrderCreateInput("SALES", null, "  ", whOne, "", "", lines("1")),
+                            new OutboundOrderCreateInput(
+                                "SALES", null, "  ", whOne, "", "", lines("1")),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须给外部单号");
@@ -505,7 +560,13 @@ class OutboundOrderIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("承运渠道");
     // 给承运渠道后才能完成（发货交接归 8.3.4.1，这里只验状态机的硬规则）。
-    run(a, () -> sql.execute("update outbound_order set carrier_code = 'DHL' where tenant_id = ? and id = ?", a, created.id()));
+    run(
+        a,
+        () ->
+            sql.execute(
+                "update outbound_order set carrier_code = 'DHL' where tenant_id = ? and id = ?",
+                a,
+                created.id()));
     var shipped = move(created.id(), "SHIPPED", "承运商已揽收");
     assertThat(shipped.status()).isEqualTo("SHIPPED");
     assertThat(shipped.shippedAt()).isNotNull();
@@ -526,7 +587,8 @@ class OutboundOrderIntegrationTest {
     // 待打包 → 待复核（打包发现缺件回复核）。
     move(created.id(), "PENDING_RECHECK");
     move(created.id(), "PENDING_PACKING");
-    assertThat(move(created.id(), "PENDING_RECHECK", "缺一件，回复核").status()).isEqualTo("PENDING_RECHECK");
+    assertThat(move(created.id(), "PENDING_RECHECK", "缺一件，回复核").status())
+        .isEqualTo("PENDING_RECHECK");
   }
 
   @Test
@@ -570,7 +632,13 @@ class OutboundOrderIntegrationTest {
     move(created.id(), "PENDING_RECHECK");
     move(created.id(), "PENDING_PACKING");
     move(created.id(), "PENDING_SHIPMENT");
-    run(a, () -> sql.execute("update outbound_order set carrier_code = 'UPS' where tenant_id = ? and id = ?", a, created.id()));
+    run(
+        a,
+        () ->
+            sql.execute(
+                "update outbound_order set carrier_code = 'UPS' where tenant_id = ? and id = ?",
+                a,
+                created.id()));
     move(created.id(), "SHIPPED", "承运商已揽收");
     var result = cancel(List.of(created.id()), "发错了");
     assertThat(result.cancelledCount()).isZero();
@@ -598,7 +666,9 @@ class OutboundOrderIntegrationTest {
         boolean dbOk = dbResult == null;
         boolean serviceOk = from.canTransitionTo(to);
         assertThat(dbOk)
-            .as("%s → %s：数据库触发器与 Java 转换矩阵必须一致（serviceOk=%s, 数据库=%s）", from, to, serviceOk, dbOk ? "接受" : dbResult)
+            .as(
+                "%s → %s：数据库触发器与 Java 转换矩阵必须一致（serviceOk=%s, 数据库=%s）",
+                from, to, serviceOk, dbOk ? "接受" : dbResult)
             .isEqualTo(serviceOk);
         if (dbOk) accepted++;
         else rejected++;
@@ -608,8 +678,11 @@ class OutboundOrderIntegrationTest {
     assertThat(accepted).isEqualTo(allowed.size());
     assertThat(accepted).isGreaterThan(0);
     assertThat(rejected).isGreaterThan(0);
-    assertThat(allowed).contains(
-        "PENDING_PICKING>PICKING", "PENDING_RECHECK>PICKING", "PENDING_PACKING>PENDING_RECHECK");
+    assertThat(allowed)
+        .contains(
+            "PENDING_PICKING>PICKING",
+            "PENDING_RECHECK>PICKING",
+            "PENDING_PACKING>PENDING_RECHECK");
     // 终态在矩阵里没有任何去向。
     assertThat(OutboundOrderStatus.SHIPPED.transitionsFrom()).isEmpty();
     assertThat(OutboundOrderStatus.CANCELLED.transitionsFrom()).isEmpty();
@@ -666,9 +739,8 @@ class OutboundOrderIntegrationTest {
   /**
    * 直接打数据库状态字段，看 V72 触发器收不收。
    *
-   * <p>刻意**每个探测都开一个新事务**：PostgreSQL 里任何一条语句报错都会中止整个事务，
-   * 后续语句只会得到「current transaction is aborted」。把探测与复位放进同一个事务，
-   * 测试会因为错误的原因（事务已中止）而通过 —— 那是一个永远绿的假断言。
+   * <p>刻意**每个探测都开一个新事务**：PostgreSQL 里任何一条语句报错都会中止整个事务， 后续语句只会得到「current transaction is
+   * aborted」。把探测与复位放进同一个事务， 测试会因为错误的原因（事务已中止）而通过 —— 那是一个永远绿的假断言。
    */
   private String probe(UUID orderId, OutboundOrderStatus to) {
     boolean shipped = to == OutboundOrderStatus.SHIPPED;
@@ -742,7 +814,9 @@ class OutboundOrderIntegrationTest {
                     a,
                     () -> {
                       sql.execute(
-                          "delete from outbound_order_line where tenant_id = ? and order_id = ?", a, created.id());
+                          "delete from outbound_order_line where tenant_id = ? and order_id = ?",
+                          a,
+                          created.id());
                       return null;
                     }))
         .isInstanceOf(DataAccessException.class)
@@ -920,7 +994,8 @@ class OutboundOrderIntegrationTest {
     assertThat(caps.statuses()).hasSize(7);
     assertThat(caps.transitions()).isNotEmpty();
     // 打印只有两种，面单归 8.3.4.2。
-    assertThat(caps.printDocuments()).extracting(OutboundEnumOption::name)
+    assertThat(caps.printDocuments())
+        .extracting(OutboundEnumOption::name)
         .containsExactly("OUTBOUND_ORDER", "PICK_LIST");
     assertThat(caps.pickingHandoverNote()).contains("8.3.2.1");
     assertThat(caps.orderFulfillmentNote()).contains("9 订单履约尚未交付");
@@ -940,7 +1015,8 @@ class OutboundOrderIntegrationTest {
         .andExpect(jsonPath("$.items[0].status").value("PENDING_PICKING"))
         .andExpect(jsonPath("$.items[0].skuLineCount").value(1));
     // 不带权限码时是 403。
-    http.perform(get("/warehouse/inventory/outbound-orders").header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders").header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isOk());
     // 裸时间串 → 400。
     http.perform(
@@ -959,17 +1035,23 @@ class OutboundOrderIntegrationTest {
     var otherUser = UUID.randomUUID();
     var selfActor = actor(otherUser, a, List.of(grant("SELF", allPermissions)));
     var visible =
-        access.run(selfActor, "warehouse.inventory.read", () -> orders.list(List.of(), List.of(), List.of(), null, null, null, 0, 50, selfActor));
+        access.run(
+            selfActor,
+            "warehouse.inventory.read",
+            () -> orders.list(List.of(), List.of(), List.of(), null, null, null, 0, 50, selfActor));
     assertThat(visible.total()).isZero();
     // ALL 范围看得到。
-    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorA).total()).isEqualTo(1);
+    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorA).total())
+        .isEqualTo(1);
     // SELF 范围自己建的看得到。
     var selfActorOwn = actor(user, a, List.of(grant("SELF", allPermissions)));
     var own =
         access.run(
             selfActorOwn,
             "warehouse.inventory.read",
-            () -> orders.list(List.of(), List.of(), List.of(), null, null, null, 0, 50, selfActorOwn));
+            () ->
+                orders.list(
+                    List.of(), List.of(), List.of(), null, null, null, 0, 50, selfActorOwn));
     assertThat(own.total()).isEqualTo(1);
   }
 
@@ -979,8 +1061,10 @@ class OutboundOrderIntegrationTest {
   void 断言一_两租户互不可见() {
     var a1 = createFor(a, "SO-TENANT-A", whOne);
     var b1 = createFor(b, "SO-TENANT-B", idFor(b, 4));
-    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorA).total()).isEqualTo(1);
-    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorB).total()).isEqualTo(1);
+    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorA).total())
+        .isEqualTo(1);
+    assertThat(list(List.of(), List.of(), List.of(), null, null, null, 0, 50, actorB).total())
+        .isEqualTo(1);
     // A 看不到 B 的单，B 也拿不到 A 的单。
     assertThatThrownBy(() -> requireAs(b, a1.id()))
         .isInstanceOf(ResponseStatusException.class)
@@ -989,11 +1073,19 @@ class OutboundOrderIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在或不属于当前租户");
     // B 不能推进 A 的单。
-    assertThatThrownBy(() -> run(b, () -> orders.transition(a1.id(), new OutboundTransitionInput("PICKING", null), user)))
+    assertThatThrownBy(
+            () ->
+                run(
+                    b,
+                    () ->
+                        orders.transition(
+                            a1.id(), new OutboundTransitionInput("PICKING", null), user)))
         .isInstanceOf(ResponseStatusException.class);
     // B 不能取消 A 的单，也不能对 A 的单生成拣货任务。
-    assertThat(run(b, () -> orders.cancel(List.of(a1.id()), "越权取消", user)).cancelledCount()).isZero();
-    assertThat(run(b, () -> orders.requestPicking(List.of(a1.id()), null, user)).requestedCount()).isZero();
+    assertThat(run(b, () -> orders.cancel(List.of(a1.id()), "越权取消", user)).cancelledCount())
+        .isZero();
+    assertThat(run(b, () -> orders.requestPicking(List.of(a1.id()), null, user)).requestedCount())
+        .isZero();
     assertThat(requireAs(a, a1.id()).status()).isEqualTo("PENDING_PICKING");
   }
 
@@ -1033,7 +1125,11 @@ class OutboundOrderIntegrationTest {
     }
     // 四张表逐张确认 FORCE RLS
     for (var table :
-        List.of("outbound_order", "outbound_order_line", "outbound_pick_request", "outbound_order_event")) {
+        List.of(
+            "outbound_order",
+            "outbound_order_line",
+            "outbound_pick_request",
+            "outbound_order_event")) {
       assertThat(
               sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
                   .get("relforcerowsecurity", Boolean.class))
@@ -1062,7 +1158,9 @@ class OutboundOrderIntegrationTest {
       int size,
       AccessService.Access actor) {
     return access.run(
-        actor, "warehouse.inventory.read", () -> orders.list(warehouses, sources, statuses, from, to, keyword, page, size, actor));
+        actor,
+        "warehouse.inventory.read",
+        () -> orders.list(warehouses, sources, statuses, from, to, keyword, page, size, actor));
   }
 
   OutboundOrderSummary require(UUID id) {
@@ -1073,11 +1171,18 @@ class OutboundOrderIntegrationTest {
     return access.run(
         actorFor(tenant),
         "warehouse.inventory.read",
-        () -> orders.list(List.of(), List.of(), List.of(), null, null, null, 0, 200, actorFor(tenant)).items()
-            .stream()
-            .filter(o -> o.id().equals(id))
-            .findFirst()
-            .orElseThrow(() -> new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "出库单不存在或不属于当前租户：" + id)));
+        () ->
+            orders
+                .list(List.of(), List.of(), List.of(), null, null, null, 0, 200, actorFor(tenant))
+                .items()
+                .stream()
+                .filter(o -> o.id().equals(id))
+                .findFirst()
+                .orElseThrow(
+                    () ->
+                        new ResponseStatusException(
+                            org.springframework.http.HttpStatus.NOT_FOUND,
+                            "出库单不存在或不属于当前租户：" + id)));
   }
 
   OutboundOrderSummary move(UUID id, String target) {

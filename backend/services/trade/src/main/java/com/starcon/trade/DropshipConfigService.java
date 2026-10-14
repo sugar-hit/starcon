@@ -23,22 +23,18 @@ import org.springframework.web.server.ResponseStatusException;
  * <p><b>五条实现纪律</b>（照抄 9.3.2.1 的写法，不另起风格）：
  *
  * <ol>
- *   <li><b>判定只有一处</b>：{@link #evaluate} 是唯一的可售判定实现；
- *       页面预览与落库结论不一致时，运营看到的和系统做的是两件事。</li>
- *   <li><b>物流与货权互不推导</b>：本服务**不**计算「是否占我方库存」——
- *       {@code counts_against_own_inventory} / {@code pure_agency_exempt} 是 DB
- *       生成列（V118 第 3 节），这里只读出来如实报给 9.6.1.2。
- *       在服务层再写一遍等价判断，就等于有了第二份可能与服务层漂移的真相。</li>
- *   <li><b>金额只有一处口径</b>：差价抽成全程 {@code BigDecimal}，
- *       {@code expectedMarginAmount} 等三个金额取自 DB 生成列，服务层不另算。</li>
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上，
- *       cast 不出现在绑定序列末位。</li>
- *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。</li>
+ *   <li><b>判定只有一处</b>：{@link #evaluate} 是唯一的可售判定实现； 页面预览与落库结论不一致时，运营看到的和系统做的是两件事。
+ *   <li><b>物流与货权互不推导</b>：本服务**不**计算「是否占我方库存」—— {@code counts_against_own_inventory} / {@code
+ *       pure_agency_exempt} 是 DB 生成列（V118 第 3 节），这里只读出来如实报给 9.6.1.2。
+ *       在服务层再写一遍等价判断，就等于有了第二份可能与服务层漂移的真相。
+ *   <li><b>金额只有一处口径</b>：差价抽成全程 {@code BigDecimal}， {@code expectedMarginAmount} 等三个金额取自 DB
+ *       生成列，服务层不另算。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 写在 values 的对应位置上， cast 不出现在绑定序列末位。
+ *   <li><b>不用 JPA 懒加载</b>：全部 jOOQ 显式 SQL。
  * </ol>
  *
- * <p><b>跨服务一律不读表</b>：2.3.1 店铺（channel）、3.6.2 供应商报价（catalog）、
- * 7.1.1.3 可售量（warehouse）分属三个独立数据库，按 AGENTS.md 禁止跨库读取。
- * 本服务自维护三张带 {@code source} 标注的只读投影/观测表（理由见 V118 文件头第二节）。
+ * <p><b>跨服务一律不读表</b>：2.3.1 店铺（channel）、3.6.2 供应商报价（catalog）、 7.1.1.3 可售量（warehouse）分属三个独立数据库，按
+ * AGENTS.md 禁止跨库读取。 本服务自维护三张带 {@code source} 标注的只读投影/观测表（理由见 V118 文件头第二节）。
  */
 @Service
 public class DropshipConfigService {
@@ -90,9 +86,8 @@ public class DropshipConfigService {
    * 本模块的能力与上游可用性。
    *
    * <p>{@code crossServiceReadAvailable=false} 与 {@code reservesOwnInventory=false}
-   * 都是如实报出：三个上游分属三个独立数据库，本模块只维护带来源标注的投影；
-   * 而「纯代理不占我方库存」是**判定结论**不是预占动作 —— 真正预占要调 warehouse
-   * 的授权 API，属下游 9.6.1.2 职责。现在假装预占，两边会同时以为占了同一批货。
+   * 都是如实报出：三个上游分属三个独立数据库，本模块只维护带来源标注的投影； 而「纯代理不占我方库存」是**判定结论**不是预占动作 —— 真正预占要调 warehouse 的授权
+   * API，属下游 9.6.1.2 职责。现在假装预占，两边会同时以为占了同一批货。
    */
   public DropshipCapabilities capabilities() {
     return new DropshipCapabilities(
@@ -107,15 +102,13 @@ public class DropshipConfigService {
                 "SUPPLIER_QUOTE",
                 "供应商报价（3.6.2）",
                 true,
-                "3.6.2 供应商报价（catalog 服务）→ 本服务只读投影 "
-                    + "fulfillment_dropship_supplier_ref",
+                "3.6.2 供应商报价（catalog 服务）→ 本服务只读投影 " + "fulfillment_dropship_supplier_ref",
                 null),
             new DropshipCapabilities.DropshipCapabilityDimension(
                 "SUPPLIER_STOCK",
                 "供应商可供货量",
                 true,
-                "7.1.1.3 可用量（warehouse 服务）→ 本服务观测表 "
-                    + "fulfillment_dropship_supplier_stock",
+                "7.1.1.3 可用量（warehouse 服务）→ 本服务观测表 " + "fulfillment_dropship_supplier_stock",
                 null),
             new DropshipCapabilities.DropshipCapabilityDimension(
                 "OWN_STOCK",
@@ -185,8 +178,8 @@ public class DropshipConfigService {
     }
     String sqlWhere = whereClause(where);
     long total =
-        sql.fetchOne("select count(*) c from fulfillment_dropship_shop_ref" + sqlWhere,
-                binds.toArray())
+        sql.fetchOne(
+                "select count(*) c from fulfillment_dropship_shop_ref" + sqlWhere, binds.toArray())
             .get("c", Long.class);
     List<DropshipShopRefRow> items =
         sql.fetch(
@@ -219,16 +212,30 @@ public class DropshipConfigService {
           "insert into fulfillment_dropship_shop_ref(id,tenant_id,shop_code,shop_name,"
               + "platform_code,region_code,active,source_system,synced_at,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), input.shopCode().trim(), input.shopName().trim(),
+          id,
+          currentTenant(),
+          input.shopCode().trim(),
+          input.shopName().trim(),
           input.platformCode().trim().toUpperCase(Locale.ROOT),
-          blankTo(input.regionCode(), "*"), active, source, input.syncedAt(), now, now);
+          blankTo(input.regionCode(), "*"),
+          active,
+          source,
+          input.syncedAt(),
+          now,
+          now);
     } else {
       sql.execute(
           "update fulfillment_dropship_shop_ref set shop_name = ?, platform_code = ?,"
               + " region_code = ?, active = ?, source_system = ?, synced_at = ?::timestamptz,"
               + " updated_at = ?::timestamptz where id = ?",
-          input.shopName().trim(), input.platformCode().trim().toUpperCase(Locale.ROOT),
-          blankTo(input.regionCode(), "*"), active, source, input.syncedAt(), now, id);
+          input.shopName().trim(),
+          input.platformCode().trim().toUpperCase(Locale.ROOT),
+          blankTo(input.regionCode(), "*"),
+          active,
+          source,
+          input.syncedAt(),
+          now,
+          id);
     }
     return new DropshipShopRefSaved(id, input.shopCode().trim(), created);
   }
@@ -288,7 +295,9 @@ public class DropshipConfigService {
     String source = supplierSource(input.quoteSource()).name();
     boolean active = input.active() == null || input.active();
     BigDecimal lead =
-        input.leadTimeDays() == null ? null : input.leadTimeDays().setScale(2, RoundingMode.HALF_UP);
+        input.leadTimeDays() == null
+            ? null
+            : input.leadTimeDays().setScale(2, RoundingMode.HALF_UP);
     if (lead != null && lead.signum() < 0) {
       throw bad("供应商备货时效不能为负");
     }
@@ -310,17 +319,34 @@ public class DropshipConfigService {
               + "supplier_name,currency_code,quote_valid_from,quote_valid_to,quote_source,"
               + "lead_time_days,active,synced_at,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), input.supplierCode().trim(), input.supplierName().trim(),
-          input.currencyCode().trim().toUpperCase(Locale.ROOT), input.quoteValidFrom(),
-          input.quoteValidTo(), source, lead, active, input.syncedAt(), now, now);
+          id,
+          currentTenant(),
+          input.supplierCode().trim(),
+          input.supplierName().trim(),
+          input.currencyCode().trim().toUpperCase(Locale.ROOT),
+          input.quoteValidFrom(),
+          input.quoteValidTo(),
+          source,
+          lead,
+          active,
+          input.syncedAt(),
+          now,
+          now);
     } else {
       sql.execute(
           "update fulfillment_dropship_supplier_ref set supplier_name = ?, currency_code = ?,"
               + " quote_valid_from = ?, quote_valid_to = ?, quote_source = ?, lead_time_days = ?,"
               + " active = ?, synced_at = ?::timestamptz, updated_at = ?::timestamptz where id = ?",
-          input.supplierName().trim(), input.currencyCode().trim().toUpperCase(Locale.ROOT),
-          input.quoteValidFrom(), input.quoteValidTo(), source, lead, active, input.syncedAt(),
-          now, id);
+          input.supplierName().trim(),
+          input.currencyCode().trim().toUpperCase(Locale.ROOT),
+          input.quoteValidFrom(),
+          input.quoteValidTo(),
+          source,
+          lead,
+          active,
+          input.syncedAt(),
+          now,
+          id);
     }
     return new DropshipSupplierRefSaved(id, input.supplierCode().trim(), created);
   }
@@ -346,9 +372,10 @@ public class DropshipConfigService {
       binds.add(query.shopCode().trim());
     }
     if (notBlank(query.skuRef())) {
-      where.add("(sku_ref = ? or exists (select 1 from fulfillment_dropship_config_line l"
-          + " where l.tenant_id = fulfillment_dropship_config.tenant_id"
-          + " and l.config_id = fulfillment_dropship_config.id and l.sku_ref = ?))");
+      where.add(
+          "(sku_ref = ? or exists (select 1 from fulfillment_dropship_config_line l"
+              + " where l.tenant_id = fulfillment_dropship_config.tenant_id"
+              + " and l.config_id = fulfillment_dropship_config.id and l.sku_ref = ?))");
       binds.add(query.skuRef().trim());
       binds.add(query.skuRef().trim());
     }
@@ -369,16 +396,18 @@ public class DropshipConfigService {
       binds.add(configStatus(query.status()).name());
     }
     if (Boolean.TRUE.equals(query.effectiveOnly())) {
-      where.add("status = 'ACTIVE' and effective_from <= now()"
-          + " and (effective_to is null or effective_to > now())");
+      where.add(
+          "status = 'ACTIVE' and effective_from <= now()"
+              + " and (effective_to is null or effective_to > now())");
     }
     if (query.countsAgainstOwnInventory() != null) {
       where.add("counts_against_own_inventory = ?");
       binds.add(query.countsAgainstOwnInventory());
     }
     if (notBlank(query.keyword())) {
-      where.add("(config_code ilike ? or config_name ilike ? or note ilike ?"
-          + " or supplier_code ilike ?)");
+      where.add(
+          "(config_code ilike ? or config_name ilike ? or note ilike ?"
+              + " or supplier_code ilike ?)");
       String k = "%" + query.keyword().trim() + "%";
       for (int i = 0; i < 4; i++) {
         binds.add(k);
@@ -386,12 +415,14 @@ public class DropshipConfigService {
     }
     String sqlWhere = whereClause(where);
     long total =
-        sql.fetchOne("select count(*) c from fulfillment_dropship_config" + sqlWhere,
-                binds.toArray())
+        sql.fetchOne(
+                "select count(*) c from fulfillment_dropship_config" + sqlWhere, binds.toArray())
             .get("c", Long.class);
     List<DropshipConfigRow> items =
         sql.fetch(
-                "select " + CONFIG_COLUMNS + " from fulfillment_dropship_config"
+                "select "
+                    + CONFIG_COLUMNS
+                    + " from fulfillment_dropship_config"
                     + sqlWhere
                     + " order by priority, config_code limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
@@ -402,7 +433,8 @@ public class DropshipConfigService {
   /** 配置详情：配置头 + 明细行 + 最近事件。跨租户在 RLS 下查不到 → 404。 */
   public DropshipConfigDetail configDetail(UUID configId) {
     var row =
-        sql.fetchOne("select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
+        sql.fetchOne(
+            "select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
             configId);
     if (row == null) {
       throw notFound("代发配置不存在或不属于当前租户");
@@ -418,7 +450,9 @@ public class DropshipConfigService {
   /** 明细行（同一配置的 SKU 覆盖价）。 */
   public List<DropshipConfigLineRow> configLines(UUID configId) {
     return sql.fetch(
-            "select " + LINE_COLUMNS + " from fulfillment_dropship_config_line"
+            "select "
+                + LINE_COLUMNS
+                + " from fulfillment_dropship_config_line"
                 + " where config_id = ? order by sku_ref",
             configId)
         .map(DropshipConfigService::lineRow);
@@ -427,8 +461,7 @@ public class DropshipConfigService {
   /**
    * 维护一条代发配置。
    *
-   * <p>金额与比例一律 {@code BigDecimal}；货权与物流两个维度分别校验，
-   * 「纯代理免确认 / 非纯代理须确认」的判据在 DB 的 CHECK + 触发器两层再各自复验一次。
+   * <p>金额与比例一律 {@code BigDecimal}；货权与物流两个维度分别校验， 「纯代理免确认 / 非纯代理须确认」的判据在 DB 的 CHECK + 触发器两层再各自复验一次。
    */
   @Transactional
   public DropshipConfigSaved saveConfig(DropshipConfigInput input, UUID membershipId) {
@@ -447,22 +480,18 @@ public class DropshipConfigService {
 
     DropshipFulfillmentPath path = fulfillmentPath(input.fulfillmentPath());
     DropshipOwnershipMode ownership = ownershipMode(input.ownershipMode());
-    String supplierCode =
-        input.supplierCode() == null ? "" : input.supplierCode().trim();
+    String supplierCode = input.supplierCode() == null ? "" : input.supplierCode().trim();
     // 物流维度：自营发货不该挂供应商；供应商直发必须有供应商。
     if (path == DropshipFulfillmentPath.SUPPLIER_DIRECT && supplierCode.isBlank()) {
       throw bad("履约路径是「供应商直发」，必须给出代发供应商 supplierCode，否则「谁直发」无从谈起");
     }
     if (path == DropshipFulfillmentPath.SELF_FULFILLED && !supplierCode.isBlank()) {
-      throw bad(
-          "履约路径是「自营发货」，不该挂代发供应商：货是我方仓发的，"
-              + "把供应商挂在上面会让货权判断出现第三个来源");
+      throw bad("履约路径是「自营发货」，不该挂代发供应商：货是我方仓发的，" + "把供应商挂在上面会让货权判断出现第三个来源");
     }
     // 货权维度：自营发货不可能是纯代理（DB CHECK 也会拒，这里先给人话）。
-    if (path == DropshipFulfillmentPath.SELF_FULFILLED && ownership == DropshipOwnershipMode.PURE_AGENCY) {
-      throw bad(
-          "自营发货不可能是「纯代理」：货从我方仓出、我方发货，货权在我方是前提。"
-              + "货权请选「我方货权」");
+    if (path == DropshipFulfillmentPath.SELF_FULFILLED
+        && ownership == DropshipOwnershipMode.PURE_AGENCY) {
+      throw bad("自营发货不可能是「纯代理」：货从我方仓出、我方发货，货权在我方是前提。" + "货权请选「我方货权」");
     }
     // 非纯代理必须「单独确认」：三个字段缺一不可。
     OffsetDateTime confirmedAt = input.ownershipConfirmedAt();
@@ -478,18 +507,14 @@ public class DropshipConfigService {
         throw bad("货权在「我方」时必须给出确认人 ownershipConfirmedByMembershipId");
       }
       if (confirmedNote.isBlank()) {
-        throw bad(
-            "货权在「我方」时必须写明确认依据 ownershipConfirmedNote："
-                + "与 7.7 货权规则联合评审的结论是什么，留空等于没评审过");
+        throw bad("货权在「我方」时必须写明确认依据 ownershipConfirmedNote：" + "与 7.7 货权规则联合评审的结论是什么，留空等于没评审过");
       }
       if (notBlank(input.ownershipReviewedWith())
           && input.ownershipReviewedWith().trim().isEmpty()) {
         throw bad("联合评审对象不能是空串（不评审就留空，不要写成空白）");
       }
     } else if (confirmedAt != null || !confirmedNote.isEmpty()) {
-      throw bad(
-          "纯代理模式不需要「单独确认」货权，也不该带确认时间与确认说明："
-              + "带上会让人误以为它也被复核过");
+      throw bad("纯代理模式不需要「单独确认」货权，也不该带确认时间与确认说明：" + "带上会让人误以为它也被复核过");
     }
 
     // 结算维度
@@ -506,9 +531,7 @@ public class DropshipConfigService {
       }
     } else {
       if (input.marginShareRate() != null) {
-        throw bad(
-            "结算方式是「固定供货价」，marginShareRate 必须留空："
-                + "留着它会让人以为会抽差价");
+        throw bad("结算方式是「固定供货价」，marginShareRate 必须留空：" + "留着它会让人以为会抽差价");
       }
       rate = null;
     }
@@ -530,9 +553,7 @@ public class DropshipConfigService {
     BigDecimal buffer;
     if (check == DropshipAvailabilityCheckMode.SUPPLIER_STOCK) {
       if (input.minSupplierStockBuffer() == null) {
-        throw bad(
-            "可售校验选了「按供应商库存校验」，必须给出 minSupplierStockBuffer 安全余量，"
-                + "否则「够不够卖」没有判定线");
+        throw bad("可售校验选了「按供应商库存校验」，必须给出 minSupplierStockBuffer 安全余量，" + "否则「够不够卖」没有判定线");
       }
       buffer = qty(input.minSupplierStockBuffer());
       if (buffer.signum() < 0) {
@@ -540,9 +561,7 @@ public class DropshipConfigService {
       }
     } else {
       if (input.minSupplierStockBuffer() != null) {
-        throw bad(
-            "可售校验不是「按供应商库存校验」时，minSupplierStockBuffer 必须留空："
-                + "留着它会让人以为仍按供应商库存判定");
+        throw bad("可售校验不是「按供应商库存校验」时，minSupplierStockBuffer 必须留空：" + "留着它会让人以为仍按供应商库存判定");
       }
       buffer = null;
     }
@@ -579,15 +598,44 @@ public class DropshipConfigService {
               // 30 个占位符 + 2 个字面量（'DRAFT' / 1）= 32 列，顺序与上面的列清单逐位对应。
               + " values (?,?,?,?,?,?,?,?,?,?,?::timestamptz,?,?,?,?,?,?,?,?,?,?,?,?,?,"
               + "'DRAFT',?::timestamptz,?::timestamptz,?,1,?,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), input.configCode().trim(), input.configName().trim(),
-          scope.name(), shopCode, skuRef, path.name(), supplierCode, ownership.name(),
-          confirmedAt, input.ownershipConfirmedByMembershipId(), confirmedNote,
+          id,
+          currentTenant(),
+          input.configCode().trim(),
+          input.configName().trim(),
+          scope.name(),
+          shopCode,
+          skuRef,
+          path.name(),
+          supplierCode,
+          ownership.name(),
+          confirmedAt,
+          input.ownershipConfirmedByMembershipId(),
+          confirmedNote,
           input.ownershipReviewedWith() == null ? "" : input.ownershipReviewedWith().trim(),
-          settlementTiming(input.settlementTiming()).name(), basis.name(), rate, currency, cost,
-          sellPrice, check.name(), buffer, listing.name(), priority, from, to, note, membershipId,
-          now, now);
-      event(id, null, "CREATED", "", "DRAFT",
-          "创建代发配置（" + path.name() + " / " + ownership.name() + "）", membershipId);
+          settlementTiming(input.settlementTiming()).name(),
+          basis.name(),
+          rate,
+          currency,
+          cost,
+          sellPrice,
+          check.name(),
+          buffer,
+          listing.name(),
+          priority,
+          from,
+          to,
+          note,
+          membershipId,
+          now,
+          now);
+      event(
+          id,
+          null,
+          "CREATED",
+          "",
+          "DRAFT",
+          "创建代发配置（" + path.name() + " / " + ownership.name() + "）",
+          membershipId);
     } else {
       // 更新：DB 触发器 dropship_ownership_clear_on_change 会在货权/结算维度变动时
       // 把确认清空，随后 dropship_ownership_confirmed 会拒绝未重新确认的写入 ——
@@ -603,11 +651,32 @@ public class DropshipConfigService {
               + " min_supplier_stock_buffer = ?, listing_policy = ?, priority = ?,"
               + " effective_from = ?::timestamptz, effective_to = ?::timestamptz, note = ?,"
               + " version = version + 1, updated_at = ?::timestamptz where id = ?",
-          input.configName().trim(), scope.name(), shopCode, skuRef, path.name(), supplierCode,
-          ownership.name(), confirmedAt, input.ownershipConfirmedByMembershipId(), confirmedNote,
+          input.configName().trim(),
+          scope.name(),
+          shopCode,
+          skuRef,
+          path.name(),
+          supplierCode,
+          ownership.name(),
+          confirmedAt,
+          input.ownershipConfirmedByMembershipId(),
+          confirmedNote,
           input.ownershipReviewedWith() == null ? "" : input.ownershipReviewedWith().trim(),
-          settlementTiming(input.settlementTiming()).name(), basis.name(), rate, currency, cost,
-          sellPrice, check.name(), buffer, listing.name(), priority, from, to, note, now, id);
+          settlementTiming(input.settlementTiming()).name(),
+          basis.name(),
+          rate,
+          currency,
+          cost,
+          sellPrice,
+          check.name(),
+          buffer,
+          listing.name(),
+          priority,
+          from,
+          to,
+          note,
+          now,
+          id);
       event(id, null, "UPDATED", "", "", "更新代发配置", membershipId);
     }
     return new DropshipConfigSaved(id, input.configCode().trim(), created);
@@ -616,8 +685,7 @@ public class DropshipConfigService {
   /**
    * 推进配置状态：DRAFT → ACTIVE → SUSPENDED ↔ ACTIVE → CLOSED。
    *
-   * <p>激活时补齐 {@code effective_from}（没有生效期的配置激活了也没意义），
-   * 并要求至少一条明细行 —— 空配置激活等于给一个范围开了代发却没有 SKU。
+   * <p>激活时补齐 {@code effective_from}（没有生效期的配置激活了也没意义）， 并要求至少一条明细行 —— 空配置激活等于给一个范围开了代发却没有 SKU。
    */
   @Transactional
   public DropshipConfigSaved advanceStatus(
@@ -627,7 +695,8 @@ public class DropshipConfigService {
     }
     DropshipConfigStatus target = configStatus(input.status());
     var row =
-        sql.fetchOne("select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
+        sql.fetchOne(
+            "select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
             configId);
     if (row == null) {
       throw notFound("代发配置不存在或不属于当前租户");
@@ -643,9 +712,7 @@ public class DropshipConfigService {
                   configId)
               .get("c", Long.class);
       if (lines == 0) {
-        throw bad(
-            "配置还没有任何 SKU 明细行：空配置激活等于给一个范围开了代发却没有可代发的 SKU，"
-                + "下游 9.6.1.2 会拿到一个永远不可售的配置");
+        throw bad("配置还没有任何 SKU 明细行：空配置激活等于给一个范围开了代发却没有可代发的 SKU，" + "下游 9.6.1.2 会拿到一个永远不可售的配置");
       }
     }
     OffsetDateTime now = OffsetDateTime.now();
@@ -657,17 +724,26 @@ public class DropshipConfigService {
               + " effective_from = coalesce(effective_from, ?::timestamptz),"
               + " activated_at = ?::timestamptz, activated_by_membership_id = ?,"
               + " updated_at = ?::timestamptz where id = ?",
-          now, now, membershipId, now, configId);
+          now,
+          now,
+          membershipId,
+          now,
+          configId);
     } else if (target == DropshipConfigStatus.CLOSED) {
       sql.execute(
           "update fulfillment_dropship_config set status = 'CLOSED', closed_at = ?::timestamptz,"
               + " closed_by_membership_id = ?, updated_at = ?::timestamptz where id = ?",
-          now, membershipId, now, configId);
+          now,
+          membershipId,
+          now,
+          configId);
     } else {
       sql.execute(
           "update fulfillment_dropship_config set status = ?, updated_at = ?::timestamptz"
               + " where id = ?",
-          target.name(), now, configId);
+          target.name(),
+          now,
+          configId);
     }
     event(configId, null, "STATUS_CHANGED", current.name(), target.name(), note, membershipId);
     return new DropshipConfigSaved(configId, row.get("config_code", String.class), false);
@@ -677,14 +753,13 @@ public class DropshipConfigService {
 
   /** 维护一条 SKU 明细行（可覆盖供货价 / 参考售价）。 */
   @Transactional
-  public DropshipConfigLineSaved saveConfigLine(
-      UUID configId, DropshipConfigLineInput input) {
+  public DropshipConfigLineSaved saveConfigLine(UUID configId, DropshipConfigLineInput input) {
     if (input == null) {
       throw bad("请求体不能为空");
     }
     var config =
-        sql.fetchOne("select config_code,status from fulfillment_dropship_config where id = ?",
-            configId);
+        sql.fetchOne(
+            "select config_code,status from fulfillment_dropship_config where id = ?", configId);
     if (config == null) {
       throw notFound("代发配置不存在或不属于当前租户");
     }
@@ -710,7 +785,8 @@ public class DropshipConfigService {
     var existing =
         sql.fetchOne(
             "select id from fulfillment_dropship_config_line where config_id = ? and sku_ref = ?",
-            configId, input.skuRef().trim());
+            configId,
+            input.skuRef().trim());
     boolean created = existing == null;
     UUID id = created ? UUID.randomUUID() : existing.get(0, UUID.class);
     if (created) {
@@ -719,14 +795,29 @@ public class DropshipConfigService {
               + "sku_name,supplier_cost_override,reference_sell_price_override,active,note,"
               + "created_at,updated_at)"
               + " values (?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), configId, input.skuRef().trim(), nz(input.skuName()),
-          costOverride, sellOverride, active, nz(input.note()), now, now);
+          id,
+          currentTenant(),
+          configId,
+          input.skuRef().trim(),
+          nz(input.skuName()),
+          costOverride,
+          sellOverride,
+          active,
+          nz(input.note()),
+          now,
+          now);
     } else {
       sql.execute(
           "update fulfillment_dropship_config_line set sku_name = ?, supplier_cost_override = ?,"
               + " reference_sell_price_override = ?, active = ?, note = ?,"
               + " updated_at = ?::timestamptz where id = ?",
-          nz(input.skuName()), costOverride, sellOverride, active, nz(input.note()), now, id);
+          nz(input.skuName()),
+          costOverride,
+          sellOverride,
+          active,
+          nz(input.note()),
+          now,
+          id);
     }
     return new DropshipConfigLineSaved(id, configId, input.skuRef().trim(), created);
   }
@@ -790,7 +881,8 @@ public class DropshipConfigService {
         sql.fetchOne(
             "select id from fulfillment_dropship_supplier_stock"
                 + " where supplier_code = ? and sku_ref = ?",
-            input.supplierCode().trim(), input.skuRef().trim());
+            input.supplierCode().trim(),
+            input.skuRef().trim());
     boolean created = existing == null;
     UUID id = created ? UUID.randomUUID() : existing.get(0, UUID.class);
     if (created) {
@@ -798,13 +890,24 @@ public class DropshipConfigService {
           "insert into fulfillment_dropship_supplier_stock(id,tenant_id,supplier_code,sku_ref,"
               + "available_qty,stock_source,observed_at,created_at,updated_at)"
               + " values (?,?,?,?,?,?,?::timestamptz,?::timestamptz,?::timestamptz)",
-          id, currentTenant(), input.supplierCode().trim(), input.skuRef().trim(), qty, source,
-          input.observedAt(), now, now);
+          id,
+          currentTenant(),
+          input.supplierCode().trim(),
+          input.skuRef().trim(),
+          qty,
+          source,
+          input.observedAt(),
+          now,
+          now);
     } else {
       sql.execute(
           "update fulfillment_dropship_supplier_stock set available_qty = ?, stock_source = ?,"
               + " observed_at = ?::timestamptz, updated_at = ?::timestamptz where id = ?",
-          qty, source, input.observedAt(), now, id);
+          qty,
+          source,
+          input.observedAt(),
+          now,
+          id);
     }
     return new DropshipSupplierStockSaved(
         id, input.supplierCode().trim(), input.skuRef().trim(), created);
@@ -815,8 +918,8 @@ public class DropshipConfigService {
   /**
    * 可售标记列表（真分页）。
    *
-   * <p>{@code sellable=false} 且 {@code supplierAvailableQty=null} = 「没人报过供应商库存」；
-   * {@code sellable=false} 且 {@code supplierAvailableQty=0} = 「供应商确实没货」。两者必须能分开看。
+   * <p>{@code sellable=false} 且 {@code supplierAvailableQty=null} = 「没人报过供应商库存」； {@code
+   * sellable=false} 且 {@code supplierAvailableQty=0} = 「供应商确实没货」。两者必须能分开看。
    */
   public DropshipEvaluationPage pageEvaluations(DropshipEvaluationQuery query) {
     int size = pageSize(query.size());
@@ -859,7 +962,9 @@ public class DropshipConfigService {
             .get("c", Long.class);
     List<DropshipEvaluationRow> items =
         sql.fetch(
-                "select " + EVAL_COLUMNS + " from fulfillment_dropship_evaluation"
+                "select "
+                    + EVAL_COLUMNS
+                    + " from fulfillment_dropship_evaluation"
                     + sqlWhere
                     + " order by evaluated_at desc, id limit ? offset ?",
                 append(binds, size, (long) pageNo * size))
@@ -873,19 +978,18 @@ public class DropshipConfigService {
    * <p><b>判定顺序</b>（每一步都给出「缺什么」，绝不静默通过）：
    *
    * <ol>
-   *   <li>配置未生效 → CONFIG_NOT_ACTIVE；不在有效期内 → CONFIG_NOT_EFFECTIVE</li>
-   *   <li>明细行缺失或停用 → LINE_INACTIVE</li>
-   *   <li>按店铺生效时店铺已停用 → SHOP_INACTIVE</li>
-   *   <li>供应商报价过期 → QUOTE_EXPIRED</li>
-   *   <li>差价转负 → NEGATIVE_MARGIN（蓝图下游的「静默亏损」闸门）</li>
-   *   <li>按供应商库存校验时：无记录 → NO_SUPPLIER_STOCK_RECORD，不够 → SUPPLIER_STOCK_INSUFFICIENT</li>
+   *   <li>配置未生效 → CONFIG_NOT_ACTIVE；不在有效期内 → CONFIG_NOT_EFFECTIVE
+   *   <li>明细行缺失或停用 → LINE_INACTIVE
+   *   <li>按店铺生效时店铺已停用 → SHOP_INACTIVE
+   *   <li>供应商报价过期 → QUOTE_EXPIRED
+   *   <li>差价转负 → NEGATIVE_MARGIN（蓝图下游的「静默亏损」闸门）
+   *   <li>按供应商库存校验时：无记录 → NO_SUPPLIER_STOCK_RECORD，不够 → SUPPLIER_STOCK_INSUFFICIENT
    * </ol>
    *
-   * <p>{@code sellable} 与 {@code listable} 分开判定：不可售不必然下架，
-   * {@code listingPolicy} 决定这二者怎么组合。
+   * <p>{@code sellable} 与 {@code listable} 分开判定：不可售不必然下架， {@code listingPolicy} 决定这二者怎么组合。
    *
-   * <p>金额取自 DB 生成列（按明细行覆盖价重算的等价口径在服务层只做一次，
-   * 落库的 {@code expected_margin_amount} 与配置头生成列同源，见 {@link #marginOf}）。
+   * <p>金额取自 DB 生成列（按明细行覆盖价重算的等价口径在服务层只做一次， 落库的 {@code expected_margin_amount} 与配置头生成列同源，见 {@link
+   * #marginOf}）。
    */
   @Transactional
   public DropshipEvaluationSaved evaluate(DropshipEvaluationRequest request) {
@@ -897,7 +1001,8 @@ public class DropshipConfigService {
       throw bad("请求数量必须大于 0");
     }
     var row =
-        sql.fetchOne("select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
+        sql.fetchOne(
+            "select " + CONFIG_COLUMNS + " from fulfillment_dropship_config where id = ?",
             request.configId());
     if (row == null) {
       throw notFound("代发配置不存在或不属于当前租户");
@@ -907,9 +1012,12 @@ public class DropshipConfigService {
     // 明细行：缺失或停用都不该判成可售 —— 但两者要分开说。
     var line =
         sql.fetchOne(
-            "select " + LINE_COLUMNS + " from fulfillment_dropship_config_line"
+            "select "
+                + LINE_COLUMNS
+                + " from fulfillment_dropship_config_line"
                 + " where config_id = ? and sku_ref = ?",
-            request.configId(), skuRef);
+            request.configId(),
+            skuRef);
 
     DropshipSellReasonCode reason = DropshipSellReasonCode.SELLABLE;
     String detail = "配置生效、供应商可供货、差价非负";
@@ -996,9 +1104,11 @@ public class DropshipConfigService {
     }
 
     // 供应商可供货量
-    if (reason == DropshipSellReasonCode.SELLABLE
-        && checkMode.equals("SUPPLIER_STOCK")) {
-      requiredQty = requestedQty.add(buffer == null ? ZERO_QTY : buffer).setScale(QTY_SCALE, RoundingMode.HALF_UP);
+    if (reason == DropshipSellReasonCode.SELLABLE && checkMode.equals("SUPPLIER_STOCK")) {
+      requiredQty =
+          requestedQty
+              .add(buffer == null ? ZERO_QTY : buffer)
+              .setScale(QTY_SCALE, RoundingMode.HALF_UP);
       if (supplierCode.isBlank()) {
         reason = DropshipSellReasonCode.NO_SUPPLIER_STOCK_RECORD;
         detail = "按供应商库存校验，但配置上没有代发供应商，无从问谁要货";
@@ -1007,7 +1117,8 @@ public class DropshipConfigService {
             sql.fetchOne(
                 "select available_qty from fulfillment_dropship_supplier_stock"
                     + " where supplier_code = ? and sku_ref = ?",
-                supplierCode, skuRef);
+                supplierCode,
+                skuRef);
         if (stock == null) {
           // 关键：这是「没人报过」，不是「供应商没货」。所以 available 保持 null。
           reason = DropshipSellReasonCode.NO_SUPPLIER_STOCK_RECORD;
@@ -1055,10 +1166,24 @@ public class DropshipConfigService {
             + "settlement_basis,expected_margin_amount,counts_against_own_inventory,evaluated_at)"
             // 18 列 = 18 个占位符；cast 写在 evaluated_at 这一位上，不放在绑定序列末位之后。
             + " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
-        id, currentTenant(), request.configId(),
-        line == null ? null : line.get("id", UUID.class), skuRef, shopCode, supplierCode,
-        requestedQty, requiredQty, supplierAvailable, sellable, listable, reason.name(), detail,
-        settlementBasis, margin, countsOwn, now);
+        id,
+        currentTenant(),
+        request.configId(),
+        line == null ? null : line.get("id", UUID.class),
+        skuRef,
+        shopCode,
+        supplierCode,
+        requestedQty,
+        requiredQty,
+        supplierAvailable,
+        sellable,
+        listable,
+        reason.name(),
+        detail,
+        settlementBasis,
+        margin,
+        countsOwn,
+        now);
     return new DropshipEvaluationSaved(id, sellable, listable, reason.name());
   }
 
@@ -1076,8 +1201,8 @@ public class DropshipConfigService {
     }
     String sqlWhere = whereClause(where);
     long total =
-        sql.fetchOne("select count(*) c from fulfillment_dropship_event" + sqlWhere,
-                binds.toArray())
+        sql.fetchOne(
+                "select count(*) c from fulfillment_dropship_event" + sqlWhere, binds.toArray())
             .get("c", Long.class);
     List<DropshipEventRow> items =
         sql.fetch(
@@ -1095,23 +1220,25 @@ public class DropshipConfigService {
             "select id,config_id,event_kind,from_status,to_status,detail,actor_membership_id,"
                 + "occurred_at from fulfillment_dropship_event where config_id = ?"
                 + " order by occurred_at desc, id limit ?",
-            configId, limit)
+            configId,
+            limit)
         .map(DropshipConfigService::eventRow);
   }
 
   private void event(
-      UUID configId,
-      UUID lineId,
-      String kind,
-      String from,
-      String to,
-      String detail,
-      UUID actor) {
+      UUID configId, UUID lineId, String kind, String from, String to, String detail, UUID actor) {
     sql.execute(
         "insert into fulfillment_dropship_event(id,tenant_id,config_id,event_kind,from_status,"
             + "to_status,detail,actor_membership_id,occurred_at)"
             + " values (?,?,?,?,?,?,?,?,?::timestamptz)",
-        UUID.randomUUID(), currentTenant(), configId, kind, nz(from), nz(to), nz(detail), actor,
+        UUID.randomUUID(),
+        currentTenant(),
+        configId,
+        kind,
+        nz(from),
+        nz(to),
+        nz(detail),
+        actor,
         OffsetDateTime.now());
   }
 
@@ -1128,74 +1255,111 @@ public class DropshipConfigService {
 
   private static DropshipShopRefRow shopRefRow(Record r) {
     return new DropshipShopRefRow(
-        r.get("id", UUID.class), r.get("shop_code", String.class),
-        r.get("shop_name", String.class), r.get("platform_code", String.class),
-        r.get("region_code", String.class), r.get("active", Boolean.class),
-        r.get("source_system", String.class), r.get("synced_at", OffsetDateTime.class),
+        r.get("id", UUID.class),
+        r.get("shop_code", String.class),
+        r.get("shop_name", String.class),
+        r.get("platform_code", String.class),
+        r.get("region_code", String.class),
+        r.get("active", Boolean.class),
+        r.get("source_system", String.class),
+        r.get("synced_at", OffsetDateTime.class),
         r.get("updated_at", OffsetDateTime.class));
   }
 
   private static DropshipSupplierRefRow supplierRefRow(Record r) {
     return new DropshipSupplierRefRow(
-        r.get("id", UUID.class), r.get("supplier_code", String.class),
-        r.get("supplier_name", String.class), r.get("currency_code", String.class),
-        r.get("quote_valid_from", LocalDate.class), r.get("quote_valid_to", LocalDate.class),
-        r.get("quote_source", String.class), r.get("lead_time_days", BigDecimal.class),
-        r.get("active", Boolean.class), r.get("synced_at", OffsetDateTime.class),
+        r.get("id", UUID.class),
+        r.get("supplier_code", String.class),
+        r.get("supplier_name", String.class),
+        r.get("currency_code", String.class),
+        r.get("quote_valid_from", LocalDate.class),
+        r.get("quote_valid_to", LocalDate.class),
+        r.get("quote_source", String.class),
+        r.get("lead_time_days", BigDecimal.class),
+        r.get("active", Boolean.class),
+        r.get("synced_at", OffsetDateTime.class),
         r.get("updated_at", OffsetDateTime.class));
   }
 
   private static DropshipConfigRow configRow(Record r) {
     return new DropshipConfigRow(
-        r.get("id", UUID.class), r.get("config_code", String.class),
-        r.get("config_name", String.class), r.get("scope_kind", String.class),
-        r.get("shop_code", String.class), r.get("sku_ref", String.class),
-        r.get("fulfillment_path", String.class), r.get("supplier_code", String.class),
+        r.get("id", UUID.class),
+        r.get("config_code", String.class),
+        r.get("config_name", String.class),
+        r.get("scope_kind", String.class),
+        r.get("shop_code", String.class),
+        r.get("sku_ref", String.class),
+        r.get("fulfillment_path", String.class),
+        r.get("supplier_code", String.class),
         r.get("ownership_mode", String.class),
         r.get("counts_against_own_inventory", Boolean.class),
-        r.get("pure_agency_exempt", Boolean.class), r.get("settlement_timing", String.class),
-        r.get("settlement_basis", String.class), r.get("margin_share_rate", BigDecimal.class),
-        r.get("currency_code", String.class), r.get("supplier_cost", BigDecimal.class),
-        r.get("reference_sell_price", BigDecimal.class), r.get("gross_spread", BigDecimal.class),
+        r.get("pure_agency_exempt", Boolean.class),
+        r.get("settlement_timing", String.class),
+        r.get("settlement_basis", String.class),
+        r.get("margin_share_rate", BigDecimal.class),
+        r.get("currency_code", String.class),
+        r.get("supplier_cost", BigDecimal.class),
+        r.get("reference_sell_price", BigDecimal.class),
+        r.get("gross_spread", BigDecimal.class),
         r.get("expected_margin_amount", BigDecimal.class),
         r.get("expected_supplier_amount", BigDecimal.class),
         r.get("availability_check_mode", String.class),
-        r.get("min_supplier_stock_buffer", BigDecimal.class), r.get("listing_policy", String.class),
-        r.get("priority", Integer.class), r.get("status", String.class),
-        r.get("effective_from", OffsetDateTime.class), r.get("effective_to", OffsetDateTime.class),
+        r.get("min_supplier_stock_buffer", BigDecimal.class),
+        r.get("listing_policy", String.class),
+        r.get("priority", Integer.class),
+        r.get("status", String.class),
+        r.get("effective_from", OffsetDateTime.class),
+        r.get("effective_to", OffsetDateTime.class),
         r.get("ownership_confirmed_at", OffsetDateTime.class),
         r.get("ownership_confirmed_note", String.class),
-        r.get("ownership_reviewed_with", String.class), r.get("note", String.class),
-        r.get("version", Integer.class), r.get("created_at", OffsetDateTime.class),
+        r.get("ownership_reviewed_with", String.class),
+        r.get("note", String.class),
+        r.get("version", Integer.class),
+        r.get("created_at", OffsetDateTime.class),
         r.get("updated_at", OffsetDateTime.class));
   }
 
   private static DropshipConfigLineRow lineRow(Record r) {
     return new DropshipConfigLineRow(
-        r.get("id", UUID.class), r.get("config_id", UUID.class), r.get("sku_ref", String.class),
-        r.get("sku_name", String.class), r.get("supplier_cost_override", BigDecimal.class),
+        r.get("id", UUID.class),
+        r.get("config_id", UUID.class),
+        r.get("sku_ref", String.class),
+        r.get("sku_name", String.class),
+        r.get("supplier_cost_override", BigDecimal.class),
         r.get("reference_sell_price_override", BigDecimal.class),
-        r.get("active", Boolean.class), r.get("note", String.class),
-        r.get("created_at", OffsetDateTime.class), r.get("updated_at", OffsetDateTime.class));
+        r.get("active", Boolean.class),
+        r.get("note", String.class),
+        r.get("created_at", OffsetDateTime.class),
+        r.get("updated_at", OffsetDateTime.class));
   }
 
   private static DropshipSupplierStockRow stockRow(Record r) {
     return new DropshipSupplierStockRow(
-        r.get("id", UUID.class), r.get("supplier_code", String.class),
-        r.get("sku_ref", String.class), r.get("available_qty", BigDecimal.class),
-        r.get("stock_source", String.class), r.get("observed_at", OffsetDateTime.class),
+        r.get("id", UUID.class),
+        r.get("supplier_code", String.class),
+        r.get("sku_ref", String.class),
+        r.get("available_qty", BigDecimal.class),
+        r.get("stock_source", String.class),
+        r.get("observed_at", OffsetDateTime.class),
         r.get("updated_at", OffsetDateTime.class));
   }
 
   private static DropshipEvaluationRow evaluationRow(Record r) {
     return new DropshipEvaluationRow(
-        r.get("id", UUID.class), r.get("config_id", UUID.class),
-        r.get("config_line_id", UUID.class), r.get("sku_ref", String.class),
-        r.get("shop_code", String.class), r.get("supplier_code", String.class),
-        r.get("requested_qty", BigDecimal.class), r.get("required_qty", BigDecimal.class),
-        r.get("supplier_available_qty", BigDecimal.class), r.get("sellable", Boolean.class),
-        r.get("listable", Boolean.class), r.get("reason_code", String.class),
-        r.get("reason_detail", String.class), r.get("settlement_basis", String.class),
+        r.get("id", UUID.class),
+        r.get("config_id", UUID.class),
+        r.get("config_line_id", UUID.class),
+        r.get("sku_ref", String.class),
+        r.get("shop_code", String.class),
+        r.get("supplier_code", String.class),
+        r.get("requested_qty", BigDecimal.class),
+        r.get("required_qty", BigDecimal.class),
+        r.get("supplier_available_qty", BigDecimal.class),
+        r.get("sellable", Boolean.class),
+        r.get("listable", Boolean.class),
+        r.get("reason_code", String.class),
+        r.get("reason_detail", String.class),
+        r.get("settlement_basis", String.class),
         r.get("expected_margin_amount", BigDecimal.class),
         r.get("counts_against_own_inventory", Boolean.class),
         r.get("evaluated_at", OffsetDateTime.class));
@@ -1236,8 +1400,8 @@ public class DropshipConfigService {
   /**
    * 我方毛利（差价抽成时 = 差价 × 留存比例；固定供货价时 = 差价）。
    *
-   * <p>与 DB 生成列 {@code expected_margin_amount} 同一套口径（全 {@code BigDecimal}，
-   * HALF_UP 到 4 位）。带覆盖价时按覆盖价重算 —— 那正是明细行存在的意义。
+   * <p>与 DB 生成列 {@code expected_margin_amount} 同一套口径（全 {@code BigDecimal}， HALF_UP 到 4
+   * 位）。带覆盖价时按覆盖价重算 —— 那正是明细行存在的意义。
    */
   private static BigDecimal marginOf(Record config, Record line) {
     BigDecimal cost = costOf(config, line);
@@ -1245,7 +1409,9 @@ public class DropshipConfigService {
     BigDecimal spread = sell.subtract(cost).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     if (config.get("settlement_basis", String.class).equals("MARGIN_SHARE")) {
       BigDecimal rate = config.get("margin_share_rate", BigDecimal.class);
-      return spread.multiply(rate == null ? ZERO_RATE : rate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+      return spread
+          .multiply(rate == null ? ZERO_RATE : rate)
+          .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
     }
     return spread;
   }
@@ -1352,9 +1518,7 @@ public class DropshipConfigService {
     try {
       return DropshipStockSource.valueOf(value.trim().toUpperCase(Locale.ROOT));
     } catch (RuntimeException e) {
-      throw bad(
-          "未知的库存来源「" + value
-              + "」：只能是 MODULE_7_1_1_3 / MODULE_3_6_2 / TENANT_MAINTAINED");
+      throw bad("未知的库存来源「" + value + "」：只能是 MODULE_7_1_1_3 / MODULE_3_6_2 / TENANT_MAINTAINED");
     }
   }
 
@@ -1402,8 +1566,8 @@ public class DropshipConfigService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义
-   * GUC **复位成空串**而不是「回到未设置」，直接 cast 会报 uuid 语法错。
+   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义 GUC **复位成空串**而不是「回到未设置」，直接 cast 会报
+   * uuid 语法错。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")

@@ -6,11 +6,11 @@
 
 ## 决策摘要
 
-| 缺口 | 结论 |
-| --- | --- |
-| 蓝图路由 `/settings/books` 不存在 | 新建页面，真实调用 6 个新端点 |
-| api-proxy 白名单没有三段新路径 | 补 inner alternation，反向抽取断言 |
-| OpenAPI 契约未重生成 | `--spec-dir` 重跑 codegen |
+| 缺口                              | 结论                               |
+| --------------------------------- | ---------------------------------- |
+| 蓝图路由 `/settings/books` 不存在 | 新建页面，真实调用 6 个新端点      |
+| api-proxy 白名单没有三段新路径    | 补 inner alternation，反向抽取断言 |
+| OpenAPI 契约未重生成              | `--spec-dir` 重跑 codegen          |
 
 ### ① 页面：照 17.1.2.2 的写法新建，不另起风格
 
@@ -100,6 +100,7 @@ export type BookCategory = NonNullable<LedgerBookItem['bookCategory']>;
 ## 文件清单
 
 新增：
+
 - `apps/web/src/app/settings/books/page.tsx`
 - `apps/web/src/components/iam/ledger-book-workspace.tsx`
 - `apps/web/src/components/iam/ledger-book-model.ts`
@@ -107,6 +108,7 @@ export type BookCategory = NonNullable<LedgerBookItem['bookCategory']>;
 - `apps/web/src/lib/ledger-book-api-proxy.test.ts`
 
 修改：
+
 - `apps/web/src/lib/api-proxy.ts`（identity 白名单两处内层 alternation）
 - `apps/web/src/app/api/iam/[...path]/route.test.ts`（新增放行 + 反向拒绝用例）
 - `apps/web/src/components/iam/identity-workspace.tsx`（导航入口 + `visible()` 权限码）
@@ -115,15 +117,15 @@ export type BookCategory = NonNullable<LedgerBookItem['bookCategory']>;
 
 ## 验证（真实结果）
 
-| 命令 | 结果 |
-| --- | --- |
-| `backend && ./mvnw verify` | BUILD SUCCESS，700 例 0 失败；identity 191 例含 `LedgerBookIntegrationTest` 8 例 |
-| `pnpm typecheck` | 3/3 通过 |
-| `pnpm lint` | 通过（仅 catalog/warehouse 既有 warning，非本车道文件） |
-| `pnpm test` | 83 文件 **1475 例全绿**（新增 `ledger-book-api-proxy` 12 例 + `ledger-book-model` 7 例） |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过，路由表出现 `/settings/books`（6.58 kB） |
-| `node tools/module-progress/sync.mjs --check` | ✓ 台账与蓝图一致 |
-| 台账完整性 | 465 行、无重复 ID |
+| 命令                                                         | 结果                                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `backend && ./mvnw verify`                                   | BUILD SUCCESS，700 例 0 失败；identity 191 例含 `LedgerBookIntegrationTest` 8 例         |
+| `pnpm typecheck`                                             | 3/3 通过                                                                                 |
+| `pnpm lint`                                                  | 通过（仅 catalog/warehouse 既有 warning，非本车道文件）                                  |
+| `pnpm test`                                                  | 83 文件 **1475 例全绿**（新增 `ledger-book-api-proxy` 12 例 + `ledger-book-model` 7 例） |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过，路由表出现 `/settings/books`（6.58 kB）                                            |
+| `node tools/module-progress/sync.mjs --check`                | ✓ 台账与蓝图一致                                                                         |
+| 台账完整性                                                   | 465 行、无重复 ID                                                                        |
 
 **本车道跑 verify 期间同时存活的 PG 容器数：1**（`starcon-mig-v2`，是常驻的开发库，
 不是 Testcontainers 起的）。verify 结束后仍为 1 —— Testcontainers 的容器已被 Ryuk 回收，

@@ -16,12 +16,10 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.1.1.3 可用量计算：**全系统唯一的可售量口径**。
  *
- * <p>蓝图关系段的原话是「可售量是全系统的单一口径来源，不允许各系统各自算 —— 这是超卖的第一根源」。
- * 兑现这句话的办法不是「再建一张表」，而是<b>让这个算式只有这一处</b>：
- * 本类里的每一个数都由 {@code stock_bucket}（V2）× {@code inventory_quality_status}（V1）×
- * {@code warehouse_location / inventory_lot}（V2）× {@code inventory_policy}（V1）现算，
- * 读时不写、算完不留痕。所以本模块<b>没有自己的迁移</b>：派生数据存下来只会比它描述的库存更早过期，
- * 而过期的那一份恰好是防超卖用的数。
+ * <p>蓝图关系段的原话是「可售量是全系统的单一口径来源，不允许各系统各自算 —— 这是超卖的第一根源」。 兑现这句话的办法不是「再建一张表」，而是<b>让这个算式只有这一处</b>：
+ * 本类里的每一个数都由 {@code stock_bucket}（V2）× {@code inventory_quality_status}（V1）× {@code
+ * warehouse_location / inventory_lot}（V2）× {@code inventory_policy}（V1）现算，
+ * 读时不写、算完不留痕。所以本模块<b>没有自己的迁移</b>：派生数据存下来只会比它描述的库存更早过期， 而过期的那一份恰好是防超卖用的数。
  *
  * <p><b>算式（与 {@link AvailableQuantityModels} 的类头逐字对应）</b>：
  *
@@ -32,36 +30,27 @@ import org.springframework.web.server.ResponseStatusException;
  *   ④ 安全缓冲     = Σ_SKU inventory_policy.safety_stock（SKU &gt; WAREHOUSE &gt; DEFAULT）
  * </pre>
  *
- * <p><b>预占（7.2.1.2 / V107）是从①里进来的，不是另减一次。</b>{@code stock_bucket.reserved}
- * 由 V2 的触发器同步自 {@code inventory_reservation}，V107 的分配表把「圈在哪」钉到
- * 仓/货位/批次三维。蓝图的总纲写着「available = on_hand − reserved，<b>没有第三个来源</b>」，
- * 所以本模块<b>不去 join reservation_allocation 重新累一遍</b>：那样等于把预占扣两次 ——
- * 一次在 {@code reserved} 列里，一次在分配表里。两边一旦不一致（分配表有终态行、余额还没回写），
- * 可售量就会凭空少一块，而且少得毫无规律。分配表在本模块里的正确用法是**溯源**（哪个预占占了哪些量），
- * 那是 7.2.1.2 的输出，不是本模块的输入。
+ * <p><b>预占（7.2.1.2 / V107）是从①里进来的，不是另减一次。</b>{@code stock_bucket.reserved} 由 V2 的触发器同步自 {@code
+ * inventory_reservation}，V107 的分配表把「圈在哪」钉到 仓/货位/批次三维。蓝图的总纲写着「available = on_hand −
+ * reserved，<b>没有第三个来源</b>」， 所以本模块<b>不去 join reservation_allocation 重新累一遍</b>：那样等于把预占扣两次 —— 一次在
+ * {@code reserved} 列里，一次在分配表里。两边一旦不一致（分配表有终态行、余额还没回写），
+ * 可售量就会凭空少一块，而且少得毫无规律。分配表在本模块里的正确用法是**溯源**（哪个预占占了哪些量）， 那是 7.2.1.2 的输出，不是本模块的输入。
  *
- * <p><b>「不重复扣减」的实现方式是互斥五片，而不是连减五刀。</b>待检、残次、未上架、批次冻结
- * 都是把 ② 的<b>筛选范围</b>缩小，它们与「合格可售」那片互斥且穷尽，于是
- * {@code Σ五片 == available} 恒等。若改成先算 available 再依次减，残次货会被扣两次
- * （先当不合格排除、再当扣减项），而恒等式会当场破掉。
+ * <p><b>「不重复扣减」的实现方式是互斥五片，而不是连减五刀。</b>待检、残次、未上架、批次冻结 都是把 ② 的<b>筛选范围</b>缩小，它们与「合格可售」那片互斥且穷尽，于是
+ * {@code Σ五片 == available} 恒等。若改成先算 available 再依次减，残次货会被扣两次 （先当不合格排除、再当扣减项），而恒等式会当场破掉。
  *
- * <p><b>与 7.2.1.3（并行车道）的边界</b>：本模块<b>不实现释放，也不对预占用量做自动过期扣减</b>。
- * 仍在 HELD 态且已超时的那部分预占<b>照扣</b>（它此刻确实占着货），并在
- * {@link AvailableQuantityCapabilities#releaseNote()} 里说明这一点。
- * 等 7.2.1.3 落地后，改的是它把 {@code reserved} 减下去，本模块的算式一行都不用动 ——
- * 这也正是把预占只当作 {@code reserved} 列、而不在这里重算一遍的理由。
+ * <p><b>与 7.2.1.3（并行车道）的边界</b>：本模块<b>不实现释放，也不对预占用量做自动过期扣减</b>。 仍在 HELD
+ * 态且已超时的那部分预占<b>照扣</b>（它此刻确实占着货），并在 {@link AvailableQuantityCapabilities#releaseNote()} 里说明这一点。 等
+ * 7.2.1.3 落地后，改的是它把 {@code reserved} 减下去，本模块的算式一行都不用动 —— 这也正是把预占只当作 {@code reserved}
+ * 列、而不在这里重算一遍的理由。
  *
- * <p><b>递归 CTE 不参与统计</b>，聚合各自独立成查询（与 8.5.2.1 同一条纪律）：
- * 安全缓冲走 {@code scope_pairs} 这张 distinct 集合 + 三个标量子查询，<b>不</b>把它
- * join 进主聚合再求和 —— join 进来会让缓冲按 bucket 行数被放大 N 倍。
+ * <p><b>递归 CTE 不参与统计</b>，聚合各自独立成查询（与 8.5.2.1 同一条纪律）： 安全缓冲走 {@code scope_pairs} 这张 distinct 集合 +
+ * 三个标量子查询，<b>不</b>把它 join 进主聚合再求和 —— join 进来会让缓冲按 bucket 行数被放大 N 倍。
  */
 @Service
 public class AvailableQuantityService {
 
-  /**
-   * 主聚合的固定 FROM。质量状态、库位、批次都是<b>本服务</b>的表，所以这里可以放心 JOIN
-   * （与 7.1.1.2 的 FROM 同一套口径，列都逐字相同）。
-   */
+  /** 主聚合的固定 FROM。质量状态、库位、批次都是<b>本服务</b>的表，所以这里可以放心 JOIN （与 7.1.1.2 的 FROM 同一套口径，列都逐字相同）。 */
   private static final String FROM =
       clause(
           """
@@ -103,13 +92,13 @@ public class AvailableQuantityService {
       "case when q.role='PENDING_INSPECTION' then b.available else 0 end";
 
   /** 片三：残次。 */
-  private static final String DEFECTIVE = "case when q.role='DEFECTIVE' then b.available else 0 end";
+  private static final String DEFECTIVE =
+      "case when q.role='DEFECTIVE' then b.available else 0 end";
 
   /**
    * 片四：未上架 / 不可发货。
    *
-   * <p>带 {@code q.role='SELLABLE'} 前缀是<b>互斥性</b>的要求：待检品放在不可拣库位上，
-   * 它只该落进片二。若这里不限定 role，同一批货会同时进片二与片四，
+   * <p>带 {@code q.role='SELLABLE'} 前缀是<b>互斥性</b>的要求：待检品放在不可拣库位上， 它只该落进片二。若这里不限定 role，同一批货会同时进片二与片四，
    * 「Σ五片 == available」当场破掉，而破掉的方式正是蓝图禁止的「重复扣减」。
    */
   private static final String UNLISTED =
@@ -128,32 +117,44 @@ public class AvailableQuantityService {
   /**
    * 五片的量、行数与合计。
    *
-   * <p>量与行数<b>同一条 SQL、同一条 where</b> 算出来，所以界面上不可能出现
-   * 「这一片有 500 件但一行都没有」这种无法解释的组合 —— 那只会是两处口径漂移的产物。
+   * <p>量与行数<b>同一条 SQL、同一条 where</b> 算出来，所以界面上不可能出现 「这一片有 500 件但一行都没有」这种无法解释的组合 —— 那只会是两处口径漂移的产物。
    */
   private static final String SLICE_COLUMNS =
-      " coalesce(sum(" + SELLABLE + "),0) as s_sellable,"
-          + " coalesce(sum(" + PENDING + "),0) as s_pending,"
-          + " coalesce(sum(" + DEFECTIVE + "),0) as s_defective,"
-          + " coalesce(sum(" + UNLISTED + "),0) as s_unlisted,"
-          + " coalesce(sum(" + BLOCKED_LOT + "),0) as s_blocked_lot,"
-          + " count(*) filter (where " + QUALIFIED + ") as bc_sellable,"
+      " coalesce(sum("
+          + SELLABLE
+          + "),0) as s_sellable,"
+          + " coalesce(sum("
+          + PENDING
+          + "),0) as s_pending,"
+          + " coalesce(sum("
+          + DEFECTIVE
+          + "),0) as s_defective,"
+          + " coalesce(sum("
+          + UNLISTED
+          + "),0) as s_unlisted,"
+          + " coalesce(sum("
+          + BLOCKED_LOT
+          + "),0) as s_blocked_lot,"
+          + " count(*) filter (where "
+          + QUALIFIED
+          + ") as bc_sellable,"
           + " count(*) filter (where q.role='PENDING_INSPECTION') as bc_pending,"
           + " count(*) filter (where q.role='DEFECTIVE') as bc_defective,"
           + " count(*) filter (where q.role='SELLABLE' and (not loc.pickable or loc.status<>'ACTIVE')) as bc_unlisted,"
           + " count(*) filter (where q.role='SELLABLE' and loc.pickable and loc.status='ACTIVE'"
           + " and lot.id is not null and lot.status<>'ACTIVE') as bc_blocked_lot,"
-          + " coalesce(sum(" + SLICES_TOTAL + "),0) as slices_total,";
+          + " coalesce(sum("
+          + SLICES_TOTAL
+          + "),0) as slices_total,";
 
   /** 排序键白名单。排序键来自 query string，只允许这四个；非法键报 400。 */
-  private static final List<String> SORTS =
-      List.of("ON_HAND", "AVAILABLE", "SELLABLE", "SKU_CODE");
+  private static final List<String> SORTS = List.of("ON_HAND", "AVAILABLE", "SELLABLE", "SKU_CODE");
 
   /**
    * 可售量算式原文，随响应返回。
    *
-   * <p>蓝图说可售量是全系统的单一口径来源 —— 那么口径本身就必须能被每个消费端读到，
-   * 而不是只躺在文档里等人来对。同一段话也在 {@link AvailableQuantityCapabilities} 里。
+   * <p>蓝图说可售量是全系统的单一口径来源 —— 那么口径本身就必须能被每个消费端读到， 而不是只躺在文档里等人来对。同一段话也在 {@link
+   * AvailableQuantityCapabilities} 里。
    */
   private static final String FORMULA =
       "sellable = max(0, Σ available[role='SELLABLE' ∧ location.pickable ∧ location.status='ACTIVE' "
@@ -162,8 +163,7 @@ public class AvailableQuantityService {
 
   /** 五片恒等式原文，随响应返回。 */
   private static final String SLICE_IDENTITY =
-      "合格可售 + 待检 + 残次 + 未上架/不可发货 + 批次冻结 == Σ available"
-          + "（五片互斥且穷尽；被排除的片是**筛选**不是扣减，不重复扣减）";
+      "合格可售 + 待检 + 残次 + 未上架/不可发货 + 批次冻结 == Σ available" + "（五片互斥且穷尽；被排除的片是**筛选**不是扣减，不重复扣减）";
 
   private final DSLContext sql;
   private final SellablePolicyService sellablePolicies;
@@ -175,9 +175,7 @@ public class AvailableQuantityService {
 
   // ------------------------------------------------------------ 能力声明
 
-  /**
-   * 接入情况。前端据此<b>禁用</b>不可用维度并说明归属模块，而不是让用户填完再收一个 422。
-   */
+  /** 接入情况。前端据此<b>禁用</b>不可用维度并说明归属模块，而不是让用户填完再收一个 422。 */
   public AvailableQuantityCapabilities capabilities() {
     return new AvailableQuantityCapabilities(
         true,
@@ -192,15 +190,13 @@ public class AvailableQuantityService {
         "批次状态 inventory_lot.status（ACTIVE / DEPLETED / EXPIRED）已交付，非 ACTIVE 的批次不计入可售",
         true,
         "7.2.1 / V1",
-        "安全缓冲取 inventory_policy.safety_stock，按 SKU > WAREHOUSE > DEFAULT 解析；"
-            + "未配置时为 null 而不是 0",
+        "安全缓冲取 inventory_policy.safety_stock，按 SKU > WAREHOUSE > DEFAULT 解析；" + "未配置时为 null 而不是 0",
         true,
         "7.2.2.1 / V56",
         "生效渠道口径只读取与展示，平台回写额仍由 7.2.2.1 算；本模块不重复实现共享池分配",
         false,
         "7.3.1.2",
-        "按日期的效期剔除（lot.expires_on < 今天）刻意不做：没有效期策略时凭空剔货，"
-            + "会让一个还没设效期的租户少一批可售，而少掉的那批正是没人能解释的部分",
+        "按日期的效期剔除（lot.expires_on < 今天）刻意不做：没有效期策略时凭空剔货，" + "会让一个还没设效期的租户少一批可售，而少掉的那批正是没人能解释的部分",
         false,
         "7.2.1.3",
         "预占过期自动释放属 7.2.1.3（并行车道），本模块不实现释放，也不对预占用量做自动过期扣减",
@@ -210,8 +206,7 @@ public class AvailableQuantityService {
             + "它落地后由它把 reserved 减下去，本模块算式无需改动",
         FORMULA,
         SLICE_IDENTITY,
-        "可售量不落库、不留历史快照：请求一个历史时刻的可售量没有定义（预占与释放在动），"
-            + "computedAt 取服务端当前时刻，不接受调用方传时刻");
+        "可售量不落库、不留历史快照：请求一个历史时刻的可售量没有定义（预占与释放在动），" + "computedAt 取服务端当前时刻，不接受调用方传时刻");
   }
 
   // ------------------------------------------------------------ 报告
@@ -282,7 +277,9 @@ public class AvailableQuantityService {
                 + " coalesce(sum(b.on_hand),0) as on_hand,"
                 + " coalesce(sum(b.reserved),0) as reserved,"
                 + " coalesce(sum(b.available),0) as available,"
-                + " coalesce(sum(" + SELLABLE + "),0) as sellable_before_buffer,"
+                + " coalesce(sum("
+                + SELLABLE
+                + "),0) as sellable_before_buffer,"
                 + " count(*) as bucket_count,"
                 + " count(distinct b.warehouse_id) as warehouse_count,"
                 + " count(distinct b.location_id) as location_count,"
@@ -295,8 +292,8 @@ public class AvailableQuantityService {
             append(binds, size, (long) page * size));
 
     long total =
-        sql.fetchOne(
-                "select count(distinct b.sku_id)" + FROM + w, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(distinct b.sku_id)" + FROM + w, binds.toArray())
+            .get(0, Long.class);
 
     return new AvailableQuantityPage(
         totals(totals, buffers),
@@ -304,8 +301,7 @@ public class AvailableQuantityService {
         total,
         page,
         size,
-        "缓冲按 SKU 解析后汇总：SKU 档只计一次，WAREHOUSE 档按范围内该 SKU 所在的仓各计一次，"
-            + "避免同一份安全库存被多个 bucket 行放大");
+        "缓冲按 SKU 解析后汇总：SKU 档只计一次，WAREHOUSE 档按范围内该 SKU 所在的仓各计一次，" + "避免同一份安全库存被多个 bucket 行放大");
   }
 
   // ------------------------------------------------------------ 合计组装
@@ -322,9 +318,8 @@ public class AvailableQuantityService {
   /**
    * 由一行聚合结果组装合计与拆解。
    *
-   * <p>{@code safetyBuffer}（租户配没配）与 {@code safetyBufferDeducted}（这次减了多少）
-   * 是<b>两个不同的数</b>，必须分开：没配缓冲时 deducted = 0（算式里没有减项），
-   * 但 safetyBuffer 必须是 null 而不是 0 —— 「没留缓冲」与「留了 0 件缓冲」在界面上
+   * <p>{@code safetyBuffer}（租户配没配）与 {@code safetyBufferDeducted}（这次减了多少） 是<b>两个不同的数</b>，必须分开：没配缓冲时
+   * deducted = 0（算式里没有减项）， 但 safetyBuffer 必须是 null 而不是 0 —— 「没留缓冲」与「留了 0 件缓冲」在界面上
    * 必须能区分，否则运营会以为系统替他保住了 0 件。
    */
   private AvailableQuantityTotals totals(Record r, Map<UUID, SafetyBuffer> buffers) {
@@ -348,18 +343,41 @@ public class AvailableQuantityService {
 
     var slices =
         List.of(
-            slice("SELLABLE", "合格可售", true, "role=SELLABLE ∧ 库位可拣启用 ∧ 批次未冻结",
-                decimal(r, "s_sellable"), count(r, "bc_sellable")),
-            slice("PENDING_INSPECTION", "待检", false, "role=PENDING_INSPECTION，被排除不重复扣减",
-                decimal(r, "s_pending"), count(r, "bc_pending")),
-            slice("DEFECTIVE", "残次", false, "role=DEFECTIVE，被排除不重复扣减",
-                decimal(r, "s_defective"), count(r, "bc_defective")),
-            slice("UNLISTED", "未上架 / 不可发货", false,
+            slice(
+                "SELLABLE",
+                "合格可售",
+                true,
+                "role=SELLABLE ∧ 库位可拣启用 ∧ 批次未冻结",
+                decimal(r, "s_sellable"),
+                count(r, "bc_sellable")),
+            slice(
+                "PENDING_INSPECTION",
+                "待检",
+                false,
+                "role=PENDING_INSPECTION，被排除不重复扣减",
+                decimal(r, "s_pending"),
+                count(r, "bc_pending")),
+            slice(
+                "DEFECTIVE",
+                "残次",
+                false,
+                "role=DEFECTIVE，被排除不重复扣减",
+                decimal(r, "s_defective"),
+                count(r, "bc_defective")),
+            slice(
+                "UNLISTED",
+                "未上架 / 不可发货",
+                false,
                 "role=SELLABLE 但库位不可拣或已停用；**排除**而非从可售基数再扣一次",
-                decimal(r, "s_unlisted"), count(r, "bc_unlisted")),
-            slice("BLOCKED_LOT", "批次已冻结 / 耗尽 / 过期", false,
+                decimal(r, "s_unlisted"),
+                count(r, "bc_unlisted")),
+            slice(
+                "BLOCKED_LOT",
+                "批次已冻结 / 耗尽 / 过期",
+                false,
                 "role=SELLABLE、库位可拣，但批次状态非 ACTIVE；**排除**而非再扣一次",
-                decimal(r, "s_blocked_lot"), count(r, "bc_blocked_lot")));
+                decimal(r, "s_blocked_lot"),
+                count(r, "bc_blocked_lot")));
 
     // 恒等式判定位：五片之和必须恰好等于 available。库里有 CHECK(available>=0) 与
     // V2 的 balance↔bucket 守恒触发器兜底，但恒等式本身坏掉时（口径改错）
@@ -387,7 +405,8 @@ public class AvailableQuantityService {
 
   private AvailableQuantityRow row(Record r, SafetyBuffer buffer) {
     BigDecimal before = decimal(r, "sellable_before_buffer");
-    BigDecimal value = buffer == null || buffer.buffer() == null ? BigDecimal.ZERO : buffer.buffer();
+    BigDecimal value =
+        buffer == null || buffer.buffer() == null ? BigDecimal.ZERO : buffer.buffer();
     BigDecimal raw = before.subtract(value);
     boolean exceeds = raw.signum() < 0;
     return new AvailableQuantityRow(
@@ -426,17 +445,14 @@ public class AvailableQuantityService {
    * <p><b>三条纪律</b>：
    *
    * <ol>
-   *   <li><b>不 join 进主聚合。</b>{@code scope_pairs} 先把 (tenant, sku, warehouse) 去重，
-   *       再算缓冲。若直接 join 进主聚合，缓冲会被 bucket 行数放大 —— 一个 SKU 有 20 条
-   *       bucket 记录，它的安全库存就被扣 20 次。
-   *   <li><b>SKU 档只计一次，WAREHOUSE 档按仓各计一次。</b>安全库存的承诺单位不同：
-   *       SKU 档是「这个 SKU 全网留 N 件」，WAREHOUSE 档是「这个仓给这个 SKU 留 N 件」。
-   *       一个 SKU 落在 3 个仓上、3 个仓各有 WAREHOUSE 档，求和是对的（3 份承诺），
-   *       而 SKU 档一旦命中就必须只算一份 —— 否则同一份承诺被算 3 次。
-   *   <li><b>三个分支都只取 {@code safety_stock IS NOT NULL} 的行。</b>这样
-   *       {@code coalesce} 命中的来源与 {@code scope_type} 判定的来源必然一致；
-   *       若 WAREHOUSE 档存在但 safety_stock 为 null 而实际值来自 DEFAULT，
-   *       scope_type 不能报成 WAREHOUSE（那是另一条策略，与本值无关）。
+   *   <li><b>不 join 进主聚合。</b>{@code scope_pairs} 先把 (tenant, sku, warehouse) 去重， 再算缓冲。若直接 join
+   *       进主聚合，缓冲会被 bucket 行数放大 —— 一个 SKU 有 20 条 bucket 记录，它的安全库存就被扣 20 次。
+   *   <li><b>SKU 档只计一次，WAREHOUSE 档按仓各计一次。</b>安全库存的承诺单位不同： SKU 档是「这个 SKU 全网留 N 件」，WAREHOUSE
+   *       档是「这个仓给这个 SKU 留 N 件」。 一个 SKU 落在 3 个仓上、3 个仓各有 WAREHOUSE 档，求和是对的（3 份承诺）， 而 SKU 档一旦命中就必须只算一份
+   *       —— 否则同一份承诺被算 3 次。
+   *   <li><b>三个分支都只取 {@code safety_stock IS NOT NULL} 的行。</b>这样 {@code coalesce} 命中的来源与 {@code
+   *       scope_type} 判定的来源必然一致； 若 WAREHOUSE 档存在但 safety_stock 为 null 而实际值来自 DEFAULT， scope_type
+   *       不能报成 WAREHOUSE（那是另一条策略，与本值无关）。
    * </ol>
    */
   private Map<UUID, SafetyBuffer> buffers(String w, List<Object> binds) {
@@ -496,8 +512,11 @@ public class AvailableQuantityService {
               UUID tenant = r.get("tenant_id", UUID.class);
               UUID sku = r.get("sku_id", UUID.class);
               if (tenant != null && sku != null) {
-                result.put(sku, new SafetyBuffer(r.get("safety_stock", BigDecimal.class),
-                    r.get("scope_type", String.class)));
+                result.put(
+                    sku,
+                    new SafetyBuffer(
+                        r.get("safety_stock", BigDecimal.class),
+                        r.get("scope_type", String.class)));
               }
             });
     return result;
@@ -508,9 +527,8 @@ public class AvailableQuantityService {
   /**
    * 生效的渠道口径，<b>只读与展示</b>。
    *
-   * <p>刻意不重算平台回写额：共享池的分配与池余量是 7.2.2.1 的产出（{@code /pools} 与
-   * {@code /calculation}），本模块再造一遍就会与它漂移，而这两个数都会被回写到平台上 ——
-   * 漂移的直接后果是超卖或断货。
+   * <p>刻意不重算平台回写额：共享池的分配与池余量是 7.2.2.1 的产出（{@code /pools} 与 {@code
+   * /calculation}），本模块再造一遍就会与它漂移，而这两个数都会被回写到平台上 —— 漂移的直接后果是超卖或断货。
    */
   private AvailableChannelPolicy channelPolicy(AvailableQuantityQuery q) {
     // 档位名直接透传给 7.2.2.1，由**它**裁决非法值并抛 400 —— 本模块不维护第二份
@@ -520,7 +538,9 @@ public class AvailableQuantityService {
     return new AvailableChannelPolicy(
         row != null,
         row == null ? null : row.id(),
-        q.channelScopeType() == null || q.channelScopeType().isBlank() ? "DEFAULT" : q.channelScopeType(),
+        q.channelScopeType() == null || q.channelScopeType().isBlank()
+            ? "DEFAULT"
+            : q.channelScopeType(),
         effective.resolvedScopeType().name(),
         row == null ? null : row.poolMode().name(),
         row == null ? null : row.poolKey(),
@@ -542,10 +562,9 @@ public class AvailableQuantityService {
   /**
    * 筛选条件。
    *
-   * <p><b>所有条件只引用 {@code b}（bucket 事实表）与 {@code s}（sku 参照）</b>，
-   * 所以同一段条件既能用在大 FROM 上，也能用在 {@code scope_pairs} 那条只 join 了
-   * {@code sku_ref} 的窄查询上 —— 缓冲解析与主聚合因此共用<b>同一份</b>筛选定义，
-   * 不会出现「主聚合按 A 范围算、缓冲按 B 范围算」这种错得毫无规律的不一致。
+   * <p><b>所有条件只引用 {@code b}（bucket 事实表）与 {@code s}（sku 参照）</b>， 所以同一段条件既能用在大 FROM 上，也能用在 {@code
+   * scope_pairs} 那条只 join 了 {@code sku_ref} 的窄查询上 —— 缓冲解析与主聚合因此共用<b>同一份</b>筛选定义， 不会出现「主聚合按 A
+   * 范围算、缓冲按 B 范围算」这种错得毫无规律的不一致。
    */
   private void conditions(AvailableQuantityQuery q, List<String> where, List<Object> binds) {
     if (q.warehouseId() != null) {

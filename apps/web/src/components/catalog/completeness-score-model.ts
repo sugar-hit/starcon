@@ -70,7 +70,9 @@ export function fetchScores(query: ScoreListQuery) {
 }
 
 export function fetchScorecard(ownerType: string, ownerId: string) {
-  return api<CompletenessScorecard>(`${ROOT}/${encodeURIComponent(ownerType)}/${encodeURIComponent(ownerId)}`);
+  return api<CompletenessScorecard>(
+    `${ROOT}/${encodeURIComponent(ownerType)}/${encodeURIComponent(ownerId)}`,
+  );
 }
 
 export function fetchGaps(params: {
@@ -99,11 +101,7 @@ export function fetchCustoms(skuId: string) {
 }
 
 export function saveCustoms(skuId: string, body: CustomsDeclarationInput) {
-  return api<CustomsDeclaration>(
-    `${ROOT}/customs/skus/${encodeURIComponent(skuId)}`,
-    'PUT',
-    body,
-  );
+  return api<CustomsDeclaration>(`${ROOT}/customs/skus/${encodeURIComponent(skuId)}`, 'PUT', body);
 }
 
 export function deleteCustoms(skuId: string, version: number) {
@@ -147,7 +145,11 @@ export function deleteCertification(skuId: string, certId: string, version: numb
  * 让用户自己给自己打分，而完整度直接决定能否刊登与能否清关。
  */
 export function evaluate(ownerType: string, ownerIds: string[], note?: string) {
-  return api<CompletenessEvaluationResult>(`${ROOT}/evaluations`, 'POST', { ownerType, ownerIds, note });
+  return api<CompletenessEvaluationResult>(`${ROOT}/evaluations`, 'POST', {
+    ownerType,
+    ownerIds,
+    note,
+  });
 }
 
 // ================================================================ 展示口径（R2 / R4）
@@ -297,7 +299,10 @@ export function blankToNull(value: string) {
  * 允许数字与字母，小数点 / 短横线会被去掉。
  */
 export function hsCodeProblem(value: string) {
-  const code = (value.trim().replace(/[\s.\-_/]/g, '')).toUpperCase();
+  const code = value
+    .trim()
+    .replace(/[\s.\-_/]/g, '')
+    .toUpperCase();
   if (code === '') return null; // 空 = 未填，由评分判缺失，不在表单层拦
   if (code.length > 32) return 'HS 编码最多 32 个字符';
   if (!/^[0-9A-Z]+$/.test(code)) return `HS 编码只含数字与字母：${code}`;
@@ -384,9 +389,7 @@ export function certificationProblem(input: {
 
 /** 把空白元素从申报要素里剔掉（后端也会剔，但前端剔了列表更好读）。 */
 export function cleanElements(elements: string[]) {
-  return elements
-    .map((element) => element.trim())
-    .filter((element) => element !== '');
+  return elements.map((element) => element.trim()).filter((element) => element !== '');
 }
 
 // ================================================================ 错误态

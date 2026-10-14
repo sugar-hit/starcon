@@ -303,7 +303,10 @@ export function DropshipConfigWorkspace() {
                 ))}
               </ul>
             ) : (
-              <EmptyState title="还没有店铺投影" description="先登记一个店铺，代发配置才能按店铺生效。" />
+              <EmptyState
+                title="还没有店铺投影"
+                description="先登记一个店铺，代发配置才能按店铺生效。"
+              />
             )}
             <div className="flex flex-wrap items-end gap-2">
               <Field label="店铺 code">
@@ -322,7 +325,7 @@ export function DropshipConfigWorkspace() {
               </Field>
               <Field label="来源">
                 <select
-                  className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+                  className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
                   value={shopForm.sourceSystem}
                   onChange={(e) => setShopForm({ ...shopForm, sourceSystem: e.target.value })}
                 >
@@ -383,7 +386,9 @@ export function DropshipConfigWorkspace() {
                 <Input
                   className="w-36"
                   value={supplierForm.supplierCode}
-                  onChange={(e) => setSupplierForm({ ...supplierForm, supplierCode: e.target.value })}
+                  onChange={(e) =>
+                    setSupplierForm({ ...supplierForm, supplierCode: e.target.value })
+                  }
                 />
               </Field>
               <Field label="供应商名">
@@ -465,7 +470,9 @@ export function DropshipConfigWorkspace() {
               </Field>
               <Button
                 size="sm"
-                disabled={busy || !stockForm.supplierCode || !stockForm.skuRef || !stockForm.availableQty}
+                disabled={
+                  busy || !stockForm.supplierCode || !stockForm.skuRef || !stockForm.availableQty
+                }
                 onClick={() =>
                   void run(async () => {
                     await saveSupplierStock({
@@ -493,14 +500,20 @@ export function DropshipConfigWorkspace() {
       >
         <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
           <Field label="配置 code">
-            <Input value={form.configCode} onChange={(e) => setForm({ ...form, configCode: e.target.value })} />
+            <Input
+              value={form.configCode}
+              onChange={(e) => setForm({ ...form, configCode: e.target.value })}
+            />
           </Field>
           <Field label="配置名">
-            <Input value={form.configName} onChange={(e) => setForm({ ...form, configName: e.target.value })} />
+            <Input
+              value={form.configName}
+              onChange={(e) => setForm({ ...form, configName: e.target.value })}
+            />
           </Field>
           <Field label="适用范围">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.scopeKind}
               onChange={(e) => setForm({ ...form, scopeKind: e.target.value })}
             >
@@ -513,17 +526,23 @@ export function DropshipConfigWorkspace() {
           </Field>
           {form.scopeKind === 'SHOP' ? (
             <Field label="店铺 code">
-              <Input value={form.shopCode} onChange={(e) => setForm({ ...form, shopCode: e.target.value })} />
+              <Input
+                value={form.shopCode}
+                onChange={(e) => setForm({ ...form, shopCode: e.target.value })}
+              />
             </Field>
           ) : (
             <Field label="SKU ref">
-              <Input value={form.skuRef} onChange={(e) => setForm({ ...form, skuRef: e.target.value })} />
+              <Input
+                value={form.skuRef}
+                onChange={(e) => setForm({ ...form, skuRef: e.target.value })}
+              />
             </Field>
           )}
 
           <Field label="履约路径（物流）">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.fulfillmentPath}
               onChange={(e) => setForm({ ...form, fulfillmentPath: e.target.value })}
             >
@@ -542,7 +561,7 @@ export function DropshipConfigWorkspace() {
           </Field>
           <Field label="货权模式">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.ownershipMode}
               onChange={(e) => setForm({ ...form, ownershipMode: e.target.value })}
             >
@@ -555,7 +574,7 @@ export function DropshipConfigWorkspace() {
           </Field>
           <Field label="结算周期">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.settlementTiming}
               onChange={(e) => setForm({ ...form, settlementTiming: e.target.value })}
             >
@@ -569,7 +588,7 @@ export function DropshipConfigWorkspace() {
 
           <Field label="结算方式">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.settlementBasis}
               onChange={(e) => setForm({ ...form, settlementBasis: e.target.value })}
             >
@@ -589,10 +608,16 @@ export function DropshipConfigWorkspace() {
             </Field>
           )}
           <Field label="币种">
-            <Input value={form.currencyCode} onChange={(e) => setForm({ ...form, currencyCode: e.target.value })} />
+            <Input
+              value={form.currencyCode}
+              onChange={(e) => setForm({ ...form, currencyCode: e.target.value })}
+            />
           </Field>
           <Field label="供货价">
-            <Input value={form.supplierCost} onChange={(e) => setForm({ ...form, supplierCost: e.target.value })} />
+            <Input
+              value={form.supplierCost}
+              onChange={(e) => setForm({ ...form, supplierCost: e.target.value })}
+            />
           </Field>
           <Field label="参考售价">
             <Input
@@ -603,7 +628,7 @@ export function DropshipConfigWorkspace() {
 
           <Field label="可售校验">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.availabilityCheckMode}
               onChange={(e) => setForm({ ...form, availabilityCheckMode: e.target.value })}
             >
@@ -624,7 +649,7 @@ export function DropshipConfigWorkspace() {
           )}
           <Field label="刊登策略">
             <select
-              className="border-border bg-background w-full rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 w-full rounded-md border px-3 py-2"
               value={form.listingPolicy}
               onChange={(e) => setForm({ ...form, listingPolicy: e.target.value })}
             >
@@ -661,9 +686,7 @@ export function DropshipConfigWorkspace() {
           )}
         </div>
 
-        {formError && (
-          <p className="text-copy-13 text-destructive mt-2">{formError}</p>
-        )}
+        {formError && <p className="text-copy-13 text-destructive mt-2">{formError}</p>}
 
         <div className="mt-3 flex items-center gap-3">
           <Button
@@ -791,8 +814,8 @@ export function DropshipConfigWorkspace() {
                     {settlementBasisLabel(c.settlementBasis)}
                   </Badge>
                   <span className="text-copy-13 text-muted">
-                    差价 {moneyText(c.grossSpread)} / 毛利 {marginText(c.expectedMarginAmount)} / 应付{' '}
-                    {moneyText(c.expectedSupplierAmount)}
+                    差价 {moneyText(c.grossSpread)} / 毛利 {marginText(c.expectedMarginAmount)} /
+                    应付 {moneyText(c.expectedSupplierAmount)}
                     {c.settlementBasis === 'MARGIN_SHARE'
                       ? `（抽成 ${marginShareText(c.marginShareRate)}）`
                       : ''}
@@ -833,7 +856,12 @@ export function DropshipConfigWorkspace() {
               ))}
             </div>
             <div className="mt-3 flex items-center gap-2">
-              <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+              >
                 上一页
               </Button>
               <span className="text-copy-13 text-muted">
@@ -927,7 +955,7 @@ export function DropshipConfigWorkspace() {
         <div className="flex flex-wrap items-end gap-2">
           <Field label="配置">
             <select
-              className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+              className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
               value={evalForm.configId}
               onChange={(e) => setEvalForm({ ...evalForm, configId: e.target.value })}
             >
@@ -963,8 +991,10 @@ export function DropshipConfigWorkspace() {
                   skuRef: evalForm.skuRef,
                   requestedQty: Number(evalForm.requestedQty),
                 });
-                return `判定结果：${sellReasonLabel(result.reasonCode)}`
-                  + `（可售 ${result.sellable ? '是' : '否'} / 可刊登 ${result.listable ? '是' : '否'}）`;
+                return (
+                  `判定结果：${sellReasonLabel(result.reasonCode)}` +
+                  `（可售 ${result.sellable ? '是' : '否'} / 可刊登 ${result.listable ? '是' : '否'}）`
+                );
               })
             }
           >

@@ -22,13 +22,10 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 10.4.2.1 海外仓连接。
  *
- * <p>🔴 本类唯一不能妥协的约束（蓝图 §10.4.2.1 加粗句）：
- * 「外部仓库存是**观测值不是自有账本**，必须与自营库存**分开存储与对账，不能覆盖**」。
+ * <p>🔴 本类唯一不能妥协的约束（蓝图 §10.4.2.1 加粗句）： 「外部仓库存是**观测值不是自有账本**，必须与自营库存**分开存储与对账，不能覆盖**」。
  *
- * <p>本类里所有与库存相关的写操作只做一件事：往 {@code external_stock_observation}
- * **插一行新快照**。类里不存在、也不允许存在对观测表的 UPDATE/DELETE ——
- * 不是「记得别写」，而是数据库层触发器 + 权限面各挡一层（迁移 V93），
- * 绕过服务层直接写 SQL 同样改不动已观测到的值。
+ * <p>本类里所有与库存相关的写操作只做一件事：往 {@code external_stock_observation} **插一行新快照**。类里不存在、也不允许存在对观测表的
+ * UPDATE/DELETE —— 不是「记得别写」，而是数据库层触发器 + 权限面各挡一层（迁移 V93）， 绕过服务层直接写 SQL 同样改不动已观测到的值。
  *
  * <p>自营库存账本在 warehouse 服务（独立库，V51 warehouse_inventory_ledger）。
  * 本服务没有它的数据源，本类也不引入——分开存储由**分库**保证，比靠约定可靠。
@@ -41,8 +38,7 @@ public class WarehouseConnectionService {
   private final DSLContext sql;
   private final Map<String, OverseasWarehouseAdapter> adapters;
 
-  public WarehouseConnectionService(
-      DSLContext sql, List<OverseasWarehouseAdapter> adapterList) {
+  public WarehouseConnectionService(DSLContext sql, List<OverseasWarehouseAdapter> adapterList) {
     this.sql = sql;
     this.adapters =
         adapterList.stream()
@@ -59,7 +55,8 @@ public class WarehouseConnectionService {
   // ==================================================================
 
   public List<WarehouseProviderView> providers() {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,code,name,kind,supports_inventory_sync,supports_forecast,"
                 + " supports_status_callback,supports_billing from warehouse_provider order by position,code")
         .stream()
@@ -117,8 +114,9 @@ public class WarehouseConnectionService {
           + " left join credential_ref cr on cr.tenant_id=c.tenant_id and cr.id=c.credential_id";
 
   public List<WarehouseConnectionView> connections() {
-    return sql.fetch(CONNECTION_SELECT + " order by c.status,c.display_name,c.id")
-        .stream().map(this::mapConnection).toList();
+    return sql.fetch(CONNECTION_SELECT + " order by c.status,c.display_name,c.id").stream()
+        .map(this::mapConnection)
+        .toList();
   }
 
   public WarehouseConnectionView connection(UUID id) {
@@ -129,8 +127,8 @@ public class WarehouseConnectionService {
 
   /** 新建连接：凭据先落 credential_ref（只存 secret manager 引用），连接只拿外键。 */
   public UUID createConnection(WarehouseConnectionInput input) {
-    if (one(Long.class, "select count(*) from warehouse_provider where id=?", input.providerId()) == 0L)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "服务商不存在");
+    if (one(Long.class, "select count(*) from warehouse_provider where id=?", input.providerId())
+        == 0L) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "服务商不存在");
 
     UUID credentialId = Ids.next();
     sql.execute(
@@ -160,11 +158,12 @@ public class WarehouseConnectionService {
 
   /** 连接启用/停用同步。 */
   public void setPaused(UUID id, boolean paused) {
-    int n = sql.execute(
-        "update warehouse_connection set sync_paused=?,updated_at=now(),version=version+1"
-            + " where id=? and status<>'REVOKED'",
-        paused,
-        id);
+    int n =
+        sql.execute(
+            "update warehouse_connection set sync_paused=?,updated_at=now(),version=version+1"
+                + " where id=? and status<>'REVOKED'",
+            paused,
+            id);
     if (n == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "连接不存在或已吊销");
   }
 
@@ -249,11 +248,14 @@ public class WarehouseConnectionService {
   /**
    * 登记一条服务商库存报送。
    *
-   * <p>这是适配器的**输入**，不是观测：服务商报错时它要能改（所以有 UPDATE），
-   * 观测快照不能改（所以没有 UPDATE）。两者分表正是为了保住这个区别。
+   * <p>这是适配器的**输入**，不是观测：服务商报错时它要能改（所以有 UPDATE）， 观测快照不能改（所以没有 UPDATE）。两者分表正是为了保住这个区别。
    */
   public UUID recordInboundStockLine(
-      UUID accountId, String externalSku, BigDecimal quantity, String unit, String source,
+      UUID accountId,
+      String externalSku,
+      BigDecimal quantity,
+      String unit,
+      String source,
       java.time.OffsetDateTime reportedAt) {
     if (one(Long.class, "select count(*) from warehouse_account where id=?", accountId) == 0L)
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓账户不存在");
@@ -280,13 +282,11 @@ public class WarehouseConnectionService {
    *
    * <p>同步粒度是**仓账户**（蓝图：多仓服务商下每个仓是一个账户，账单与同步都按账户走）。
    *
-   * <p>写路径只有一条：适配器取数 → 插观测快照 → 落同步记录。
-   * 全程没有任何一步碰自营库存表——不只是没写，是服务层连数据源都没有。
+   * <p>写路径只有一条：适配器取数 → 插观测快照 → 落同步记录。 全程没有任何一步碰自营库存表——不只是没写，是服务层连数据源都没有。
    */
   public UUID triggerSync(UUID accountId, String triggerSource) {
     AccountContext ctx = accountContext(accountId);
-    if (ctx.syncPaused())
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "该连接已暂停同步");
+    if (ctx.syncPaused()) throw new ResponseStatusException(HttpStatus.CONFLICT, "该连接已暂停同步");
 
     OverseasWarehouseAdapter adapter = adapters.get(ctx.providerCode());
     if (adapter == null)
@@ -305,8 +305,11 @@ public class WarehouseConnectionService {
                 + " where account_id=?",
             accountId);
     String idempotencyKey = "wst:" + accountId + ":" + batch;
-    if (one(Long.class, "select count(*) from warehouse_sync_run where idempotency_key=?", idempotencyKey) != 0L)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "该批报送已同步过，无需重复触发");
+    if (one(
+            Long.class,
+            "select count(*) from warehouse_sync_run where idempotency_key=?",
+            idempotencyKey)
+        != 0L) throw new ResponseStatusException(HttpStatus.CONFLICT, "该批报送已同步过，无需重复触发");
 
     UUID runId = Ids.next();
     sql.execute(
@@ -350,12 +353,13 @@ public class WarehouseConnectionService {
   /**
    * 把适配器取回的观测落成**快照行**。
    *
-   * <p>这里是整个模块唯一写库存数字的地方，也是「不能覆盖」的落点：
-   * 全部是 INSERT，同账户同 SKU 同时点靠唯一约束去重（重放不翻倍），
-   * 没有任何 UPDATE —— 已观测到的值改不了，只能再落一行新时点的快照。
+   * <p>这里是整个模块唯一写库存数字的地方，也是「不能覆盖」的落点： 全部是 INSERT，同账户同 SKU 同时点靠唯一约束去重（重放不翻倍）， 没有任何 UPDATE ——
+   * 已观测到的值改不了，只能再落一行新时点的快照。
    */
   private int writeObservations(
-      UUID runId, AccountContext ctx, UUID accountId,
+      UUID runId,
+      AccountContext ctx,
+      UUID accountId,
       OverseasWarehouseAdapter.StockSnapshot snapshot) {
     Instant observedAt = snapshot.observedAt();
     int written = 0;
@@ -382,7 +386,8 @@ public class WarehouseConnectionService {
     return written;
   }
 
-  private void finishRun(UUID runId, String status, int fetched, int observed, int failed, String error) {
+  private void finishRun(
+      UUID runId, String status, int fetched, int observed, int failed, String error) {
     sql.execute(
         "update warehouse_sync_run set status=?,finished_at=now(),fetched_count=?,observed_count=?,"
             + " failed_count=?,error_detail=? where id=? and status='RUNNING'",
@@ -410,8 +415,10 @@ public class WarehouseConnectionService {
                 + " r.started_at,r.finished_at,r.fetched_count,r.observed_count,r.failed_count,"
                 + " r.error_detail from warehouse_sync_run r"
                 + " left join warehouse_account a on a.tenant_id=r.tenant_id and a.id=r.account_id"
-                + " where true" + (filtered ? " and r.connection_id=?" : "")
-                + " order by r.started_at desc limit " + Math.max(1, Math.min(limit, 200)),
+                + " where true"
+                + (filtered ? " and r.connection_id=?" : "")
+                + " order by r.started_at desc limit "
+                + Math.max(1, Math.min(limit, 200)),
             filtered ? new Object[] {connectionId} : new Object[0]);
     return rows.stream()
         .map(
@@ -438,7 +445,8 @@ public class WarehouseConnectionService {
 
   /** 某个仓账户的观测流水，按观测时点倒序——观测值的历史本身就是要留的证据。 */
   public List<ExternalStockObservationView> observations(UUID accountId, int limit) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select o.id,o.account_id,a.name account_name,o.external_sku,o.quantity,o.unit,o.source,"
                 + " o.observed_at from external_stock_observation o"
                 + " join warehouse_account a on a.tenant_id=o.tenant_id and a.id=o.account_id"
@@ -463,11 +471,11 @@ public class WarehouseConnectionService {
   /**
    * 各 SKU 的最新观测。
    *
-   * <p>用 DISTINCT ON 按 observed_at 取最新——「当前看到的数」是**查出来的**，
-   * 不是存在一行里等着被 UPDATE 覆盖的。这是快照语义最直接的体现。
+   * <p>用 DISTINCT ON 按 observed_at 取最新——「当前看到的数」是**查出来的**， 不是存在一行里等着被 UPDATE 覆盖的。这是快照语义最直接的体现。
    */
   public List<ExternalStockLatestView> latestObservations(UUID accountId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select distinct on (o.external_sku) o.account_id,a.name account_name,o.external_sku,"
                 + " o.quantity,o.unit,o.source,o.observed_at"
                 + " from external_stock_observation o"
@@ -527,7 +535,8 @@ public class WarehouseConnectionService {
 
   /** 数量 HALF_UP 到 6 位小数，禁浮点——与 DB 的 numeric(19,6) 一致。 */
   private static BigDecimal normalizeQuantity(BigDecimal q) {
-    return q == null ? BigDecimal.ZERO.setScale(QUANTITY_SCALE, RoundingMode.HALF_UP)
+    return q == null
+        ? BigDecimal.ZERO.setScale(QUANTITY_SCALE, RoundingMode.HALF_UP)
         : q.setScale(QUANTITY_SCALE, RoundingMode.HALF_UP);
   }
 }

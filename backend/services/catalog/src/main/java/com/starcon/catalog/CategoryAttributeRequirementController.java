@@ -10,15 +10,12 @@ import java.util.function.Function;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 3.3.1.2 类目属性要求：按类目配置必填 / 可选 / 条件必填与取值范围，
- * 并输出录入表单 schema 与保存前校验结果。
+ * 3.3.1.2 类目属性要求：按类目配置必填 / 可选 / 条件必填与取值范围， 并输出录入表单 schema 与保存前校验结果。
  *
- * <p>路由挂在 {@code /catalog/categories} 之下：规则**挂在类目上**，
- * 而不是挂在 {@code /catalog/attributes} 上——那是 3.2.1.1 的属性字典入口，
- * 「这个类目要求哪些属性」与「这个租户有哪些属性」是两个问题，两个入口也避免维护方分不清。
+ * <p>路由挂在 {@code /catalog/categories} 之下：规则**挂在类目上**， 而不是挂在 {@code /catalog/attributes} 上——那是
+ * 3.2.1.1 的属性字典入口， 「这个类目要求哪些属性」与「这个租户有哪些属性」是两个问题，两个入口也避免维护方分不清。
  *
- * <p>三个只读端点对应蓝图的三个输出（规则 / 表单 schema / 校验结果），
- * 三个写端点对应规则配置（保存 / 启停 / 删除）。
+ * <p>三个只读端点对应蓝图的三个输出（规则 / 表单 schema / 校验结果）， 三个写端点对应规则配置（保存 / 启停 / 删除）。
  *
  * <p>权限沿用属性域：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}。
  */
@@ -57,8 +54,7 @@ public class CategoryAttributeRequirementController {
   /**
    * 某个类目的属性要求视图：生效规则集（含继承）+ 本节点规则 + 统计。
    *
-   * <p>两个数组都给而不是给一个开关：配置页需要并排显示「本节点配了什么」与
-   * 「最终生效什么」，前者用于编辑，后者用于校验自查。
+   * <p>两个数组都给而不是给一个开关：配置页需要并排显示「本节点配了什么」与 「最终生效什么」，前者用于编辑，后者用于校验自查。
    */
   @GetMapping("/attribute-requirements/{categoryId}")
   public CategoryRequirementsView requirements(
@@ -70,8 +66,7 @@ public class CategoryAttributeRequirementController {
   /**
    * 某个类目的生效规则集（含从祖先继承的）。
    *
-   * <p>与上一个端点的区别：这个直接给数组，下游（3.1.1.2 商品编辑）拿它做校验时不需要
-   * 先解开视图结构。
+   * <p>与上一个端点的区别：这个直接给数组，下游（3.1.1.2 商品编辑）拿它做校验时不需要 先解开视图结构。
    */
   @GetMapping("/attribute-requirements/{categoryId}/effective")
   public List<CategoryAttributeRequirement> effective(
@@ -86,8 +81,7 @@ public class CategoryAttributeRequirementController {
    * 生成录入表单 schema：字段键、标签、控件类型、是否必填、选项、约束、依赖关系。
    *
    * <p>{@code values} 以重复的查询参数传入当前已填写的值（{@code values=COLOR:RED}），
-   * 用于求值条件必填——不带它时条件字段一律按「尚未触发」渲染（不亮必填星号）。
-   * 带上它就能拿到「用户刚把颜色改成红色，保修期立刻变必填」的效果。
+   * 用于求值条件必填——不带它时条件字段一律按「尚未触发」渲染（不亮必填星号）。 带上它就能拿到「用户刚把颜色改成红色，保修期立刻变必填」的效果。
    */
   @PostMapping("/attribute-requirements/{categoryId}/entry-form-schema")
   public EntryFormSchema entryFormSchema(
@@ -106,8 +100,7 @@ public class CategoryAttributeRequirementController {
   /**
    * 按类目的有效规则集校验一份提交的属性值，逐字段返回结果。
    *
-   * <p>不做「不合法就 400」：录入表单需要一次拿到所有不合法字段并同时高亮，
-   * 逐次报错会让用户来回提交十几轮。整体结论在返回体的 {@code valid} 上。
+   * <p>不做「不合法就 400」：录入表单需要一次拿到所有不合法字段并同时高亮， 逐次报错会让用户来回提交十几轮。整体结论在返回体的 {@code valid} 上。
    */
   @PostMapping("/attribute-requirements/{categoryId}/validate")
   public AttributeValidationReport validate(
@@ -135,8 +128,7 @@ public class CategoryAttributeRequirementController {
   /**
    * 启用停用一条要求。
    *
-   * <p>与删除分开：停用是「本节点不再覆盖祖先」（属性回退到祖先链上一条），
-   * 删除是「本层这条覆盖彻底不存在」（条件取值与允许选项一并清除）。两者都可撤销但语义不同。
+   * <p>与删除分开：停用是「本节点不再覆盖祖先」（属性回退到祖先链上一条）， 删除是「本层这条覆盖彻底不存在」（条件取值与允许选项一并清除）。两者都可撤销但语义不同。
    */
   @PutMapping("/attribute-requirements/{categoryId}/{attributeId}/enabled")
   public Map<String, Boolean> setEnabled(
@@ -175,8 +167,7 @@ public class CategoryAttributeRequirementController {
   /**
    * 把 {@code COLOR:RED} 这样的查询参数拆成键值对。
    *
-   * <p>用查询参数而不是请求体：schema 生成是**只读渲染**，下游（商品编辑页）每次改一个字段
-   * 就要重算一次，用 GET 风格的语义更贴切，也让响应能被浏览器与 CDN 缓存。
+   * <p>用查询参数而不是请求体：schema 生成是**只读渲染**，下游（商品编辑页）每次改一个字段 就要重算一次，用 GET 风格的语义更贴切，也让响应能被浏览器与 CDN 缓存。
    * 缺分隔符或值为空的项直接丢弃，不让一个手误的查询参数毁掉整次渲染。
    */
   private static Map<String, String> parseValues(List<String> values) {

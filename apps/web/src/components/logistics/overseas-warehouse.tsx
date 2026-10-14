@@ -100,7 +100,10 @@ export function OverseasWarehouseWorkspace() {
       return;
     }
     try {
-      const [o, l] = await Promise.all([fetchObservations(accountId), fetchLatestObservations(accountId)]);
+      const [o, l] = await Promise.all([
+        fetchObservations(accountId),
+        fetchLatestObservations(accountId),
+      ]);
       setObservations(o);
       setLatest(l);
     } catch (e) {
@@ -183,12 +186,24 @@ export function OverseasWarehouseWorkspace() {
         description="对接海外仓/第三方仓服务商：连接授权、仓账户、库存同步与外部库存观测。"
       />
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="服务商" value={String(providers.length)} comparisonLabel="已登记的对接服务商" />
-        <StatCard label="连接" value={String(connections.length)} comparisonLabel="按租户维护的授权连接" />
-        <StatCard label="仓账户" value={String(accounts.length)} comparisonLabel="多仓服务商下的物理仓" />
+        <StatCard
+          label="服务商"
+          value={String(providers.length)}
+          comparisonLabel="已登记的对接服务商"
+        />
+        <StatCard
+          label="连接"
+          value={String(connections.length)}
+          comparisonLabel="按租户维护的授权连接"
+        />
+        <StatCard
+          label="仓账户"
+          value={String(accounts.length)}
+          comparisonLabel="多仓服务商下的物理仓"
+        />
         <StatCard
           label="异常同步"
           value={String(failing)}
@@ -228,16 +243,22 @@ export function OverseasWarehouseWorkspace() {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{c.displayName || c.authorizedAccount}</span>
                         <Badge tone="info">{c.providerName}</Badge>
-                        <Badge tone={c.status === 'ACTIVE' && !c.syncPaused ? 'success' : 'warning'}>
+                        <Badge
+                          tone={c.status === 'ACTIVE' && !c.syncPaused ? 'success' : 'warning'}
+                        >
                           {connectionStatusLabel(c)}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="text-muted-foreground mt-1 text-sm">
                         账号 {c.authorizedAccount} · 仓账户 {c.accountCount} 个
                         {c.credential ? ` · 凭据 ${c.credential.status}` : ''}
-                        {c.lastSyncAt ? ` · 最近同步 ${new Date(c.lastSyncAt).toLocaleString()}` : ' · 尚未同步'}
+                        {c.lastSyncAt
+                          ? ` · 最近同步 ${new Date(c.lastSyncAt).toLocaleString()}`
+                          : ' · 尚未同步'}
                       </p>
-                      {c.lastError ? <p className="mt-1 text-sm text-destructive">{c.lastError}</p> : null}
+                      {c.lastError ? (
+                        <p className="text-destructive mt-1 text-sm">{c.lastError}</p>
+                      ) : null}
                     </div>
                     <Button
                       size="sm"
@@ -274,13 +295,19 @@ export function OverseasWarehouseWorkspace() {
                           <Badge tone="info">{warehouseKindLabel(a.warehouseKind)}</Badge>
                           {f.stale ? <Badge tone="neutral">{f.label}</Badge> : null}
                         </div>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 text-sm">
                           {a.connectionName} · {a.externalAccountCode}
-                          {a.countryCode ? ` · ${a.countryCode}` : ''} · 观测 SKU {a.observedSkuCount ?? 0} 个
+                          {a.countryCode ? ` · ${a.countryCode}` : ''} · 观测 SKU{' '}
+                          {a.observedSkuCount ?? 0} 个
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-2">
-                        <Button size="sm" variant="outline" onClick={() => void report(a.id)} disabled={busy}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => void report(a.id)}
+                          disabled={busy}
+                        >
                           登记报送
                         </Button>
                         <Button size="sm" onClick={() => void sync(a.id)} disabled={busy}>
@@ -306,7 +333,7 @@ export function OverseasWarehouseWorkspace() {
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left">
                     <th className="py-2">仓账户</th>
                     <th className="py-2">状态</th>
                     <th className="py-2">触发</th>
@@ -372,7 +399,7 @@ export function OverseasWarehouseWorkspace() {
                 <h3 className="mb-2 text-sm font-medium">各 SKU 最新观测</h3>
                 <table className="mb-6 w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-muted-foreground">
+                    <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2">SKU</th>
                       <th className="py-2">观测数量</th>
                       <th className="py-2">来源</th>
@@ -384,7 +411,7 @@ export function OverseasWarehouseWorkspace() {
                       <tr key={o.externalSku} className="border-b last:border-0">
                         <td className="py-2 font-mono text-xs">{o.externalSku}</td>
                         <td className="py-2">{quantityText(o.quantity, o.unit)}</td>
-                        <td className="py-2 text-muted-foreground">{o.source}</td>
+                        <td className="text-muted-foreground py-2">{o.source}</td>
                         <td className="py-2">{new Date(o.observedAt).toLocaleString()}</td>
                       </tr>
                     ))}
@@ -394,7 +421,7 @@ export function OverseasWarehouseWorkspace() {
                 <h3 className="mb-2 text-sm font-medium">观测流水</h3>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-muted-foreground">
+                    <tr className="text-muted-foreground border-b text-left">
                       <th className="py-2">SKU</th>
                       <th className="py-2">观测数量</th>
                       <th className="py-2">观测时点</th>

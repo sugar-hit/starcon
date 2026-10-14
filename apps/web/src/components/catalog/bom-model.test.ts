@@ -200,18 +200,18 @@ describe('组件清单', () => {
     expect(componentsProblem([{ skuId: 'a', unitQuantity: '0', scrapRate: '' }])).toContain(
       '必须大于 0',
     );
-    expect(
-      componentsProblem([{ skuId: 'a', unitQuantity: '1', scrapRate: '200' }]),
-    ).toContain('不能超过 100%');
+    expect(componentsProblem([{ skuId: 'a', unitQuantity: '1', scrapRate: '200' }])).toContain(
+      '不能超过 100%',
+    );
     expect(
       componentsProblem([
         { skuId: 'a', unitQuantity: '1', scrapRate: '' },
         { skuId: 'a', unitQuantity: '2', scrapRate: '' },
       ]),
     ).toContain('出现了两次');
-    expect(
-      componentsProblem([{ skuId: '', unitQuantity: '1', scrapRate: '' }]),
-    ).toContain('每个组件都要选一个 SKU');
+    expect(componentsProblem([{ skuId: '', unitQuantity: '1', scrapRate: '' }])).toContain(
+      '每个组件都要选一个 SKU',
+    );
   });
 
   it('草稿默认值：用量 1、损耗率留空（大多数组件不损耗）', () => {
@@ -256,12 +256,8 @@ describe('生效区间（规则 R1–R5 的前端口径）', () => {
   it('半开区间：终点必须严格晚于起点', () => {
     expect(rangeOrderProblem('', '')).toContain('生效起点不能为空');
     expect(rangeOrderProblem('2026-03-01T00:00', '')).toBeNull();
-    expect(rangeOrderProblem('2026-03-01T00:00', '2026-03-01T00:00')).toContain(
-      '必须晚于生效起点',
-    );
-    expect(rangeOrderProblem('2026-03-01T06:00', '2026-03-01T00:00')).toContain(
-      '必须晚于生效起点',
-    );
+    expect(rangeOrderProblem('2026-03-01T00:00', '2026-03-01T00:00')).toContain('必须晚于生效起点');
+    expect(rangeOrderProblem('2026-03-01T06:00', '2026-03-01T00:00')).toContain('必须晚于生效起点');
   });
 
   it('展示文案要写清半开区间与「终点空=一直有效」', () => {
@@ -420,8 +416,12 @@ describe('展开前置校验', () => {
     const base = emptyExplosionFilter();
     expect(explosionProblem(base)).toContain('请先选一个 BOM 版本');
     expect(explosionProblem({ ...base, versionId: 'v1' })).toBeNull();
-    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '0' })).toContain('必须大于 0');
-    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '1.5' })).toContain('必须是整数');
+    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '0' })).toContain(
+      '必须大于 0',
+    );
+    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '1.5' })).toContain(
+      '必须是整数',
+    );
     // bomId 与 versionId 二选一即可。
     expect(explosionProblem({ ...base, bomId: 'b1' })).toBeNull();
   });
@@ -478,7 +478,9 @@ describe('缺口列的呈现', () => {
 
   it('缺口数直接来自后端，前端不重算', () => {
     // 后端给的缺口原样显示；前端没有再减一次可用/在途。
-    expect(gapText({ gap: 6.7, covered: false, requiredQuantity: 7.7 }).startsWith('6.7')).toBe(true);
+    expect(gapText({ gap: 6.7, covered: false, requiredQuantity: 7.7 }).startsWith('6.7')).toBe(
+      true,
+    );
   });
 });
 

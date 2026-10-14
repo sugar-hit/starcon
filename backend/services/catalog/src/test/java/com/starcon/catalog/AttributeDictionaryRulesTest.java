@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
  * 3.2.1.1 属性定义的纯规则：编码词表、选项集合自洽性、规格轴蕴含式、类目范围形态。
  *
  * <p>与前端 {@code attribute-dictionary-model.ts} 同口径。这一层单独测，是因为它的每个失败分支
- * 对应的症状都是「配置保存成功了但录入时就是不生效」——那种问题在界面上完全看不出根因，
- * 必须在规则层就钉死。
+ * 对应的症状都是「配置保存成功了但录入时就是不生效」——那种问题在界面上完全看不出根因， 必须在规则层就钉死。
  */
 class AttributeDictionaryRulesTest {
 
@@ -59,7 +58,8 @@ class AttributeDictionaryRulesTest {
                 "TRANSPORT", AttributeDictionaryRules.USAGES, "属性用途"))
         .contains("不支持的属性用途");
     assertThat(
-            AttributeDictionaryRules.inVocabularyProblem(null, AttributeDictionaryRules.USAGES, "属性用途"))
+            AttributeDictionaryRules.inVocabularyProblem(
+                null, AttributeDictionaryRules.USAGES, "属性用途"))
         .contains("不支持的属性用途");
   }
 
@@ -90,15 +90,25 @@ class AttributeDictionaryRulesTest {
   @Test
   void variantAxisMustBeRequiredSingleValueOptionAttribute() {
     // 蓝图与 V1 的 CHECK 同口径：规格轴 = 按 SKU 填写的必填单选枚举属性。
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "OPTION", "SKU_ONLY", false, true, "SPECIFICATION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "OPTION", "SKU_ONLY", false, true, "SPECIFICATION"))
         .isNull();
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "TEXT", "SKU_ONLY", false, true, "SPECIFICATION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "TEXT", "SKU_ONLY", false, true, "SPECIFICATION"))
         .contains("必填单选枚举属性");
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "OPTION", "COMMON_DEFAULT", false, true, "SPECIFICATION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "OPTION", "COMMON_DEFAULT", false, true, "SPECIFICATION"))
         .contains("必填单选枚举属性");
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "OPTION", "SKU_ONLY", true, true, "SPECIFICATION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "OPTION", "SKU_ONLY", true, true, "SPECIFICATION"))
         .contains("必填单选枚举属性");
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "OPTION", "SKU_ONLY", false, false, "SPECIFICATION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "OPTION", "SKU_ONLY", false, false, "SPECIFICATION"))
         .contains("必填单选枚举属性");
   }
 
@@ -106,17 +116,23 @@ class AttributeDictionaryRulesTest {
   void variantAxisMustBeRegisteredAsSpecificationUsage() {
     // V11 的 attribute_definition_variant_usage 在应用层的同口径表达：
     // 3.1.3.1 的「输入：属性定义（用途=规格）」要在字典侧真的成立。
-    assertThat(AttributeDictionaryRules.variantAxisProblem(true, "OPTION", "SKU_ONLY", false, true, "DESCRIPTION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                true, "OPTION", "SKU_ONLY", false, true, "DESCRIPTION"))
         .contains("用途必须是「规格」");
     // 非规格轴属性不做用途限制。
-    assertThat(AttributeDictionaryRules.variantAxisProblem(false, "OPTION", "SKU_ONLY", false, true, "DESCRIPTION"))
+    assertThat(
+            AttributeDictionaryRules.variantAxisProblem(
+                false, "OPTION", "SKU_ONLY", false, true, "DESCRIPTION"))
         .isNull();
   }
 
   @Test
   void numericRangeIsOnlyMeaningfulForDecimalAttributes() {
     assertThat(AttributeDictionaryRules.rangeProblem("DECIMAL", null, null)).isNull();
-    assertThat(AttributeDictionaryRules.rangeProblem("DECIMAL", new BigDecimal("0.5"), new BigDecimal("9.5")))
+    assertThat(
+            AttributeDictionaryRules.rangeProblem(
+                "DECIMAL", new BigDecimal("0.5"), new BigDecimal("9.5")))
         .isNull();
     assertThat(AttributeDictionaryRules.rangeProblem("TEXT", new BigDecimal("1"), null))
         .contains("只对数值属性");
@@ -126,10 +142,14 @@ class AttributeDictionaryRulesTest {
 
   @Test
   void invertedNumericRangeIsRejected() {
-    assertThat(AttributeDictionaryRules.rangeProblem("DECIMAL", new BigDecimal("9"), new BigDecimal("1")))
+    assertThat(
+            AttributeDictionaryRules.rangeProblem(
+                "DECIMAL", new BigDecimal("9"), new BigDecimal("1")))
         .contains("下限不能大于上限");
     // 相等是一个合法区间（只能是这一个值），不能误杀。
-    assertThat(AttributeDictionaryRules.rangeProblem("DECIMAL", new BigDecimal("5"), new BigDecimal("5")))
+    assertThat(
+            AttributeDictionaryRules.rangeProblem(
+                "DECIMAL", new BigDecimal("5"), new BigDecimal("5")))
         .isNull();
   }
 

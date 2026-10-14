@@ -13,8 +13,7 @@ import java.util.UUID;
  * <p>蓝图 08-warehouse-operations.md 8.2.1.1 的输入/输出契约：
  *
  * <ul>
- *   <li>输入：来源单据（6 采购单 / 11 退货授权 / 7.5 调拨单）；实收明细（SKU、数量、批次、
- *       序列号、效期）；差异原因。
+ *   <li>输入：来源单据（6 采购单 / 11 退货授权 / 7.5 调拨单）；实收明细（SKU、数量、批次、 序列号、效期）；差异原因。
  *   <li>输出：收货单（草稿/已收/部分收/已关闭）+ 库存入库分录（转入待检或可售 bucket）。
  * </ul>
  *
@@ -24,12 +23,11 @@ import java.util.UUID;
  * <p>数字口径（界面上每一列都对应其中一条，不做二次加工）：
  *
  * <ul>
- *   <li>{@code expected} 预期 · {@code received} 累计实收 · {@code rejected} 累计拒收
- *       —— 蓝图原文「**预期与实收分开记录**」。三行永不相减覆盖，差额现场可读。
- *   <li>{@code outstanding = expected − received − rejected}：还差多少没到齐。
- *       它**不是**差异 —— 货还在路上；关单时才会被如实记成 SHORT_RECEIPT。
- *   <li>拒收量**不写分录、不进库存**：它从没进过 inventory_balance，
- *       所以 8.2.1.2 接手的是索赔与改判，而不是「把它从库存里删掉」。
+ *   <li>{@code expected} 预期 · {@code received} 累计实收 · {@code rejected} 累计拒收 ——
+ *       蓝图原文「**预期与实收分开记录**」。三行永不相减覆盖，差额现场可读。
+ *   <li>{@code outstanding = expected − received − rejected}：还差多少没到齐。 它**不是**差异 —— 货还在路上；关单时才会被如实记成
+ *       SHORT_RECEIPT。
+ *   <li>拒收量**不写分录、不进库存**：它从没进过 inventory_balance， 所以 8.2.1.2 接手的是索赔与改判，而不是「把它从库存里删掉」。
  * </ul>
  */
 public final class GoodsReceiptModels {
@@ -38,14 +36,12 @@ public final class GoodsReceiptModels {
   /**
    * 收货单状态词表。与 {@code goods_receipt.status} 的 CHECK 逐值对应。
    *
-   * <p>合法转换只有这一张表（{@link #ALLOWED_TRANSITIONS} 是唯一真相，服务层与前端共用）：
-   * {@code DRAFT → PARTIALLY_RECEIVED / RECEIVED / CLOSED}、
-   * {@code PARTIALLY_RECEIVED → PARTIALLY_RECEIVED / RECEIVED / CLOSED}、
-   * {@code RECEIVED → CLOSED}、{@code CLOSED} 为终态。
+   * <p>合法转换只有这一张表（{@link #ALLOWED_TRANSITIONS} 是唯一真相，服务层与前端共用）： {@code DRAFT → PARTIALLY_RECEIVED /
+   * RECEIVED / CLOSED}、 {@code PARTIALLY_RECEIVED → PARTIALLY_RECEIVED / RECEIVED / CLOSED}、 {@code
+   * RECEIVED → CLOSED}、{@code CLOSED} 为终态。
    *
-   * <p>{@code DRAFT → CLOSED} 是刻意允许的：货一件没到、整单拒收时，
-   * 必须有一个合法动作把它结掉，否则这张单会永远挂在待办里。
-   * {@code CLOSED} 之后一律拒绝 —— 已关闭的单再收货等于账外入库。
+   * <p>{@code DRAFT → CLOSED} 是刻意允许的：货一件没到、整单拒收时， 必须有一个合法动作把它结掉，否则这张单会永远挂在待办里。 {@code CLOSED}
+   * 之后一律拒绝 —— 已关闭的单再收货等于账外入库。
    */
   public enum ReceiptStatus {
     /** 草稿：只有意图，未动库存。 */
@@ -73,8 +69,7 @@ public final class GoodsReceiptModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的收货单状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的收货单状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -95,9 +90,8 @@ public final class GoodsReceiptModels {
   /**
    * 来源类型词表。
    *
-   * <p>四类里只有 {@code TRANSFER} 的上游（7.5.1.1 调拨单）已交付。
-   * 其余三类在 {@link GoodsReceiptCapabilities} 里显式 {@code available=false} 并给出原因，
-   * **不建占位表、不返回空集冒充成功**。
+   * <p>四类里只有 {@code TRANSFER} 的上游（7.5.1.1 调拨单）已交付。 其余三类在 {@link GoodsReceiptCapabilities} 里显式
+   * {@code available=false} 并给出原因， **不建占位表、不返回空集冒充成功**。
    */
   public enum ReceiptSourceType {
     /** 6 采购单。上游 6.3 未交付。 */
@@ -192,9 +186,8 @@ public final class GoodsReceiptModels {
   /**
    * 来源维度接入情况。
    *
-   * <p>沿用仓库既有约定（7.1.1.2 {@code DimensionCapability}、7.4.2.2 capabilities）：
-   * {@code available=false} 时 {@code href} 仍然给出 —— 它是**路由契约**而不是死链，
-   * 指明这个来源落在哪个模块、上游交付后直接可用；{@code note} 说明当前为什么不可用，
+   * <p>沿用仓库既有约定（7.1.1.2 {@code DimensionCapability}、7.4.2.2 capabilities）： {@code available=false}
+   * 时 {@code href} 仍然给出 —— 它是**路由契约**而不是死链， 指明这个来源落在哪个模块、上游交付后直接可用；{@code note} 说明当前为什么不可用，
    * 避免界面上出现点下去没反应或 404 的按钮。
    */
   public record ReceiptSourceCapability(
@@ -316,8 +309,7 @@ public final class GoodsReceiptModels {
   /**
    * 一次实收事件及其覆盖的明细行。
    *
-   * <p>逐笔留痕：只记「总共收了 60」就答不出「这 60 是哪几笔到的」，
-   * 而货损追责与批次效期核对的起点都是那几笔到达时间。
+   * <p>逐笔留痕：只记「总共收了 60」就答不出「这 60 是哪几笔到的」， 而货损追责与批次效期核对的起点都是那几笔到达时间。
    */
   public record GoodsReceiptEventRow(
       UUID id,
@@ -369,8 +361,7 @@ public final class GoodsReceiptModels {
   /**
    * 本单的库存分录（复用 7.1.2.1 台账的响应）。
    *
-   * <p>{@code attribution} 与口径说明必须随响应返回：拒收量**不在分录里**
-   * （它从没进过库存），不说明的话「预期 100、实收 60、拒收 10、分录只有 +60」
+   * <p>{@code attribution} 与口径说明必须随响应返回：拒收量**不在分录里** （它从没进过库存），不说明的话「预期 100、实收 60、拒收 10、分录只有 +60」
    * 会被读成「30 件的账去哪了」。
    */
   public record GoodsReceiptMovements(
@@ -408,8 +399,7 @@ public final class GoodsReceiptModels {
   /**
    * 实收请求：一次收货落到同一个库位。
    *
-   * <p>{@code serialNumbers} 在行内给出：条数必须等于该行的实收量（或与 {@code
-   * declaredSerialCount} 一致），否则报「不允许大概齐」。
+   * <p>{@code serialNumbers} 在行内给出：条数必须等于该行的实收量（或与 {@code declaredSerialCount} 一致），否则报「不允许大概齐」。
    */
   public record GoodsReceiptReceiveRequest(
       Long expectedVersion,
@@ -432,9 +422,8 @@ public final class GoodsReceiptModels {
   /**
    * 差异登记请求。
    *
-   * <p>{@code discrepancyType} 为 {@code null} 时由服务层按数量自动判定：
-   * 超预期 → OVER_RECEIPT、全量拒收 → REJECTED，否则报出「必须明确差异类型」，
-   * **不猜** —— 猜错类型的差异记录会直接误导 8.2.1.2 的索赔判断。
+   * <p>{@code discrepancyType} 为 {@code null} 时由服务层按数量自动判定： 超预期 → OVER_RECEIPT、全量拒收 →
+   * REJECTED，否则报出「必须明确差异类型」， **不猜** —— 猜错类型的差异记录会直接误导 8.2.1.2 的索赔判断。
    */
   public record ReceiptDiscrepancyRequest(
       @Schema(nullable = true) UUID lineId,
@@ -445,8 +434,7 @@ public final class GoodsReceiptModels {
       String evidenceNote) {}
 
   /** 关单请求：把剩余未到齐如实记为少收，然后结案。 */
-  public record GoodsReceiptCloseRequest(
-      Long expectedVersion, String reason, String notes) {}
+  public record GoodsReceiptCloseRequest(Long expectedVersion, String reason, String notes) {}
 
   /** 建单/改单/实收/关单后的回读结果（响应是「库里真实存了什么」）。 */
   public record GoodsReceiptSaved(

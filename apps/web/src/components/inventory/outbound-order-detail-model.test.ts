@@ -142,7 +142,9 @@ describe('8.3.1.2 出库单详情展示口径', () => {
       ownerModule: '8.3.3.2 打包与称重',
     };
     expect(actionButtonText({ ...base, reasonRequired: false })).toBe('推进到「待打包」');
-    expect(actionButtonText({ ...base, reasonRequired: true })).toBe('推进到「待打包」（需填原因）');
+    expect(actionButtonText({ ...base, reasonRequired: true })).toBe(
+      '推进到「待打包」（需填原因）',
+    );
   });
 
   it('详情链接稳定', () => {

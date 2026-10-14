@@ -16,14 +16,14 @@
 
 ## 并入后发现并修掉的真实缺陷（都不是 git 报出来的）
 
-| 缺陷 | 后果 |
-| --- | --- |
-| `inventory/allocation-policies` 分支的 uuid 支自带前导 `\/`，外层组又消费了那个斜杠 | `/{id}`、`/{id}/retire` 永远匹配不上 |
-| 同分支外层组缺 `?` | 裸列表与新增（前端 POST 裸路径）被拒 → 新增策略浏览器端 404 |
-| `inventory/serial-movements` / `serial-operations` 从未登记 | 后端早已实现（`InventorySerialController`），前端在调 → 页面 404（既有缺陷） |
-| `RuleEditor` prop 类型声明 `superseding` 但解构漏了 | 换版预填 6 处引用取不到值 |
-| 作废入口引用不存在的 `onRetire` | 只有类型错误，没有运行时表现 |
-| `variant="primary"` 不是 Button 支持的取值（全仓唯一一处） | typecheck 红 |
+| 缺陷                                                                                | 后果                                                                         |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `inventory/allocation-policies` 分支的 uuid 支自带前导 `\/`，外层组又消费了那个斜杠 | `/{id}`、`/{id}/retire` 永远匹配不上                                         |
+| 同分支外层组缺 `?`                                                                  | 裸列表与新增（前端 POST 裸路径）被拒 → 新增策略浏览器端 404                  |
+| `inventory/serial-movements` / `serial-operations` 从未登记                         | 后端早已实现（`InventorySerialController`），前端在调 → 页面 404（既有缺陷） |
+| `RuleEditor` prop 类型声明 `superseding` 但解构漏了                                 | 换版预填 6 处引用取不到值                                                    |
+| 作废入口引用不存在的 `onRetire`                                                     | 只有类型错误，没有运行时表现                                                 |
+| `variant="primary"` 不是 Button 支持的取值（全仓唯一一处）                          | typecheck 红                                                                 |
 
 **白名单只在浏览器端生效，`pnpm test` 直连服务层永远测不出来漏登记。** 判断依据必须是「从前端源码反向抽取调用点」，逐条断言应放行的放行。
 
@@ -39,15 +39,15 @@
 
 ## 验证结果（最终态）
 
-| 项 | 结果 |
-| --- | --- |
-| `pnpm typecheck` | 0 error |
-| `pnpm lint` | 3/3（仅 react-hooks 警告） |
-| `pnpm test` | 77 文件 / 1353 用例全过 |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过 |
-| `cd backend && ./mvnw verify` | 通过（23 个迁移到 V74，Testcontainers PG） |
-| `node tools/module-progress/sync.mjs --check` | 台账与蓝图一致 |
-| 白名单反向校验 | 48 条前端调用点全覆盖、9 条拒绝清单路径仍 404 |
+| 项                                                           | 结果                                          |
+| ------------------------------------------------------------ | --------------------------------------------- |
+| `pnpm typecheck`                                             | 0 error                                       |
+| `pnpm lint`                                                  | 3/3（仅 react-hooks 警告）                    |
+| `pnpm test`                                                  | 77 文件 / 1353 用例全过                       |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 通过                                          |
+| `cd backend && ./mvnw verify`                                | 通过（23 个迁移到 V74，Testcontainers PG）    |
+| `node tools/module-progress/sync.mjs --check`                | 台账与蓝图一致                                |
+| 白名单反向校验                                               | 48 条前端调用点全覆盖、9 条拒绝清单路径仍 404 |
 
 ## 后续待办
 

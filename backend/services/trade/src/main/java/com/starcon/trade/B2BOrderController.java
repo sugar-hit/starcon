@@ -3,7 +3,6 @@ package com.starcon.trade;
 import static com.starcon.trade.B2BOrderModels.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,20 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.7.1.1 批发订单与账期。
  *
- * <p><b>命名空间是 {@code /trade/b2b-orders}。</b>刻意不是 {@code /trade/orders}：
- * 该路径已被 {@code TradeTenancyIntegrationTest} 的断言 2 显式预留给另一条车道，
- * 占了它会让一条<b>已通过的测试</b>变红，而那个测试文件不属于本车道。
+ * <p><b>命名空间是 {@code /trade/b2b-orders}。</b>刻意不是 {@code /trade/orders}： 该路径已被 {@code
+ * TradeTenancyIntegrationTest} 的断言 2 显式预留给另一条车道， 占了它会让一条<b>已通过的测试</b>变红，而那个测试文件不属于本车道。
  *
- * <p>也刻意不与 9.1.2.2 的 {@code /trade/sales-orders} 合并：零售与批发的
- * 订单类型 / 收款方式 / 成本口径三者都不同，且生命周期不同（账期到期、开票需求）。
- * 合并会让「哪个 tab 能改数据」与「这张单该收没收」两件事都变得不明显。
+ * <p>也刻意不与 9.1.2.2 的 {@code /trade/sales-orders} 合并：零售与批发的 订单类型 / 收款方式 /
+ * 成本口径三者都不同，且生命周期不同（账期到期、开票需求）。 合并会让「哪个 tab 能改数据」与「这张单该收没收」两件事都变得不明显。
  *
  * <p>权限码用 {@code trade.b2b.read} / {@code trade.b2b.create} / {@code trade.b2b.update}：
  * 发起账期与登记发货等于让财务按它确认应收，不是读权限能带过去的动作。
  *
- * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code
+ * app.current_tenant}，由 RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/b2b-orders")
@@ -66,8 +62,7 @@ public class B2BOrderController {
   /**
    * 客户档案投影 upsert（3.6.1.2 → trade 侧只读投影）。
    *
-   * <p>这是**事件同步的写入面**：catalog 侧客户分级 / 账期变更后同步过来。
-   * 幂等键是 customerPartyId，版本号单调（乱序到达的旧事件会被 DB 拒绝覆盖新值）。
+   * <p>这是**事件同步的写入面**：catalog 侧客户分级 / 账期变更后同步过来。 幂等键是 customerPartyId，版本号单调（乱序到达的旧事件会被 DB 拒绝覆盖新值）。
    */
   @PutMapping("/customer-terms")
   public B2BCustomerTermsRow upsertCustomerTerms(
@@ -84,10 +79,7 @@ public class B2BOrderController {
       @RequestParam(required = false) String keyword,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int size) {
-    return call(
-        auth,
-        "read",
-        actor -> b2b.pageCustomerTerms(customerLevel, keyword, page, size));
+    return call(auth, "read", actor -> b2b.pageCustomerTerms(customerLevel, keyword, page, size));
   }
 
   // ================================================================ 上游投影：阶梯价
@@ -95,8 +87,7 @@ public class B2BOrderController {
   /**
    * 阶梯价投影 upsert（05 价目 → trade 侧投影），**整体替换**该 SKU × 分级的全部档位。
    *
-   * <p>05 价目（5.1.1.2，D6）未交付，因此此刻由本端点维护；价目交付后由事件同步接管
-   * 同两张表，表结构与所有下游读法都不需要改。
+   * <p>05 价目（5.1.1.2，D6）未交付，因此此刻由本端点维护；价目交付后由事件同步接管 同两张表，表结构与所有下游读法都不需要改。
    */
   @PutMapping("/price-books")
   public B2BPriceBookRow upsertPriceBook(
@@ -127,8 +118,7 @@ public class B2BOrderController {
   /**
    * 阶梯价试算（只读，不落库）。
    *
-   * <p>下单要问「买 120 件多少钱、再买多少进下一档」，而建单是**先校验起订量再落档**的 ——
-   * 在下单页每改一次数量就吃一个 400 是坏体验。试算与建单走同一个落档函数。
+   * <p>下单要问「买 120 件多少钱、再买多少进下一档」，而建单是**先校验起订量再落档**的 —— 在下单页每改一次数量就吃一个 400 是坏体验。试算与建单走同一个落档函数。
    */
   @PostMapping("/price-quote")
   public B2BQuoteResponse quote(
@@ -175,8 +165,7 @@ public class B2BOrderController {
   /**
    * 创建批发订单（草稿）。
    *
-   * <p>行只收 SKU 与数量：单价、阶梯落档、起订量全部由系统算。
-   * 账期天数缺省时取客户档案投影上的账期（3.6.1.2）。
+   * <p>行只收 SKU 与数量：单价、阶梯落档、起订量全部由系统算。 账期天数缺省时取客户档案投影上的账期（3.6.1.2）。
    */
   @PostMapping
   public B2BSaved create(
@@ -197,8 +186,7 @@ public class B2BOrderController {
   /**
    * 确认订单：DRAFT → CONFIRMED。
    *
-   * <p><b>确认不产生应收。</b>B2B 的账期从发货确认那天起算 ——
-   * 与零售「平台先收款后发货」的方向相反，这正是 12.1.2.2 要分开建模的原因。
+   * <p><b>确认不产生应收。</b>B2B 的账期从发货确认那天起算 —— 与零售「平台先收款后发货」的方向相反，这正是 12.1.2.2 要分开建模的原因。
    */
   @PostMapping("/{id}/confirm")
   public B2BSaved confirm(
@@ -210,8 +198,7 @@ public class B2BOrderController {
   /**
    * 发货确认 —— 应收的<b>唯一</b>产生入口。
    *
-   * <p>收款方式决定发不产生应收：下单结算不产生（款项已收），确认收货后结算 / 账期产生，
-   * 账期的到期日 = 发货确认时刻 + 账期天数。
+   * <p>收款方式决定发不产生应收：下单结算不产生（款项已收），确认收货后结算 / 账期产生， 账期的到期日 = 发货确认时刻 + 账期天数。
    */
   @PostMapping("/{id}/shipments")
   public B2BSaved ship(
@@ -234,8 +221,7 @@ public class B2BOrderController {
   /**
    * 应收列表：真分页 + 账期资金汇总（未结 / 逾期 / 待开票）。
    *
-   * <p>刻意与订单列表**分成两个端点**而不是合并成一张表：应收是「已发货才存在」的另一类单据，
-   * 它的主查询维度是到期日（资金计划按它排），与订单列表的创建时间维度不是一回事。
+   * <p>刻意与订单列表**分成两个端点**而不是合并成一张表：应收是「已发货才存在」的另一类单据， 它的主查询维度是到期日（资金计划按它排），与订单列表的创建时间维度不是一回事。
    */
   @GetMapping("/receivables")
   public B2BReceivablePage receivables(

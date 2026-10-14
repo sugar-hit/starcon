@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>端点按蓝图模块号标注，方便对照 10-logistics-and-freight.md。
  *
- * <p>权限码**复用** identity 已有的 {@code channel.connection.*} 与 {@code channel.sync.*}
- * （连接配置归 connection，库存同步归 sync），因此本模块不需要改动 identity 服务，
- * 跨车道回归面为 0。
+ * <p>权限码**复用** identity 已有的 {@code channel.connection.*} 与 {@code channel.sync.*} （连接配置归
+ * connection，库存同步归 sync），因此本模块不需要改动 identity 服务， 跨车道回归面为 0。
  */
 @RestController
 @RequestMapping("/channel/warehouse-providers")
@@ -29,8 +28,7 @@ public class WarehouseConnectionController {
     this.service = service;
   }
 
-  private <T> T call(
-      String bearer, String permission, Function<AccessService.Access, T> work) {
+  private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, permission);
     return access.run(actor, permission, () -> work.apply(actor));
   }
@@ -114,8 +112,7 @@ public class WarehouseConnectionController {
   /**
    * 登记一条服务商库存报送。
    *
-   * <p>这是**输入**，服务商报错时能改（下方有 DELETE 撤销）；观测快照不能改。
-   * 两者分表正是为了让这个区别在数据上成立。
+   * <p>这是**输入**，服务商报错时能改（下方有 DELETE 撤销）；观测快照不能改。 两者分表正是为了让这个区别在数据上成立。
    */
   @PostMapping("/accounts/{id}/inbound-stock-lines")
   public UUID inboundLine(
@@ -140,8 +137,7 @@ public class WarehouseConnectionController {
   /**
    * 触发一次库存同步。
    *
-   * <p>同步结果只写观测快照表，**不写自营库存**——这是蓝图那条加粗约束的运行时体现，
-   * DB 层另有触发器与权限各挡一层（迁移 V93）。
+   * <p>同步结果只写观测快照表，**不写自营库存**——这是蓝图那条加粗约束的运行时体现， DB 层另有触发器与权限各挡一层（迁移 V93）。
    */
   @PostMapping("/accounts/{id}/sync")
   public UUID syncTrigger(

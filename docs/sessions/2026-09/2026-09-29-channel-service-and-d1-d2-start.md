@@ -54,24 +54,26 @@ commit `8c3fc96`。
 
 ## 踩坑记录
 
-| 坑 | 结论 |
-|---|---|
-| `marketplace.code` 声明全局 UNIQUE | 站点码只在**平台内**唯一（每个平台都有 US / DE） |
-| jOOQ 绑 timestamptz | **只有 `LocalDateTime` 可用**；`Instant` / `OffsetDateTime` / String 全被绑成 varchar。SQL 里写 `?::timestamptz` 或 `cast(? as ...)` 都会让 jOOQ 报 bad grammar |
-| jOOQ 搜索占位符 | `where (?='' or a ilike ? or b ilike ?)` 这类混合写法会让 jOOQ 误判参数个数。改为在 Java 侧决定是否加过滤片段 |
-| RLS 策略拼权限码 | `channel_operation()` 返回的已是完整权限码，再拼前缀会导致策略永不命中 |
-| shop_marketplace 查询 | 漏了 `tenant_id` 条件，RLS 之外又多一层显式隔离 |
-| 代理路由 | `/api/iam` 只是本地别名，**完整路径（含 `identity/`）要原样转发给上游** |
+| 坑                                 | 结论                                                                                                                                                            |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `marketplace.code` 声明全局 UNIQUE | 站点码只在**平台内**唯一（每个平台都有 US / DE）                                                                                                                |
+| jOOQ 绑 timestamptz                | **只有 `LocalDateTime` 可用**；`Instant` / `OffsetDateTime` / String 全被绑成 varchar。SQL 里写 `?::timestamptz` 或 `cast(? as ...)` 都会让 jOOQ 报 bad grammar |
+| jOOQ 搜索占位符                    | `where (?='' or a ilike ? or b ilike ?)` 这类混合写法会让 jOOQ 误判参数个数。改为在 Java 侧决定是否加过滤片段                                                   |
+| RLS 策略拼权限码                   | `channel_operation()` 返回的已是完整权限码，再拼前缀会导致策略永不命中                                                                                          |
+| shop_marketplace 查询              | 漏了 `tenant_id` 条件，RLS 之外又多一层显式隔离                                                                                                                 |
+| 代理路由                           | `/api/iam` 只是本地别名，**完整路径（含 `identity/`）要原样转发给上游**                                                                                         |
 
 ## 后续待办
 
 **D1–D2 期剩余**：
+
 - 17 组织权限：`legal_entity`（法人）与店铺数据范围绑定 —— 店铺已存 `legal_entity_id`，但 identity 侧还没有法人实体
 - 02.4 同步运行 / 02.5 平台回写 / 02.6 消息接入（本期未做，`sync_cursor` / `platform_operation` / `webhook_receipt` 尚未建表）
 
 **D3 期**：07 库存核算 + 08 仓储作业
 
 **横切**：
+
 - `spotless:apply` 在 Java 25 上崩溃（`NoSuchMethodError: Log$DeferredDiagnosticHandler`），
   是本仓库既有问题，`./mvnw verify` 不受影响（未绑定到构建生命周期）
 - 契约无漂移检查已覆盖 channel（`tools/codegen/catalog-contracts.py` 已加入 8083）
@@ -79,6 +81,7 @@ commit `8c3fc96`。
 ## 文件清单
 
 新增
+
 - `backend/services/channel/`（pom、application.yml、ChannelApplication、AccessService、
   ChannelModels、ChannelService、ChannelController、ApiErrorHandler、
   V1__channel_registry_connections_and_shops.sql、2 个测试）
@@ -89,6 +92,7 @@ commit `8c3fc96`。
 - `packages/api-contracts/src/channel.openapi.json`
 
 修改
+
 - `backend/pom.xml`（channel 模块 + surefire api.version）
 - `apps/web/src/lib/api.ts`（多服务前缀分发）
 - `apps/web/src/lib/api-proxy.ts`（服务表驱动的路由 + channel allowlist）

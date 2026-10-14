@@ -23,7 +23,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,18 +30,13 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.7.1.2 寄售与代销：协议 → 寄售可用量 → 销售事实 → 结算触发单 → 未售退货与期末清理，
- * <b>以及「寄售未售出不产生采购成本与应付」这条财务分叉</b>，外加租户隔离三断言。
+ * 7.7.1.2 寄售与代销：协议 → 寄售可用量 → 销售事实 → 结算触发单 → 未售退货与期末清理， <b>以及「寄售未售出不产生采购成本与应付」这条财务分叉</b>，外加租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本测试的核心是 {@link #未售出不产生任何应付()} 与 {@link #数据库层挡住把寄售货算成自有资产()} 两条</b>。
- * 蓝图原话：「寄售库存不计入我方采购入库成本，仅在售出时结转」，并且把「寄售未售出不产生
- * 采购成本与应付」称为寄售与普通采购在财务上的根本分叉。只测「卖出去了会算应付」证明不了
- * 这条红线 —— 那条路在「随便按寄售量写个应付」面前一样成立。所以必须**真的**去数据库里
- * 硬写不该存在的应付行，验证 V71 的闸门会当场拒绝：
- * 一条只写在服务层注释里的红线，等于没有红线。
+ * 蓝图原话：「寄售库存不计入我方采购入库成本，仅在售出时结转」，并且把「寄售未售出不产生 采购成本与应付」称为寄售与普通采购在财务上的根本分叉。只测「卖出去了会算应付」证明不了 这条红线 ——
+ * 那条路在「随便按寄售量写个应付」面前一样成立。所以必须**真的**去数据库里 硬写不该存在的应付行，验证 V71 的闸门会当场拒绝： 一条只写在服务层注释里的红线，等于没有红线。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,7 +48,10 @@ class ConsignmentIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID le = idFor(a, 1);
@@ -65,7 +62,8 @@ class ConsignmentIntegrationTest {
   static final UUID supplier = UUID.randomUUID();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-consignment-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-consignment-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -86,7 +84,8 @@ class ConsignmentIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -101,7 +100,8 @@ class ConsignmentIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -163,19 +163,38 @@ class ConsignmentIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-ONE", "一仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-ONE",
+                "一仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-TWO", "二仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-TWO",
+                "二仓",
+                "CN",
+                "Asia/Shanghai");
             return null;
           });
     }
@@ -195,19 +214,36 @@ class ConsignmentIntegrationTest {
   UUID activeAgreement(String cycle, String endTreatment) {
     var input =
         new ConsignmentAgreementInput(
-            "CONSIGNMENT", supplier, "SUP-1", "供应商一", le, "CNY", cycle, endTreatment,
-            LocalDate.now().minusDays(3), null, "寄售协议",
+            "CONSIGNMENT",
+            supplier,
+            "SUP-1",
+            "供应商一",
+            le,
+            "CNY",
+            cycle,
+            endTreatment,
+            LocalDate.now().minusDays(3),
+            null,
+            "寄售协议",
             List.of(
-                new ConsignmentLineInput(skuOne, whOne, new BigDecimal("100"), new BigDecimal("12.5")),
-                new ConsignmentLineInput(skuTwo, whOne, new BigDecimal("40"), new BigDecimal("30"))));
+                new ConsignmentLineInput(
+                    skuOne, whOne, new BigDecimal("100"), new BigDecimal("12.5")),
+                new ConsignmentLineInput(
+                    skuTwo, whOne, new BigDecimal("40"), new BigDecimal("30"))));
     var id =
-        access.run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
-            .agreement().id();
-    return access.run(actorA, "warehouse.inventory.update", () -> service.activate(id, null, user)).id();
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
+            .agreement()
+            .id();
+    return access
+        .run(actorA, "warehouse.inventory.update", () -> service.activate(id, null, user))
+        .id();
   }
 
   UUID lineOf(UUID agreementId, UUID skuId) {
-    return access.run(actorA, "warehouse.inventory.read", () -> service.agreement(agreementId)).lines()
+    return access
+        .run(actorA, "warehouse.inventory.read", () -> service.agreement(agreementId))
+        .lines()
         .stream()
         .filter(l -> l.skuId().equals(skuId))
         .findFirst()
@@ -221,7 +257,9 @@ class ConsignmentIntegrationTest {
         "warehouse.inventory.update",
         () ->
             service.recordSale(
-                agreementId, lineId, new ConsignmentSaleInput(new BigDecimal(qty), ref, null, null, at, null),
+                agreementId,
+                lineId,
+                new ConsignmentSaleInput(new BigDecimal(qty), ref, null, null, at, null),
                 user));
   }
 
@@ -230,21 +268,22 @@ class ConsignmentIntegrationTest {
   /**
    * 绕过服务层直接写数据库 —— 这才是验证「红线真的在数据库里」的正确姿势。
    *
-   * <p>必须在租户事务里做：RLS 开着 FORCE，事务外裸写连行都看不见（UPDATE 静默影响 0 行），
-   * 那会让「数据库挡住了我」变成一句自欺欺人的话。
+   * <p>必须在租户事务里做：RLS 开着 FORCE，事务外裸写连行都看不见（UPDATE 静默影响 0 行）， 那会让「数据库挡住了我」变成一句自欺欺人的话。
    */
   void rawAsA(Runnable write) {
-    access.run(actorA, "warehouse.inventory.update", () -> {
-      write.run();
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () -> {
+          write.run();
+          return null;
+        });
   }
 
   /**
    * 断言「被**数据库**拒绝」，而不是被应用层挡住。
    *
-   * <p>沿异常链找数据库的错误消息：应用层的 409 与数据库的约束拒绝都是 DataAccessException，
-   * 只断言异常类型分不出「我自己在服务层拦的」和「数据库真的不让我写」。
+   * <p>沿异常链找数据库的错误消息：应用层的 409 与数据库的约束拒绝都是 DataAccessException， 只断言异常类型分不出「我自己在服务层拦的」和「数据库真的不让我写」。
    */
   void assertDbRejects(String expectedFragment, Runnable write) {
     assertThatThrownBy(() -> rawAsA(write))
@@ -291,9 +330,16 @@ class ConsignmentIntegrationTest {
             sql.execute(
                 "update consignment_agreement_line set counts_as_owned_asset = true"
                     + " where tenant_id = ? and id = ?",
-                a, line));
-    var read = access.run(actorA, "warehouse.inventory.read", () -> service.agreement(agreement)).lines()
-        .stream().filter(l -> l.id().equals(line)).findFirst().orElseThrow();
+                a,
+                line));
+    var read =
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.agreement(agreement))
+            .lines()
+            .stream()
+            .filter(l -> l.id().equals(line))
+            .findFirst()
+            .orElseThrow();
     assertThat(read.countsAsOwnedAsset()).isFalse();
     assertThat(read.stockOwnerType()).isEqualTo("SUPPLIER");
   }
@@ -347,12 +393,25 @@ class ConsignmentIntegrationTest {
   void 草稿协议不能记销售() {
     var input =
         new ConsignmentAgreementInput(
-            "CONSIGNMENT", supplier, "SUP-1", "供应商一", le, "CNY", "MONTHLY", "RETURN_TO_SUPPLIER",
-            LocalDate.now(), null, null,
-            List.of(new ConsignmentLineInput(skuOne, whOne, new BigDecimal("10"), new BigDecimal("5"))));
+            "CONSIGNMENT",
+            supplier,
+            "SUP-1",
+            "供应商一",
+            le,
+            "CNY",
+            "MONTHLY",
+            "RETURN_TO_SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new ConsignmentLineInput(
+                    skuOne, whOne, new BigDecimal("10"), new BigDecimal("5"))));
     var draft =
-        access.run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
-            .agreement().id();
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
+            .agreement()
+            .id();
     UUID line = lineOf(draft, skuOne);
     assertThatThrownBy(() -> sale(draft, line, "1", "SO-1", now()))
         .isInstanceOf(ResponseStatusException.class)
@@ -371,7 +430,8 @@ class ConsignmentIntegrationTest {
         () ->
             sql.execute(
                 "update consignment_agreement_line set sold_quantity = 999 where tenant_id = ? and id = ?",
-                a, line));
+                a,
+                line));
     assertThatThrownBy(() -> sale(agreement, line, "1", "SO-2", now()))
         .isInstanceOf(ResponseStatusException.class);
   }
@@ -427,15 +487,18 @@ class ConsignmentIntegrationTest {
     UUID agreement = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     UUID line = lineOf(agreement, skuOne);
     sale(agreement, line, "10", "SO-1", now());
-    var window = access.run(actorA, "warehouse.inventory.read", () -> service.settlementWindow(agreement));
+    var window =
+        access.run(actorA, "warehouse.inventory.read", () -> service.settlementWindow(agreement));
     var settlement =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.update",
                 () ->
                     service.createSettlement(
                         agreement,
-                        new ConsignmentSettlementInput(window.periodStart(), window.periodEnd(), null),
+                        new ConsignmentSettlementInput(
+                            window.periodStart(), window.periodEnd(), null),
                         user))
             .settlement();
     // 绕过服务层，硬把同一条销售事实塞进另一张结算单 → UNIQUE(tenant_id, sale_id) 挡住。
@@ -445,17 +508,32 @@ class ConsignmentIntegrationTest {
             sql.execute(
                 "insert into consignment_settlement(id,tenant_id,settlement_code,agreement_id,period_start,"
                     + "period_end,currency,status,created_by_user_id) values(?,?,?,?,?,?,'CNY','OPEN',?)",
-                other, a, "ST-OTHER", agreement, LocalDate.now().minusDays(90),
-                LocalDate.now().minusDays(60), user));
-    var saleId = access.run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
-        .sales().get(0).id();
+                other,
+                a,
+                "ST-OTHER",
+                agreement,
+                LocalDate.now().minusDays(90),
+                LocalDate.now().minusDays(60),
+                user));
+    var saleId =
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
+            .sales()
+            .get(0)
+            .id();
     assertDbRejects(
         "violates unique constraint",
         () ->
             sql.execute(
                 "insert into consignment_settlement_line(id,tenant_id,settlement_id,agreement_line_id,"
                     + "sale_id,quantity,unit_price) values(?,?,?,?,?,?,?)",
-                UUID.randomUUID(), a, other, line, saleId, new BigDecimal("10"), new BigDecimal("12.5")));
+                UUID.randomUUID(),
+                a,
+                other,
+                line,
+                saleId,
+                new BigDecimal("10"),
+                new BigDecimal("12.5")));
     assertThat(settlement.totalQuantity()).isEqualByComparingTo("10.000000");
   }
 
@@ -465,7 +543,8 @@ class ConsignmentIntegrationTest {
     UUID line = lineOf(agreement, skuOne);
     sale(agreement, line, "10", "SO-1", now());
     var settlement =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.update",
                 () ->
@@ -477,7 +556,9 @@ class ConsignmentIntegrationTest {
             .settlement();
     var confirmed =
         access.run(
-            actorA, "warehouse.inventory.update", () -> service.confirmSettlement(settlement.id(), null, user));
+            actorA,
+            "warehouse.inventory.update",
+            () -> service.confirmSettlement(settlement.id(), null, user));
     assertThat(confirmed.status()).isEqualTo("CONFIRMED");
     // reference_id 是交给 12 应付的定位键。
     assertThat(confirmed.referenceId()).isNotBlank();
@@ -488,12 +569,15 @@ class ConsignmentIntegrationTest {
             sql.execute(
                 "update consignment_settlement_line set quantity = 999"
                     + " where tenant_id = ? and settlement_id = ?",
-                a, settlement.id()));
+                a,
+                settlement.id()));
     // 已确认的单据不能重复确认。
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update", () -> service.confirmSettlement(settlement.id(), null, user)))
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.confirmSettlement(settlement.id(), null, user)))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -510,7 +594,8 @@ class ConsignmentIntegrationTest {
     UUID monthly = activeAgreement("MONTHLY", "RETURN_TO_SUPPLIER");
     var m = access.run(actorA, "warehouse.inventory.read", () -> service.settlementWindow(monthly));
     assertThat(m.periodStart().getDayOfMonth()).isEqualTo(1);
-    assertThat(m.periodEnd()).isEqualTo(m.periodStart().withDayOfMonth(m.periodStart().lengthOfMonth()));
+    assertThat(m.periodEnd())
+        .isEqualTo(m.periodStart().withDayOfMonth(m.periodStart().lengthOfMonth()));
   }
 
   // ================================================================ 红线：未售出不产生应付
@@ -550,19 +635,33 @@ class ConsignmentIntegrationTest {
             sql.execute(
                 "insert into consignment_settlement(id,tenant_id,settlement_code,agreement_id,period_start,"
                     + "period_end,currency,status,created_by_user_id) values(?,?,?,?,?,?,'CNY','OPEN',?)",
-                forged, a, "ST-FORGED", agreement, LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(1), user));
+                forged,
+                a,
+                "ST-FORGED",
+                agreement,
+                LocalDate.now().minusDays(5),
+                LocalDate.now().plusDays(1),
+                user));
     assertDbRejects(
         "violates foreign key constraint",
         () ->
             sql.execute(
                 "insert into consignment_settlement_line(id,tenant_id,settlement_id,agreement_line_id,"
                     + "sale_id,quantity,unit_price) values(?,?,?,?,?,?,?)",
-                UUID.randomUUID(), a, forged, line, UUID.randomUUID(), new BigDecimal("140"),
+                UUID.randomUUID(),
+                a,
+                forged,
+                line,
+                UUID.randomUUID(),
+                new BigDecimal("140"),
                 new BigDecimal("12.5")));
     // 应付合计仍是 0：那 140 件寄售货一笔应付都没产生。
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.settlementDetail(forged))
-            .settlement().totalAmount()).isEqualByComparingTo("0.000000");
+    assertThat(
+            access
+                .run(actorA, "warehouse.inventory.read", () -> service.settlementDetail(forged))
+                .settlement()
+                .totalAmount())
+        .isEqualByComparingTo("0.000000");
   }
 
   // ================================================================ 未售退货与期末清理
@@ -573,24 +672,32 @@ class ConsignmentIntegrationTest {
     UUID line = lineOf(agreement, skuOne);
     sale(agreement, line, "30", "SO-1", now());
     var draft =
-        access.run(
-            actorA,
-            "warehouse.inventory.update",
-            () ->
-                service.createReturn(
-                    agreement,
-                    new ConsignmentReturnInput(
-                        "UNSOLD_RETURN", "RETURN_TO_SUPPLIER",
-                        List.of(new ConsignmentReturnLineInput(line, new BigDecimal("20"))), "退未售"),
-                    user))
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.update",
+                () ->
+                    service.createReturn(
+                        agreement,
+                        new ConsignmentReturnInput(
+                            "UNSOLD_RETURN",
+                            "RETURN_TO_SUPPLIER",
+                            List.of(new ConsignmentReturnLineInput(line, new BigDecimal("20"))),
+                            "退未售"),
+                        user))
             .returnOrder();
     // 草稿期不动数量：卖出 30 后两条行合计剩余 = (100-30) + 40 = 110。
     assertThat(
-            access.run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement))
-                .totalRemaining()).isEqualByComparingTo("110.000000");
+            access
+                .run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement))
+                .totalRemaining())
+        .isEqualByComparingTo("110.000000");
 
     var executed =
-        access.run(actorA, "warehouse.inventory.update", () -> service.executeReturn(draft.id(), null, user));
+        access.run(
+            actorA,
+            "warehouse.inventory.update",
+            () -> service.executeReturn(draft.id(), null, user));
     assertThat(executed.status()).isEqualTo("EXECUTED");
     // 退回供应商：不产生任何应付。
     assertThat(executed.totalPayableAmount()).isEqualByComparingTo("0.000000");
@@ -602,7 +709,9 @@ class ConsignmentIntegrationTest {
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update", () -> service.executeReturn(draft.id(), null, user)))
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.executeReturn(draft.id(), null, user)))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -611,19 +720,25 @@ class ConsignmentIntegrationTest {
     UUID agreement = activeAgreement("MONTHLY", "CONVERT_TO_PURCHASE");
     UUID line = lineOf(agreement, skuOne);
     var draft =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.update",
                 () ->
                     service.createReturn(
                         agreement,
                         new ConsignmentReturnInput(
-                            "PERIOD_END_CLEANUP", "CONVERT_TO_PURCHASE",
-                            List.of(new ConsignmentReturnLineInput(line, new BigDecimal("25"))), "期末买断"),
+                            "PERIOD_END_CLEANUP",
+                            "CONVERT_TO_PURCHASE",
+                            List.of(new ConsignmentReturnLineInput(line, new BigDecimal("25"))),
+                            "期末买断"),
                         user))
             .returnOrder();
     var executed =
-        access.run(actorA, "warehouse.inventory.update", () -> service.executeReturn(draft.id(), null, user));
+        access.run(
+            actorA,
+            "warehouse.inventory.update",
+            () -> service.executeReturn(draft.id(), null, user));
     // 转入采购是「未售出不产生应付」的唯一例外：25 × 12.5 = 312.5。
     assertThat(executed.totalPayableAmount()).isEqualByComparingTo("312.500000");
     var view = access.run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement));
@@ -643,8 +758,10 @@ class ConsignmentIntegrationTest {
                         service.createReturn(
                             agreement,
                             new ConsignmentReturnInput(
-                                "PERIOD_END_CLEANUP", "RETURN_TO_SUPPLIER",
-                                List.of(new ConsignmentReturnLineInput(line, new BigDecimal("1"))), null),
+                                "PERIOD_END_CLEANUP",
+                                "RETURN_TO_SUPPLIER",
+                                List.of(new ConsignmentReturnLineInput(line, new BigDecimal("1"))),
+                                null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("协议约定的期末处理是");
@@ -656,22 +773,27 @@ class ConsignmentIntegrationTest {
     UUID line = lineOf(agreement, skuOne);
     sale(agreement, line, "95", "SO-1", now());
     var draft =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.update",
                 () ->
                     service.createReturn(
                         agreement,
                         new ConsignmentReturnInput(
-                            "UNSOLD_RETURN", "RETURN_TO_SUPPLIER",
-                            List.of(new ConsignmentReturnLineInput(line, new BigDecimal("10"))), null),
+                            "UNSOLD_RETURN",
+                            "RETURN_TO_SUPPLIER",
+                            List.of(new ConsignmentReturnLineInput(line, new BigDecimal("10"))),
+                            null),
                         user))
             .returnOrder();
     // 剩 5 件却要退 10 件：执行时挡住，提示按当前剩余重新拟单。
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update", () -> service.executeReturn(draft.id(), null, user)))
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.executeReturn(draft.id(), null, user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("超过当前剩余");
   }
@@ -687,8 +809,10 @@ class ConsignmentIntegrationTest {
     var written = sale(agreement, line, "1", "SO-TZ", at);
     // 断言写回的值，而不是断言「没报错」。
     var readBack =
-        access.run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
-            .sales().stream()
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
+            .sales()
+            .stream()
             .filter(s -> s.id().equals(written.id()))
             .findFirst()
             .orElseThrow();
@@ -705,16 +829,38 @@ class ConsignmentIntegrationTest {
     sale(agreement, line, "10", "SO-1", now());
 
     // B 看不到 A 的任何东西：连详情都是 404（比返回空集更强 —— 不泄露存在性）。
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.agreement(agreement)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.stockView(agreement)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.auditTrail(agreement, null)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20))
-        .total()).isZero();
+    assertThatThrownBy(
+            () ->
+                access.run(actorB, "warehouse.inventory.read", () -> service.agreement(agreement)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(actorB, "warehouse.inventory.read", () -> service.stockView(agreement)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.sales(agreement, null, 0, 10)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.auditTrail(agreement, null)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThat(
+            access
+                .run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.agreements(null, null, null, 0, 20))
+                .total())
+        .isZero();
     // B 不能往 A 的协议行上写销售。
     assertThatThrownBy(
             () ->
@@ -723,21 +869,45 @@ class ConsignmentIntegrationTest {
                     "warehouse.inventory.update",
                     () ->
                         service.recordSale(
-                            agreement, line,
-                            new ConsignmentSaleInput(new BigDecimal("1"), "SO-X", null, null, now(), null),
+                            agreement,
+                            line,
+                            new ConsignmentSaleInput(
+                                new BigDecimal("1"), "SO-X", null, null, now(), null),
                             user)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
     // B 自己的协议与 A 的互不可见。
     var bInput =
         new ConsignmentAgreementInput(
-            "CONSIGNMENT", supplier, "SUP-B", "B 的供应商", idFor(b, 1), "CNY", "MONTHLY",
-            "RETURN_TO_SUPPLIER", LocalDate.now(), null, null,
-            List.of(new ConsignmentLineInput(idFor(b, 2), idFor(b, 4), new BigDecimal("5"), new BigDecimal("2"))));
+            "CONSIGNMENT",
+            supplier,
+            "SUP-B",
+            "B 的供应商",
+            idFor(b, 1),
+            "CNY",
+            "MONTHLY",
+            "RETURN_TO_SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new ConsignmentLineInput(
+                    idFor(b, 2), idFor(b, 4), new BigDecimal("5"), new BigDecimal("2"))));
     var bAgreement =
-        access.run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user))
-            .agreement().id();
-    assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20))
-        .agreements().stream().map(ConsignmentAgreement::id)).containsExactly(bAgreement);
+        access
+            .run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user))
+            .agreement()
+            .id();
+    assertThat(
+            access
+                .run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.agreements(null, null, null, 0, 20))
+                .agreements()
+                .stream()
+                .map(ConsignmentAgreement::id))
+        .containsExactly(bAgreement);
   }
 
   @Test
@@ -747,22 +917,26 @@ class ConsignmentIntegrationTest {
     sale(agreement, line, "10", "SO-1", now());
 
     // 身份是 B，伪造 X-Tenant-Id 指向 A：B 看到的仍然是 B 的（空）。
-    http.perform(get("/warehouse/inventory/consignments")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/consignments")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
-    http.perform(get("/warehouse/inventory/consignments/{id}", agreement)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/consignments/{id}", agreement)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
-    http.perform(get("/warehouse/inventory/consignments/{id}/stock-view", agreement)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/consignments/{id}/stock-view", agreement)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 把 A 的单确认（确认=把应付交出去）。
     var settlement =
-        access.run(
+        access
+            .run(
                 actorA,
                 "warehouse.inventory.update",
                 () ->
@@ -772,14 +946,23 @@ class ConsignmentIntegrationTest {
                             LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null),
                         user))
             .settlement();
-    http.perform(post("/warehouse/inventory/consignments/settlements/{id}/confirm", settlement.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json").content("{}"))
+    http.perform(
+            post("/warehouse/inventory/consignments/settlements/{id}/confirm", settlement.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isNotFound());
     // A 的数据未被这串伪造请求改动：应付仍未确认。
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.settlementDetail(settlement.id()))
-        .settlement().status()).isEqualTo("OPEN");
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.settlementDetail(settlement.id()))
+                .settlement()
+                .status())
+        .isEqualTo("OPEN");
   }
 
   @Test
@@ -788,29 +971,58 @@ class ConsignmentIntegrationTest {
     sale(agreement, lineOf(agreement, skuOne), "10", "SO-1", now());
     var bInput =
         new ConsignmentAgreementInput(
-            "CONSIGNMENT", supplier, "SUP-B", "B 的供应商", idFor(b, 1), "CNY", "MONTHLY",
-            "RETURN_TO_SUPPLIER", LocalDate.now(), null, null,
-            List.of(new ConsignmentLineInput(idFor(b, 2), idFor(b, 4), new BigDecimal("5"), new BigDecimal("2"))));
+            "CONSIGNMENT",
+            supplier,
+            "SUP-B",
+            "B 的供应商",
+            idFor(b, 1),
+            "CNY",
+            "MONTHLY",
+            "RETURN_TO_SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new ConsignmentLineInput(
+                    idFor(b, 2), idFor(b, 4), new BigDecimal("5"), new BigDecimal("2"))));
     access.run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user));
 
     // 交替复用同一条物理连接（池容量=1）：A → B → A → B
     for (int i = 0; i < 3; i++) {
       var a1 = access.run(actorA, "warehouse.inventory.read", () -> service.stockView(agreement));
       assertThat(a1.totalSold()).isEqualByComparingTo("10.000000");
-      var b1 = access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20));
+      var b1 =
+          access.run(
+              actorB,
+              "warehouse.inventory.read",
+              () -> service.agreements(null, null, null, 0, 20));
       assertThat(b1.total()).isEqualTo(1);
-      var a2 = access.run(actorA, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20));
+      var a2 =
+          access.run(
+              actorA,
+              "warehouse.inventory.read",
+              () -> service.agreements(null, null, null, 0, 20));
       assertThat(a2.total()).isEqualTo(1);
     }
     // 八张表逐张确认 FORCE RLS
-    for (var table : List.of(
-        "consignment_agreement", "consignment_agreement_line", "consignment_sale",
-        "consignment_settlement", "consignment_settlement_line", "consignment_return",
-        "consignment_return_line", "consignment_audit")) {
-      assertThat(sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
-          .get("relforcerowsecurity", Boolean.class)).isTrue();
-      assertThat(sql.fetchOne("select relrowsecurity from pg_class where relname = ?", table)
-          .get("relrowsecurity", Boolean.class)).isTrue();
+    for (var table :
+        List.of(
+            "consignment_agreement",
+            "consignment_agreement_line",
+            "consignment_sale",
+            "consignment_settlement",
+            "consignment_settlement_line",
+            "consignment_return",
+            "consignment_return_line",
+            "consignment_audit")) {
+      assertThat(
+              sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
+                  .get("relforcerowsecurity", Boolean.class))
+          .isTrue();
+      assertThat(
+              sql.fetchOne("select relrowsecurity from pg_class where relname = ?", table)
+                  .get("relrowsecurity", Boolean.class))
+          .isTrue();
     }
   }
 
@@ -823,10 +1035,11 @@ class ConsignmentIntegrationTest {
     var cap = access.run(readOnly, "warehouse.inventory.read", () -> service.capabilities());
     assertThat(cap.modes()).hasSize(2);
     // 只读身份走 HTTP 写路径被 403 挡住。
-    http.perform(post("/warehouse/inventory/consignments")
-            .header("Authorization", "Bearer consignment-read-only")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/consignments")
+                .header("Authorization", "Bearer consignment-read-only")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isForbidden());
   }
 }

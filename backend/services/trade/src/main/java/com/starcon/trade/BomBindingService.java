@@ -31,29 +31,23 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>蓝图 06 卷 6.4.1.2 原话：
  *
  * <blockquote>
- * 职责：加工单引用 BOM 版本并冻结展开结果，后续 BOM 修改不影响已下达的加工单。
- * 输入：BOM 版本选择；冻结动作。输出：冻结的组件清单快照。
- * 关系：上游 = 3.5.2.2 展开；下游 = 6.4.1.1。
- * <b>冻结与订单冻结组件同理</b>：加工周期长，BOM 中途改配会导致实物与系统不符。
+ *
+ * 职责：加工单引用 BOM 版本并冻结展开结果，后续 BOM 修改不影响已下达的加工单。 输入：BOM 版本选择；冻结动作。输出：冻结的组件清单快照。 关系：上游 = 3.5.2.2 展开；下游
+ * = 6.4.1.1。 <b>冻结与订单冻结组件同理</b>：加工周期长，BOM 中途改配会导致实物与系统不符。
+ *
  * </blockquote>
  *
- * <p><b>本模块的本质是快照，不是引用。</b>冻结动作把 catalog 3.5.2.2 展开出的
- * <b>整棵展开树</b>连同它的推导依据（单位用量、损耗率、成品 SKU、组件 SKU 及顺序、
- * 所在层与物化路径、来源版本）拍平进 {@code processing_bom_snapshot} /
- * {@code processing_bom_snapshot_line}。读快照**不 join catalog、不 join 当前 BOM** ——
- * 所以 BOM 中途改配、展开重算、库存变动，都影响不到已下达的加工单。
+ * <p><b>本模块的本质是快照，不是引用。</b>冻结动作把 catalog 3.5.2.2 展开出的 <b>整棵展开树</b>连同它的推导依据（单位用量、损耗率、成品 SKU、组件 SKU
+ * 及顺序、 所在层与物化路径、来源版本）拍平进 {@code processing_bom_snapshot} / {@code
+ * processing_bom_snapshot_line}。读快照**不 join catalog、不 join 当前 BOM** —— 所以 BOM
+ * 中途改配、展开重算、库存变动，都影响不到已下达的加工单。
  *
- * <p><b>与 6.4.1.1 的分工（不是重复建设）</b>：6.4.1.1 在建单时冻结的是
- * <b>单层</b>领料清单（{@code processing_order_component}，问「要领哪些料」）；
- * 本模块冻结的是<b>多层</b>展开树（问「这批料当时按哪棵树、哪一版算的」）。
- * 一个成品用半成品 SA、SA 又由面料 + 拉链组成时，单层清单答不出
- * 「这 3 个 SA 的面料按哪一版、什么损耗率算的」—— 而加工周期长达数周，
- * 这正是蓝图点名要消灭的「实物与系统不符」。
+ * <p><b>与 6.4.1.1 的分工（不是重复建设）</b>：6.4.1.1 在建单时冻结的是 <b>单层</b>领料清单（{@code
+ * processing_order_component}，问「要领哪些料」）； 本模块冻结的是<b>多层</b>展开树（问「这批料当时按哪棵树、哪一版算的」）。 一个成品用半成品 SA、SA
+ * 又由面料 + 拉链组成时，单层清单答不出 「这 3 个 SA 的面料按哪一版、什么损耗率算的」—— 而加工周期长达数周， 这正是蓝图点名要消灭的「实物与系统不符」。
  *
- * <p><b>口径不另立一套</b>：展开由 catalog 3.5.2.2 真算，本类经
- * {@link BomExplosionPort} 原样搬运，<b>不重算、不取整</b>。
- * 尤其损耗率是<b>百分数</b>（V25 规则 R6，5 = 5%），需求量是规则 R7 的
- * 6 位小数结果。
+ * <p><b>口径不另立一套</b>：展开由 catalog 3.5.2.2 真算，本类经 {@link BomExplosionPort} 原样搬运，<b>不重算、不取整</b>。
+ * 尤其损耗率是<b>百分数</b>（V25 规则 R6，5 = 5%），需求量是规则 R7 的 6 位小数结果。
  */
 @Service
 public class BomBindingService {
@@ -83,13 +77,10 @@ public class BomBindingService {
   /**
    * 冻结动作：按 BOM 版本展开一次，把整棵展开树拍平进本服务的库。
    *
-   * <p><b>为什么必须调 catalog 而不是自己 join</b>：多层递归展开（V26 规则 E1 的逐层结转）、
-   * 子 BOM 判定（E3）、深度截断（E4）、缺口公式（E2）都是 catalog 的职责，
-   * 而 BOM 表在它的库里。两处各实现一遍必然漂移，而漂移的后果是
-   * 「按不同口径冻结的料」—— 那正是本模块要消灭的东西。
+   * <p><b>为什么必须调 catalog 而不是自己 join</b>：多层递归展开（V26 规则 E1 的逐层结转）、 子 BOM 判定（E3）、深度截断（E4）、缺口公式（E2）都是
+   * catalog 的职责， 而 BOM 表在它的库里。两处各实现一遍必然漂移，而漂移的后果是 「按不同口径冻结的料」—— 那正是本模块要消灭的东西。
    *
-   * <p><b>已冻结过就不覆盖</b>：UNIQUE(tenant_id, order_id) + 触发器钉死一份单只有一份快照。
-   * 覆盖它会让「这张单当时按哪棵树算的」在历史里出现两个答案，
+   * <p><b>已冻结过就不覆盖</b>：UNIQUE(tenant_id, order_id) + 触发器钉死一份单只有一份快照。 覆盖它会让「这张单当时按哪棵树算的」在历史里出现两个答案，
    * 而领料与回溯只能选一个。正确做法是另开一张加工单。
    */
   @Transactional
@@ -120,13 +111,7 @@ public class BomBindingService {
 
     BomExplosionPort.ExplosionRun run =
         explosions.explode(
-            versionId,
-            outputQuantity,
-            input.warehouseId(),
-            asOf,
-            input.maxDepth(),
-            note,
-            bearer);
+            versionId, outputQuantity, input.warehouseId(), asOf, input.maxDepth(), note, bearer);
 
     // BOM 版本必须**已发布**：草稿版本可以随手改组件，按它冻结的树无从回溯
     // （与 6.4.1.1 建单时的同一判据，规则 R3：只有已发布版本参与判定）。
@@ -279,9 +264,8 @@ public class BomBindingService {
   /**
    * 读一张加工单的 BOM 绑定：冻结快照 + 「此刻生效的是不是同一版」。
    *
-   * <p><b>快照本身不 join catalog。</b>唯一一次跨服务调用是规则 R4 的时刻查询，
-   * 而且它<b>只用于生成提示</b>（{@code drifted} / {@code effectiveVersionMissing}），
-   * 绝不参与计算快照里的任何一行 —— 那才是「快照不是引用」的分界线。
+   * <p><b>快照本身不 join catalog。</b>唯一一次跨服务调用是规则 R4 的时刻查询， 而且它<b>只用于生成提示</b>（{@code drifted} / {@code
+   * effectiveVersionMissing}）， 绝不参与计算快照里的任何一行 —— 那才是「快照不是引用」的分界线。
    */
   public BomBinding binding(UUID orderId, String bearer) {
     UUID tenantId = currentTenant();
@@ -294,35 +278,40 @@ public class BomBindingService {
     boolean drifted = false;
     var notes = new ArrayList<String>();
     if (snapshot == null) {
-      notes.add("这张加工单还没有冻结 BOM 展开结果：加工周期内 BOM 一旦改配，"
-          + "就无法回答「这批料当时按哪一版、什么损耗率领的」。请在草稿态执行冻结。");
+      notes.add("这张加工单还没有冻结 BOM 展开结果：加工周期内 BOM 一旦改配，" + "就无法回答「这批料当时按哪一版、什么损耗率领的」。请在草稿态执行冻结。");
     } else {
       if (snapshot.truncated()) {
-        notes.add("这份快照是**按深度上限截断**的，清单不完整："
-            + "第 " + snapshot.reachedDepth() + " 层之下还有下级 BOM 没展开。"
-            + "被展开到的部分已冻结，未展开的部分这张单答不出「按哪一版算」。");
+        notes.add(
+            "这份快照是**按深度上限截断**的，清单不完整："
+                + "第 "
+                + snapshot.reachedDepth()
+                + " 层之下还有下级 BOM 没展开。"
+                + "被展开到的部分已冻结，未展开的部分这张单答不出「按哪一版算」。");
       }
       BomExplosionPort.EffectiveVersion effective =
           explosions.effective(snapshot.bomId(), now(), bearer);
       if (!effective.effective()) {
         effectiveVersionMissing = true;
-        notes.add("这个 BOM 此刻没有生效版本（草稿未发布、区间有缝或已发布版本全部关闭）："
-            + "不影响已冻结的快照，但「现在新单该按哪一版算」需要先在 3.5.2.1 处理。");
+        notes.add(
+            "这个 BOM 此刻没有生效版本（草稿未发布、区间有缝或已发布版本全部关闭）：" + "不影响已冻结的快照，但「现在新单该按哪一版算」需要先在 3.5.2.1 处理。");
       } else {
         effectiveVersionNo = effective.versionNo();
         if (!effectiveVersionNo.equals(snapshot.bomVersionNo())) {
           drifted = true;
-          notes.add("BOM 已接替新版本：这张单冻结的是「"
-              + snapshot.bomVersionNo()
-              + "」，此刻生效的是「"
-              + effectiveVersionNo
-              + "」。**已下达的加工单不受影响**（快照已冻结，领料按 "
-              + snapshot.bomVersionNo() + " 走）；但按新版本生产的下一批货要另开单。");
+          notes.add(
+              "BOM 已接替新版本：这张单冻结的是「"
+                  + snapshot.bomVersionNo()
+                  + "」，此刻生效的是「"
+                  + effectiveVersionNo
+                  + "」。**已下达的加工单不受影响**（快照已冻结，领料按 "
+                  + snapshot.bomVersionNo()
+                  + " 走）；但按新版本生产的下一批货要另开单。");
         }
       }
-      notes.add("快照里的单位用量 / 损耗率 / 需求量都是冻结时刻的值，"
-          + "读它们不 join 当前 BOM：损耗率是**百分数**（5 = 5%），"
-          + "需求量按规则 R7 = 单位用量 × 产量 × (1 + 损耗率/100)，6 位小数不取整。");
+      notes.add(
+          "快照里的单位用量 / 损耗率 / 需求量都是冻结时刻的值，"
+              + "读它们不 join 当前 BOM：损耗率是**百分数**（5 = 5%），"
+              + "需求量按规则 R7 = 单位用量 × 产量 × (1 + 损耗率/100)，6 位小数不取整。");
     }
     return new BomBinding(
         orderId,
@@ -451,9 +440,8 @@ public class BomBindingService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>nullif 不是洁癖：事务局部的 set_config 提交后，PostgreSQL 把自定义 GUC
-   * <b>复位成空串</b>而不是「回到未设置」，直接 cast 会报 uuid 语法错
-   * （与 ProcessingOrderService 同一句写法）。
+   * <p>nullif 不是洁癖：事务局部的 set_config 提交后，PostgreSQL 把自定义 GUC <b>复位成空串</b>而不是「回到未设置」，直接 cast 会报 uuid
+   * 语法错 （与 ProcessingOrderService 同一句写法）。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")
@@ -490,10 +478,7 @@ public class BomBindingService {
     return value == null ? null : value.toString();
   }
 
-  /**
-   * 读数量。纯文本 SQL 里的表达式列 jOOQ 拿不到列类型，
-   * 收口成不依赖驱动返回类型的读法（null 被静默读成 0 是同一个坑）。
-   */
+  /** 读数量。纯文本 SQL 里的表达式列 jOOQ 拿不到列类型， 收口成不依赖驱动返回类型的读法（null 被静默读成 0 是同一个坑）。 */
   private static BigDecimal decimal(Record r, String field) {
     Object value = r.get(field);
     if (value == null) {
@@ -510,9 +495,8 @@ public class BomBindingService {
   /**
    * 损耗率刻度：与 DB numeric(7,4) 及 catalog V25 的 scrap_rate 对齐。
    *
-   * <p>这里<b>只做刻度对齐，不做语义换算</b>：catalog 给的百分数（5 = 5%）
-   * 原样落库。绝不在这里除以 100 —— 那是 R6 明确禁止的比率化，
-   * 一次漂移就让领料量翻 6 倍且不报错。
+   * <p>这里<b>只做刻度对齐，不做语义换算</b>：catalog 给的百分数（5 = 5%） 原样落库。绝不在这里除以 100 —— 那是 R6 明确禁止的比率化， 一次漂移就让领料量翻
+   * 6 倍且不报错。
    */
   private static BigDecimal scrap(BigDecimal value) {
     return value == null ? BigDecimal.ZERO : value.setScale(SCRAP_SCALE, RoundingMode.HALF_UP);
@@ -523,8 +507,7 @@ public class BomBindingService {
       throw bad(label + "必须大于 0");
     }
     if (value.scale() > QTY_SCALE) {
-      throw bad(
-          label + "最多 6 位小数（与 DB numeric(19,6) 及 catalog 规则 R7 的口径一致）");
+      throw bad(label + "最多 6 位小数（与 DB numeric(19,6) 及 catalog 规则 R7 的口径一致）");
     }
     return qty(value);
   }
@@ -541,8 +524,8 @@ public class BomBindingService {
   }
 
   /**
-   * 读文本列。纯文本 SQL 里 jOOQ 拿不到列类型，{@code Record.get(String)} 返回 Object，
-   * 直接塞进 record 的 String 位会编译不过 —— 收口到一处，不在每个调用点写强转。
+   * 读文本列。纯文本 SQL 里 jOOQ 拿不到列类型，{@code Record.get(String)} 返回 Object， 直接塞进 record 的 String 位会编译不过 ——
+   * 收口到一处，不在每个调用点写强转。
    */
   private static String text(Record r, String column) {
     Object value = r.get(column);

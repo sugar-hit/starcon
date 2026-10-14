@@ -57,10 +57,7 @@ import {
   type UsableFilter,
 } from './party-model';
 import { useIdentity } from '../iam/identity-shell';
-import {
-  PartyRoleProfileLedger,
-  PartyRoleProfilePanels,
-} from './party-role-profile-workspace';
+import { PartyRoleProfileLedger, PartyRoleProfilePanels } from './party-role-profile-workspace';
 
 const PAGE_SIZE = 20;
 

@@ -9,16 +9,13 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,27 +28,22 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.3.1 复核扫描。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住十一件「错了会发错货」的事：
  *
  * <ul>
- *   <li><b>开单三道闸都是真的</b>：出库单不在「待复核」开不了、拣货任务没完成开不了、
- *       一行基线都没有开不了。绕开服务层用超级用户也过不去（V117 的守卫）。
- *   <li><b>基线真的是订单明细</b>：改一次 outbound_order_line 的读数方向不会让基线跟着变
- *       （冻结语义），而改一次拣货实拣量基线里的 pickedQuantity 会跟着变 —— 两个数是分开的。
- *   <li><b>序列号必须逐件核对，件数相等不算过</b>：扫 S1、S2、S9 三件而实拣是 S1、S2、S3
- *       → 件数一样，<b>判序列号不符</b>，并且永远拿不到 MATCHED。
+ *   <li><b>开单三道闸都是真的</b>：出库单不在「待复核」开不了、拣货任务没完成开不了、 一行基线都没有开不了。绕开服务层用超级用户也过不去（V117 的守卫）。
+ *   <li><b>基线真的是订单明细</b>：改一次 outbound_order_line 的读数方向不会让基线跟着变 （冻结语义），而改一次拣货实拣量基线里的 pickedQuantity
+ *       会跟着变 —— 两个数是分开的。
+ *   <li><b>序列号必须逐件核对，件数相等不算过</b>：扫 S1、S2、S9 三件而实拣是 S1、S2、S3 → 件数一样，<b>判序列号不符</b>，并且永远拿不到 MATCHED。
  *   <li><b>漏件/多件/错件/重复扫/未知码五类各有判定来源</b>，不是同一类换名字。
  *   <li><b>重扫不重复计件</b>：扫两遍 SN-1，基线实扫仍是 1 件，但多出一条重复扫异常。
- *   <li><b>「复核是错发拦截的最后机会」在 DB 层也成立</b>：有未处置异常时用
- *       <b>超级用户直连 SQL</b> 强行把复核单改成 PASSED，被 V117 的守卫拒（23514）。
+ *   <li><b>「复核是错发拦截的最后机会」在 DB 层也成立</b>：有未处置异常时用 <b>超级用户直连 SQL</b> 强行把复核单改成 PASSED，被 V117
+ *       的守卫拒（23514）。
  *   <li><b>通过 ≠ 已发货 ≠ 已打包</b>：通过只把出库单推到「待打包」，SHIPPED 拿不到。
- *   <li><b>复核不动库存</b>：通过与失败两种结局下 inventory_balance / stock_bucket /
- *       inventory_entry 全都不变，预占不释放。
- *   <li><b>扫描记录 append-only</b>、<b>异常只能处置一次</b>、<b>规则停用不能复活</b>，
- *       都用超级用户直连 SQL 验过。
+ *   <li><b>复核不动库存</b>：通过与失败两种结局下 inventory_balance / stock_bucket / inventory_entry 全都不变，预占不释放。
+ *   <li><b>扫描记录 append-only</b>、<b>异常只能处置一次</b>、<b>规则停用不能复活</b>， 都用超级用户直连 SQL 验过。
  *   <li><b>时刻写回不偏 −28800s</b>：带 +08:00 偏移的扫描时刻原样读回。
  *   <li><b>租户隔离三断言</b>实跑 + 六张表逐张断言 FORCE RLS。
  * </ul>
@@ -75,8 +67,13 @@ class RecountScanIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -86,7 +83,8 @@ class RecountScanIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -101,7 +99,8 @@ class RecountScanIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -173,21 +172,37 @@ class RecountScanIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 10; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", WAREHOUSE_ZONE.getId(),
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                WAREHOUSE_ZONE.getId(),
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -236,7 +251,14 @@ class RecountScanIntegrationTest {
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable,parent_id) values(?,?,?,?,?,?,'ACTIVE',?,?)",
-              id, tenant, wh(tenant), code, code + " 位", type, pickable, parent);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type,
+              pickable,
+              parent);
           return id;
         });
   }
@@ -250,14 +272,30 @@ class RecountScanIntegrationTest {
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved)"
                   + " values(?,?,?,?,?,?,cast(? as numeric),cast(? as numeric))",
-              balance, tenant, skuId, wh(tenant), idFor(tenant, 1), sellable(tenant), onHand, onHand);
+              balance,
+              tenant,
+              skuId,
+              wh(tenant),
+              idFor(tenant, 1),
+              sellable(tenant),
+              onHand,
+              onHand);
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at)"
                   + " values(?,?,?,?,?,?,null,?,?,cast(? as numeric),cast(? as numeric),?::timestamptz)",
-              UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), loc,
-              sellable(tenant), balance, onHand, onHand, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              loc,
+              sellable(tenant),
+              balance,
+              onHand,
+              onHand,
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -270,7 +308,11 @@ class RecountScanIntegrationTest {
           sql.execute(
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,status,"
                   + "current_location_id) values(?,?,?,?,'IN_STOCK',?)",
-              id, tenant, number, skuId, loc);
+              id,
+              tenant,
+              number,
+              skuId,
+              loc);
           return id;
         });
   }
@@ -287,7 +329,12 @@ class RecountScanIntegrationTest {
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,carrier_code,status,created_by_user_id)"
                   + " values(?,?,?,'SALES',?,?,'SF','PENDING_PICKING',?)",
-              orderId, tenant, code, "SO-" + code, wh(tenant), user);
+              orderId,
+              tenant,
+              code,
+              "SO-" + code,
+              wh(tenant),
+              user);
           BigDecimal total = BigDecimal.ZERO;
           int lineNo = 0;
           for (UUID skuId : skuIds) {
@@ -295,18 +342,31 @@ class RecountScanIntegrationTest {
             sql.execute(
                 "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                     + "sku_name,quantity) values(?,?,?,?,?,?,?,cast(? as numeric))",
-                UUID.randomUUID(), tenant, orderId, lineNo, skuId,
-                codes.get(skuId), "商品" + lineNo, quantity);
+                UUID.randomUUID(),
+                tenant,
+                orderId,
+                lineNo,
+                skuId,
+                codes.get(skuId),
+                "商品" + lineNo,
+                quantity);
             total = total.add(new BigDecimal(quantity));
           }
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at)"
                   + " values(?,?,?,?,cast(? as numeric),?,?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, skuIds.length, total, user, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              orderId,
+              skuIds.length,
+              total,
+              user,
+              OffsetDateTime.now());
           sql.execute(
               "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return orderId;
         });
   }
@@ -316,10 +376,12 @@ class RecountScanIntegrationTest {
     asWrite(
         tenant,
         () -> {
-          sql.execute("delete from pick_task where tenant_id=? and outbound_order_id=?", tenant, orderId);
+          sql.execute(
+              "delete from pick_task where tenant_id=? and outbound_order_id=?", tenant, orderId);
           sql.execute(
               "update outbound_order set status='PENDING_PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return null;
         });
   }
@@ -354,9 +416,7 @@ class RecountScanIntegrationTest {
     var lines = asWrite(tenant, () -> pickTasks.detail(taskId).lines());
     asWrite(
         tenant,
-        () ->
-            pickTasks.assign(
-                taskId, new PickTaskModels.PickTaskAssignInput(user, null), user));
+        () -> pickTasks.assign(taskId, new PickTaskModels.PickTaskAssignInput(user, null), user));
     for (int i = 0; i < lines.size(); i++) {
       var line = lines.get(i);
       List<UUID> serials =
@@ -367,8 +427,13 @@ class RecountScanIntegrationTest {
               pickTasks.recordPick(
                   taskId,
                   new PickTaskModels.PickTaskPickInput(
-                      line.id(), line.sourceLocationId(), null, line.plannedQuantity(),
-                      serials, null, null),
+                      line.id(),
+                      line.sourceLocationId(),
+                      null,
+                      line.plannedQuantity(),
+                      serials,
+                      null,
+                      null),
                   user));
     }
     asWrite(tenant, () -> pickTasks.complete(taskId, user));
@@ -377,8 +442,8 @@ class RecountScanIntegrationTest {
   /** 建一张「拣完待复核」的出库单 + 拣货任务。 */
   record Picked(UUID orderId, UUID taskId) {}
 
-  Picked picked(UUID tenant, String code, String quantity, Map<Integer, List<UUID>> serials,
-      UUID... skuIds) {
+  Picked picked(
+      UUID tenant, String code, String quantity, Map<Integer, List<UUID>> serials, UUID... skuIds) {
     UUID orderId = outbound(tenant, code, quantity, skuIds);
     UUID taskId = pickTask(tenant, orderId);
     finishTask(tenant, taskId, serials);
@@ -387,20 +452,14 @@ class RecountScanIntegrationTest {
 
   RecountCreated openSession(UUID tenant, UUID orderId, UUID ruleId) {
     return asWrite(
-        tenant,
-        () ->
-            service.open(
-                new RecountOpenInput(orderId, ruleId, user, null), user));
+        tenant, () -> service.open(new RecountOpenInput(orderId, ruleId, user, null), user));
   }
 
   RecountScanRow scan(UUID tenant, UUID sessionId, String type, String value, String at) {
     return asWrite(
         tenant,
         () ->
-            service.scan(
-                sessionId.toString(),
-                new RecountScanInput(type, value, at, null),
-                user));
+            service.scan(sessionId.toString(), new RecountScanInput(type, value, at, null), user));
   }
 
   RecountRuleRow rule(UUID tenant, String code, boolean requireSerial, String threshold) {
@@ -409,8 +468,12 @@ class RecountScanIntegrationTest {
         () ->
             service.createRule(
                 new RecountRuleInput(
-                    code, "规则 " + code, wh(tenant), requireSerial,
-                    threshold == null ? null : new BigDecimal(threshold), "开箱备注"),
+                    code,
+                    "规则 " + code,
+                    wh(tenant),
+                    requireSerial,
+                    threshold == null ? null : new BigDecimal(threshold),
+                    "开箱备注"),
                 user));
   }
 
@@ -424,29 +487,30 @@ class RecountScanIntegrationTest {
 
   long balanceOnHand(UUID tenant, UUID skuId) {
     return as(
-            tenant,
-            () ->
-                sql.fetchOne(
-                        "select on_hand from inventory_balance where tenant_id"
-                            + " = current_setting('app.current_tenant', true)::uuid"
-                            + " and sku_id = ? and warehouse_id = ?",
-                        skuId, wh(tenant))
-                    .get("on_hand", BigDecimal.class)
-                    .longValue())
-        ;
+        tenant,
+        () ->
+            sql.fetchOne(
+                    "select on_hand from inventory_balance where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and sku_id = ? and warehouse_id = ?",
+                    skuId,
+                    wh(tenant))
+                .get("on_hand", BigDecimal.class)
+                .longValue());
   }
 
   long reservedOnHand(UUID tenant, UUID skuId) {
     return as(
-            tenant,
-            () ->
-                sql.fetchOne(
-                        "select reserved from inventory_balance where tenant_id"
-                            + " = current_setting('app.current_tenant', true)::uuid"
-                            + " and sku_id = ? and warehouse_id = ?",
-                        skuId, wh(tenant))
-                    .get("reserved", BigDecimal.class)
-                    .longValue());
+        tenant,
+        () ->
+            sql.fetchOne(
+                    "select reserved from inventory_balance where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and sku_id = ? and warehouse_id = ?",
+                    skuId,
+                    wh(tenant))
+                .get("reserved", BigDecimal.class)
+                .longValue());
   }
 
   long inventoryEntryCount(UUID tenant) {
@@ -503,8 +567,13 @@ class RecountScanIntegrationTest {
     assertThat(caps.inventoryOwnerModule()).isEqualTo("8.3.2.1 拣货任务（复核只读不搬，货与预占都还在打包区）");
     assertThat(caps.statuses()).containsExactly("OPEN", "PASSED", "FAILED", "CANCELLED");
     assertThat(caps.exceptionKinds())
-        .contains("MISSING_ITEM", "WRONG_ITEM", "EXTRA_ITEM", "DUPLICATE_SCAN",
-            "SERIAL_MISMATCH", "UNKNOWN_BARCODE");
+        .contains(
+            "MISSING_ITEM",
+            "WRONG_ITEM",
+            "EXTRA_ITEM",
+            "DUPLICATE_SCAN",
+            "SERIAL_MISMATCH",
+            "UNKNOWN_BARCODE");
     // 「高价值」只能取件数 —— 口径必须写在返回里，而不是藏在列名里假装是金额。
     assertThat(caps.highValueBasis())
         .contains("出库单上没有金额列")
@@ -517,24 +586,50 @@ class RecountScanIntegrationTest {
 
   @Test
   void rulesRequireCodeNameAndPositiveThreshold() {
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.createRule(new RecountRuleInput("", "名字", wh(a), true, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createRule(
+                                new RecountRuleInput("", "名字", wh(a), true, null, null), user))))
         .hasMessageContaining("ruleCode");
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.createRule(new RecountRuleInput("R1", "  ", wh(a), true, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createRule(
+                                new RecountRuleInput("R1", "  ", wh(a), true, null, null), user))))
         .hasMessageContaining("name");
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.createRule(
-            new RecountRuleInput("R1", "名字", wh(a), true, new BigDecimal("0"), null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createRule(
+                                new RecountRuleInput(
+                                    "R1", "名字", wh(a), true, new BigDecimal("0"), null),
+                                user))))
         .hasMessageContaining("highValueQuantityThreshold");
     // 重复编码
     rule(a, "R-DUP", true, null);
-    assertThat(catchThrowable(() -> rule(a, "R-DUP", true, null)))
-        .hasMessageContaining("已存在");
+    assertThat(catchThrowable(() -> rule(a, "R-DUP", true, null))).hasMessageContaining("已存在");
     // 不属于本租户的仓
     UUID foreignWarehouse = as(b, () -> wh(b));
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.createRule(new RecountRuleInput("R-X", "名字", foreignWarehouse, true, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createRule(
+                                new RecountRuleInput(
+                                    "R-X", "名字", foreignWarehouse, true, null, null),
+                                user))))
         .hasMessageContaining("不存在");
   }
 
@@ -542,21 +637,29 @@ class RecountScanIntegrationTest {
   void retiredRuleCannotBeRevivedAndReasonIsRequired() {
     var created = rule(a, "R-RETIRE", true, "10");
     String ruleId = created.id().toString();
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.retireRule(ruleId, new RecountRetireInput("  "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a, () -> service.retireRule(ruleId, new RecountRetireInput("  "), user))))
         .hasMessageContaining("原因");
-    var retired = asWrite(a, () ->
-        service.retireRule(ruleId, new RecountRetireInput("口径改了"), user));
+    var retired =
+        asWrite(a, () -> service.retireRule(ruleId, new RecountRetireInput("口径改了"), user));
     assertThat(retired.status()).isEqualTo("RETIRED");
     assertThat(retired.retireReason()).isEqualTo("口径改了");
     // 服务层挡一次
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.retireRule(ruleId, new RecountRetireInput("再来一次"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a, () -> service.retireRule(ruleId, new RecountRetireInput("再来一次"), user))))
         .hasMessageContaining("不能复活");
     // 超级用户直连也挡一次（23514）
-    assertThatThrownBy(() -> superuserSql(
-            "update recount_rule set status='ACTIVE', retired_at=null, retire_reason=null"
-                + " where rule_code='R-RETIRE' and tenant_id='%s'".formatted(a)))
+    assertThatThrownBy(
+            () ->
+                superuserSql(
+                    "update recount_rule set status='ACTIVE', retired_at=null, retire_reason=null"
+                        + " where rule_code='R-RETIRE' and tenant_id='%s'".formatted(a)))
         .hasMessageContaining("停用后不能复活");
   }
 
@@ -580,25 +683,28 @@ class RecountScanIntegrationTest {
 
     // (1) 出库单不在「待复核」
     UUID notPicked = outbound(a, "OB-NP", "3", sku(a, 1));
-    assertThat(catchThrowable(() -> openSession(a, notPicked, null)))
-        .hasMessageContaining("待复核");
+    assertThat(catchThrowable(() -> openSession(a, notPicked, null))).hasMessageContaining("待复核");
 
     // (2) 拣货任务没完成：出库单已经在「待复核」，但工单被直连压回「拣货中」——
     //     这是「订单状态对了、货其实还没到打包区」的真实情形，核了也核不准。
     UUID inFlight = outbound(a, "OB-IF", "3", sku(a, 1));
     UUID inFlightTask = pickTask(a, inFlight);
-    asWrite(a, () -> {
-      sql.execute(
-          "update outbound_order set status='PENDING_RECHECK' where tenant_id=? and id=?",
-          a, inFlight);
-      sql.execute(
-          "update pick_task set status='IN_PROGRESS', assignee_user_id=?,"
-              + " started_at=coalesce(started_at, now()) where tenant_id=? and id=?",
-          user, a, inFlightTask);
-      return null;
-    });
-    assertThat(catchThrowable(() -> openSession(a, inFlight, null)))
-        .hasMessageContaining("已完成");
+    asWrite(
+        a,
+        () -> {
+          sql.execute(
+              "update outbound_order set status='PENDING_RECHECK' where tenant_id=? and id=?",
+              a,
+              inFlight);
+          sql.execute(
+              "update pick_task set status='IN_PROGRESS', assignee_user_id=?,"
+                  + " started_at=coalesce(started_at, now()) where tenant_id=? and id=?",
+              user,
+              a,
+              inFlightTask);
+          return null;
+        });
+    assertThat(catchThrowable(() -> openSession(a, inFlight, null))).hasMessageContaining("已完成");
 
     // (3) 正常路径能开
     var ready = picked(a, "OB-OK", "3", null, sku(a, 1));
@@ -620,8 +726,23 @@ class RecountScanIntegrationTest {
     assertThat(catchThrowable(() -> openSession(a, ready.orderId(), null)))
         .hasMessageContaining("复核单");
     // 取消之后可以再开（返工轮次是**新会话**，不是把第一轮改成通过）
-    var first = as(a, () -> service.page(null, ready.orderId(), "OPEN", null, false, false, null,
-        "STARTED_AT", 0, 50)).items().get(0);
+    var first =
+        as(
+                a,
+                () ->
+                    service.page(
+                        null,
+                        ready.orderId(),
+                        "OPEN",
+                        null,
+                        false,
+                        false,
+                        null,
+                        "STARTED_AT",
+                        0,
+                        50))
+            .items()
+            .get(0);
     asWrite(a, () -> service.cancel(first.id().toString(), new RecountCancelInput("先重拣"), user));
     var second = openSession(a, ready.orderId(), null);
     assertThat(second.id()).isNotEqualTo(first.id());
@@ -649,15 +770,25 @@ class RecountScanIntegrationTest {
 
     // 上游实拣在任务 COMPLETED 之后**改不动**（8.3.2.1 的守卫）——
     // 这正是复核基线可以放心冻结读数的前提：源头被冻结了。
-    UUID lineId = as(a, () -> sql.fetchOne(
-        "select id from pick_task_line where tenant_id=current_setting('app.current_tenant',true)::uuid"
-            + " limit 1").get("id", UUID.class));
-    assertThatThrownBy(() -> asWrite(a, () -> {
-              sql.execute(
-                  "update pick_task_line set picked_quantity=3 where tenant_id=? and id=?",
-                  a, lineId);
-              return null;
-            }))
+    UUID lineId =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                        "select id from pick_task_line where tenant_id=current_setting('app.current_tenant',true)::uuid"
+                            + " limit 1")
+                    .get("id", UUID.class));
+    assertThatThrownBy(
+            () ->
+                asWrite(
+                    a,
+                    () -> {
+                      sql.execute(
+                          "update pick_task_line set picked_quantity=3 where tenant_id=? and id=?",
+                          a,
+                          lineId);
+                      return null;
+                    }))
         .hasMessageContaining("不可再改");
 
     // 基线里的实拣读数因此是稳定的冻结值
@@ -698,8 +829,11 @@ class RecountScanIntegrationTest {
     assertThat(detail.exceptions())
         .extracting(RecountExceptionRow::kind)
         .contains("MISSING_ITEM", "EXTRA_ITEM");
-    var missing = detail.exceptions().stream()
-        .filter(e -> "MISSING_ITEM".equals(e.kind())).findFirst().orElseThrow();
+    var missing =
+        detail.exceptions().stream()
+            .filter(e -> "MISSING_ITEM".equals(e.kind()))
+            .findFirst()
+            .orElseThrow();
     assertThat(missing.expectedQuantity()).isEqualTo("2");
     assertThat(missing.scannedQuantity()).isEqualTo("1");
   }
@@ -758,14 +892,16 @@ class RecountScanIntegrationTest {
                 + "(select id from inventory_serial where serial_number='DUP-1'),"
                 + "'DUP-1',1,1,'MATCHED',gen_random_uuid(),now())")
             .formatted(a, session.id()));
-    var afterDirect = as(
-        a,
-        () -> sql.fetchOne(
-            "select scan_occurrence, verdict from recount_scan where tenant_id"
-                + " = current_setting('app.current_tenant', true)::uuid"
-                + " and session_id=? and scan_type='SERIAL' and scanned_value='DUP-1'"
-                + " order by scan_occurrence desc limit 1",
-            session.id()));
+    var afterDirect =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select scan_occurrence, verdict from recount_scan where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and session_id=? and scan_type='SERIAL' and scanned_value='DUP-1'"
+                        + " order by scan_occurrence desc limit 1",
+                    session.id()));
     assertThat(afterDirect.get("scan_occurrence", Integer.class)).isEqualTo(3);
     assertThat(afterDirect.get("verdict", String.class)).isEqualTo("DUPLICATE");
   }
@@ -806,13 +942,11 @@ class RecountScanIntegrationTest {
     var report = asWrite(a, () -> service.settle(session.id().toString(), user));
     assertThat(report.verdict()).isEqualTo("FAILED");
     assertThat(report.mismatchLineCount()).isEqualTo(1);
-    assertThat(report.blockingReasons()).anySatisfy(r -> assertThat(r).contains("序列号不符")
-        .contains("没核过"));
+    assertThat(report.blockingReasons())
+        .anySatisfy(r -> assertThat(r).contains("序列号不符").contains("没核过"));
 
     // SN-9 被 8.3.2.1 拣给了别的行吗？没有 → 判错件（WRONG_ITEM）
-    assertThat(detail.exceptions())
-        .extracting(RecountExceptionRow::kind)
-        .contains("WRONG_ITEM");
+    assertThat(detail.exceptions()).extracting(RecountExceptionRow::kind).contains("WRONG_ITEM");
 
     // 重新开一张干净的：扫对两个号 → MATCHED
     UUID t1 = serial(a, sku(a, 1), "OK-1", la.a1());
@@ -867,13 +1001,13 @@ class RecountScanIntegrationTest {
 
     var detail = as(a, () -> service.detail(session.id().toString()));
     assertThat(detail.session().status()).isEqualTo("PASSED");
-    assertThat(detail.timeline()).extracting(RecountEventRow::eventType)
+    assertThat(detail.timeline())
+        .extracting(RecountEventRow::eventType)
         .contains("OPENED", "SCANNED", "PASSED");
   }
 
   @Test
-  void passingWithCleanRowsButPendingExceptionIsRejectedByTheDatabaseToo()
-      throws Exception {
+  void passingWithCleanRowsButPendingExceptionIsRejectedByTheDatabaseToo() throws Exception {
     Layout la = layout(a);
     bucket(a, la.a1(), sku(a, 1), "100");
     var ready = picked(a, "OB-GATE", "2", null, sku(a, 1));
@@ -890,7 +1024,10 @@ class RecountScanIntegrationTest {
               "insert into recount_exception(id,tenant_id,session_id,kind,sku_code,sku_name,"
                   + "detail,raised_at) values(?,?,?,'WRONG_ITEM','SKU-X','商品X',"
                   + "'测试：行都核过了但还有异常没处理',?::timestamptz)",
-              exId, a, session.id(), OffsetDateTime.now());
+              exId,
+              a,
+              session.id(),
+              OffsetDateTime.now());
           return null;
         });
     assertThat(as(a, () -> service.detail(session.id().toString())).session().matchedLineCount())
@@ -898,9 +1035,11 @@ class RecountScanIntegrationTest {
 
     // **超级用户直连强行把复核单改成 PASSED** —— V117 的守卫拒（23514）。
     // 这正是「先放行再补异常」那条路被关死的地方。
-    assertThatThrownBy(() -> superuserSql(
-            "update recount_session set status='PASSED', completed_at=now()"
-                + " where tenant_id='%s' and id='%s'".formatted(a, session.id())))
+    assertThatThrownBy(
+            () ->
+                superuserSql(
+                    "update recount_session set status='PASSED', completed_at=now()"
+                        + " where tenant_id='%s' and id='%s'".formatted(a, session.id())))
         .hasMessageContaining("异常没人处理");
 
     // 处置之前，结算结论已经是「异常」且明确指出拦路的是什么
@@ -910,17 +1049,21 @@ class RecountScanIntegrationTest {
     assertThat(report.pendingExceptionCount()).isEqualTo(1);
 
     // 处置掉那条异常之后，行本身是干净的 → 真的能过，出库单交到待打包
-    asWrite(a, () -> service.resolveException(
-        session.id().toString(), exId.toString(),
-        new RecountResolveInput("IGNORED", "开箱确认是包装附赠品"), user));
+    asWrite(
+        a,
+        () ->
+            service.resolveException(
+                session.id().toString(),
+                exId.toString(),
+                new RecountResolveInput("IGNORED", "开箱确认是包装附赠品"),
+                user));
     assertThat(asWrite(a, () -> service.complete(session.id().toString(), user)).verdict())
         .isEqualTo("PASSED");
     assertThat(outboundStatus(a, ready.orderId())).isEqualTo("PENDING_PACKING");
   }
 
   @Test
-  void lineStatusCannotBeFabricatedByDirectSqlAndUncleanRowsBlockPassing()
-      throws Exception {
+  void lineStatusCannotBeFabricatedByDirectSqlAndUncleanRowsBlockPassing() throws Exception {
     Layout la = layout(a);
     bucket(a, la.a1(), sku(a, 1), "100");
     var ready = picked(a, "OB-DIR", "3", null, sku(a, 1));
@@ -936,9 +1079,11 @@ class RecountScanIntegrationTest {
         .isEqualTo("MISSING");
 
     // 于是「强行判通过」被 V117 的守卫拒（23514）
-    assertThatThrownBy(() -> superuserSql(
-            "update recount_session set status='PASSED', completed_at=now()"
-                + " where tenant_id='%s' and id='%s'".formatted(a, session.id())))
+    assertThatThrownBy(
+            () ->
+                superuserSql(
+                    "update recount_session set status='PASSED', completed_at=now()"
+                        + " where tenant_id='%s' and id='%s'".formatted(a, session.id())))
         .hasMessageContaining("没核过");
   }
 
@@ -961,19 +1106,30 @@ class RecountScanIntegrationTest {
         .anySatisfy(d -> assertThat(d).contains("建议开箱复核"));
 
     // 没写原因不许开箱
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.openBox(session.id().toString(), new RecountOpenBoxInput("  "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.openBox(
+                                session.id().toString(), new RecountOpenBoxInput("  "), user))))
         .hasMessageContaining("原因");
 
-    var opened = asWrite(a, () ->
-        service.openBox(session.id().toString(), new RecountOpenBoxInput("高价值，开箱确认"), user));
+    var opened =
+        asWrite(
+            a,
+            () ->
+                service.openBox(
+                    session.id().toString(), new RecountOpenBoxInput("高价值，开箱确认"), user));
     assertThat(opened.openBox()).isTrue();
     assertThat(opened.openBoxReason()).isEqualTo("高价值，开箱确认");
 
     // 低于阈值的单不要求开箱
     var small = picked(a, "OB-SMALL", "1", null, sku(a, 1));
     var smallSession = openSession(a, small.orderId(), r.id());
-    assertThat(as(a, () -> service.detail(smallSession.id().toString())).verdict().openBoxRequired())
+    assertThat(
+            as(a, () -> service.detail(smallSession.id().toString())).verdict().openBoxRequired())
         .isFalse();
   }
 
@@ -988,18 +1144,28 @@ class RecountScanIntegrationTest {
     scan(a, session.id(), "BARCODE", "SKU-1", null); // 3 应发 / 1 实扫 → 漏件
     asWrite(a, () -> service.settle(session.id().toString(), user));
 
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.escalate(session.id().toString(), new RecountEscalateInput(" "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.escalate(
+                                session.id().toString(), new RecountEscalateInput(" "), user))))
         .hasMessageContaining("处理意见");
 
-    asWrite(a, () -> service.escalate(
-        session.id().toString(), new RecountEscalateInput("转仓库主管人工开箱核对"), user));
+    asWrite(
+        a,
+        () ->
+            service.escalate(
+                session.id().toString(), new RecountEscalateInput("转仓库主管人工开箱核对"), user));
     var detail = as(a, () -> service.detail(session.id().toString()));
     assertThat(detail.exceptions())
-        .allSatisfy(e -> {
-          assertThat(e.resolution()).isEqualTo("MANUAL");
-          assertThat(e.manualNote()).isEqualTo("转仓库主管人工开箱核对");
-        });
+        .allSatisfy(
+            e -> {
+              assertThat(e.resolution()).isEqualTo("MANUAL");
+              assertThat(e.manualNote()).isEqualTo("转仓库主管人工开箱核对");
+            });
     assertThat(detail.session().pendingExceptionCount()).isZero();
 
     // **转人工不等于放行**：处置意见本身不是「这件货没问题」——
@@ -1028,24 +1194,49 @@ class RecountScanIntegrationTest {
     var ex = as(a, () -> service.detail(session.id().toString())).exceptions().get(0);
     String sid = session.id().toString();
 
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.resolveException(sid, ex.id().toString(),
-            new RecountResolveInput("CORRECTED", " "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.resolveException(
+                                sid,
+                                ex.id().toString(),
+                                new RecountResolveInput("CORRECTED", " "),
+                                user))))
         .hasMessageContaining("处理意见");
 
-    var resolved = asWrite(a, () ->
-        service.resolveException(sid, ex.id().toString(),
-            new RecountResolveInput("CORRECTED", "已退回拣货补了一件"), user));
+    var resolved =
+        asWrite(
+            a,
+            () ->
+                service.resolveException(
+                    sid,
+                    ex.id().toString(),
+                    new RecountResolveInput("CORRECTED", "已退回拣货补了一件"),
+                    user));
     assertThat(resolved.resolution()).isEqualTo("CORRECTED");
 
     // 服务层挡第二次
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.resolveException(sid, ex.id().toString(),
-            new RecountResolveInput("IGNORED", "反悔"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.resolveException(
+                                sid,
+                                ex.id().toString(),
+                                new RecountResolveInput("IGNORED", "反悔"),
+                                user))))
         .hasMessageContaining("已经处置过");
     // 超级用户直连也挡第二次（23514）
-    assertThatThrownBy(() -> superuserSql(
-            "update recount_exception set resolution='IGNORED' where id='%s'".formatted(ex.id())))
+    assertThatThrownBy(
+            () ->
+                superuserSql(
+                    "update recount_exception set resolution='IGNORED' where id='%s'"
+                        .formatted(ex.id())))
         .hasMessageContaining("事实只能处置一次");
   }
 
@@ -1057,11 +1248,18 @@ class RecountScanIntegrationTest {
     var session = openSession(a, ready.orderId(), null);
     long entriesBefore = inventoryEntryCount(a);
 
-    assertThat(catchThrowable(() -> asWrite(a, () ->
-        service.cancel(session.id().toString(), new RecountCancelInput(""), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.cancel(
+                                session.id().toString(), new RecountCancelInput(""), user))))
         .hasMessageContaining("原因");
-    var cancelled = asWrite(a, () ->
-        service.cancel(session.id().toString(), new RecountCancelInput("先重拣"), user));
+    var cancelled =
+        asWrite(
+            a, () -> service.cancel(session.id().toString(), new RecountCancelInput("先重拣"), user));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     assertThat(inventoryEntryCount(a)).isEqualTo(entriesBefore);
     // 取消后不许再扫
@@ -1085,8 +1283,11 @@ class RecountScanIntegrationTest {
     assertThat(row.scannedAt().toInstant().toString()).startsWith("2026-03-14T01:30:00");
 
     // 事件流水里的时刻同样写的是作业时刻，不是 DB 的 now()
-    var scanned = as(a, () -> service.detail(session.id().toString())).timeline().stream()
-        .filter(e -> "SCANNED".equals(e.eventType())).findFirst().orElseThrow();
+    var scanned =
+        as(a, () -> service.detail(session.id().toString())).timeline().stream()
+            .filter(e -> "SCANNED".equals(e.eventType()))
+            .findFirst()
+            .orElseThrow();
     assertThat(scanned.occurredAt().toInstant().toString()).startsWith("2026-03-14T01:30:00");
   }
 
@@ -1104,27 +1305,29 @@ class RecountScanIntegrationTest {
     scan(a, s2.id(), "BARCODE", "SKU-2", null);
     asWrite(a, () -> service.settle(s2.id().toString(), user)); // 异常在结算时才产生
 
-    var all = as(a, () -> service.page(null, null, null, null, false, false, null,
-        "STARTED_AT", 0, 50));
+    var all =
+        as(a, () -> service.page(null, null, null, null, false, false, null, "STARTED_AT", 0, 50));
     assertThat(all.total()).isEqualTo(2);
     assertThat(all.summary().totalSessions()).isEqualTo(2);
     assertThat(all.summary().openSessions()).isEqualTo(2);
 
     // 真分页
-    var firstPage = as(a, () -> service.page(null, null, null, null, false, false, null,
-        "SESSION_CODE", 0, 1));
+    var firstPage =
+        as(a, () -> service.page(null, null, null, null, false, false, null, "SESSION_CODE", 0, 1));
     assertThat(firstPage.items()).hasSize(1);
     assertThat(firstPage.total()).isEqualTo(2);
 
     // 真筛选：关键字能按出库单号命中
-    var byKeyword = as(a, () -> service.page(null, null, null, null, false, false, "OB-L1",
-        "STARTED_AT", 0, 50));
+    var byKeyword =
+        as(
+            a,
+            () -> service.page(null, null, null, null, false, false, "OB-L1", "STARTED_AT", 0, 50));
     assertThat(byKeyword.total()).isEqualTo(1);
     assertThat(byKeyword.items().get(0).outboundOrderCode()).isEqualTo("OB-L1");
 
     // 「只有异常」的筛选真的按异常数走
-    var withEx = as(a, () -> service.page(null, null, null, null, false, true, null,
-        "STARTED_AT", 0, 50));
+    var withEx =
+        as(a, () -> service.page(null, null, null, null, false, true, null, "STARTED_AT", 0, 50));
     assertThat(withEx.total()).isEqualTo(1);
     assertThat(withEx.items().get(0).id()).isEqualTo(s2.id());
 
@@ -1132,16 +1335,40 @@ class RecountScanIntegrationTest {
     assertThat(byKeyword.summary().totalSessions()).isEqualTo(2);
 
     // 排序白名单
-    assertThat(catchThrowable(() -> as(a, () ->
-        service.page(null, null, null, null, false, false, null, "DROP TABLE", 0, 50))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(
+                        a,
+                        () ->
+                            service.page(
+                                null, null, null, null, false, false, null, "DROP TABLE", 0, 50))))
         .hasMessageContaining("sort");
     // 状态白名单
-    assertThat(catchThrowable(() -> as(a, () ->
-        service.page(null, null, "NOPE", null, false, false, null, "STARTED_AT", 0, 50))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(
+                        a,
+                        () ->
+                            service.page(
+                                null,
+                                null,
+                                "NOPE",
+                                null,
+                                false,
+                                false,
+                                null,
+                                "STARTED_AT",
+                                0,
+                                50))))
         .hasMessageContaining("status");
     // 超大 size 被夹住，不假装分页不存在
-    var capped = as(a, () -> service.page(null, null, null, null, false, false, null,
-        "STARTED_AT", 0, 100000));
+    var capped =
+        as(
+            a,
+            () ->
+                service.page(null, null, null, null, false, false, null, "STARTED_AT", 0, 100000));
     assertThat(capped.size()).isEqualTo(200);
     assertThat(s1.id()).isNotEqualTo(s2.id());
     assertThat(r1.orderId()).isNotEqualTo(r2.orderId());
@@ -1168,8 +1395,7 @@ class RecountScanIntegrationTest {
     assertThat(catchThrowable(() -> scan(b, sa.id(), "BARCODE", "SKU-1", null)))
         .hasMessageContaining("不存在");
     // B 完成 A 的复核单 → 404
-    assertThat(catchThrowable(() ->
-        asWrite(b, () -> service.complete(sa.id().toString(), user))))
+    assertThat(catchThrowable(() -> asWrite(b, () -> service.complete(sa.id().toString(), user))))
         .hasMessageContaining("不存在");
     // B 也看不到 A 的规则。
     // **A 的规则 id 必须先在 A 的上下文里取好**：在 as(b, ...) 里嵌一层 as(a, ...)
@@ -1179,8 +1405,8 @@ class RecountScanIntegrationTest {
     assertThat(catchThrowable(() -> as(b, () -> service.rule(aRuleId))))
         .hasMessageContaining("不存在");
     // B 的列表里只有自己那一单
-    var bList = as(b, () -> service.page(null, null, null, null, false, false, null,
-        "STARTED_AT", 0, 50));
+    var bList =
+        as(b, () -> service.page(null, null, null, null, false, false, null, "STARTED_AT", 0, 50));
     assertThat(bList.total()).isEqualTo(1);
     assertThat(bList.items().get(0).id()).isEqualTo(sb.id());
     // B 开不了 A 的出库单的复核单（出库单不在 B 的可见范围）
@@ -1208,9 +1434,9 @@ class RecountScanIntegrationTest {
 
     // 带上真实身份但伪造租户头：看到的仍然只有 A 自己那一张
     http.perform(
-                get("/warehouse/recount-scans")
-                    .header("Authorization", "Bearer tenant-a")
-                    .header("X-Tenant-Id", b.toString()))
+            get("/warehouse/recount-scans")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.items[0].sessionCode").value(sa.sessionCode()));
@@ -1229,10 +1455,26 @@ class RecountScanIntegrationTest {
 
     // A → B → A 三轮：连接池只有 1 条连接，每次归还后都可能被下一个人拿到。
     for (int round = 0; round < 3; round++) {
-      assertThat(as(a, () -> service.page(null, null, null, null, false, false, null,
-                  "SESSION_CODE", 0, 50)).items().get(0).id()).isEqualTo(sa.id());
-      assertThat(as(b, () -> service.page(null, null, null, null, false, false, null,
-                  "SESSION_CODE", 0, 50)).items().get(0).id()).isEqualTo(sb.id());
+      assertThat(
+              as(
+                      a,
+                      () ->
+                          service.page(
+                              null, null, null, null, false, false, null, "SESSION_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(sa.id());
+      assertThat(
+              as(
+                      b,
+                      () ->
+                          service.page(
+                              null, null, null, null, false, false, null, "SESSION_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(sb.id());
       assertThat(as(a, () -> service.detail(sa.id().toString())).session().sessionCode())
           .isEqualTo(sa.sessionCode());
       assertThat(as(b, () -> service.detail(sb.id().toString())).session().sessionCode())
@@ -1247,14 +1489,19 @@ class RecountScanIntegrationTest {
         as(
             a,
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select relname, relrowsecurity, relforcerowsecurity from pg_class"
                             + " where relname in ('recount_rule','recount_session','recount_line',"
                             + " 'recount_scan','recount_exception','recount_event') order by relname")
                     .stream()
-                    .map(r -> r.get("relname", String.class) + ":"
-                        + r.get("relrowsecurity", Boolean.class) + "/"
-                        + r.get("relforcerowsecurity", Boolean.class))
+                    .map(
+                        r ->
+                            r.get("relname", String.class)
+                                + ":"
+                                + r.get("relrowsecurity", Boolean.class)
+                                + "/"
+                                + r.get("relforcerowsecurity", Boolean.class))
                     .toList());
     assertThat(forced).hasSize(6);
     assertThat(forced).allMatch(s -> s.endsWith("true/true"));
@@ -1268,14 +1515,15 @@ class RecountScanIntegrationTest {
     bucket(a, la.a1(), sku(a, 1), "100");
     var ready = picked(a, "OB-H", "2", null, sku(a, 1));
 
-    http.perform(get("/warehouse/recount-scans/capabilities"))
-        .andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/recount-scans/capabilities")
-            .header("Authorization", "Bearer no-permission"))
+    http.perform(get("/warehouse/recount-scans/capabilities")).andExpect(status().isUnauthorized());
+    http.perform(
+            get("/warehouse/recount-scans/capabilities")
+                .header("Authorization", "Bearer no-permission"))
         .andExpect(status().isForbidden());
 
-    http.perform(get("/warehouse/recount-scans/capabilities")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/recount-scans/capabilities")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.refType").value("RECOUNT_SCAN"))
         .andExpect(jsonPath("$.lastChanceGate").value(true))
@@ -1290,33 +1538,39 @@ class RecountScanIntegrationTest {
     var created = openSession(a, ready.orderId(), null);
 
     // 写端点要写权限
-    http.perform(post("/warehouse/recount-scans/" + created.id() + "/scans")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"scanType\":\"BARCODE\",\"scannedValue\":\"SKU-1\"}"))
+    http.perform(
+            post("/warehouse/recount-scans/" + created.id() + "/scans")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"scanType\":\"BARCODE\",\"scannedValue\":\"SKU-1\"}"))
         .andExpect(status().isForbidden());
 
-    http.perform(post("/warehouse/recount-scans/" + created.id() + "/scans")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"scanType\":\"BARCODE\",\"scannedValue\":\"SKU-1\"}"))
+    http.perform(
+            post("/warehouse/recount-scans/" + created.id() + "/scans")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"scanType\":\"BARCODE\",\"scannedValue\":\"SKU-1\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.verdict").value("MATCHED"))
         .andExpect(jsonPath("$.scannedValue").value("SKU-1"));
 
-    http.perform(get("/warehouse/recount-scans/" + created.id())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/recount-scans/" + created.id())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lines[0].expectedQuantity").value("2"))
         .andExpect(jsonPath("$.verdict.verdict").value("FAILED"))
         .andExpect(jsonPath("$.verdict.blocking").value(true));
 
     // 规则 CRUD
-    http.perform(post("/warehouse/recount-scans/rules")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"ruleCode\":\"H-R1\",\"name\":\"HTTP 规则\",\"warehouseId\":\"" + wh(a)
-                + "\",\"requireSerialCheck\":true,\"highValueQuantityThreshold\":\"5\"}"))
+    http.perform(
+            post("/warehouse/recount-scans/rules")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"ruleCode\":\"H-R1\",\"name\":\"HTTP 规则\",\"warehouseId\":\""
+                        + wh(a)
+                        + "\",\"requireSerialCheck\":true,\"highValueQuantityThreshold\":\"5\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.ruleCode").value("H-R1"))
         .andExpect(jsonPath("$.highValueQuantityThreshold").value(5.0));
@@ -1326,20 +1580,22 @@ class RecountScanIntegrationTest {
         .andExpect(jsonPath("$.total").isNumber());
 
     // 非法枚举值 → 400 且说清允许值
-    http.perform(post("/warehouse/recount-scans/" + created.id() + "/scans")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"scanType\":\"QRCODE\",\"scannedValue\":\"SKU-1\"}"))
+    http.perform(
+            post("/warehouse/recount-scans/" + created.id() + "/scans")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"scanType\":\"QRCODE\",\"scannedValue\":\"SKU-1\"}"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void httpSurfacesNotFoundForMissingAndBadIds() throws Exception {
-    http.perform(get("/warehouse/recount-scans/" + UUID.randomUUID())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/recount-scans/" + UUID.randomUUID())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isNotFound());
-    http.perform(get("/warehouse/recount-scans/not-a-uuid")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/recount-scans/not-a-uuid").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isBadRequest());
   }
 }

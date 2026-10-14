@@ -154,7 +154,11 @@ export function HandoverWorkspace() {
         }
       />
 
-      {error ? <Notice tone="danger" title="操作未完成">{error}</Notice> : null}
+      {error ? (
+        <Notice tone="danger" title="操作未完成">
+          {error}
+        </Notice>
+      ) : null}
 
       {page ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -166,7 +170,7 @@ export function HandoverWorkspace() {
       ) : null}
 
       <SectionCard title="开交接单">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           交接单由一张<b>已打包</b>（8.3.3.2）的打包单开出，开单时会把包裹与明细冻结到本单。
           <b>开单不动库存</b> —— 实发扣减发生在「确认交接」那一个事务里。
         </p>
@@ -226,7 +230,7 @@ export function HandoverWorkspace() {
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground mt-4 text-sm">加载中…</p>
         ) : page && page.items.length === 0 ? (
           <EmptyState
             className="mt-4"
@@ -277,19 +281,24 @@ export function HandoverWorkspace() {
       {selected ? (
         <SectionCard title="交接详情">
           {detailLoading ? (
-            <p className="text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground text-sm">加载中…</p>
           ) : !detail ? (
             <EmptyState title="详情不可用" description="该交接单在当前租户下读不到。" />
           ) : (
             <div className="space-y-4">
-              {actionError ? <Notice tone="danger" title="操作未完成">{actionError}</Notice> : null}
+              {actionError ? (
+                <Notice tone="danger" title="操作未完成">
+                  {actionError}
+                </Notice>
+              ) : null}
 
               <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                 <span>
                   交接单：<span className="font-mono text-xs">{detail.order.handoverCode}</span>
                 </span>
                 <span>
-                  出库单：<span className="font-mono text-xs">{detail.order.outboundOrderCode}</span>
+                  出库单：
+                  <span className="font-mono text-xs">{detail.order.outboundOrderCode}</span>
                   {detail.order.outboundOrderStatusLabel
                     ? `（${detail.order.outboundOrderStatusLabel}）`
                     : ''}
@@ -360,7 +369,7 @@ export function HandoverWorkspace() {
 
                   {detail.parcels.length ? (
                     <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         每箱运单号（留空 = 跟随主运单号，整车发运的常态）：
                       </p>
                       {detail.parcels.map((p) => (
@@ -415,7 +424,10 @@ export function HandoverWorkspace() {
                 ) : (
                   detail.parcels.map((parcel) => {
                     const items = detail.items.filter((i) => i.parcelId === parcel.parcelId);
-                    const wb = effectiveWaybill(parcel.parcelWaybillNo, detail.order.masterWaybillNo);
+                    const wb = effectiveWaybill(
+                      parcel.parcelWaybillNo,
+                      detail.order.masterWaybillNo,
+                    );
                     return (
                       <div key={parcel.id} className="mt-3 rounded-md border p-3">
                         <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -427,7 +439,7 @@ export function HandoverWorkspace() {
                           <span>体积 {registeredCell(parcel.volumeCbm, '未量尺寸')} cbm</span>
                           {parcel.deducted ? <span>已扣减</span> : <span>未扣减</span>}
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground mt-2 text-xs">
                           {items.length === 0
                             ? '这一箱一件货都没有 —— 蓝图要求「包裹必须含明细项」，空箱不能交出去。'
                             : items
@@ -460,7 +472,7 @@ export function HandoverWorkspace() {
                   <tbody>
                     {detail.items.length === 0 ? (
                       <tr>
-                        <td className="p-2 text-muted-foreground" colSpan={5}>
+                        <td className="text-muted-foreground p-2" colSpan={5}>
                           还没有明细行。
                         </td>
                       </tr>
@@ -484,7 +496,7 @@ export function HandoverWorkspace() {
               <div>
                 <h3 className="text-sm font-semibold">预占消费（承诺侧 7.2.1.2）</h3>
                 {detail.reservations.length === 0 ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     本次交接<b>未预占出库</b> —— 没有可消费的预占分配，因此没有预占被消费。
                     这不是「预占已消耗」。
                   </p>
@@ -511,7 +523,7 @@ export function HandoverWorkspace() {
                   </table>
                 )}
                 {detail.reservationCandidates.length > 0 ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-xs">
                     本仓仍有 {detail.reservationCandidates.length} 条可消费的已承诺预占
                     （本次交接之外的其他订单）。
                   </p>
@@ -522,7 +534,8 @@ export function HandoverWorkspace() {
                 <h3 className="text-sm font-semibold">交接判据</h3>
                 {verdict.handable ? (
                   <Notice tone="info" title="可以确认交接">
-                    确认会<b>从本仓出库 {detail.order.totalQuantity} 件</b>并在同一事务里消费对应预占。
+                    确认会<b>从本仓出库 {detail.order.totalQuantity} 件</b>
+                    并在同一事务里消费对应预占。
                   </Notice>
                 ) : (
                   <Notice tone="warning" title="还不能确认交接">
@@ -534,7 +547,7 @@ export function HandoverWorkspace() {
                   </Notice>
                 )}
                 {verdict.warnings.length > 0 ? (
-                  <ul className="mt-2 list-disc pl-6 text-xs text-muted-foreground">
+                  <ul className="text-muted-foreground mt-2 list-disc pl-6 text-xs">
                     {verdict.warnings.map((w) => (
                       <li key={w}>{w}</li>
                     ))}
@@ -593,7 +606,8 @@ export function HandoverWorkspace() {
                     出库流水：<span className="font-mono">{done.inventoryTransactionId}</span>
                   </p>
                   <p className="text-xs">
-                    分录：{ledgerDigest(done.ledgerEntries)}；释放实物预占 {done.reservedDeductedQuantity}
+                    分录：{ledgerDigest(done.ledgerEntries)}；释放实物预占{' '}
+                    {done.reservedDeductedQuantity}
                     ；序列号出库 {done.serialCount} 个。
                   </p>
                 </Notice>
@@ -602,12 +616,12 @@ export function HandoverWorkspace() {
               <div>
                 <h3 className="text-sm font-semibold">时间线</h3>
                 {detail.timeline.length === 0 ? (
-                  <p className="mt-2 text-xs text-muted-foreground">暂无流水。</p>
+                  <p className="text-muted-foreground mt-2 text-xs">暂无流水。</p>
                 ) : (
                   <ul className="mt-2 space-y-1 text-xs">
                     {detail.timeline.map((e) => (
                       <li key={e.id} className="border-b py-1">
-                        <span className="font-mono text-muted-foreground">{e.occurredAt}</span>{' '}
+                        <span className="text-muted-foreground font-mono">{e.occurredAt}</span>{' '}
                         <span className="font-semibold">{e.eventTypeLabel}</span> — {e.detail}
                       </li>
                     ))}
@@ -617,19 +631,18 @@ export function HandoverWorkspace() {
 
               <div>
                 <h3 className="text-sm font-semibold">本模块边界</h3>
-                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                <ul className="text-muted-foreground mt-2 space-y-1 text-xs">
                   {detail.unavailable.map((u) => (
                     <li key={u.capability}>
-                      <span className="font-semibold">{u.capability}</span>（归 {u.ownerModule}）：{u.reason}
+                      <span className="font-semibold">{u.capability}</span>（归 {u.ownerModule}）：
+                      {u.reason}
                     </li>
                   ))}
                 </ul>
               </div>
 
               {caps ? (
-                <p className="text-xs text-muted-foreground">
-                  {caps.transactionBasis}
-                </p>
+                <p className="text-muted-foreground text-xs">{caps.transactionBasis}</p>
               ) : null}
             </div>
           )}

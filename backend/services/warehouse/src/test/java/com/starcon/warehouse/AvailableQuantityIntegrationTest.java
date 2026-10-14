@@ -9,8 +9,6 @@ import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,18 +26,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 7.1.1.3 可用量计算。
  *
- * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住八件「错了会误导人、而且错了没人会发现」的事：
  *
  * <ul>
  *   <li><b>五片恒等式</b>：合格可售 + 待检 + 残次 + 未上架 + 批次冻结 == available。
  *       这是蓝图「不重复扣减」的可执行定义；它破了就是口径改错了，而口径错了就是超卖。
- *   <li><b>互斥性专门造反例</b>：待检品放在<b>不可拣</b>库位上。若四片没有 role 前缀，
- *       这批货会同时落进待检片与未上架片 —— 恒等式当场破掉，这一条用例就是防它的。
- *   <li><b>安全缓冲不被 bucket 行数放大</b>：同一个 SKU 摆 5 条 bucket、SKU 档 safety_stock=10，
- *       只能扣 10，扣 50 就是把同一份承诺算了五遍。这是最容易犯也最难被发现的错。
+ *   <li><b>互斥性专门造反例</b>：待检品放在<b>不可拣</b>库位上。若四片没有 role 前缀， 这批货会同时落进待检片与未上架片 —— 恒等式当场破掉，这一条用例就是防它的。
+ *   <li><b>安全缓冲不被 bucket 行数放大</b>：同一个 SKU 摆 5 条 bucket、SKU 档 safety_stock=10， 只能扣 10，扣 50
+ *       就是把同一份承诺算了五遍。这是最容易犯也最难被发现的错。
  *   <li><b>SKU 档只计一次、WAREHOUSE 档按仓各计一次</b>：同一份承诺不能因为跨了三个仓变三份。
  *   <li><b>没配缓冲给 null 不给 0</b>：「没留缓冲」与「留了 0 件缓冲」在界面上必须能区分。
  *   <li><b>缓冲大于基数</b>：可售量钳到 0 并把事实报出来，而不是发一个负数回平台。
@@ -55,16 +51,23 @@ class AvailableQuantityIntegrationTest {
   static final UUID user = UUID.randomUUID();
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
-  static final List<String> allPermissions = List.of("warehouse.inventory.read", "warehouse.inventory.update");
+  static final List<String> allPermissions =
+      List.of("warehouse.inventory.read", "warehouse.inventory.update");
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-available-quantity-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-available-quantity-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -74,7 +77,8 @@ class AvailableQuantityIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -89,7 +93,8 @@ class AvailableQuantityIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -97,8 +102,12 @@ class AvailableQuantityIntegrationTest {
           });
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
-      actors.put("Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
-      actors.put("Bearer no-permission", actor(user, a, List.of(grant("ALL", List.of("warehouse.other.read")))));
+      actors.put(
+          "Bearer read-only",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+      actors.put(
+          "Bearer no-permission",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.other.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -153,27 +162,52 @@ class AvailableQuantityIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 5; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             // 质量状态三值词表（V1）：可售 / 待检 / 残次
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "GOOD", "合格", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "GOOD",
+                "合格",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, "PENDING", "待检", "PENDING_INSPECTION");
+                idFor(tenant, 7),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 8), tenant, "DEFECT", "残次", "DEFECTIVE");
+                idFor(tenant, 8),
+                tenant,
+                "DEFECT",
+                "残次",
+                "DEFECTIVE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "WH-1", "本租仓库",
-                "LOCAL", "CN", "Asia/Shanghai", idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 9),
+                tenant,
+                "WH-1",
+                "本租仓库",
+                "LOCAL",
+                "CN",
+                "Asia/Shanghai",
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -213,12 +247,17 @@ class AvailableQuantityIntegrationTest {
         actorFor(tenant),
         "warehouse.inventory.read",
         () -> {
-          UUID id = UUID.nameUUIDFromBytes(
-              ("loc-" + tenant + "-" + code).getBytes());
+          UUID id = UUID.nameUUIDFromBytes(("loc-" + tenant + "-" + code).getBytes());
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,pickable)"
                   + " values(?,?,?,?,?,'STORAGE',?,?)",
-              id, tenant, wh(tenant), code, "库位" + code, active ? "ACTIVE" : "INACTIVE", pickable);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              "库位" + code,
+              active ? "ACTIVE" : "INACTIVE",
+              pickable);
           return id;
         });
   }
@@ -231,7 +270,11 @@ class AvailableQuantityIntegrationTest {
           UUID id = UUID.nameUUIDFromBytes(("lot-" + tenant + "-" + code).getBytes());
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code,status) values(?,?,?,?,?)",
-              id, tenant, skuId, code, status);
+              id,
+              tenant,
+              skuId,
+              code,
+              status);
           return id;
         });
   }
@@ -239,14 +282,18 @@ class AvailableQuantityIntegrationTest {
   /**
    * 建一条 bucket，并在需要时把所属 balance 的在手/预占**累加**上去。
    *
-   * <p>{@code inventory_balance} 的唯一键是 (租户, SKU, 仓, 法人, 质量状态) —— 一个 SKU 的多条
-   * bucket 共用<b>同一行</b> balance。所以第二次给同键的 SKU 落第二条 bucket 时必须累加而不是再插一行
-   * （再插会被唯一约束挡下，而那正是 V2 设计的意图：一个 balance 只有一条）。
-   * 累加与插 bucket 在同一事务里，守恒是延迟约束，提交时两侧自动对齐。
+   * <p>{@code inventory_balance} 的唯一键是 (租户, SKU, 仓, 法人, 质量状态) —— 一个 SKU 的多条 bucket 共用<b>同一行</b>
+   * balance。所以第二次给同键的 SKU 落第二条 bucket 时必须累加而不是再插一行 （再插会被唯一约束挡下，而那正是 V2 设计的意图：一个 balance 只有一条）。 累加与插
+   * bucket 在同一事务里，守恒是延迟约束，提交时两侧自动对齐。
    */
   UUID insertBucket(
-      UUID tenant, UUID skuId, UUID locationId, UUID lotId, UUID qualityId,
-      BigDecimal onHand, BigDecimal reserved) {
+      UUID tenant,
+      UUID skuId,
+      UUID locationId,
+      UUID lotId,
+      UUID qualityId,
+      BigDecimal onHand,
+      BigDecimal reserved) {
     return access.run(
         actorFor(tenant),
         "warehouse.inventory.read",
@@ -256,34 +303,66 @@ class AvailableQuantityIntegrationTest {
               sql.fetchOne(
                   "select id from inventory_balance where tenant_id=? and sku_id=?"
                       + " and warehouse_id=? and legal_entity_id=? and quality_status_id=?",
-                  tenant, skuId, wh(tenant), idFor(tenant, 1), qualityId);
+                  tenant,
+                  skuId,
+                  wh(tenant),
+                  idFor(tenant, 1),
+                  qualityId);
           if (existing == null) {
             UUID balanceId = UUID.randomUUID();
             sql.execute(
                 "insert into inventory_balance(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                     + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-                balanceId, tenant, idFor(tenant, 1), skuId, wh(tenant), qualityId, onHand, reserved);
+                balanceId,
+                tenant,
+                idFor(tenant, 1),
+                skuId,
+                wh(tenant),
+                qualityId,
+                onHand,
+                reserved);
             UUID bucketId = UUID.randomUUID();
             sql.execute(
                 "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
                     + "lot_id,quality_status_id,balance_id,on_hand,reserved)"
                     + " values(?,?,?,?,?,?,?,?,?,?,?)",
-                bucketId, tenant, idFor(tenant, 1), skuId, wh(tenant), locationId,
-                lotId, qualityId, balanceId, onHand, reserved);
+                bucketId,
+                tenant,
+                idFor(tenant, 1),
+                skuId,
+                wh(tenant),
+                locationId,
+                lotId,
+                qualityId,
+                balanceId,
+                onHand,
+                reserved);
             return bucketId;
           }
           UUID balance = existing.get(0, UUID.class);
           sql.execute(
               "update inventory_balance set on_hand=on_hand+?, reserved=reserved+?"
                   + " where id=? and tenant_id=?",
-              onHand, reserved, balance, tenant);
+              onHand,
+              reserved,
+              balance,
+              tenant);
           UUID bucketId = UUID.randomUUID();
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
                   + "lot_id,quality_status_id,balance_id,on_hand,reserved)"
                   + " values(?,?,?,?,?,?,?,?,?,?,?)",
-              bucketId, tenant, idFor(tenant, 1), skuId, wh(tenant), locationId,
-              lotId, qualityId, balance, onHand, reserved);
+              bucketId,
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              locationId,
+              lotId,
+              qualityId,
+              balance,
+              onHand,
+              reserved);
           return bucketId;
         });
   }
@@ -296,13 +375,20 @@ class AvailableQuantityIntegrationTest {
           sql.execute(
               "insert into inventory_policy(id,tenant_id,scope_type,scope_key,safety_stock)"
                   + " values(?,?,?,?,?)",
-              UUID.randomUUID(), tenant, scopeType, scopeKey, safetyStock);
+              UUID.randomUUID(),
+              tenant,
+              scopeType,
+              scopeKey,
+              safetyStock);
           return null;
         });
   }
 
   AvailableQuantityReport report(UUID tenant) {
-    return report(tenant, new AvailableQuantityQuery(null, null, null, null, null, null, null, null, null, null, null));
+    return report(
+        tenant,
+        new AvailableQuantityQuery(
+            null, null, null, null, null, null, null, null, null, null, null));
   }
 
   AvailableQuantityReport report(UUID tenant, AvailableQuantityQuery q) {
@@ -310,7 +396,9 @@ class AvailableQuantityIntegrationTest {
   }
 
   AvailableQuantityPage skus(UUID tenant) {
-    return skus(tenant, new AvailableQuantityQuery(null, null, null, null, null, null, null, null, null, 0, 50));
+    return skus(
+        tenant,
+        new AvailableQuantityQuery(null, null, null, null, null, null, null, null, null, 0, 50));
   }
 
   AvailableQuantityPage skus(UUID tenant, AvailableQuantityQuery q) {
@@ -318,7 +406,11 @@ class AvailableQuantityIntegrationTest {
   }
 
   static BigDecimal amount(AvailableQuantityTotals t, String code) {
-    return t.slices().stream().filter(s -> s.code().equals(code)).findFirst().orElseThrow().amount();
+    return t.slices().stream()
+        .filter(s -> s.code().equals(code))
+        .findFirst()
+        .orElseThrow()
+        .amount();
   }
 
   // ================================================================ 口径恒等式
@@ -333,11 +425,11 @@ class AvailableQuantityIntegrationTest {
     UUID activeLot = insertLot(a, sku(a, 2), "LOT-OK", "ACTIVE");
 
     insertBucket(a, sku(a, 2), pickable, activeLot, good(a), bd(100), bd(0));
-    insertBucket(a, sku(a, 2), pickable, null, good(a), bd(30), bd(10));       // 预占 10
-    insertBucket(a, sku(a, 2), blocked, activeLot, good(a), bd(50), bd(0));     // 不可拣库位
-    insertBucket(a, sku(a, 2), inactive, activeLot, good(a), bd(20), bd(0));    // 停用库位
-    insertBucket(a, sku(a, 3), pickable, frozenLot, good(a), bd(40), bd(0));    // 批次过期
-    insertBucket(a, sku(a, 3), blocked, null, pending(a), bd(15), bd(0));      // 待检 + 不可拣
+    insertBucket(a, sku(a, 2), pickable, null, good(a), bd(30), bd(10)); // 预占 10
+    insertBucket(a, sku(a, 2), blocked, activeLot, good(a), bd(50), bd(0)); // 不可拣库位
+    insertBucket(a, sku(a, 2), inactive, activeLot, good(a), bd(20), bd(0)); // 停用库位
+    insertBucket(a, sku(a, 3), pickable, frozenLot, good(a), bd(40), bd(0)); // 批次过期
+    insertBucket(a, sku(a, 3), blocked, null, pending(a), bd(15), bd(0)); // 待检 + 不可拣
     insertBucket(a, sku(a, 4), pickable, null, pending(a), bd(8), bd(0));
     insertBucket(a, sku(a, 4), pickable, null, defective(a), bd(3), bd(0));
 
@@ -351,13 +443,18 @@ class AvailableQuantityIntegrationTest {
     assertThat(amount(t, "DEFECTIVE")).isEqualByComparingTo("3");
     // available = on_hand − reserved = 266 − 10
     assertThat(t.available()).isEqualByComparingTo("256");
-    assertThat(t.slices().stream().map(AvailableQuantitySlice::amount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add))
+    assertThat(
+            t.slices().stream()
+                .map(AvailableQuantitySlice::amount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add))
         .isEqualByComparingTo(t.available());
     // 只有合格可售片计入基数
     assertThat(t.sellableBeforeBuffer()).isEqualByComparingTo("120");
-    assertThat(t.slices()).filteredOn(AvailableQuantitySlice::countedInSellable)
-        .singleElement().extracting(AvailableQuantitySlice::code).isEqualTo("SELLABLE");
+    assertThat(t.slices())
+        .filteredOn(AvailableQuantitySlice::countedInSellable)
+        .singleElement()
+        .extracting(AvailableQuantitySlice::code)
+        .isEqualTo("SELLABLE");
   }
 
   @Test
@@ -432,8 +529,9 @@ class AvailableQuantityIntegrationTest {
     insertPolicy(a, "WAREHOUSE", wh(a).toString(), bd(8));
     insertPolicy(a, "DEFAULT", "", bd(4));
 
-    var rows = skus(a).rows().stream().collect(
-        java.util.stream.Collectors.toMap(r -> r.skuCode(), r -> r));
+    var rows =
+        skus(a).rows().stream()
+            .collect(java.util.stream.Collectors.toMap(r -> r.skuCode(), r -> r));
     // 两个 SKU 都命中 WAREHOUSE 档（比 DEFAULT 更具体），各扣 8
     assertThat(rows.get("SKU-1").safetyBuffer()).isEqualByComparingTo("8");
     assertThat(rows.get("SKU-1").bufferScopeType()).isEqualTo("WAREHOUSE");
@@ -441,8 +539,9 @@ class AvailableQuantityIntegrationTest {
 
     // SKU 档一命中就压过仓库档
     insertPolicy(a, "SKU", sku(a, 2).toString(), bd(30));
-    rows = skus(a).rows().stream().collect(
-        java.util.stream.Collectors.toMap(r -> r.skuCode(), r -> r));
+    rows =
+        skus(a).rows().stream()
+            .collect(java.util.stream.Collectors.toMap(r -> r.skuCode(), r -> r));
     assertThat(rows.get("SKU-1").safetyBuffer()).isEqualByComparingTo("30");
     assertThat(rows.get("SKU-1").bufferScopeType()).isEqualTo("SKU");
     assertThat(rows.get("SKU-1").sellable()).isEqualByComparingTo("70");
@@ -512,8 +611,16 @@ class AvailableQuantityIntegrationTest {
     for (int i = 2; i <= 5; i++) {
       insertBucket(a, sku(a, i), loc, null, good(a), bd(i * 10), bd(0));
     }
-    var first = skus(a, new AvailableQuantityQuery(null, null, null, null, null, null, null, null, "SELLABLE", 0, 2));
-    var second = skus(a, new AvailableQuantityQuery(null, null, null, null, null, null, null, null, "SKU_CODE", 1, 2));
+    var first =
+        skus(
+            a,
+            new AvailableQuantityQuery(
+                null, null, null, null, null, null, null, null, "SELLABLE", 0, 2));
+    var second =
+        skus(
+            a,
+            new AvailableQuantityQuery(
+                null, null, null, null, null, null, null, null, "SKU_CODE", 1, 2));
     assertThat(first.total()).isEqualTo(4);
     assertThat(first.rows()).hasSize(2);
     assertThat(second.rows()).hasSize(2);
@@ -528,8 +635,21 @@ class AvailableQuantityIntegrationTest {
     insertBucket(a, sku(a, 2), loc, null, good(a), bd(10), bd(0));
     assertThat(
             org.assertj.core.api.Assertions.catchThrowable(
-                () -> skus(a, new AvailableQuantityQuery(
-                    null, null, null, null, null, null, null, null, "on_hand; drop table stock_bucket", 0, 10))))
+                () ->
+                    skus(
+                        a,
+                        new AvailableQuantityQuery(
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "on_hand; drop table stock_bucket",
+                            0,
+                            10))))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
         .hasMessageContaining("白名单");
   }
@@ -554,11 +674,22 @@ class AvailableQuantityIntegrationTest {
               "insert into inventory_reservation(id,tenant_id,reservation_no,source_system,"
                   + "source_type,legal_entity_id,sku_id,requested_quantity,status)"
                   + " values(?,?,?, 'MANUAL','OTHER_HOLD',?,?,?, 'HELD')",
-              reservationId, a, "RSV-TEST-1", idFor(a, 1), sku(a, 2), bd(30));
+              reservationId,
+              a,
+              "RSV-TEST-1",
+              idFor(a, 1),
+              sku(a, 2),
+              bd(30));
           sql.execute(
               "insert into reservation_allocation(id,tenant_id,reservation_id,warehouse_id,"
                   + "location_id,lot_id,allocated_quantity,status) values(?,?,?,?,?,?,?, 'HELD')",
-              allocationId, a, reservationId, wh(a), loc, null, bd(30));
+              allocationId,
+              a,
+              reservationId,
+              wh(a),
+              loc,
+              null,
+              bd(30));
           return null;
         });
 
@@ -618,7 +749,9 @@ class AvailableQuantityIntegrationTest {
                   + "platform_stock_scope,buffer_ratio,include_in_transit,effective_from,"
                   + "created_by_membership_id)"
                   + " values(?,?, 'DEFAULT','EXCLUSIVE','EXCL-','OWN_WAREHOUSE',0.1,false, now() at time zone 'UTC', ?)",
-              UUID.randomUUID(), a, UUID.randomUUID());
+              UUID.randomUUID(),
+              a,
+              UUID.randomUUID());
           return null;
         });
 
@@ -709,9 +842,10 @@ class AvailableQuantityIntegrationTest {
     insertBucket(a, sku(a, 2), locA, null, good(a), bd(100), bd(0));
 
     // 用 A 的身份请求，但把头伪造成 B：租户由 identity 的成员关系解析，头进不来
-    http.perform(get("/warehouse/inventory/sellable")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/sellable")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totals.onHand").value(100));
   }
@@ -733,11 +867,19 @@ class AvailableQuantityIntegrationTest {
   @Test
   @DisplayName("本模块读的每张表都 FORCE ROW LEVEL SECURITY")
   void everyReadTableForcesRls() throws Exception {
-    for (var table : List.of("stock_bucket", "inventory_balance", "inventory_quality_status",
-        "warehouse_location", "inventory_lot", "inventory_policy")) {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-          var s = c.prepareStatement(
-              "select relforcerowsecurity,relrowsecurity from pg_class where relname=?")) {
+    for (var table :
+        List.of(
+            "stock_bucket",
+            "inventory_balance",
+            "inventory_quality_status",
+            "warehouse_location",
+            "inventory_lot",
+            "inventory_policy")) {
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+          var s =
+              c.prepareStatement(
+                  "select relforcerowsecurity,relrowsecurity from pg_class where relname=?")) {
         s.setString(1, table);
         try (var rs = s.executeQuery()) {
           assertThat(rs.next()).as("表 %s 必须存在", table).isTrue();
@@ -767,14 +909,16 @@ class AvailableQuantityIntegrationTest {
         .andExpect(jsonPath("$.capabilities.expiryByDateAvailable").value(false))
         .andExpect(jsonPath("$.capabilities.reservationReleaseAvailable").value(false));
 
-    http.perform(get("/warehouse/inventory/sellable/skus").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/sellable/skus").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows[0].skuCode").value("SKU-1"))
         .andExpect(jsonPath("$.rows[0].sellable").value(85))
         .andExpect(jsonPath("$.total").value(1));
 
-    http.perform(get("/warehouse/inventory/sellable/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/sellable/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.availableFormula").isNotEmpty())
         .andExpect(jsonPath("$.sliceIdentity").isNotEmpty());
@@ -784,9 +928,11 @@ class AvailableQuantityIntegrationTest {
   @DisplayName("无权限 401 / 403：有读权限才放行")
   void permissionIsEnforced() throws Exception {
     http.perform(get("/warehouse/inventory/sellable")).andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/inventory/sellable").header("Authorization", "Bearer no-permission"))
+    http.perform(
+            get("/warehouse/inventory/sellable").header("Authorization", "Bearer no-permission"))
         .andExpect(status().isForbidden());
-    http.perform(get("/warehouse/inventory/sellable/skus").header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/inventory/sellable/skus").header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
   }
 

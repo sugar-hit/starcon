@@ -12,12 +12,12 @@
 
 四件职责各自成闭环，全部落到 PostgreSQL 16，无 mock：
 
-| 职责 | 落点 |
-| --- | --- |
-| 寄售协议 | `consignment_agreement` / `consignment_agreement_line` + 8 个端点（建单/加行/启用/暂停/关闭/列表/详情） |
-| 寄售可用量 | `GET /stock-view` + 协议明细行（寄售/已售/退回/转采购/剩余） |
-| 销售触发结算数量 | `consignment_sale` → `consignment_settlement(_line)` + 出单/确认端点 |
-| 未售退货与期末清理 | `consignment_return(_line)` + 建单/执行/作废端点 |
+| 职责               | 落点                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| 寄售协议           | `consignment_agreement` / `consignment_agreement_line` + 8 个端点（建单/加行/启用/暂停/关闭/列表/详情） |
+| 寄售可用量         | `GET /stock-view` + 协议明细行（寄售/已售/退回/转采购/剩余）                                            |
+| 销售触发结算数量   | `consignment_sale` → `consignment_settlement(_line)` + 出单/确认端点                                    |
+| 未售退货与期末清理 | `consignment_return(_line)` + 建单/执行/作废端点                                                        |
 
 - 迁移：`V71__warehouse_consignment_agency.sql`（8 张表）
 - 端点：17 个，挂 `/warehouse/inventory/consignments`

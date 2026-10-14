@@ -8,15 +8,15 @@
 
 蓝图职责逐条对应：
 
-| 蓝图要求                       | 落地                                                          |
-| ------------------------------ | ------------------------------------------------------------- |
-| 手工输入内部编码               | `PUT /catalog/sku-code/skus/{id}/code`，version 乐观锁        |
-| 按规则自动生成                 | `POST /catalog/sku-code/batch` action=`GENERATE`（只填空编码） |
-| 批量补齐                       | `POST /catalog/sku-code/batch` action=`BACKFILL`（规范化补齐） |
-| 编码规则定义                   | `sku_code_rule` + `sku_code_rule_seq`；CRUD 走 `/rules`        |
-| 外部条码（scheme+value 唯一）  | `sku_identifier`，`UNIQUE(tenant_id,scheme,value)`             |
-| 条码批量导入 / 扫码录入        | `POST .../identifiers/import` 与 `POST .../identifiers`       |
-| **唯一性冲突拒绝清单**         | `sku_code_batch_item` 逐行留痕 + 响应逐行返回                  |
+| 蓝图要求                      | 落地                                                           |
+| ----------------------------- | -------------------------------------------------------------- |
+| 手工输入内部编码              | `PUT /catalog/sku-code/skus/{id}/code`，version 乐观锁         |
+| 按规则自动生成                | `POST /catalog/sku-code/batch` action=`GENERATE`（只填空编码） |
+| 批量补齐                      | `POST /catalog/sku-code/batch` action=`BACKFILL`（规范化补齐） |
+| 编码规则定义                  | `sku_code_rule` + `sku_code_rule_seq`；CRUD 走 `/rules`        |
+| 外部条码（scheme+value 唯一） | `sku_identifier`，`UNIQUE(tenant_id,scheme,value)`             |
+| 条码批量导入 / 扫码录入       | `POST .../identifiers/import` 与 `POST .../identifiers`        |
+| **唯一性冲突拒绝清单**        | `sku_code_batch_item` 逐行留痕 + 响应逐行返回                  |
 
 ## 关键 trade-off
 
@@ -73,9 +73,11 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V7__sku_code_barcode.sql`
 
 **后端**
+
 - `.../catalog/SkuCodePattern.java`（编码展开纯规则，5 例单测）
 - `.../catalog/BarcodeScheme.java`（scheme 与 GTIN mod-10 校验，9 例单测）
 - `.../catalog/SkuCodeService.java`
@@ -83,12 +85,14 @@
 - `.../catalog/CatalogModels.java`（追加 3.1.2.3 一段 DTO）
 
 **前端**
+
 - `apps/web/src/components/catalog/sku-code-model.ts`（19 例单测）
 - `apps/web/src/components/catalog/sku-code-workspace.tsx`
 - `apps/web/src/app/products/sku/code/page.tsx`
 - `apps/web/src/components/catalog/sku-list-workspace.tsx`（加一个入口链接）
 
 **测试**
+
 - `.../catalog/SkuCodeIntegrationTest.java`（28 例）
 
 ## 验证

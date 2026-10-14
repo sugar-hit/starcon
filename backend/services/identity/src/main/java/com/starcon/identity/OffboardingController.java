@@ -32,20 +32,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 17.2.2.3 离职与停用。
  *
- * <p>核心约束是**停用而非删除**（蓝图「关系」栏：离职员工的操作记录是审计追溯的依据）。
- * 本类**不提供任何物理删除端点**：成员走 {@code membership.status} 状态流转，离职本身落成一条
- * {@code offboarding_case}，它记着原因、生效时刻、操作人与被停用的成员，可逆可查。
- * 删除防线不止一处：控制器无 DELETE 端点、迁移不授予 {@code identity_app} DELETE、
- * 指向 membership 的外键全部 {@code ON DELETE RESTRICT}，membership 上还有删除保护触发器。
+ * <p>核心约束是**停用而非删除**（蓝图「关系」栏：离职员工的操作记录是审计追溯的依据）。 本类**不提供任何物理删除端点**：成员走 {@code membership.status}
+ * 状态流转，离职本身落成一条 {@code offboarding_case}，它记着原因、生效时刻、操作人与被停用的成员，可逆可查。 删除防线不止一处：控制器无 DELETE 端点、迁移不授予
+ * {@code identity_app} DELETE、 指向 membership 的外键全部 {@code ON DELETE RESTRICT}，membership
+ * 上还有删除保护触发器。
  *
- * <p><b>服务边界</b>：审批（17.4.2.2）与工作台待办（01）尚未交付，AGENTS.md 禁止跨服务读表，
- * 所以这里<b>不查询</b>它们的表，只维护两张台账 —— {@code offboarding_responsibility_item}
- * 记录「谁转给谁」，{@code offboarding_reclaim_item} 记录「哪些条目被标记待回收 / 已回收」。
- * 下游经授权 API 登记条目并消费状态；下游缺席时条目如实停在 {@code PENDING}，
- * 不会被伪装成「已全部处理」。案卷状态也据此推导：有未结条目就是 {@code OPEN}。
+ * <p><b>服务边界</b>：审批（17.4.2.2）与工作台待办（01）尚未交付，AGENTS.md 禁止跨服务读表， 所以这里<b>不查询</b>它们的表，只维护两张台账 —— {@code
+ * offboarding_responsibility_item} 记录「谁转给谁」，{@code offboarding_reclaim_item} 记录「哪些条目被标记待回收 / 已回收」。
+ * 下游经授权 API 登记条目并消费状态；下游缺席时条目如实停在 {@code PENDING}， 不会被伪装成「已全部处理」。案卷状态也据此推导：有未结条目就是 {@code OPEN}。
  *
- * <p>独立成 {@code OffboardingController} 而不是并进 {@code AdministrationController}：
- * 17.2.2.1 成员管理与本模块是两个 L4 单元，同一文件各自生长会让两侧改动在合并时互相打架。
+ * <p>独立成 {@code OffboardingController} 而不是并进 {@code AdministrationController}： 17.2.2.1 成员管理与本模块是两个
+ * L4 单元，同一文件各自生长会让两侧改动在合并时互相打架。
  */
 @RestController
 @RequestMapping("/identity")
@@ -70,10 +67,10 @@ public class OffboardingController {
   /**
    * 离职案卷。
    *
-   * <p>四个待结计数是本模块「四块职责各有一个真实读出口」的落点：停用看 {@code memberName/status}，
-   * 责任转移看 {@code responsibilityTotal/Pending}，待办回收看 {@code reclaimTotal/Pending}，
-   * 历史留痕看 {@code operatorName/effectiveAt/revertedAt}。三个计数只报数字不够，
-   * 所以 {@code total} 与 {@code pending} 同时给出 —— 「共 8 项、已结 8 项」才是「处理完了」。
+   * <p>四个待结计数是本模块「四块职责各有一个真实读出口」的落点：停用看 {@code memberName/status}， 责任转移看 {@code
+   * responsibilityTotal/Pending}，待办回收看 {@code reclaimTotal/Pending}， 历史留痕看 {@code
+   * operatorName/effectiveAt/revertedAt}。三个计数只报数字不够， 所以 {@code total} 与 {@code pending} 同时给出 —— 「共
+   * 8 项、已结 8 项」才是「处理完了」。
    */
   public record OffboardingCaseView(
       UUID id,
@@ -144,8 +141,8 @@ public class OffboardingController {
   /**
    * 责任转移条目登记。
    *
-   * <p>{@code sourceSystem + referenceId} 是跨服务定位键，刻意不建外键指向 trade / workflow：
-   * 那是别的服务的表。identity 只登记「他们说名下还有这些活」，不去库里核对。
+   * <p>{@code sourceSystem + referenceId} 是跨服务定位键，刻意不建外键指向 trade / workflow： 那是别的服务的表。identity
+   * 只登记「他们说名下还有这些活」，不去库里核对。
    */
   public record OffboardingResponsibilityInput(
       @NotNull @Pattern(regexp = "DOCUMENT|APPROVAL", message = "条目类型只能是单据或审批") String itemKind,
@@ -168,10 +165,10 @@ public class OffboardingController {
   /**
    * 回收待办 / 任务。
    *
-   * <p>{@code successorMembershipId} 为空 = 直接回收（关闭），非空 = 改派给接手人。
-   * 两种结论都要在台账里留痕，所以「不填」是有含义的操作而不是漏填。
+   * <p>{@code successorMembershipId} 为空 = 直接回收（关闭），非空 = 改派给接手人。 两种结论都要在台账里留痕，所以「不填」是有含义的操作而不是漏填。
    */
-  public record OffboardingReclaimActionInput(@Schema(nullable = true) UUID successorMembershipId) {}
+  public record OffboardingReclaimActionInput(
+      @Schema(nullable = true) UUID successorMembershipId) {}
 
   // ------------------------------------------------------------------
   // 读出口
@@ -180,9 +177,8 @@ public class OffboardingController {
   /**
    * 本租户全部离职案卷，按创建时刻倒序。
    *
-   * <p>用户名的解析刻意走 {@code member_names(hash)}（会话成员关系为条件），不用 app_user 直连：
-   * app_user 对 identity_app 没有 GRANT，且成员名必须以「我所在租户」为条件解析，
-   * 伪造 {@code X-Tenant-Id} 拿不到别人的用户名。
+   * <p>用户名的解析刻意走 {@code member_names(hash)}（会话成员关系为条件），不用 app_user 直连： app_user 对 identity_app 没有
+   * GRANT，且成员名必须以「我所在租户」为条件解析， 伪造 {@code X-Tenant-Id} 拿不到别人的用户名。
    */
   @GetMapping("/offboarding")
   public List<OffboardingCaseView> cases(
@@ -192,7 +188,8 @@ public class OffboardingController {
         OFFBOARDING_READ,
         false,
         a ->
-            sql.fetch(caseSelect() + " order by c.created_at desc, c.id", hash(auth), hash(auth))
+            sql
+                .fetch(caseSelect() + " order by c.created_at desc, c.id", hash(auth), hash(auth))
                 .stream()
                 .map(OffboardingController::toCase)
                 .toList());
@@ -208,9 +205,7 @@ public class OffboardingController {
         OFFBOARDING_READ,
         false,
         a -> {
-          var row =
-              sql.fetchOne(
-                  caseSelect() + " where c.id=?", hash(auth), hash(auth), id);
+          var row = sql.fetchOne(caseSelect() + " where c.id=?", hash(auth), hash(auth), id);
           if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "离职记录不存在");
           return new OffboardingDetailView(
               toCase(row),
@@ -245,9 +240,11 @@ public class OffboardingController {
           if (sql.fetchExists(
               sql.selectOne()
                   .from("offboarding_case")
-                  .where("tenant_id=? and membership_id=? and status='OPEN'", a.tenantId(), input.membershipId())))
-            throw IdentityController.error(
-                HttpStatus.CONFLICT, "该成员已有一条在办的离职记录，请先处理或撤销");
+                  .where(
+                      "tenant_id=? and membership_id=? and status='OPEN'",
+                      a.tenantId(),
+                      input.membershipId())))
+            throw IdentityController.error(HttpStatus.CONFLICT, "该成员已有一条在办的离职记录，请先处理或撤销");
           check(departing.get("status", String.class).equals("ACTIVE"), "该成员已是停用状态");
           require(!ownerOf(departing), "不能停用租户所有者，请先使用转移所有者操作");
 
@@ -262,9 +259,7 @@ public class OffboardingController {
                 input.departmentLeaderSuccessorMembershipId() != null,
                 "该成员负责 " + led.size() + " 个部门，请先指定部门负责人接手人");
             var successor = member(a, input.departmentLeaderSuccessorMembershipId());
-            check(
-                successor.get("status", String.class).equals("ACTIVE"),
-                "部门负责人接手人必须处于启用状态");
+            check(successor.get("status", String.class).equals("ACTIVE"), "部门负责人接手人必须处于启用状态");
           }
 
           var before = memberSnapshot(a, input.membershipId(), hash(auth));
@@ -318,8 +313,7 @@ public class OffboardingController {
    * 撤销离职（可逆）：成员恢复启用，案卷标 REVERTED。
    *
    * <p>恢复的是案卷里记下的 {@code previousStatus}，不是硬编码成 ACTIVE —— 停用动作本身要如实留痕。
-   * 已结清的责任转移与回收条目**不回滚**：它们已经发生在下游服务里，identity 无权假装没发生，
-   * 所以案卷保留这些行作为「当时转过什么」的证据。
+   * 已结清的责任转移与回收条目**不回滚**：它们已经发生在下游服务里，identity 无权假装没发生， 所以案卷保留这些行作为「当时转过什么」的证据。
    */
   @PostMapping("/offboarding/{id}/revert")
   public void revert(
@@ -330,19 +324,18 @@ public class OffboardingController {
         OFFBOARDING_UPDATE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from offboarding_case where tenant_id=? and id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from offboarding_case where tenant_id=? and id=?", a.tenantId(), id);
           if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "离职记录不存在");
           // OPEN（还有未结条目）与 COMPLETED（台账已结清）都可以撤销：
           // 「条目都转完了才发现人是误停」是真实场景，不该因为状态已结算就锁死。
           // 只有 REVERTED 是终态。
-          check(
-              !row.get("status", String.class).equals("REVERTED"),
-              "该离职记录已经撤销过了");
+          check(!row.get("status", String.class).equals("REVERTED"), "该离职记录已经撤销过了");
           // 撤销会把成员恢复成停用前的角色状态。若他还挂着 OWNER，恢复的瞬间就凭空多出
           // 一个所有者——所以先要求走「转移所有者」这条既有通道（见 AdministrationController）。
           if (isOwnerRole(row))
-            throw IdentityController.error(
-                HttpStatus.CONFLICT, "该成员持有所有者角色，请先使用转移所有者操作");
+            throw IdentityController.error(HttpStatus.CONFLICT, "该成员持有所有者角色，请先使用转移所有者操作");
 
           var before = caseSnapshot(id, hash(auth));
           sql.execute(
@@ -377,8 +370,8 @@ public class OffboardingController {
   /**
    * 下游经授权 API 登记一条「名下还在办」的单据或审批。
    *
-   * <p>这是跨服务边界的落点：trade / workflow 调用本端点把自己那侧的条目登记进来，
-   * identity 不去读它们的表。未指定接手人的条目停在 PENDING，不会假装已经转移。
+   * <p>这是跨服务边界的落点：trade / workflow 调用本端点把自己那侧的条目登记进来， identity 不去读它们的表。未指定接手人的条目停在
+   * PENDING，不会假装已经转移。
    */
   @PostMapping("/offboarding/{caseId}/responsibility-items")
   public UUID addResponsibilityItem(
@@ -391,8 +384,9 @@ public class OffboardingController {
         true,
         a -> {
           var row = openCase(a.tenantId(), caseId);
-          UUID id = registerResponsibility(
-              a.tenantId(), caseId, row.get("membership_id", UUID.class), input);
+          UUID id =
+              registerResponsibility(
+                  a.tenantId(), caseId, row.get("membership_id", UUID.class), input);
           settle(a.tenantId(), caseId);
           audit(
               a,
@@ -421,17 +415,14 @@ public class OffboardingController {
         a -> {
           openCase(a.tenantId(), caseId);
           var successor = member(a, input.successorMembershipId());
-          check(
-              successor.get("status", String.class).equals("ACTIVE"),
-              "接手人必须处于启用状态");
+          check(successor.get("status", String.class).equals("ACTIVE"), "接手人必须处于启用状态");
           var item =
               sql.fetchOne(
                   "select * from offboarding_responsibility_item where tenant_id=? and case_id=? and id=?",
                   a.tenantId(),
                   caseId,
                   itemId);
-          if (item == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "责任转移条目不存在");
+          if (item == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "责任转移条目不存在");
           check(item.get("status", String.class).equals("PENDING"), "该条目已转移过");
           require(
               !item.get("owner_membership_id", UUID.class).equals(input.successorMembershipId()),
@@ -499,8 +490,7 @@ public class OffboardingController {
   /**
    * 回收待办或任务：关闭（不填接手人）或改派（填接手人）。
    *
-   * <p>TODO 与 TASK 的处置不同，所以两种结论都写进台账而不是只留一个布尔值：
-   * 事后要能答出「这条是关掉了，还是转给别人了」。
+   * <p>TODO 与 TASK 的处置不同，所以两种结论都写进台账而不是只留一个布尔值： 事后要能答出「这条是关掉了，还是转给别人了」。
    */
   @PostMapping("/offboarding/{caseId}/reclaim-items/{itemId}/reclaim")
   public void reclaimItem(
@@ -516,9 +506,7 @@ public class OffboardingController {
           openCase(a.tenantId(), caseId);
           if (input.successorMembershipId() != null) {
             var successor = member(a, input.successorMembershipId());
-            check(
-                successor.get("status", String.class).equals("ACTIVE"),
-                "接手人必须处于启用状态");
+            check(successor.get("status", String.class).equals("ACTIVE"), "接手人必须处于启用状态");
           }
           var item =
               sql.fetchOne(
@@ -569,13 +557,16 @@ public class OffboardingController {
   // ------------------------------------------------------------------
 
   /**
-   * 与 {@code AdministrationController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code AdministrationController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 →
+   * 组织变更要求 OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -587,7 +578,8 @@ public class OffboardingController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "离职与停用变更需由当前租户所有者执行");
           return work.apply(a);
@@ -654,7 +646,8 @@ public class OffboardingController {
 
   private List<OffboardingResponsibilityView> responsibility(
       UUID tenantId, UUID caseId, String token) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select r.*,s.username as successor_name from offboarding_responsibility_item r"
                 + " left join member_names(?) s on s.id=r.successor_membership_id"
                 + " where r.tenant_id=? and r.case_id=? order by r.registered_at,r.id",
@@ -682,7 +675,8 @@ public class OffboardingController {
   }
 
   private List<OffboardingReclaimView> reclaims(UUID tenantId, UUID caseId, String token) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select k.*,s.username as successor_name from offboarding_reclaim_item k"
                 + " left join member_names(?) s on s.id=k.successor_membership_id"
                 + " where k.tenant_id=? and k.case_id=? order by k.registered_at,k.id",
@@ -763,7 +757,8 @@ public class OffboardingController {
     return id;
   }
 
-  private UUID registerReclaim(UUID tenantId, UUID caseId, UUID holderId, OffboardingReclaimInput input) {
+  private UUID registerReclaim(
+      UUID tenantId, UUID caseId, UUID holderId, OffboardingReclaimInput input) {
     UUID id = Ids.next();
     try {
       sql.execute(
@@ -788,8 +783,7 @@ public class OffboardingController {
   /**
    * 按待结条目推导案卷状态：还有 PENDING 就是 OPEN，全部结清才 COMPLETED。
    *
-   * <p>刻意不在停用那一刻就标「已完成」——下游服务还没消费台账，说完成了就是假的。
-   * REVERTED 是终态，撤销后不再结算。
+   * <p>刻意不在停用那一刻就标「已完成」——下游服务还没消费台账，说完成了就是假的。 REVERTED 是终态，撤销后不再结算。
    */
   private void settle(UUID tenantId, UUID caseId) {
     sql.execute(
@@ -808,15 +802,15 @@ public class OffboardingController {
   }
 
   private Record openCase(UUID tenantId, UUID caseId) {
-    var row = sql.fetchOne("select * from offboarding_case where tenant_id=? and id=?", tenantId, caseId);
+    var row =
+        sql.fetchOne("select * from offboarding_case where tenant_id=? and id=?", tenantId, caseId);
     if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "离职记录不存在");
     check(row.get("status", String.class).equals("OPEN"), "该离职记录已结案或已撤销");
     return row;
   }
 
   private Record member(IdentityController.Access a, UUID id) {
-    var r =
-        sql.fetchOne("select * from membership where tenant_id=? and id=?", a.tenantId(), id);
+    var r = sql.fetchOne("select * from membership where tenant_id=? and id=?", a.tenantId(), id);
     if (r == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "成员不存在或不属于当前租户");
     return r;
   }
@@ -835,8 +829,7 @@ public class OffboardingController {
    * 撤销前判断：被停用成员是否仍持有 OWNER 角色（撤销会把角色一并恢复）。
    *
    * <p>刻意 join 到 role 再按 code 判定，而不是 {@code role_id=(select id from role where
-   * code='OWNER')}：那个标量子查询不带租户条件，多租户库里每户各有一个 OWNER 角色，
-   * 结果不确定（要么报错，要么命中别人家的角色）。
+   * code='OWNER')}：那个标量子查询不带租户条件，多租户库里每户各有一个 OWNER 角色， 结果不确定（要么报错，要么命中别人家的角色）。
    */
   private boolean isOwnerRole(Record offboardingCase) {
     return sql.fetchExists(
@@ -897,9 +890,7 @@ public class OffboardingController {
     snapshot.put("referenceId", str(row.get("reference_id", UUID.class)));
     snapshot.put("title", row.get("title", String.class));
     snapshot.put("status", row.get("status", String.class));
-    snapshot.put(
-        "successorMembershipId",
-        str(row.get("successor_membership_id", UUID.class)));
+    snapshot.put("successorMembershipId", str(row.get("successor_membership_id", UUID.class)));
     return snapshot;
   }
 

@@ -3,8 +3,6 @@ package com.starcon.catalog;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -25,8 +23,7 @@ import java.util.UUID;
  *   <li>执行 → {@link ImportJobRow}（带 applied/failed/skipped）。
  * </ul>
  *
- * <p><b>预校验与执行返回的都是任务行而不是「成功/失败」一句话</b>：
- * 蓝图把「结果统计」列为输出，而 3.8.1.2 要在这份统计上做校验报告。
+ * <p><b>预校验与执行返回的都是任务行而不是「成功/失败」一句话</b>： 蓝图把「结果统计」列为输出，而 3.8.1.2 要在这份统计上做校验报告。
  * 统计是库里可查的事实，页面只读它，不在前端重算。
  */
 final class ImportWizardModels {
@@ -53,7 +50,6 @@ final class ImportWizardModels {
 
   /** 模板列表。 */
   public record ImportTemplatePage(List<ImportTemplateRow> items, int total) {}
-
 
   /**
    * 模板的一列。
@@ -120,8 +116,7 @@ final class ImportWizardModels {
    * 导入任务行 = 「导入任务 + 结果统计」。
    *
    * <p>四段计数（valid/invalid/applied/failed/skipped）是蓝图点名的输出，页面上的进度条、
-   * 成功失败数字全部读它。任务还在跑时它们是**已推进的进度**，不是最终结论 ——
-   * {@link #status} 才是结论。
+   * 成功失败数字全部读它。任务还在跑时它们是**已推进的进度**，不是最终结论 —— {@link #status} 才是结论。
    */
   public record ImportJobRow(
       UUID id,
@@ -173,14 +168,18 @@ final class ImportWizardModels {
   /**
    * 逐行错误明细 = 本模块的**预校验交付物**。
    *
-   * <p>{@link #severity} 是 ERROR 还是 WARNING 直接决定该行落不落库，
-   * 所以它是数据而不是界面文案。
+   * <p>{@link #severity} 是 ERROR 还是 WARNING 直接决定该行落不落库， 所以它是数据而不是界面文案。
    */
   public record ImportRowErrorLine(
       UUID id, int rowNo, String fieldKey, String code, String message, String severity) {}
 
   public record ImportRowErrorPage(
-      List<ImportRowErrorLine> items, int page, int size, long total, int errorCount, int warningCount) {}
+      List<ImportRowErrorLine> items,
+      int page,
+      int size,
+      long total,
+      int errorCount,
+      int warningCount) {}
 
   /** 任务详情：任务行 + 当前筛选下的逐行结果。 */
   public record ImportJobDetail(ImportJobRow job, ImportJobRowPage rows) {}
@@ -191,7 +190,13 @@ final class ImportWizardModels {
 
   /** 上传文件的统计回执（解析结果摘要）。 */
   public record ImportUploadSummary(
-      UUID jobId, String fileName, BigDecimal byteSize, String contentSha256, int rowCount, int columnCount, List<String> headers) {}
+      UUID jobId,
+      String fileName,
+      BigDecimal byteSize,
+      String contentSha256,
+      int rowCount,
+      int columnCount,
+      List<String> headers) {}
 
   /** 模板 CSV 下载的元信息（前端用同一个函数拼下载链接）。 */
   public record ImportTemplateFile(String fileName, String contentType, byte[] content) {}

@@ -166,7 +166,12 @@ describe('量纲词表与候选过滤', () => {
 
 describe('单位组表单校验', () => {
   it('编辑时不校验编码（后端已规定建后不可改）', () => {
-    const draft = { ...emptyGroupDraft(), name: '重量组', baseUnitCode: '克', members: [member('克', 0)] };
+    const draft = {
+      ...emptyGroupDraft(),
+      name: '重量组',
+      baseUnitCode: '克',
+      members: [member('克', 0)],
+    };
     // 新建时编码为空要报错。
     expect(validateGroup(draft, true)).toContain('单位组编码不能为空');
     // 编辑态编码留空也不报——它在表单里是只读的。
@@ -284,7 +289,13 @@ describe('从详情回填草稿：成员必须带 position', () => {
 describe('组内换算版本表单', () => {
   it('基准单位不需要换算版本（比例恒为 1）', () => {
     const problems = validateGroupConversion(
-      { unitCode: '克', quantityPerBase: '1', effectiveFrom: '2026-01-01', effectiveTo: '', note: '' },
+      {
+        unitCode: '克',
+        quantityPerBase: '1',
+        effectiveFrom: '2026-01-01',
+        effectiveTo: '',
+        note: '',
+      },
       '克',
     );
     expect(problems).toContain('组基础单位的比例恒为 1，不需要换算版本');
@@ -293,7 +304,13 @@ describe('组内换算版本表单', () => {
   it('非法比例与倒挂区间都被拒', () => {
     expect(
       validateGroupConversion(
-        { unitCode: '千克', quantityPerBase: '0', effectiveFrom: '2026-01-01', effectiveTo: '', note: '' },
+        {
+          unitCode: '千克',
+          quantityPerBase: '0',
+          effectiveFrom: '2026-01-01',
+          effectiveTo: '',
+          note: '',
+        },
         '克',
       ),
     ).toContain('换算比例必须大于 0');

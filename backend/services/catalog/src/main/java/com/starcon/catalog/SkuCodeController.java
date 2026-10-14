@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.1.2.3 编码与条码：内部编码规则、手工/自动/批量三种编码方式、外部条码与冲突拒绝清单。
  *
- * <p>路由挂在 {@code /catalog/sku-code} 之下，与 3.1.2.1/3.1.2.2 的 {@code /catalog/skus} 分开：
- * 编码是一个独立的维护域（规则 + 批量 + 条码），挂在 {@code /skus} 下会和
- * {@code /catalog/skus/export}、{@code /catalog/skus/capabilities} 这些静态段抢匹配。
+ * <p>路由挂在 {@code /catalog/sku-code} 之下，与 3.1.2.1/3.1.2.2 的 {@code /catalog/skus} 分开： 编码是一个独立的维护域（规则
+ * + 批量 + 条码），挂在 {@code /skus} 下会和 {@code /catalog/skus/export}、{@code /catalog/skus/capabilities}
+ * 这些静态段抢匹配。
  *
- * <p>权限沿用 SKU 档案：读 {@code catalog.sku.read}，写 {@code catalog.sku.update}。
- * 编码与条码是 SKU 档案不可分割的一部分，不另开更宽或更窄的口子。
+ * <p>权限沿用 SKU 档案：读 {@code catalog.sku.read}，写 {@code catalog.sku.update}。 编码与条码是 SKU
+ * 档案不可分割的一部分，不另开更宽或更窄的口子。
  */
 @RestController
 @RequestMapping("/catalog/sku-code")

@@ -21,14 +21,12 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.3.2.1 序列号：档案、位置流转历史与出入库强校验。
  *
- * <p>蓝图原话：「序列号级库存管理：录入/扫码、状态（在库/已售/在途/维修/报废）、当前位置、
- * 绑定 SKU 与批次，出入库时强校验数量与序列号条数一致」「输出：序列号档案 + 位置流转历史 + 校验错误」
- * 「<b>序列号校验是一致性硬约束</b>：数量为 1 时必须有且仅有 1 个序列号，不允许『大概齐』」。
+ * <p>蓝图原话：「序列号级库存管理：录入/扫码、状态（在库/已售/在途/维修/报废）、当前位置、 绑定 SKU 与批次，出入库时强校验数量与序列号条数一致」「输出：序列号档案 + 位置流转历史
+ * + 校验错误」 「<b>序列号校验是一致性硬约束</b>：数量为 1 时必须有且仅有 1 个序列号，不允许『大概齐』」。
  *
- * <p><b>三张表分工</b>（V58）：{@code inventory_serial} 是**现在**这一件是什么状态、在哪个库位；
- * {@code inventory_serial_movement} 是 append-only 的流转事实；
- * {@code inventory_serial_operation} 是一次业务操作的操作头，承载「声明数量」与「序列号条数」
- * 这两个可比数字 —— 没有这一行，蓝图那条硬约束就只能是一段可以被绕过的应用层 if。
+ * <p><b>三张表分工</b>（V58）：{@code inventory_serial} 是**现在**这一件是什么状态、在哪个库位； {@code
+ * inventory_serial_movement} 是 append-only 的流转事实； {@code inventory_serial_operation}
+ * 是一次业务操作的操作头，承载「声明数量」与「序列号条数」 这两个可比数字 —— 没有这一行，蓝图那条硬约束就只能是一段可以被绕过的应用层 if。
  *
  * <p><b>「不允许大概齐」不是提示，是提交不了的状态</b>。四层一起保证：
  *
@@ -37,8 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
  *       不等就<b>一条都不写</b>，并把差多少、哪个号有问题逐条回给调用方。
  *   <li>写操作头前再校验一次「可操作条数 == 声明数量」，防止逐号校验因条件变化少了一个号。
  *   <li>操作头的 {@code CHECK(serial_count = declared_quantity)} 让「声明自相矛盾」无法落库。
- *   <li>V58 的延迟约束触发器在 COMMIT 时数一遍真正写入的流转行，对不上就整笔回滚 ——
- *       挡住「数量对得上、实际少写两件」这种半成品。
+ *   <li>V58 的延迟约束触发器在 COMMIT 时数一遍真正写入的流转行，对不上就整笔回滚 —— 挡住「数量对得上、实际少写两件」这种半成品。
  * </ol>
  *
  * <p><b>位置与状态是两条正交的轴</b>，这是本模块最容易写错的地方：
@@ -52,22 +49,21 @@ import org.springframework.web.server.ResponseStatusException;
  *   REBIND          保持不变                      必须为空（改批次不改状态）
  * </pre>
  *
- * <p>为什么报废只能走 OUTBOUND：V58 的 CHECK 规定「报废的号不能挂在库位上」，
- * 而货报废时它确实已经从货架上被拿走了。出库 + SCRAPPED 表达的正是这件事，语义与物理一致；
- * 硬造一个「状态流转」把它留在库位上，只会让约束与现实两头不讨好。
+ * <p>为什么报废只能走 OUTBOUND：V58 的 CHECK 规定「报废的号不能挂在库位上」， 而货报废时它确实已经从货架上被拿走了。出库 + SCRAPPED
+ * 表达的正是这件事，语义与物理一致； 硬造一个「状态流转」把它留在库位上，只会让约束与现实两头不讨好。
  *
  * <p>四条实现纪律：
  *
  * <ul>
- *   <li><b>租户不来自请求</b>：由 {@link AccessService} 从已认证成员关系解析并绑定
- *       {@code app.current_tenant}，写入时用 {@code current_setting('app.current_tenant')} 取值
- *       （与 {@code WarehouseReferenceService} 同一写法），全程靠 RLS 隔离，不接受 X-Tenant-Id。
- *   <li><b>写入逐行 execute</b>，不用 {@code DSLContext.batch(String,...)}：纯文本语句上
- *       带 {@code ?::cast} 的 batch 绑定不可靠（与 7.1.2.1 / 7.1.2.2 同一条理由）。
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 后面一律跟一个字面量（{@code now()}），
- *       让 cast 不落在 values 末位 —— 末位 cast 会让 jOOQ 整体绑定错位一格。
- *   <li><b>数量一律 numeric(19,6) + BigDecimal</b>，比较一律 {@code compareTo}，不用 {@code equals}
- *       （后者把 0 与 0.0000 判成不等）。
+ *   <li><b>租户不来自请求</b>：由 {@link AccessService} 从已认证成员关系解析并绑定 {@code app.current_tenant}，写入时用 {@code
+ *       current_setting('app.current_tenant')} 取值 （与 {@code WarehouseReferenceService} 同一写法），全程靠
+ *       RLS 隔离，不接受 X-Tenant-Id。
+ *   <li><b>写入逐行 execute</b>，不用 {@code DSLContext.batch(String,...)}：纯文本语句上 带 {@code ?::cast} 的
+ *       batch 绑定不可靠（与 7.1.2.1 / 7.1.2.2 同一条理由）。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 后面一律跟一个字面量（{@code now()}）， 让 cast 不落在 values 末位 —— 末位
+ *       cast 会让 jOOQ 整体绑定错位一格。
+ *   <li><b>数量一律 numeric(19,6) + BigDecimal</b>，比较一律 {@code compareTo}，不用 {@code equals} （后者把 0 与
+ *       0.0000 判成不等）。
  * </ul>
  */
 @Service
@@ -91,8 +87,7 @@ public class InventorySerialService {
   /**
    * 不动库位的两个方向：状态流转与批次改绑。
    *
-   * <p>它们的号必须在架上 —— 一个不在任何库位上的号要改状态或改批次，只能走出入库
-   * （那才会真的改变它的位置）。把这个判断显式列出来，免得每加一个方向就忘了
+   * <p>它们的号必须在架上 —— 一个不在任何库位上的号要改状态或改批次，只能走出入库 （那才会真的改变它的位置）。把这个判断显式列出来，免得每加一个方向就忘了
    * 给「库位不变」这条分支补一条检查。
    */
   private static final List<SerialMovementDirection> KEEP_LOCATION =
@@ -120,8 +115,15 @@ public class InventorySerialService {
     binds.add((long) pageNo * size);
     var rows =
         sql.fetch(
-            "select " + PROFILE_COLUMNS + " " + PROFILE_FROM + " where " + conditions
-                + " order by " + orderBy(q.sort()) + " limit ? offset ?",
+            "select "
+                + PROFILE_COLUMNS
+                + " "
+                + PROFILE_FROM
+                + " where "
+                + conditions
+                + " order by "
+                + orderBy(q.sort())
+                + " limit ? offset ?",
             binds.toArray());
 
     long total = count("select count(*) " + PROFILE_FROM + " where " + conditions, where);
@@ -144,8 +146,7 @@ public class InventorySerialService {
   /**
    * 状态分布汇总。
    *
-   * <p>{@code sumMatches} 显式给出「五档之和 == 总数」。界面必须把它画出来：
-   * 五档加起来不等于总数，说明聚合口径漂了，那种情况下每个单独的数字都不可信。
+   * <p>{@code sumMatches} 显式给出「五档之和 == 总数」。界面必须把它画出来： 五档加起来不等于总数，说明聚合口径漂了，那种情况下每个单独的数字都不可信。
    */
   public SerialStats stats(SerialQuery query) {
     var q = query == null ? EMPTY_QUERY : query;
@@ -154,7 +155,10 @@ public class InventorySerialService {
 
     var rows =
         sql.fetch(
-            "select s.status, count(*) as cnt " + PROFILE_FROM + " where " + conditions
+            "select s.status, count(*) as cnt "
+                + PROFILE_FROM
+                + " where "
+                + conditions
                 + " group by s.status",
             where.toArray());
     long total = 0;
@@ -179,7 +183,9 @@ public class InventorySerialService {
         sql.fetch(
             "select count(*) filter (where s.lot_id is null) as unbound,"
                 + " count(*) filter (where s.lot_id is not null and lo.status <> 'ACTIVE') as stale_lot "
-                + PROFILE_FROM + " where " + conditions,
+                + PROFILE_FROM
+                + " where "
+                + conditions,
             where.toArray());
     long unbound = detail.get(0).get("unbound", Long.class);
     long staleLot = detail.get(0).get("stale_lot", Long.class);
@@ -194,8 +200,7 @@ public class InventorySerialService {
   /**
    * 扫码 / 单条录入。
    *
-   * <p>录入本身就是一次入库：号扫到哪个库位，它当下就在那个库位上。
-   * 因此这里直接写「档案 + 操作头 + 一条流转」，而不是先建档、以后再补一条入库记录 ——
+   * <p>录入本身就是一次入库：号扫到哪个库位，它当下就在那个库位上。 因此这里直接写「档案 + 操作头 + 一条流转」，而不是先建档、以后再补一条入库记录 ——
    * 后者会让号在它已经在库的那段时间里没有任何流转历史，正是事后查不到「这号什么时候到的」的原因。
    *
    * <p>号已存在时按**退货入库**处理（已售/在途/维修 → 在库）；已在库的号会被拒绝并提示改用库位转移。
@@ -226,11 +231,9 @@ public class InventorySerialService {
   /**
    * 批量导入（一个 SKU 的若干台设备，通常是收货扫描枪一次上传的整箱）。
    *
-   * <p>整批同 SKU、同库位、同批次：批量导入的价值在于「一次扫完一箱」，
-   * 混着 SKU 的批量在现场用不上，强行支持只会让校验规则分叉。要多 SKU 就调多次。
+   * <p>整批同 SKU、同库位、同批次：批量导入的价值在于「一次扫完一箱」， 混着 SKU 的批量在现场用不上，强行支持只会让校验规则分叉。要多 SKU 就调多次。
    *
-   * <p>{@code dryRun=true} 时只校验不落库 —— 收货现场先看一遍「哪几个号有问题」再决定是否提交，
-   * 比先落库再逐条撤销现实得多。
+   * <p>{@code dryRun=true} 时只校验不落库 —— 收货现场先看一遍「哪几个号有问题」再决定是否提交， 比先落库再逐条撤销现实得多。
    */
   @Transactional
   public SerialValidationResult importBatch(SerialImportRequest request, UUID actorId) {
@@ -239,8 +242,7 @@ public class InventorySerialService {
     }
     var serials = request.serials() == null ? List.<String>of() : request.serials();
     if (serials.size() < MIN_IMPORT_BATCH) {
-      throw new IllegalArgumentException(
-          "批量导入至少 " + MIN_IMPORT_BATCH + " 条；单条录入请用扫码端点");
+      throw new IllegalArgumentException("批量导入至少 " + MIN_IMPORT_BATCH + " 条；单条录入请用扫码端点");
     }
     if (serials.size() > MAX_BATCH_SIZE) {
       throw new IllegalArgumentException(
@@ -269,8 +271,7 @@ public class InventorySerialService {
   /**
    * 编辑档案：只能改批次绑定与备注。
    *
-   * <p><b>不能改 SKU</b>（序列号与 SKU 的绑定永久不可变，V58 触发器会挡），
-   * 也<b>不能改状态与位置</b> —— 那两样必须走流转端点，否则状态变更就绕开了流转历史，
+   * <p><b>不能改 SKU</b>（序列号与 SKU 的绑定永久不可变，V58 触发器会挡）， 也<b>不能改状态与位置</b> —— 那两样必须走流转端点，否则状态变更就绕开了流转历史，
    * 档案与历史会对不上。
    */
   @Transactional
@@ -281,7 +282,9 @@ public class InventorySerialService {
     if (lotId != null && !Objects.equals(lotId, current.lotId())) {
       // 改绑前先确认这个批次确实是**同一个 SKU** 的批次，否则档案会指向一个不相干的批次，
       // 按批次追溯时直接断链 —— 那比没绑批次更难查。
-      var lot = sql.fetch("select id from inventory_lot where id = ? and sku_id = ?", lotId, current.skuId());
+      var lot =
+          sql.fetch(
+              "select id from inventory_lot where id = ? and sku_id = ?", lotId, current.skuId());
       if (lot.isEmpty()) {
         throw new IllegalArgumentException("批次不存在，或不属于该序列号绑定的 SKU");
       }
@@ -289,19 +292,19 @@ public class InventorySerialService {
     String note = request == null || request.note() == null ? current.note() : request.note();
     sql.execute(
         "update inventory_serial set lot_id = ?, note = ?, updated_at = now() where id = ?",
-        lotId, note, id);
+        lotId,
+        note,
+        id);
     return profile(id);
   }
 
   /**
    * 作废一次录错的录入 —— 只删「录错了」，不删「没发生过」。
    *
-   * <p>已被任何单据引用过的号删掉，等于让那张单据凭空少了一件货，那种情况只能走报废。
-   * 因此只允许作废**仅有建档那一次入库**、且仍在库的号，这正是扫码录错的标准修法。
+   * <p>已被任何单据引用过的号删掉，等于让那张单据凭空少了一件货，那种情况只能走报废。 因此只允许作废**仅有建档那一次入库**、且仍在库的号，这正是扫码录错的标准修法。
    *
-   * <p>走 {@code discard_unused_serial} 而不是直接 {@code delete}：流转历史是 append-only，
-   * 应用角色连它的 DELETE 权限都没有。这个函数是数据库里唯一被允许删除序列号历史的入口，
-   * 它会把守卫条件重新校验一遍（见 V58）。直接删档案会撞流转行的外键 —— 那正是它的作用：
+   * <p>走 {@code discard_unused_serial} 而不是直接 {@code delete}：流转历史是 append-only， 应用角色连它的 DELETE
+   * 权限都没有。这个函数是数据库里唯一被允许删除序列号历史的入口， 它会把守卫条件重新校验一遍（见 V58）。直接删档案会撞流转行的外键 —— 那正是它的作用：
    * 让「删档案」与「删掉它那次入库的凭据」这两件事不可能各走各的。
    */
   @Transactional
@@ -338,8 +341,7 @@ public class InventorySerialService {
   /**
    * 出入库 / 库位转移 / 状态流转 / 批次改绑。
    *
-   * <p>流程固定三步：<b>先校验、再落库、返回逐条错误</b>。
-   * 校验没过时**一条都不写** —— 半套操作落库比不落库更糟，因为档案与历史已经对不上了。
+   * <p>流程固定三步：<b>先校验、再落库、返回逐条错误</b>。 校验没过时**一条都不写** —— 半套操作落库比不落库更糟，因为档案与历史已经对不上了。
    */
   @Transactional
   public SerialValidationResult move(SerialMoveRequest request, UUID actorId) {
@@ -371,8 +373,7 @@ public class InventorySerialService {
       issues.add(issue(SerialIssueCode.QUANTITY_NOT_INTEGER, "", "序列号数量必填", "", ""));
     } else if (quantity.compareTo(BigDecimal.ZERO) < 0) {
       issues.add(
-          issue(SerialIssueCode.QUANTITY_NEGATIVE, "", "序列号数量不能为负", "",
-              quantity.toPlainString()));
+          issue(SerialIssueCode.QUANTITY_NEGATIVE, "", "序列号数量不能为负", "", quantity.toPlainString()));
     } else if (quantity.stripTrailingZeros().scale() > 0) {
       // 序列号是离散件：带小数的数量在物理上不存在。
       issues.add(
@@ -416,12 +417,7 @@ public class InventorySerialService {
     for (var number : trimmed) {
       if (!seen.add(number)) {
         issues.add(
-            issue(
-                SerialIssueCode.SERIAL_DUPLICATED,
-                number,
-                "同一个序列号在本次操作里出现了多次",
-                number,
-                number));
+            issue(SerialIssueCode.SERIAL_DUPLICATED, number, "同一个序列号在本次操作里出现了多次", number, number));
       } else {
         unique.add(number);
       }
@@ -440,18 +436,37 @@ public class InventorySerialService {
 
     if (!issues.isEmpty()) {
       return new SerialValidationResult(
-          false, dryRun, quantity == null ? ZERO : quantity, trimmed.size(), List.copyOf(issues),
-          false, null, null);
+          false,
+          dryRun,
+          quantity == null ? ZERO : quantity,
+          trimmed.size(),
+          List.copyOf(issues),
+          false,
+          null,
+          null);
     }
     if (dryRun || plans.isEmpty()) {
       return new SerialValidationResult(
-          true, dryRun, quantity == null ? ZERO : quantity, trimmed.size(), List.of(), false, null, null);
+          true,
+          dryRun,
+          quantity == null ? ZERO : quantity,
+          trimmed.size(),
+          List.of(),
+          false,
+          null,
+          null);
     }
 
     var operation = persist(plan, plans, direction, request, actorId);
     var profiles = plans.stream().map(SerialPlan::id).map(this::profile).toList();
     return new SerialValidationResult(
-        true, false, quantity == null ? ZERO : quantity, trimmed.size(), List.of(), true, operation,
+        true,
+        false,
+        quantity == null ? ZERO : quantity,
+        trimmed.size(),
+        List.of(),
+        true,
+        operation,
         profiles);
   }
 
@@ -510,8 +525,13 @@ public class InventorySerialService {
                   target.name()));
           return null;
         }
-        return new Plan(direction, target, request.toLocationId(), null,
-            warehouseOf(request.toLocationId()), lotId);
+        return new Plan(
+            direction,
+            target,
+            request.toLocationId(),
+            null,
+            warehouseOf(request.toLocationId()),
+            lotId);
       }
       case OUTBOUND -> {
         if (request.toLocationId() != null) {
@@ -553,7 +573,9 @@ public class InventorySerialService {
           issues.add(issue(SerialIssueCode.LOCATION_REQUIRED, "", "库位转移必须指定目标库位", "", ""));
           return null;
         }
-        if (toStatus != null && toStatus != SerialStatus.IN_STOCK && toStatus != SerialStatus.REPAIR) {
+        if (toStatus != null
+            && toStatus != SerialStatus.IN_STOCK
+            && toStatus != SerialStatus.REPAIR) {
           issues.add(
               issue(
                   SerialIssueCode.STATUS_NOT_ALLOWED,
@@ -564,8 +586,13 @@ public class InventorySerialService {
           return null;
         }
         // toStatus 为 null = 保持各号原状态，逐号校验时各自按自己的原状态落。
-        return new Plan(direction, toStatus, request.toLocationId(), request.fromLocationId(),
-            warehouseOf(request.toLocationId()), null);
+        return new Plan(
+            direction,
+            toStatus,
+            request.toLocationId(),
+            request.fromLocationId(),
+            warehouseOf(request.toLocationId()),
+            null);
       }
       case STATUS_CHANGE -> {
         if (request.toLocationId() != null) {
@@ -589,14 +616,18 @@ public class InventorySerialService {
               issue(
                   SerialIssueCode.STATUS_NOT_ALLOWED,
                   "",
-                  toStatus.name()
-                      + " 的序列号不能挂在库位上：这类状态请用出库方向，它会把序列号从库位上摘掉",
+                  toStatus.name() + " 的序列号不能挂在库位上：这类状态请用出库方向，它会把序列号从库位上摘掉",
                   "IN_STOCK / REPAIR",
                   toStatus.name()));
           return null;
         }
-        return new Plan(direction, toStatus, null, request.fromLocationId(),
-            request.fromLocationId() == null ? null : warehouseOf(request.fromLocationId()), null);
+        return new Plan(
+            direction,
+            toStatus,
+            null,
+            request.fromLocationId(),
+            request.fromLocationId() == null ? null : warehouseOf(request.fromLocationId()),
+            null);
       }
       case REBIND -> {
         if (toStatus != null) {
@@ -619,8 +650,13 @@ public class InventorySerialService {
                   String.valueOf(request.toLocationId())));
           return null;
         }
-        return new Plan(direction, null, null, request.fromLocationId(),
-            request.fromLocationId() == null ? null : warehouseOf(request.fromLocationId()), lotId);
+        return new Plan(
+            direction,
+            null,
+            null,
+            request.fromLocationId(),
+            request.fromLocationId() == null ? null : warehouseOf(request.fromLocationId()),
+            lotId);
       }
     }
     return null;
@@ -629,8 +665,8 @@ public class InventorySerialService {
   /**
    * count(*) 归一化。
    *
-   * <p>jOOQ 在这条语句上返回的是 {@code Object}（纯文本 SQL 没有列类型信息），
-   * 窄化只在这一处做；三个列表的 total 走同一个函数，分页口径才不会各写一遍各错一遍。
+   * <p>jOOQ 在这条语句上返回的是 {@code Object}（纯文本 SQL 没有列类型信息）， 窄化只在这一处做；三个列表的 total
+   * 走同一个函数，分页口径才不会各写一遍各错一遍。
    */
   private long count(String text, List<Object> binds) {
     var value = sql.fetchValue(text, binds.toArray());
@@ -649,13 +685,11 @@ public class InventorySerialService {
   /**
    * 逐号校验并算出每个号的落点。
    *
-   * <p>一次 {@code where serial_number in (?,?,...)} 批量取回档案，而不是逐号查询：
-   * 扫 200 个号发 200 条 SQL 在收货现场是可感知的卡顿，而号天然是列表参数，
-   * 一次 IN 查询既快又只走一次索引。
+   * <p>一次 {@code where serial_number in (?,?,...)} 批量取回档案，而不是逐号查询： 扫 200 个号发 200 条 SQL
+   * 在收货现场是可感知的卡顿，而号天然是列表参数， 一次 IN 查询既快又只走一次索引。
    *
-   * <p>占位符是**按个数生成**的而不是 {@code = any(?)}：纯文本语句里 jOOQ 会把一个
-   * {@code String[]} 当成多个独立绑定发出去，PG 收到的是「一个标量 ANY 一个数组」，
-   * 直接报 {@code op ANY/ALL (array) requires array on right side}。
+   * <p>占位符是**按个数生成**的而不是 {@code = any(?)}：纯文本语句里 jOOQ 会把一个 {@code String[]} 当成多个独立绑定发出去，PG
+   * 收到的是「一个标量 ANY 一个数组」， 直接报 {@code op ANY/ALL (array) requires array on right side}。
    * 占位符个数由入参个数决定，不存在被填错的位置。
    *
    * <p>取档案用左连接 {@code warehouse_location}：号本身一定有行（查不到就是「号不存在 →
@@ -672,7 +706,8 @@ public class InventorySerialService {
             left join warehouse_location loc
               on loc.tenant_id = s.tenant_id and loc.id = s.current_location_id
             where s.serial_number in (%s)
-            """.formatted(String.join(",", java.util.Collections.nCopies(numbers.size(), "?"))),
+            """
+                .formatted(String.join(",", java.util.Collections.nCopies(numbers.size(), "?"))),
             numbers.toArray(new String[0]));
 
     var byNumber = new HashMap<String, Record>(rows.size());
@@ -687,18 +722,25 @@ public class InventorySerialService {
       // --- 号不存在：只有入库建档才允许。
       if (existing == null) {
         if (plan.direction() != SerialMovementDirection.INBOUND) {
-          issues.add(issue(SerialIssueCode.SERIAL_NOT_FOUND, number, "序列号不存在：" + number, "", number));
+          issues.add(
+              issue(SerialIssueCode.SERIAL_NOT_FOUND, number, "序列号不存在：" + number, "", number));
           continue;
         }
         if (skuId == null) {
-          issues.add(
-              issue(SerialIssueCode.SKU_MISMATCH, number, "新建序列号必须指定 SKU", "", ""));
+          issues.add(issue(SerialIssueCode.SKU_MISMATCH, number, "新建序列号必须指定 SKU", "", ""));
           continue;
         }
         // 新号必然是从「不在任何库位、不在任何批次」走进 INBOUND 的落点。
-        out.add(new SerialPlan(
-            UUID.randomUUID(), number, null, plan.targetStatus(), null,
-            plan.toLocationId(), null, plan.toLotId()));
+        out.add(
+            new SerialPlan(
+                UUID.randomUUID(),
+                number,
+                null,
+                plan.targetStatus(),
+                null,
+                plan.toLocationId(),
+                null,
+                plan.toLotId()));
         continue;
       }
 
@@ -720,7 +762,8 @@ public class InventorySerialService {
       }
 
       // --- 位置校验
-      if (plan.fromLocationId() != null && !Objects.equals(currentLocation, plan.fromLocationId())) {
+      if (plan.fromLocationId() != null
+          && !Objects.equals(currentLocation, plan.fromLocationId())) {
         issues.add(
             issue(
                 SerialIssueCode.LOCATION_MISMATCH,
@@ -777,8 +820,7 @@ public class InventorySerialService {
             issue(
                 SerialIssueCode.TRANSITION_NOT_ALLOWED,
                 number,
-                "序列号 " + number + " 当前为「" + current.label() + "」，不能变更为「"
-                    + target.label() + "」",
+                "序列号 " + number + " 当前为「" + current.label() + "」，不能变更为「" + target.label() + "」",
                 current.name(),
                 target.name()));
         continue;
@@ -812,7 +854,8 @@ public class InventorySerialService {
       }
 
       out.add(
-          new SerialPlan(id, number, current, target, currentLocation, toLocation, currentLot, toLot));
+          new SerialPlan(
+              id, number, current, target, currentLocation, toLocation, currentLot, toLot));
     }
     return out;
   }
@@ -822,11 +865,10 @@ public class InventorySerialService {
   /**
    * 写入一次操作：操作头 + N 条流转 + 档案推进，全部在同一个事务里。
    *
-   * <p>操作头**先写**：流转行有指向它的外键，先有头才有行。
-   * V58 的延迟约束触发器在 COMMIT 时回头数流转行 —— 少写一条，整笔回滚。
+   * <p>操作头**先写**：流转行有指向它的外键，先有头才有行。 V58 的延迟约束触发器在 COMMIT 时回头数流转行 —— 少写一条，整笔回滚。
    *
-   * <p>租户用 {@code current_setting('app.current_tenant')} 在 SQL 里取，
-   * 不从参数传（与 {@code WarehouseReferenceService} 同一写法）：传进来就多一个能被填错的入口。
+   * <p>租户用 {@code current_setting('app.current_tenant')} 在 SQL 里取， 不从参数传（与 {@code
+   * WarehouseReferenceService} 同一写法）：传进来就多一个能被填错的入口。
    */
   private SerialOperationRecord persist(
       Plan plan,
@@ -844,8 +886,7 @@ public class InventorySerialService {
     if (serials.size() != quantity.toBigIntegerExact().intValue()) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "声明 " + quantity.toBigIntegerExact() + " 件，但只有 " + serials.size()
-              + " 件通过校验，本次操作已整体撤销");
+          "声明 " + quantity.toBigIntegerExact() + " 件，但只有 " + serials.size() + " 件通过校验，本次操作已整体撤销");
     }
     if (request.skuId() == null) {
       throw new IllegalArgumentException("序列号操作必须指定 SKU");
@@ -857,9 +898,19 @@ public class InventorySerialService {
           location_id,ref_type,ref_id,declared_quantity,serial_count,actor_id,note,occurred_at)
         values (?,current_setting('app.current_tenant',true)::uuid,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)
         """,
-        operationId, direction.name(), request.skuId(), request.lotId(), plan.toWarehouseId(),
-        plan.toLocationId(), request.refType() == null ? "" : request.refType(), request.refId(),
-        quantity, serials.size(), actorId, request.note() == null ? "" : request.note(), occurredAt);
+        operationId,
+        direction.name(),
+        request.skuId(),
+        request.lotId(),
+        plan.toWarehouseId(),
+        plan.toLocationId(),
+        request.refType() == null ? "" : request.refType(),
+        request.refId(),
+        quantity,
+        serials.size(),
+        actorId,
+        request.note() == null ? "" : request.note(),
+        occurredAt);
 
     for (var s : serials) {
       // 顺序：**档案先落、流转后落**。流转行有指向档案的外键，反过来写会让建档那一次
@@ -871,8 +922,14 @@ public class InventorySerialService {
               current_location_id,note,last_movement_at,created_at,updated_at)
             values (?,current_setting('app.current_tenant',true)::uuid,?,?,?,?,?,?,?::timestamptz, now(), now())
             """,
-            s.id(), s.serialNumber(), request.skuId(), s.toLotId(), s.toStatus().name(),
-            s.toLocationId(), request.note() == null ? "" : request.note(), occurredAt);
+            s.id(),
+            s.serialNumber(),
+            request.skuId(),
+            s.toLotId(),
+            s.toStatus().name(),
+            s.toLocationId(),
+            request.note() == null ? "" : request.note(),
+            occurredAt);
       } else {
         // 乐观推进：把「号现在长什么样」写进 WHERE，并发改动时这里会更新 0 行。
         // 宁可整笔失败也不要覆盖掉别人的写入 —— 并发地把同一个号改两次，
@@ -886,12 +943,17 @@ public class InventorySerialService {
                   and current_location_id is not distinct from ?::uuid
                   and lot_id is not distinct from ?::uuid
                 """,
-                s.toStatus().name(), s.toLocationId(), s.toLotId(), occurredAt, s.id(),
-                s.fromStatus().name(), s.fromLocationId(), s.fromLotId());
+                s.toStatus().name(),
+                s.toLocationId(),
+                s.toLotId(),
+                occurredAt,
+                s.id(),
+                s.fromStatus().name(),
+                s.fromLocationId(),
+                s.fromLotId());
         if (updated == 0) {
           throw new ResponseStatusException(
-              HttpStatus.CONFLICT,
-              "序列号 " + s.serialNumber() + " 在本次操作期间被改动过，请刷新后重试");
+              HttpStatus.CONFLICT, "序列号 " + s.serialNumber() + " 在本次操作期间被改动过，请刷新后重试");
         }
       }
 
@@ -902,11 +964,22 @@ public class InventorySerialService {
             from_lot_id,to_lot_id,ref_type,ref_id,actor_id,note,occurred_at)
           values (?,current_setting('app.current_tenant',true)::uuid,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)
           """,
-          UUID.randomUUID(), s.id(), operationId, direction.kind().name(), s.serialNumber(),
+          UUID.randomUUID(),
+          s.id(),
+          operationId,
+          direction.kind().name(),
+          s.serialNumber(),
           s.fromStatus() == null ? SerialStatus.IN_STOCK.name() : s.fromStatus().name(),
-          s.toStatus().name(), s.fromLocationId(), s.toLocationId(), s.fromLotId(), s.toLotId(),
-          request.refType() == null ? "" : request.refType(), request.refId(), actorId,
-          request.note() == null ? "" : request.note(), occurredAt);
+          s.toStatus().name(),
+          s.fromLocationId(),
+          s.toLocationId(),
+          s.fromLotId(),
+          s.toLotId(),
+          request.refType() == null ? "" : request.refType(),
+          request.refId(),
+          actorId,
+          request.note() == null ? "" : request.note(),
+          occurredAt);
     }
 
     var headers =
@@ -940,12 +1013,19 @@ public class InventorySerialService {
     binds.add((long) pageNo * size);
     var rows =
         sql.fetch(
-            "select " + MOVEMENT_COLUMNS + " from inventory_serial_movement m " + MOVEMENT_FROM
-                + " where " + conditions + " order by m.occurred_at desc, m.id desc limit ? offset ?",
+            "select "
+                + MOVEMENT_COLUMNS
+                + " from inventory_serial_movement m "
+                + MOVEMENT_FROM
+                + " where "
+                + conditions
+                + " order by m.occurred_at desc, m.id desc limit ? offset ?",
             binds.toArray());
     long total =
         count(
-            "select count(*) from inventory_serial_movement m " + MOVEMENT_FROM + " where "
+            "select count(*) from inventory_serial_movement m "
+                + MOVEMENT_FROM
+                + " where "
                 + conditions,
             where);
     return new SerialMovementPage(
@@ -1000,7 +1080,8 @@ public class InventorySerialService {
                 + conditions
                 + " order by o.occurred_at desc, o.id desc limit ? offset ?",
             binds.toArray());
-    long total = count("select count(*) from inventory_serial_operation o where " + conditions, where);
+    long total =
+        count("select count(*) from inventory_serial_operation o where " + conditions, where);
     return new SerialOperationPage(
         rows.stream().map(InventorySerialService::operation).toList(), total, pageNo, size);
   }
@@ -1008,12 +1089,10 @@ public class InventorySerialService {
   // ---------------------------------------------------------------- SQL 片段
 
   /**
-   * 档案查询的 FROM。SKU 编码与批次号固化进档案（跨服务，档案要独立可读），
-   * 库位编码/名称同理 —— 库里那几列改名删掉都不该让历史页面读不出「当时在哪」。
+   * 档案查询的 FROM。SKU 编码与批次号固化进档案（跨服务，档案要独立可读）， 库位编码/名称同理 —— 库里那几列改名删掉都不该让历史页面读不出「当时在哪」。
    *
-   * <p>{@code left join lateral} 现算流转次数：它就是历史条数，
-   * 落一份计数进档案就多了一个能漂移的真相来源。走 {@code (tenant_id, serial_id)} 索引，
-   * 每行一次索引查找，比全表 group by 便宜得多。
+   * <p>{@code left join lateral} 现算流转次数：它就是历史条数， 落一份计数进档案就多了一个能漂移的真相来源。走 {@code (tenant_id,
+   * serial_id)} 索引， 每行一次索引查找，比全表 group by 便宜得多。
    */
   private static final String PROFILE_FROM =
       """
@@ -1081,8 +1160,9 @@ public class InventorySerialService {
       where.add(SerialStatus.parse(q.status()).name());
     }
     if (q.keyword() != null && !q.keyword().isBlank()) {
-      sb.append(" and (s.serial_number ilike ? or coalesce(k.code, '') ilike ?"
-          + " or coalesce(lo.lot_code, '') ilike ?)");
+      sb.append(
+          " and (s.serial_number ilike ? or coalesce(k.code, '') ilike ?"
+              + " or coalesce(lo.lot_code, '') ilike ?)");
       var pattern = "%" + q.keyword().trim() + "%";
       where.add(pattern);
       where.add(pattern);
@@ -1118,8 +1198,9 @@ public class InventorySerialService {
       where.add(q.refId());
     }
     if (q.keyword() != null && !q.keyword().isBlank()) {
-      sb.append(" and (m.serial_number ilike ? or coalesce(tl.code, '') ilike ?"
-          + " or coalesce(fl.code, '') ilike ? or coalesce(tlo.lot_code, '') ilike ?)");
+      sb.append(
+          " and (m.serial_number ilike ? or coalesce(tl.code, '') ilike ?"
+              + " or coalesce(fl.code, '') ilike ? or coalesce(tlo.lot_code, '') ilike ?)");
       var pattern = "%" + q.keyword().trim() + "%";
       where.add(pattern);
       where.add(pattern);
@@ -1223,10 +1304,9 @@ public class InventorySerialService {
   /**
    * 取时间值。
    *
-   * <p>纯文本语句里 jOOQ 拿不到列类型，返回的可能是 {@link OffsetDateTime}、
-   * {@link java.time.Instant} 或 {@link java.sql.Timestamp}，直接
-   * {@code get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛 ClassCastException
-   * （与 7.1.2.1 / 7.1.2.2 同一处理）。
+   * <p>纯文本语句里 jOOQ 拿不到列类型，返回的可能是 {@link OffsetDateTime}、 {@link java.time.Instant} 或 {@link
+   * java.sql.Timestamp}，直接 {@code get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛
+   * ClassCastException （与 7.1.2.1 / 7.1.2.2 同一处理）。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);

@@ -3,7 +3,6 @@ package com.starcon.trade;
 import static com.starcon.trade.FulfillmentRoutingModels.*;
 
 import jakarta.validation.Valid;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,15 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.3.2.2 FBA 与自发货选择。
  *
- * <p>命名空间 {@code /trade/fulfillment/routing}：卷 09 的前端入口是 {@code /orders}，
- * 浏览器只经 /api/trade 代理访问（proxy 白名单里 trade/ 这一支由本车道首次放行）。
+ * <p>命名空间 {@code /trade/fulfillment/routing}：卷 09 的前端入口是 {@code /orders}， 浏览器只经 /api/trade
+ * 代理访问（proxy 白名单里 trade/ 这一支由本车道首次放行）。
  *
  * <p>权限码用 {@code trade.fulfillment.read} / {@code trade.fulfillment.update}：
  * 落决策与登记资质直接改变履约路径与合规判断，不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/fulfillment/routing")
@@ -51,8 +49,7 @@ public class FulfillmentRoutingController {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 渠道库存与 MCF 资质是
-   * 本服务自维护（上游在别的库，不可跨库读），订单行与履约请求尚未交付，
+   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 渠道库存与 MCF 资质是 本服务自维护（上游在别的库，不可跨库读），订单行与履约请求尚未交付，
    * 这些都必须由接口自己说，而不是让调用方从 404 或空数组里猜。
    */
   @GetMapping("/capabilities")
@@ -82,8 +79,7 @@ public class FulfillmentRoutingController {
   /**
    * 登记 / 更新一个店铺在一个平台上的多渠道配送资质。
    *
-   * <p>{@code status=AUTHORIZED} 必须给核验时间与来源出处 ——
-   * 缺货自动切自发货受平台政策约束，这个出处就是合规依据。
+   * <p>{@code status=AUTHORIZED} 必须给核验时间与来源出处 —— 缺货自动切自发货受平台政策约束，这个出处就是合规依据。
    */
   @PostMapping("/mcf-authorizations")
   public McfSaved saveMcf(
@@ -148,7 +144,8 @@ public class FulfillmentRoutingController {
   public StockSnapshotSaved saveStockSnapshot(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody StockSnapshotInput input) {
-    return call(auth, "fulfillment.update", a -> routing.saveStockSnapshot(input, a.membershipId()));
+    return call(
+        auth, "fulfillment.update", a -> routing.saveStockSnapshot(input, a.membershipId()));
   }
 
   // ============================================================ 路径评估与决策
@@ -156,8 +153,7 @@ public class FulfillmentRoutingController {
   /**
    * 路径评估（只读，不落库）：按当前库存、资质与成本参数算出「应该走哪条路」。
    *
-   * <p>{@code platformAvailableQty} 可手工指定，用于「如果平台仓只有 N 件会怎么判」的预演；
-   * 不传则读该 SKU 最新的平台仓库存快照。
+   * <p>{@code platformAvailableQty} 可手工指定，用于「如果平台仓只有 N 件会怎么判」的预演； 不传则读该 SKU 最新的平台仓库存快照。
    */
   @PostMapping("/evaluations")
   public RoutingEvaluation evaluate(
@@ -198,8 +194,16 @@ public class FulfillmentRoutingController {
         a ->
             routing.pageDecisions(
                 new DecisionQuery(
-                    orderRef, platformCode, shopCode, skuRef, chosenPath, reasonCode, status,
-                    keyword, page, size)));
+                    orderRef,
+                    platformCode,
+                    shopCode,
+                    skuRef,
+                    chosenPath,
+                    reasonCode,
+                    status,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /** 决策详情：决策 + 候选快照 + 切换记录 + 事件流。跨租户在 RLS 下查不到 → 404。 */
@@ -216,7 +220,10 @@ public class FulfillmentRoutingController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID decisionId,
       @Valid @RequestBody DecisionStatusInput input) {
-    return call(auth, "fulfillment.update", a -> routing.advanceStatus(decisionId, input, a.membershipId()));
+    return call(
+        auth,
+        "fulfillment.update",
+        a -> routing.advanceStatus(decisionId, input, a.membershipId()));
   }
 
   // ============================================================ 缺货切换记录
@@ -224,8 +231,7 @@ public class FulfillmentRoutingController {
   /**
    * 缺货切换记录列表：这是「为什么这单没走平台仓」的查询入口。
    *
-   * <p>返回的每一行都带触发原因、当时的平台仓可用量与需求量 ——
-   * 事后库存会被补上，只有这份快照能回答「当时缺多少」。
+   * <p>返回的每一行都带触发原因、当时的平台仓可用量与需求量 —— 事后库存会被补上，只有这份快照能回答「当时缺多少」。
    */
   @GetMapping("/switches")
   public SwitchPage switches(
@@ -239,6 +245,8 @@ public class FulfillmentRoutingController {
     return call(
         auth,
         "fulfillment.read",
-        a -> routing.pageSwitches(new SwitchQuery(orderRef, decisionId, platformCode, triggerReason, page, size)));
+        a ->
+            routing.pageSwitches(
+                new SwitchQuery(orderRef, decisionId, platformCode, triggerReason, page, size)));
   }
 }

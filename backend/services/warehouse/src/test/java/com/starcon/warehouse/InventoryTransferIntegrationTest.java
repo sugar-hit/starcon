@@ -24,14 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.5.1.1 调拨单：完整状态机、**在途不丢账**、分次收货、差异如实记录、
- * 乐观锁冲突，以及租户隔离三断言。
+ * 7.5.1.1 调拨单：完整状态机、**在途不丢账**、分次收货、差异如实记录、 乐观锁冲突，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryLotIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryLotIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -58,7 +56,8 @@ class InventoryTransferIntegrationTest {
   static final UUID locSz1 = idFor(a, 9);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-transfer-test-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-transfer-test-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(
@@ -163,22 +162,42 @@ class InventoryTransferIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -196,7 +215,11 @@ class InventoryTransferIntegrationTest {
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        id, a, warehouse, code, "库位 " + code);
+        id,
+        a,
+        warehouse,
+        code,
+        "库位 " + code);
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -219,12 +242,25 @@ class InventoryTransferIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balanceId, a, sku, warehouse, leA, qSellable, new BigDecimal(onHand));
+              balanceId,
+              a,
+              sku,
+              warehouse,
+              leA,
+              qSellable,
+              new BigDecimal(onHand));
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,null,?,?,?,0,now())",
-              UUID.randomUUID(), a, leA, sku, warehouse, location, qSellable, balanceId,
+              UUID.randomUUID(),
+              a,
+              leA,
+              sku,
+              warehouse,
+              location,
+              qSellable,
+              balanceId,
               new BigDecimal(onHand));
           return null;
         });
@@ -233,8 +269,8 @@ class InventoryTransferIntegrationTest {
   /**
    * 与 7.1.1.1 总览 / 7.1.2.2 核对 / 7.2.2.1 可售量 / 7.1.3.1 多仓分布**完全相同**的那条在途口径。
    *
-   * <p>包在 {@code asA} 里：FORCE RLS 下没有绑定 {@code app.current_tenant} 的查询会一行都看不到，
-   * 断言会变成「一切都等于 0」而看起来通过。
+   * <p>包在 {@code asA} 里：FORCE RLS 下没有绑定 {@code app.current_tenant} 的查询会一行都看不到， 断言会变成「一切都等于
+   * 0」而看起来通过。
    */
   BigDecimal sharedInTransit() {
     return asA(() -> rawInTransit());
@@ -253,14 +289,17 @@ class InventoryTransferIntegrationTest {
             sql.fetchOne(
                     "select coalesce(sum(on_hand),0) from inventory_balance"
                         + " where sku_id=? and warehouse_id=?",
-                    sku, warehouse)
+                    sku,
+                    warehouse)
                 .get(0, BigDecimal.class));
   }
 
   List<org.jooq.Record> legsOf(UUID lineId) {
     return asA(
-        () -> sql.fetch("select status,quantity,received_at from inventory_transfer where line_id=?",
-            lineId));
+        () ->
+            sql.fetch(
+                "select status,quantity,received_at from inventory_transfer where line_id=?",
+                lineId));
   }
 
   long countTransactions(String kind) {
@@ -315,7 +354,8 @@ class InventoryTransferIntegrationTest {
     assertThat(onHand(skuA, whSh)).isEqualByComparingTo("100");
     assertThat(onHand(skuA, whSz)).isEqualByComparingTo("0");
 
-    var confirmed = asA(() -> service.confirm(draft.id(), new TransferOrderActionRequest(0L, null)));
+    var confirmed =
+        asA(() -> service.confirm(draft.id(), new TransferOrderActionRequest(0L, null)));
     assertThat(confirmed.status()).isEqualTo("PENDING_SHIPMENT");
 
     var line = lineIdOf(draft.id());
@@ -358,8 +398,11 @@ class InventoryTransferIntegrationTest {
 
     // 守恒式：已发出 = 已实收 + 已确认差异 + 仍在途
     assertThat(received.shippedQuantity())
-        .isEqualByComparingTo(received.receivedQuantity().add(received.discrepancyQuantity())
-            .add(received.inTransitQuantity()));
+        .isEqualByComparingTo(
+            received
+                .receivedQuantity()
+                .add(received.discrepancyQuantity())
+                .add(received.inTransitQuantity()));
 
     var detail = asA(() -> service.detail(draft.id()));
     assertThat(detail.shipments()).hasSize(1);
@@ -379,7 +422,9 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("60"))))));
 
     var first =
@@ -388,7 +433,11 @@ class InventoryTransferIntegrationTest {
                 service.receive(
                     draft.id(),
                     new TransferReceiveRequest(
-                        2L, null, locSz1, null, "第一批",
+                        2L,
+                        null,
+                        locSz1,
+                        null,
+                        "第一批",
                         List.of(new TransferReceiveLineRequest(line, new BigDecimal("25"))))));
     assertThat(first.status()).isEqualTo("PARTIALLY_RECEIVED");
     assertThat(onHand(skuA, whSz)).isEqualByComparingTo("25");
@@ -402,7 +451,11 @@ class InventoryTransferIntegrationTest {
                 service.receive(
                     draft.id(),
                     new TransferReceiveRequest(
-                        3L, null, locSz1, null, "第二批",
+                        3L,
+                        null,
+                        locSz1,
+                        null,
+                        "第二批",
                         List.of(new TransferReceiveLineRequest(line, new BigDecimal("20"))))));
     assertThat(second.inTransitQuantity()).isEqualByComparingTo("15");
     assertThat(sharedInTransit()).isEqualByComparingTo("15");
@@ -413,7 +466,11 @@ class InventoryTransferIntegrationTest {
                 service.receive(
                     draft.id(),
                     new TransferReceiveRequest(
-                        4L, null, locSz1, null, "第三批",
+                        4L,
+                        null,
+                        locSz1,
+                        null,
+                        "第三批",
                         List.of(new TransferReceiveLineRequest(line, new BigDecimal("15"))))));
     assertThat(third.status()).isEqualTo("RECEIVED");
     assertThat(sharedInTransit()).isEqualByComparingTo("0");
@@ -431,11 +488,11 @@ class InventoryTransferIntegrationTest {
     // 三段数量之和仍等于发出量 —— 拆行只是形状变化，账没变
     var legs = legsOf(line);
     assertThat(legs).hasSize(3);
-    assertThat(legs).allSatisfy(l -> assertThat(l.get("status", String.class)).isEqualTo("RECEIVED"));
-    assertThat(legs).allSatisfy(
-        l -> assertThat(l.get("received_at", OffsetDateTime.class)).isNotNull());
-    assertThat(legs).allSatisfy(
-        l -> assertThat(l.get("quantity", BigDecimal.class)).isPositive());
+    assertThat(legs)
+        .allSatisfy(l -> assertThat(l.get("status", String.class)).isEqualTo("RECEIVED"));
+    assertThat(legs)
+        .allSatisfy(l -> assertThat(l.get("received_at", OffsetDateTime.class)).isNotNull());
+    assertThat(legs).allSatisfy(l -> assertThat(l.get("quantity", BigDecimal.class)).isPositive());
     assertThat(
             legs.stream()
                 .map(l -> l.get("quantity", BigDecimal.class))
@@ -443,9 +500,7 @@ class InventoryTransferIntegrationTest {
         .isEqualByComparingTo("60");
     // 一行都不留在途
     assertThat(
-            legs.stream()
-                .filter(l -> l.get("status", String.class).equals("IN_TRANSIT"))
-                .count())
+            legs.stream().filter(l -> l.get("status", String.class).equals("IN_TRANSIT")).count())
         .isZero();
   }
 
@@ -460,14 +515,20 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("60"))))));
     asA(
         () ->
             service.receive(
                 draft.id(),
                 new TransferReceiveRequest(
-                    2L, null, locSz1, null, "先到一批",
+                    2L,
+                    null,
+                    locSz1,
+                    null,
+                    "先到一批",
                     List.of(new TransferReceiveLineRequest(line, new BigDecimal("25"))))));
 
     var legs = legsOf(line);
@@ -485,8 +546,7 @@ class InventoryTransferIntegrationTest {
     assertThat(transit).isEqualByComparingTo("35");
     // 拆行之后，发出的那一趟仍然是 60 —— 发出量从 append-only 分录派生，不受拆行影响
     var detail = asA(() -> service.detail(draft.id()));
-    assertThat(detail.shipments().get(0).lines().get(0).quantity())
-        .isEqualByComparingTo("60");
+    assertThat(detail.shipments().get(0).lines().get(0).quantity()).isEqualByComparingTo("60");
   }
 
   @Test
@@ -500,7 +560,9 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("60"))))));
 
     assertThatThrownBy(
@@ -510,7 +572,11 @@ class InventoryTransferIntegrationTest {
                         service.receive(
                             draft.id(),
                             new TransferReceiveRequest(
-                                2L, null, locSz1, null, "",
+                                2L,
+                                null,
+                                locSz1,
+                                null,
+                                "",
                                 List.of(
                                     new TransferReceiveLineRequest(line, new BigDecimal("61")))))))
         .isInstanceOf(IllegalArgumentException.class)
@@ -530,18 +596,25 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("30"))))));
     asA(
         () ->
             service.receive(
                 draft.id(),
                 new TransferReceiveRequest(
-                    2L, null, locSz1, null, "",
+                    2L,
+                    null,
+                    locSz1,
+                    null,
+                    "",
                     List.of(new TransferReceiveLineRequest(line, new BigDecimal("20"))))));
 
     // 差异原因必填：没给就不许结案，否则短少的货会被无声抹掉
-    assertThatThrownBy(() -> asA(() -> service.close(draft.id(), new TransferCloseRequest(3L, null, null))))
+    assertThatThrownBy(
+            () -> asA(() -> service.close(draft.id(), new TransferCloseRequest(3L, null, null))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须给出差异原因");
 
@@ -557,13 +630,18 @@ class InventoryTransferIntegrationTest {
 
     var detail = asA(() -> service.detail(draft.id()));
     var shortage =
-        detail.receipts().stream().filter(r -> r.kind().equals("SHORTAGE")).findFirst().orElseThrow();
+        detail.receipts().stream()
+            .filter(r -> r.kind().equals("SHORTAGE"))
+            .findFirst()
+            .orElseThrow();
     assertThat(shortage.lines().get(0).quantity()).isEqualByComparingTo("10");
     assertThat(shortage.reason()).isEqualTo("LOST");
     // 守恒式仍然成立：30 = 20 + 10 + 0
     assertThat(detail.order().shippedQuantity())
         .isEqualByComparingTo(
-            detail.order().receivedQuantity()
+            detail
+                .order()
+                .receivedQuantity()
                 .add(detail.order().discrepancyQuantity())
                 .add(detail.order().inTransitQuantity()));
   }
@@ -585,13 +663,13 @@ class InventoryTransferIntegrationTest {
                         service.ship(
                             draft.id(),
                             new TransferShipRequest(
-                                0L, null, "",
-                                List.of(
-                                    new TransferShipLineRequest(line, new BigDecimal("60")))))))
+                                0L,
+                                null,
+                                "",
+                                List.of(new TransferShipLineRequest(line, new BigDecimal("60")))))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
 
     // 缺 expectedVersion 也要拒绝（不能当成「不校验」）
     assertThatThrownBy(
@@ -601,9 +679,10 @@ class InventoryTransferIntegrationTest {
                         service.ship(
                             draft.id(),
                             new TransferShipRequest(
-                                null, null, "",
-                                List.of(
-                                    new TransferShipLineRequest(line, new BigDecimal("60")))))))
+                                null,
+                                null,
+                                "",
+                                List.of(new TransferShipLineRequest(line, new BigDecimal("60")))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("expectedVersion");
 
@@ -618,7 +697,9 @@ class InventoryTransferIntegrationTest {
                 service.ship(
                     draft.id(),
                     new TransferShipRequest(
-                        1L, null, "",
+                        1L,
+                        null,
+                        "",
                         List.of(new TransferShipLineRequest(line, new BigDecimal("60"))))));
     assertThat(shipped.version()).isEqualTo(2);
     // 再用同一个旧版本发货 → 409
@@ -629,9 +710,10 @@ class InventoryTransferIntegrationTest {
                         service.ship(
                             draft.id(),
                             new TransferShipRequest(
-                                1L, null, "",
-                                List.of(
-                                    new TransferShipLineRequest(line, new BigDecimal("1")))))))
+                                1L,
+                                null,
+                                "",
+                                List.of(new TransferShipLineRequest(line, new BigDecimal("1")))))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -648,9 +730,10 @@ class InventoryTransferIntegrationTest {
                         service.ship(
                             draft.id(),
                             new TransferShipRequest(
-                                1L, null, "",
-                                List.of(
-                                    new TransferShipLineRequest(line, new BigDecimal("60")))))))
+                                1L,
+                                null,
+                                "",
+                                List.of(new TransferShipLineRequest(line, new BigDecimal("60")))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("可用量不足");
     assertThat(onHand(skuA, whSh)).isEqualByComparingTo("30");
@@ -671,14 +754,15 @@ class InventoryTransferIntegrationTest {
                         service.ship(
                             draft.id(),
                             new TransferShipRequest(
-                                0L, null, "",
+                                0L,
+                                null,
+                                "",
                                 List.of(
                                     new TransferShipLineRequest(
                                         lineIdOf(draft.id()), new BigDecimal("60")))))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
     // 草稿不能收货
     assertThatThrownBy(
             () ->
@@ -687,7 +771,11 @@ class InventoryTransferIntegrationTest {
                         service.receive(
                             draft.id(),
                             new TransferReceiveRequest(
-                                0L, null, locSz1, null, "",
+                                0L,
+                                null,
+                                locSz1,
+                                null,
+                                "",
                                 List.of(
                                     new TransferReceiveLineRequest(
                                         lineIdOf(draft.id()), new BigDecimal("10")))))))
@@ -699,7 +787,11 @@ class InventoryTransferIntegrationTest {
                 service.update(
                     draft.id(),
                     new TransferOrderUpdateRequest(
-                        0L, null, null, "改成补货", "",
+                        0L,
+                        null,
+                        null,
+                        "改成补货",
+                        "",
                         List.of(
                             new TransferOrderLineRequest(skuA, qSellable, new BigDecimal("80"))))));
     assertThat(edited.requestedQuantity()).isEqualByComparingTo("80");
@@ -716,14 +808,20 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("20"))))));
     asA(
         () ->
             service.receive(
                 draft.id(),
                 new TransferReceiveRequest(
-                    2L, null, locSz1, null, "",
+                    2L,
+                    null,
+                    locSz1,
+                    null,
+                    "",
                     List.of(new TransferReceiveLineRequest(line, new BigDecimal("20"))))));
     assertThatThrownBy(
             () ->
@@ -732,7 +830,11 @@ class InventoryTransferIntegrationTest {
                         service.receive(
                             draft.id(),
                             new TransferReceiveRequest(
-                                3L, null, locSz1, null, "",
+                                3L,
+                                null,
+                                locSz1,
+                                null,
+                                "",
                                 List.of(
                                     new TransferReceiveLineRequest(line, new BigDecimal("1")))))))
         .isInstanceOf(ResponseStatusException.class);
@@ -751,14 +853,20 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("30"))))));
     asA(
         () ->
             service.receive(
                 draft.id(),
                 new TransferReceiveRequest(
-                    2L, null, locSz1, null, "",
+                    2L,
+                    null,
+                    locSz1,
+                    null,
+                    "",
                     List.of(new TransferReceiveLineRequest(line, new BigDecimal("30"))))));
 
     assertThat(entryDelta("TRANSFER_OUT")).isEqualByComparingTo("-30");
@@ -779,7 +887,9 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 draft.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(new TransferShipLineRequest(line, new BigDecimal("30"))))));
 
     // 7.1.3.1 多仓分布刻意只按 kind='SHIPMENT' 算周转天数的出库速度，
@@ -802,25 +912,29 @@ class InventoryTransferIntegrationTest {
                 service.create(
                     a,
                     new TransferOrderCreateRequest(
-                        whSh, whSz, leA, shipAt, arriveAt, "补货", "",
+                        whSh,
+                        whSz,
+                        leA,
+                        shipAt,
+                        arriveAt,
+                        "补货",
+                        "",
                         List.of(
                             new TransferOrderLineRequest(skuA, qSellable, new BigDecimal("10"))))));
     var readBack =
-        asA(
-                () ->
-                    sql.fetchOne(
-                            "select expected_ship_at,expected_arrive_at from transfer_order"
-                                + " where id=?",
-                            order.id())
-                        .get("expected_ship_at", OffsetDateTime.class))
+        asA(() ->
+                sql.fetchOne(
+                        "select expected_ship_at,expected_arrive_at from transfer_order"
+                            + " where id=?",
+                        order.id())
+                    .get("expected_ship_at", OffsetDateTime.class))
             .toInstant();
     assertThat(readBack).isEqualTo(shipAt.toInstant());
     // 走 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s，这里断言偏移本身
     var offset =
         asA(
             () ->
-                sql.fetchOne(
-                        "select expected_ship_at from transfer_order where id=?", order.id())
+                sql.fetchOne("select expected_ship_at from transfer_order where id=?", order.id())
                     .get("expected_ship_at", OffsetDateTime.class)
                     .getOffset()
                     .getTotalSeconds());
@@ -837,7 +951,13 @@ class InventoryTransferIntegrationTest {
                         service.create(
                             a,
                             new TransferOrderCreateRequest(
-                                whSh, whSz, leA, arriveAt, shipAt, "", "",
+                                whSh,
+                                whSz,
+                                leA,
+                                arriveAt,
+                                shipAt,
+                                "",
+                                "",
                                 List.of(
                                     new TransferOrderLineRequest(
                                         skuA, qSellable, new BigDecimal("10")))))))
@@ -854,7 +974,8 @@ class InventoryTransferIntegrationTest {
     asA(() -> service.confirm(first.id(), new TransferOrderActionRequest(0L, null)));
     createOrder("80");
 
-    var page1 = asA(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 1)));
+    var page1 =
+        asA(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 1)));
     assertThat(page1.total()).isEqualTo(2);
     assertThat(page1.rows()).hasSize(1);
     // 合计是全量的：分页只切行，不切数
@@ -867,13 +988,20 @@ class InventoryTransferIntegrationTest {
     assertThat(page1.warehouseOptions()).hasSize(2);
 
     var byStatus =
-        asA(() -> service.page(new TransferOrderQuery(null, null, null, List.of("DRAFT"), null, null, 0, 50)));
+        asA(
+            () ->
+                service.page(
+                    new TransferOrderQuery(null, null, null, List.of("DRAFT"), null, null, 0, 50)));
     assertThat(byStatus.total()).isEqualTo(1);
     // DRAFT 那一行是第二张单（第一张已被确认成待发），不是被确认过的那张
     assertThat(byStatus.rows().get(0).orderCode()).isNotEqualTo(first.orderCode());
     assertThat(byStatus.summary().draftCount()).isEqualTo(1);
     var byPending =
-        asA(() -> service.page(new TransferOrderQuery(null, null, null, List.of("PENDING_SHIPMENT"), null, null, 0, 50)));
+        asA(
+            () ->
+                service.page(
+                    new TransferOrderQuery(
+                        null, null, null, List.of("PENDING_SHIPMENT"), null, null, 0, 50)));
     assertThat(byPending.rows().get(0).orderCode()).isEqualTo(first.orderCode());
 
     var byWarehouse =
@@ -883,7 +1011,9 @@ class InventoryTransferIntegrationTest {
         asA(() -> service.page(new TransferOrderQuery(null, null, skuA, null, null, null, 0, 50)));
     assertThat(bySku.total()).isEqualTo(2);
     var byKeyword =
-        asA(() -> service.page(new TransferOrderQuery(null, null, null, null, "SKU-1", null, 0, 50)));
+        asA(
+            () ->
+                service.page(new TransferOrderQuery(null, null, null, null, "SKU-1", null, 0, 50)));
     assertThat(byKeyword.total()).isEqualTo(2);
 
     // 非法排序键与非法状态当场 400，不静默忽略
@@ -891,14 +1021,16 @@ class InventoryTransferIntegrationTest {
             () ->
                 asA(
                     () ->
-                        service.page(new TransferOrderQuery(null, null, null, null, null, "DROP", 0, 50))))
+                        service.page(
+                            new TransferOrderQuery(null, null, null, null, null, "DROP", 0, 50))))
         .isInstanceOf(IllegalArgumentException.class);
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
                         service.page(
-                            new TransferOrderQuery(null, null, null, List.of("NOPE"), null, null, 0, 50))))
+                            new TransferOrderQuery(
+                                null, null, null, List.of("NOPE"), null, null, 0, 50))))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -906,31 +1038,102 @@ class InventoryTransferIntegrationTest {
   void 建单校验_同仓跨租户空明细都拒绝() {
     seedBalance(skuA, whSh, locSh1, "100");
     assertThatThrownBy(
-            () -> asA(() -> service.create(a, new TransferOrderCreateRequest(whSh, whSh, leA, null, null, "", "", List.of(new TransferOrderLineRequest(skuA, qSellable, BigDecimal.ONE))))))
+            () ->
+                asA(
+                    () ->
+                        service.create(
+                            a,
+                            new TransferOrderCreateRequest(
+                                whSh,
+                                whSh,
+                                leA,
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new TransferOrderLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不能是同一个仓");
     // 目标仓塞另一个租户的仓 → 建不出来
     assertThatThrownBy(
-            () -> asA(() -> service.create(a, new TransferOrderCreateRequest(whSh, idFor(b, 5), leA, null, null, "", "", List.of(new TransferOrderLineRequest(skuA, qSellable, BigDecimal.ONE))))))
+            () ->
+                asA(
+                    () ->
+                        service.create(
+                            a,
+                            new TransferOrderCreateRequest(
+                                whSh,
+                                idFor(b, 5),
+                                leA,
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new TransferOrderLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不属于本租户");
     // 空明细
     assertThatThrownBy(
-            () -> asA(() -> service.create(a, new TransferOrderCreateRequest(whSh, whSz, leA, null, null, "", "", List.of()))))
+            () ->
+                asA(
+                    () ->
+                        service.create(
+                            a,
+                            new TransferOrderCreateRequest(
+                                whSh, whSz, leA, null, null, "", "", List.of()))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("至少要有一条明细");
     // 数量为 0
     assertThatThrownBy(
-            () -> asA(() -> service.create(a, new TransferOrderCreateRequest(whSh, whSz, leA, null, null, "", "", List.of(new TransferOrderLineRequest(skuA, qSellable, BigDecimal.ZERO))))))
+            () ->
+                asA(
+                    () ->
+                        service.create(
+                            a,
+                            new TransferOrderCreateRequest(
+                                whSh,
+                                whSz,
+                                leA,
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new TransferOrderLineRequest(
+                                        skuA, qSellable, BigDecimal.ZERO))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须大于 0");
     // 收货库位必须属于目的仓
     var draft = createOrder("10");
     asA(() -> service.confirm(draft.id(), new TransferOrderActionRequest(0L, null)));
     var line = lineIdOf(draft.id());
-    asA(() -> service.ship(draft.id(), new TransferShipRequest(1L, null, "", List.of(new TransferShipLineRequest(line, new BigDecimal("10"))))));
+    asA(
+        () ->
+            service.ship(
+                draft.id(),
+                new TransferShipRequest(
+                    1L,
+                    null,
+                    "",
+                    List.of(new TransferShipLineRequest(line, new BigDecimal("10"))))));
     assertThatThrownBy(
-            () -> asA(() -> service.receive(draft.id(), new TransferReceiveRequest(2L, null, locSh1, null, "", List.of(new TransferReceiveLineRequest(line, new BigDecimal("10")))))))
+            () ->
+                asA(
+                    () ->
+                        service.receive(
+                            draft.id(),
+                            new TransferReceiveRequest(
+                                2L,
+                                null,
+                                locSh1,
+                                null,
+                                "",
+                                List.of(
+                                    new TransferReceiveLineRequest(line, new BigDecimal("10")))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不属于目标仓");
   }
@@ -947,7 +1150,9 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 orderA.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(
                         new TransferShipLineRequest(
                             lineIdOf(orderA.id()), new BigDecimal("60"))))));
@@ -961,16 +1166,24 @@ class InventoryTransferIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,shipped_at)"
                   + " values(?,?,?,?,?,?,?,?, 'IN_TRANSIT',now())",
-              UUID.randomUUID(), b, idFor(b, 2), idFor(b, 1), idFor(b, 4), idFor(b, 5),
-              idFor(b, 6), new BigDecimal("7"));
+              UUID.randomUUID(),
+              b,
+              idFor(b, 2),
+              idFor(b, 1),
+              idFor(b, 4),
+              idFor(b, 5),
+              idFor(b, 6),
+              new BigDecimal("7"));
           return null;
         });
 
-    var pageA = asA(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
+    var pageA =
+        asA(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
     assertThat(pageA.total()).isEqualTo(1);
     assertThat(pageA.summary().inTransitQuantity()).isEqualByComparingTo("60");
 
-    var pageB = asB(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
+    var pageB =
+        asB(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
     assertThat(pageB.total()).isZero();
     assertThat(pageB.summary().orderCount()).isZero();
 
@@ -978,8 +1191,7 @@ class InventoryTransferIntegrationTest {
     assertThatThrownBy(() -> asB(() -> service.detail(orderA.id())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // 拿 A 的明细行 id 给 B 收货 → 建不出痕迹
     assertThatThrownBy(
             () ->
@@ -988,7 +1200,11 @@ class InventoryTransferIntegrationTest {
                         service.receive(
                             orderA.id(),
                             new TransferReceiveRequest(
-                                0L, null, locSz1, null, "",
+                                0L,
+                                null,
+                                locSz1,
+                                null,
+                                "",
                                 List.of(
                                     new TransferReceiveLineRequest(
                                         lineIdOf(orderA.id()), new BigDecimal("1")))))))
@@ -1001,31 +1217,35 @@ class InventoryTransferIntegrationTest {
     var orderA = createOrder("60");
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的（这里是空）
-    http.perform(get("/warehouse/inventory/transfers")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/transfers")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0))
         .andExpect(jsonPath("$.summary.orderCount").value(0));
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/transfers")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/transfers")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].orderCode").value(orderA.orderCode()));
     // 详情端点同样不受伪造头影响
-    http.perform(get("/warehouse/inventory/transfers/" + orderA.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/transfers/" + orderA.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 未认证 401
     http.perform(get("/warehouse/inventory/transfers")).andExpect(status().isUnauthorized());
     // 写端点要 update 权限：只有 read 的角色不能建单
-    http.perform(post("/warehouse/inventory/transfers")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"fromWarehouseId\":\"" + whSh + "\"}"))
+    http.perform(
+            post("/warehouse/inventory/transfers")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"fromWarehouseId\":\"" + whSh + "\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -1039,7 +1259,9 @@ class InventoryTransferIntegrationTest {
             service.ship(
                 orderA.id(),
                 new TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(
                         new TransferShipLineRequest(
                             lineIdOf(orderA.id()), new BigDecimal("60"))))));
@@ -1051,8 +1273,14 @@ class InventoryTransferIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,shipped_at)"
                   + " values(?,?,?,?,?,?,?,?, 'IN_TRANSIT',now())",
-              UUID.randomUUID(), b, idFor(b, 2), idFor(b, 1), idFor(b, 4), idFor(b, 5),
-              idFor(b, 6), new BigDecimal("7"));
+              UUID.randomUUID(),
+              b,
+              idFor(b, 2),
+              idFor(b, 1),
+              idFor(b, 4),
+              idFor(b, 5),
+              idFor(b, 6),
+              new BigDecimal("7"));
           return null;
         });
 
@@ -1061,9 +1289,17 @@ class InventoryTransferIntegrationTest {
     // A 有 60 件在途（来自它自己的调拨单），B 有 7 件在途（裸夹具，没有调拨单）——
     // 两个数既不能互相污染，也不能因为求和口径不同就各说各话。
     for (int i = 0; i < 20; i++) {
-      var pa = asA(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
-      var pb = asB(() -> service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
-      assertThat(pa.rows()).extracting(TransferOrderRow::orderCode).containsExactly(orderA.orderCode());
+      var pa =
+          asA(
+              () ->
+                  service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
+      var pb =
+          asB(
+              () ->
+                  service.page(new TransferOrderQuery(null, null, null, null, null, null, 0, 50)));
+      assertThat(pa.rows())
+          .extracting(TransferOrderRow::orderCode)
+          .containsExactly(orderA.orderCode());
       assertThat(pb.rows()).isEmpty();
       assertThat(pa.summary().inTransitQuantity()).isEqualByComparingTo("60");
       assertThat(pb.summary().inTransitQuantity()).isEqualByComparingTo("0");
@@ -1108,15 +1344,25 @@ class InventoryTransferIntegrationTest {
   void 端点_完整流转与响应形状() throws Exception {
     seedBalance(skuA, whSh, locSh1, "100");
     var created =
-        http.perform(post("/warehouse/inventory/transfers")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content(
-                    "{\"fromWarehouseId\":\"" + whSh + "\",\"toWarehouseId\":\"" + whSz + "\","
-                        + "\"legalEntityId\":\"" + leA + "\",\"reason\":\"补深圳仓\","
-                        + "\"expectedShipAt\":\"2026-10-20T09:30:00+08:00\","
-                        + "\"lines\":[{\"skuId\":\"" + skuA + "\",\"qualityStatusId\":\""
-                        + qSellable + "\",\"quantity\":60}]}"))
+        http.perform(
+                post("/warehouse/inventory/transfers")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"fromWarehouseId\":\""
+                            + whSh
+                            + "\",\"toWarehouseId\":\""
+                            + whSz
+                            + "\","
+                            + "\"legalEntityId\":\""
+                            + leA
+                            + "\",\"reason\":\"补深圳仓\","
+                            + "\"expectedShipAt\":\"2026-10-20T09:30:00+08:00\","
+                            + "\"lines\":[{\"skuId\":\""
+                            + skuA
+                            + "\",\"qualityStatusId\":\""
+                            + qSellable
+                            + "\",\"quantity\":60}]}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("DRAFT"))
             .andExpect(jsonPath("$.version").value(0))
@@ -1128,8 +1374,9 @@ class InventoryTransferIntegrationTest {
 
     var lineId =
         com.jayway.jsonpath.JsonPath.read(
-            http.perform(get("/warehouse/inventory/transfers/" + orderId)
-                    .header("Authorization", "Bearer tenant-a"))
+            http.perform(
+                    get("/warehouse/inventory/transfers/" + orderId)
+                        .header("Authorization", "Bearer tenant-a"))
                 .andExpect(status().isOk())
                 // 守恒口径说明必须随响应返回，界面上要显示
                 .andExpect(jsonPath("$.conservationNote").exists())
@@ -1139,60 +1386,75 @@ class InventoryTransferIntegrationTest {
                 .getContentAsString(),
             "$.lines[0].id");
 
-    http.perform(post("/warehouse/inventory/transfers/" + orderId + "/confirm")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"expectedVersion\":0}"))
+    http.perform(
+            post("/warehouse/inventory/transfers/" + orderId + "/confirm")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"expectedVersion\":0}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("PENDING_SHIPMENT"));
 
     // 版本错 → 409
-    http.perform(post("/warehouse/inventory/transfers/" + orderId + "/ship")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"expectedVersion\":0,\"lines\":[{\"lineId\":\"" + lineId + "\",\"quantity\":60}]}"))
+    http.perform(
+            post("/warehouse/inventory/transfers/" + orderId + "/ship")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"expectedVersion\":0,\"lines\":[{\"lineId\":\""
+                        + lineId
+                        + "\",\"quantity\":60}]}"))
         .andExpect(status().isConflict());
 
-    http.perform(post("/warehouse/inventory/transfers/" + orderId + "/ship")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"expectedVersion\":1,\"lines\":[{\"lineId\":\"" + lineId + "\",\"quantity\":60}]}"))
+    http.perform(
+            post("/warehouse/inventory/transfers/" + orderId + "/ship")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"expectedVersion\":1,\"lines\":[{\"lineId\":\""
+                        + lineId
+                        + "\",\"quantity\":60}]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("IN_TRANSIT"))
         .andExpect(jsonPath("$.inTransitQuantity").value(60));
 
-    http.perform(post("/warehouse/inventory/transfers/" + orderId + "/receive")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"expectedVersion\":2,\"locationId\":\"" + locSz1 + "\","
-                    + "\"lines\":[{\"lineId\":\"" + lineId + "\",\"quantity\":60}]}"))
+    http.perform(
+            post("/warehouse/inventory/transfers/" + orderId + "/receive")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"expectedVersion\":2,\"locationId\":\""
+                        + locSz1
+                        + "\","
+                        + "\"lines\":[{\"lineId\":\""
+                        + lineId
+                        + "\",\"quantity\":60}]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("RECEIVED"))
         .andExpect(jsonPath("$.inTransitQuantity").value(0));
 
     // 分录下钻复用台账，带归属口径
-    http.perform(get("/warehouse/inventory/transfers/" + orderId + "/movements")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/transfers/" + orderId + "/movements")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.attribution").value("ORDER_GRANULAR"))
         .andExpect(jsonPath("$.movements.total").value(2));
 
     // 非法排序 400
-    http.perform(get("/warehouse/inventory/transfers")
-            .header("Authorization", "Bearer tenant-a")
-            .param("sort", "DROP_TABLE"))
+    http.perform(
+            get("/warehouse/inventory/transfers")
+                .header("Authorization", "Bearer tenant-a")
+                .param("sort", "DROP_TABLE"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void 端点_未知字段返回400() throws Exception {
-    http.perform(post("/warehouse/inventory/transfers")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"fromWarehouseId\":\"" + whSh + "\",\"nope\":true}"))
+    http.perform(
+            post("/warehouse/inventory/transfers")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"fromWarehouseId\":\"" + whSh + "\",\"nope\":true}"))
         .andExpect(status().isBadRequest());
   }
 

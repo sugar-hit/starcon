@@ -161,21 +161,24 @@ export function ImportWizardWorkspace() {
     void loadTemplates();
   }, [loadTemplates]);
 
-  const loadTemplate = useCallback(async (id: string) => {
-    if (!id) {
-      setTemplate(null);
-      return;
-    }
-    const detail = await fetchTemplate(id);
-    setTemplate(detail);
-    // 默认映射 = 字段键与列头同名的那部分；剩下的由运营在映射步骤里选。
-    const initial: Record<string, string> = {};
-    for (const c of detail.columns) {
-      if (headers.includes(c.header)) initial[c.fieldKey] = c.header;
-      else if (headers.includes(c.fieldKey)) initial[c.fieldKey] = c.fieldKey;
-    }
-    setMapping((prev) => ({ ...initial, ...prev }));
-  }, [headers]);
+  const loadTemplate = useCallback(
+    async (id: string) => {
+      if (!id) {
+        setTemplate(null);
+        return;
+      }
+      const detail = await fetchTemplate(id);
+      setTemplate(detail);
+      // 默认映射 = 字段键与列头同名的那部分；剩下的由运营在映射步骤里选。
+      const initial: Record<string, string> = {};
+      for (const c of detail.columns) {
+        if (headers.includes(c.header)) initial[c.fieldKey] = c.header;
+        else if (headers.includes(c.fieldKey)) initial[c.fieldKey] = c.fieldKey;
+      }
+      setMapping((prev) => ({ ...initial, ...prev }));
+    },
+    [headers],
+  );
 
   useEffect(() => {
     if (!templateId) {
@@ -203,19 +206,22 @@ export function ImportWizardWorkspace() {
   }, [templateId, loadMappings]);
 
   /** 任务详情的所有读都走这里，轮询与手动刷新共用同一条路径。 */
-  const loadJob = useCallback(async (id: string, page = rowPage, outcome = rowOutcome) => {
-    const [detail, rowPage_, errorPage_] = await Promise.all([
-      fetchJob(id),
-      fetchRows(id, outcome || null, page, ROW_PAGE_SIZE),
-      fetchErrors(id, severity || null, showAllErrors ? 0 : errorPage, 50),
-    ]);
-    setJob(detail);
-    // headers 只在上传那一步设置一次：它来自上传回执，之后每次轮询都重置
-    // 会让「文件里有哪几列」在映射步骤上凭空消失。
-    setRows(rowPage_);
-    setErrors(errorPage_);
-    return detail;
-  }, [rowPage, rowOutcome, errorPage, severity, showAllErrors]);
+  const loadJob = useCallback(
+    async (id: string, page = rowPage, outcome = rowOutcome) => {
+      const [detail, rowPage_, errorPage_] = await Promise.all([
+        fetchJob(id),
+        fetchRows(id, outcome || null, page, ROW_PAGE_SIZE),
+        fetchErrors(id, severity || null, showAllErrors ? 0 : errorPage, 50),
+      ]);
+      setJob(detail);
+      // headers 只在上传那一步设置一次：它来自上传回执，之后每次轮询都重置
+      // 会让「文件里有哪几列」在映射步骤上凭空消失。
+      setRows(rowPage_);
+      setErrors(errorPage_);
+      return detail;
+    },
+    [rowPage, rowOutcome, errorPage, severity, showAllErrors],
+  );
 
   /**
    * 轮询：只在任务**还在跑**时开，一到终态立刻停。
@@ -391,13 +397,13 @@ export function ImportWizardWorkspace() {
   return (
     <div className="space-y-4">
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 flex items-start gap-2 rounded-md border px-3 py-2">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>{actionError}</span>
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md border px-3 py-2">
           {notice}
         </div>
       )}
@@ -481,12 +487,12 @@ export function ImportWizardWorkspace() {
           </div>
 
           {loadingTemplates ? (
-            <p className="text-muted-foreground flex items-center gap-2 text-copy-13">
+            <p className="text-muted-foreground text-copy-13 flex items-center gap-2">
               <Loader2 className="size-4 animate-spin" />
               正在读取模板…
             </p>
           ) : templateError ? (
-            <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-copy-13">
+            <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 flex items-start gap-2 rounded-md border px-3 py-2">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <span>{templateError}</span>
             </div>
@@ -521,7 +527,10 @@ export function ImportWizardWorkspace() {
               </div>
               <ul className="border-border divide-border divide-y rounded-md border">
                 {templates.map((t) => (
-                  <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                  <li
+                    key={t.id}
+                    className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
+                  >
                     <span className="flex items-center gap-2">
                       <span className="font-medium">{t.name}</span>
                       <code className="text-muted-foreground text-xs">{t.code}</code>
@@ -529,7 +538,11 @@ export function ImportWizardWorkspace() {
                       {!t.enabled && <Badge tone="warning">已停用</Badge>}
                     </span>
                     <span className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => window.open(templateFileUrl(t.id))}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(templateFileUrl(t.id))}
+                      >
                         <Download className="mr-2 size-4" />
                         下载模板
                       </Button>
@@ -562,7 +575,11 @@ export function ImportWizardWorkspace() {
                 模板共 {template?.columns.length ?? 0} 列，必填{' '}
                 {template?.columns.filter((c) => c.required).length ?? 0} 列。
               </span>
-              <Button variant="secondary" size="sm" onClick={() => window.open(templateFileUrl(templateId))}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => window.open(templateFileUrl(templateId))}
+              >
                 <Download className="mr-2 size-4" />
                 下载这份模板的 CSV
               </Button>
@@ -576,8 +593,7 @@ export function ImportWizardWorkspace() {
               选择 CSV 文件（{importMode ? modeLabel(importMode) : ''}模式）
             </span>
             <span className="text-muted-foreground text-xs">
-              上传后只会解析并逐行存下**原始文本**，一个商品都还没写进库 ——
-              真正落库要等第 5 步。
+              上传后只会解析并逐行存下**原始文本**，一个商品都还没写进库 —— 真正落库要等第 5 步。
             </span>
             <input
               type="file"
@@ -606,9 +622,7 @@ export function ImportWizardWorkspace() {
                 文件列头在上传时已按字段名自动匹配了一部分，下面的下拉就是确认或改选。
               </p>
             ) : (
-              <p className="text-muted-foreground text-copy-13">
-                文件里的列：{headers.join('、')}
-              </p>
+              <p className="text-muted-foreground text-copy-13">文件里的列：{headers.join('、')}</p>
             )}
             <ul className="border-border divide-border divide-y rounded-md border">
               {(template?.columns ?? []).map((c) => (
@@ -658,7 +672,7 @@ export function ImportWizardWorkspace() {
               </p>
             )}
             {missingRequired.length > 0 && (
-              <p className="text-destructive flex items-start gap-2 text-copy-13">
+              <p className="text-destructive text-copy-13 flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <span>还有必填列没对应到文件列：{missingRequired.join('、')}</span>
               </p>
@@ -669,7 +683,10 @@ export function ImportWizardWorkspace() {
                 <span className="text-copy-13 font-medium">已保存的映射（可直接套用）</span>
                 <div className="flex flex-wrap gap-2">
                   {mappings.map((m) => (
-                    <span key={m.id} className="border-border flex items-center gap-1 rounded border px-2 py-1 text-xs">
+                    <span
+                      key={m.id}
+                      className="border-border flex items-center gap-1 rounded border px-2 py-1 text-xs"
+                    >
                       <button className="underline" onClick={() => void applySavedMapping(m)}>
                         {m.name}
                       </button>
@@ -732,7 +749,12 @@ export function ImportWizardWorkspace() {
                 </Button>
               )}
               {writable && (job.status === 'PENDING' || job.status === 'PREVALIDATED') && (
-                <Button size="sm" variant="outline" onClick={() => void runCancel()} disabled={busy}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void runCancel()}
+                  disabled={busy}
+                >
                   <Ban className="mr-2 size-4" />
                   取消任务
                 </Button>
@@ -768,7 +790,7 @@ export function ImportWizardWorkspace() {
                 {job.fileName}（{job.fileFormat}）· {progressText(job)}
               </span>
               {busyRunning && (
-                <span className="text-muted-foreground flex items-center gap-1 text-copy-13">
+                <span className="text-muted-foreground text-copy-13 flex items-center gap-1">
                   <Loader2 className="size-3.5 animate-spin" />
                   后台运行中
                 </span>
@@ -776,7 +798,7 @@ export function ImportWizardWorkspace() {
             </div>
 
             {busyRunning && (
-              <div className="h-2 w-full overflow-hidden rounded bg-muted">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded">
                 <div
                   className="bg-primary h-full transition-[width]"
                   style={{ width: `${progressPercent(job)}%` }}
@@ -785,13 +807,13 @@ export function ImportWizardWorkspace() {
             )}
 
             {job.error && (
-              <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-copy-13">
+              <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md border px-3 py-2">
                 {job.error}
               </div>
             )}
 
             {/* 红线：3.8.1.2 蓝图「校验失败的行不落库，不允许尽力导入产生半截数据」 */}
-            <p className="border-border bg-muted/40 rounded-md border px-3 py-2 text-copy-13">
+            <p className="border-border bg-muted/40 text-copy-13 rounded-md border px-3 py-2">
               {executeHint(job)}
             </p>
 
@@ -801,7 +823,8 @@ export function ImportWizardWorkspace() {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-copy-14 font-medium">
-                  错误明细（必须修正 {errors?.errorCount ?? 0} · 可跳过 {errors?.warningCount ?? 0}）
+                  错误明细（必须修正 {errors?.errorCount ?? 0} · 可跳过 {errors?.warningCount ?? 0}
+                  ）
                 </span>
                 <div className="flex items-center gap-2">
                   <select
@@ -840,7 +863,10 @@ export function ImportWizardWorkspace() {
                         </div>
                         <ul className="space-y-0.5">
                           {g.items.map((it, i) => (
-                            <li key={`${it.id}-${i}`} className="flex flex-wrap items-baseline gap-2 text-xs">
+                            <li
+                              key={`${it.id}-${i}`}
+                              className="flex flex-wrap items-baseline gap-2 text-xs"
+                            >
                               <Badge tone={it.severity === 'ERROR' ? 'warning' : 'neutral'}>
                                 {it.severity === 'ERROR' ? '必须修正' : '可跳过'}
                               </Badge>
@@ -895,7 +921,10 @@ export function ImportWizardWorkspace() {
                 <>
                   <ul className="border-border divide-border divide-y rounded-md border">
                     {rows.items.map((r) => (
-                      <li key={r.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-copy-13">
+                      <li
+                        key={r.id}
+                        className="text-copy-13 flex flex-wrap items-center gap-2 px-3 py-2"
+                      >
                         <span className="w-20 font-medium">第 {r.rowNo} 行</span>
                         <Badge tone={outcomeTone(r.outcome)}>{outcomeLabel(r.outcome)}</Badge>
                         {r.errorCount > 0 && (
@@ -1062,7 +1091,7 @@ function JobHistory({ onOpen }: { onOpen: (id: string) => void }) {
 
   if (loading && !data) {
     return (
-      <p className="text-muted-foreground flex items-center gap-2 px-4 py-6 text-copy-13">
+      <p className="text-muted-foreground text-copy-13 flex items-center gap-2 px-4 py-6">
         <Loader2 className="size-4 animate-spin" />
         正在读取导入任务…
       </p>
@@ -1117,7 +1146,7 @@ function JobHistory({ onOpen }: { onOpen: (id: string) => void }) {
           ))}
         </select>
       </div>
-      <ul className="border-border divide-y divide-border">
+      <ul className="border-border divide-border divide-y">
         {data.items.map((j) => (
           <li key={j.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
             <span className="flex flex-wrap items-center gap-2">
@@ -1125,7 +1154,8 @@ function JobHistory({ onOpen }: { onOpen: (id: string) => void }) {
               <Badge tone="neutral">{entityLabel(j.targetEntity)}</Badge>
               <Badge tone={statusTone(j.status)}>{statusLabel(j.status)}</Badge>
               <span className="text-muted-foreground text-xs">
-                {j.rowCount} 行 · 成功 {j.appliedCount} · 跳过 {j.skippedCount} · 失败 {j.failedCount}
+                {j.rowCount} 行 · 成功 {j.appliedCount} · 跳过 {j.skippedCount} · 失败{' '}
+                {j.failedCount}
               </span>
             </span>
             <Button size="sm" variant="outline" onClick={() => onOpen(j.id)}>

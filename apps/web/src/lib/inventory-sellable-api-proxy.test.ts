@@ -45,22 +45,19 @@ function warehousePattern(): RegExp {
 const allows = (path: string) => warehousePattern().test(path);
 
 describe('7.1.1.3 正向：三个真实形状必须放行', () => {
-  it.each([
-    'inventory/sellable',
-    'inventory/sellable/skus',
-    'inventory/sellable/capabilities',
-  ])('放行 %s', (path) => {
-    expect(allows(path)).toBe(true);
-  });
+  it.each(['inventory/sellable', 'inventory/sellable/skus', 'inventory/sellable/capabilities'])(
+    '放行 %s',
+    (path) => {
+      expect(allows(path)).toBe(true);
+    },
+  );
 
   it('三个形状与前端模型实际发出的路径一致（反向从模型源码抽取）', () => {
     const source = readFileSync(
       join(__dirname, '../components/inventory/inventory-sellable-model.ts'),
       'utf8',
     );
-    const paths = [
-      ...source.matchAll(/['`](warehouse\/inventory\/sellable.*?)['`]/g),
-    ]
+    const paths = [...source.matchAll(/['`](warehouse\/inventory\/sellable.*?)['`]/g)]
       .map((m) => m[1])
       .filter((p): p is string => typeof p === 'string')
       // 模板串里 `${queryString(params)}` 之后是运行时拼上的 query，它不参与白名单判别

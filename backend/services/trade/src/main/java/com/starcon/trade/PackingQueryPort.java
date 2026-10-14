@@ -16,30 +16,24 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 读取上游 8.3.3.2 打包与称重的**跨服务端口**。
  *
- * <p>蓝图 9.4.1.1 的输入句第一个词是「已完成打包的出库单」，而打包结果
- * （{@code packing_order} / {@code parcel} / {@code parcel_item}）在
- * <b>warehouse 服务的库</b>里。AGENTS.md 模块边界纪律禁止跨服务 SQL / FK /
- * 共享视图，所以本端口<b>只经 warehouse 的授权 HTTP 只读端点</b>读，
- * 不直连对方库、不建跨库视图、不建跨库外键。
+ * <p>蓝图 9.4.1.1 的输入句第一个词是「已完成打包的出库单」，而打包结果 （{@code packing_order} / {@code parcel} / {@code
+ * parcel_item}）在 <b>warehouse 服务的库</b>里。AGENTS.md 模块边界纪律禁止跨服务 SQL / FK / 共享视图，所以本端口<b>只经 warehouse
+ * 的授权 HTTP 只读端点</b>读， 不直连对方库、不建跨库视图、不建跨库外键。
  *
- * <p>用法与 6.4.1.1 的 {@code BomVersionPort}（读 catalog）逐字同构 ——
- * 跨服务读一律走一个 port 类，取不到就<b>显式失败</b>，绝不返回空集合冒充
- * 「仓库没有已打包的出库单」：那会让看板显示 0 单，而真实情况是仓库不可达，
- * 现场照着空看板以为货已经发完。
+ * <p>用法与 6.4.1.1 的 {@code BomVersionPort}（读 catalog）逐字同构 —— 跨服务读一律走一个 port
+ * 类，取不到就<b>显式失败</b>，绝不返回空集合冒充 「仓库没有已打包的出库单」：那会让看板显示 0 单，而真实情况是仓库不可达， 现场照着空看板以为货已经发完。
  *
  * <p>用的是 8.3.3.2（warehouse V121）已交付的三个只读形状：
  *
  * <ul>
- *   <li>{@code GET /warehouse/packing-orders?status=COMPLETED&page=&size=} ——
- *       已完成打包的打包单（真分页 / 真筛选 / 带汇总）；
+ *   <li>{@code GET /warehouse/packing-orders?status=COMPLETED&page=&size=} —— 已完成打包的打包单（真分页 / 真筛选 /
+ *       带汇总）；
  *   <li>{@code GET /warehouse/packing-orders/{id}} —— 单头 + 包裹 + 明细；
  *   <li>{@code GET /warehouse/packing-orders/capabilities} —— 上游能力声明。
  * </ul>
  *
- * <p>租户<b>不</b>由本端口传递租户号：转发的是<b>调用方自己的</b>
- * {@code Authorization} bearer，warehouse 侧仍按已认证成员关系解析租户并强制 RLS。
- * 也就是说租户隔离是<b>两道</b>（trade 侧 RLS + warehouse 侧 RLS），
- * 而不是「本服务替对方决定租户」。
+ * <p>租户<b>不</b>由本端口传递租户号：转发的是<b>调用方自己的</b> {@code Authorization} bearer，warehouse 侧仍按已认证成员关系解析租户并强制
+ * RLS。 也就是说租户隔离是<b>两道</b>（trade 侧 RLS + warehouse 侧 RLS）， 而不是「本服务替对方决定租户」。
  */
 @Service
 public class PackingQueryPort {
@@ -47,8 +41,7 @@ public class PackingQueryPort {
   /**
    * 8.3.3.2 的打包单行（字段名逐字对齐 warehouse 的 PackingRow 契约）。
    *
-   * <p>刻意只声明本模块真正用到的字段：读得越少，跨服务契约越不容易在对方
-   * 加字段时把本模块撑爆。
+   * <p>刻意只声明本模块真正用到的字段：读得越少，跨服务契约越不容易在对方 加字段时把本模块撑爆。
    */
   record PackingOrderView(
       UUID id,
@@ -93,20 +86,20 @@ public class PackingQueryPort {
   /**
    * 拉一页<b>已完成打包</b>的打包单。
    *
-   * <p>用 {@code status=COMPLETED} 而不是拉全量再在本地筛：已完成是蓝图输入句的
-   * 原词（「已完成打包的出库单」），而 8.3.3.2 的状态机里 COMPLETED 是唯一把
-   * 出库单推进到「待发货」的那一步（STARTED / FAILED / CANCELLED 都不该出现在
-   * 待发货看板上）。
+   * <p>用 {@code status=COMPLETED} 而不是拉全量再在本地筛：已完成是蓝图输入句的 原词（「已完成打包的出库单」），而 8.3.3.2 的状态机里 COMPLETED
+   * 是唯一把 出库单推进到「待发货」的那一步（STARTED / FAILED / CANCELLED 都不该出现在 待发货看板上）。
    */
-  public PackingPage completedPage(
-      UUID warehouseId, int page, int size, String bearer) {
+  public PackingPage completedPage(UUID warehouseId, int page, int size, String bearer) {
     try {
       PackingPage result =
           client
               .get()
               .uri(
                   uriBuilder -> {
-                    var b = uriBuilder.path("/warehouse/packing-orders").queryParam("status", "COMPLETED");
+                    var b =
+                        uriBuilder
+                            .path("/warehouse/packing-orders")
+                            .queryParam("status", "COMPLETED");
                     if (warehouseId != null) b.queryParam("warehouseId", warehouseId);
                     return b.queryParam("page", page).queryParam("size", size).build();
                   })
@@ -122,8 +115,7 @@ public class PackingQueryPort {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "登录已失效，请重新登录");
       }
       if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN, "当前身份无权读取仓库的打包结果，待发货清单暂时同步不了");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "当前身份无权读取仓库的打包结果，待发货清单暂时同步不了");
       }
       throw unavailable("仓库服务返回 " + e.getStatusCode().value() + "，待发货清单暂时同步不了");
     } catch (RestClientException e) {
@@ -147,13 +139,11 @@ public class PackingQueryPort {
       return detail;
     } catch (RestClientResponseException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "仓库没有这张打包单：" + packingOrderId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库没有这张打包单：" + packingOrderId);
       }
       if (e.getStatusCode() == HttpStatus.UNAUTHORIZED
           || e.getStatusCode() == HttpStatus.FORBIDDEN) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN, "当前身份无权读取该打包单，待发货清单暂时同步不了");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "当前身份无权读取该打包单，待发货清单暂时同步不了");
       }
       throw unavailable("仓库服务返回 " + e.getStatusCode().value() + "，待发货清单暂时同步不了");
     } catch (RestClientException e) {
@@ -164,8 +154,7 @@ public class PackingQueryPort {
   /**
    * 不可达一律 503，并把「为什么」如实报出。
    *
-   * <p>刻意<b>不</b>返回空列表冒充「没有已打包的出库单」：空清单会被当成
-   * 「今天没有待发货的货」而让现场收工，而真实情况是仓库挂了。
+   * <p>刻意<b>不</b>返回空列表冒充「没有已打包的出库单」：空清单会被当成 「今天没有待发货的货」而让现场收工，而真实情况是仓库挂了。
    */
   private ResponseStatusException unavailable(String reason) {
     return new ResponseStatusException(

@@ -9,7 +9,7 @@ Jackson record responses include every component. Nullable fields are annotated 
   - 结构完全相同 → 两份都活在自己的文件里，桶文件显式指定一份消除 export * 歧义，
     忘了指定就是 TS2308 编译错误，而不是静默覆盖。
 """
-import argparse, json, sys, urllib.request, subprocess
+import argparse, json, sys, urllib.request, subprocess, re
 from pathlib import Path
 
 root=Path(__file__).resolve().parents[2]
@@ -21,6 +21,21 @@ root=Path(__file__).resolve().parents[2]
 SERVICES=[('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084),('trade',8085),('crm',8086)]
 ALLOWLIST=Path(__file__).resolve().parent/'contract-collision-allowlist.json'
 BACKLOG='docs/backlog/2026-10/2026-10-10-contract-flat-overwrite-and-nav-gaps.md'
+
+
+def normalize_operation_ids(spec):
+    """SpringDoc suffixes duplicate method names in discovery order; use stable route IDs."""
+    ids = {}
+    for path, item in sorted(spec.get('paths', {}).items()):
+        for method, operation in item.items():
+            if method not in {'get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'}:
+                continue
+            operation_id = method + '_' + re.sub(r'[^a-zA-Z0-9]+', '_', path).strip('_')
+            if operation_id in ids:
+                raise ValueError(f'Operation ID collision: {ids[operation_id]} and {method} {path}')
+            ids[operation_id] = f'{method} {path}'
+            operation['operationId'] = operation_id
+    return spec
 
 
 def load_specs(spec_dir):
@@ -36,7 +51,7 @@ def load_specs(spec_dir):
         # to a same-origin value. Otherwise the same code generates two different contracts and CI's
         # "no drift" check fails depending on how the spec was fetched.
         spec['servers']=[{'url':'/','description':'Same-origin service base'}]
-        specs[service]=spec
+        specs[service]=normalize_operation_ids(spec)
     return specs
 
 

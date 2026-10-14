@@ -23,36 +23,27 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.2.1.2 预占分配明细。
  *
- * <p>蓝图：「展示一个预占需求实际分配到了哪些 bucket（哪个仓、哪个货位、哪个批次），以及每个分配的
- * held→终态迁移记录。」输出「分配明细行 + 状态迁移时间线」。
+ * <p>蓝图：「展示一个预占需求实际分配到了哪些 bucket（哪个仓、哪个货位、哪个批次），以及每个分配的 held→终态迁移记录。」输出「分配明细行 + 状态迁移时间线」。
  *
- * <p><b>为什么分配到具体 bucket 是前提</b>（蓝图关系句原文）：只记总量的话，
- * 「这 20 件到底是从哪几个批次出的」「仓储成本摊到哪个 SKU 上」这两个问题都答不出来。
+ * <p><b>为什么分配到具体 bucket 是前提</b>（蓝图关系句原文）：只记总量的话， 「这 20 件到底是从哪几个批次出的」「仓储成本摊到哪个 SKU 上」这两个问题都答不出来。
  * 所以本表的每一行都必须指着一个（仓, 货位, 批次）三元组，没有「分配到某个抽象池子」的写法。
  *
  * <p>七条实现纪律：
  *
  * <ol>
- *   <li><b>汇总不受分页与筛选影响</b>。它回答「这笔预占一共圈了多少」，拿筛选后的数当汇总会让
- *       「切了个筛选怎么总量变了」看起来像数据丢了。
- *   <li><b>bucket 数与分配笔数分开报</b>：同一个 bucket 分两次圈只算一个 bucket。
- *       只报笔数的话，拆单圈货会把「圈了几个地方」虚高一倍。
- *   <li><b>分录的时间线按发生时刻正序</b>，且同刻并列时以 id 收尾 —— 否则同一页两次请求
- *       顺序可能不同（同一毫秒内确实会发生）。
- *   <li><b>时间一律带偏移量</b>：库里是 timestamptz，绑定时写 {@code ?::timestamptz}。
- *       用 {@code Timestamp.valueOf(LocalDateTime)} 会静默偏 −28800s。
+ *   <li><b>汇总不受分页与筛选影响</b>。它回答「这笔预占一共圈了多少」，拿筛选后的数当汇总会让 「切了个筛选怎么总量变了」看起来像数据丢了。
+ *   <li><b>bucket 数与分配笔数分开报</b>：同一个 bucket 分两次圈只算一个 bucket。 只报笔数的话，拆单圈货会把「圈了几个地方」虚高一倍。
+ *   <li><b>分录的时间线按发生时刻正序</b>，且同刻并列时以 id 收尾 —— 否则同一页两次请求 顺序可能不同（同一毫秒内确实会发生）。
+ *   <li><b>时间一律带偏移量</b>：库里是 timestamptz，绑定时写 {@code ?::timestamptz}。 用 {@code
+ *       Timestamp.valueOf(LocalDateTime)} 会静默偏 −28800s。
  *   <li><b>写操作必须显式带上发生时刻</b>（{@code allocatedAt} / {@code occurredAt}）。
- *       跨服务调用方与本服务之间有时钟差，用服务端当前时间会把「什么时候发生的」换成
- *       「本服务什么时候知道的」，而时间线正是批次追溯的凭据。
- *   <li><b>分配状态变，预占状态跟着变</b>：分配全部承诺 → 预占进 COMMITTED；
- *       分配全部消耗且覆盖需求量 → 预占进 CONSUMED。不同步的话预占会一直停在 HELD，
+ *       跨服务调用方与本服务之间有时钟差，用服务端当前时间会把「什么时候发生的」换成 「本服务什么时候知道的」，而时间线正是批次追溯的凭据。
+ *   <li><b>分配状态变，预占状态跟着变</b>：分配全部承诺 → 预占进 COMMITTED； 分配全部消耗且覆盖需求量 → 预占进 CONSUMED。不同步的话预占会一直停在 HELD，
  *       而蓝图 7.2.1.3 的超时清理会把已承诺发货的货误释放，直接造成超卖。
- *   <li><b>释放与过期不是本模块的按钮</b>：属 7.2.1.3，本模块既不提供入口，
- *       也不在能力声明里假装已接入。
+ *   <li><b>释放与过期不是本模块的按钮</b>：属 7.2.1.3，本模块既不提供入口， 也不在能力声明里假装已接入。
  * </ol>
  *
- * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离，
- * 服务层的 {@code tenant_id} 谓词是第二道防线。
+ * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离， 服务层的 {@code tenant_id} 谓词是第二道防线。
  */
 @Service
 public class ReservationAllocationService {
@@ -80,8 +71,7 @@ public class ReservationAllocationService {
           + "不跨服务读写 trade 的表；bucket 的仓 / 货位 / 批次只登记本服务引用登记表里的 id 与快照。";
 
   private static final String TIMEZONE_NOTE =
-      "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，"
-          + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）";
+      "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，" + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）";
 
   private final DSLContext sql;
   private final Clock clock;
@@ -112,7 +102,8 @@ public class ReservationAllocationService {
     String sqlWhere = " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne("select count(*)" + FROM_CLAUSE + sqlWhere, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(*)" + FROM_CLAUSE + sqlWhere, binds.toArray())
+            .get(0, Long.class);
 
     List<ReservationAllocationRow> rows =
         sql.fetch(
@@ -134,9 +125,8 @@ public class ReservationAllocationService {
   /**
    * 行查询与计数查询**共用同一段 FROM**。
    *
-   * <p>共用不是洁癖：关键字筛选要匹配仓编码 / 货位编码 / 批次号（用户在明细列上看到的那三列），
-   * 所以 where 会引用 {@code w} / {@code l} / {@code lt}。若计数查询只写
-   * {@code from reservation_allocation}，带关键字的请求会在 count 那一步报 bad SQL grammar ——
+   * <p>共用不是洁癖：关键字筛选要匹配仓编码 / 货位编码 / 批次号（用户在明细列上看到的那三列）， 所以 where 会引用 {@code w} / {@code l} / {@code
+   * lt}。若计数查询只写 {@code from reservation_allocation}，带关键字的请求会在 count 那一步报 bad SQL grammar ——
    * 而且只在用户真的敲了关键字时才炸，不敲关键字的用例全绿。
    */
   private static String selectRows() {
@@ -166,9 +156,8 @@ public class ReservationAllocationService {
   /**
    * 过滤条件拼装。
    *
-   * <p>预占 id 作为**第一个绑定值**固定在 binds[0]，其余条件追加其后，
-   * 这样 count / rows / 分页 limit 的绑定顺序始终一致 —— Java 没有具名绑定，
-   * 一旦顺序错位就是「筛 A 却返回 B」这种最难查的 bug。
+   * <p>预占 id 作为**第一个绑定值**固定在 binds[0]，其余条件追加其后， 这样 count / rows / 分页 limit 的绑定顺序始终一致 —— Java
+   * 没有具名绑定， 一旦顺序错位就是「筛 A 却返回 B」这种最难查的 bug。
    */
   private void filters(
       UUID reservationId, ReservationAllocationQuery q, List<String> where, List<Object> binds) {
@@ -187,7 +176,8 @@ public class ReservationAllocationService {
         names.add(name);
       }
       if (!names.isEmpty()) {
-        where.add("a.status in (" + names.stream().map(n -> "?").collect(Collectors.joining(",")) + ")");
+        where.add(
+            "a.status in (" + names.stream().map(n -> "?").collect(Collectors.joining(",")) + ")");
         binds.addAll(names);
       }
     }
@@ -229,9 +219,8 @@ public class ReservationAllocationService {
       case "STATUS" -> " order by a.status, a.id";
       case "QUANTITY" -> " order by a.allocated_quantity desc, a.id";
       case "REMAINING" -> " order by a.remaining desc, a.id";
-      // bucket 排序用可读的编码而不是 uuid：同一仓内按 uuid 排出来的顺序对用户毫无意义。
-      case "BUCKET" ->
-          " order by w.code, coalesce(l.code,''), coalesce(lt.lot_code,''), a.id";
+        // bucket 排序用可读的编码而不是 uuid：同一仓内按 uuid 排出来的顺序对用户毫无意义。
+      case "BUCKET" -> " order by w.code, coalesce(l.code,''), coalesce(lt.lot_code,''), a.id";
       default -> " order by a.allocated_at desc, a.id";
     };
   }
@@ -241,9 +230,8 @@ public class ReservationAllocationService {
   /**
    * 分配汇总。**不受分页与筛选影响**。
    *
-   * <p>{@code bucket_count} 用「仓 | 货位 | 批次」的字符串三元组去重而不是 ROW 去重：
-   * ROW 比较里 NULL 与 NULL 的相等性在不同写法下容易读错，而这里货位与批次本来就可空，
-   * 写成字符串拼接后「同一个仓 + 都没有货位」的两行必然算同一个 bucket，没有解释空间。
+   * <p>{@code bucket_count} 用「仓 | 货位 | 批次」的字符串三元组去重而不是 ROW 去重： ROW 比较里 NULL 与 NULL
+   * 的相等性在不同写法下容易读错，而这里货位与批次本来就可空， 写成字符串拼接后「同一个仓 + 都没有货位」的两行必然算同一个 bucket，没有解释空间。
    *
    * <p>allocated / consumed / released 是**全部**分配之和（含终态），
    * 因为「当初圈了多少、出了多少、还了多少」是三个历史事实，不会因为某一行进了终态就消失。
@@ -267,7 +255,8 @@ public class ReservationAllocationService {
                                     ||coalesce(lot_id::text,'')) as bucket_count
               from reservation_allocation
              where tenant_id = %s and reservation_id = ?
-            """.formatted(TENANT),
+            """
+                .formatted(TENANT),
             reservationId);
 
     Map<String, Long> counts = new LinkedHashMap<>();
@@ -288,7 +277,8 @@ public class ReservationAllocationService {
                 select coalesce(sum(allocated_quantity),0) from reservation_allocation
                  where tenant_id = %s and reservation_id = ?
                    and status not in ('RELEASED','EXPIRED')
-                """.formatted(TENANT),
+                """
+                    .formatted(TENANT),
                 reservationId)
             .get(0, BigDecimal.class);
 
@@ -307,7 +297,9 @@ public class ReservationAllocationService {
     var one =
         sql.fetchOne(
             "select requested_quantity from inventory_reservation"
-                + " where tenant_id = " + TENANT + " and id = ?",
+                + " where tenant_id = "
+                + TENANT
+                + " and id = ?",
             reservationId);
     if (one == null) throw notFound(reservationId);
     return one.get(0, BigDecimal.class);
@@ -329,7 +321,8 @@ public class ReservationAllocationService {
               left join legal_entity_ref le on le.tenant_id=r.tenant_id and le.id=r.legal_entity_id
               left join sku_ref sk on sk.tenant_id=r.tenant_id and sk.id=r.sku_id
              where r.tenant_id = %s and r.id = ?
-            """.formatted(TENANT),
+            """
+                .formatted(TENANT),
             reservationId);
     if (r == null) throw notFound(reservationId);
 
@@ -423,7 +416,8 @@ public class ReservationAllocationService {
                         transitionLabel(e.get("transition", String.class)),
                         e.get("from_status", String.class),
                         e.get("to_status", String.class),
-                        ReservationAllocationStatus.valueOf(e.get("to_status", String.class)).label(),
+                        ReservationAllocationStatus.valueOf(e.get("to_status", String.class))
+                            .label(),
                         e.get("quantity", BigDecimal.class),
                         e.get("occurred_at", OffsetDateTime.class),
                         e.get("actor_id", UUID.class),
@@ -438,7 +432,8 @@ public class ReservationAllocationService {
 
   private long timelineTotal(UUID tenantId, UUID reservationId) {
     return sql.fetchOne(
-            "select count(*) from reservation_entry where tenant_id = " + TENANT
+            "select count(*) from reservation_entry where tenant_id = "
+                + TENANT
                 + " and reservation_id = ?",
             reservationId)
         .get(0, Long.class);
@@ -449,11 +444,9 @@ public class ReservationAllocationService {
   /**
    * 下拉项。
    *
-   * <p><b>仓 / 货位 / 批次的候选值只取这条预占实际出现过的</b>，不是全库：明细页的筛选器问的是
-   * 「这笔预占圈过哪些地方」，把全库几千个批次倒给下拉框既慢又没意义。
+   * <p><b>仓 / 货位 / 批次的候选值只取这条预占实际出现过的</b>，不是全库：明细页的筛选器问的是 「这笔预占圈过哪些地方」，把全库几千个批次倒给下拉框既慢又没意义。
    *
-   * <p>{@code transitions} 刻意**不含**释放与过期：那是 7.2.1.3 的动作。
-   * 在这里列出它等于给前端一个可以点、但点了什么也不发生的按钮。
+   * <p>{@code transitions} 刻意**不含**释放与过期：那是 7.2.1.3 的动作。 在这里列出它等于给前端一个可以点、但点了什么也不发生的按钮。
    */
   public ReservationAllocationOptions options(UUID tenantId, UUID reservationId) {
     // 顺带确认预占存在：不存在时下拉项返回空会让页面显示成「这笔预占没有圈任何地方」。
@@ -490,33 +483,34 @@ public class ReservationAllocationService {
   /**
    * 登记分配时的可选目标：租户在用的仓 / 货位，以及这笔预占那个 SKU 名下的在用批次。
    *
-   * <p>与 {@link #bucketOptions} 那组候选值用途不同，必须分开：筛选器只关心「这笔预占圈过哪些」，
-   * 而登记时恰恰需要**还没被圈过**的那些 —— 新建的预占一条分配都没有，
-   * 拿筛选候选集去填登记表就是死结。
+   * <p>与 {@link #bucketOptions} 那组候选值用途不同，必须分开：筛选器只关心「这笔预占圈过哪些」， 而登记时恰恰需要**还没被圈过**的那些 ——
+   * 新建的预占一条分配都没有， 拿筛选候选集去填登记表就是死结。
    *
-   * <p>只给 {@code ACTIVE}：把已归档的仓、已过期的批次倒进选择框，只会让人选到一个
-   * 提交后必然被拒的组合。
+   * <p>只给 {@code ACTIVE}：把已归档的仓、已过期的批次倒进选择框，只会让人选到一个 提交后必然被拒的组合。
    *
-   * <p>批次按<b>父预占的 SKU</b>过滤而不是全库：把别的商品的批次列出来让人选，
-   * 十有八九会选错，而错的那个会被 DB 的守卫挡下、只留下一句「SKU 不是同一个商品」。
-   * 在这里就按 SKU 筛掉，比让用户踩一次报错再学一次便宜得多。
+   * <p>批次按<b>父预占的 SKU</b>过滤而不是全库：把别的商品的批次列出来让人选， 十有八九会选错，而错的那个会被 DB 的守卫挡下、只留下一句「SKU 不是同一个商品」。 在这里就按
+   * SKU 筛掉，比让用户踩一次报错再学一次便宜得多。
    */
   private ReservationAllocationTargets targets(UUID tenantId, UUID reservationId) {
     var warehouseRows =
         sql.fetch(
-                "select id, code, name from warehouse where tenant_id = " + TENANT
+                "select id, code, name from warehouse where tenant_id = "
+                    + TENANT
                     + " and status='ACTIVE' order by code",
                 new Object[0])
             .map(
                 r ->
                     new ReservationAllocationTarget(
-                        r.get("id", UUID.class), null, r.get("code", String.class),
+                        r.get("id", UUID.class),
+                        null,
+                        r.get("code", String.class),
                         r.get("name", String.class)));
 
     var locationRows =
         sql.fetch(
                 "select l.id, l.warehouse_id, l.code, l.name from warehouse_location l"
-                    + " where l.tenant_id = " + TENANT
+                    + " where l.tenant_id = "
+                    + TENANT
                     + " and l.status='ACTIVE'"
                     + " and exists (select 1 from warehouse w where w.tenant_id=l.tenant_id"
                     + "   and w.id=l.warehouse_id and w.status='ACTIVE')"
@@ -530,9 +524,12 @@ public class ReservationAllocationService {
 
     var lotRows =
         sql.fetch(
-                "select id, lot_code from inventory_lot where tenant_id = " + TENANT
+                "select id, lot_code from inventory_lot where tenant_id = "
+                    + TENANT
                     + " and status='ACTIVE' and sku_id = (select sku_id from inventory_reservation"
-                    + "   where tenant_id = " + TENANT + " and id = ?)"
+                    + "   where tenant_id = "
+                    + TENANT
+                    + " and id = ?)"
                     + " order by lot_code",
                 new Object[] {reservationId})
             .map(
@@ -546,17 +543,16 @@ public class ReservationAllocationService {
   /**
    * 某个 bucket 维度上的候选项。
    *
-   * <p>货位与批次可空，所以用 {@code having id is not null} 把「这一维没填」的组滤掉 ——
-   * 直接 inner join 会把整行丢掉，数量口径就与明细对不上了。
+   * <p>货位与批次可空，所以用 {@code having id is not null} 把「这一维没填」的组滤掉 —— 直接 inner join 会把整行丢掉，数量口径就与明细对不上了。
    *
-   * @param nameExpr 该维度的名称列；批次没有名称列（{@code inventory_lot} 只有 lot_code），
-   *     传 {@code null} 表示这一维没有名称可读。刻意做成「可空的列表达式」而不是在 SQL 里
-   *     写 {@code null as name}：那样 {@code group by} 里就得跟着写 {@code null}，
-   *     而按常量分组是 PostgreSQL 直接拒绝的语法
+   * @param nameExpr 该维度的名称列；批次没有名称列（{@code inventory_lot} 只有 lot_code）， 传 {@code null}
+   *     表示这一维没有名称可读。刻意做成「可空的列表达式」而不是在 SQL 里 写 {@code null as name}：那样 {@code group by} 里就得跟着写
+   *     {@code null}， 而按常量分组是 PostgreSQL 直接拒绝的语法
    */
   private List<ReservationAllocationBucketOption> bucketOptions(
       UUID tenantId, UUID reservationId, String idExpr, String codeExpr, String nameExpr) {
-    String groupBy = nameExpr == null ? idExpr + ", " + codeExpr : idExpr + ", " + codeExpr + ", " + nameExpr;
+    String groupBy =
+        nameExpr == null ? idExpr + ", " + codeExpr : idExpr + ", " + codeExpr + ", " + nameExpr;
     return sql.fetch(
             """
             select %s as id, %s as code, %s as name,
@@ -571,7 +567,13 @@ public class ReservationAllocationService {
              order by %s
             """
                 .formatted(
-                    idExpr, codeExpr, nameExpr == null ? "null" : nameExpr, TENANT, groupBy, idExpr, codeExpr),
+                    idExpr,
+                    codeExpr,
+                    nameExpr == null ? "null" : nameExpr,
+                    TENANT,
+                    groupBy,
+                    idExpr,
+                    codeExpr),
             reservationId)
         .map(
             r ->
@@ -584,14 +586,11 @@ public class ReservationAllocationService {
   }
 
   /**
-   * 链路各环节的接入情况。复用 7.2.1.1 的 {@code ReservationCapability}，
-   * 不另造一份形状相同的类型（另造会让同一条链路的能力声明有两种表示）。
+   * 链路各环节的接入情况。复用 7.2.1.1 的 {@code ReservationCapability}， 不另造一份形状相同的类型（另造会让同一条链路的能力声明有两种表示）。
    *
-   * <p><b>2026-10-14 更新</b>：{@code ALLOCATION_RELEASE} 由 {@code available=false} 翻成
-   * {@code true}。这是 7.2.1.3 落地后的回填 —— 7.2.1.2 交付时释放与过期尚未交付，
-   * 所以这里显式报了「未接入」并写明归属模块；现在 7.2.1.3 已交付
-   * （手动释放 / 批量过期清理 / 过期时刻补写 / append-only 凭据），声明必须跟着变，
-   * 否则前端会继续禁用一个已经能用的入口。
+   * <p><b>2026-10-14 更新</b>：{@code ALLOCATION_RELEASE} 由 {@code available=false} 翻成 {@code true}。这是
+   * 7.2.1.3 落地后的回填 —— 7.2.1.2 交付时释放与过期尚未交付， 所以这里显式报了「未接入」并写明归属模块；现在 7.2.1.3 已交付 （手动释放 / 批量过期清理 /
+   * 过期时刻补写 / append-only 凭据），声明必须跟着变， 否则前端会继续禁用一个已经能用的入口。
    */
   public List<ReservationCapability> capabilities() {
     return List.of(
@@ -635,15 +634,13 @@ public class ReservationAllocationService {
    *
    * <ul>
    *   <li>预占存在且未终结 → 404 / 409（父表已终结时再加分配等于往历史里补货）
-   *   <li>仓 / 货位 / 批次存在且自洽 → 404 / 400（**先在 Java 里判**，因为复合外键冲突会被
-   *       ApiErrorHandler 翻成一句笼统的 409，用户看不出是「货位不属于这个仓」）
-   *   <li>跨行守恒（所有分配之和 ≤ 需求量）→ 交给 DB 触发器：Java 与 DB 之间存在裸 SQL 缝隙，
-   *       而超卖是不可逆事故，必须在 DB 层兜住
+   *   <li>仓 / 货位 / 批次存在且自洽 → 404 / 400（**先在 Java 里判**，因为复合外键冲突会被 ApiErrorHandler 翻成一句笼统的
+   *       409，用户看不出是「货位不属于这个仓」）
+   *   <li>跨行守恒（所有分配之和 ≤ 需求量）→ 交给 DB 触发器：Java 与 DB 之间存在裸 SQL 缝隙， 而超卖是不可逆事故，必须在 DB 层兜住
    * </ul>
    *
-   * <p>写入顺序固定为「先插分配、再插分录」：V107 的分录守卫要求该分配此刻的状态恰等于分录的
-   * to_status，所以分录只能在分配行落库之后写。两者在同一事务里（调用方的
-   * {@code AccessService.run} 已开事务），不会出现「有分配没有流水」的中间态。
+   * <p>写入顺序固定为「先插分配、再插分录」：V107 的分录守卫要求该分配此刻的状态恰等于分录的 to_status，所以分录只能在分配行落库之后写。两者在同一事务里（调用方的 {@code
+   * AccessService.run} 已开事务），不会出现「有分配没有流水」的中间态。
    */
   public ReservationAllocationCreated allocate(
       UUID tenantId, UUID reservationId, ReservationAllocationCreateInput input) {
@@ -675,16 +672,17 @@ public class ReservationAllocationService {
         allocatedAt,
         input.note());
 
-    UUID entryId = appendEntry(
-        tenantId,
-        reservationId,
-        allocationId,
-        "ALLOCATED",
-        null,
-        "HELD",
-        quantity,
-        allocatedAt,
-        "登记分配");
+    UUID entryId =
+        appendEntry(
+            tenantId,
+            reservationId,
+            allocationId,
+            "ALLOCATED",
+            null,
+            "HELD",
+            quantity,
+            allocatedAt,
+            "登记分配");
 
     var after = parentRollup(reservationId);
     return new ReservationAllocationCreated(
@@ -702,8 +700,7 @@ public class ReservationAllocationService {
   /**
    * 承诺分配：HELD → COMMITTED。
    *
-   * <p>承诺时把 {@code expires_at} **保留**而不是清空：expires_at 是业务事实
-   * （「这笔预占原本计划在 T 过期」），清空它会让事后对账失去依据。
+   * <p>承诺时把 {@code expires_at} **保留**而不是清空：expires_at 是业务事实 （「这笔预占原本计划在 T 过期」），清空它会让事后对账失去依据。
    * 「承诺后不再自动 TTL 释放」由状态本身保证（V102 的超时谓词只看 HELD），不需要靠清空字段。
    */
   public ReservationAllocationTransitioned commit(
@@ -715,12 +712,13 @@ public class ReservationAllocationService {
     var from = ReservationAllocationStatus.valueOf(allocation.get("status", String.class));
     if (from != ReservationAllocationStatus.HELD) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "分配当前是 " + from.label() + "，只有预占中（HELD）的分配可以承诺");
+          HttpStatus.CONFLICT, "分配当前是 " + from.label() + "，只有预占中（HELD）的分配可以承诺");
     }
     var reservation = lockOpenReservation(reservationId);
     OffsetDateTime occurredAt =
-        input == null || input.occurredAt() == null ? now() : input.occurredAt().truncatedTo(ChronoUnit.MILLIS);
+        input == null || input.occurredAt() == null
+            ? now()
+            : input.occurredAt().truncatedTo(ChronoUnit.MILLIS);
     BigDecimal quantity = allocation.get("allocated_quantity", BigDecimal.class);
 
     sql.execute(
@@ -762,12 +760,10 @@ public class ReservationAllocationService {
   /**
    * 消耗出库：COMMITTED → CONSUMED，支持部分出库。
    *
-   * <p>数量不传时取「该分配的剩余量」（一次性全出）；传了必须为正且不超过剩余量。
-   * 部分出库是常态：一张订单拆单出库时，同一个 bucket 上的货分几次出，
+   * <p>数量不传时取「该分配的剩余量」（一次性全出）；传了必须为正且不超过剩余量。 部分出库是常态：一张订单拆单出库时，同一个 bucket 上的货分几次出，
    * 把它写成「必须一次性全出」会逼调用方去算剩余量，而算错的后果是静默的账实不符。
    *
-   * <p>刻意**不允许** HELD → CONSUMED：没承诺就出库意味着货没圈住就走了，
-   * 那正是超卖的定义。合法迁移矩阵由 V107 的分录守卫在 DB 层再钉一遍。
+   * <p>刻意**不允许** HELD → CONSUMED：没承诺就出库意味着货没圈住就走了， 那正是超卖的定义。合法迁移矩阵由 V107 的分录守卫在 DB 层再钉一遍。
    */
   public ReservationAllocationTransitioned consume(
       UUID tenantId,
@@ -778,12 +774,13 @@ public class ReservationAllocationService {
     var from = ReservationAllocationStatus.valueOf(allocation.get("status", String.class));
     if (from != ReservationAllocationStatus.COMMITTED) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "分配当前是 " + from.label() + "，只有已承诺（COMMITTED）的分配可以消耗");
+          HttpStatus.CONFLICT, "分配当前是 " + from.label() + "，只有已承诺（COMMITTED）的分配可以消耗");
     }
     var reservation = lockOpenReservation(reservationId);
     OffsetDateTime occurredAt =
-        input == null || input.occurredAt() == null ? now() : input.occurredAt().truncatedTo(ChronoUnit.MILLIS);
+        input == null || input.occurredAt() == null
+            ? now()
+            : input.occurredAt().truncatedTo(ChronoUnit.MILLIS);
 
     BigDecimal remaining = allocation.get("remaining", BigDecimal.class);
     BigDecimal quantity =
@@ -841,15 +838,16 @@ public class ReservationAllocationService {
   /**
    * 锁定预占并确认它没进终态。
    *
-   * <p>{@code for update}：并发两次「承诺同一个分配」时，两个事务都读到 HELD 会双双通过
-   * Java 层的 if 判断，然后由 DB 的 {@code where status='HELD'} 让后一个更新 0 行 ——
-   * 不看影响行数的话，调用方会拿到一个「成功但什么都没发生」的假回执。
+   * <p>{@code for update}：并发两次「承诺同一个分配」时，两个事务都读到 HELD 会双双通过 Java 层的 if 判断，然后由 DB 的 {@code where
+   * status='HELD'} 让后一个更新 0 行 —— 不看影响行数的话，调用方会拿到一个「成功但什么都没发生」的假回执。
    */
   private org.jooq.Record lockOpenReservation(UUID reservationId) {
     var one =
         sql.fetchOne(
             "select id,status,requested_quantity,sku_id,allocated_quantity,consumed_quantity,remaining"
-                + " from inventory_reservation where tenant_id = " + TENANT + " and id=? for update",
+                + " from inventory_reservation where tenant_id = "
+                + TENANT
+                + " and id=? for update",
             reservationId);
     if (one == null) throw notFound(reservationId);
     var status = ReservationModels.ReservationStatus.valueOf(one.get("status", String.class));
@@ -868,7 +866,8 @@ public class ReservationAllocationService {
     var one =
         sql.fetchOne(
             "select id,status,allocated_quantity,consumed_quantity,remaining"
-                + " from reservation_allocation where tenant_id = " + TENANT
+                + " from reservation_allocation where tenant_id = "
+                + TENANT
                 + " and reservation_id=? and id=? for update",
             reservationId,
             allocationId);
@@ -879,11 +878,10 @@ public class ReservationAllocationService {
   /**
    * 全部分配承诺时把预占推进到 COMMITTED。
    *
-   * <p>这一步不做的话，预占会一直停在 HELD，而蓝图 7.2.1.3 的超时清理会把已承诺发货的货
-   * 误释放 —— 那是蓝图自己点名的超卖场景。所以「分配状态变，预占状态跟着变」不是洁癖，是防线。
+   * <p>这一步不做的话，预占会一直停在 HELD，而蓝图 7.2.1.3 的超时清理会把已承诺发货的货 误释放 ——
+   * 那是蓝图自己点名的超卖场景。所以「分配状态变，预占状态跟着变」不是洁癖，是防线。
    *
-   * <p>判定用「非终态分配全部为 COMMITTED 且至少一条」：部分承诺时预占仍留 HELD，
-   * 因为它确实还有没承诺的部分，继续参与超时是对的。
+   * <p>判定用「非终态分配全部为 COMMITTED 且至少一条」：部分承诺时预占仍留 HELD， 因为它确实还有没承诺的部分，继续参与超时是对的。
    */
   private void promoteReservationToCommitted(UUID reservationId, OffsetDateTime at) {
     var open =
@@ -893,14 +891,17 @@ public class ReservationAllocationService {
                    count(*) filter (where status='COMMITTED') as committed_count
               from reservation_allocation
              where tenant_id = %s and reservation_id = ? and status not in ('RELEASED','EXPIRED')
-            """.formatted(TENANT),
+            """
+                .formatted(TENANT),
             reservationId);
     long openCount = open.get("open_count", Long.class);
     if (openCount == 0 || open.get("committed_count", Long.class) != openCount) return;
 
     sql.execute(
         "update inventory_reservation set status='COMMITTED', committed_at=?::timestamptz"
-            + " where tenant_id=" + TENANT + " and id=? and status='HELD'",
+            + " where tenant_id="
+            + TENANT
+            + " and id=? and status='HELD'",
         at,
         reservationId);
   }
@@ -909,9 +910,8 @@ public class ReservationAllocationService {
    * 分配全部消耗且覆盖需求量时把预占推进到 CONSUMED，并把预占的已消费量对齐到分配之和。
    *
    * <p>{@code consumed_quantity} 按分配之和**重算**而不是累加：累加在两次并发消耗、
-   * 或一次请求重试时会翻倍，而重算是幂等的。这个列由本模块维护（allocated 由 V107 的触发器维护），
-   * {@code released_quantity} 归 7.2.1.3，本模块**不碰** —— 碰了就会在对方写完释放量后
-   * 被下一次分配变更覆盖回去。
+   * 或一次请求重试时会翻倍，而重算是幂等的。这个列由本模块维护（allocated 由 V107 的触发器维护）， {@code released_quantity} 归
+   * 7.2.1.3，本模块**不碰** —— 碰了就会在对方写完释放量后 被下一次分配变更覆盖回去。
    */
   private void settleReservationIfFullyConsumed(UUID reservationId, OffsetDateTime at) {
     var r =
@@ -924,7 +924,8 @@ public class ReservationAllocationService {
                      where tenant_id = %s and id = ?) as requested
               from reservation_allocation
              where tenant_id = %s and reservation_id = ?
-            """.formatted(TENANT, TENANT),
+            """
+                .formatted(TENANT, TENANT),
             reservationId,
             reservationId);
     BigDecimal consumed = r.get("consumed_total", BigDecimal.class);
@@ -939,7 +940,9 @@ public class ReservationAllocationService {
           "update inventory_reservation set consumed_quantity=?::numeric,"
               + " status='CONSUMED', settled_at=?::timestamptz,"
               + " committed_at=coalesce(committed_at,?::timestamptz)"
-              + " where tenant_id=" + TENANT + " and id=? and status<>'CONSUMED'",
+              + " where tenant_id="
+              + TENANT
+              + " and id=? and status<>'CONSUMED'",
           consumed,
           at,
           at,
@@ -948,7 +951,9 @@ public class ReservationAllocationService {
       // 部分消耗：只对齐已消费量，不动状态。
       sql.execute(
           "update inventory_reservation set consumed_quantity=?::numeric"
-              + " where tenant_id=" + TENANT + " and id=?",
+              + " where tenant_id="
+              + TENANT
+              + " and id=?",
           consumed,
           reservationId);
     }
@@ -988,7 +993,9 @@ public class ReservationAllocationService {
     var one =
         sql.fetchOne(
             "select requested_quantity, allocated_quantity, consumed_quantity, remaining, status"
-                + " from inventory_reservation where tenant_id = " + TENANT + " and id = ?",
+                + " from inventory_reservation where tenant_id = "
+                + TENANT
+                + " and id = ?",
             reservationId);
     if (one == null) throw notFound(reservationId);
     return new ParentRollup(
@@ -1000,13 +1007,17 @@ public class ReservationAllocationService {
   }
 
   private record ParentRollup(
-      BigDecimal requested, BigDecimal allocated, BigDecimal consumed, BigDecimal remaining,
+      BigDecimal requested,
+      BigDecimal allocated,
+      BigDecimal consumed,
+      BigDecimal remaining,
       String status) {}
 
   // ================================================================ 内部：引用登记校验
 
   private void requireWarehouse(UUID warehouseId) {
-    if (sql.fetchOne("select 1 from warehouse where tenant_id = " + TENANT + " and id = ?", warehouseId)
+    if (sql.fetchOne(
+            "select 1 from warehouse where tenant_id = " + TENANT + " and id = ?", warehouseId)
         == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库 " + warehouseId + " 不存在或无权使用");
     }
@@ -1015,13 +1026,14 @@ public class ReservationAllocationService {
   /**
    * 货位必须属于所声明的仓。
    *
-   * <p>先在 Java 里判：V107 的复合外键当然也会拒「A 仓 + B 仓的货位」，但那是 23503 / 23514，
-   * 经 {@code ApiErrorHandler} 翻成一句「库存数据与既有记录冲突」，用户完全看不出是货位挂错了仓。
+   * <p>先在 Java 里判：V107 的复合外键当然也会拒「A 仓 + B 仓的货位」，但那是 23503 / 23514， 经 {@code ApiErrorHandler}
+   * 翻成一句「库存数据与既有记录冲突」，用户完全看不出是货位挂错了仓。
    */
   private void requireLocationInWarehouse(UUID warehouseId, UUID locationId) {
     if (locationId == null) return;
     if (sql.fetchOne(
-            "select 1 from warehouse_location where tenant_id = " + TENANT
+            "select 1 from warehouse_location where tenant_id = "
+                + TENANT
                 + " and warehouse_id=? and id=?",
             warehouseId,
             locationId)
@@ -1034,12 +1046,14 @@ public class ReservationAllocationService {
   /**
    * 批次必须属于预占的那个 SKU。
    *
-   * <p>V107 的更新守卫也逐行比对，这里先判是为了给出能指到 SKU 的错误文案
-   * （「批次属于 SKU-A，这笔预占要的是 SKU-B」），而不是一句「批次 SKU 与预占 SKU 不是同一个商品」。
+   * <p>V107 的更新守卫也逐行比对，这里先判是为了给出能指到 SKU 的错误文案 （「批次属于 SKU-A，这笔预占要的是 SKU-B」），而不是一句「批次 SKU 与预占 SKU
+   * 不是同一个商品」。
    */
   private void requireLotOfSku(UUID lotId, UUID skuId) {
     if (lotId == null) return;
-    var one = sql.fetchOne("select sku_id from inventory_lot where tenant_id = " + TENANT + " and id = ?", lotId);
+    var one =
+        sql.fetchOne(
+            "select sku_id from inventory_lot where tenant_id = " + TENANT + " and id = ?", lotId);
     if (one == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "批次 " + lotId + " 不存在或无权使用");
     }
@@ -1108,17 +1122,14 @@ public class ReservationAllocationService {
   /**
    * 租户越权时统一 404 而不是 403。
    *
-   * <p>给 403 等于确认了「这条预占存在、只是不归你管」，那是信息泄露：
-   * 猜 id 就能试出别人的预占是否存在。404 同时覆盖「不存在」与「不归你」两种情况。
+   * <p>给 403 等于确认了「这条预占存在、只是不归你管」，那是信息泄露： 猜 id 就能试出别人的预占是否存在。404 同时覆盖「不存在」与「不归你」两种情况。
    */
   private static ResponseStatusException notFound(UUID reservationId) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "预占 " + reservationId + " 不存在或无权查看");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "预占 " + reservationId + " 不存在或无权查看");
   }
 
   private static ResponseStatusException notFoundAllocation(UUID allocationId) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "分配 " + allocationId + " 不存在或无权操作");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "分配 " + allocationId + " 不存在或无权操作");
   }
 
   private OffsetDateTime now() {

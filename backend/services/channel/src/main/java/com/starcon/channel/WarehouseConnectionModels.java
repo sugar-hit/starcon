@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,8 +16,7 @@ import java.util.UUID;
  *
  * <p>对接海外仓/第三方仓服务商：连接配置、仓账户、库存同步记录、外部库存观测。
  *
- * <p>🔴 本模块最重要的纪律来自蓝图 §10.4.2.1 加粗句：「外部仓库存是**观测值不是自有账本**，
- * 必须与自营库存**分开存储与对账，不能覆盖**」。因此：
+ * <p>🔴 本模块最重要的纪律来自蓝图 §10.4.2.1 加粗句：「外部仓库存是**观测值不是自有账本**， 必须与自营库存**分开存储与对账，不能覆盖**」。因此：
  *
  * <ul>
  *   <li>{@code ExternalStockObservationView} 是**快照**，每行带 source 与 observedAt，没有「当前余额」语义
@@ -26,8 +24,8 @@ import java.util.UUID;
  *   <li>自营库存账本在 warehouse 服务（独立库），本模块**够不到**它，也不试图够
  * </ul>
  *
- * <p>与 02 卷同款纪律：任何类型都装不下明文凭据。{@code WarehouseConnectionView} 只暴露
- * 凭据的**引用**（provider / 引用串 / 有效期 / 状态），不暴露秘密本身。
+ * <p>与 02 卷同款纪律：任何类型都装不下明文凭据。{@code WarehouseConnectionView} 只暴露 凭据的**引用**（provider / 引用串 / 有效期 /
+ * 状态），不暴露秘密本身。
  */
 public final class WarehouseConnectionModels {
   private WarehouseConnectionModels() {}
@@ -109,8 +107,7 @@ public final class WarehouseConnectionModels {
   /**
    * 服务商库存报送行（适配器的输入）。
    *
-   * <p>{@code reportedAt} 必须是 OffsetDateTime：时点语义要保留偏移，
-   * 换算成本地时间再存会把跨时区仓的观测时刻算错。
+   * <p>{@code reportedAt} 必须是 OffsetDateTime：时点语义要保留偏移， 换算成本地时间再存会把跨时区仓的观测时刻算错。
    */
   public record InboundStockLineInput(
       @NotBlank @Size(max = 128) String externalSku,
@@ -150,9 +147,8 @@ public final class WarehouseConnectionModels {
   /**
    * 外部库存观测快照。
    *
-   * <p>刻意**不含** available/onHand/committed 这类「当前余额」字段：观测是带时点的事实，
-   * 余额是随时间变化的派生量。给了余额字段就会有人去原地 UPDATE 它，
-   * 那正是蓝图禁止的「覆盖」。
+   * <p>刻意**不含** available/onHand/committed 这类「当前余额」字段：观测是带时点的事实， 余额是随时间变化的派生量。给了余额字段就会有人去原地 UPDATE
+   * 它， 那正是蓝图禁止的「覆盖」。
    */
   @Schema(description = "外部仓库存观测快照（append-only，非账本）")
   public record ExternalStockObservationView(
@@ -168,8 +164,7 @@ public final class WarehouseConnectionModels {
   /**
    * 最新观测视图：按 SKU 取该账户最新一行。
    *
-   * <p>「最新」是查询出来的（observed_at 最大），不是存出来的——这正是快照语义与账本语义的
-   * 分界线，也是为什么本模块不需要、也不允许对观测表做 UPDATE。
+   * <p>「最新」是查询出来的（observed_at 最大），不是存出来的——这正是快照语义与账本语义的 分界线，也是为什么本模块不需要、也不允许对观测表做 UPDATE。
    */
   public record ExternalStockLatestView(
       UUID accountId,

@@ -23,18 +23,14 @@ import java.util.UUID;
  * <p>数字口径（界面上每一列都对应其中一条，不做二次加工）：
  *
  * <ul>
- *   <li>数量 {@code numeric(19,4)} / 单价 {@code numeric(19,4)} / 行金额生成列
- *       {@code round(quantity*unit_price,4)}。金额是数量的函数，普通列会允许
- *       「改了数量忘了改金额」，而那会直接变成内部结算凭据上的错数。
- *   <li>舍入只发生在落 {@code numeric(19,4)} 这一步（PostgreSQL 四舍五入、远离零），
- *       单价与数量本身不做中间舍入 —— 避免双重舍入。
+ *   <li>数量 {@code numeric(19,4)} / 单价 {@code numeric(19,4)} / 行金额生成列 {@code
+ *       round(quantity*unit_price,4)}。金额是数量的函数，普通列会允许 「改了数量忘了改金额」，而那会直接变成内部结算凭据上的错数。
+ *   <li>舍入只发生在落 {@code numeric(19,4)} 这一步（PostgreSQL 四舍五入、远离零）， 单价与数量本身不做中间舍入 —— 避免双重舍入。
  *   <li>整单一个币种（ISO 4217 三字母大写）。跨币种换算属 12 财务，本模块不存汇率。
- *   <li>短少 {@code discrepancyQuantity} 与实收 {@code receivedQuantity} 之和不得超过调拨量，
- *       由 DB 触发器兜底。
+ *   <li>短少 {@code discrepancyQuantity} 与实收 {@code receivedQuantity} 之和不得超过调拨量， 由 DB 触发器兜底。
  * </ul>
  *
- * <p><b>本模块不是普通同仓调拨</b>：货权从转出法人转到转入法人，意味着利润归属变了。
- * 所以这里有 7.5.1.1 没有的三样东西 —— 转移定价、双方确认、内部结算凭据。
+ * <p><b>本模块不是普通同仓调拨</b>：货权从转出法人转到转入法人，意味着利润归属变了。 所以这里有 7.5.1.1 没有的三样东西 —— 转移定价、双方确认、内部结算凭据。
  */
 public final class LegalEntityTransferModels {
   private LegalEntityTransferModels() {}
@@ -42,8 +38,7 @@ public final class LegalEntityTransferModels {
   /**
    * 跨法人调拨单状态。与 {@code cross_entity_transfer.status} 的 CHECK 逐值对应。
    *
-   * <p>与 7.5.1.1 的最大不同：中间多出<b>两个</b>确认态。转出方与转入方是两个法人，
-   * 一个接口同时替两边签字等于没有第二方。
+   * <p>与 7.5.1.1 的最大不同：中间多出<b>两个</b>确认态。转出方与转入方是两个法人， 一个接口同时替两边签字等于没有第二方。
    */
   public enum LegalEntityTransferStatus {
     /** 草稿：只有意图，未定价确认，未动库存。 */
@@ -79,8 +74,7 @@ public final class LegalEntityTransferModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的跨法人调拨状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的跨法人调拨状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -91,8 +85,7 @@ public final class LegalEntityTransferModels {
   /**
    * 转移定价口径：单价是怎么来的。
    *
-   * <p>记录它比只记金额更重要 —— 12 财务做收入确认时要复算「这个价凭什么这么定」，
-   * 而「一个说不清来路的金额」复算不出来。
+   * <p>记录它比只记金额更重要 —— 12 财务做收入确认时要复算「这个价凭什么这么定」， 而「一个说不清来路的金额」复算不出来。
    */
   public enum LegalEntityTransferValuationBasis {
     /** 人工定价。 */
@@ -239,7 +232,8 @@ public final class LegalEntityTransferModels {
       int size) {}
 
   /** 按币种分组的金额合计。跨币种直接相加是错的，所以按币种分层。 */
-  public record LegalEntityTransferCurrencyAmount(String currencyCode, BigDecimal amount, long count) {}
+  public record LegalEntityTransferCurrencyAmount(
+      String currencyCode, BigDecimal amount, long count) {}
 
   /** 状态/定价口径下拉项。 */
   public record LegalEntityTransferOption(String value, String label, long transferCount) {}
@@ -267,10 +261,7 @@ public final class LegalEntityTransferModels {
 
   /** 一次确认（append-only：一个方向只会有一行）。 */
   public record LegalEntityTransferApprovalRow(
-      String side,
-      UUID approvedBy,
-      OffsetDateTime approvedAt,
-      String notes) {}
+      String side, UUID approvedBy, OffsetDateTime approvedAt, String notes) {}
 
   /** 内部结算凭据行。金额取自单头合计，与明细逐行之和一致（DB 触发器钉死）。 */
   public record LegalEntityTransferSettlementRow(
@@ -296,8 +287,7 @@ public final class LegalEntityTransferModels {
    * <p>12 财务按 {@code (sourceSystem, referenceId)} 反查即可拿到一张调拨单唯一一张凭据 ——
    * UNIQUE(source_system,reference_id) 保证重复投递不会重复计提收入。
    *
-   * <p><b>刻意不含</b>科目、凭证行、税额与汇率：那些属于 12 自己的权威，
-   * 本服务复制一份只会造出两份对不上的账。
+   * <p><b>刻意不含</b>科目、凭证行、税额与汇率：那些属于 12 自己的权威， 本服务复制一份只会造出两份对不上的账。
    */
   public record LegalEntityTransferSettlementHandoff(
       String sourceSystem,
@@ -381,10 +371,10 @@ public final class LegalEntityTransferModels {
   /**
    * 发运请求。
    *
-   * <p>跨法人调拨<b>整单发运</b>，不拆批次：转移定价是整单口径，
-   * 部分发运会让「一张凭据对应哪几行货」失去唯一答案，而凭据正是 12 财务的取数入口。
+   * <p>跨法人调拨<b>整单发运</b>，不拆批次：转移定价是整单口径， 部分发运会让「一张凭据对应哪几行货」失去唯一答案，而凭据正是 12 财务的取数入口。
    */
-  public record LegalEntityTransferShipRequest(Long expectedVersion, OffsetDateTime shippedAt, String notes) {}
+  public record LegalEntityTransferShipRequest(
+      Long expectedVersion, OffsetDateTime shippedAt, String notes) {}
 
   /** 实收请求：一次实收落到转入仓的同一个库位。 */
   public record LegalEntityTransferReceiveRequest(
@@ -398,7 +388,8 @@ public final class LegalEntityTransferModels {
   public record LegalEntityTransferReceiveLineRequest(UUID lineId, BigDecimal quantity) {}
 
   /** 结案请求：把发出过但收不到的部分记为差异。 */
-  public record LegalEntityTransferCloseRequest(Long expectedVersion, String reason, String notes) {}
+  public record LegalEntityTransferCloseRequest(
+      Long expectedVersion, String reason, String notes) {}
 
   /** 作废请求：仅在未发运前可用。 */
   public record LegalEntityTransferCancelRequest(Long expectedVersion, String reason) {}

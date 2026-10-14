@@ -24,38 +24,30 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.5.2.2 BOM 展开：按 BOM 版本与需求量展开出需要采购/备货的组件清单。
  *
- * <p>蓝图原文：「职责：按 BOM 版本与需求量展开出需要采购/备货的组件清单与数量，
- * 支持多层展开和按仓库过滤。」「输出：多级展开的组件清单（含需求量、当前可用、在途、缺口）。」
- * 「下游 = 06 采购单（缺口转采购）、07 补货。**展开结果是建议不是事实**，
- * 实际采购由 06 生成单据后成立。」
+ * <p>蓝图原文：「职责：按 BOM 版本与需求量展开出需要采购/备货的组件清单与数量， 支持多层展开和按仓库过滤。」「输出：多级展开的组件清单（含需求量、当前可用、在途、缺口）。」 「下游 =
+ * 06 采购单（缺口转采购）、07 补货。**展开结果是建议不是事实**， 实际采购由 06 生成单据后成立。」
  *
- * <p><b>与 3.5.2.1 的分工</b>（V25 文件头末节 + V26 第零节）：3.5.2.1 只做<b>单层</b>精确需求量（规则 R7），
- * 多级递归、子 BOM 判定、按仓库过滤、缺口计算全部归本类。本类**不复制** R6/R7：
- * 需求量一律转发 {@link BomRules#requiredQuantity}，损耗率一律是百分数（{@code 5} = 5%）。
+ * <p><b>与 3.5.2.1 的分工</b>（V25 文件头末节 + V26 第零节）：3.5.2.1 只做<b>单层</b>精确需求量（规则 R7）， 多级递归、子 BOM
+ * 判定、按仓库过滤、缺口计算全部归本类。本类**不复制** R6/R7： 需求量一律转发 {@link BomRules#requiredQuantity}，损耗率一律是百分数（{@code 5}
+ * = 5%）。
  *
  * <p><b>本类钉死的三条语义</b>（V26 文件头第一/二/四节，与 {@link BomExplosionRules} 同口径）：
  *
  * <ol>
  *   <li><b>E1 逐层结转</b>：顶层行用成品数量，子层用<b>父行的缺口</b>而不是父行的需求量 ——
- *       半成品已有库存与在途时只展开缺的那部分。按需求量展开会为「根本不生产的那几件半成品」
- *       多算一层料，而多算出来的料会变成一张没人能解释为什么不买的采购单。
+ *       半成品已有库存与在途时只展开缺的那部分。按需求量展开会为「根本不生产的那几件半成品」 多算一层料，而多算出来的料会变成一张没人能解释为什么不买的采购单。
  *   <li><b>E2 缺口</b>：{@code max(0, required − available − inTransit)}。在途可抵扣是因为
- *       货权已归本租户（已经买了只是没到），抵扣它是为了不重复下单；下限截 0 是因为
- *       「多出来多少」对采购决策无用，富余量由 surplus 单独给出。
- *   <li><b>E4 循环拒绝 / 深度截断</b>：循环引用<b>直接 409 拒绝并逐个点名绕回路径</b>，
- *       不截断 —— 绕回自己意味着需求量在数学上无界，任何有限截断都是错的小数，
+ *       货权已归本租户（已经买了只是没到），抵扣它是为了不重复下单；下限截 0 是因为 「多出来多少」对采购决策无用，富余量由 surplus 单独给出。
+ *   <li><b>E4 循环拒绝 / 深度截断</b>：循环引用<b>直接 409 拒绝并逐个点名绕回路径</b>， 不截断 —— 绕回自己意味着需求量在数学上无界，任何有限截断都是错的小数，
  *       而它会被当成建议下成真实的单。深度上限则<b>截断但显式标明</b>（status=TRUNCATED）。
  * </ol>
  *
- * <p><b>为什么是「逐层」而不是「递归」</b>（实现上的关键选择）：
- * 判定某个子装配要不要继续展开，需要先知道<b>它自己的缺口</b>，而缺口要等 warehouse
- * 返回可用与在途。所以按层推进、每层一次批量可用量查询 —— 若改成「先把树走完再取数」，
- * 就会对那些已被库存完全覆盖的半成品也递归下去，产生一串 0 需求的噪声行，
+ * <p><b>为什么是「逐层」而不是「递归」</b>（实现上的关键选择）： 判定某个子装配要不要继续展开，需要先知道<b>它自己的缺口</b>，而缺口要等 warehouse
+ * 返回可用与在途。所以按层推进、每层一次批量可用量查询 —— 若改成「先把树走完再取数」， 就会对那些已被库存完全覆盖的半成品也递归下去，产生一串 0 需求的噪声行，
  * 甚至在**不该展开的区域**里撞上循环引用而误报。
  *
- * <p><b>租户隔离</b>：展开的<b>每一层</b>都是一条带 {@code tenant_id=?} 的显式 SQL，
- * 且 {@code bom} / {@code bom_version} / {@code bom_component} / {@code sku} 全部 FORCE RLS ——
- * 展开树里没有任何一层能绕过隔离。
+ * <p><b>租户隔离</b>：展开的<b>每一层</b>都是一条带 {@code tenant_id=?} 的显式 SQL， 且 {@code bom} / {@code
+ * bom_version} / {@code bom_component} / {@code sku} 全部 FORCE RLS —— 展开树里没有任何一层能绕过隔离。
  *
  * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}，沿用 3.5.2.1 的词表。
  */
@@ -119,21 +111,21 @@ public class BomExplosionService {
   /**
    * 展开一次并把结果冻结成 run + line 两张表。
    *
-   * <p><b>为什么落库</b>：展开结果是「建议」，而建议会变成真实的采购单。
-   * 06 的单子引用的是**这一次展开的 id**，不是「现在的 BOM × 现在的库存」——
-   * 后者随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
-   * 冻结的是建议（规则、版本、仓库过滤、as_of 都在行里），**不是库存事实**：
-   * 库存本身仍然是 warehouse 的，catalog 一份副本都没有。
+   * <p><b>为什么落库</b>：展开结果是「建议」，而建议会变成真实的采购单。 06 的单子引用的是**这一次展开的 id**，不是「现在的 BOM × 现在的库存」——
+   * 后者随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。 冻结的是建议（规则、版本、仓库过滤、as_of 都在行里），**不是库存事实**： 库存本身仍然是 warehouse
+   * 的，catalog 一份副本都没有。
    */
   public BomExplosionRun explode(
       AccessService.Access actor, String bearer, BomExplosionInput input) {
     UUID tenantId = actor.tenantId();
     int maxDepth = BomExplosionRules.resolveMaxDepth(input.maxDepth());
-    check(BomExplosionRules.maxDepthProblem(input.maxDepth()) == null,
+    check(
+        BomExplosionRules.maxDepthProblem(input.maxDepth()) == null,
         BomExplosionRules.maxDepthProblem(input.maxDepth()));
 
     BigDecimal outputQuantity = input.outputQuantity();
-    check(BomRules.outputQuantityProblem(outputQuantity) == null,
+    check(
+        BomRules.outputQuantityProblem(outputQuantity) == null,
         BomRules.outputQuantityProblem(outputQuantity));
 
     // as_of 是**业务时间**：它决定子 BOM 取哪一版，必须与结果一起冻结，
@@ -172,7 +164,8 @@ public class BomExplosionService {
         BigDecimal inTransit = stock.get(p.lineId()).inTransit();
         BigDecimal gap = BomExplosionRules.gap(p.required(), available, inTransit);
         boolean wantsExpand = p.isSubAssembly() && p.subVersionId() != null;
-        boolean covered = wantsExpand && BomExplosionRules.covered(p.required(), available, inTransit);
+        boolean covered =
+            wantsExpand && BomExplosionRules.covered(p.required(), available, inTransit);
         boolean truncated = wantsExpand && !covered && depth >= maxDepth;
         boolean expand = wantsExpand && !covered && !truncated;
         if (truncated) truncatedAny = true;
@@ -189,11 +182,21 @@ public class BomExplosionService {
                   append(p.ancestorCodes(), p.skuCode())));
         }
         lines.add(
-            line(depth, p, available, inTransit, expand, covered, truncated,
+            line(
+                depth,
+                p,
+                available,
+                inTransit,
+                expand,
+                covered,
+                truncated,
                 note(p, gap, expand, covered, truncated, maxDepth)));
       }
-      check(lines.size() <= MAX_LINES,
-          "展开结果超过 " + MAX_LINES + " 行，已中止：这不是一棵人能核对的物料清单，"
+      check(
+          lines.size() <= MAX_LINES,
+          "展开结果超过 "
+              + MAX_LINES
+              + " 行，已中止：这不是一棵人能核对的物料清单，"
               + "多半是某个组件的用量被填成了极小的数（于是每一层都要展开出几十个 SKU）。"
               + "请检查单位用量，或减小展开深度上限");
       current = next;
@@ -203,10 +206,12 @@ public class BomExplosionService {
     // 采购对象口径：只统计**不再向下展开**的行。中间层的量与它的下级不是相加关系
     // ——「缺 3 个半成品」与「下级缺 300 个面料」是两个采购对象，不是一个。
     List<BomExplosionLine> purchase = ordered.stream().filter(l -> !l.expanded()).toList();
-    BigDecimal totalRequired = purchase.stream().map(BomExplosionLine::requiredQuantity)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-    BigDecimal totalGap = purchase.stream().map(BomExplosionLine::gap)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal totalRequired =
+        purchase.stream()
+            .map(BomExplosionLine::requiredQuantity)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal totalGap =
+        purchase.stream().map(BomExplosionLine::gap).reduce(BigDecimal.ZERO, BigDecimal::add);
 
     String status = truncatedAny ? "TRUNCATED" : "COMPLETED";
     UUID runId = Ids.next();
@@ -217,9 +222,24 @@ public class BomExplosionService {
             + "output_quantity,warehouse_id,as_of,max_depth,reached_depth,status,line_count,"
             + "purchase_line_count,total_required,total_gap,requested_by,note)"
             + " values(?,?,?,?,?,?,?,?,?::timestamptz,?,?,?,?,?,?,?,?,?)",
-        runId, tenantId, root.bomId(), root.versionId(), root.versionNo(), root.outputSkuId(),
-        outputQuantity, input.warehouseId(), asOfDb, maxDepth, reachedDepth, status,
-        ordered.size(), purchase.size(), totalRequired, totalGap, actor.userId(), note);
+        runId,
+        tenantId,
+        root.bomId(),
+        root.versionId(),
+        root.versionNo(),
+        root.outputSkuId(),
+        outputQuantity,
+        input.warehouseId(),
+        asOfDb,
+        maxDepth,
+        reachedDepth,
+        status,
+        ordered.size(),
+        purchase.size(),
+        totalRequired,
+        totalGap,
+        actor.userId(),
+        note);
     for (BomExplosionLine l : ordered) {
       sql.execute(
           "insert into bom_explosion_line(id,tenant_id,run_id,parent_line_id,depth,path,sku_id,"
@@ -228,12 +248,34 @@ public class BomExplosionService {
               + "sub_bom_code,sub_version_id,sub_version_no,ambiguous_sub_bom,expanded,covered,"
               + "truncated,role,note)"
               + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          l.id(), tenantId, runId, l.parentLineId(), l.depth(), l.path(), l.skuId(),
-          l.componentId(), l.sourceVersionId(), l.sourceVersionNo(), l.sourceBomCode(),
-          l.unitQuantity(), l.scrapRate(), l.requiredQuantity(), l.available(), l.inTransit(),
-          l.gap(), l.isSubAssembly(), l.subBomId(), l.subBomCode(), l.subVersionId(),
-          l.subVersionNo(), l.ambiguousSubBom(), l.expanded(), l.covered(), l.truncated(),
-          l.role(), l.note());
+          l.id(),
+          tenantId,
+          runId,
+          l.parentLineId(),
+          l.depth(),
+          l.path(),
+          l.skuId(),
+          l.componentId(),
+          l.sourceVersionId(),
+          l.sourceVersionNo(),
+          l.sourceBomCode(),
+          l.unitQuantity(),
+          l.scrapRate(),
+          l.requiredQuantity(),
+          l.available(),
+          l.inTransit(),
+          l.gap(),
+          l.isSubAssembly(),
+          l.subBomId(),
+          l.subBomCode(),
+          l.subVersionId(),
+          l.subVersionNo(),
+          l.ambiguousSubBom(),
+          l.expanded(),
+          l.covered(),
+          l.truncated(),
+          l.role(),
+          l.note());
     }
     audit(actor, runId, "BomExploded");
     return view(tenantId, runId);
@@ -255,16 +297,14 @@ public class BomExplosionService {
   /**
    * 解析展开的根版本。
    *
-   * <p>给 {@code versionId} 就是「按这一版展开」（可含草稿：试算是纯计算不是事实）；
-   * 给 {@code bomId} 就是「按 {@code asOf} 这一刻生效的那一版」（规则 R4 的时刻查询），
-   * 与 06 采购建议、08 加工单取版本的形状一致。两个都给时以 versionId 为准（它更精确：
-   * bomId 只是用来反查版本），但必须校验两者指向同一个 BOM ——
-   * 不校验的话「展开 v2 却显示成另一个 BOM 的编码」会让人以为算错了。
+   * <p>给 {@code versionId} 就是「按这一版展开」（可含草稿：试算是纯计算不是事实）； 给 {@code bomId} 就是「按 {@code asOf}
+   * 这一刻生效的那一版」（规则 R4 的时刻查询）， 与 06 采购建议、08 加工单取版本的形状一致。两个都给时以 versionId 为准（它更精确： bomId
+   * 只是用来反查版本），但必须校验两者指向同一个 BOM —— 不校验的话「展开 v2 却显示成另一个 BOM 的编码」会让人以为算错了。
    */
   private Root resolveRoot(UUID tenantId, BomExplosionInput input, Instant asOf) {
-    check(input.versionId() != null || input.bomId() != null,
-        "请指定要展开的 BOM 版本，或指定 BOM 让系统按展开基准时刻取生效版本："
-            + "两个都不给的话无从判断「展开哪一份物料清单」");
+    check(
+        input.versionId() != null || input.bomId() != null,
+        "请指定要展开的 BOM 版本，或指定 BOM 让系统按展开基准时刻取生效版本：" + "两个都不给的话无从判断「展开哪一份物料清单」");
     UUID versionId = input.versionId();
     if (versionId == null) {
       Record effective =
@@ -273,10 +313,15 @@ public class BomExplosionService {
                   + " and v.effective_from<=?::timestamptz"
                   + " and (v.effective_to is null or ?::timestamptz<v.effective_to)"
                   + " order by v.effective_from desc limit 1",
-              tenantId, input.bomId(), utcOf(asOf), utcOf(asOf));
+              tenantId,
+              input.bomId(),
+              utcOf(asOf),
+              utcOf(asOf));
       if (effective == null) {
         throw notFound(
-            "在 " + asOf + " 这一刻这个 BOM 没有生效版本：可能只有草稿，或已发布版本的区间都还没到。"
+            "在 "
+                + asOf
+                + " 这一刻这个 BOM 没有生效版本：可能只有草稿，或已发布版本的区间都还没到。"
                 + "只有已发布版本参与生效判定（规则 R3）—— 按草稿领料、据草稿下单都不是事实。"
                 + "要按草稿试算请直接指定版本号");
       }
@@ -291,13 +336,16 @@ public class BomExplosionService {
                 + " join bom b on b.tenant_id=v.tenant_id and b.id=v.bom_id"
                 + " join sku s on s.tenant_id=b.tenant_id and s.id=b.output_sku_id"
                 + " where v.tenant_id=? and v.id=?",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     if (row == null) throw notFound("BOM 版本不存在");
     UUID bomId = row.get("bom_id", UUID.class);
     if (input.bomId() != null && !input.bomId().equals(bomId)) {
       throw bad(
-          "指定的版本不属于指定的 BOM：版本「" + row.get("version_no", String.class)
-              + "」属于 BOM " + row.get("bom_code", String.class)
+          "指定的版本不属于指定的 BOM：版本「"
+              + row.get("version_no", String.class)
+              + "」属于 BOM "
+              + row.get("bom_code", String.class)
               + "。两个都传时以版本为准，但它们必须指向同一个 BOM —— 否则页面上显示的 BOM 编码"
               + "与实际展开的那一版不是一回事，缺口的归属就无从判断");
     }
@@ -318,8 +366,7 @@ public class BomExplosionService {
   /**
    * 构建一层的待算行：读组件 → 判定子 BOM → 取子版本生效版 → 算出需求量。
    *
-   * <p>每层最多 4 条 SQL（组件 / 子 BOM 候选 / 子版本生效 / 可用量），不随组件数增长 ——
-   * 逐条查的话一层 50 个组件就是 150 次往返。
+   * <p>每层最多 4 条 SQL（组件 / 子 BOM 候选 / 子版本生效 / 可用量），不随组件数增长 —— 逐条查的话一层 50 个组件就是 150 次往返。
    */
   private List<Pending> buildLevel(
       UUID tenantId, List<Work> works, int depth, Root root, Instant asOf) {
@@ -330,13 +377,15 @@ public class BomExplosionService {
             "select c.version_id,c.id,c.sku_id,c.unit_quantity,c.scrap_rate,c.role,"
                 + "s.code as sku_code,s.name as sku_name"
                 + " from bom_component c join sku s on s.tenant_id=c.tenant_id and s.id=c.sku_id"
-                + " where c.tenant_id=? and c.version_id in " + placeholders(versionIds.size())
+                + " where c.tenant_id=? and c.version_id in "
+                + placeholders(versionIds.size())
                 + " order by c.version_id,s.code,c.id",
             concat(List.of(tenantId), new ArrayList<>(versionIds)).toArray());
 
     // 组件 SKU → 是不是子装配 + 取哪个子 BOM（规则 E3 第 1、2 步）。
     // bom 表对 (tenant_id, output_sku_id) 没有唯一约束，所以这里可能返回多个候选。
-    Map<UUID, List<BomExplosionRules.BomCandidate>> candidatesBySku = subBomCandidates(tenantId, components);
+    Map<UUID, List<BomExplosionRules.BomCandidate>> candidatesBySku =
+        subBomCandidates(tenantId, components);
     Set<UUID> chosenBomIds = new LinkedHashSet<>();
     Map<UUID, BomExplosionRules.BomCandidate> chosenBySku = new LinkedHashMap<>();
     Map<UUID, Boolean> ambiguousBySku = new LinkedHashMap<>();
@@ -356,15 +405,19 @@ public class BomExplosionService {
 
     List<Pending> out = new ArrayList<>();
     for (Work work : works) {
-      var rows = components.stream().filter(r -> r.get("version_id", UUID.class).equals(work.versionId()))
-          .toList();
+      var rows =
+          components.stream()
+              .filter(r -> r.get("version_id", UUID.class).equals(work.versionId()))
+              .toList();
       int ordinal = 0;
       for (Record r : rows) {
         ordinal++;
         UUID skuId = r.get("sku_id", UUID.class);
         String skuCode = r.get("sku_code", String.class);
-        String path = work.pathPrefix().isEmpty() ? String.valueOf(ordinal)
-            : work.pathPrefix() + "." + ordinal;
+        String path =
+            work.pathPrefix().isEmpty()
+                ? String.valueOf(ordinal)
+                : work.pathPrefix() + "." + ordinal;
 
         // 循环引用：当前路径上（成品 SKU 链）出现过的组件 SKU，说明 BOM 图绕回了自己。
         // 直接拒绝而不是截断 —— 见类注释 E4。
@@ -375,7 +428,8 @@ public class BomExplosionService {
         BigDecimal unitQuantity = r.get("unit_quantity", BigDecimal.class);
         BigDecimal scrapRate = r.get("scrap_rate", BigDecimal.class);
         // 规则 R7 逐层递推：驱动量在顶层是成品数量，在子层是父行的缺口。
-        BigDecimal required = BomExplosionRules.requiredQuantity(work.driver(), unitQuantity, scrapRate);
+        BigDecimal required =
+            BomExplosionRules.requiredQuantity(work.driver(), unitQuantity, scrapRate);
 
         var candidate = chosenBySku.get(skuId);
         boolean isSub = candidate != null;
@@ -389,26 +443,52 @@ public class BomExplosionService {
           var version = isSub ? effectiveSub.get(candidate.id()) : null;
           if (version == null) {
             // 取不到生效版本 → 按叶子件处理，并说清为什么（规则 E3 第 3 步）。
-            note = "这个组件本身是另一个 BOM 的成品（" + candidate.code()
-                + "），但在 " + asOf + " 这一刻没有生效版本，所以按采购件处理 —— "
-                + "只有已发布版本参与生效判定（规则 R3），按草稿领料、据草稿下单都不是事实";
+            note =
+                "这个组件本身是另一个 BOM 的成品（"
+                    + candidate.code()
+                    + "），但在 "
+                    + asOf
+                    + " 这一刻没有生效版本，所以按采购件处理 —— "
+                    + "只有已发布版本参与生效判定（规则 R3），按草稿领料、据草稿下单都不是事实";
           } else {
             subVersionId = version.get("id", UUID.class);
             subVersionNo = version.get("version_no", String.class);
-            note = (ambiguous
-                    ? "这个成品 SKU 被 " + candidatesBySku.get(skuId).size()
-                        + " 个 BOM 同时声明为产出（" + joinCodes(candidatesBySku.get(skuId))
-                        + "），本次按编码序取第一个（" + candidate.code() + "）"
+            note =
+                (ambiguous
+                    ? "这个成品 SKU 被 "
+                        + candidatesBySku.get(skuId).size()
+                        + " 个 BOM 同时声明为产出（"
+                        + joinCodes(candidatesBySku.get(skuId))
+                        + "），本次按编码序取第一个（"
+                        + candidate.code()
+                        + "）"
                     : "子装配：" + candidate.code() + " 的 " + subVersionNo);
           }
         }
         out.add(
             new Pending(
-                Ids.next(), work.parentLineId(), path, skuId, skuCode,
-                r.get("sku_name", String.class), r.get("id", UUID.class), work.versionId(),
-                work.versionNo(), work.bomCode(), unitQuantity, scrapRate, required, isSub,
-                candidate, ambiguous, subVersionId, subVersionNo, r.get("role", String.class),
-                note, work.ancestorSkus(), work.ancestorCodes()));
+                Ids.next(),
+                work.parentLineId(),
+                path,
+                skuId,
+                skuCode,
+                r.get("sku_name", String.class),
+                r.get("id", UUID.class),
+                work.versionId(),
+                work.versionNo(),
+                work.bomCode(),
+                unitQuantity,
+                scrapRate,
+                required,
+                isSub,
+                candidate,
+                ambiguous,
+                subVersionId,
+                subVersionNo,
+                r.get("role", String.class),
+                note,
+                work.ancestorSkus(),
+                work.ancestorCodes()));
       }
     }
     return out;
@@ -417,7 +497,8 @@ public class BomExplosionService {
   /** 一次问齐「哪些组件 SKU 是某个 BOM 的成品」以及候选子 BOM。 */
   private Map<UUID, List<BomExplosionRules.BomCandidate>> subBomCandidates(
       UUID tenantId, List<Record> components) {
-    List<UUID> skuIds = components.stream().map(r -> r.get("sku_id", UUID.class)).distinct().toList();
+    List<UUID> skuIds =
+        components.stream().map(r -> r.get("sku_id", UUID.class)).distinct().toList();
     if (skuIds.isEmpty()) return Map.of();
     var rows =
         sql.fetch(
@@ -429,7 +510,9 @@ public class BomExplosionService {
     for (Record r : rows) {
       bySku
           .computeIfAbsent(r.get("output_sku_id", UUID.class), k -> new ArrayList<>())
-          .add(new BomExplosionRules.BomCandidate(r.get("id", UUID.class), r.get("code", String.class)));
+          .add(
+              new BomExplosionRules.BomCandidate(
+                  r.get("id", UUID.class), r.get("code", String.class)));
     }
     return bySku;
   }
@@ -437,8 +520,8 @@ public class BomExplosionService {
   /**
    * 一次问齐「这些子 BOM 在 as_of 这一刻生效的是哪一版」。
    *
-   * <p>半开区间判定与 V25 的触发器同一段 SQL 形状（{@code from <= at < (to is null or at < to)}），
-   * 只取已发布版本（规则 R3）。规则 R2 保证同一 BOM 至多命中一行。
+   * <p>半开区间判定与 V25 的触发器同一段 SQL 形状（{@code from <= at < (to is null or at < to)}）， 只取已发布版本（规则 R3）。规则
+   * R2 保证同一 BOM 至多命中一行。
    */
   private Map<UUID, Record> effectiveSubVersions(UUID tenantId, Set<UUID> bomIds, Instant asOf) {
     if (bomIds.isEmpty()) return Map.of();
@@ -446,7 +529,8 @@ public class BomExplosionService {
     var rows =
         sql.fetch(
             "select bom_id,id,version_no from bom_version where tenant_id=? and status='PUBLISHED'"
-                + " and bom_id in " + placeholders(ids.size())
+                + " and bom_id in "
+                + placeholders(ids.size())
                 + " and effective_from<=?::timestamptz"
                 + " and (effective_to is null or ?::timestamptz<effective_to)"
                 + " order by bom_id,effective_from desc,id",
@@ -463,15 +547,12 @@ public class BomExplosionService {
   /**
    * 取这一层的可用量与在途（规则 E2 的两个来源）。
    *
-   * <p><b>跨服务</b>：可用与在途是 warehouse 的事实，catalog 既不 JOIN 也不复制，
-   * 通过授权端点按 SKU 集合批量取。整层一次调用（不是每行一次）。
+   * <p><b>跨服务</b>：可用与在途是 warehouse 的事实，catalog 既不 JOIN 也不复制， 通过授权端点按 SKU 集合批量取。整层一次调用（不是每行一次）。
    *
-   * <p>拿不到时**整个展开失败**而不是把可用当成 0：把「查不到」当成 0 会让每个组件
-   * 都显示缺货，进而生成一张全是虚假缺口的采购单。
+   * <p>拿不到时**整个展开失败**而不是把可用当成 0：把「查不到」当成 0 会让每个组件 都显示缺货，进而生成一张全是虚假缺口的采购单。
    *
-   * <p>返回按行 id 索引的不可变结果 —— <b>不做成字段</b>：本类是 Spring 单例，
-   * 把一次展开的中间态挂在字段上会让并发请求互相覆盖，甚至把 A 租户的可用量
-   * 算进 B 租户的缺口。
+   * <p>返回按行 id 索引的不可变结果 —— <b>不做成字段</b>：本类是 Spring 单例， 把一次展开的中间态挂在字段上会让并发请求互相覆盖，甚至把 A 租户的可用量 算进 B
+   * 租户的缺口。
    */
   private Map<UUID, Stock> applyAvailability(
       List<Pending> pending, String bearer, UUID warehouseId) {
@@ -512,36 +593,66 @@ public class BomExplosionService {
       boolean truncated,
       String note) {
     BigDecimal gap = BomExplosionRules.gap(p.required(), available, inTransit);
-    boolean isCovered = forceCovered || BomExplosionRules.covered(p.required(), available, inTransit);
+    boolean isCovered =
+        forceCovered || BomExplosionRules.covered(p.required(), available, inTransit);
     return new BomExplosionLine(
-        p.lineId(), p.parentLineId(), depth, p.path(), p.skuId(), p.skuCode(),
-        p.skuName(), p.componentId(), p.sourceVersionId(), p.sourceVersionNo(), p.sourceBomCode(),
-        p.unitQuantity(), p.scrapRate(), p.required(), available, inTransit, gap,
-        BomExplosionRules.surplus(p.required(), available, inTransit), p.isSubAssembly(),
+        p.lineId(),
+        p.parentLineId(),
+        depth,
+        p.path(),
+        p.skuId(),
+        p.skuCode(),
+        p.skuName(),
+        p.componentId(),
+        p.sourceVersionId(),
+        p.sourceVersionNo(),
+        p.sourceBomCode(),
+        p.unitQuantity(),
+        p.scrapRate(),
+        p.required(),
+        available,
+        inTransit,
+        gap,
+        BomExplosionRules.surplus(p.required(), available, inTransit),
+        p.isSubAssembly(),
         p.subBom() == null ? null : p.subBom().id(),
-        p.subBom() == null ? null : p.subBom().code(), p.subVersionId(), p.subVersionNo(),
-        p.ambiguousSubBom(), expanded, isCovered, truncated, p.role(), note);
+        p.subBom() == null ? null : p.subBom().code(),
+        p.subVersionId(),
+        p.subVersionNo(),
+        p.ambiguousSubBom(),
+        expanded,
+        isCovered,
+        truncated,
+        p.role(),
+        note);
   }
 
   /**
    * 组合一行的说明。
    *
-   * <p><b>基础说明永远保留在前面</b>：子 BOM 歧义告警（「被 2 个 BOM 同时声明为产出」）
-   * 与「子级用量按缺口递推」这类展开说明是**两件事**，后者一旦覆盖前者，
+   * <p><b>基础说明永远保留在前面</b>：子 BOM 歧义告警（「被 2 个 BOM 同时声明为产出」） 与「子级用量按缺口递推」这类展开说明是**两件事**，后者一旦覆盖前者，
    * 恰恰是在真正展开歧义行的那一刻把告警吞掉 —— 那正是最需要看见它的时刻。
    */
   private static String note(
       Pending p, BigDecimal gap, boolean expand, boolean covered, boolean truncated, int maxDepth) {
     StringBuilder out = new StringBuilder(p.note());
     if (expand) {
-      out.append("；已按 ").append(p.subBom().code()).append(" 的 ").append(p.subVersionNo())
-          .append(" 继续展开（子级用量按本行缺口 ").append(plain(gap)).append(" 递推）");
+      out.append("；已按 ")
+          .append(p.subBom().code())
+          .append(" 的 ")
+          .append(p.subVersionNo())
+          .append(" 继续展开（子级用量按本行缺口 ")
+          .append(plain(gap))
+          .append(" 递推）");
     } else if (covered) {
       out.append("；可用 + 在途已覆盖本行需求，无需向下展开");
     } else if (truncated) {
-      out.append("；已展开到第 ").append(maxDepth)
+      out.append("；已展开到第 ")
+          .append(maxDepth)
           .append(" 层展开深度上限，这个组件仍是另一个 BOM 的成品（")
-          .append(p.subBom().code()).append(" 的 ").append(p.subVersionNo())
+          .append(p.subBom().code())
+          .append(" 的 ")
+          .append(p.subVersionNo())
           .append("），它的下级没有展开 —— 这份清单不完整");
     }
     return out.toString();
@@ -552,15 +663,13 @@ public class BomExplosionService {
   /**
    * 循环引用：整个展开被拒绝（409），错误信息逐个点名绕回路径。
    *
-   * <p>判定键是<b>当前路径上出现过的成品 SKU</b>：子 BOM 由 {@code output_sku_id} 唯一确定，
-   * 所以「同一个 SKU 在自己的祖先链上再次出现」等价于「BOM 图上绕回了自己」。
+   * <p>判定键是<b>当前路径上出现过的成品 SKU</b>：子 BOM 由 {@code output_sku_id} 唯一确定， 所以「同一个 SKU
+   * 在自己的祖先链上再次出现」等价于「BOM 图上绕回了自己」。
    *
-   * <p><b>为什么拒绝而不是截断</b>：绕回自己意味着这批料的需求量在数学上无界，
-   * 任何有限的截断结果都是一个错的小数，而它会被当成采购建议下成真实的单。
-   * 静默死循环更是直接挂住服务 —— 两者都比报错坏。
+   * <p><b>为什么拒绝而不是截断</b>：绕回自己意味着这批料的需求量在数学上无界， 任何有限的截断结果都是一个错的小数，而它会被当成采购建议下成真实的单。 静默死循环更是直接挂住服务 ——
+   * 两者都比报错坏。
    *
-   * <p><b>这一层约束数据库做不到</b>：bom_component 只引用 SKU 不引用 BOM（V25 的刻意选择），
-   * 只有真正展开时才知道绕回，所以纵深防线在服务层。
+   * <p><b>这一层约束数据库做不到</b>：bom_component 只引用 SKU 不引用 BOM（V25 的刻意选择）， 只有真正展开时才知道绕回，所以纵深防线在服务层。
    */
   private static ResponseStatusException cycle(Root root, Work work, String skuCode, UUID skuId) {
     List<String> chain = new ArrayList<>(work.ancestorCodes());
@@ -576,8 +685,12 @@ public class BomExplosionService {
             + skuCode
             + "」又是祖先链上的某个成品，BOM 图绕回了自己 —— 这批料的需求量在数学上无界，"
             + "任何有限的截断结果都是错的小数，而它会被当成采购建议下成真实的单。"
-            + "请改掉这条组件引用（BOM " + root.bomCode() + " 的 " + root.versionNo()
-            + "，祖先链：" + String.join(" → ", work.ancestorCodes())
+            + "请改掉这条组件引用（BOM "
+            + root.bomCode()
+            + " 的 "
+            + root.versionNo()
+            + "，祖先链："
+            + String.join(" → ", work.ancestorCodes())
             + "）。注意：这条约束在数据库层做不到，因为组件行只引用 SKU 不引用 BOM，"
             + "只有真正展开时才知道绕回");
   }
@@ -618,7 +731,8 @@ public class BomExplosionService {
             "select r.id,r.bom_id,b.code as bom_code,r.version_id,r.version_no,r.output_sku_id,"
                 + "s.code as output_sku_code,r.output_quantity,r.warehouse_id,r.as_of,r.status,"
                 + "r.reached_depth,r.line_count,r.purchase_line_count,r.total_gap,r.created_at"
-                + from + where
+                + from
+                + where
                 + " order by r.created_at desc,r.id desc limit ? offset ?",
             pageBinds.toArray());
     List<BomExplosionRunRow> items = new ArrayList<>(rows.size());
@@ -626,18 +740,28 @@ public class BomExplosionService {
       String status = r.get("status", String.class);
       items.add(
           new BomExplosionRunRow(
-              r.get("id", UUID.class), r.get("bom_id", UUID.class), r.get("bom_code", String.class),
-              r.get("version_id", UUID.class), r.get("version_no", String.class),
-              r.get("output_sku_id", UUID.class), r.get("output_sku_code", String.class),
-              r.get("output_quantity", BigDecimal.class), r.get("warehouse_id", UUID.class),
-              r.get("as_of", OffsetDateTime.class) == null ? null
+              r.get("id", UUID.class),
+              r.get("bom_id", UUID.class),
+              r.get("bom_code", String.class),
+              r.get("version_id", UUID.class),
+              r.get("version_no", String.class),
+              r.get("output_sku_id", UUID.class),
+              r.get("output_sku_code", String.class),
+              r.get("output_quantity", BigDecimal.class),
+              r.get("warehouse_id", UUID.class),
+              r.get("as_of", OffsetDateTime.class) == null
+                  ? null
                   : r.get("as_of", OffsetDateTime.class).toInstant().toString(),
-              status, "TRUNCATED".equals(status), r.get("reached_depth", Integer.class),
-              r.get("line_count", Integer.class), r.get("purchase_line_count", Integer.class),
+              status,
+              "TRUNCATED".equals(status),
+              r.get("reached_depth", Integer.class),
+              r.get("line_count", Integer.class),
+              r.get("purchase_line_count", Integer.class),
               r.get("total_gap", BigDecimal.class),
               r.get("created_at", OffsetDateTime.class).toInstant().toString()));
     }
-    return new BomExplosionRunPage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new BomExplosionRunPage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   private BomExplosionRun view(UUID tenantId, UUID id) {
@@ -653,7 +777,8 @@ public class BomExplosionService {
                 + " join bom_version v on v.tenant_id=r.tenant_id and v.id=r.version_id"
                 + " join sku s on s.tenant_id=r.tenant_id and s.id=r.output_sku_id"
                 + " where r.tenant_id=? and r.id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (r == null) throw notFound("展开记录不存在");
     var lineRows =
         sql.fetch(
@@ -665,7 +790,8 @@ public class BomExplosionService {
                 + "l.truncated,l.role,l.note"
                 + " from bom_explosion_line l join sku s on s.tenant_id=l.tenant_id and s.id=l.sku_id"
                 + " where l.tenant_id=? and l.run_id=? order by l.path",
-            tenantId, id);
+            tenantId,
+            id);
     List<BomExplosionLine> lines = new ArrayList<>(lineRows.size());
     for (Record x : lineRows) {
       BigDecimal required = x.get("required_quantity", BigDecimal.class);
@@ -673,22 +799,34 @@ public class BomExplosionService {
       BigDecimal inTransit = x.get("in_transit", BigDecimal.class);
       lines.add(
           new BomExplosionLine(
-              x.get("id", UUID.class), x.get("parent_line_id", UUID.class),
-              x.get("depth", Integer.class), x.get("path", String.class),
-              x.get("sku_id", UUID.class), x.get("sku_code", String.class),
-              x.get("sku_name", String.class), x.get("component_id", UUID.class),
-              x.get("source_version_id", UUID.class), x.get("source_version_no", String.class),
-              x.get("source_bom_code", String.class), x.get("unit_quantity", BigDecimal.class),
-              x.get("scrap_rate", BigDecimal.class), required, available, inTransit,
+              x.get("id", UUID.class),
+              x.get("parent_line_id", UUID.class),
+              x.get("depth", Integer.class),
+              x.get("path", String.class),
+              x.get("sku_id", UUID.class),
+              x.get("sku_code", String.class),
+              x.get("sku_name", String.class),
+              x.get("component_id", UUID.class),
+              x.get("source_version_id", UUID.class),
+              x.get("source_version_no", String.class),
+              x.get("source_bom_code", String.class),
+              x.get("unit_quantity", BigDecimal.class),
+              x.get("scrap_rate", BigDecimal.class),
+              required,
+              available,
+              inTransit,
               x.get("gap", BigDecimal.class),
               BomExplosionRules.surplus(required, available, inTransit),
               Boolean.TRUE.equals(x.get("is_sub_assembly", Boolean.class)),
-              x.get("sub_bom_id", UUID.class), x.get("sub_bom_code", String.class),
-              x.get("sub_version_id", UUID.class), x.get("sub_version_no", String.class),
+              x.get("sub_bom_id", UUID.class),
+              x.get("sub_bom_code", String.class),
+              x.get("sub_version_id", UUID.class),
+              x.get("sub_version_no", String.class),
               Boolean.TRUE.equals(x.get("ambiguous_sub_bom", Boolean.class)),
               Boolean.TRUE.equals(x.get("expanded", Boolean.class)),
               Boolean.TRUE.equals(x.get("covered", Boolean.class)),
-              Boolean.TRUE.equals(x.get("truncated", Boolean.class)), x.get("role", String.class),
+              Boolean.TRUE.equals(x.get("truncated", Boolean.class)),
+              x.get("role", String.class),
               x.get("note", String.class)));
     }
     String status = r.get("status", String.class);
@@ -696,21 +834,35 @@ public class BomExplosionService {
     OffsetDateTime asOf = r.get("as_of", OffsetDateTime.class);
     List<BomExplosionLine> sorted = sortByPath(lines);
     return new BomExplosionRun(
-        r.get("id", UUID.class), r.get("bom_id", UUID.class), r.get("bom_code", String.class),
-        r.get("version_id", UUID.class), r.get("version_no", String.class),
-        r.get("version_status", String.class), r.get("version_name", String.class),
-        r.get("output_sku_id", UUID.class), r.get("output_sku_code", String.class),
-        r.get("output_sku_name", String.class), r.get("output_quantity", BigDecimal.class),
-        r.get("warehouse_id", UUID.class), asOf == null ? null : asOf.toInstant().toString(),
-        r.get("max_depth", Integer.class), r.get("reached_depth", Integer.class), status,
-        truncated, r.get("line_count", Integer.class),
-        r.get("purchase_line_count", Integer.class), r.get("total_required", BigDecimal.class),
-        r.get("total_gap", BigDecimal.class), r.get("requested_by", UUID.class),
-        r.get("note", String.class), sorted,
+        r.get("id", UUID.class),
+        r.get("bom_id", UUID.class),
+        r.get("bom_code", String.class),
+        r.get("version_id", UUID.class),
+        r.get("version_no", String.class),
+        r.get("version_status", String.class),
+        r.get("version_name", String.class),
+        r.get("output_sku_id", UUID.class),
+        r.get("output_sku_code", String.class),
+        r.get("output_sku_name", String.class),
+        r.get("output_quantity", BigDecimal.class),
+        r.get("warehouse_id", UUID.class),
+        asOf == null ? null : asOf.toInstant().toString(),
+        r.get("max_depth", Integer.class),
+        r.get("reached_depth", Integer.class),
+        status,
+        truncated,
+        r.get("line_count", Integer.class),
+        r.get("purchase_line_count", Integer.class),
+        r.get("total_required", BigDecimal.class),
+        r.get("total_gap", BigDecimal.class),
+        r.get("requested_by", UUID.class),
+        r.get("note", String.class),
+        sorted,
         calculationNote(r, asOf, truncated, status));
   }
 
-  private static String calculationNote(Record r, OffsetDateTime asOf, boolean truncated, String status) {
+  private static String calculationNote(
+      Record r, OffsetDateTime asOf, boolean truncated, String status) {
     return "需求量按「单位用量 × 驱动量 × (1 + 损耗率/100)」逐层递推，保留 6 位小数"
         + "**不取整**（规则 R7，损耗率是百分数：5 = 5%）。"
         + "顶层行的驱动量是成品数量，子层行的驱动量是**父行的缺口** —— "
@@ -721,12 +873,11 @@ public class BomExplosionService {
             ? "本次不限仓库（在途按全租户合计）。"
             : "本次按仓库过滤：在途取的是发往该仓的货，发出去只会让来源仓变少。")
         + "可用与在途来自 warehouse 服务的授权端点，catalog 不存任何库存副本。"
-        + "展开基准时刻 " + (asOf == null ? "—" : asOf.toInstant())
+        + "展开基准时刻 "
+        + (asOf == null ? "—" : asOf.toInstant())
         + " 决定了每一层子 BOM 取哪一版（只有已发布版本参与，规则 R3）。"
         + "合计只统计**不再向下展开**的行：中间层的量与它的下级不是相加关系。"
-        + (truncated
-            ? "**本次结果不完整**：命中了展开深度上限，还有下级没有展开（状态 " + status + "）。"
-            : "");
+        + (truncated ? "**本次结果不完整**：命中了展开深度上限，还有下级没有展开（状态 " + status + "）。" : "");
   }
 
   // ================================================================ 辅助
@@ -746,8 +897,7 @@ public class BomExplosionService {
   /**
    * 按物化路径排序。
    *
-   * <p>不能直接按字符串排：{@code "10"} 在字符串序里排在 {@code "2"} 前面，
-   * 那样展开树在页面上会变成 1, 10, 11, 2…，父子顺序全乱。
+   * <p>不能直接按字符串排：{@code "10"} 在字符串序里排在 {@code "2"} 前面， 那样展开树在页面上会变成 1, 10, 11, 2…，父子顺序全乱。
    * 逐段按数值比较才是路径的真正顺序。
    */
   private static final java.util.Comparator<List<Integer>> PATH_KEY_ORDER =

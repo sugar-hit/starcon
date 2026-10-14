@@ -22,8 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.2.1.1 属性定义列表：租户级属性字典 CRUD、选项集合、类目绑定规则、真实分页，
- * 以及租户隔离三断言。
+ * 3.2.1.1 属性定义列表：租户级属性字典 CRUD、选项集合、类目绑定规则、真实分页， 以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -210,7 +209,9 @@ class AttributeDictionaryIntegrationTest {
 
   /** 建一条文本字典条目（最简形态）。 */
   UUID dict(String code, String name) {
-    return write(actor, () -> dictionary.save(actor, null, input(code, name, "TEXT", "DESCRIPTION", List.of())))
+    return write(
+            actor,
+            () -> dictionary.save(actor, null, input(code, name, "TEXT", "DESCRIPTION", List.of())))
         .id();
   }
 
@@ -224,19 +225,19 @@ class AttributeDictionaryIntegrationTest {
 
   UUID spu(String category) {
     return write(
-            actor,
-            () ->
-                catalog.saveSpu(
-                    actor,
-                    null,
-                    new SpuInput(
-                        "AD-" + UUID.randomUUID().toString().substring(0, 8),
-                        "属性字典测试商品",
-                        "描述",
-                        "品牌",
-                        category,
-                        "DRAFT",
-                        0)));
+        actor,
+        () ->
+            catalog.saveSpu(
+                actor,
+                null,
+                new SpuInput(
+                    "AD-" + UUID.randomUUID().toString().substring(0, 8),
+                    "属性字典测试商品",
+                    "描述",
+                    "品牌",
+                    category,
+                    "DRAFT",
+                    0)));
   }
 
   static String between(String text, String prefix, String suffix) {
@@ -309,8 +310,7 @@ class AttributeDictionaryIntegrationTest {
     assertThatThrownBy(() -> dict(code, "第二个"))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -331,11 +331,18 @@ class AttributeDictionaryIntegrationTest {
             .version();
 
     // 改编码：必须被拒并说明原因（SPU 级定义与规格轴都按 code 对齐它）。
-    assertThatThrownBy(() -> write(actor, () -> dictionary.save(actor, id, input(uniqueCode("OTHER"), "改名了", "TEXT", "DESCRIPTION", List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        dictionary.save(
+                            actor,
+                            id,
+                            input(uniqueCode("OTHER"), "改名了", "TEXT", "DESCRIPTION", List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
 
     // 改数据类型：同样被拒（已存在的取值与类目范围都按这个类型解析）。
     assertThatThrownBy(
@@ -364,8 +371,7 @@ class AttributeDictionaryIntegrationTest {
                                 version))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
 
     // 名称/用途/筛选这些可变字段要真的能改。
     var updated = write(actor, () -> dictionary.save(actor, id, rename(code, "新名", version)));
@@ -378,11 +384,11 @@ class AttributeDictionaryIntegrationTest {
     String code = uniqueCode("VER");
     UUID id = dict(code, "乐观锁");
     // 存盘时 version=0；带 99 提交必须 409，且不能把改动写进去。
-    assertThatThrownBy(() -> write(actor, () -> dictionary.save(actor, id, rename(code, "不该写进去", 99))))
+    assertThatThrownBy(
+            () -> write(actor, () -> dictionary.save(actor, id, rename(code, "不该写进去", 99))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
     assertThat(tx(actor, () -> dictionary.options(id))).isEmpty();
     var row =
         tx(
@@ -406,7 +412,8 @@ class AttributeDictionaryIntegrationTest {
                         dictionary.save(
                             actor,
                             null,
-                            input(uniqueCode("NOOPT"), "枚举没选项", "OPTION", "DESCRIPTION", List.of()))))
+                            input(
+                                uniqueCode("NOOPT"), "枚举没选项", "OPTION", "DESCRIPTION", List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("至少提供一个选项");
     // 非枚举属性不能挂选项。
@@ -553,7 +560,8 @@ class AttributeDictionaryIntegrationTest {
     assertThat(secondPage.items()).hasSize(2);
     // 两页不能重叠：真实分页，不是把同一批数据换个标签。
     assertThat(secondPage.items().stream().map(AttributeDefinitionRow::code).toList())
-        .doesNotContainAnyElementsOf(firstPage.items().stream().map(AttributeDefinitionRow::code).toList());
+        .doesNotContainAnyElementsOf(
+            firstPage.items().stream().map(AttributeDefinitionRow::code).toList());
 
     var lastPage =
         tx(
@@ -579,7 +587,8 @@ class AttributeDictionaryIntegrationTest {
             actor,
             () ->
                 dictionary.list(
-                    new AttributeDefinitionQuery(prefix, "DECIMAL", null, null, null, null, 0, 20)));
+                    new AttributeDefinitionQuery(
+                        prefix, "DECIMAL", null, null, null, null, 0, 20)));
     assertThat(byType.items()).isEmpty();
     assertThat(byType.total()).isZero();
 
@@ -596,7 +605,8 @@ class AttributeDictionaryIntegrationTest {
             actor,
             () ->
                 dictionary.list(
-                    new AttributeDefinitionQuery("含百分号100%", null, null, null, null, null, 0, 200)));
+                    new AttributeDefinitionQuery(
+                        "含百分号100%", null, null, null, null, null, 0, 200)));
     assertThat(page.items()).extracting(AttributeDefinitionRow::code).containsExactly(code);
   }
 
@@ -646,10 +656,7 @@ class AttributeDictionaryIntegrationTest {
     assertThat(rows).extracting(AttributeOptionRow::value).containsExactly("红色", "蓝色");
     assertThat(rows).allMatch(AttributeOptionRow::enabled);
 
-    write(
-        actor,
-        () ->
-            dictionary.addOption(actor, id, new AttributeOptionInput(" 绿色 ", 5, true)));
+    write(actor, () -> dictionary.addOption(actor, id, new AttributeOptionInput(" 绿色 ", 5, true)));
     assertThat(tx(actor, () -> dictionary.options(id)))
         .extracting(AttributeOptionRow::value)
         .containsExactly("红色", "蓝色", "绿色");
@@ -659,18 +666,16 @@ class AttributeDictionaryIntegrationTest {
                     actor,
                     () ->
                         sql.fetchOne(
-                                "select value,position from attribute_option"
-                                    + " where attribute_id=? and value='绿色'",
-                                id))
+                            "select value,position from attribute_option"
+                                + " where attribute_id=? and value='绿色'",
+                            id))
                 .get("position", Integer.class))
         .isEqualTo(5);
 
     // 改位置与启用状态（停用不删除）。
     write(
         actor,
-        () ->
-            dictionary.updateOption(
-                actor, id, "红色", new AttributeOptionInput("红色", 9, false)));
+        () -> dictionary.updateOption(actor, id, "红色", new AttributeOptionInput("红色", 9, false)));
     var disabled =
         tx(actor, () -> dictionary.options(id)).stream()
             .filter(r -> r.value().equals("红色"))
@@ -702,8 +707,7 @@ class AttributeDictionaryIntegrationTest {
             () ->
                 write(
                     actor,
-                    () ->
-                        dictionary.addOption(actor, id, new AttributeOptionInput("棉", 0, true))))
+                    () -> dictionary.addOption(actor, id, new AttributeOptionInput("棉", 0, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("只有枚举属性");
   }
@@ -717,8 +721,7 @@ class AttributeDictionaryIntegrationTest {
             dictionary.saveCategoryRule(
                 actor,
                 id,
-                new CategoryAttributeRuleInput(
-                    "服饰", true, null, null, 0, List.of("XL"))));
+                new CategoryAttributeRuleInput("服饰", true, null, null, 0, List.of("XL"))));
     // 选项列表要把「被几条类目规则引用」讲出来，否则用户点了删除才知道删不掉。
     var option =
         tx(actor, () -> dictionary.options(id)).stream()
@@ -756,8 +759,7 @@ class AttributeDictionaryIntegrationTest {
                         dictionary.addOption(
                             actor,
                             id,
-                            new AttributeOptionInput(
-                                "第51个" + UUID.randomUUID(), 51, true))))
+                            new AttributeOptionInput("第51个" + UUID.randomUUID(), 51, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("最多配置 50 个选项");
   }
@@ -805,7 +807,8 @@ class AttributeDictionaryIntegrationTest {
                         dictionary.saveCategoryRule(
                             actor,
                             id,
-                            new CategoryAttributeRuleInput("服饰", false, null, null, 0, List.of("不存在的颜色")))))
+                            new CategoryAttributeRuleInput(
+                                "服饰", false, null, null, 0, List.of("不存在的颜色")))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不在该属性的选项集合里");
   }
@@ -847,7 +850,12 @@ class AttributeDictionaryIntegrationTest {
                             actor,
                             id,
                             new CategoryAttributeRuleInput(
-                                category, false, new BigDecimal("30"), new BigDecimal("1"), 0, List.of()))))
+                                category,
+                                false,
+                                new BigDecimal("30"),
+                                new BigDecimal("1"),
+                                0,
+                                List.of()))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("下限不能大于上限");
     // 枚举属性不能用取值上下限表达范围（范围形态的校验先于可选值形态报错，
@@ -920,15 +928,20 @@ class AttributeDictionaryIntegrationTest {
         actor,
         () ->
             dictionary.saveCategoryRule(
-                actor, first, new CategoryAttributeRuleInput(category, true, null, null, 0, List.of())));
+                actor,
+                first,
+                new CategoryAttributeRuleInput(category, true, null, null, 0, List.of())));
     write(
         actor,
         () ->
             dictionary.saveCategoryRule(
-                actor, second, new CategoryAttributeRuleInput(category, false, null, null, 0, List.of())));
+                actor,
+                second,
+                new CategoryAttributeRuleInput(category, false, null, null, 0, List.of())));
     assertThat(tx(actor, () -> dictionary.categoryRules(category, first))).hasSize(1);
     assertThat(tx(actor, () -> dictionary.categoryRules(category, second))).hasSize(1);
-    assertThat(tx(actor, () -> dictionary.categoryRules(null, null)).size()).isGreaterThanOrEqualTo(2);
+    assertThat(tx(actor, () -> dictionary.categoryRules(null, null)).size())
+        .isGreaterThanOrEqualTo(2);
   }
 
   @Test
@@ -939,7 +952,9 @@ class AttributeDictionaryIntegrationTest {
         actor,
         () ->
             dictionary.saveCategoryRule(
-                actor, id, new CategoryAttributeRuleInput(category, true, null, null, 0, List.of())));
+                actor,
+                id,
+                new CategoryAttributeRuleInput(category, true, null, null, 0, List.of())));
     write(actor, () -> dictionary.delete(actor, id, 0));
     // 规则跟着属性走：属性没了要求就没有意义，留着会变成指向空处的死规则。
     assertThat(tx(actor, () -> dictionary.categoryRules(category, null)))
@@ -990,7 +1005,8 @@ class AttributeDictionaryIntegrationTest {
             dictionary.saveCategoryRule(
                 actor,
                 optId,
-                new CategoryAttributeRuleInput(uniqueCategory("服饰"), true, null, null, 0, List.of())));
+                new CategoryAttributeRuleInput(
+                    uniqueCategory("服饰"), true, null, null, 0, List.of())));
     var after =
         tx(actor, () -> dictionary.overview()).topUsedAttributes().stream()
             .filter(u -> u.id().equals(optId))
@@ -1053,11 +1069,11 @@ class AttributeDictionaryIntegrationTest {
                 write(
                     actorB,
                     () ->
-                        dictionary.addOption(actorB, myId, new AttributeOptionInput("越权写入", 9, true))))
+                        dictionary.addOption(
+                            actorB, myId, new AttributeOptionInput("越权写入", 9, true))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 改 A 的字典条目 → 404
     assertThatThrownBy(
             () ->
@@ -1070,8 +1086,7 @@ class AttributeDictionaryIntegrationTest {
                             input(myCode, "B 改的名字", "OPTION", "DESCRIPTION", List.of("x")))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 删 A 的字典条目 → 404
     assertThatThrownBy(() -> write(actorB, () -> dictionary.delete(actorB, myId, 0)))
         .isInstanceOf(ResponseStatusException.class);
@@ -1171,7 +1186,8 @@ class AttributeDictionaryIntegrationTest {
             .getContentAsString();
     String id = between(created, "\"id\":\"", "\"");
     http.perform(
-            get("/catalog/attributes/" + id + "/options").header("Authorization", "Bearer tenant-a"))
+            get("/catalog/attributes/" + id + "/options")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("红色")));
     http.perform(
@@ -1187,8 +1203,7 @@ class AttributeDictionaryIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("服饰")));
     // 未认证 → 不能是 200（身份服务拒绝或不可达都算）。
-    int anonymous =
-        http.perform(get("/catalog/attributes")).andReturn().getResponse().getStatus();
+    int anonymous = http.perform(get("/catalog/attributes")).andReturn().getResponse().getStatus();
     assertThat(anonymous).isNotEqualTo(200);
   }
 
@@ -1242,8 +1257,8 @@ class AttributeDictionaryIntegrationTest {
   }
 
   /**
-   * V11 改了 {@code attribute_definition} 与 {@code attribute_option}，这里是给已交付的
-   * 3.2.2.1（SPU 公共属性）立的回归桩：字典提升之后，SPU 级定义与属性赋值必须照常工作。
+   * V11 改了 {@code attribute_definition} 与 {@code attribute_option}，这里是给已交付的 3.2.2.1（SPU
+   * 公共属性）立的回归桩：字典提升之后，SPU 级定义与属性赋值必须照常工作。
    */
   @Test
   void deliveredSpuLevelAttributesStillWork() {
@@ -1322,11 +1337,10 @@ class AttributeDictionaryIntegrationTest {
                     0)));
     assertThat(
             tx(
-                    actor,
-                    () ->
-                        sql.fetchOne(
-                                "select count(*) from attribute_option where value in ('红','蓝')")
-                            .get(0, Long.class)))
+                actor,
+                () ->
+                    sql.fetchOne("select count(*) from attribute_option where value in ('红','蓝')")
+                        .get(0, Long.class)))
         .isEqualTo(2L);
   }
 }

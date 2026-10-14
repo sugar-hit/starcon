@@ -75,7 +75,12 @@ export function ApprovalFlowWorkspace() {
 
   const [editing, setEditing] = useState<{ id: string | null; draft: FlowDraft } | null>(null);
   const [positionEditor, setPositionEditor] = useState<ApprovalPositionView | 'new' | null>(null);
-  const [positionForm, setPositionForm] = useState({ code: '', name: '', description: '', status: 'ACTIVE' });
+  const [positionForm, setPositionForm] = useState({
+    code: '',
+    name: '',
+    description: '',
+    status: 'ACTIVE',
+  });
 
   const can = useCallback(
     (permission: string) => session.permissions.includes(permission),
@@ -120,22 +125,19 @@ export function ApprovalFlowWorkspace() {
     void load();
   }, [load]);
 
-  const openDetail = useCallback(
-    async (id: string) => {
-      setError('');
-      try {
-        const [detail, report] = await Promise.all([
-          api<ApprovalFlowDetailView>(`identity/approval-flows/${id}`),
-          api<ApprovalValidationView>(`identity/approval-flows/${id}/validation`),
-        ]);
-        setDetails((prev) => ({ ...prev, [id]: detail }));
-        setReports((prev) => ({ ...prev, [id]: report }));
-      } catch (e) {
-        setError(e instanceof ApiError ? e.message : '流程详情加载失败');
-      }
-    },
-    [],
-  );
+  const openDetail = useCallback(async (id: string) => {
+    setError('');
+    try {
+      const [detail, report] = await Promise.all([
+        api<ApprovalFlowDetailView>(`identity/approval-flows/${id}`),
+        api<ApprovalValidationView>(`identity/approval-flows/${id}/validation`),
+      ]);
+      setDetails((prev) => ({ ...prev, [id]: detail }));
+      setReports((prev) => ({ ...prev, [id]: report }));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : '流程详情加载失败');
+    }
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -147,19 +149,16 @@ export function ApprovalFlowWorkspace() {
     );
   }, [flows, search]);
 
-  const unregistered = useMemo(
-    () => registrations.filter((r) => !r.registered),
-    [registrations],
-  );
+  const unregistered = useMemo(() => registrations.filter((r) => !r.registered), [registrations]);
 
-  const activeCount = useMemo(
-    () => flows.filter((f) => f.status === 'ACTIVE').length,
-    [flows],
-  );
+  const activeCount = useMemo(() => flows.filter((f) => f.status === 'ACTIVE').length, [flows]);
 
   const save = useCallback(async () => {
     if (!editing) return;
-    const errors = validateDraft(editing.draft, roles.map((r) => r.id));
+    const errors = validateDraft(
+      editing.draft,
+      roles.map((r) => r.id),
+    );
     if (errors.length > 0) {
       setError(errors.join('；'));
       return;
@@ -169,8 +168,7 @@ export function ApprovalFlowWorkspace() {
     setNotice('');
     try {
       const body = toRequestBody(editing.draft);
-      if (editing.id)
-        await api(`identity/approval-flows/${editing.id}`, 'PUT', body);
+      if (editing.id) await api(`identity/approval-flows/${editing.id}`, 'PUT', body);
       else await api('identity/approval-flows', 'POST', body);
       setNotice(editing.id ? '审批流已更新' : '审批流已创建');
       setEditing(null);
@@ -254,7 +252,7 @@ export function ApprovalFlowWorkspace() {
           —— 需要管控就得显式定义一条流程。
         </p>
         {notice && (
-          <p role="status" className="text-sm text-primary">
+          <p role="status" className="text-primary text-sm">
             {notice}
           </p>
         )}
@@ -292,13 +290,12 @@ export function ApprovalFlowWorkspace() {
       <section className="bg-card space-y-3 rounded-lg border p-6">
         <h3 className="font-semibold">单据类型注册情况</h3>
         {unregistered.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            全部可注册的单据类型都已注册生效审批流。
-          </p>
+          <p className="text-muted-foreground text-sm">全部可注册的单据类型都已注册生效审批流。</p>
         ) : (
           <>
             <p className="text-muted-foreground text-sm">
-              以下 {unregistered.length} 个单据类型<b>尚未注册</b>，它们的变更类操作当前可以直接执行：
+              以下 {unregistered.length} 个单据类型<b>尚未注册</b>
+              ，它们的变更类操作当前可以直接执行：
             </p>
             <ul className="flex flex-wrap gap-2">
               {unregistered.map((r) => (
@@ -350,7 +347,7 @@ export function ApprovalFlowWorkspace() {
             搜索审批流
           </label>
           <div className="relative ml-auto">
-            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+            <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
             <input
               id="approval-flow-search"
               value={search}
@@ -448,7 +445,9 @@ export function ApprovalFlowWorkspace() {
                                 {n.nodeKey}
                               </span>
                               <span>{n.nodeName}</span>
-                              <Badge>{APPROVAL_MODE_LABELS[n.approvalMode] ?? n.approvalMode}</Badge>
+                              <Badge>
+                                {APPROVAL_MODE_LABELS[n.approvalMode] ?? n.approvalMode}
+                              </Badge>
                               <span className="text-muted-foreground">
                                 阶段 {n.stageIndex} · 顺序 {n.nodeOrder} ·{' '}
                                 {approverSummary(n, { roleName, positionName, memberName })}
@@ -469,9 +468,8 @@ export function ApprovalFlowWorkspace() {
                           <ul className="space-y-1 text-xs">
                             {detail.branches.map((b) => (
                               <li key={b.id}>
-                                {b.branchName} · {b.currencyCode} ·{' '}
-                                {b.minAmount ?? '不限'} — {b.maxAmount ?? '不限'} → 节点{' '}
-                                {b.targetNodeKey}
+                                {b.branchName} · {b.currencyCode} · {b.minAmount ?? '不限'} —{' '}
+                                {b.maxAmount ?? '不限'} → 节点 {b.targetNodeKey}
                               </li>
                             ))}
                           </ul>
@@ -695,7 +693,10 @@ function FlowEditor({
   onClose: () => void;
   onSave: () => void;
 }) {
-  const errors = validateDraft(draft, roles.map((r) => r.id));
+  const errors = validateDraft(
+    draft,
+    roles.map((r) => r.id),
+  );
   const patchNode = (index: number, next: Partial<NodeDraft>) => {
     const nodes = draft.nodes.map((n, i) => (i === index ? { ...n, ...next } : n));
     onChange({ ...draft, nodes });
@@ -929,9 +930,7 @@ function FlowEditor({
                   <input
                     className={control}
                     value={n.conditionExpression ?? ''}
-                    onChange={(e) =>
-                      patchNode(i, { conditionExpression: e.target.value || null })
-                    }
+                    onChange={(e) => patchNode(i, { conditionExpression: e.target.value || null })}
                     placeholder="amount > 1000 && currency = 'USD'"
                   />
                 </Field>
@@ -1020,7 +1019,9 @@ function FlowEditor({
                 size="sm"
                 variant="outline"
                 aria-label={`删除金额分支 ${b.branchName}`}
-                onClick={() => onChange({ ...draft, branches: draft.branches.filter((_, j) => j !== i) })}
+                onClick={() =>
+                  onChange({ ...draft, branches: draft.branches.filter((_, j) => j !== i) })
+                }
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -1083,7 +1084,8 @@ function FlowEditor({
                     patchEscalation(i, {
                       timeoutAction: ev.target.value,
                       escalateApproverType: ev.target.value === 'ESCALATE' ? 'ROLE' : null,
-                      escalateRoleId: ev.target.value === 'ESCALATE' ? roles[0]?.id ?? null : null,
+                      escalateRoleId:
+                        ev.target.value === 'ESCALATE' ? (roles[0]?.id ?? null) : null,
                       escalatePositionId: null,
                       escalateMembershipId: null,
                     })
@@ -1109,7 +1111,9 @@ function FlowEditor({
                   <select
                     className={control}
                     value={e.escalateRoleId ?? ''}
-                    onChange={(ev) => patchEscalation(i, { escalateRoleId: ev.target.value || null })}
+                    onChange={(ev) =>
+                      patchEscalation(i, { escalateRoleId: ev.target.value || null })
+                    }
                   >
                     <option value="">请选择角色</option>
                     {roles.map((r) => (
@@ -1135,7 +1139,10 @@ function FlowEditor({
         </section>
 
         {errors.length > 0 && (
-          <div role="alert" className="bg-card text-destructive space-y-1 rounded-md border p-3 text-sm">
+          <div
+            role="alert"
+            className="bg-card text-destructive space-y-1 rounded-md border p-3 text-sm"
+          >
             <p className="font-medium">保存前还有 {errors.length} 处需要修正：</p>
             <ul className="list-inside list-disc">
               {errors.map((e, i) => (

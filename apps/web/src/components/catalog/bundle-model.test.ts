@@ -34,7 +34,11 @@ import {
   versionNameProblem,
   versionNoProblem,
 } from './bundle-model';
-import type { BundleComponentRow, BundleRow, BundleVersionRow } from '../../../../../packages/api-contracts/src/index';
+import type {
+  BundleComponentRow,
+  BundleRow,
+  BundleVersionRow,
+} from '../../../../../packages/api-contracts/src/index';
 
 function versionRow(overrides: Partial<BundleVersionRow> = {}): BundleVersionRow {
   return {
@@ -197,7 +201,9 @@ describe('3.5.1.1 套装版本管理 · 生效区间校验', () => {
     const later = local(60);
     expect(closeToProblem(future, null)).toBeNull();
     // 本版 30 天后结束，收紧到 20 天后是合法的向前关闭。
-    expect(closeToProblem(local(20), new Date(Date.now() + 30 * 86400_000).toISOString())).toBeNull();
+    expect(
+      closeToProblem(local(20), new Date(Date.now() + 30 * 86400_000).toISOString()),
+    ).toBeNull();
     expect(closeToProblem('', null)).toContain('一直有效');
     expect(closeToProblem('2020-01-01T00:00', null)).toContain('追溯改写');
     // 比原终点更晚的 datetime-local 写法
@@ -281,7 +287,11 @@ describe('3.5.1.1 套装版本管理 · 写操作语义', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation((url: string, init: RequestInit) => {
-        calls.push({ url, method: init.method ?? 'GET', body: init.body ? JSON.parse(String(init.body)) : null });
+        calls.push({
+          url,
+          method: init.method ?? 'GET',
+          body: init.body ? JSON.parse(String(init.body)) : null,
+        });
         return Promise.resolve(new Response('{}', { status: 200 }));
       }),
     );

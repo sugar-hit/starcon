@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { ParcelCostAllocation, ParcelItemSalesOrderLine } from '../../../../../packages/api-contracts/src/index';
+import type {
+  ParcelCostAllocation,
+  ParcelItemSalesOrderLine,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionHint,
   allocationVerdict,
@@ -138,9 +141,7 @@ describe('强弱关联必须区分', () => {
   });
 
   it('弱关联绝不显示成强关联', () => {
-    const label = orderLineLabel(
-      link({ strongMatch: false, matchBasis: 'SKU_NAME_FALLBACK' }),
-    );
+    const label = orderLineLabel(link({ strongMatch: false, matchBasis: 'SKU_NAME_FALLBACK' }));
     expect(label).toContain('弱关联');
     expect(label).not.toContain('强关联');
   });
@@ -158,9 +159,9 @@ describe('数量与不可得分段的展示', () => {
   });
 
   it('不可得分段写明归谁', () => {
-    expect(
-      unavailableText({ label: '物流轨迹', ownerModule: '10.3.1.1', reason: '未交付' }),
-    ).toBe('物流轨迹 · 归 10.3.1.1 未接入');
+    expect(unavailableText({ label: '物流轨迹', ownerModule: '10.3.1.1', reason: '未交付' })).toBe(
+      '物流轨迹 · 归 10.3.1.1 未接入',
+    );
     expect(unavailableText({ label: '运费与体积重', ownerModule: null, reason: '不在这算' })).toBe(
       '运费与体积重 · 未接入',
     );

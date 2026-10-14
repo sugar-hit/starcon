@@ -34,14 +34,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.4.1 发货交接的集成测试。
  *
- * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池
- * 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造 tenant header 无效、
- * 连接池归还后不串租户。
+ * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造
+ * tenant header 无效、 连接池归还后不串租户。
  *
- * <p>本模块最要紧的两条断言单独占两个用例：
- * <b>「实发扣减与预占消费在同一事务」</b>（{@link #confirmConsumesReservationInSameTransaction()}）
- * 与 <b>「缺货时整单回滚、一件都不扣」</b>（{@link #insufficientStockRollsBackEverything()}）。
- * 前者证明预占确实被消费掉了（不是「消费了一半」也不是「没消费」），后者证明不会出现
+ * <p>本模块最要紧的两条断言单独占两个用例： <b>「实发扣减与预占消费在同一事务」</b>（{@link
+ * #confirmConsumesReservationInSameTransaction()}） 与 <b>「缺货时整单回滚、一件都不扣」</b>（{@link
+ * #insufficientStockRollsBackEverything()}）。 前者证明预占确实被消费掉了（不是「消费了一半」也不是「没消费」），后者证明不会出现
  * 「扣了能扣的、把扣不动的留在货���」这种最恶心的半边状态。
  */
 @SpringBootTest
@@ -63,8 +61,13 @@ class ShipmentHandoverIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -74,7 +77,8 @@ class ShipmentHandoverIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -89,7 +93,8 @@ class ShipmentHandoverIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -164,21 +169,37 @@ class ShipmentHandoverIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 10; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", WAREHOUSE_ZONE.getId(),
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                WAREHOUSE_ZONE.getId(),
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -214,17 +235,24 @@ class ShipmentHandoverIntegrationTest {
     return as(
         tenant,
         () -> {
-          var existing = sql.fetchOne(
-              "select id from warehouse_location where tenant_id"
-                  + " = current_setting('app.current_tenant', true)::uuid"
-                  + " and warehouse_id=? and code=?",
-              wh(tenant), code);
+          var existing =
+              sql.fetchOne(
+                  "select id from warehouse_location where tenant_id"
+                      + " = current_setting('app.current_tenant', true)::uuid"
+                      + " and warehouse_id=? and code=?",
+                  wh(tenant),
+                  code);
           if (existing != null) return existing.get("id", UUID.class);
           UUID id = UUID.randomUUID();
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable) values(?,?,?,?,?,?,'ACTIVE',true)",
-              id, tenant, wh(tenant), code, code + " 位", type);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type);
           return id;
         });
   }
@@ -238,14 +266,28 @@ class ShipmentHandoverIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,cast(? as numeric),0)",
-              balance, tenant, skuId, wh(tenant), idFor(tenant, 1), sellable(tenant), onHand);
+              balance,
+              tenant,
+              skuId,
+              wh(tenant),
+              idFor(tenant, 1),
+              sellable(tenant),
+              onHand);
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,null,?,?,cast(? as numeric),0,"
                   + "?::timestamptz)",
-              UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), loc,
-              sellable(tenant), balance, onHand, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              loc,
+              sellable(tenant),
+              balance,
+              onHand,
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -266,9 +308,8 @@ class ShipmentHandoverIntegrationTest {
   /**
    * 只动<b>打包区那一个 bucket</b> + 对应 balance，量按 delta 同步增减。
    *
-   * <p>刻意不写「把所有 bucket 都设成某个值」：那会让
-   * {@code inventory_balance} 与 {@code stock_bucket} 的汇总之和不等，
-   * V2 的延迟约束触发器会在提交那一刻拒掉 —— 而它拒得对。
+   * <p>刻意不写「把所有 bucket 都设成某个值」：那会让 {@code inventory_balance} 与 {@code stock_bucket} 的汇总之和不等， V2
+   * 的延迟约束触发器会在提交那一刻拒掉 —— 而它拒得对。
    */
   void adjustStagingStock(UUID tenant, UUID skuId, String delta) {
     as(
@@ -281,23 +322,27 @@ class ShipmentHandoverIntegrationTest {
                   + " + interval '1 microsecond') where tenant_id"
                   + " = current_setting('app.current_tenant', true)::uuid"
                   + " and sku_id=? and warehouse_id=? and location_id=?",
-              delta, OffsetDateTime.now(), skuId, wh(tenant), loc);
+              delta,
+              OffsetDateTime.now(),
+              skuId,
+              wh(tenant),
+              loc);
           sql.execute(
               "update inventory_balance set on_hand=on_hand+cast(? as numeric),updated_at=now()"
                   + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                   + " and sku_id=? and warehouse_id=?",
-              delta, skuId, wh(tenant));
+              delta,
+              skuId,
+              wh(tenant));
           return null;
         });
   }
 
   /**
-   * 铺<b>实物预占</b>（7.1.1.1 那一侧：{@code stock_bucket.reserved} 与
-   * {@code inventory_balance.reserved}）。
+   * 铺<b>实物预占</b>（7.1.1.1 那一侧：{@code stock_bucket.reserved} 与 {@code inventory_balance.reserved}）。
    *
-   * <p>刻意与 {@link #reserve} 分开：前者是「货被圈住了」，后者是「有一条承诺分配」。
-   * 两者是两本账（V123 §四），本模块交接时<b>同时</b>动它们，而测试必须能分别铺开，
-   * 否则「两本账」这件事在用例里根本区分不出来。
+   * <p>刻意与 {@link #reserve} 分开：前者是「货被圈住了」，后者是「有一条承诺分配」。 两者是两本账（V123
+   * §四），本模块交接时<b>同时</b>动它们，而测试必须能分别铺开， 否则「两本账」这件事在用例里根本区分不出来。
    */
   void reserveStock(UUID tenant, UUID skuId, String amount) {
     as(
@@ -310,12 +355,18 @@ class ShipmentHandoverIntegrationTest {
                   + " + interval '1 microsecond') where tenant_id"
                   + " = current_setting('app.current_tenant', true)::uuid"
                   + " and sku_id=? and warehouse_id=? and location_id=?",
-              amount, OffsetDateTime.now(), skuId, wh(tenant), loc);
+              amount,
+              OffsetDateTime.now(),
+              skuId,
+              wh(tenant),
+              loc);
           sql.execute(
               "update inventory_balance set reserved=reserved+cast(? as numeric),updated_at=now()"
                   + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
                   + " and sku_id=? and warehouse_id=?",
-              amount, skuId, wh(tenant));
+              amount,
+              skuId,
+              wh(tenant));
           return null;
         });
   }
@@ -328,7 +379,11 @@ class ShipmentHandoverIntegrationTest {
           sql.execute(
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,status,"
                   + "current_location_id) values(?,?,?,?,'IN_STOCK',?)",
-              id, tenant, number, skuId, loc);
+              id,
+              tenant,
+              number,
+              skuId,
+              loc);
           return id;
         });
   }
@@ -356,7 +411,12 @@ class ShipmentHandoverIntegrationTest {
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,carrier_code,status,created_by_user_id)"
                   + " values(?,?,?,'SALES',?,?,'SF','PENDING_PICKING',?)",
-              orderId, tenant, code, "SO-" + code, wh(tenant), user);
+              orderId,
+              tenant,
+              code,
+              "SO-" + code,
+              wh(tenant),
+              user);
           BigDecimal total = BigDecimal.ZERO;
           int lineNo = 0;
           for (UUID skuId : skuIds) {
@@ -364,28 +424,45 @@ class ShipmentHandoverIntegrationTest {
             sql.execute(
                 "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                     + "sku_name,quantity) values(?,?,?,?,?,?,?,cast(? as numeric))",
-                UUID.randomUUID(), tenant, orderId, lineNo, skuId,
-                codes.get(skuId), "商品" + lineNo, quantity);
+                UUID.randomUUID(),
+                tenant,
+                orderId,
+                lineNo,
+                skuId,
+                codes.get(skuId),
+                "商品" + lineNo,
+                quantity);
             total = total.add(new BigDecimal(quantity));
           }
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at)"
                   + " values(?,?,?,?,cast(? as numeric),?,?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, skuIds.length, total, user, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              orderId,
+              skuIds.length,
+              total,
+              user,
+              OffsetDateTime.now());
           sql.execute(
               "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return orderId;
         });
   }
 
   void ensureStaging(UUID tenant) {
-    if (as(tenant, () -> sql.fetchOne(
-            "select 1 as ok from warehouse_location where tenant_id"
-                + " = current_setting('app.current_tenant', true)::uuid"
-                + " and warehouse_id=? and type='SHIPPING' limit 1",
-            wh(tenant))) == null) {
+    if (as(
+            tenant,
+            () ->
+                sql.fetchOne(
+                    "select 1 as ok from warehouse_location where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and warehouse_id=? and type='SHIPPING' limit 1",
+                    wh(tenant)))
+        == null) {
       location(tenant, "OUT", "SHIPPING");
     }
   }
@@ -412,8 +489,13 @@ class ShipmentHandoverIntegrationTest {
               pickTasks.recordPick(
                   task,
                   new PickTaskModels.PickTaskPickInput(
-                      line.id(), line.sourceLocationId(), null, line.plannedQuantity(),
-                      lineSerials, null, null),
+                      line.id(),
+                      line.sourceLocationId(),
+                      null,
+                      line.plannedQuantity(),
+                      lineSerials,
+                      null,
+                      null),
                   user));
     }
     asWrite(tenant, () -> pickTasks.complete(task, user));
@@ -422,10 +504,9 @@ class ShipmentHandoverIntegrationTest {
   UUID passedRecount(UUID tenant, UUID orderId, Map<Integer, List<String>> scansByIndex) {
     var session =
         asWrite(
-                tenant,
-                () ->
-                    recounts.open(
-                        new RecountModels.RecountOpenInput(orderId, null, user, null), user));
+            tenant,
+            () ->
+                recounts.open(new RecountModels.RecountOpenInput(orderId, null, user, null), user));
     int i = 0;
     for (var line : asWrite(tenant, () -> recounts.detail(session.id().toString()).lines())) {
       List<String> values = scansByIndex == null ? null : scansByIndex.getOrDefault(i, List.of());
@@ -463,25 +544,33 @@ class ShipmentHandoverIntegrationTest {
         tenant,
         () ->
             packing.createMaterial(
-                new PackingMaterialInput(code, "纸箱 " + code, "PACKAGING", "CARTON", wh(tenant),
-                    "30", "20", "10", tare, max),
+                new PackingMaterialInput(
+                    code,
+                    "纸箱 " + code,
+                    "PACKAGING",
+                    "CARTON",
+                    wh(tenant),
+                    "30",
+                    "20",
+                    "10",
+                    tare,
+                    max),
                 user));
   }
 
   /** 一路走到「已打包」：开单 + 一箱 + 装齐 + 称重 + 完成。 */
   PackingCreated packedOrder(UUID tenant, UUID sessionId, String code) {
-    var order = asWrite(
-        tenant,
-        () -> packing.open(new PackingOpenInput(sessionId, user, null), user));
+    var order =
+        asWrite(tenant, () -> packing.open(new PackingOpenInput(sessionId, user, null), user));
     var material = carton(tenant, "C-" + code, "200", "5000");
     var parcel =
         asWrite(
-                tenant,
-                () ->
-                    packing.addParcel(
-                        order.id().toString(),
-                        new ParcelAddInput(material.id(), null, null, null),
-                        user));
+            tenant,
+            () ->
+                packing.addParcel(
+                    order.id().toString(),
+                    new ParcelAddInput(material.id(), null, null, null),
+                    user));
     for (var line : as(tenant, () -> packing.detail(order.id().toString()).baseline())) {
       asWrite(
           tenant,
@@ -500,8 +589,9 @@ class ShipmentHandoverIntegrationTest {
                 parcel.id().toString(),
                 new ParcelMeasureInput("1200", "30", "20", "10", null, null),
                 user));
-    return asWrite(tenant, () -> packing.complete(order.id().toString(),
-        new PackingCompleteInput(null, null), user));
+    return asWrite(
+        tenant,
+        () -> packing.complete(order.id().toString(), new PackingCompleteInput(null, null), user));
   }
 
   /** 一路走到「已打包」的非序列号版本（逐行扫条码）。 */
@@ -523,7 +613,8 @@ class ShipmentHandoverIntegrationTest {
 
   HandoverRow openHandover(UUID tenant, UUID packingOrderId) {
     return asWrite(
-        tenant, () -> service.open(new HandoverOpenInput(packingOrderId, null, null, null, null), user));
+        tenant,
+        () -> service.open(new HandoverOpenInput(packingOrderId, null, null, null, null), user));
   }
 
   HandoverRow waybill(UUID tenant, UUID handoverId, String carrier, String no) {
@@ -547,8 +638,8 @@ class ShipmentHandoverIntegrationTest {
   }
 
   /**
-   * 铺一条<b>已承诺</b>的预占（7.2.1.2 的口径：建行 → ALLOCATED 分录 → 承诺 → COMMITTED 分录
-   * → 父预占推进 COMMITTED）。这是本模块「预占转实扣」的另一半账。
+   * 铺一条<b>已承诺</b>的预占（7.2.1.2 的口径：建行 → ALLOCATED 分录 → 承诺 → COMMITTED 分录 → 父预占推进
+   * COMMITTED）。这是本模块「预占转实扣」的另一半账。
    */
   record Reserved(UUID reservationId, UUID allocationId, String reservationNo) {}
 
@@ -562,30 +653,56 @@ class ShipmentHandoverIntegrationTest {
               "insert into inventory_reservation(id,tenant_id,reservation_no,source_system,"
                   + "source_type,source_ref_code,legal_entity_id,sku_id,requested_quantity)"
                   + " values(?,?,?,'TRADE','SALES_ORDER',?,?,?,cast(? as numeric))",
-              reservationId, tenant, no, "SO-1", idFor(tenant, 1), skuId, quantity);
+              reservationId,
+              tenant,
+              no,
+              "SO-1",
+              idFor(tenant, 1),
+              skuId,
+              quantity);
           UUID allocationId = UUID.randomUUID();
           sql.execute(
               "insert into reservation_allocation(id,tenant_id,reservation_id,warehouse_id,location_id,"
                   + "allocated_quantity) values(?,?,?,?,?,cast(? as numeric))",
-              allocationId, tenant, reservationId, wh(tenant), loc, quantity);
+              allocationId,
+              tenant,
+              reservationId,
+              wh(tenant),
+              loc,
+              quantity);
           sql.execute(
               "insert into reservation_entry(id,tenant_id,reservation_id,allocation_id,transition,"
                   + "from_status,to_status,quantity,occurred_at) values(?,?,?,?,'ALLOCATED',null,"
                   + "'HELD',cast(? as numeric),?::timestamptz)",
-              UUID.randomUUID(), tenant, reservationId, allocationId, quantity, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              reservationId,
+              allocationId,
+              quantity,
+              OffsetDateTime.now());
           sql.execute(
               "update reservation_allocation set status='COMMITTED',committed_at=?::timestamptz"
                   + " where tenant_id=? and id=?",
-              OffsetDateTime.now(), tenant, allocationId);
+              OffsetDateTime.now(),
+              tenant,
+              allocationId);
           sql.execute(
               "insert into reservation_entry(id,tenant_id,reservation_id,allocation_id,transition,"
                   + "from_status,to_status,quantity,occurred_at) values(?,?,?,?,'COMMITTED','HELD',"
                   + "'COMMITTED',cast(? as numeric),?::timestamptz)",
-              UUID.randomUUID(), tenant, reservationId, allocationId, quantity, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              reservationId,
+              allocationId,
+              quantity,
+              OffsetDateTime.now());
           sql.execute(
               "update inventory_reservation set status='COMMITTED',committed_at=?::timestamptz,"
                   + "allocated_quantity=cast(? as numeric) where tenant_id=? and id=?",
-              OffsetDateTime.now(), quantity, tenant, reservationId);
+              OffsetDateTime.now(),
+              quantity,
+              tenant,
+              reservationId);
           return new Reserved(reservationId, allocationId, no);
         });
   }
@@ -598,7 +715,8 @@ class ShipmentHandoverIntegrationTest {
                     "select coalesce(sum(on_hand),0) as q from inventory_balance where tenant_id"
                         + " = current_setting('app.current_tenant', true)::uuid"
                         + " and sku_id=? and warehouse_id=?",
-                    skuId, wh(tenant))
+                    skuId,
+                    wh(tenant))
                 .get("q", BigDecimal.class));
   }
 
@@ -610,7 +728,8 @@ class ShipmentHandoverIntegrationTest {
                     "select coalesce(sum(reserved),0) as q from inventory_balance where tenant_id"
                         + " = current_setting('app.current_tenant', true)::uuid"
                         + " and sku_id=? and warehouse_id=?",
-                    skuId, wh(tenant))
+                    skuId,
+                    wh(tenant))
                 .get("q", BigDecimal.class));
   }
 
@@ -673,8 +792,7 @@ class ShipmentHandoverIntegrationTest {
     var order = asWrite(a, () -> packing.open(new PackingOpenInput(sessionId, user, null), user));
 
     // 打包单还在 OPEN：货还没封箱，交不出去。
-    assertThat(catchThrowable(() -> openHandover(a, order.id())))
-        .hasMessageContaining("已打包");
+    assertThat(catchThrowable(() -> openHandover(a, order.id()))).hasMessageContaining("已打包");
   }
 
   @Test
@@ -695,17 +813,38 @@ class ShipmentHandoverIntegrationTest {
     var handover = openHandover(a, r.packing().id());
 
     // 承运渠道与运单号缺一不可。
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.registerWaybills(
-        handover.id().toString(),
-        new HandoverWaybillInput("", "顺丰", "SF123", null, null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.registerWaybills(
+                                handover.id().toString(),
+                                new HandoverWaybillInput("", "顺丰", "SF123", null, null, null, null),
+                                user))))
         .hasMessageContaining("carrierCode 不能为空");
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.registerWaybills(
-        handover.id().toString(),
-        new HandoverWaybillInput("SF", "顺丰", "  ", null, null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.registerWaybills(
+                                handover.id().toString(),
+                                new HandoverWaybillInput("SF", "顺丰", "  ", null, null, null, null),
+                                user))))
         .hasMessageContaining("masterWaybillNo 不能为空");
     // 开单时只填运单号不填渠道：DB 的 CHECK 与服务层都拒。
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.open(
-        new HandoverOpenInput(r.packing().id(), "", null, "SF123", null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.open(
+                                new HandoverOpenInput(r.packing().id(), "", null, "SF123", null),
+                                user))))
         .hasMessageContaining("承运渠道");
 
     var registered = waybill(a, handover.id(), "SF", "SF123456");
@@ -729,10 +868,13 @@ class ShipmentHandoverIntegrationTest {
     assertThat(before.blockingReasons()).anyMatch(s -> s.contains("承运渠道"));
     assertThat(before.blockingReasons()).anyMatch(s -> s.contains("运单号"));
 
-    var after = as(a, () -> {
-      waybill(a, handover.id(), "SF", "SF123");
-      return service.completionOf(handover.id().toString());
-    });
+    var after =
+        as(
+            a,
+            () -> {
+              waybill(a, handover.id(), "SF", "SF123");
+              return service.completionOf(handover.id().toString());
+            });
     assertThat(after.handableOver()).isTrue();
     assertThat(after.carrierRegistered()).isTrue();
     assertThat(after.waybillRegistered()).isTrue();
@@ -768,22 +910,30 @@ class ShipmentHandoverIntegrationTest {
     assertThat(balanceReserved(a, sku(a, 1))).isEqualByComparingTo("0");
 
     // ---- 台账：一笔 SHIPMENT 流水 + 带符号分录，ref 指回这张交接单
-    var tx = as(a, () -> sql.fetchOne(
-        "select id,kind,ref_type,ref_id,occurred_at from inventory_transaction"
-            + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-            + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
-        handover.id()));
+    var tx =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select id,kind,ref_type,ref_id,occurred_at from inventory_transaction"
+                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                        + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
+                    handover.id()));
     assertThat(tx.get("kind", String.class)).isEqualTo("SHIPMENT");
     assertThat(tx.get("ref_type", String.class)).isEqualTo("SHIPMENT_HANDOVER");
     assertThat(tx.get("ref_id", UUID.class)).isEqualTo(handover.id());
     assertThat(tx.get("occurred_at", OffsetDateTime.class)).isNotNull();
     assertThat(done.inventoryTransactionId()).isEqualTo(tx.get("id", UUID.class));
 
-    var entry = as(a, () -> sql.fetchOne(
-        "select on_hand_delta,reserved_delta from inventory_entry"
-            + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-            + " and transaction_id=?",
-        done.inventoryTransactionId()));
+    var entry =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select on_hand_delta,reserved_delta from inventory_entry"
+                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                        + " and transaction_id=?",
+                    done.inventoryTransactionId()));
     assertThat(entry.get("on_hand_delta", BigDecimal.class)).isEqualByComparingTo("-2");
     assertThat(entry.get("reserved_delta", BigDecimal.class)).isEqualByComparingTo("0");
 
@@ -795,11 +945,18 @@ class ShipmentHandoverIntegrationTest {
     assertThat(after.items().get(0).balanceId()).isNotNull();
     assertThat(outboundStatus(a, r.orderId())).isEqualTo("SHIPPED");
     // 发货事件：出库单时间线上有一条 PENDING_SHIPMENT → SHIPPED
-    assertThat(as(a, () -> ((Number) sql.fetchOne(
-            "select count(*) from outbound_order_event"
-                + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-                + " and order_id=? and to_status='SHIPPED'",
-            r.orderId()).get(0)).longValue()))
+    assertThat(
+            as(
+                a,
+                () ->
+                    ((Number)
+                            sql.fetchOne(
+                                    "select count(*) from outbound_order_event"
+                                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                                        + " and order_id=? and to_status='SHIPPED'",
+                                    r.orderId())
+                                .get(0))
+                        .longValue()))
         .isEqualTo(1);
   }
 
@@ -812,16 +969,26 @@ class ShipmentHandoverIntegrationTest {
     var at = OffsetDateTime.of(2026, 10, 14, 9, 30, 0, 0, ZoneOffset.ofHours(8));
     confirm(a, handover.id(), at.toString());
 
-    var readBack = as(a, () -> sql.fetchOne(
-        "select handover_at from shipment_handover where tenant_id"
-            + " = current_setting('app.current_tenant', true)::uuid and id=?",
-        handover.id()).get("handover_at", OffsetDateTime.class));
+    var readBack =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                        "select handover_at from shipment_handover where tenant_id"
+                            + " = current_setting('app.current_tenant', true)::uuid and id=?",
+                        handover.id())
+                    .get("handover_at", OffsetDateTime.class));
     assertThat(readBack.toInstant()).isEqualTo(at.toInstant());
     // 出库单的 shipped_at 是同一个事实，不许出现两个不同的「发货时刻」。
-    var shippedAt = as(a, () -> sql.fetchOne(
-        "select shipped_at from outbound_order where tenant_id"
-            + " = current_setting('app.current_tenant', true)::uuid and id=?",
-        r.orderId()).get("shipped_at", OffsetDateTime.class));
+    var shippedAt =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                        "select shipped_at from outbound_order where tenant_id"
+                            + " = current_setting('app.current_tenant', true)::uuid and id=?",
+                        r.orderId())
+                    .get("shipped_at", OffsetDateTime.class));
     assertThat(shippedAt.toInstant()).isEqualTo(at.toInstant());
   }
 
@@ -833,15 +1000,21 @@ class ShipmentHandoverIntegrationTest {
     confirm(a, handover.id(), null);
 
     // 第二次确认：交接单已终结，DB 的状态守卫拒。
-    assertThat(catchThrowable(() -> confirm(a, handover.id(), null)))
-        .hasMessageContaining("已交接");
+    assertThat(catchThrowable(() -> confirm(a, handover.id(), null))).hasMessageContaining("已交接");
     // 库存没有被动第二次。
     assertThat(balanceOnHand(a, sku(a, 1))).isEqualByComparingTo("98");
-    assertThat(as(a, () -> ((Number) sql.fetchOne(
-            "select count(*) from inventory_transaction"
-                + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-                + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
-            handover.id()).get(0)).longValue()))
+    assertThat(
+            as(
+                a,
+                () ->
+                    ((Number)
+                            sql.fetchOne(
+                                    "select count(*) from inventory_transaction"
+                                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                                        + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
+                                    handover.id())
+                                .get(0))
+                        .longValue()))
         .isEqualTo(1);
   }
 
@@ -862,11 +1035,18 @@ class ShipmentHandoverIntegrationTest {
     assertThat(balanceOnHand(a, sku(a, 1))).isEqualByComparingTo(onHandBefore);
     assertThat(balanceReserved(a, sku(a, 1))).isEqualByComparingTo(reservedBefore);
     // 出库流水没有留下（同一事务回滚）
-    assertThat(as(a, () -> ((Number) sql.fetchOne(
-            "select count(*) from inventory_transaction"
-                + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-                + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
-            handover.id()).get(0)).longValue()))
+    assertThat(
+            as(
+                a,
+                () ->
+                    ((Number)
+                            sql.fetchOne(
+                                    "select count(*) from inventory_transaction"
+                                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                                        + " and ref_type='SHIPMENT_HANDOVER' and ref_id=?",
+                                    handover.id())
+                                .get(0))
+                        .longValue()))
         .isZero();
     // 交接单仍在「交接中」，出库单仍在「待发货」
     assertThat(as(a, () -> service.detail(handover.id().toString())).order().status())
@@ -903,30 +1083,42 @@ class ShipmentHandoverIntegrationTest {
     assertThat(balanceReserved(a, sku(a, 1))).isEqualByComparingTo("0");
 
     // ---- 承诺侧：分配 COMMITTED → CONSUMED，量恰好等于出库量
-    var allocation = as(a, () -> sql.fetchOne(
-        "select status,consumed_quantity,remaining,settled_at from reservation_allocation"
-            + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
-        reserved.allocationId()));
+    var allocation =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select status,consumed_quantity,remaining,settled_at from reservation_allocation"
+                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
+                    reserved.allocationId()));
     assertThat(allocation.get("status", String.class)).isEqualTo("CONSUMED");
     assertThat(allocation.get("consumed_quantity", BigDecimal.class)).isEqualByComparingTo("2");
     assertThat(allocation.get("remaining", BigDecimal.class)).isEqualByComparingTo("0");
     assertThat(allocation.get("settled_at", OffsetDateTime.class)).isNotNull();
 
     // ---- 父预占：整笔消耗完且覆盖需求量 → CONSUMED（不是「消费了一半还挂在 HELD」）
-    var parent = as(a, () -> sql.fetchOne(
-        "select status,consumed_quantity,remaining,settled_at from inventory_reservation"
-            + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
-        reserved.reservationId()));
+    var parent =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select status,consumed_quantity,remaining,settled_at from inventory_reservation"
+                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
+                    reserved.reservationId()));
     assertThat(parent.get("status", String.class)).isEqualTo("CONSUMED");
     assertThat(parent.get("consumed_quantity", BigDecimal.class)).isEqualByComparingTo("2");
     assertThat(parent.get("remaining", BigDecimal.class)).isEqualByComparingTo("0");
 
     // ---- 两本账都留下了可查的凭据
-    var entry = as(a, () -> sql.fetchOne(
-        "select transition,from_status,to_status,quantity from reservation_entry"
-            + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
-            + " and reservation_id=? and transition='CONSUMED'",
-        reserved.reservationId()));
+    var entry =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select transition,from_status,to_status,quantity from reservation_entry"
+                        + " where tenant_id = current_setting('app.current_tenant', true)::uuid"
+                        + " and reservation_id=? and transition='CONSUMED'",
+                    reserved.reservationId()));
     assertThat(entry.get("from_status", String.class)).isEqualTo("COMMITTED");
     assertThat(entry.get("to_status", String.class)).isEqualTo("CONSUMED");
     assertThat(entry.get("quantity", BigDecimal.class)).isEqualByComparingTo("2");
@@ -977,16 +1169,26 @@ class ShipmentHandoverIntegrationTest {
     var done = confirm(a, handover.id(), null);
 
     assertThat(done.reservedDeductedQuantity()).isEqualTo("2");
-    assertThat(as(a, () -> sql.fetchOne(
-            "select status,consumed_quantity from reservation_allocation"
-                + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
-            reserved.allocationId()).get("status", String.class)))
+    assertThat(
+            as(
+                a,
+                () ->
+                    sql.fetchOne(
+                            "select status,consumed_quantity from reservation_allocation"
+                                + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
+                            reserved.allocationId())
+                        .get("status", String.class)))
         .isEqualTo("CONSUMED");
     // 预占整笔被吃干净了 —— 不会留一个「还剩 0 但状态是 COMMITTED」的悬空行。
-    assertThat(as(a, () -> sql.fetchOne(
-            "select status from inventory_reservation"
-                + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
-            reserved.reservationId()).get("status", String.class)))
+    assertThat(
+            as(
+                a,
+                () ->
+                    sql.fetchOne(
+                            "select status from inventory_reservation"
+                                + " where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?",
+                            reserved.reservationId())
+                        .get("status", String.class)))
         .isEqualTo("CONSUMED");
     // 实物侧 reserved 减的是 min(2, 6) = 2 —— 被圈的只有 2 件，
     // 另外 4 件本来就没被谁圈住，硬减成 6 是在编账。
@@ -1007,15 +1209,37 @@ class ShipmentHandoverIntegrationTest {
 
     var order = asWrite(a, () -> packing.open(new PackingOpenInput(sessionId, user, null), user));
     var material = carton(a, "C-HSER", "200", "5000");
-    var parcel = asWrite(a, () -> packing.addParcel(order.id().toString(),
-        new ParcelAddInput(material.id(), null, null, null), user));
+    var parcel =
+        asWrite(
+            a,
+            () ->
+                packing.addParcel(
+                    order.id().toString(),
+                    new ParcelAddInput(material.id(), null, null, null),
+                    user));
     var line = as(a, () -> packing.detail(order.id().toString()).baseline()).get(0);
-    asWrite(a, () -> packing.addItem(order.id().toString(), parcel.id().toString(),
-        new ParcelItemInput(line.id(), "1", serialId, null), user));
-    asWrite(a, () -> packing.measure(order.id().toString(), parcel.id().toString(),
-        new ParcelMeasureInput("1200", "30", "20", "10", null, null), user));
-    var packed = asWrite(a, () -> packing.complete(order.id().toString(),
-        new PackingCompleteInput(null, null), user));
+    asWrite(
+        a,
+        () ->
+            packing.addItem(
+                order.id().toString(),
+                parcel.id().toString(),
+                new ParcelItemInput(line.id(), "1", serialId, null),
+                user));
+    asWrite(
+        a,
+        () ->
+            packing.measure(
+                order.id().toString(),
+                parcel.id().toString(),
+                new ParcelMeasureInput("1200", "30", "20", "10", null, null),
+                user));
+    var packed =
+        asWrite(
+            a,
+            () ->
+                packing.complete(
+                    order.id().toString(), new PackingCompleteInput(null, null), user));
 
     var handover = openHandover(a, packed.id());
     waybill(a, handover.id(), "SF", "SF123");
@@ -1023,23 +1247,41 @@ class ShipmentHandoverIntegrationTest {
     assertThat(done.serialCount()).isEqualTo(1);
 
     // 货离开了仓库，档案就不能还写着「在库」—— 否则售后环节会被凭空多卖一次。
-    var serialAfter = as(a, () -> sql.fetchOne(
-        "select status,current_location_id from inventory_serial where tenant_id"
-            + " = current_setting('app.current_tenant', true)::uuid and id=?",
-        serialId));
+    var serialAfter =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                    "select status,current_location_id from inventory_serial where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid and id=?",
+                    serialId));
     assertThat(serialAfter.get("status", String.class)).isEqualTo("SOLD");
     assertThat(serialAfter.get("current_location_id", UUID.class)).isNull();
     // 出库操作头与逐件流转都在（V58 的口径）。
-    assertThat(as(a, () -> ((Number) sql.fetchOne(
-            "select count(*) from inventory_serial_operation where tenant_id"
-                + " = current_setting('app.current_tenant', true)::uuid"
-                + " and direction='OUTBOUND' and ref_id=?",
-            handover.id()).get(0)).longValue()))
+    assertThat(
+            as(
+                a,
+                () ->
+                    ((Number)
+                            sql.fetchOne(
+                                    "select count(*) from inventory_serial_operation where tenant_id"
+                                        + " = current_setting('app.current_tenant', true)::uuid"
+                                        + " and direction='OUTBOUND' and ref_id=?",
+                                    handover.id())
+                                .get(0))
+                        .longValue()))
         .isEqualTo(1);
-    assertThat(as(a, () -> ((Number) sql.fetchOne(
-            "select count(*) from inventory_serial_movement where tenant_id"
-                + " = current_setting('app.current_tenant', true)::uuid and serial_id=?",
-            serialId).get(0)).longValue()))
+    assertThat(
+            as(
+                a,
+                () ->
+                    ((Number)
+                            sql.fetchOne(
+                                    "select count(*) from inventory_serial_movement where tenant_id"
+                                        + " = current_setting('app.current_tenant', true)::uuid and serial_id=?",
+                                    serialId)
+                                .get(0))
+                        .longValue()))
         .isEqualTo(1);
   }
 
@@ -1052,20 +1294,29 @@ class ShipmentHandoverIntegrationTest {
     waybill(a, handover.id(), "SF", "SF123");
 
     // 原因必填
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.cancel(
-        handover.id().toString(), new HandoverCancelInput("  "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.cancel(
+                                handover.id().toString(), new HandoverCancelInput("  "), user))))
         .hasMessageContaining("必须写原因");
 
-    var cancelled = asWrite(a, () -> service.cancel(handover.id().toString(),
-        new HandoverCancelInput("承运商爽约，重新约车"), user));
+    var cancelled =
+        asWrite(
+            a,
+            () ->
+                service.cancel(
+                    handover.id().toString(), new HandoverCancelInput("承运商爽约，重新约车"), user));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     // 库存一分没动。
     assertThat(balanceOnHand(a, sku(a, 1))).isEqualByComparingTo("100");
     assertThat(outboundStatus(a, r.orderId())).isEqualTo("PENDING_SHIPMENT");
 
     // 终态不可复活：已作废的单不能再确认交接。
-    assertThat(catchThrowable(() -> confirm(a, handover.id(), null)))
-        .hasMessageContaining("已作废");
+    assertThat(catchThrowable(() -> confirm(a, handover.id(), null))).hasMessageContaining("已作废");
   }
 
   // ================================================================ 列表与查询
@@ -1079,38 +1330,42 @@ class ShipmentHandoverIntegrationTest {
     waybill(a, h1.id(), "SF", "SF111111");
     waybill(a, h2.id(), "YTO", "YT222222");
 
-    var all = as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT",
-        0, 50));
+    var all =
+        as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT", 0, 50));
     assertThat(all.total()).isEqualTo(2);
     assertThat(all.summary().totalHandovers()).isEqualTo(2);
     assertThat(all.summary().totalQuantity()).isEqualTo("5");
 
-    var byCarrier = as(a, () -> service.page(wh(a), null, null, null, "SF", null, null,
-        "CREATED_AT", 0, 50));
+    var byCarrier =
+        as(a, () -> service.page(wh(a), null, null, null, "SF", null, null, "CREATED_AT", 0, 50));
     assertThat(byCarrier.total()).isEqualTo(1);
     assertThat(byCarrier.items().get(0).id()).isEqualTo(h1.id());
 
     // 按运单号搜（客服接到「我的单号查不到」时的第一跳）
-    var byKeyword = as(a, () -> service.page(wh(a), null, null, null, null, null, "YT222222",
-        "CREATED_AT", 0, 50));
+    var byKeyword =
+        as(
+            a,
+            () ->
+                service.page(wh(a), null, null, null, null, null, "YT222222", "CREATED_AT", 0, 50));
     assertThat(byKeyword.total()).isEqualTo(1);
     assertThat(byKeyword.items().get(0).id()).isEqualTo(h2.id());
 
     // 真分页：size=1 时总数仍是 2，页内只有一条
-    var page0 = as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT",
-        0, 1));
+    var page0 =
+        as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT", 0, 1));
     assertThat(page0.items()).hasSize(1);
     assertThat(page0.total()).isEqualTo(2);
-    var page1 = as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT",
-        1, 1));
+    var page1 =
+        as(a, () -> service.page(wh(a), null, null, null, null, null, null, "CREATED_AT", 1, 1));
     assertThat(page1.items()).hasSize(1);
     assertThat(page1.items().get(0).id()).isNotEqualTo(page0.items().get(0).id());
   }
 
   @Test
   void capabilitiesDeclareInventoryOwnershipAndDownstreamBoundaries() throws Exception {
-    http.perform(get("/warehouse/shipment-handovers/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/shipment-handovers/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.touchesInventory").value(true))
         .andExpect(jsonPath("$.upstreamModule").value("8.3.3.2"));
@@ -1124,8 +1379,8 @@ class ShipmentHandoverIntegrationTest {
     // 只有 warehouse.inventory.read 的人不许交接：确认要动库存。
     // 权限校验在 Controller 的 call() 里（Service 自己不查权限），所以这一条必须走 HTTP。
     http.perform(
-            org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .post("/warehouse/shipment-handovers/" + handover.id() + "/confirm")
+            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                    "/warehouse/shipment-handovers/" + handover.id() + "/confirm")
                 .header("Authorization", "Bearer read-only")
                 .contentType("application/json")
                 .content("{}"))
@@ -1148,21 +1403,36 @@ class ShipmentHandoverIntegrationTest {
     assertThat(catchThrowable(() -> as(b, () -> service.detail(ha.id().toString()))))
         .hasMessageContaining("不存在");
     // B 在 A 的交接单上登记运单号 → 404（写路径同样隔离）
-    assertThat(catchThrowable(() -> asWrite(b, () -> service.registerWaybills(
-        ha.id().toString(),
-        new HandoverWaybillInput("SF", "顺丰", "SF999", null, null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        b,
+                        () ->
+                            service.registerWaybills(
+                                ha.id().toString(),
+                                new HandoverWaybillInput(
+                                    "SF", "顺丰", "SF999", null, null, null, null),
+                                user))))
         .hasMessageContaining("不存在");
     // B 确认 A 的交接 → 404
-    assertThat(catchThrowable(() -> asWrite(b, () -> service.confirm(
-        ha.id().toString(),
-        new HandoverConfirmInput(user, null, null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        b,
+                        () ->
+                            service.confirm(
+                                ha.id().toString(),
+                                new HandoverConfirmInput(user, null, null, null, null),
+                                user))))
         .hasMessageContaining("不存在");
     // B 开不了 A 的打包单的交接单
     assertThat(catchThrowable(() -> openHandover(b, ra.packing().id())))
         .hasMessageContaining("不存在");
     // B 的列表里只有自己那一张
-    var bList = as(b, () -> service.page(wh(b), null, null, null, null, null, null, "CREATED_AT",
-        0, 50));
+    var bList =
+        as(b, () -> service.page(wh(b), null, null, null, null, null, null, "CREATED_AT", 0, 50));
     assertThat(bList.total()).isEqualTo(1);
     assertThat(bList.items().get(0).id()).isEqualTo(hb.id());
     // A 的库存没被 B 的确认动过
@@ -1187,9 +1457,9 @@ class ShipmentHandoverIntegrationTest {
 
     // 带上真实身份但伪造租户头：看到的仍然只有 A 自己那一张
     http.perform(
-                get("/warehouse/shipment-handovers")
-                    .header("Authorization", "Bearer tenant-a")
-                    .header("X-Tenant-Id", b.toString()))
+            get("/warehouse/shipment-handovers")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.items[0].handoverCode").value(handover.handoverCode()));
@@ -1203,10 +1473,26 @@ class ShipmentHandoverIntegrationTest {
     var hb = openHandover(b, rb.packing().id());
     // A → B → A 三轮：连接池只有 1 条连接，每次归还后都可能被下一个人拿到。
     for (int round = 0; round < 3; round++) {
-      assertThat(as(a, () -> service.page(wh(a), null, null, null, null, null, null,
-                  "HANDOVER_CODE", 0, 50)).items().get(0).id()).isEqualTo(ha.id());
-      assertThat(as(b, () -> service.page(wh(b), null, null, null, null, null, null,
-                  "HANDOVER_CODE", 0, 50)).items().get(0).id()).isEqualTo(hb.id());
+      assertThat(
+              as(
+                      a,
+                      () ->
+                          service.page(
+                              wh(a), null, null, null, null, null, null, "HANDOVER_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(ha.id());
+      assertThat(
+              as(
+                      b,
+                      () ->
+                          service.page(
+                              wh(b), null, null, null, null, null, null, "HANDOVER_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(hb.id());
       assertThat(as(a, () -> service.detail(ha.id().toString())).order().handoverCode())
           .isEqualTo(ha.handoverCode());
       assertThat(as(b, () -> service.detail(hb.id().toString())).order().handoverCode())

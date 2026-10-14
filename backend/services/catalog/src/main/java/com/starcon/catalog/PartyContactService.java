@@ -18,22 +18,19 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.6.3.1 往来单位的联系人：带姓名的那个人是谁、怎么联系到他、谁是默认联系人。
  *
- * <p>与 {@code party.email / phone / website} 的分工写在
- * {@code V31__party_addresses_contacts.sql} 第零节：主体那三列回答「怎么找到这个主体」
- * （公司总机 / info@ 邮箱），本表回答「跟这个主体对接的**那个人**是谁」。
- * 生命周期也不同 —— 总机不会因为对接人离职而失效，对接人会，所以不能合成一列。
+ * <p>与 {@code party.email / phone / website} 的分工写在 {@code V31__party_addresses_contacts.sql}
+ * 第零节：主体那三列回答「怎么找到这个主体」 （公司总机 / info@ 邮箱），本表回答「跟这个主体对接的**那个人**是谁」。 生命周期也不同 ——
+ * 总机不会因为对接人离职而失效，对接人会，所以不能合成一列。
  *
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>邮箱 / 电话 / 手机至少给一项</b>（规则 C1）。三个都空的联系人是一行
- *       在 06 采购问交期、10 物流约提货、11 售后约退货时都用不了的记录，
+ *   <li><b>邮箱 / 电话 / 手机至少给一项</b>（规则 C1）。三个都空的联系人是一行 在 06 采购问交期、10 物流约提货、11 售后约退货时都用不了的记录，
  *       而它看上去和真联系人完全一样。被拒的应该是**建这一行**。
  *   <li><b>默认联系人只有一个，删之前必须先改默认</b>（规则 C2）。
- *   <li><b>联系人允许物理删除</b>，而地址不允许（软删除）：联系人是「当前正在对接的那个人」的
- *       <b>当前事实</b>，没有回溯需求 —— 已发生单据里的联系人姓名与电话是单据自己的冻结快照
- *       （与 V27 第七节对 06/11/12 的约定同源）。地址不能这么删，是因为下游单据引用的是
- *       {@code (address_id, version_no)} 指路牌，删掉地址会让指路牌指向不存在的行。
+ *   <li><b>联系人允许物理删除</b>，而地址不允许（软删除）：联系人是「当前正在对接的那个人」的 <b>当前事实</b>，没有回溯需求 ——
+ *       已发生单据里的联系人姓名与电话是单据自己的冻结快照 （与 V27 第七节对 06/11/12 的约定同源）。地址不能这么删，是因为下游单据引用的是 {@code
+ *       (address_id, version_no)} 指路牌，删掉地址会让指路牌指向不存在的行。
  *   <li><b>选中阻断只有一处实现</b>：{@link PartyContactRules#selectionBlock}。
  * </ol>
  *
@@ -71,12 +68,10 @@ public class PartyContactService {
   /**
    * 联系人列表（按主体，不分页）。
    *
-   * <p>刻意**不**分页：这是「某个往来单位的对接人」这一层，扇出量是人决定的（两三个人），
-   * 不是数据量决定的；与 {@code PartyService.rolesOf} 同一取舍 ——
+   * <p>刻意**不**分页：这是「某个往来单位的对接人」这一层，扇出量是人决定的（两三个人）， 不是数据量决定的；与 {@code PartyService.rolesOf} 同一取舍 ——
    * 给一个最多五条的集合加分页控件只会让人以为后面还有东西。
    *
-   * <p>关键词覆盖姓名 / 邮箱 / 手机：运营从一封邮件的签名里抄下一个名字或号码就来找人，
-   * 通配符按 {@code escape '!'} 转义。
+   * <p>关键词覆盖姓名 / 邮箱 / 手机：运营从一封邮件的签名里抄下一个名字或号码就来找人， 通配符按 {@code escape '!'} 转义。
    */
   public List<PartyContact> list(UUID partyId, String keyword, Boolean primaryOnly) {
     partyRow(partyId);
@@ -92,8 +87,12 @@ public class PartyContactService {
       for (int i = 0; i < 5; i++) binds.add(pattern);
     }
     if (Boolean.TRUE.equals(primaryOnly)) where.add("c.is_primary");
-    return sql.fetch(
-            SELECT_COLUMNS + FROM_CONTACT + " and " + String.join(" and ", where)
+    return sql
+        .fetch(
+            SELECT_COLUMNS
+                + FROM_CONTACT
+                + " and "
+                + String.join(" and ", where)
                 + " order by c.is_primary desc,c.name,c.id",
             concat(List.of(currentTenantId()), binds).toArray())
         .stream()
@@ -110,14 +109,15 @@ public class PartyContactService {
   /**
    * 默认联系人 —— 06 采购 / 11 售后 / 12 财务要「找谁签字」时走的就是它。
    *
-   * <p>没有默认联系人时 404：单据侧要能区分「有人但没人被设为默认」（提示去设一个）
-   * 与「这个主体一条联系人都没有」。
+   * <p>没有默认联系人时 404：单据侧要能区分「有人但没人被设为默认」（提示去设一个） 与「这个主体一条联系人都没有」。
    */
   public PartyContact primary(UUID partyId) {
     partyRow(partyId);
     var row =
         sql.fetchOne(
-            SELECT_COLUMNS + FROM_CONTACT + " and c.party_id=? and c.is_primary", currentTenantId(), partyId);
+            SELECT_COLUMNS + FROM_CONTACT + " and c.party_id=? and c.is_primary",
+            currentTenantId(),
+            partyId);
     if (row == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "该往来单位还没有默认联系人");
     return toContact(row);
   }
@@ -125,9 +125,8 @@ public class PartyContactService {
   /**
    * 引用候选：下游单据的下拉数据源。
    *
-   * <p>与 {@link PartyAddressService#candidates} 同一纪律：过滤<b>进 SQL</b>，
-   * 而不是取一批回来在内存里挑 —— 内存过滤会让「这一批里恰好没有可选的」显示成
-   * 「这个主体没有对接人」。
+   * <p>与 {@link PartyAddressService#candidates} 同一纪律：过滤<b>进 SQL</b>， 而不是取一批回来在内存里挑 ——
+   * 内存过滤会让「这一批里恰好没有可选的」显示成 「这个主体没有对接人」。
    */
   public List<PartyContact> candidates(UUID partyId, String keyword, boolean includeBlocked) {
     partyRow(partyId);
@@ -136,8 +135,12 @@ public class PartyContactService {
     where.add("c.party_id=?");
     binds.add(partyId);
     if (!includeBlocked) where.add(SELECTABLE);
-    return sql.fetch(
-            SELECT_COLUMNS + FROM_CONTACT + " and " + String.join(" and ", where)
+    return sql
+        .fetch(
+            SELECT_COLUMNS
+                + FROM_CONTACT
+                + " and "
+                + String.join(" and ", where)
                 + " order by c.is_primary desc,c.name,c.id limit ?",
             concat(concat(List.of(currentTenantId()), binds), List.of(MAX_CANDIDATES)).toArray())
         .stream()
@@ -150,8 +153,7 @@ public class PartyContactService {
   /**
    * 建 / 改联系人（{@code contactId} 为空即新建）。
    *
-   * <p>拉黑的主体不允许<b>新增</b>联系人（规则 A5，与 3.6.1.1 的 P6 同源）；
-   * 改联系人、设默认在拉黑状态下仍允许 —— 清理一个已拉黑对手方的对接人
+   * <p>拉黑的主体不允许<b>新增</b>联系人（规则 A5，与 3.6.1.1 的 P6 同源）； 改联系人、设默认在拉黑状态下仍允许 —— 清理一个已拉黑对手方的对接人
    * 正是之后要做的动作。
    */
   public PartyContactSaved save(
@@ -159,10 +161,16 @@ public class PartyContactService {
     var party = partyRow(partyId);
     String problem =
         contactProblem(
-            input.name(), input.position(), input.email(), input.phone(), input.mobile(), input.note());
+            input.name(),
+            input.position(),
+            input.email(),
+            input.phone(),
+            input.mobile(),
+            input.note());
     CatalogService.check(problem == null, problem);
     if (contactId == null) {
-      String blocked = PartyAddressRules.createUnderPartyProblem(party.get("status", String.class), "新增联系人");
+      String blocked =
+          PartyAddressRules.createUnderPartyProblem(party.get("status", String.class), "新增联系人");
       CatalogService.check(blocked == null, blocked);
     }
 
@@ -181,7 +189,15 @@ public class PartyContactService {
         sql.execute(
             "insert into party_contact(id,tenant_id,party_id,name,position,email,phone,mobile,note)"
                 + " values(?,?,?,?,?,?,?,?,?)",
-            newId, actor.tenantId(), partyId, name, position, email, phone, mobile, note);
+            newId,
+            actor.tenantId(),
+            partyId,
+            name,
+            position,
+            email,
+            phone,
+            mobile,
+            note);
       } catch (DataAccessException e) {
         throw conflict("联系人保存失败，请刷新后重试");
       }
@@ -189,7 +205,8 @@ public class PartyContactService {
       if (input.isPrimary()) {
         sql.execute(
             "update party_contact set is_primary=false where tenant_id=? and party_id=? and is_primary",
-            actor.tenantId(), partyId);
+            actor.tenantId(),
+            partyId);
         sql.execute("update party_contact set is_primary=true where id=?", newId);
       }
       audit(actor, newId, "PartyContactSaved");
@@ -203,12 +220,18 @@ public class PartyContactService {
           sql.execute(
               "update party_contact set name=?,position=?,email=?,phone=?,mobile=?,note=?,"
                   + "version=version+1,updated_at=now() where id=? and version=?",
-              name, position, email, phone, mobile, note, contactId, input.version());
+              name,
+              position,
+              email,
+              phone,
+              mobile,
+              note,
+              contactId,
+              input.version());
     } catch (DataAccessException e) {
       throw conflict("联系人保存失败，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
     if (input.isPrimary()) makePrimary(partyId, contactId);
     audit(actor, contactId, "PartyContactSaved");
     return savedResult(partyId, contactId);
@@ -217,8 +240,7 @@ public class PartyContactService {
   /**
    * 设 / 取消默认联系人（{@code PUT /{id}/primary}）。
    *
-   * <p>与地址的默认用法一样：设默认要走<b>独立端点</b>而不是在保存里顺手改 ——
-   * 「换默认签字人」是一次明确的动作，混进「改个电话号码」里会让运营在编辑别的字段时
+   * <p>与地址的默认用法一样：设默认要走<b>独立端点</b>而不是在保存里顺手改 —— 「换默认签字人」是一次明确的动作，混进「改个电话号码」里会让运营在编辑别的字段时
    * 悄悄换掉了默认联系人。
    */
   public PartyContactSaved setPrimary(
@@ -234,11 +256,14 @@ public class PartyContactService {
           sql.execute(
               "update party_contact set is_primary=false,version=version+1,updated_at=now()"
                   + " where id=? and version=?",
-              contactId, input.version());
-      if (updated != 1)
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
+              contactId,
+              input.version());
+      if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
     }
-    audit(actor, contactId, input.isPrimary() ? "PartyContactPrimarySet" : "PartyContactPrimaryCleared");
+    audit(
+        actor,
+        contactId,
+        input.isPrimary() ? "PartyContactPrimarySet" : "PartyContactPrimaryCleared");
     return savedResult(partyId, contactId);
   }
 
@@ -254,8 +279,7 @@ public class PartyContactService {
     CatalogService.check(blocked == null, blocked);
     int deleted =
         sql.execute("delete from party_contact where id=? and version=?", contactId, version);
-    if (deleted != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
+    if (deleted != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "联系人已被他人修改，请刷新后重试");
     audit(actor, contactId, "PartyContactDeleted");
   }
 
@@ -265,7 +289,9 @@ public class PartyContactService {
     sql.execute(
         "update party_contact set is_primary=false,updated_at=now()"
             + " where tenant_id=? and party_id=? and is_primary and id<>?",
-        currentTenantId(), partyId, contactId);
+        currentTenantId(),
+        partyId,
+        contactId);
     sql.execute(
         "update party_contact set is_primary=true,version=version+1,updated_at=now() where id=?",
         contactId);
@@ -279,7 +305,8 @@ public class PartyContactService {
     String block =
         selectionBlock(
             new SelectionInputs(
-                r.get("party_deleted_at", OffsetDateTime.class) != null, r.get("party_status", String.class)));
+                r.get("party_deleted_at", OffsetDateTime.class) != null,
+                r.get("party_status", String.class)));
     return new PartyContact(
         r.get("id", UUID.class),
         r.get("party_id", UUID.class),
@@ -301,7 +328,9 @@ public class PartyContactService {
     var row =
         sql.fetchOne(
             SELECT_COLUMNS + FROM_CONTACT + " and c.party_id=? and c.id=?",
-            currentTenantId(), partyId, contactId);
+            currentTenantId(),
+            partyId,
+            contactId);
     if (row == null) throw CatalogService.missing();
     return toContact(row);
   }
@@ -351,6 +380,10 @@ public class PartyContactService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 }

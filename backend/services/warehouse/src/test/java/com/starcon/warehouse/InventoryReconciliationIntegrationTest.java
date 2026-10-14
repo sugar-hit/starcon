@@ -29,18 +29,16 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.1.2.2 账实核对：账实一致也要出结论、差异定位到具体流水、可疑四类、时区不丢偏移、
- * 范围校验，以及租户隔离三断言。
+ * 7.1.2.2 账实核对：账实一致也要出结论、差异定位到具体流水、可疑四类、时区不丢偏移、 范围校验，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryLedgerIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryLedgerIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>造差异的手法</b>：夹具 {@code txn(...)} 只插流水**不动余额快照**
- * （真实系统里流水与余额由同一事务推进，这里刻意拆开，才能造出「记了流水没动账」的漂移）。
+ * <p><b>造差异的手法</b>：夹具 {@code txn(...)} 只插流水**不动余额快照** （真实系统里流水与余额由同一事务推进，这里刻意拆开，才能造出「记了流水没动账」的漂移）。
  * 于是「快照 = N，Σ 分录 = M」时差异恒为 M − N，想造哪一类差异就摆哪一组数。
  */
 @SpringBootTest
@@ -169,19 +167,39 @@ class InventoryReconciliationIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 3), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 3),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -203,7 +221,13 @@ class InventoryReconciliationIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-              id, a, skuA, warehouse, leA, qSellable, new BigDecimal(onHand),
+              id,
+              a,
+              skuA,
+              warehouse,
+              leA,
+              qSellable,
+              new BigDecimal(onHand),
               new BigDecimal(reserved));
           return null;
         });
@@ -213,12 +237,10 @@ class InventoryReconciliationIntegrationTest {
   /**
    * 写一笔库存业务（业务单 + 分录），**不动余额快照** —— 差异就是这么造出来的。
    *
-   * <p>两个时间都用 {@code ?::timestamptz} 绑定，且 {@code created_at} 排在
-   * {@code notes} 之前：cast 落在 values 列表末位会让 jOOQ 整体绑定错位一格
-   * （AGENTS.md 与 7.1.2.1 测试的同一条纪律），所以最后一个绑定是普通列 notes。
+   * <p>两个时间都用 {@code ?::timestamptz} 绑定，且 {@code created_at} 排在 {@code notes} 之前：cast 落在 values
+   * 列表末位会让 jOOQ 整体绑定错位一格 （AGENTS.md 与 7.1.2.1 测试的同一条纪律），所以最后一个绑定是普通列 notes。
    *
-   * <p>{@code createdAt} 为 null 时落 {@code now()}，即"当时就录了"；
-   * 要造迟到补记/并发碰撞时显式传值。
+   * <p>{@code createdAt} 为 null 时落 {@code now()}，即"当时就录了"； 要造迟到补记/并发碰撞时显式传值。
    */
   UUID txn(
       String kind,
@@ -248,11 +270,23 @@ class InventoryReconciliationIntegrationTest {
           sql.execute(
               "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,"
                   + "actor_id,created_at,notes) values(?,?,?,?,?,?::timestamptz,?,?::timestamptz,?)",
-              txId, a, kind, refType, refId, occurredAt, user, at, "夹具");
+              txId,
+              a,
+              kind,
+              refType,
+              refId,
+              occurredAt,
+              user,
+              at,
+              "夹具");
           sql.execute(
               "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                   + "reserved_delta) values(?,?,?,?,?,?)",
-              UUID.randomUUID(), a, txId, balanceId, new BigDecimal(onHandDelta),
+              UUID.randomUUID(),
+              a,
+              txId,
+              balanceId,
+              new BigDecimal(onHandDelta),
               new BigDecimal(reservedDelta));
           return null;
         });
@@ -270,15 +304,32 @@ class InventoryReconciliationIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balB, b, idFor(b, 2), idFor(b, 3), idFor(b, 1), idFor(b, 5), new BigDecimal(onHand));
+              balB,
+              b,
+              idFor(b, 2),
+              idFor(b, 3),
+              idFor(b, 1),
+              idFor(b, 5),
+              new BigDecimal(onHand));
           sql.execute(
               "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,"
                   + "actor_id,notes) values(?,?,?,?,?,?::timestamptz,?,?)",
-              txB, b, "RECEIPT", "PO", UUID.randomUUID(), at, user, "B 的入库");
+              txB,
+              b,
+              "RECEIPT",
+              "PO",
+              UUID.randomUUID(),
+              at,
+              user,
+              "B 的入库");
           sql.execute(
               "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                   + "reserved_delta) values(?,?,?,?,?,0)",
-              UUID.randomUUID(), b, txB, balB, new BigDecimal("7"));
+              UUID.randomUUID(),
+              b,
+              txB,
+              balB,
+              new BigDecimal("7"));
           return null;
         });
     return balB;
@@ -299,8 +350,7 @@ class InventoryReconciliationIntegrationTest {
   }
 
   ReconciliationResult run(AccessService.Access who, ReconciliationRequest request) {
-    return access.run(
-        who, "warehouse.inventory.update", () -> service.run(request, who.userId()));
+    return access.run(who, "warehouse.inventory.update", () -> service.run(request, who.userId()));
   }
 
   /** 只带某一类可疑的发现，测试里读起来比 filter 链清楚。 */
@@ -334,15 +384,11 @@ class InventoryReconciliationIntegrationTest {
     assertThat(r.openingOnHand()).isEqualByComparingTo("0");
     assertThat(r.afterWindowOnHand()).isEqualByComparingTo("0");
     // opening + period 恰好等于 expected
-    assertThat(r.expectedOnHand())
-        .isEqualByComparingTo(r.openingOnHand().add(r.periodOnHand()));
+    assertThat(r.expectedOnHand()).isEqualByComparingTo(r.openingOnHand().add(r.periodOnHand()));
     assertThat(r.discrepancyCount()).isZero();
     assertThat(r.suspectCount()).isZero();
     // 差异为零也要写清核了哪个区间、多少笔分录
-    assertThat(r.verdictNote())
-        .contains("1 条余额行")
-        .contains("3 笔分录")
-        .contains("完全一致");
+    assertThat(r.verdictNote()).contains("1 条余额行").contains("3 笔分录").contains("完全一致");
     assertThat(r.scopeType()).isEqualTo(ReconciliationScopeType.ALL);
     assertThat(r.scopeLabel()).isEqualTo("全部余额行");
   }
@@ -433,8 +479,7 @@ class InventoryReconciliationIntegrationTest {
     // 三个桶恰好把全部历史分完
     assertThat(r.expectedOnHand()).isEqualByComparingTo("7");
     assertThat(r.expectedOnHand())
-        .isEqualByComparingTo(
-            r.openingOnHand().add(r.periodOnHand()).add(r.afterWindowOnHand()));
+        .isEqualByComparingTo(r.openingOnHand().add(r.periodOnHand()).add(r.afterWindowOnHand()));
     // 快照 5，累计 5(区间内) + 2(区间后) = 7 → 差 +2
     assertThat(r.onHandDiff()).isEqualByComparingTo("2");
     assertThat(r.verdictNote()).contains("区间结束后仍有流水");
@@ -477,7 +522,8 @@ class InventoryReconciliationIntegrationTest {
     var at = now().minusDays(2);
     var first = txn("RECEIPT", "PO", at, bal, "12", "0", at);
     // 同类型同数量同操作人，但来源单据不同 → V1 的 UNIQUE(tenant_id,ref_type,ref_id) 挡不住
-    var second = txn("RECEIPT", "MANUAL_GRN", at.plusSeconds(20), bal, "12", "0", at.plusSeconds(20));
+    var second =
+        txn("RECEIPT", "MANUAL_GRN", at.plusSeconds(20), bal, "12", "0", at.plusSeconds(20));
 
     var result = run(actorA, last30Days());
     var dupes = of(result.suspects(), ReconciliationSuspectCategory.DUPLICATE);
@@ -512,8 +558,7 @@ class InventoryReconciliationIntegrationTest {
     var at = now().minusDays(2);
     // 数量不同（否则会被重复记先命中），但**写入时刻**相差 15 秒
     var first = txn("RECEIPT", "PO", at, bal, "12", "0", at);
-    var second =
-        txn("SHIPMENT", "ORDER", at.plusSeconds(15), bal, "-3", "0", at.plusSeconds(15));
+    var second = txn("SHIPMENT", "ORDER", at.plusSeconds(15), bal, "-3", "0", at.plusSeconds(15));
 
     var result = run(actorA, last30Days());
     var lost = of(result.suspects(), ReconciliationSuspectCategory.LOST_UPDATE);
@@ -540,7 +585,8 @@ class InventoryReconciliationIntegrationTest {
   void 迟到补记_入库时刻远晚于声称的发生时刻() {
     var bal = balance(whSh, "100", "0");
     // 声称 3 天前发生，今天才录进来
-    var late = txn("ADJUSTMENT", "MANUAL", now().minusDays(3), bal, "7", "0", now().minusSeconds(30));
+    var late =
+        txn("ADJUSTMENT", "MANUAL", now().minusDays(3), bal, "7", "0", now().minusSeconds(30));
 
     var result = run(actorA, last30Days());
     var backfills = of(result.suspects(), ReconciliationSuspectCategory.BACKFILL);
@@ -554,14 +600,7 @@ class InventoryReconciliationIntegrationTest {
   void 当天补记不算跨期补记() {
     var bal = balance(whSh, "100", "0");
     // 迟了 2 小时，还不到一天
-    txn(
-        "ADJUSTMENT",
-        "MANUAL",
-        now().minusHours(2),
-        bal,
-        "7",
-        "0",
-        now().minusSeconds(30));
+    txn("ADJUSTMENT", "MANUAL", now().minusHours(2), bal, "7", "0", now().minusSeconds(30));
     var result = run(actorA, last30Days());
     assertThat(of(result.suspects(), ReconciliationSuspectCategory.BACKFILL)).isEmpty();
   }
@@ -599,7 +638,13 @@ class InventoryReconciliationIntegrationTest {
     // 桶一（3 天前）：迟到补记 + 重复记 → 含 HIGH
     txn("ADJUSTMENT", "MANUAL", now.minusDays(3), bal1, "5", "0", now.minusDays(1));
     txn("RECEIPT", "PO", now.minusDays(3), bal1, "9", "0", now.minusDays(3));
-    txn("RECEIPT", "MANUAL_GRN", now.minusDays(3).plusSeconds(20), bal1, "9", "0",
+    txn(
+        "RECEIPT",
+        "MANUAL_GRN",
+        now.minusDays(3).plusSeconds(20),
+        bal1,
+        "9",
+        "0",
         now.minusDays(3).plusSeconds(20));
     // 桶二（2 天前）：只迟到了一条补记 → WARN
     txn("ADJUSTMENT", "MANUAL2", now.minusDays(2), bal2, "4", "0", now);
@@ -661,8 +706,7 @@ class InventoryReconciliationIntegrationTest {
   void 范围只能选一个维度() {
     var now = now();
     assertThatThrownBy(
-            () ->
-                run(actorA, new ReconciliationRequest(now.minusDays(30), now, whSh, skuA, null)))
+            () -> run(actorA, new ReconciliationRequest(now.minusDays(30), now, whSh, skuA, null)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("三选一");
   }
@@ -675,8 +719,7 @@ class InventoryReconciliationIntegrationTest {
             () ->
                 run(
                     actorA,
-                    new ReconciliationRequest(
-                        now.minusDays(30), now, idFor(b, 3), null, null)))
+                    new ReconciliationRequest(now.minusDays(30), now, idFor(b, 3), null, null)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在或无权查看");
   }
@@ -700,8 +743,8 @@ class InventoryReconciliationIntegrationTest {
                 .contentType("application/json")
                 .content("{}"))
         .andExpect(status().isForbidden());
-    http.perform(get("/warehouse/inventory/reconciliation")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/inventory/reconciliation").header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
   }
 
@@ -900,15 +943,14 @@ class InventoryReconciliationIntegrationTest {
         access.run(
             actorA,
             "warehouse.inventory.read",
-            () ->
-                sql.fetchOne(
-                    "select occurred_at from inventory_transaction where id=?", txId));
+            () -> sql.fetchOne("select occurred_at from inventory_transaction where id=?", txId));
     assertThat(stored).isNotNull();
     assertThat(stored.get(0, OffsetDateTime.class).toInstant()).isEqualTo(shanghai.toInstant());
     assertThat(stored.get(0, OffsetDateTime.class).getOffset().getTotalSeconds()).isEqualTo(28800);
 
     // 落库的核对区间也保持同一瞬间
-    var header = access.run(actorA, "warehouse.inventory.read", () -> service.runOf(result.run().id()));
+    var header =
+        access.run(actorA, "warehouse.inventory.read", () -> service.runOf(result.run().id()));
     assertThat(header.windowFrom().toInstant())
         .isEqualTo(OffsetDateTime.parse("2026-10-01T00:00:00+08:00").toInstant());
     assertThat(header.windowTo().toInstant())
@@ -944,9 +986,11 @@ class InventoryReconciliationIntegrationTest {
     assertThat(b.discrepancies().get(0).balanceId()).isEqualTo(balB);
 
     // 批次列表也按租户隔离
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.runs(0, 20, null)).total())
+    assertThat(
+            access.run(actorA, "warehouse.inventory.read", () -> service.runs(0, 20, null)).total())
         .isEqualTo(1);
-    assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.runs(0, 20, null)).total())
+    assertThat(
+            access.run(actorB, "warehouse.inventory.read", () -> service.runs(0, 20, null)).total())
         .isEqualTo(1);
   }
 

@@ -17,10 +17,10 @@
 卷 10 物流与头程、卷 11 售后与退货）按 `README.md:118-124` 的服务归属表，主责服务
 都需要 `trade`（11 还需 `finance`）：
 
-| 卷 | 服务归属（README.md） | 服务是否已在集成头 |
-| -- | ---------------------- | ------------------ |
-| 09 订单履约 | trade + channel | ❌ trade 缺 |
-| 10 物流与头程 | channel + trade + warehouse | ❌ trade 缺 |
+| 卷            | 服务归属（README.md）       | 服务是否已在集成头    |
+| ------------- | --------------------------- | --------------------- |
+| 09 订单履约   | trade + channel             | ❌ trade 缺           |
+| 10 物流与头程 | channel + trade + warehouse | ❌ trade 缺           |
 | 11 售后与退货 | trade + finance + warehouse | ❌ trade / finance 缺 |
 
 集成头 `integration/module-dev`（`e44c62c`）下 `backend/services/` 只有

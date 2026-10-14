@@ -24,16 +24,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.1.3.1 多仓分布视图：多仓矩阵、自有账本与平台观测的分离、在途归属、周转天数口径、
- * DB 级「平台仓不得有自有账本」强制，以及租户隔离三断言。
+ * 7.1.3.1 多仓分布视图：多仓矩阵、自有账本与平台观测的分离、在途归属、周转天数口径、 DB 级「平台仓不得有自有账本」强制，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryBucketIntegrationTest} / {@link InventoryLedgerIntegrationTest}
- * 完全一致（同样的 Testcontainers、同样的 fake identity server、同样的按租户派生 UUID、
- * 同样的 TRUNCATE 清场），避免每个测试类各写一套风格。
+ * <p>夹具写法与 {@link InventoryBucketIntegrationTest} / {@link InventoryLedgerIntegrationTest} 完全一致（同样的
+ * Testcontainers、同样的 fake identity server、同样的按租户派生 UUID、 同样的 TRUNCATE 清场），避免每个测试类各写一套风格。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -182,34 +180,98 @@ class InventoryDistributionIntegrationTest {
         () -> {
           sql.execute(
               "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-              leA, a, "LE-1", "主体一");
+              leA,
+              a,
+              "LE-1",
+              "主体一");
           // spu_id 是 V55 新增的引用登记列：前两个 SKU 属于同一 SPU，第三个故意不登记。
           sql.execute(
               "insert into sku_ref(id,tenant_id,code,name,spu_id) values(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
-              skuA, a, "SKU-1", "商品一", spuA,
-              skuASameSpu, a, "SKU-2", "商品二", spuA,
-              skuANoSpu, a, "SKU-9", "未登记SPU", null);
+              skuA,
+              a,
+              "SKU-1",
+              "商品一",
+              spuA,
+              skuASameSpu,
+              a,
+              "SKU-2",
+              "商品二",
+              spuA,
+              skuANoSpu,
+              a,
+              "SKU-9",
+              "未登记SPU",
+              null);
           sql.execute(
               "insert into warehouse(id,tenant_id,code,name,country_code,timezone,kind)"
                   + " values(?,?,?,?,?,?,?),(?,?,?,?,?,?,?),(?,?,?,?,?,?,?),(?,?,?,?,?,?,?)",
-              whSh, a, "WH-SH", "上海仓", "CN", "Asia/Shanghai", "LOCAL",
-              whSz, a, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai", "LOCAL",
-              whFba, a, "FBA-US", "美国FBA", "US", "America/Los_Angeles", "PLATFORM_FBA",
-              whTpl, a, "TPL-DE", "德国三方仓", "DE", "Europe/Berlin", "THIRD_PARTY");
+              whSh,
+              a,
+              "WH-SH",
+              "上海仓",
+              "CN",
+              "Asia/Shanghai",
+              "LOCAL",
+              whSz,
+              a,
+              "WH-SZ",
+              "深圳仓",
+              "CN",
+              "Asia/Shanghai",
+              "LOCAL",
+              whFba,
+              a,
+              "FBA-US",
+              "美国FBA",
+              "US",
+              "America/Los_Angeles",
+              "PLATFORM_FBA",
+              whTpl,
+              a,
+              "TPL-DE",
+              "德国三方仓",
+              "DE",
+              "Europe/Berlin",
+              "THIRD_PARTY");
           sql.execute(
               "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-              qSellable, a, "SELLABLE", "可售", "SELLABLE");
+              qSellable,
+              a,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
                   + " values(?,?,?,?,?,?,?),(?,?,?,?,?,?,?),(?,?,?,?,?,?,?)",
-              locSh, a, whSh, "A-01", "A区01", "STORAGE", true,
-              locSz, a, whSz, "B-01", "B区01", "STORAGE", true,
+              locSh,
+              a,
+              whSh,
+              "A-01",
+              "A区01",
+              "STORAGE",
+              true,
+              locSz,
+              a,
+              whSz,
+              "B-01",
+              "B区01",
+              "STORAGE",
+              true,
               // FBA 仓也建一个库位：用来证明 bucket 侧的「平台仓不得有账本」触发器真的生效
-              locFba, a, whFba, "FBA-A1", "FBA货位", "STORAGE", true);
+              locFba,
+              a,
+              whFba,
+              "FBA-A1",
+              "FBA货位",
+              "STORAGE",
+              true);
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on)"
                   + " values(?,?,?,?,current_date+365,current_date-10)",
-              lotA, a, skuA, "LOT-2026-01");
+              lotA,
+              a,
+              skuA,
+              "LOT-2026-01");
           return null;
         });
     access.run(
@@ -218,16 +280,33 @@ class InventoryDistributionIntegrationTest {
         () -> {
           sql.execute(
               "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-              leB, b, "LE-B", "主体B");
+              leB,
+              b,
+              "LE-B",
+              "主体B");
           sql.execute(
-              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuB, b, "SKU-B", "商品B");
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuB,
+              b,
+              "SKU-B",
+              "商品B");
           sql.execute(
               "insert into warehouse(id,tenant_id,code,name,country_code,timezone,kind)"
                   + " values(?,?,?,?,?,?,?)",
-              whB, b, "WH-B", "B仓", "CN", "Asia/Shanghai", "LOCAL");
+              whB,
+              b,
+              "WH-B",
+              "B仓",
+              "CN",
+              "Asia/Shanghai",
+              "LOCAL");
           sql.execute(
               "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-              qSellB, b, "SELLABLE", "可售", "SELLABLE");
+              qSellB,
+              b,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
           return null;
         });
   }
@@ -249,9 +328,14 @@ class InventoryDistributionIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-              id, tenant, sku, warehouse, tenant.equals(a) ? leA : leB,
+              id,
+              tenant,
+              sku,
+              warehouse,
+              tenant.equals(a) ? leA : leB,
               tenant.equals(a) ? qSellable : qSellB,
-              new BigDecimal(onHand), new BigDecimal(reserved));
+              new BigDecimal(onHand),
+              new BigDecimal(reserved));
           return null;
         });
     return id;
@@ -263,8 +347,7 @@ class InventoryDistributionIntegrationTest {
   }
 
   /**
-   * 给一条余额行挂一个 bucket。reserved 必须与余额一致：V2 的守恒触发器要求
-   * Σ bucket 的在手/预占都等于 balance，只对齐在手会被 DB 以「不平」拒绝。
+   * 给一条余额行挂一个 bucket。reserved 必须与余额一致：V2 的守恒触发器要求 Σ bucket 的在手/预占都等于 balance，只对齐在手会被 DB 以「不平」拒绝。
    */
   void addBucket(
       UUID tenant, UUID balanceId, UUID warehouse, UUID location, String onHand, String reserved) {
@@ -278,8 +361,13 @@ class InventoryDistributionIntegrationTest {
                   + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
                   + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,?::numeric(19,4),"
                   + "?::timestamptz from inventory_balance bal where bal.id=?",
-              UUID.randomUUID(), location, tenant.equals(a) ? lotA : null, new BigDecimal(onHand),
-              new BigDecimal(reserved), OffsetDateTime.now(), balanceId);
+              UUID.randomUUID(),
+              location,
+              tenant.equals(a) ? lotA : null,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved),
+              OffsetDateTime.now(),
+              balanceId);
           return null;
         });
   }
@@ -287,8 +375,8 @@ class InventoryDistributionIntegrationTest {
   /**
    * 写一笔库存业务（业务单 + 分录）。
    *
-   * <p>occurredAt 用 {@code ?::timestamptz} 绑定，且 cast **不在绑定序列末位**
-   * （后面还有 2 个绑定）：落在末位会让 jOOQ 整体绑定错位一格。
+   * <p>occurredAt 用 {@code ?::timestamptz} 绑定，且 cast **不在绑定序列末位** （后面还有 2 个绑定）：落在末位会让 jOOQ
+   * 整体绑定错位一格。
    */
   UUID txn(
       UUID tenant, String kind, OffsetDateTime occurredAt, UUID balanceId, String onHandDelta) {
@@ -301,11 +389,22 @@ class InventoryDistributionIntegrationTest {
           sql.execute(
               "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,"
                   + "actor_id,notes) values(?,?,?,?,?,?::timestamptz,?,?)",
-              txId, tenant, kind, "ORDER", refId, occurredAt, user, "夹具");
+              txId,
+              tenant,
+              kind,
+              "ORDER",
+              refId,
+              occurredAt,
+              user,
+              "夹具");
           sql.execute(
               "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                   + "reserved_delta) values(?,?,?,?,?,0)",
-              UUID.randomUUID(), tenant, txId, balanceId, new BigDecimal(onHandDelta));
+              UUID.randomUUID(),
+              tenant,
+              txId,
+              balanceId,
+              new BigDecimal(onHandDelta));
           return null;
         });
     return txId;
@@ -321,8 +420,14 @@ class InventoryDistributionIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,"
                   + "shipped_at) values(?,?,?,?,?,?,?,?,'IN_TRANSIT',?::timestamptz)",
-              UUID.randomUUID(), tenant, sku, tenant.equals(a) ? leA : leB, from, to,
-              tenant.equals(a) ? qSellable : qSellB, new BigDecimal(quantity),
+              UUID.randomUUID(),
+              tenant,
+              sku,
+              tenant.equals(a) ? leA : leB,
+              from,
+              to,
+              tenant.equals(a) ? qSellable : qSellB,
+              new BigDecimal(quantity),
               OffsetDateTime.now().minusDays(2));
           return null;
         });
@@ -345,9 +450,17 @@ class InventoryDistributionIntegrationTest {
               "insert into platform_stock_observation(id,tenant_id,warehouse_id,sku_id,"
                   + "legal_entity_id,source,collected_at,observed_on_hand,observed_reserved,"
                   + "observed_available,observed_inbound) values(?,?,?,?,?,?,?::timestamptz,?,?,?,?)",
-              UUID.randomUUID(), tenant, warehouse, sku, tenant.equals(a) ? leA : leB,
-              source, collectedAt, new BigDecimal(onHand),
-              new BigDecimal("0"), new BigDecimal(onHand), new BigDecimal(inbound));
+              UUID.randomUUID(),
+              tenant,
+              warehouse,
+              sku,
+              tenant.equals(a) ? leA : leB,
+              source,
+              collectedAt,
+              new BigDecimal(onHand),
+              new BigDecimal("0"),
+              new BigDecimal(onHand),
+              new BigDecimal(inbound));
           return null;
         });
   }
@@ -374,7 +487,8 @@ class InventoryDistributionIntegrationTest {
     balance(a, whSz, skuA, "40", "0");
 
     var m = matrixOf(a, skuA);
-    assertThat(m.rows()).extracting(DistributionRow::warehouseCode)
+    assertThat(m.rows())
+        .extracting(DistributionRow::warehouseCode)
         .containsExactlyInAnyOrder("WH-SH", "WH-SZ");
     var sh = row(a, skuA, "WH-SH");
     assertThat(sh.onHand()).isEqualByComparingTo("100");
@@ -453,8 +567,16 @@ class InventoryDistributionIntegrationTest {
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,"
                   + "shipped_at,received_at) values(?,?,?,?,?,?,?,?,'RECEIVED',?::timestamptz,"
                   + "?::timestamptz)",
-              UUID.randomUUID(), a, skuA, leA, whSh, whSz, qSellable, new BigDecimal("30"),
-              OffsetDateTime.now().minusDays(5), OffsetDateTime.now().minusDays(1));
+              UUID.randomUUID(),
+              a,
+              skuA,
+              leA,
+              whSh,
+              whSz,
+              qSellable,
+              new BigDecimal("30"),
+              OffsetDateTime.now().minusDays(5),
+              OffsetDateTime.now().minusDays(1));
           return null;
         });
     // 已收货 → 既不是在途、也没进在手（没有 TRANSFER_IN 分录），所以这一行根本不出现
@@ -508,14 +630,14 @@ class InventoryDistributionIntegrationTest {
     observation(a, whFba, skuA, "THIRD_PARTY_API", now.minusHours(2), "30", "0");
 
     var fbaRows =
-        matrixOf(a, skuA).rows().stream()
-            .filter(r -> r.warehouseCode().equals("FBA-US"))
-            .toList();
+        matrixOf(a, skuA).rows().stream().filter(r -> r.warehouseCode().equals("FBA-US")).toList();
     assertThat(fbaRows).hasSize(2);
-    assertThat(fbaRows).extracting(DistributionRow::source)
+    assertThat(fbaRows)
+        .extracting(DistributionRow::source)
         .containsExactlyInAnyOrder("AMAZON_FBA", "THIRD_PARTY_API");
     // 两个来源的分歧被暴露成两行，而不是被求和成一个 110
-    assertThat(fbaRows).extracting(r -> r.platformOnHand().toPlainString())
+    assertThat(fbaRows)
+        .extracting(r -> r.platformOnHand().toPlainString())
         .containsExactlyInAnyOrder("80.0000", "30.0000");
   }
 
@@ -533,8 +655,7 @@ class InventoryDistributionIntegrationTest {
             actorA,
             "warehouse.inventory.read",
             () ->
-                sql.fetch("select observed_on_hand from platform_stock_observation")
-                    .stream()
+                sql.fetch("select observed_on_hand from platform_stock_observation").stream()
                     .map(r -> r.get("observed_on_hand", BigDecimal.class))
                     .toList());
     assertThat(stored).hasSize(2);
@@ -542,8 +663,7 @@ class InventoryDistributionIntegrationTest {
 
   @Test
   void 平台仓不得有自有账本余额被DB拒绝() {
-    assertThatThrownBy(() -> balance(a, whFba, skuA, "10", "0"))
-        .hasMessageContaining("平台仓");
+    assertThatThrownBy(() -> balance(a, whFba, skuA, "10", "0")).hasMessageContaining("平台仓");
     // bucket 侧同样锁住：直接插一行属于 FBA 仓的 bucket（不走 balance 推导）同样被拒
     assertThatThrownBy(
             () ->
@@ -556,8 +676,16 @@ class InventoryDistributionIntegrationTest {
                               + "warehouse_id,location_id,lot_id,quality_status_id,balance_id,"
                               + "on_hand,reserved,last_movement_at)"
                               + " values(?,?,?,?,?,?,?,?,?,1,0,?::timestamptz)",
-                          UUID.randomUUID(), a, leA, skuA, whFba, locFba, lotA, qSellable,
-                          UUID.randomUUID(), OffsetDateTime.now());
+                          UUID.randomUUID(),
+                          a,
+                          leA,
+                          skuA,
+                          whFba,
+                          locFba,
+                          lotA,
+                          qSellable,
+                          UUID.randomUUID(),
+                          OffsetDateTime.now());
                       return null;
                     }))
         .hasMessageContaining("平台仓");
@@ -598,8 +726,7 @@ class InventoryDistributionIntegrationTest {
                     actorA,
                     "warehouse.inventory.read",
                     () -> {
-                      sql.execute(
-                          "update platform_stock_observation set observed_on_hand=1");
+                      sql.execute("update platform_stock_observation set observed_on_hand=1");
                       return null;
                     }))
         .rootCause()
@@ -618,7 +745,8 @@ class InventoryDistributionIntegrationTest {
     // 即使用超级用户连接绕过权限层，append-only 触发器仍然挡得住
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      assertThatThrownBy(() -> s.execute("update platform_stock_observation set observed_on_hand=1"))
+      assertThatThrownBy(
+              () -> s.execute("update platform_stock_observation set observed_on_hand=1"))
           .hasMessageContaining("append-only");
       assertThatThrownBy(() -> s.execute("delete from platform_stock_observation"))
           .hasMessageContaining("append-only");
@@ -639,9 +767,16 @@ class InventoryDistributionIntegrationTest {
             () ->
                 service.recordObservation(
                     new PlatformObservationInput(
-                        whFba, skuA, leA, "amazon_fba", collectedAt,
-                        new BigDecimal("80"), new BigDecimal("5"), new BigDecimal("75"),
-                        new BigDecimal("25"), "FBA-REF-1")));
+                        whFba,
+                        skuA,
+                        leA,
+                        "amazon_fba",
+                        collectedAt,
+                        new BigDecimal("80"),
+                        new BigDecimal("5"),
+                        new BigDecimal("75"),
+                        new BigDecimal("25"),
+                        "FBA-REF-1")));
 
     assertThat(saved.source()).isEqualTo("AMAZON_FBA");
     assertThat(saved.warehouseKind()).isEqualTo("PLATFORM_FBA");
@@ -664,8 +799,16 @@ class InventoryDistributionIntegrationTest {
                     () ->
                         service.recordObservation(
                             new PlatformObservationInput(
-                                whFba, skuA, leA, "  ", now,
-                                BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.ZERO, null))))
+                                whFba,
+                                skuA,
+                                leA,
+                                "  ",
+                                now,
+                                BigDecimal.ONE,
+                                BigDecimal.ZERO,
+                                BigDecimal.ONE,
+                                BigDecimal.ZERO,
+                                null))))
         .hasMessageContaining("source");
     assertThatThrownBy(
             () ->
@@ -675,8 +818,16 @@ class InventoryDistributionIntegrationTest {
                     () ->
                         service.recordObservation(
                             new PlatformObservationInput(
-                                whFba, skuA, leA, "AMAZON_FBA", null,
-                                BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.ZERO, null))))
+                                whFba,
+                                skuA,
+                                leA,
+                                "AMAZON_FBA",
+                                null,
+                                BigDecimal.ONE,
+                                BigDecimal.ZERO,
+                                BigDecimal.ONE,
+                                BigDecimal.ZERO,
+                                null))))
         .hasMessageContaining("collectedAt");
     // 负数量在服务层就给出可读报错，而不是只抛一句 constraint 名字
     assertThatThrownBy(
@@ -687,8 +838,16 @@ class InventoryDistributionIntegrationTest {
                     () ->
                         service.recordObservation(
                             new PlatformObservationInput(
-                                whFba, skuA, leA, "AMAZON_FBA", now,
-                                new BigDecimal("-1"), BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.ZERO, null))))
+                                whFba,
+                                skuA,
+                                leA,
+                                "AMAZON_FBA",
+                                now,
+                                new BigDecimal("-1"),
+                                BigDecimal.ZERO,
+                                BigDecimal.ONE,
+                                BigDecimal.ZERO,
+                                null))))
         .hasMessageContaining("不能为负");
   }
 
@@ -702,13 +861,15 @@ class InventoryDistributionIntegrationTest {
         """
             .formatted(whFba, skuA, leA);
     // 只读身份：矩阵能看，但不能写观测
-    http.perform(get("/warehouse/inventory/distribution?skuId=" + skuA)
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            get("/warehouse/inventory/distribution?skuId=" + skuA)
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
-    http.perform(post("/warehouse/inventory/platform-observations")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content(body))
+    http.perform(
+            post("/warehouse/inventory/platform-observations")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(body))
         .andExpect(status().isForbidden());
   }
 
@@ -762,7 +923,11 @@ class InventoryDistributionIntegrationTest {
             actorA,
             "warehouse.inventory.read",
             () -> service.distribution(new DistributionQuery(skuA, null, null, 90)));
-    var sh = wider.rows().stream().filter(r -> r.warehouseCode().equals("WH-SH")).findFirst().orElseThrow();
+    var sh =
+        wider.rows().stream()
+            .filter(r -> r.warehouseCode().equals("WH-SH"))
+            .findFirst()
+            .orElseThrow();
     assertThat(sh.turnoverComputable()).isTrue();
     assertThat(sh.turnoverDays()).isEqualByComparingTo("180.0");
     assertThat(wider.window().lookbackDays()).isEqualTo(90);
@@ -850,9 +1015,11 @@ class InventoryDistributionIntegrationTest {
             () -> service.distribution(new DistributionQuery(null, spuA, null, 30)));
     assertThat(m.subject().spuId()).isEqualTo(spuA);
     assertThat(m.skuScope().matchedSkuCount()).isEqualTo(2);
-    var sh = m.rows().stream().filter(r -> r.warehouseCode().equals("WH-SH")).findFirst().orElseThrow();
+    var sh =
+        m.rows().stream().filter(r -> r.warehouseCode().equals("WH-SH")).findFirst().orElseThrow();
     assertThat(sh.onHand()).isEqualByComparingTo("120");
-    var fba = m.rows().stream().filter(r -> r.warehouseCode().equals("FBA-US")).findFirst().orElseThrow();
+    var fba =
+        m.rows().stream().filter(r -> r.warehouseCode().equals("FBA-US")).findFirst().orElseThrow();
     // 同来源的两个 SKU 相加是同质的；采集时间取最旧那条
     assertThat(fba.platformOnHand()).isEqualByComparingTo("100");
   }
@@ -897,7 +1064,8 @@ class InventoryDistributionIntegrationTest {
 
   @Test
   void 端点参数校验返回400() throws Exception {
-    http.perform(get("/warehouse/inventory/distribution").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/distribution").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isBadRequest());
     http.perform(
             get("/warehouse/inventory/distribution?skuId=" + skuA + "&spuId=" + spuA)
@@ -948,11 +1116,20 @@ class InventoryDistributionIntegrationTest {
         () -> {
           sql.execute(
               "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-              leOther, a, "LE-2", "主体二");
+              leOther,
+              a,
+              "LE-2",
+              "主体二");
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              UUID.randomUUID(), a, skuA, whSh, leOther, qSellable, new BigDecimal("500"));
+              UUID.randomUUID(),
+              a,
+              skuA,
+              whSh,
+              leOther,
+              qSellable,
+              new BigDecimal("500"));
           return null;
         });
 
@@ -1001,10 +1178,12 @@ class InventoryDistributionIntegrationTest {
         .andExpect(jsonPath("$.window.outboundKinds[0]").value("SHIPMENT"))
         .andExpect(jsonPath("$.skuScope.matchedSkuCount").value(1))
         // 平台行带来源与采集时间，自有行的平台列为 null
-        .andExpect(jsonPath("$.rows[?(@.warehouseKind=='PLATFORM_FBA')].source")
-            .value(org.hamcrest.Matchers.hasItem("AMAZON_FBA")))
-        .andExpect(jsonPath("$.rows[?(@.warehouseKind=='LOCAL')].platformOnHand")
-            .value(org.hamcrest.Matchers.hasItem(org.hamcrest.Matchers.nullValue())));
+        .andExpect(
+            jsonPath("$.rows[?(@.warehouseKind=='PLATFORM_FBA')].source")
+                .value(org.hamcrest.Matchers.hasItem("AMAZON_FBA")))
+        .andExpect(
+            jsonPath("$.rows[?(@.warehouseKind=='LOCAL')].platformOnHand")
+                .value(org.hamcrest.Matchers.hasItem(org.hamcrest.Matchers.nullValue())));
   }
 
   // ================================================================ 租户隔离三断言
@@ -1062,11 +1241,12 @@ class InventoryDistributionIntegrationTest {
          "observedReserved":0,"observedAvailable":1,"observedInbound":0}
         """
             .formatted(whFba, skuA, leA);
-    http.perform(post("/warehouse/inventory/platform-observations")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString())
-            .contentType("application/json")
-            .content(body))
+    http.perform(
+            post("/warehouse/inventory/platform-observations")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString())
+                .contentType("application/json")
+                .content(body))
         .andExpect(status().isOk());
     // 写进的是 A 的租户（whFba 属于 A），B 的表里仍然一条都没有
     assertThat(matrixOf(b, skuA).rows()).isEmpty();

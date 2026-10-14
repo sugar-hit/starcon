@@ -5,6 +5,7 @@
 > 左侧顶侧菜单的字体，还是太小。标题太大，然后还靠中间。很突兀。Logo下面的横线和右侧顶部导航栏没对齐。应该是一体的，必须要对齐。
 
 3 个问题：
+
 1. 左侧 Nav 字体太小（之前 12px 还是不够）
 2. PageHeader 标题太大（20px）且靠中间（mx-auto 偏移）
 3. Logo 下分隔线跟 header 下边框没对齐（应该是一体）
@@ -22,6 +23,7 @@
 ```
 
 **关键修复** — 删 `mx-auto` 后:
+
 - 内容永远从主区左边沿 x=240 + px-5(20) = x=260 开始
 - 不再被 max-w-7xl (1280px) 居中偏移
 - 任何视窗宽度下都左对齐
@@ -36,6 +38,7 @@
 ```
 
 **对齐** — 两个顶部容器都 h-16 (64px):
+
 - Logo div bottom edge: y=64
 - Header bottom edge: y=64
 - 两条 border-b 在同一条线上 → "一体" ✓
@@ -67,18 +70,18 @@ Nav:   fontSize=13px
 
 ## 当前 typography 完整图
 
-| 元素 | 字号 | token |
-|---|---|---|
-| StatCard value (KPI hero) | 24px | h-24 |
+| 元素                         | 字号     | token                         |
+| ---------------------------- | -------- | ----------------------------- |
+| StatCard value (KPI hero)    | 24px     | h-24                          |
 | **PageHeader h1 (页面标题)** | **18px** | **text-[18px] font-semibold** |
-| SectionCard title | 16px | h-16 font-semibold |
-| CardTitle (banner) | 16px | h-16 font-semibold |
-| CardTitle (typical) | 14px | h-14 font-medium |
-| CardDescription | 13px | copy-13 |
-| Body text | 14px | copy-14 |
-| Segmented label | 12px | label-12 |
-| **Nav item** | **13px** | **copy-13** |
-| Eyebrow / footer | 12px | label-12 |
+| SectionCard title            | 16px     | h-16 font-semibold            |
+| CardTitle (banner)           | 16px     | h-16 font-semibold            |
+| CardTitle (typical)          | 14px     | h-14 font-medium              |
+| CardDescription              | 13px     | copy-13                       |
+| Body text                    | 14px     | copy-14                       |
+| Segmented label              | 12px     | label-12                      |
+| **Nav item**                 | **13px** | **copy-13**                   |
+| Eyebrow / footer             | 12px     | label-12                      |
 
 5 档清晰层级：24 / 18 / 16 / 14 / 12-13
 

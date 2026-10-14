@@ -19,41 +19,33 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.5.2.1 库位利用率。
  *
- * <p>蓝图：「分析库位占用：容量利用率、周转率、空置库位、爆满库位、低效库位，给出调整建议。
- * 输入：库位与库存占用；出库频次。输出：利用率报表 + 热力图 + 建议。」以及关系段：
- * 「上游 = 8.1.2.1；下游 = 8.1.2.2 自动分配优化。库位热力数据同时优化拣货路径（高频商品放近出口）。」
+ * <p>蓝图：「分析库位占用：容量利用率、周转率、空置库位、爆满库位、低效库位，给出调整建议。 输入：库位与库存占用；出库频次。输出：利用率报表 + 热力图 + 建议。」以及关系段： 「上游 =
+ * 8.1.2.1；下游 = 8.1.2.2 自动分配优化。库位热力数据同时优化拣货路径（高频商品放近出口）。」
  *
- * <p><b>本模块不建表。</b>三样输入全在既有事实表里：容量在 {@code warehouse_location}
- * （8.1.2.1 的 V105 补的列）、占用在 {@code stock_bucket}、出库频次在
- * {@code inventory_transaction} + {@code inventory_entry}（V1 建的 append-only 事实）。
- * 建议是<b>读时派生</b>的 —— 存一张「建议表」只会让建议比它描述的库存更先过期。
- * 所以 V109 这个版本号<b>刻意留空</b>，不为了「有一张自己的表」而建。
+ * <p><b>本模块不建表。</b>三样输入全在既有事实表里：容量在 {@code warehouse_location} （8.1.2.1 的 V105 补的列）、占用在 {@code
+ * stock_bucket}、出库频次在 {@code inventory_transaction} + {@code inventory_entry}（V1 建的 append-only
+ * 事实）。 建议是<b>读时派生</b>的 —— 存一张「建议表」只会让建议比它描述的库存更先过期。 所以 V109 这个版本号<b>刻意留空</b>，不为了「有一张自己的表」而建。
  *
- * <p><b>为什么出库频次要摊分，以及摊分为什么不会重复计数。</b>
- * {@code inventory_entry} 是 <b>balance 粒度</b>（仓库 × SKU × 法人 × 质量状态），
- * 表上没有 {@code location_id} —— 「这一件是从哪个库位拣走的」这件事，**系统里没有任何
- * 一张表在记**。所以出库量只能在 <b>SKU 粒度</b>是真的，库位粒度只能摊分：
+ * <p><b>为什么出库频次要摊分，以及摊分为什么不会重复计数。</b> {@code inventory_entry} 是 <b>balance 粒度</b>（仓库 × SKU × 法人 ×
+ * 质量状态）， 表上没有 {@code location_id} —— 「这一件是从哪个库位拣走的」这件事，**系统里没有任何 一张表在记**。所以出库量只能在 <b>SKU
+ * 粒度</b>是真的，库位粒度只能摊分：
  *
  * <pre>
  *   库位出库量 = Σ_SKU( 该 SKU 本仓窗口内出库量 × 该库位占该 SKU 全仓在手量的比例 )
  * </pre>
  *
- * 这个口径的关键性质是<b>可加</b>：同一个 SKU 在三个库位上的比例加起来恒为 1，所以
- * {@code Σ库位出库量 == 仓库真实出库量}，既不重复计数也不漏计（与 8.1.1.1「平台仓观测值
- * 不相加」是同一个坑的反面 —— 那里是会重复，这里必须配平）。比例的分母用
- * {@code nullif(...)} 兜住：SKU 全仓在手为 0 时分母是 0，那 0/0 交回 SQL 得 NULL，
- * 外层再 {@code coalesce} 成 0 —— <b>不</b>让它变成除零错误，也<b>不</b>编一个比例。
+ * 这个口径的关键性质是<b>可加</b>：同一个 SKU 在三个库位上的比例加起来恒为 1，所以 {@code Σ库位出库量 == 仓库真实出库量}，既不重复计数也不漏计（与
+ * 8.1.1.1「平台仓观测值 不相加」是同一个坑的反面 —— 那里是会重复，这里必须配平）。比例的分母用 {@code nullif(...)} 兜住：SKU 全仓在手为 0 时分母是 0，那
+ * 0/0 交回 SQL 得 NULL， 外层再 {@code coalesce} 成 0 —— <b>不</b>让它变成除零错误，也<b>不</b>编一个比例。
  *
- * <p><b>三处分母边界</b>（全部在 {@link #gradeOf} 与 {@link #utilizationOf} 里显式处理，
- * 且都有测试钉住）：容量未量、容量为 0、在手为 0。三处都给 null 而不是 0 或 100%，
- * 理由与 {@link LocationUtilizationModels} 的文件头一致。
+ * <p><b>三处分母边界</b>（全部在 {@link #gradeOf} 与 {@link #utilizationOf} 里显式处理， 且都有测试钉住）：容量未量、容量为 0、在手为
+ * 0。三处都给 null 而不是 0 或 100%， 理由与 {@link LocationUtilizationModels} 的文件头一致。
  *
- * <p><b>每条聚合各是一个独立查询 / 标量子查询，不 join 展开。</b>库位 × SKU × 出库流水
- * 三张表两两 join 会成笛卡尔积，同一个库位的在手数会被流水条数放大 N 次 —— 那是
- * 本仓库反复出现过的真实事故形状（见 8.1.1.1 / 8.1.2.1 的文件头）。
+ * <p><b>每条聚合各是一个独立查询 / 标量子查询，不 join 展开。</b>库位 × SKU × 出库流水 三张表两两 join 会成笛卡尔积，同一个库位的在手数会被流水条数放大 N 次
+ * —— 那是 本仓库反复出现过的真实事故形状（见 8.1.1.1 / 8.1.2.1 的文件头）。
  *
- * <p><b>租户谓词每条查询都写。</b>RLS（{@code app.current_tenant}）是第一道防线，
- * 显式 {@code tenant_id=} 是第二道：忘绑上下文时第二道让查询当场返回空，而不是全表。
+ * <p><b>租户谓词每条查询都写。</b>RLS（{@code app.current_tenant}）是第一道防线， 显式 {@code tenant_id=}
+ * 是第二道：忘绑上下文时第二道让查询当场返回空，而不是全表。
  */
 @Service
 public class LocationUtilizationService {
@@ -61,8 +53,7 @@ public class LocationUtilizationService {
   /**
    * 「高效位」阈值：利用率 ≥ 此值算高位（≥85%），<b>≥1.0</b> 算爆满。
    *
-   * <p>爆满的判据是 {@code > 1.0} 而不是 {@code >= 1.0}：正好装满是「刚好放不下下一件」，
-   * 仍属于高位；只有已经**超出**才是爆满。这条边界有测试。
+   * <p>爆满的判据是 {@code > 1.0} 而不是 {@code >= 1.0}：正好装满是「刚好放不下下一件」， 仍属于高位；只有已经**超出**才是爆满。这条边界有测试。
    */
   private static final BigDecimal HIGH_THRESHOLD = new BigDecimal("0.85");
 
@@ -89,8 +80,7 @@ public class LocationUtilizationService {
   /**
    * 利用率报表 + 热力图 + 建议。
    *
-   * <p>仓库不存在或不属于本租户一律 404 —— 与 8.1.2.1 同一套纪律：两者可观测结果必须相同，
-   * 否则「猜 id」就成了探测别的租户有没有仓库的侧信道。
+   * <p>仓库不存在或不属于本租户一律 404 —— 与 8.1.2.1 同一套纪律：两者可观测结果必须相同， 否则「猜 id」就成了探测别的租户有没有仓库的侧信道。
    */
   public LocationUtilizationReport report(UUID warehouseId, LocationUtilizationQuery query) {
     requireWarehouse(warehouseId);
@@ -150,8 +140,7 @@ public class LocationUtilizationService {
   /**
    * 单库位详情：逐 SKU 拆分 + 该库位的建议。
    *
-   * <p>拆到 SKU 是因为「高频商品放近出口」这条建议必须能落到具体商品上才有用 ——
-   * 只给一个库位级别的汇总数，用户看到「该库位出库量高」却不知道该挪哪个 SKU。
+   * <p>拆到 SKU 是因为「高频商品放近出口」这条建议必须能落到具体商品上才有用 —— 只给一个库位级别的汇总数，用户看到「该库位出库量高」却不知道该挪哪个 SKU。
    */
   public LocationUtilizationDetail detail(
       UUID warehouseId, UUID locationId, LocationUtilizationQuery query) {
@@ -165,7 +154,8 @@ public class LocationUtilizationService {
     var grouped = skuRows(warehouseId, window.start(), window.end());
     var skus = grouped.getOrDefault(locationId, List.of());
     var flowRow = flowByLocation(grouped).get(locationId);
-    LocationUtilizationRow row = withHeat(row(node, skus, flowRow), warehouseMaxOnHand(warehouseId));
+    LocationUtilizationRow row =
+        withHeat(row(node, skus, flowRow), warehouseMaxOnHand(warehouseId));
 
     List<LocationUtilizationAdvice> myAdvice =
         advice(List.of(row), grouped).stream()
@@ -202,7 +192,11 @@ public class LocationUtilizationService {
   /** 能力声明。8.1.2.2 自动分配与 8.3.2.1 拣货路径如实报未交付。 */
   public LocationUtilizationCapabilities capabilities() {
     return new LocationUtilizationCapabilities(
-        true, true, true, true, true,
+        true,
+        true,
+        true,
+        true,
+        true,
         false,
         "8.1.2.2 库位自动分配",
         false,
@@ -217,10 +211,7 @@ public class LocationUtilizationService {
 
   // ================================================================ 口径
 
-  /**
-   * 出库频次的归集粒度。<b>随响应返回</b>，不只写在注释里 ——
-   * 看报表的人有权知道自己看到的出库量是怎么来的。
-   */
+  /** 出库频次的归集粒度。<b>随响应返回</b>，不只写在注释里 —— 看报表的人有权知道自己看到的出库量是怎么来的。 */
   private static final String OUTBOUND_GRAIN =
       "出库量由 inventory_transaction(kind='SHIPMENT') + inventory_entry 的真实出库分录聚合到"
           + "「本仓 × SKU」粒度，再按该库位占此 SKU 全仓在手量的比例摊分到库位。"
@@ -240,13 +231,11 @@ public class LocationUtilizationService {
    *
    * <ul>
    *   <li>容量为 NULL（从没量过）—— 缺的是<b>知识</b>，给 0 会被读成「量过，是空的」；
-   *   <li>容量为 0 —— 缺的是<b>定义</b>，除数本身是 0。给 0 会被读成「一个都没放」，
-   *       给 100% 是在替物理事实编数；
+   *   <li>容量为 0 —— 缺的是<b>定义</b>，除数本身是 0。给 0 会被读成「一个都没放」， 给 100% 是在替物理事实编数；
    *   <li>（不会发生）容量为负 —— V105 的 CHECK 已挡住，这里再兜一层是防御。
    * </ul>
    *
-   * <p>保留 6 位小数（{@code numeric(19,6)} 的量级），比例用 BigDecimal 除法 + HALF_UP，
-   * 全程不经过 double。
+   * <p>保留 6 位小数（{@code numeric(19,6)} 的量级），比例用 BigDecimal 除法 + HALF_UP， 全程不经过 double。
    */
   private static BigDecimal utilizationOf(BigDecimal onHand, BigDecimal capacity) {
     if (capacity == null) return null;
@@ -257,8 +246,7 @@ public class LocationUtilizationService {
   /**
    * 周转率：在手为 0 时<b>没有定义</b>，给 null。
    *
-   * <p>出库 0 件 ÷ 在手 0 件不是「0 倍」也不是「无限倍」，是除以零。
-   * 返回 0 会说「这个库位周转很慢」，而事实是「这个库位压根没货」——
+   * <p>出库 0 件 ÷ 在手 0 件不是「0 倍」也不是「无限倍」，是除以零。 返回 0 会说「这个库位周转很慢」，而事实是「这个库位压根没货」——
    * 那正是「空置库位」这条建议要处理的形态，不是周转率要表达的意思。
    */
   private static BigDecimal turnoverOf(BigDecimal outbound, BigDecimal onHand) {
@@ -271,8 +259,7 @@ public class LocationUtilizationService {
    *
    * <ol>
    *   <li>没货 → {@link LocationUtilizationGrade#IDLE}。先判这条是因为「空置」不依赖容量
-   *       就成立：一个从没量过容量的空库位毫无疑问是空置，该被建议覆盖。
-   *       放在容量之后的话，大量 capacity 为 NULL 的存量库位会全落进 UNMEASURED，
+   *       就成立：一个从没量过容量的空库位毫无疑问是空置，该被建议覆盖。 放在容量之后的话，大量 capacity 为 NULL 的存量库位会全落进 UNMEASURED，
    *       报表会因此看不见真正该处理的空库位；
    *   <li>有货但容量没量过 → {@link LocationUtilizationGrade#UNMEASURED}；
    *   <li>有货、容量量过 → 按利用率比值：&gt;1 爆满、≥0.85 高位、≥0.30 适中、否则低位。
@@ -291,8 +278,7 @@ public class LocationUtilizationService {
   /**
    * 热力强度 0..100。
    *
-   * <p><b>不许画死色块</b>：强度必须由真数算出来，且 {@code metric} 说清它来自哪个指标。
-   * 容量量不出来时退回「在手量相对最忙库位」——那是一个真实存在的相对量，
+   * <p><b>不许画死色块</b>：强度必须由真数算出来，且 {@code metric} 说清它来自哪个指标。 容量量不出来时退回「在手量相对最忙库位」——那是一个真实存在的相对量，
    * 而不是随手编的颜色；空置库位强度恒为 0（没有货就没有可比的量）。
    */
   private static LocationUtilizationRow withHeat(LocationUtilizationRow row, BigDecimal maxOnHand) {
@@ -301,7 +287,8 @@ public class LocationUtilizationService {
     if (row.capacityUtilization() != null) {
       metric = LocationUtilizationMetric.CAPACITY_UTILIZATION;
       BigDecimal scaled = row.capacityUtilization().multiply(new BigDecimal("100"));
-      heat = scaled.compareTo(BigDecimal.ZERO) <= 0 ? 0 : scaled.min(new BigDecimal("100")).intValue();
+      heat =
+          scaled.compareTo(BigDecimal.ZERO) <= 0 ? 0 : scaled.min(new BigDecimal("100")).intValue();
     } else if (row.onHand().signum() <= 0) {
       metric = LocationUtilizationMetric.IDLE;
       heat = 0;
@@ -316,12 +303,31 @@ public class LocationUtilizationService {
                   .intValue();
     }
     return new LocationUtilizationRow(
-        row.id(), row.code(), row.name(), row.type(), row.typeLabel(), row.status(),
-        row.pickable(), row.parentId(), row.capacity(), row.onHand(), row.reserved(),
-        row.capacityUtilization(), row.capacityMeasured(), row.capacityZero(),
-        row.capacityExceeded(), row.outboundQuantity(), row.outboundMovements(), row.turnover(),
-        row.turnoverComputable(), row.skuCount(), row.skuDispersion(), row.dwellDays(),
-        row.grade(), row.gradeLabel(), heat);
+        row.id(),
+        row.code(),
+        row.name(),
+        row.type(),
+        row.typeLabel(),
+        row.status(),
+        row.pickable(),
+        row.parentId(),
+        row.capacity(),
+        row.onHand(),
+        row.reserved(),
+        row.capacityUtilization(),
+        row.capacityMeasured(),
+        row.capacityZero(),
+        row.capacityExceeded(),
+        row.outboundQuantity(),
+        row.outboundMovements(),
+        row.turnover(),
+        row.turnoverComputable(),
+        row.skuCount(),
+        row.skuDispersion(),
+        row.dwellDays(),
+        row.grade(),
+        row.gradeLabel(),
+        heat);
   }
 
   /** 筛选：利用率下限天然排除「未量/容量为 0」两类（它们的利用率恒为 null）。 */
@@ -343,10 +349,7 @@ public class LocationUtilizationService {
     return true;
   }
 
-  /**
-   * 建议生成。每一类都由真实数据触发，没有触发条件就一条都不出 ——
-   * 绝不为「凑齐六种类型」而硬造一条。
-   */
+  /** 建议生成。每一类都由真实数据触发，没有触发条件就一条都不出 —— 绝不为「凑齐六种类型」而硬造一条。 */
   private static List<LocationUtilizationAdvice> advice(
       List<LocationUtilizationRow> rows, Map<UUID, List<org.jooq.Record>> skuRows) {
     List<LocationUtilizationAdvice> out = new ArrayList<>();
@@ -359,9 +362,15 @@ public class LocationUtilizationService {
                     LocationUtilizationSeverity.HIGH,
                     row,
                     null,
-                    "库位 " + row.code() + " 已超容：在手 " + plain(row.onHand())
-                        + "，量得容量 " + plain(row.capacity()) + "（"
-                        + percent(row.capacityUtilization()) + "）。",
+                    "库位 "
+                        + row.code()
+                        + " 已超容：在手 "
+                        + plain(row.onHand())
+                        + "，量得容量 "
+                        + plain(row.capacity())
+                        + "（"
+                        + percent(row.capacityUtilization())
+                        + "）。",
                     "扩容该库位，或把部分货分流到空置库位。",
                     "8.1.2.2 库位自动分配"));
         case IDLE ->
@@ -371,8 +380,7 @@ public class LocationUtilizationService {
                     LocationUtilizationSeverity.MEDIUM,
                     row,
                     null,
-                    "库位 " + row.code() + " 没有任何库存（可用容量 "
-                        + plain(row.capacity()) + "，若容量未量则为未量）。",
+                    "库位 " + row.code() + " 没有任何库存（可用容量 " + plain(row.capacity()) + "，若容量未量则为未量）。",
                     "把在堆的货上架到该库位，或下掉这个空库位。",
                     "8.1.2.2 库位自动分配"));
         case UNMEASURED ->
@@ -382,8 +390,7 @@ public class LocationUtilizationService {
                     LocationUtilizationSeverity.LOW,
                     row,
                     null,
-                    "库位 " + row.code() + " 压着 " + plain(row.onHand())
-                        + " 件，但容量从未量过，利用率算不出来。",
+                    "库位 " + row.code() + " 压着 " + plain(row.onHand()) + " 件，但容量从未量过，利用率算不出来。",
                     "补量该库位容量，利用率与爆满预警才有分母。",
                     null));
         default -> {
@@ -393,17 +400,20 @@ public class LocationUtilizationService {
 
       // 低效库位：压着货但窗口内一件没出。这是「周转率低」的运营形态，
       // 与「空置」不同（有货、不动），也与利用率高低无关。
-      if (row.onHand().signum() > 0
-          && row.outboundQuantity().compareTo(MOVING_EPSILON) < 0) {
+      if (row.onHand().signum() > 0 && row.outboundQuantity().compareTo(MOVING_EPSILON) < 0) {
         out.add(
             advice(
                 LocationUtilizationAdviceKind.INEFFICIENT_LOCATION,
                 LocationUtilizationSeverity.MEDIUM,
                 row,
                 null,
-                "库位 " + row.code() + " 压着 " + plain(row.onHand())
+                "库位 "
+                    + row.code()
+                    + " 压着 "
+                    + plain(row.onHand())
                     + " 件，统计窗口内出库 0 件（在手 "
-                    + dwellText(row.dwellDays()) + "）。",
+                    + dwellText(row.dwellDays())
+                    + "）。",
                 "核实是否滞销，考虑调拨、降价或合并到更紧凑的库位。",
                 null));
       }
@@ -416,15 +426,14 @@ public class LocationUtilizationService {
                 LocationUtilizationSeverity.HIGH,
                 row,
                 null,
-                "库位 " + row.code() + " 不可拣，但窗口内出库量高达 "
-                    + plain(row.outboundQuantity()) + " 件。",
+                "库位 " + row.code() + " 不可拣，但窗口内出库量高达 " + plain(row.outboundQuantity()) + " 件。",
                 "把高频商品移到可拣库位，缩短拣货行走距离。",
                 "8.3.2.1 拣货路径优化"));
       }
     }
 
     // SKU 分散：一个 SKU 散在多个库位 = 一次拣货要多走几趟。这是蓝图点名的
-    //「库位热力数据同时优化拣货路径」的直接落点，所以它必须由真实的跨库位计数触发。
+    // 「库位热力数据同时优化拣货路径」的直接落点，所以它必须由真实的跨库位计数触发。
     // 先建 id→row 的索引：在 rows.stream().filter(...) 里逐条找会让这条路径变成 O(行数 × SKU 数)，
     // 大仓（几千个库位）上足以让一次报表请求超时。
     Map<UUID, LocationUtilizationRow> byId = new LinkedHashMap<>();
@@ -443,8 +452,12 @@ public class LocationUtilizationService {
                 LocationUtilizationSeverity.MEDIUM,
                 row,
                 s.get("sku_id", UUID.class),
-                "SKU " + s.get("sku_id", UUID.class)
-                    + " 散在 " + locations + " 个库位（含 " + row.code()
+                "SKU "
+                    + s.get("sku_id", UUID.class)
+                    + " 散在 "
+                    + locations
+                    + " 个库位（含 "
+                    + row.code()
                     + "），一次拣货要跨多个库位取同一种商品。",
                 "把同一 SKU 收敛到尽量少的库位，拣一次拿齐。",
                 "8.3.2.1 拣货路径优化"));
@@ -551,10 +564,11 @@ public class LocationUtilizationService {
   /**
    * 每个库位上的 SKU 明细 + 该 SKU 的跨库位离散度 + 真实出库量。
    *
-   * <p>出库量在本查询里是 <b>SKU 级真实值</b>（未摊分），摊分在 {@link #flowByLocation}
-   * 里按在手占比做 —— 两步分开是为了让「真实值」与「摊分值」各自可审阅。
+   * <p>出库量在本查询里是 <b>SKU 级真实值</b>（未摊分），摊分在 {@link #flowByLocation} 里按在手占比做 ——
+   * 两步分开是为了让「真实值」与「摊分值」各自可审阅。
    */
-  private List<org.jooq.Record> skuDetailRows(UUID warehouseId, OffsetDateTime from, OffsetDateTime to) {
+  private List<org.jooq.Record> skuDetailRows(
+      UUID warehouseId, OffsetDateTime from, OffsetDateTime to) {
     return sql.fetch(
         """
         with loc_sku as (
@@ -598,7 +612,10 @@ public class LocationUtilizationService {
           left join sku_out so on so.sku_id = ls.sku_id
          order by ls.location_id, ls.sku_id
         """,
-        warehouseId, warehouseId, from, to);
+        warehouseId,
+        warehouseId,
+        from,
+        to);
   }
 
   /** 库位 → SKU 明细分组。窗口显式传参（不写死默认值，否则调窗口长度会与行里的出库量脱节）。 */
@@ -627,16 +644,17 @@ public class LocationUtilizationService {
                and b.warehouse_id = ?
                and t.occurred_at >= ?::timestamptz and t.occurred_at < ?::timestamptz
             """,
-            warehouseId, from, to);
+            warehouseId,
+            from,
+            to);
     return r == null ? BigDecimal.ZERO : decimal(r, "qty");
   }
 
   /**
    * 把 SKU 级真实出库量<b>摊分</b>到库位。
    *
-   * <p>{@code Σ(库位出库量) == 仓库真实出库量}：因为同一 SKU 在各库位的在手占比之和为 1。
-   * 摊分时 {@code nullif} 兜住「SKU 全仓在手为 0」这个 0/0 —— 让它得 NULL 再 coalesce 成 0，
-   * 而不是让整个查询除零炸掉。
+   * <p>{@code Σ(库位出库量) == 仓库真实出库量}：因为同一 SKU 在各库位的在手占比之和为 1。 摊分时 {@code nullif} 兜住「SKU 全仓在手为 0」这个
+   * 0/0 —— 让它得 NULL 再 coalesce 成 0， 而不是让整个查询除零炸掉。
    */
   private Map<UUID, Flow> flowByLocation(Map<UUID, List<org.jooq.Record>> grouped) {
     Map<UUID, BigDecimal> allocated = new LinkedHashMap<>();
@@ -687,9 +705,7 @@ public class LocationUtilizationService {
 
   /** 结构行 + SKU 明细 + 摊分流量 → 一个库位行。 */
   private static LocationUtilizationRow row(
-      org.jooq.Record r,
-      List<org.jooq.Record> skus,
-      Flow flowRow) {
+      org.jooq.Record r, List<org.jooq.Record> skus, Flow flowRow) {
     BigDecimal capacity = r.get("capacity", BigDecimal.class);
     BigDecimal onHand = decimal(r, "on_hand");
     BigDecimal reserved = decimal(r, "reserved");
@@ -780,16 +796,23 @@ public class LocationUtilizationService {
   /**
    * 全仓合计。
    *
-   * <p><b>利用率合计只在全部库位都量过容量且容量总和 &gt; 0 时才给</b>，否则 null：
-   * 把已量的容量相加当分母，会算出一个没人测过的比例。前端据此显示「仅覆盖 N/M 个库位」。
+   * <p><b>利用率合计只在全部库位都量过容量且容量总和 &gt; 0 时才给</b>，否则 null： 把已量的容量相加当分母，会算出一个没人测过的比例。前端据此显示「仅覆盖 N/M
+   * 个库位」。
    *
-   * <p>出库量这里用 <b>真实值</b>而不是把逐行摊分值加起来 —— 后者虽然配平，
-   * 但要读懂它必须先知道摊分规则；直接给真实值更不容易被误读。两者的相等性由测试断言。
+   * <p>出库量这里用 <b>真实值</b>而不是把逐行摊分值加起来 —— 后者虽然配平， 但要读懂它必须先知道摊分规则；直接给真实值更不容易被误读。两者的相等性由测试断言。
    */
   private LocationUtilizationTotals totals(
       UUID warehouseId, List<LocationUtilizationRow> all, Window window) {
-    long measured = 0, zero = 0, idle = 0, overfull = 0, high = 0, low = 0, balanced = 0,
-        unmeasured = 0, pickable = 0, skuCount = 0;
+    long measured = 0,
+        zero = 0,
+        idle = 0,
+        overfull = 0,
+        high = 0,
+        low = 0,
+        balanced = 0,
+        unmeasured = 0,
+        pickable = 0,
+        skuCount = 0;
     BigDecimal capacity = BigDecimal.ZERO, onHand = BigDecimal.ZERO, reserved = BigDecimal.ZERO;
     BigDecimal dwellSum = BigDecimal.ZERO;
     long dwellN = 0;
@@ -816,16 +839,34 @@ public class LocationUtilizationService {
         case UNMEASURED -> unmeasured++;
       }
     }
-    boolean utilizationComputable = !all.isEmpty() && measured == all.size() && capacity.signum() > 0;
+    boolean utilizationComputable =
+        !all.isEmpty() && measured == all.size() && capacity.signum() > 0;
     BigDecimal totalUtilization = utilizationComputable ? utilizationOf(onHand, capacity) : null;
 
     BigDecimal outbound = warehouseOutbound(warehouseId, window.start(), window.end());
     BigDecimal turnover = turnoverOf(outbound, onHand);
 
     return new LocationUtilizationTotals(
-        all.size(), measured, zero, idle, overfull, high, low, balanced, unmeasured, pickable,
-        capacity, onHand, reserved, totalUtilization, utilizationComputable,
-        outbound, outboundMovements(window, warehouseId), turnover, turnover != null, skuCount);
+        all.size(),
+        measured,
+        zero,
+        idle,
+        overfull,
+        high,
+        low,
+        balanced,
+        unmeasured,
+        pickable,
+        capacity,
+        onHand,
+        reserved,
+        totalUtilization,
+        utilizationComputable,
+        outbound,
+        outboundMovements(window, warehouseId),
+        turnover,
+        turnover != null,
+        skuCount);
   }
 
   private long outboundMovements(Window window, UUID warehouseId) {
@@ -840,7 +881,9 @@ public class LocationUtilizationService {
                and t.kind = 'SHIPMENT' and b.warehouse_id = ?
                and t.occurred_at >= ?::timestamptz and t.occurred_at < ?::timestamptz
             """,
-            warehouseId, window.start(), window.end());
+            warehouseId,
+            window.start(),
+            window.end());
     return r == null ? 0L : count(r, "movements");
   }
 
@@ -870,9 +913,9 @@ public class LocationUtilizationService {
   }
 
   private static LocationUtilizationQuery normalize(LocationUtilizationQuery q) {
-    LocationUtilizationQuery input = q == null ? new LocationUtilizationQuery(null, null, null, null, null, null) : q;
-    int days =
-        input.windowDays() == null ? DEFAULT_WINDOW_DAYS : input.windowDays();
+    LocationUtilizationQuery input =
+        q == null ? new LocationUtilizationQuery(null, null, null, null, null, null) : q;
+    int days = input.windowDays() == null ? DEFAULT_WINDOW_DAYS : input.windowDays();
     if (days < 1 || days > MAX_WINDOW_DAYS) {
       throw new IllegalArgumentException("统计窗口必须在 1 到 " + MAX_WINDOW_DAYS + " 天之间：" + days);
     }
@@ -893,8 +936,8 @@ public class LocationUtilizationService {
     if (keyword != null && keyword.length() > 200) {
       throw new IllegalArgumentException("关键字长度不能超过 200");
     }
-    return new LocationUtilizationQuery(days, grade == null ? null : grade.name(), type, keyword, min,
-        input.pickableOnly());
+    return new LocationUtilizationQuery(
+        days, grade == null ? null : grade.name(), type, keyword, min, input.pickableOnly());
   }
 
   private static LocationUtilizationGrade gradeOf(String raw) {
@@ -925,8 +968,7 @@ public class LocationUtilizationService {
   }
 
   private static String detailNote() {
-    return "逐 SKU 拆分是「高频商品放近出口」这条建议的依据：出库量与跨库位离散度都是真数，"
-        + "占比分母为 0 时给 null。";
+    return "逐 SKU 拆分是「高频商品放近出口」这条建议的依据：出库量与跨库位离散度都是真数，" + "占比分母为 0 时给 null。";
   }
 
   private static String plain(BigDecimal v) {
@@ -949,14 +991,13 @@ public class LocationUtilizationService {
   /**
    * 在手天数（距最近一次库存变动）。
    *
-   * <p><b>没有库存行时给 null 而不是 0</b>：「从没放过货」与「放了很久没动」是两件事，
-   * 报成 0 天会让后者看起来像刚上架。走 Instant 比较而不是 LocalDateTime ——
-   * {@code Timestamp.valueOf(LocalDateTime)} 会静默偏掉时区。
+   * <p><b>没有库存行时给 null 而不是 0</b>：「从没放过货」与「放了很久没动」是两件事， 报成 0 天会让后者看起来像刚上架。走 Instant 比较而不是
+   * LocalDateTime —— {@code Timestamp.valueOf(LocalDateTime)} 会静默偏掉时区。
    */
   private static BigDecimal dwellOf(OffsetDateTime lastMovement) {
     if (lastMovement == null) return null;
-    long seconds = java.time.Duration.between(lastMovement.toInstant(), java.time.Instant.now())
-        .getSeconds();
+    long seconds =
+        java.time.Duration.between(lastMovement.toInstant(), java.time.Instant.now()).getSeconds();
     return BigDecimal.valueOf(seconds).divide(new BigDecimal("86400"), 1, RoundingMode.HALF_UP);
   }
 

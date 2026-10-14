@@ -12,9 +12,8 @@ import java.util.UUID;
 /**
  * 7.7.1.1 货主与所有权的传输模型。
  *
- * <p>蓝图原话：「为库存 bucket 显式标注货主（stock_owner）与所有权类型（自有 / 供应商寄售 /
- * 平台所有 / 代销），使『货在谁的仓库』与『货是谁的』不再混为一谈。默认自有，但租户可把整仓
- * 或整 SKU 设为寄售。」下游 = 12 财务「自有货才进自有资产，寄售不进」。
+ * <p>蓝图原话：「为库存 bucket 显式标注货主（stock_owner）与所有权类型（自有 / 供应商寄售 / 平台所有 /
+ * 代销），使『货在谁的仓库』与『货是谁的』不再混为一谈。默认自有，但租户可把整仓 或整 SKU 设为寄售。」下游 = 12 财务「自有货才进自有资产，寄售不进」。
  *
  * <p><b>这个模块真正解决的是「一行的身份」而不是「几列配置」</b>：
  *
@@ -23,22 +22,19 @@ import java.util.UUID;
  *   供应商寄售  on_hand=100 @ A仓**同一个**库位
  * </pre>
  *
- * <p>这两行在货主维度落地之前，其余五个维度逐列相同，无法互相区分。12 财务算自有资产时
- * 只能整仓一起算：把别人的货算成自己的资产（虚增），或把自己的货漏出去（少计）——
+ * <p>这两行在货主维度落地之前，其余五个维度逐列相同，无法互相区分。12 财务算自有资产时 只能整仓一起算：把别人的货算成自己的资产（虚增），或把自己的货漏出去（少计）——
  * <b>两者都不是精度问题，而是口径错了且事后无法分辨</b>。
  *
  * <p><b>四条实现纪律</b>：
  *
  * <ul>
- *   <li><b>货主不用 tenant 顶替</b>：寄售货的货主是供应商（catalog），owner_kind =
- *       SUPPLIER_CONSIGNMENT。用 tenant 代替货主，「寄售不进自有资产」这条规则永远无法表达。
- *   <li><b>「计入自有资产」是生成列</b>（{@code countsAsOwnedAsset}），不是应用层判断：
- *       下游财务只读这一列，它必须是 ownerKind 的函数，不能是第二个真相。
- *   <li><b>区间 + 不可变</b>：货权档内容写定后不可改，改货权 = 收口旧档 + 开新档
- *       （与 V56 可售量口径、17.5.1.1 业务参数同一套约定）。
- *   <li><b>数量一律 BigDecimal + numeric(19,4)</b>，与 stock_bucket 的源列同刻度
- *       （warehouse 服务既有口径，见 V1/V2 文件头）。比较一律 {@code compareTo} 不用
- *       {@code equals}（后者把 0 与 0.0000 判成不等）。
+ *   <li><b>货主不用 tenant 顶替</b>：寄售货的货主是供应商（catalog），owner_kind = SUPPLIER_CONSIGNMENT。用 tenant
+ *       代替货主，「寄售不进自有资产」这条规则永远无法表达。
+ *   <li><b>「计入自有资产」是生成列</b>（{@code countsAsOwnedAsset}），不是应用层判断： 下游财务只读这一列，它必须是 ownerKind
+ *       的函数，不能是第二个真相。
+ *   <li><b>区间 + 不可变</b>：货权档内容写定后不可改，改货权 = 收口旧档 + 开新档 （与 V56 可售量口径、17.5.1.1 业务参数同一套约定）。
+ *   <li><b>数量一律 BigDecimal + numeric(19,4)</b>，与 stock_bucket 的源列同刻度 （warehouse 服务既有口径，见 V1/V2
+ *       文件头）。比较一律 {@code compareTo} 不用 {@code equals}（后者把 0 与 0.0000 判成不等）。
  * </ul>
  */
 public final class StockOwnershipModels {
@@ -69,8 +65,8 @@ public final class StockOwnershipModels {
    * 货主指向谁。
    *
    * <p>{@code LEGAL_ENTITY} 是唯一在本服务有登记表的一类（{@code legal_entity_ref}，identity 是
-   * 法人主数据的唯一所有者），所以它是唯一建了复合外键的一类。{@code SUPPLIER} /
-   * {@code PLATFORM} 是 catalog / channel 的跨服务逻辑 ID，只存 ID + 写入时的可读名快照。
+   * 法人主数据的唯一所有者），所以它是唯一建了复合外键的一类。{@code SUPPLIER} / {@code PLATFORM} 是 catalog / channel 的跨服务逻辑
+   * ID，只存 ID + 写入时的可读名快照。
    */
   public enum OwnerRefType {
     LEGAL_ENTITY("本租户法人"),
@@ -90,8 +86,8 @@ public final class StockOwnershipModels {
   }
 
   /**
-   * 货权配置的范围档。解析优先级 {@link #priority()} 升序即更优先：SKU &gt; LEGAL_ENTITY &gt;
-   * WAREHOUSE &gt; DEFAULT（最具体者胜，与 17.5.1.1、V56 同一套分档约定）。
+   * 货权配置的范围档。解析优先级 {@link #priority()} 升序即更优先：SKU &gt; LEGAL_ENTITY &gt; WAREHOUSE &gt;
+   * DEFAULT（最具体者胜，与 17.5.1.1、V56 同一套分档约定）。
    */
   public enum OwnershipScopeType {
     DEFAULT("全租户兜底"),
@@ -130,8 +126,8 @@ public final class StockOwnershipModels {
   /**
    * 一个货主。
    *
-   * @param countsAsOwnedAsset 生成列：仅 {@code ownerKind=SELF} 为 true。寄售 / 代销 / 平台所有
-   *     一律 false —— 这是下游 12 财务「自有货才进自有资产」唯一的判据。
+   * @param countsAsOwnedAsset 生成列：仅 {@code ownerKind=SELF} 为 true。寄售 / 代销 / 平台所有 一律 false —— 这是下游
+   *     12 财务「自有货才进自有资产」唯一的判据。
    * @param legalEntityLinked 货主是否真的挂在某个已登记法人名下。false 表示这是「租户还没登记
    *     法人时的兜底自有货主」，财务据此知道这批自有货暂时无法归到法人资产表。
    * @param systemCreated 由库存写入路径自动建立的兜底货主（{@code createdByMembershipId} 为空）。
@@ -159,10 +155,9 @@ public final class StockOwnershipModels {
   /**
    * 新建货主。
    *
-   * <p>{@code supplierRefId} / {@code platformRefId} 是**跨服务逻辑 ID**，本服务不建外键也不查
-   * 对方的表（AGENTS.md 模块边界纪律）：{@code ownerRefType=SUPPLIER} 时给 {@code ownerRefId}
-   * （catalog 的 party_supplier_profile 主键），{@code ownerRefType=PLATFORM} 时
-   * {@code ownerRefId} 留空（平台仓由渠道侧分类，7.1.3.1 那条车道，本模块不臆造平台枚举）。
+   * <p>{@code supplierRefId} / {@code platformRefId} 是**跨服务逻辑 ID**，本服务不建外键也不查 对方的表（AGENTS.md
+   * 模块边界纪律）：{@code ownerRefType=SUPPLIER} 时给 {@code ownerRefId} （catalog 的 party_supplier_profile
+   * 主键），{@code ownerRefType=PLATFORM} 时 {@code ownerRefId} 留空（平台仓由渠道侧分类，7.1.3.1 那条车道，本模块不臆造平台枚举）。
    *
    * @param ownerRefType LEGAL_ENTITY 时 ownerRefId 必须是本租户已登记的法人，否则 DB 拒绝
    */
@@ -178,7 +173,8 @@ public final class StockOwnershipModels {
       @Size(max = 500) String note) {}
 
   /** 货主写入结果。 */
-  public record StockOwnerSaved(UUID ownerId, String code, String ownerKind, boolean isDefault, String message) {}
+  public record StockOwnerSaved(
+      UUID ownerId, String code, String ownerKind, boolean isDefault, String message) {}
 
   // ------------------------------------------------------------ 货权配置
 
@@ -197,8 +193,8 @@ public final class StockOwnershipModels {
   /**
    * 一档货权配置。
    *
-   * <p>三个定位键按 {@code scopeType} 只会有一个有值（DB 层 CHECK 钉死，响应里另外几个恒为 null）。
-   * 相应的 code/name 是查询时联查出来的可读名快照，不是这一行自己存的。
+   * <p>三个定位键按 {@code scopeType} 只会有一个有值（DB 层 CHECK 钉死，响应里另外几个恒为 null）。 相应的 code/name
+   * 是查询时联查出来的可读名快照，不是这一行自己存的。
    */
   public record OwnershipRuleRow(
       UUID id,
@@ -234,8 +230,8 @@ public final class StockOwnershipModels {
   /**
    * 新建一档货权配置（{@code supersedeRuleId} 非空时 = 换版）。
    *
-   * <p>{@code scopeType} 非 DEFAULT 时必须给对应的定位键：仓库 / 法人在本服务（可校验存在性），
-   * {@code skuId} 是 catalog 的逻辑 ID（跨服务，不校验）。
+   * <p>{@code scopeType} 非 DEFAULT 时必须给对应的定位键：仓库 / 法人在本服务（可校验存在性）， {@code skuId} 是 catalog 的逻辑
+   * ID（跨服务，不校验）。
    */
   public record OwnershipRuleInput(
       @NotBlank @Size(max = 16) String scopeType,
@@ -262,9 +258,8 @@ public final class StockOwnershipModels {
   /**
    * 某一组维度在某一时刻真正生效的货主。
    *
-   * <p>{@code rule} 为 null 表示四档全未命中、落到了租户的兜底货主上（默认自有）。
-   * {@code usedFallback} 让调用方知道自己看的是「没配过货权」的兜底而不是一条真实配置 ——
-   * 界面必须能区分这两者，否则运营会以为那条寄售规则还生效着。
+   * <p>{@code rule} 为 null 表示四档全未命中、落到了租户的兜底货主上（默认自有）。 {@code usedFallback}
+   * 让调用方知道自己看的是「没配过货权」的兜底而不是一条真实配置 —— 界面必须能区分这两者，否则运营会以为那条寄售规则还生效着。
    */
   public record StockOwnershipResolved(
       @Schema(nullable = true) OwnershipRuleRow rule,
@@ -298,13 +293,11 @@ public final class StockOwnershipModels {
   /**
    * 按货主拆分的库存报表。
    *
-   * <p><b>{@code amountBasisAvailable} 恒为 false，且这是如实报出而不是没做完</b>：
-   * 全库 warehouse 与 catalog 两侧的迁移与 {@code db/schemas} 中都没有任何**库存成本**列
-   * （catalog 侧只有 {@code supplier_quote_price_tier}，那是报价不是库存计价，
-   * 且属另一个服务的跨服务引用）。蓝图要求的「按货主拆分的货值」在本仓库当前状态下
-   * **没有可用的计价依据** —— 用采购报价冒充库存成本会把账面资产算错，
-   * 比不给更糟。所以这里给数量口径的完整拆分，货值口径显式报不可用并说明原因
-   * （与 7.4.2.2 盘点差异的 {@code amountBasisAvailable=false} 同一套处置）。
+   * <p><b>{@code amountBasisAvailable} 恒为 false，且这是如实报出而不是没做完</b>： 全库 warehouse 与 catalog 两侧的迁移与
+   * {@code db/schemas} 中都没有任何**库存成本**列 （catalog 侧只有 {@code supplier_quote_price_tier}，那是报价不是库存计价，
+   * 且属另一个服务的跨服务引用）。蓝图要求的「按货主拆分的货值」在本仓库当前状态下 **没有可用的计价依据** —— 用采购报价冒充库存成本会把账面资产算错，
+   * 比不给更糟。所以这里给数量口径的完整拆分，货值口径显式报不可用并说明原因 （与 7.4.2.2 盘点差异的 {@code amountBasisAvailable=false}
+   * 同一套处置）。
    */
   public record OwnerInventoryReport(
       List<OwnerInventoryRow> rows,
@@ -325,13 +318,11 @@ public final class StockOwnershipModels {
   /**
    * 货权转移请求：把某一范围内属于 {@code fromOwnerId} 的 bucket 改判给 {@code toOwnerId}。
    *
-   * <p>为什么需要它：货权档只影响**之后**写入的 bucket（生效区间的意义就在这里）。
-   * 而「整仓设为寄售」这句话显然包含这个仓里**已经躺着的那批自有货** ——
+   * <p>为什么需要它：货权档只影响**之后**写入的 bucket（生效区间的意义就在这里）。 而「整仓设为寄售」这句话显然包含这个仓里**已经躺着的那批自有货** ——
    * 只改配置不改存量，报表会继续把旧货算成自有资产，而这正是本模块要消灭的混淆。
    *
-   * <p>转移不产生任何出入库：不改数量、不动 balance、不写流水。货权是账上的归属，
-   * 不是货物流动 —— 它只在同仓同库位换了个「货主」标注。数量会被
-   * {@code guard_bucket_conservation} 照常核对，转移前后 Σ 不变。
+   * <p>转移不产生任何出入库：不改数量、不动 balance、不写流水。货权是账上的归属， 不是货物流动 —— 它只在同仓同库位换了个「货主」标注。数量会被 {@code
+   * guard_bucket_conservation} 照常核对，转移前后 Σ 不变。
    *
    * @param warehouseId / legalEntityId / skuId 三个可选过滤条件，全部留空 = 整租户转移
    */
@@ -355,8 +346,7 @@ public final class StockOwnershipModels {
   /**
    * 货权漂移：bucket 上的货主与「按当前生效档应该属于的货主」不一致。
    *
-   * <p>这类行是**有意的**：货权档只影响之后写入的 bucket，存量不会自动跟着改。
-   * 页面把它列出来，是为了让「这批货的货权要不要跟着新配置改」变成一个可回答的问题，
+   * <p>这类行是**有意的**：货权档只影响之后写入的 bucket，存量不会自动跟着改。 页面把它列出来，是为了让「这批货的货权要不要跟着新配置改」变成一个可回答的问题，
    * 而不是等人对不上账时才发现。
    */
   public record OwnershipDriftRow(
@@ -379,8 +369,7 @@ public final class StockOwnershipModels {
   /**
    * 本模块的能力与上游可用性声明。
    *
-   * <p>存在的理由与 7.4.2.2 盘点差异一致：把「哪些维度真有依据」显式报出来，
-   * 而不是让调用方从 404 或一个空数组里去猜是哪一环没通。
+   * <p>存在的理由与 7.4.2.2 盘点差异一致：把「哪些维度真有依据」显式报出来， 而不是让调用方从 404 或一个空数组里去猜是哪一环没通。
    *
    * @param amountValuationAvailable 恒为 false，理由见 {@link OwnerInventoryReport}
    */

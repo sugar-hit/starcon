@@ -3,14 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CircleSlash, RefreshCw, TriangleAlert } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   SalesOrderOverview,
   SalesOrderOverviewCapabilities,
@@ -146,11 +139,7 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
         />
         <StatCard
           label="付款方式"
-          value={
-            paymentMethodLabels[h.paymentMethod] ??
-            h.paymentMethod ??
-            '—'
-          }
+          value={paymentMethodLabels[h.paymentMethod] ?? h.paymentMethod ?? '—'}
         />
       </div>
 
@@ -187,10 +176,7 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
               label="客户类型"
               value={detail.buyer.customerType === 'ORGANIZATION' ? '企业' : '个人'}
             />
-            <Field
-              label="客户默认币种"
-              value={detail.buyer.customerDefaultCurrency ?? '—'}
-            />
+            <Field label="客户默认币种" value={detail.buyer.customerDefaultCurrency ?? '—'} />
           </dl>
         ) : (
           <p className="text-muted-foreground text-sm">该订单没有客户快照。</p>
@@ -258,41 +244,47 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
                 {/* ⚠️ codegen 生成的数组元素类型带 `| null`（Jackson 把 record 组件
                     都标成 nullable），所以每行都要先滤掉 null —— 直接用会报
                     「possibly null」。这不是模型出错，是契约生成的保守形状。 */}
-                {detail.lines.filter((l): l is NonNullable<typeof l> => l !== null).map((line) => {
-                  // codegen 把 Map<String, ...> 渲染成 `{ }`（空的 object 类型），
-                  // 所以这里显式断言成「按 lineId 分组的属性数组」，而不是让它去索引。
-                  const attrs =
-                    (detail.attributesByLineId as unknown as Record<
-                      string,
-                      SalesOrderOverviewLineAttribute[]
-                    >)[line.id] ?? [];
-                  return (
-                    <tr key={line.id} className="border-b last:border-0">
-                      <td className="p-2">{line.lineNo}</td>
-                      <td className="p-2">
-                        <div>{line.skuCode}</div>
-                        <div className="text-muted-foreground text-xs">{line.skuName}</div>
-                        {attrs.length > 0 && (
-                          <ul className="text-muted-foreground mt-1 text-xs">
-                            {attrs.map((at) => (
-                              <li key={at.id}>
-                                {at.attributeName}：{at.attributeValue}
-                                {at.attributeUnit ? ` ${at.attributeUnit}` : ''}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </td>
-                      <td className="p-2">{line.specSnapshot ?? '—'}</td>
-                      <td className="p-2 text-right">{formatAmount(line.quantity)}</td>
-                      <td className="p-2 text-right">{formatAmount(line.unitPrice)}</td>
-                      <td className="p-2 text-right">{formatAmount(line.discountAmount)}</td>
-                      <td className="p-2 text-right">{formatAmount(line.taxAmount)}</td>
-                      <td className="p-2 text-right font-medium">{formatAmount(line.lineAmount)}</td>
-                      <td className="p-2">{line.skuMappingVersion ?? '—'}</td>
-                    </tr>
-                  );
-                })}
+                {detail.lines
+                  .filter((l): l is NonNullable<typeof l> => l !== null)
+                  .map((line) => {
+                    // codegen 把 Map<String, ...> 渲染成 `{ }`（空的 object 类型），
+                    // 所以这里显式断言成「按 lineId 分组的属性数组」，而不是让它去索引。
+                    const attrs =
+                      (
+                        detail.attributesByLineId as unknown as Record<
+                          string,
+                          SalesOrderOverviewLineAttribute[]
+                        >
+                      )[line.id] ?? [];
+                    return (
+                      <tr key={line.id} className="border-b last:border-0">
+                        <td className="p-2">{line.lineNo}</td>
+                        <td className="p-2">
+                          <div>{line.skuCode}</div>
+                          <div className="text-muted-foreground text-xs">{line.skuName}</div>
+                          {attrs.length > 0 && (
+                            <ul className="text-muted-foreground mt-1 text-xs">
+                              {attrs.map((at) => (
+                                <li key={at.id}>
+                                  {at.attributeName}：{at.attributeValue}
+                                  {at.attributeUnit ? ` ${at.attributeUnit}` : ''}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </td>
+                        <td className="p-2">{line.specSnapshot ?? '—'}</td>
+                        <td className="p-2 text-right">{formatAmount(line.quantity)}</td>
+                        <td className="p-2 text-right">{formatAmount(line.unitPrice)}</td>
+                        <td className="p-2 text-right">{formatAmount(line.discountAmount)}</td>
+                        <td className="p-2 text-right">{formatAmount(line.taxAmount)}</td>
+                        <td className="p-2 text-right font-medium">
+                          {formatAmount(line.lineAmount)}
+                        </td>
+                        <td className="p-2">{line.skuMappingVersion ?? '—'}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -319,14 +311,16 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
               </thead>
               <tbody>
                 {/* ⚠️ 同上：codegen 的数组元素带 `| null`，渲染前先滤掉。 */}
-                {detail.charges.filter((c): c is NonNullable<typeof c> => c !== null).map((c) => (
-                  <tr key={c.id} className="border-b last:border-0">
-                    <td className="p-2">{chargeTypeLabels[c.chargeType] ?? c.chargeType}</td>
-                    <td className="p-2">{c.label ?? '—'}</td>
-                    <td className="p-2">{chargeKindLabels[c.chargeKind] ?? c.chargeKind}</td>
-                    <td className="p-2 text-right">{formatAmount(c.amount)}</td>
-                  </tr>
-                ))}
+                {detail.charges
+                  .filter((c): c is NonNullable<typeof c> => c !== null)
+                  .map((c) => (
+                    <tr key={c.id} className="border-b last:border-0">
+                      <td className="p-2">{chargeTypeLabels[c.chargeType] ?? c.chargeType}</td>
+                      <td className="p-2">{c.label ?? '—'}</td>
+                      <td className="p-2">{chargeKindLabels[c.chargeKind] ?? c.chargeKind}</td>
+                      <td className="p-2 text-right">{formatAmount(c.amount)}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -369,7 +363,10 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {UNAVAILABLE_SECTION_ORDER.map((key) => {
             const section = sections.get(key);
-            const cell = unavailableCell((detail as unknown as Record<string, unknown>)[key], section);
+            const cell = unavailableCell(
+              (detail as unknown as Record<string, unknown>)[key],
+              section,
+            );
             return (
               <div key={key} className="rounded-lg border border-dashed p-3">
                 <div className="flex items-center gap-2 text-sm">
@@ -389,7 +386,10 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
 
         {/* 费用分摊单独一条横幅：构成有、分摊没有，两者在界面上必须分开讲。 */}
         {(() => {
-          const banner = allocationBanner(detail.chargeAllocations, sections.get('chargeAllocations'));
+          const banner = allocationBanner(
+            detail.chargeAllocations,
+            sections.get('chargeAllocations'),
+          );
           if (!banner) return null;
           return (
             <div className="border-primary/40 bg-primary/5 mt-3 flex items-start gap-2 rounded-lg border p-3 text-sm">
@@ -418,7 +418,12 @@ export function OrderOverviewWorkspace({ orderId }: { orderId: string }) {
             {actions.map((action) => {
               const hint = actionDisabled(action.code, action);
               return (
-                <Button key={action.code} variant="outline" disabled={hint.disabled} title={hint.title}>
+                <Button
+                  key={action.code}
+                  variant="outline"
+                  disabled={hint.disabled}
+                  title={hint.title}
+                >
                   {action.label}
                 </Button>
               );

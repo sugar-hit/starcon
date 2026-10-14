@@ -2,7 +2,6 @@ package com.starcon.catalog;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.starcon.catalog.BomRules;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -10,8 +9,8 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.5.2.1 BOM 版本管理的纯规则测试。
  *
- * <p>本文件把 BOM <b>自己</b>钉死的两条规则逐条钉死（生效区间 R1–R5 是转发 3.5.1.1 的，
- * 只做口径一致性的回归断言，不在这里重复证明 —— 那属于 BundleRulesTest）：
+ * <p>本文件把 BOM <b>自己</b>钉死的两条规则逐条钉死（生效区间 R1–R5 是转发 3.5.1.1 的， 只做口径一致性的回归断言，不在这里重复证明 —— 那属于
+ * BundleRulesTest）：
  *
  * <ul>
  *   <li><b>R6 损耗率是百分数</b>：{@code 5} = 5%，且上界 100% 有明确理由；
@@ -69,35 +68,30 @@ class BomRulesTest {
     // 1 个成品需要 2 个组件，损耗 5%：需求量 = 2 × 1 × 1.05 = 2.1
     // 如果按比率读（0.05），这里会是 2.1 × …… 不对，是 2 × 1 × 0.05 = 0.1。
     // 两个答案差 21 倍，而错的那个不报错 —— 这就是 R6 必须钉死的原因。
-    assertThat(
-            BomRules.requiredQuantity(bd("2"), bd("5"), bd("1")))
+    assertThat(BomRules.requiredQuantity(bd("2"), bd("5"), bd("1")))
         .isEqualByComparingTo("2.100000");
   }
 
   @Test
   void requiredQuantityScalesWithOutputQuantity() {
     // 产 100 个，每个要 0.5 米，损耗 3%：0.5 × 100 × 1.03 = 51.5
-    assertThat(
-            BomRules.requiredQuantity(bd("0.5"), bd("3"), bd("100")))
+    assertThat(BomRules.requiredQuantity(bd("0.5"), bd("3"), bd("100")))
         .isEqualByComparingTo("51.500000");
   }
 
   @Test
   void requiredQuantityWithZeroScrapIsPlainMultiplication() {
-    assertThat(
-            BomRules.requiredQuantity(bd("2.5"), bd("0"), bd("4")))
+    assertThat(BomRules.requiredQuantity(bd("2.5"), bd("0"), bd("4")))
         .isEqualByComparingTo("10.000000");
     // 损耗率缺省按 0 处理：委外加工里「不损耗」是绝大多数情况，必填只会让人填一堆 0。
-    assertThat(
-            BomRules.requiredQuantity(bd("2.5"), null, bd("4")))
+    assertThat(BomRules.requiredQuantity(bd("2.5"), null, bd("4")))
         .isEqualByComparingTo("10.000000");
   }
 
   @Test
   void requiredQuantityKeepsSixDecimalsAndRoundsHalfUp() {
     // 3 × 1 × 1.12345 = 3.37035 → 6 位小数正好放下，不进位也不截断。
-    assertThat(
-            BomRules.requiredQuantity(bd("3"), bd("12.345"), bd("1")))
+    assertThat(BomRules.requiredQuantity(bd("3"), bd("12.345"), bd("1")))
         .isEqualByComparingTo("3.370350");
     // 第 7 位是 5 → HALF_UP 进位。若换成 HALF_EVEN 或截断，
     // 组装单领出来的料会与采购建议算出的量差 0.000001 —— 数字对不上就会被质疑整套系统。
@@ -171,8 +165,7 @@ class BomRulesTest {
   @Test
   void outputQuantityZeroWouldProduceAnAllZeroBillOfMaterials() {
     // 产 0 个时每个组件的需求量都是 0，拿到的清单会被误读成「这个 BOM 什么料都不用」。
-    assertThat(BomRules.outputQuantityProblem(bd("0")))
-        .contains("什么料都不用");
+    assertThat(BomRules.outputQuantityProblem(bd("0"))).contains("什么料都不用");
   }
 
   // ================================================================ 区间口径与 3.5.1.1 一致
@@ -206,9 +199,7 @@ class BomRulesTest {
   void forwardCloseIsTheOnlyWayToRetireAPublishedVersion() {
     // R5：只能收紧、只能往前。
     Instant now = Instant.parse("2026-03-01T10:00:00Z");
-    assertThat(
-            BomRules.forwardCloseProblem(
-                null, Instant.parse("2026-03-01T09:00:00Z"), now))
+    assertThat(BomRules.forwardCloseProblem(null, Instant.parse("2026-03-01T09:00:00Z"), now))
         .contains("必须落在当前时刻之后");
     assertThat(
             BomRules.forwardCloseProblem(
@@ -216,9 +207,7 @@ class BomRulesTest {
         .contains("只能收紧不能往后延");
     assertThat(BomRules.forwardCloseProblem(null, null, now)).contains("要指定一个具体时刻");
     // 合法：把开放区间收到未来某一刻。
-    assertThat(
-            BomRules.forwardCloseProblem(
-                null, Instant.parse("2026-04-01T00:00:00Z"), now))
+    assertThat(BomRules.forwardCloseProblem(null, Instant.parse("2026-04-01T00:00:00Z"), now))
         .isNull();
   }
 

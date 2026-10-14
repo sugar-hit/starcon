@@ -22,14 +22,14 @@ catalog 的 pattern 是锚定正则（`^...$`），`sku-code/*` 落在 `products
 
 同批探测真实 `api-proxy` route handler：
 
-| 路径 | 结果 |
-| --- | --- |
-| `catalog/sku-code/overview` | **404** |
-| `catalog/sku-code/rules` | **404** |
-| `catalog/sku-code/skus/{id}` | **404** |
-| `catalog/sku-code/batch` | **404** |
-| `catalog/unit-conversion/*`（6 条） | 200 |
-| `catalog/skus/export` | 200 |
+| 路径                                | 结果    |
+| ----------------------------------- | ------- |
+| `catalog/sku-code/overview`         | **404** |
+| `catalog/sku-code/rules`            | **404** |
+| `catalog/sku-code/skus/{id}`        | **404** |
+| `catalog/sku-code/batch`            | **404** |
+| `catalog/unit-conversion/*`（6 条） | 200     |
+| `catalog/skus/export`               | 200     |
 
 后端侧是好的：`SkuCodeController.java:23` 声明 `@RequestMapping("/catalog/sku-code")`，
 `overview` / `rules` / `skus/{id}` / `skus/{id}/identifiers` / `batch` / `batches/{id}` 都在。

@@ -57,9 +57,7 @@ export function DomainStatusBanner({ status, note, className }: DomainStatusBann
             页面骨架用于呈现功能边界 · 不展示业务数据
           </span>
         </div>
-        {note && (
-          <div className="text-copy-13 text-muted-foreground leading-relaxed">{note}</div>
-        )}
+        {note && <div className="text-copy-13 text-muted-foreground leading-relaxed">{note}</div>}
       </div>
     </div>
   );

@@ -146,10 +146,14 @@ export function MultilingualWorkspace() {
 
   const [batching, setBatching] = useState<TranslationBatchInput | null>(null);
   const [batchTargetKeyword, setBatchTargetKeyword] = useState('');
-  const [batchTargets, setBatchTargets] = useState<{ id: string; code: string; name: string }[]>([]);
+  const [batchTargets, setBatchTargets] = useState<{ id: string; code: string; name: string }[]>(
+    [],
+  );
   const [batchSelected, setBatchSelected] = useState<Set<string>>(new Set());
 
-  const [workspace, setWorkspace] = useState<{ targetType: 'SPU' | 'SKU'; id: string } | null>(null);
+  const [workspace, setWorkspace] = useState<{ targetType: 'SPU' | 'SKU'; id: string } | null>(
+    null,
+  );
   const [workspaceView, setWorkspaceView] = useState<TranslationProductView | null>(null);
   const [workspaceKeyword, setWorkspaceKeyword] = useState('');
 
@@ -341,9 +345,7 @@ export function MultilingualWorkspace() {
   async function searchBatchTargets() {
     try {
       const page = await fetchSkuPage({ ...emptySkuFilters, keyword: batchTargetKeyword }, 0, 20);
-      setBatchTargets(
-        page.items.map((row) => ({ id: row.id, code: row.code, name: row.name })),
-      );
+      setBatchTargets(page.items.map((row) => ({ id: row.id, code: row.code, name: row.name })));
       setActionError('');
     } catch (e) {
       setActionError(errorText(e, '商品搜索失败'));
@@ -385,10 +387,7 @@ export function MultilingualWorkspace() {
     }
   }
 
-  const entryCompleteness = useMemo(
-    () => completionOf(workspaceView?.rows ?? []),
-    [workspaceView],
-  );
+  const entryCompleteness = useMemo(() => completionOf(workspaceView?.rows ?? []), [workspaceView]);
   const stillMissing = useMemo(
     () => missingRequiredLocales(requirements?.requirements ?? [], null),
     [requirements],
@@ -402,8 +401,14 @@ export function MultilingualWorkspace() {
           value={overview?.localeCount ?? 0}
           icon={<Languages className="h-4 w-4" />}
         />
-        <StatCard label="待翻（已登记语言，还没有文本）" value={overview?.pendingTranslationCount ?? 0} />
-        <StatCard label="已翻（还没有人校对，不可刊登）" value={overview?.translatedTranslationCount ?? 0} />
+        <StatCard
+          label="待翻（已登记语言，还没有文本）"
+          value={overview?.pendingTranslationCount ?? 0}
+        />
+        <StatCard
+          label="已翻（还没有人校对，不可刊登）"
+          value={overview?.translatedTranslationCount ?? 0}
+        />
         <StatCard
           label="可刊登（已校对，04 刊登只取这一档）"
           value={overview?.publishableTranslationCount ?? 0}
@@ -488,8 +493,8 @@ export function MultilingualWorkspace() {
             <div
               className={
                 requirements.siteLocaleAvailable
-                  ? 'rounded-md border border-border p-3 text-sm'
-                  : 'rounded-md border border-warning/40 bg-warning/5 p-3 text-sm'
+                  ? 'border-border rounded-md border p-3 text-sm'
+                  : 'border-warning/40 bg-warning/5 rounded-md border p-3 text-sm'
               }
             >
               <p className="font-medium">
@@ -530,27 +535,28 @@ export function MultilingualWorkspace() {
                       <td className="py-2 pr-3">{row.pendingCount}</td>
                       <td className="py-2 pr-3">{row.translatedCount}</td>
                       <td className="py-2 pr-3">{row.reviewedCount}</td>
-                      <td className="py-2 pr-3">
-                        {row.enabled ? '启用' : '停用'}
-                      </td>
+                      <td className="py-2 pr-3">{row.enabled ? '启用' : '停用'}</td>
                       <td className="py-2">
                         {writable && (
                           <span className="flex gap-1">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => void toggleLocale(
-                                locales?.items.find((l) => l.locale === row.locale) ?? {
-                                  ...row,
-                                  id: '',
-                                  sourceLabel: '',
-                                  note: '',
-                                  version: 0,
-                                  createdAt: '',
-                                  updatedAt: '',
-                                } as unknown as TranslationLocaleRow,
-                                !row.enabled,
-                              )}
+                              onClick={() =>
+                                void toggleLocale(
+                                  locales?.items.find((l) => l.locale === row.locale) ??
+                                    ({
+                                      ...row,
+                                      id: '',
+                                      sourceLabel: '',
+                                      note: '',
+                                      version: 0,
+                                      createdAt: '',
+                                      updatedAt: '',
+                                    } as unknown as TranslationLocaleRow),
+                                  !row.enabled,
+                                )
+                              }
                               disabled={!locales?.items.some((l) => l.locale === row.locale)}
                             >
                               {row.enabled ? '停用' : '启用'}
@@ -633,7 +639,11 @@ export function MultilingualWorkspace() {
                     >
                       编辑
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => void toggleLocale(row, !row.enabled)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void toggleLocale(row, !row.enabled)}
+                    >
                       {row.enabled ? '停用' : '启用'}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => void removeLocale(row)}>
@@ -715,7 +725,9 @@ export function MultilingualWorkspace() {
         ) : !entries || entries.items.length === 0 ? (
           <EmptyState
             icon={<Languages className="h-6 w-6" />}
-            title={entryFilter.keyword || entryFilter.status ? '没有匹配的译文' : '还没有任何多语言译文'}
+            title={
+              entryFilter.keyword || entryFilter.status ? '没有匹配的译文' : '还没有任何多语言译文'
+            }
             description={
               entryFilter.keyword || entryFilter.status
                 ? '换个筛选条件试试。清空后可以看到全部译文。'
@@ -731,7 +743,10 @@ export function MultilingualWorkspace() {
               {entries.items.map((row) => {
                 const publishable = row.status === 'REVIEWED';
                 return (
-                  <li key={row.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <li
+                    key={row.id}
+                    className="flex flex-wrap items-start justify-between gap-3 py-3"
+                  >
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-sm">{row.locale}</span>
@@ -741,9 +756,15 @@ export function MultilingualWorkspace() {
                           {publishable ? '可刊登' : '不可刊登'}
                         </Badge>
                       </div>
-                      <p className="text-sm">{row.name || <em className="text-muted-foreground">（待翻：还没有文本）</em>}</p>
+                      <p className="text-sm">
+                        {row.name || (
+                          <em className="text-muted-foreground">（待翻：还没有文本）</em>
+                        )}
+                      </p>
                       {row.description && (
-                        <p className="text-muted-foreground line-clamp-2 text-xs">{row.description}</p>
+                        <p className="text-muted-foreground line-clamp-2 text-xs">
+                          {row.description}
+                        </p>
                       )}
                       <p className="text-muted-foreground text-xs">
                         来源 {row.origin} · {statusHint(row.status)}
@@ -763,13 +784,21 @@ export function MultilingualWorkspace() {
                           编辑
                         </Button>
                         {row.status === 'TRANSLATED' && (
-                          <Button size="sm" variant="outline" onClick={() => void markReviewed(row)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => void markReviewed(row)}
+                          >
                             <Check className="h-4 w-4" />
                             标校对
                           </Button>
                         )}
                         {row.status === 'REVIEWED' && (
-                          <Button size="sm" variant="outline" onClick={() => void regressToPending(row)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => void regressToPending(row)}
+                          >
                             <X className="h-4 w-4" />
                             退回已翻
                           </Button>
@@ -831,7 +860,9 @@ export function MultilingualWorkspace() {
               className={control}
               placeholder="按 batchRef 找一批"
               value={suggestionFilter.batchRef}
-              onChange={(e) => setSuggestionFilter({ ...suggestionFilter, batchRef: e.target.value })}
+              onChange={(e) =>
+                setSuggestionFilter({ ...suggestionFilter, batchRef: e.target.value })
+              }
             />
             <Button
               size="sm"
@@ -864,7 +895,8 @@ export function MultilingualWorkspace() {
         ) : (
           <div className="space-y-3">
             <p className="text-muted-foreground text-xs">
-              共 {suggestions.total} 条 · 第 {suggestions.page + 1}/{Math.max(1, suggestions.totalPages)} 页
+              共 {suggestions.total} 条 · 第 {suggestions.page + 1}/
+              {Math.max(1, suggestions.totalPages)} 页
             </p>
             <ul className="divide-border divide-y">
               {suggestions.items.map((row) => (
@@ -877,7 +909,9 @@ export function MultilingualWorkspace() {
                         {suggestionStatusLabel(row.status)}
                       </Badge>
                       {row.batchRef && (
-                        <span className="text-muted-foreground font-mono text-xs">{row.batchRef}</span>
+                        <span className="text-muted-foreground font-mono text-xs">
+                          {row.batchRef}
+                        </span>
                       )}
                     </div>
                     <p className="text-sm">{row.suggestedName || '（无名称）'}</p>
@@ -964,7 +998,7 @@ export function MultilingualWorkspace() {
         }
       >
         {batching && (
-          <div className="mb-4 space-y-3 rounded-md border border-border p-3">
+          <div className="border-border mb-4 space-y-3 rounded-md border p-3">
             <Field label="动作" hint={batchActionHint(batching.action)}>
               <select
                 className={control}
@@ -981,10 +1015,7 @@ export function MultilingualWorkspace() {
 
             {batching.action !== 'ADOPT_SUGGESTIONS' ? (
               <>
-                <Field
-                  label="主体类型"
-                  hint="SPU 与 SKU 各一张译文表，这里决定处理哪一边"
-                >
+                <Field label="主体类型" hint="SPU 与 SKU 各一张译文表，这里决定处理哪一边">
                   <select
                     className={control}
                     value={batching.targetType}
@@ -1038,7 +1069,7 @@ export function MultilingualWorkspace() {
                         搜索
                       </Button>
                     </div>
-                    <ul className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                    <ul className="border-border max-h-48 space-y-1 overflow-y-auto rounded-md border p-2">
                       {batchTargets.length === 0 ? (
                         <li className="text-muted-foreground text-xs">先搜出商品再勾选</li>
                       ) : (
@@ -1091,14 +1122,15 @@ export function MultilingualWorkspace() {
         )}
 
         {batchDetail && (
-          <div className="mb-4 space-y-2 rounded-md border border-border p-3">
+          <div className="border-border mb-4 space-y-2 rounded-md border p-3">
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={batchStatusTone(batchDetail.batch.status)}>
                 {batchStatusLabel(batchDetail.batch.status)}
               </Badge>
               <span className="text-sm">
-                {batchActionLabel(batchDetail.batch.action)}：成功 {batchDetail.batch.succeededCount} · 跳过{' '}
-                {batchDetail.batch.skippedCount} · 未执行 {batchDetail.batch.rejectedCount}
+                {batchActionLabel(batchDetail.batch.action)}：成功{' '}
+                {batchDetail.batch.succeededCount} · 跳过 {batchDetail.batch.skippedCount} · 未执行{' '}
+                {batchDetail.batch.rejectedCount}
               </span>
               <Button size="sm" variant="outline" onClick={() => setBatchDetail(null)}>
                 收起
@@ -1108,7 +1140,10 @@ export function MultilingualWorkspace() {
             {batchDetail.items.length > 0 && (
               <ul className="max-h-72 space-y-1 overflow-y-auto text-xs">
                 {batchDetail.items.map((item) => (
-                  <li key={item.id} className="border-border flex flex-wrap items-start gap-2 border-b py-1">
+                  <li
+                    key={item.id}
+                    className="border-border flex flex-wrap items-start gap-2 border-b py-1"
+                  >
                     <Badge tone={outcomeTone(item.outcome)}>{outcomeLabel(item.outcome)}</Badge>
                     <span className="font-mono">{item.locale}</span>
                     <span className="font-mono">{item.targetCode || '—'}</span>
@@ -1221,7 +1256,10 @@ export function MultilingualWorkspace() {
                 size="sm"
                 variant="outline"
                 onClick={() =>
-                  void loadWorkspace(workspaceView.targetType as 'SPU' | 'SKU', workspaceView.targetId)
+                  void loadWorkspace(
+                    workspaceView.targetType as 'SPU' | 'SKU',
+                    workspaceView.targetId,
+                  )
                 }
               >
                 <RefreshCw className="h-4 w-4" />
@@ -1231,7 +1269,8 @@ export function MultilingualWorkspace() {
             <p className="text-muted-foreground text-xs">{workspaceView.note}</p>
             {entryCompleteness && entryCompleteness.missing > 0 && (
               <p className="text-sm">
-                还有 {entryCompleteness.missing} 种需求语言没有译文记录 —— 先用「补齐待翻占位」铺开，再逐个填。
+                还有 {entryCompleteness.missing} 种需求语言没有译文记录 ——
+                先用「补齐待翻占位」铺开，再逐个填。
               </p>
             )}
             {workspaceView.rows.length === 0 ? (
@@ -1242,10 +1281,15 @@ export function MultilingualWorkspace() {
             ) : (
               <ul className="divide-border divide-y">
                 {workspaceView.rows.map((row) => (
-                  <li key={row.locale} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                  <li
+                    key={row.locale}
+                    className="flex flex-wrap items-center justify-between gap-3 py-2"
+                  >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-sm">{row.locale}</span>
-                      {row.localeName && <span className="text-muted-foreground text-xs">{row.localeName}</span>}
+                      {row.localeName && (
+                        <span className="text-muted-foreground text-xs">{row.localeName}</span>
+                      )}
                       {!row.required && <Badge tone="neutral">非需求语言</Badge>}
                       <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
                       <Badge tone={publishableTone(row.publishable)}>
@@ -1415,8 +1459,7 @@ export function MultilingualWorkspace() {
                     setEditingEntry(null);
                     setEditingEntryRow(null);
                     await load();
-                    if (workspace)
-                      await loadWorkspace(workspace.targetType, workspace.id);
+                    if (workspace) await loadWorkspace(workspace.targetType, workspace.id);
                   } catch (e) {
                     setActionError(errorText(e, '译文保存失败'));
                   }
@@ -1451,7 +1494,9 @@ export function MultilingualWorkspace() {
           }}
         >
           <div className="space-y-3">
-            <p className="text-muted-foreground text-sm">建议正文：{rejecting.suggestedName || '（无名称）'}</p>
+            <p className="text-muted-foreground text-sm">
+              建议正文：{rejecting.suggestedName || '（无名称）'}
+            </p>
             <Field label="驳回理由">
               <textarea
                 className={control}

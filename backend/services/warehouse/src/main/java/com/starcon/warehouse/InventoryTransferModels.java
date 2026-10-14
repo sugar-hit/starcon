@@ -13,8 +13,7 @@ import java.util.UUID;
  *
  * <ul>
  *   <li>输入：调拨请求（源仓、目标仓、SKU、数量）；{@code expected_version}。
- *   <li>输出：调拨单（草稿/待发/在途/部分收/已收/差异）；
- *       库存分录（发出转入途、实收转入目标仓）。
+ *   <li>输出：调拨单（草稿/待发/在途/部分收/已收/差异）； 库存分录（发出转入途、实收转入目标仓）。
  * </ul>
  *
  * <p>DTO 一律带 {@code TransferOrder}/{@code Transfer} 前缀：四个服务的 schema 被 codegen
@@ -23,10 +22,10 @@ import java.util.UUID;
  * <p>数字口径（界面上每一列都对应其中一条，不做二次加工）：
  *
  * <ul>
- *   <li>{@code requested} 请求调拨量 · {@code shipped} 累计发出 · {@code received} 累计实收
- *       · {@code discrepancy} 累计确认差异 · {@code inTransit} 仍在途。
- *   <li>守恒式：{@code shipped = received + discrepancy + inTransit}，
- *       由迁移 V61 的 {@code guard_transfer_line_conservation} 在 DB 级钉死。
+ *   <li>{@code requested} 请求调拨量 · {@code shipped} 累计发出 · {@code received} 累计实收 · {@code
+ *       discrepancy} 累计确认差异 · {@code inTransit} 仍在途。
+ *   <li>守恒式：{@code shipped = received + discrepancy + inTransit}， 由迁移 V61 的 {@code
+ *       guard_transfer_line_conservation} 在 DB 级钉死。
  *   <li>{@code unshipped = requested − shipped}：还没发出去的部分。它**不是**差异 ——
  *       货从没离开源仓，不存在短少。把它算进差异会让「少发了」被误读成「路上丢了」。
  * </ul>
@@ -65,8 +64,7 @@ public final class InventoryTransferModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的调拨单状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的调拨单状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -165,8 +163,7 @@ public final class InventoryTransferModels {
   /**
    * 列表页。
    *
-   * <p>{@code summary} 是**全量**汇总（不受分页影响）；下拉词表随响应一起给，
-   * 界面不用再单独拉一次。
+   * <p>{@code summary} 是**全量**汇总（不受分页影响）；下拉词表随响应一起给， 界面不用再单独拉一次。
    */
   public record TransferOrderPage(
       TransferOrderSummary summary,
@@ -212,8 +209,8 @@ public final class InventoryTransferModels {
   /**
    * 一次收货（或一次差异登记）及其覆盖的明细行。
    *
-   * <p>{@code kind=RECEIVED} 是实收；{@code kind=SHORTAGE} 是结案时的差异登记，
-   * 二者按发生顺序混排在同一条时间线上 —— 一趟调拨的完整经过只能这样读出来。
+   * <p>{@code kind=RECEIVED} 是实收；{@code kind=SHORTAGE} 是结案时的差异登记， 二者按发生顺序混排在同一条时间线上 ——
+   * 一趟调拨的完整经过只能这样读出来。
    */
   public record TransferReceiptRow(
       UUID id,
@@ -239,9 +236,8 @@ public final class InventoryTransferModels {
   /**
    * 本单的库存分录（复用 7.1.2.1 台账的响应）。
    *
-   * <p>{@code attribution} 与口径说明必须随响应返回：在途那部分数量**不在分录里**
-   * （货权已在发出时一次性离开发货仓），不说明的话「发出 100、实收 40、分录只有 -100+40」
-   * 会被读成「60 件的账去哪了」。
+   * <p>{@code attribution} 与口径说明必须随响应返回：在途那部分数量**不在分录里** （货权已在发出时一次性离开发货仓），不说明的话「发出 100、实收 40、分录只有
+   * -100+40」 会被读成「60 件的账去哪了」。
    */
   public record TransferMovements(
       UUID orderId,
@@ -288,8 +284,8 @@ public final class InventoryTransferModels {
   /**
    * 实收请求：一次收货落到同一个库位。
    *
-   * <p>{@code lotId} 可选：蓝图 7.5.1.1 的调拨契约是 SKU × 数量（不按批次拆分），
-   * 批次级拆分属 7.3.1.x 的演进范围。给了批次就落到该批次上，不给则落在无批次库存位置。
+   * <p>{@code lotId} 可选：蓝图 7.5.1.1 的调拨契约是 SKU × 数量（不按批次拆分）， 批次级拆分属 7.3.1.x
+   * 的演进范围。给了批次就落到该批次上，不给则落在无批次库存位置。
    */
   public record TransferReceiveRequest(
       Long expectedVersion,

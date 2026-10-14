@@ -10,31 +10,27 @@ import java.util.function.Function;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 3.9.2.1 完整度评分：评分台账、评分卡、缺失项清单、批量补全入口，
- * 以及评分所依赖的两类 catalog 侧声明数据（报关属性与认证）。
+ * 3.9.2.1 完整度评分：评分台账、评分卡、缺失项清单、批量补全入口， 以及评分所依赖的两类 catalog 侧声明数据（报关属性与认证）。
  *
  * <p>路由分三段，理由是<b>读写语义不同</b>：
  *
  * <ul>
  *   <li>{@code /catalog/completeness/*} —— 评分的读出口与批量入口（台账 / 评分卡 / 清单 / 预检）。
  *       运营要问的是「哪些商品刊登不了」「该先补哪一条」，主体不固定，所以是集合资源。
- *   <li>{@code /catalog/completeness/customs/skus/{skuId}} —— 报关属性声明（V37 第二节）。
- *       它挂在 SKU 下按单主体寻址，与 {@code PhysicalSafetyController} 的
- *       {@code /catalog/physical-safety/skus/{skuId}} 同一形状。
- *   <li>{@code /catalog/completeness/certifications/skus/{skuId}[/{certId}]} —— 认证声明，
- *       一个 SKU 多条（CE / FCC / UL ...），所以要多一层 {@code {certId}}。
+ *   <li>{@code /catalog/completeness/customs/skus/{skuId}} —— 报关属性声明（V37 第二节）。 它挂在 SKU 下按单主体寻址，与
+ *       {@code PhysicalSafetyController} 的 {@code /catalog/physical-safety/skus/{skuId}} 同一形状。
+ *   <li>{@code /catalog/completeness/certifications/skus/{skuId}[/{certId}]} —— 认证声明， 一个 SKU 多条（CE
+ *       / FCC / UL ...），所以要多一层 {@code {certId}}。
  * </ul>
  *
- * <p><b>预检端点是给下游业务用的</b>（4.2.3.2 刊登预检、报关流程）：
- * 它们要的是「放行 / 拦住 + 拦住的原因」，所以与给人看的列表分开 ——
- * 一个 200 + {@code allowed=false} 加一份 blockers 才够下游把单子退回来并指出该补什么。
+ * <p><b>预检端点是给下游业务用的</b>（4.2.3.2 刊登预检、报关流程）： 它们要的是「放行 / 拦住 + 拦住的原因」，所以与给人看的列表分开 —— 一个 200 + {@code
+ * allowed=false} 加一份 blockers 才够下游把单子退回来并指出该补什么。
  *
- * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}，
- * 与 3.6.2.1 完全一致。刻意不混用合规域权限（混用会出现"能看评分却改不了报关属性"
- * 这种半截权限 —— 3.7.2.1 已在物理与安全属性上拒绝过这个方案）。
+ * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}， 与 3.6.2.1
+ * 完全一致。刻意不混用合规域权限（混用会出现"能看评分却改不了报关属性" 这种半截权限 —— 3.7.2.1 已在物理与安全属性上拒绝过这个方案）。
  *
- * <p>租户一律来自已认证成员关系（{@link AccessService} 向 identity 解析），
- * <b>不读 {@code X-Tenant-Id} 头</b>：那是客户端自称的租户，AGENTS.md 明令禁止。
+ * <p>租户一律来自已认证成员关系（{@link AccessService} 向 identity 解析）， <b>不读 {@code X-Tenant-Id}
+ * 头</b>：那是客户端自称的租户，AGENTS.md 明令禁止。
  */
 @RestController
 @RequestMapping("/catalog/completeness")
@@ -94,16 +90,27 @@ public class CompletenessScoreController {
         auth,
         "spu.read",
         a ->
-            service.list(new CompletenessQuery(
-                keyword, ownerType, grade, null, spuId, categoryName, status,
-                listingReadyOnly, missingOnly, orderBy, ascending, page, size)));
+            service.list(
+                new CompletenessQuery(
+                    keyword,
+                    ownerType,
+                    grade,
+                    null,
+                    spuId,
+                    categoryName,
+                    status,
+                    listingReadyOnly,
+                    missingOnly,
+                    orderBy,
+                    ascending,
+                    page,
+                    size)));
   }
 
   /**
    * 评分卡（蓝图「输出」那一行的读出口）。
    *
-   * <p>返回逐条检查项（含已满足的）与缺失项清单，
-   * 以及<b>两个独立</b>的就绪结论（刊登 / 清关）与各自的阻塞原因。
+   * <p>返回逐条检查项（含已满足的）与缺失项清单， 以及<b>两个独立</b>的就绪结论（刊登 / 清关）与各自的阻塞原因。
    */
   @GetMapping("/{ownerType}/{ownerId}")
   public CompletenessScorecard card(
@@ -118,9 +125,7 @@ public class CompletenessScoreController {
   /**
    * 缺失项清单：按缺失码聚合，受影响主体数降序。
    *
-   * <p>每条给出「全店有多少个主体缺这一项」与前几个代表性主体 ——
-   * 补全从影响面最大的那条开始，因为修好一条报关规则可能同时让几十个 SKU 的
-   * 清关就绪结论翻转。
+   * <p>每条给出「全店有多少个主体缺这一项」与前几个代表性主体 —— 补全从影响面最大的那条开始，因为修好一条报关规则可能同时让几十个 SKU 的 清关就绪结论翻转。
    */
   @GetMapping("/gaps")
   public CompletenessGapPage gaps(
@@ -139,9 +144,21 @@ public class CompletenessScoreController {
         auth,
         "spu.read",
         a ->
-            service.gaps(new CompletenessQuery(
-                keyword, ownerType, grade, dimension, spuId, null, status,
-                listingReadyOnly, missingOnly, null, null, page, size)));
+            service.gaps(
+                new CompletenessQuery(
+                    keyword,
+                    ownerType,
+                    grade,
+                    dimension,
+                    spuId,
+                    null,
+                    status,
+                    listingReadyOnly,
+                    missingOnly,
+                    null,
+                    null,
+                    page,
+                    size)));
   }
 
   /** 缺失项统计：补全工作台顶部的进度数字。 */
@@ -152,8 +169,10 @@ public class CompletenessScoreController {
     return call(
         auth,
         "spu.read",
-        a -> service.gapSummary(new CompletenessQuery(
-            null, ownerType, null, null, null, null, null, null, null, null, null, 0, 20)));
+        a ->
+            service.gapSummary(
+                new CompletenessQuery(
+                    null, ownerType, null, null, null, null, null, null, null, null, null, 0, 20)));
   }
 
   // ------------------------------------------------------------ 批量评估（批量补全入口）
@@ -161,11 +180,9 @@ public class CompletenessScoreController {
   /**
    * 批量评估并落快照。
    *
-   * <p>调用方只传主体 id，<b>分数由服务端现算</b>：一个"把分数传进来让我存一下"的端点
-   * 等于给完整度发了一张可自填的通行证，而完整度直接决定能否刊登与能否清关。
+   * <p>调用方只传主体 id，<b>分数由服务端现算</b>：一个"把分数传进来让我存一下"的端点 等于给完整度发了一张可自填的通行证，而完整度直接决定能否刊登与能否清关。
    *
-   * <p>逐条成败都返回，不做"整体成功/失败"：批量补全天然是"好的补了、还差的留着"，
-   * 一个整体 500 会让人以为一条都没补上。
+   * <p>逐条成败都返回，不做"整体成功/失败"：批量补全天然是"好的补了、还差的留着"， 一个整体 500 会让人以为一条都没补上。
    */
   @PostMapping("/evaluations")
   public CompletenessEvaluationResult evaluate(
@@ -198,11 +215,9 @@ public class CompletenessScoreController {
   /**
    * 刊登预检（供下游 4.2.3.2 调用）。
    *
-   * <p>返回 {@code allowed} + {@code blockers}（逐个主体带缺失码与阻塞原因），
-   * 而不是只给一个布尔：布尔答不出「这 3 个 SPU 为什么被拦住」。
+   * <p>返回 {@code allowed} + {@code blockers}（逐个主体带缺失码与阻塞原因）， 而不是只给一个布尔：布尔答不出「这 3 个 SPU 为什么被拦住」。
    *
-   * <p>清单长度放在<b>请求体</b>而不是 URL 上：一次预检的 SPU 可能上百个，
-   * 拼进 query 迟早撞长度上限。
+   * <p>清单长度放在<b>请求体</b>而不是 URL 上：一次预检的 SPU 可能上百个， 拼进 query 迟早撞长度上限。
    */
   @PostMapping("/precheck/listing")
   public ListingPrecheck listingPrecheck(
@@ -242,11 +257,9 @@ public class CompletenessScoreController {
   /**
    * 写报关属性（新建或整体替换）。
    *
-   * <p>{@code version} 是行级乐观锁：改的时候必须回传读到的版本号，否则 409。
-   * 无行时传 0 表示新建。
+   * <p>{@code version} 是行级乐观锁：改的时候必须回传读到的版本号，否则 409。 无行时传 0 表示新建。
    *
-   * <p>HS 编码与申报品名<b>可空</b>：报关属性是逐步补全的，建档时常常只有品名、
-   * HS 编码要等供应商确认。要求全填会让"建一行"都做不了，而缺什么由评分报。
+   * <p>HS 编码与申报品名<b>可空</b>：报关属性是逐步补全的，建档时常常只有品名、 HS 编码要等供应商确认。要求全填会让"建一行"都做不了，而缺什么由评分报。
    */
   @PutMapping("/customs/skus/{skuId}")
   public CustomsDeclaration saveCustoms(
@@ -285,8 +298,7 @@ public class CompletenessScoreController {
   /**
    * 新建一条认证声明。
    *
-   * <p>{@code status=NOT_REQUIRED} 是这里最要紧的一格：多数品类本来就不强制认证，
-   * 没有「显式记录无需认证」这个状态，这些商品会永远停在「认证缺失」，
+   * <p>{@code status=NOT_REQUIRED} 是这里最要紧的一格：多数品类本来就不强制认证， 没有「显式记录无需认证」这个状态，这些商品会永远停在「认证缺失」，
    * 而运营无论怎么补都补不上 —— 最后整个认证维度变成一片没人看的红色。
    */
   @PostMapping("/certifications/skus/{skuId}")

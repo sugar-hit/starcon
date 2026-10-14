@@ -43,7 +43,13 @@ import { errorText } from '../inventory/inventory-model';
  *   <li><b>加载 / 空 / 错误三态齐全</b>：没冻结是正常业务状态，不是错误。
  * </ul>
  */
-export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; orderStatus: string }) {
+export function BomBindingPanel({
+  orderId,
+  orderStatus,
+}: {
+  orderId: string;
+  orderStatus: string;
+}) {
   const [binding, setBinding] = useState<BomBinding | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -93,9 +99,10 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
 
   return (
     <SectionCard title="BOM 冻结快照（6.4.1.2）">
-      <p className="mb-3 text-xs text-muted-foreground">
-        加工单引用 BOM 版本并冻结<b>展开结果</b>，之后 BOM 怎么改都不影响这张单 —— 这是「冻结与订单冻结组件同理」：
-        加工周期长，BOM 中途改配会导致实物与系统不符。这里与上面的「组件领用记录」不是同一份：
+      <p className="text-muted-foreground mb-3 text-xs">
+        加工单引用 BOM 版本并冻结<b>展开结果</b>，之后 BOM 怎么改都不影响这张单 ——
+        这是「冻结与订单冻结组件同理」： 加工周期长，BOM
+        中途改配会导致实物与系统不符。这里与上面的「组件领用记录」不是同一份：
         领用记录是单层、按仓库出库推进；冻结快照是多层展开树，记录当时按哪一版、什么损耗率算的。
       </p>
 
@@ -106,12 +113,13 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
         </div>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">正在加载冻结快照…</p>}
+      {loading && <p className="text-muted-foreground text-sm">正在加载冻结快照…</p>}
 
       {!loading && !snapshot && !error && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
-            这张加工单还没有冻结 BOM 展开结果。加工周期内 BOM 一旦改配，就无法回答「这批料当时按哪一版、什么损耗率领的」。
+          <p className="text-muted-foreground text-sm">
+            这张加工单还没有冻结 BOM 展开结果。加工周期内 BOM
+            一旦改配，就无法回答「这批料当时按哪一版、什么损耗率领的」。
           </p>
           {freezeable ? (
             <div className="flex flex-wrap items-end gap-2">
@@ -125,13 +133,14 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
                 />
               </label>
               <Button disabled={busy} onClick={() => void freeze()}>
-                <Snowflake />冻结展开结果
+                <Snowflake />
+                冻结展开结果
               </Button>
             </div>
           ) : (
             <p className="text-xs text-amber-600">
-              当前状态是「{orderStatus}」，已下达的加工单不能补冻结 —— 它已经按当时的组件领料清单发出去了。
-              要按新 BOM 加工请另开一张加工单。
+              当前状态是「{orderStatus}」，已下达的加工单不能补冻结 ——
+              它已经按当时的组件领料清单发出去了。 要按新 BOM 加工请另开一张加工单。
             </p>
           )}
         </div>
@@ -148,7 +157,8 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
               {requiredText(snapshot.outputQuantity)} · {snapshot.lineCount} 行
             </span>
             <Button variant="ghost" size="sm" onClick={() => void load()} disabled={loading}>
-              <RefreshCw className={loading ? 'animate-spin' : ''} />刷新
+              <RefreshCw className={loading ? 'animate-spin' : ''} />
+              刷新
             </Button>
           </div>
 
@@ -161,13 +171,14 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
 
           {headline && (
             <p className="rounded-md border border-sky-500/40 bg-sky-500/10 p-2 text-xs">
-              {headline}。已下达的加工单不受影响（领料按冻结快照走）；按新版本生产的下一批货要另开单。
+              {headline}
+              。已下达的加工单不受影响（领料按冻结快照走）；按新版本生产的下一批货要另开单。
             </p>
           )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground">
+              <thead className="text-muted-foreground text-left">
                 <tr>
                   <th className="px-2 py-1">组件</th>
                   <th className="px-2 py-1">来源版本</th>
@@ -181,22 +192,25 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
               <tbody>
                 {(snapshot.lines ?? []).map((line) => (
                   <tr key={line.id} className="border-t">
-                    <td className="px-2 py-1" style={{ paddingLeft: `${8 + depthIndent(line) * 16}px` }}>
+                    <td
+                      className="px-2 py-1"
+                      style={{ paddingLeft: `${8 + depthIndent(line) * 16}px` }}
+                    >
                       {line.skuCode}
                       {line.isSubAssembly && (
-                        <span className="ml-1 text-xs text-muted-foreground">（子装配）</span>
+                        <span className="text-muted-foreground ml-1 text-xs">（子装配）</span>
                       )}
                       {isPurchaseLine(line) && (
                         <span className="ml-1 text-xs text-amber-600">需采购</span>
                       )}
                     </td>
-                    <td className="px-2 py-1 text-xs text-muted-foreground">
+                    <td className="text-muted-foreground px-2 py-1 text-xs">
                       {line.sourceBomCode} {line.sourceVersionNo}
                     </td>
                     <td className="px-2 py-1">{requiredText(line.unitQuantity)}</td>
                     <td className="px-2 py-1">{scrapText(line.scrapRate)}</td>
                     <td className="px-2 py-1">{requiredText(line.requiredQuantity)}</td>
-                    <td className="px-2 py-1 text-xs text-muted-foreground">
+                    <td className="text-muted-foreground px-2 py-1 text-xs">
                       {requiredText(line.available)} / {requiredText(line.inTransit)}
                     </td>
                     <td className="px-2 py-1">
@@ -212,7 +226,7 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
             </table>
           </div>
 
-          <p className="flex items-start gap-1 text-xs text-muted-foreground">
+          <p className="text-muted-foreground flex items-start gap-1 text-xs">
             <Lock className="mt-0.5 size-3 shrink-0" />
             快照已冻结：单位用量 / 损耗率 / 需求量都是冻结那一刻的值，读它们不 join 现在的 BOM。
             损耗率是<b>百分数</b>（5 = 5%），需求量按规则 R7 = 单位用量 × 产量 × (1 + 损耗率/100)，
@@ -220,7 +234,7 @@ export function BomBindingPanel({ orderId, orderStatus }: { orderId: string; ord
           </p>
 
           {binding && binding.notes.length > 0 && (
-            <ul className="rounded-md border p-2 text-xs text-muted-foreground">
+            <ul className="text-muted-foreground rounded-md border p-2 text-xs">
               {binding.notes.map((n) => (
                 <li key={n}>· {n}</li>
               ))}

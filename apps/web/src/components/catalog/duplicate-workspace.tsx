@@ -202,7 +202,12 @@ export function DuplicateWorkspace() {
         description="识别同 SPU 重复规格组合、同商品不同 SPU 重复建档、同条码多 SKU、近似标题+相似图片疑似同品，输出候选与相似度供人工确认。"
         extra={
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => void loadOverview()} disabled={loading}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void loadOverview()}
+              disabled={loading}
+            >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               刷新
             </Button>
@@ -210,7 +215,7 @@ export function DuplicateWorkspace() {
         }
       >
         {error && (
-          <div className="flex items-start gap-2 text-destructive text-copy-13">
+          <div className="text-destructive text-copy-13 flex items-start gap-2">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -218,7 +223,7 @@ export function DuplicateWorkspace() {
 
         {/* 范围收窄的警示：必须排在统计之前，且不能折叠 */}
         {scopeNote && (
-          <div className="border-warning-soft bg-warning-soft text-warning mt-3 flex items-start gap-2 rounded-md px-3 py-2 text-copy-13">
+          <div className="border-warning-soft bg-warning-soft text-warning text-copy-13 mt-3 flex items-start gap-2 rounded-md px-3 py-2">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{scopeNote}</span>
           </div>
@@ -231,7 +236,10 @@ export function DuplicateWorkspace() {
             <StatCard label="本次扫描 SKU" value={latest?.scannedSkuCount ?? 0} />
             <StatCard label="候选对" value={latest?.candidateCount ?? 0} />
             <StatCard label="待确认" value={overview?.pendingCount ?? 0} />
-            <StatCard label="已判合并 / 保留" value={`${overview?.mergeCount ?? 0} / ${overview?.keepCount ?? 0}`} />
+            <StatCard
+              label="已判合并 / 保留"
+              value={`${overview?.mergeCount ?? 0} / ${overview?.keepCount ?? 0}`}
+            />
           </div>
         )}
 
@@ -239,7 +247,8 @@ export function DuplicateWorkspace() {
           <div className="mt-4 flex flex-wrap gap-2">
             {overview.dimensions.map((d) => (
               <Badge key={d.dimension} tone={d.pairCount > 0 ? 'brand' : 'neutral'}>
-                {d.label} {d.pairCount} 对{d.pairCount > 0 ? ` · 最高 ${similarityText(d.topScore)}` : ''}
+                {d.label} {d.pairCount} 对
+                {d.pairCount > 0 ? ` · 最高 ${similarityText(d.topScore)}` : ''}
               </Badge>
             ))}
           </div>
@@ -258,7 +267,7 @@ export function DuplicateWorkspace() {
         description="扫描读全量商品与 SKU 的条码、标题、规格组合与图片特征，按阈值产出候选。大租户可按类目或品牌分片扫，但分片会漏掉跨范围的重复。"
       >
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">相似度阈值</span>
             <input
               className="border-border w-32 rounded-md border px-2 py-1.5"
@@ -268,7 +277,7 @@ export function DuplicateWorkspace() {
               disabled={!canWrite}
             />
           </label>
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">类目（留空 = 全量）</span>
             <input
               className="border-border w-44 rounded-md border px-2 py-1.5"
@@ -277,7 +286,7 @@ export function DuplicateWorkspace() {
               disabled={!canWrite}
             />
           </label>
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">品牌（留空 = 全量）</span>
             <input
               className="border-border w-44 rounded-md border px-2 py-1.5"
@@ -296,11 +305,14 @@ export function DuplicateWorkspace() {
             </span>
           )}
         </div>
-        {!thresholdCheck.ok && <p className="text-destructive text-copy-13 mt-2">{thresholdCheck.reason}</p>}
+        {!thresholdCheck.ok && (
+          <p className="text-destructive text-copy-13 mt-2">{thresholdCheck.reason}</p>
+        )}
         {actionError && <p className="text-destructive text-copy-13 mt-2">{actionError}</p>}
         {hasEverScanned && (
           <p className="text-muted-foreground text-copy-13 mt-3">
-            每次扫描都独立留档（当前共 {scans.length} 次）。治理之后重新扫一次，候选数的变化就是治理效果的证据。
+            每次扫描都独立留档（当前共 {scans.length}{' '}
+            次）。治理之后重新扫一次，候选数的变化就是治理效果的证据。
           </p>
         )}
       </SectionCard>
@@ -310,7 +322,7 @@ export function DuplicateWorkspace() {
         description="蓝图输出：相似度、重叠维度、影响引用数。点一行看逐维度证据与引用拆分，再登记合并/保留决定。"
       >
         {scans.length > 1 && (
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-copy-13">
+          <div className="text-copy-13 mb-3 flex flex-wrap items-center gap-2">
             <span className="text-muted-foreground">扫描：</span>
             {scans.map((s) => (
               <Button
@@ -326,7 +338,7 @@ export function DuplicateWorkspace() {
         )}
 
         <div className="mb-3 flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">维度</span>
             <select
               className="border-border rounded-md border px-2 py-1.5"
@@ -341,7 +353,7 @@ export function DuplicateWorkspace() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">决定</span>
             <select
               className="border-border rounded-md border px-2 py-1.5"
@@ -355,7 +367,7 @@ export function DuplicateWorkspace() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-copy-13">
+          <label className="text-copy-13 flex flex-col gap-1">
             <span className="text-muted-foreground">最低相似度</span>
             <input
               className="border-border w-32 rounded-md border px-2 py-1.5"
@@ -395,7 +407,8 @@ export function DuplicateWorkspace() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-copy-14 font-medium">
-                    {row.leftSkuCode}（{row.leftSpuCode}） ↔ {row.rightSkuCode}（{row.rightSpuCode}）
+                    {row.leftSkuCode}（{row.leftSpuCode}） ↔ {row.rightSkuCode}（{row.rightSpuCode}
+                    ）
                   </span>
                   <span className="flex items-center gap-2">
                     <Badge tone={row.overlapDimensionCount > 1 ? 'brand' : 'info'}>
@@ -432,31 +445,38 @@ export function DuplicateWorkspace() {
           description="两侧商品身份 + 现算的规格组合 + 全部条码 + 逐维度证据 + 引用逐项拆分 + 已登记的决定。"
         >
           <div className="grid gap-4 md:grid-cols-2">
-            {[detail.leftVariantCombination, detail.rightVariantCombination].map((signature, index) => (
-              <div key={index} className="border-border rounded-md border px-3 py-2">
-                <div className="text-copy-14 font-medium">
-                  {index === 0
-                    ? `${detail.candidate.leftSkuCode} · ${detail.candidate.leftSkuName}`
-                    : `${detail.candidate.rightSkuCode} · ${detail.candidate.rightSkuName}`}
+            {[detail.leftVariantCombination, detail.rightVariantCombination].map(
+              (signature, index) => (
+                <div key={index} className="border-border rounded-md border px-3 py-2">
+                  <div className="text-copy-14 font-medium">
+                    {index === 0
+                      ? `${detail.candidate.leftSkuCode} · ${detail.candidate.leftSkuName}`
+                      : `${detail.candidate.rightSkuCode} · ${detail.candidate.rightSkuName}`}
+                  </div>
+                  <div className="text-muted-foreground text-copy-13 mt-1">
+                    所属商品{' '}
+                    {index === 0 ? detail.candidate.leftSpuCode : detail.candidate.rightSpuCode} ·{' '}
+                    {index === 0 ? detail.candidate.leftSpuName : detail.candidate.rightSpuName}
+                  </div>
+                  <div className="text-muted-foreground text-copy-13 mt-1">
+                    规格组合：
+                    {signature === ''
+                      ? '解析不出轴值（导入占位签名的 SKU 常见），不参与规格组合这一维'
+                      : signature}
+                  </div>
+                  <div className="text-muted-foreground text-copy-13 mt-1">
+                    条码：
+                    {(index === 0 ? detail.leftBarcodeValues : detail.rightBarcodeValues).join(
+                      '、',
+                    ) || '无'}
+                  </div>
+                  <div className="text-muted-foreground text-copy-13 mt-1">
+                    引用：
+                    {referenceSummary(index === 0 ? detail.leftReferences : detail.rightReferences)}
+                  </div>
                 </div>
-                <div className="text-muted-foreground text-copy-13 mt-1">
-                  所属商品 {index === 0 ? detail.candidate.leftSpuCode : detail.candidate.rightSpuCode} ·{' '}
-                  {index === 0 ? detail.candidate.leftSpuName : detail.candidate.rightSpuName}
-                </div>
-                <div className="text-muted-foreground text-copy-13 mt-1">
-                  规格组合：
-                  {signature === ''
-                    ? '解析不出轴值（导入占位签名的 SKU 常见），不参与规格组合这一维'
-                    : signature}
-                </div>
-                <div className="text-muted-foreground text-copy-13 mt-1">
-                  条码：{(index === 0 ? detail.leftBarcodeValues : detail.rightBarcodeValues).join('、') || '无'}
-                </div>
-                <div className="text-muted-foreground text-copy-13 mt-1">
-                  引用：{referenceSummary(index === 0 ? detail.leftReferences : detail.rightReferences)}
-                </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
 
           <div className="mt-4">
@@ -486,7 +506,7 @@ export function DuplicateWorkspace() {
             {draft && (
               <>
                 <div className="mt-3 flex flex-wrap items-end gap-3">
-                  <label className="flex flex-col gap-1 text-copy-13">
+                  <label className="text-copy-13 flex flex-col gap-1">
                     <span className="text-muted-foreground">决定</span>
                     <select
                       className="border-border rounded-md border px-2 py-1.5"
@@ -501,7 +521,7 @@ export function DuplicateWorkspace() {
                     </select>
                   </label>
                   {draft.decision === 'MERGE' && (
-                    <label className="flex flex-col gap-1 text-copy-13">
+                    <label className="text-copy-13 flex flex-col gap-1">
                       <span className="text-muted-foreground">保留哪一条（主记录）</span>
                       <select
                         className="border-border rounded-md border px-2 py-1.5"
@@ -518,7 +538,7 @@ export function DuplicateWorkspace() {
                       </select>
                     </label>
                   )}
-                  <label className="flex flex-1 flex-col gap-1 text-copy-13">
+                  <label className="text-copy-13 flex flex-1 flex-col gap-1">
                     <span className="text-muted-foreground">理由</span>
                     <input
                       className="border-border rounded-md border px-2 py-1.5"
@@ -538,7 +558,9 @@ export function DuplicateWorkspace() {
                 {!submitCheck.ok && (
                   <p className="text-destructive text-copy-13 mt-2">{submitCheck.reason}</p>
                 )}
-                <p className="text-muted-foreground text-copy-13 mt-2">{executionHint(draft.decision)}</p>
+                <p className="text-muted-foreground text-copy-13 mt-2">
+                  {executionHint(draft.decision)}
+                </p>
               </>
             )}
             {!canWrite && (
@@ -553,8 +575,8 @@ export function DuplicateWorkspace() {
       {latest && (
         <p className="text-muted-foreground text-copy-13">
           最近一次扫描：{timeText(latest.startedAt)} 开始，耗时 {durationText(latest.durationMs)}，
-          覆盖 {latest.scannedSkuCount} 个 SKU / {latest.scannedSpuCount} 个 SPU，
-          阈值 {similarityText(latest.minSimilarity)}。
+          覆盖 {latest.scannedSkuCount} 个 SKU / {latest.scannedSpuCount} 个 SPU， 阈值{' '}
+          {similarityText(latest.minSimilarity)}。
         </p>
       )}
     </div>

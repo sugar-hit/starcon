@@ -125,7 +125,14 @@ export function cancelPutawayTask(taskId: string, input: PutawayTaskCancelInput)
   return api<PutawayTaskRow>(`${base}/${encodeURIComponent(taskId)}/cancel`, 'POST', input);
 }
 
-export type { PutawayTargetStat, PutawayTaskAssignInput, PutawayTaskCancelInput, PutawayTaskScanInput, PutawayTaskStartInput, PutawayTaskCompleteInput };
+export type {
+  PutawayTargetStat,
+  PutawayTaskAssignInput,
+  PutawayTaskCancelInput,
+  PutawayTaskScanInput,
+  PutawayTaskStartInput,
+  PutawayTaskCompleteInput,
+};
 
 // ================================================================ 展示口径
 
@@ -283,7 +290,10 @@ export function canScan(row: { status: string }): boolean {
  * <p>必须是执行中<b>且</b>每一行都搬完了（P2）。搬没搬完由前端先算一遍 ——
  * 不是为了替代后端判定，而是省掉一次注定被拒的往返。
  */
-export function canComplete(row: { status: string }, lines: { plannedQuantity: number; putawayQuantity: number }[]): boolean {
+export function canComplete(
+  row: { status: string },
+  lines: { plannedQuantity: number; putawayQuantity: number }[],
+): boolean {
   return row.status === 'IN_PROGRESS' && allLinesFinished(lines).ok;
 }
 
@@ -332,10 +342,7 @@ export function formatQuantity(value: number | string | null | undefined): strin
 }
 
 /** 百分比：入参为空时返回「未评估」而不是 0%（与后端 evaluated 标志同一口径）。 */
-export function formatRatio(
-  value: number | string | null | undefined,
-  evaluated: boolean,
-): string {
+export function formatRatio(value: number | string | null | undefined, evaluated: boolean): string {
   if (!evaluated || value === null || value === undefined || value === '') return '未评估';
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n) || n === 0) return '未评估';

@@ -140,9 +140,7 @@ export function fetchReferences(versionId: string) {
 
 /** 某条知识全部版本的引用记录。只读。 */
 export function fetchEntryReferences(entryId: string) {
-  return api<CrmKnowledgeReference[]>(
-    `${base}/entries/${encodeURIComponent(entryId)}/references`,
-  );
+  return api<CrmKnowledgeReference[]>(`${base}/entries/${encodeURIComponent(entryId)}/references`);
 }
 
 /**
@@ -170,7 +168,9 @@ export function reviewDueQuery(platformCode: string, policyChangedAt: string): s
 
 /** 「某平台改版后哪些条目需要复核」—— 蓝图粗体句的正面回答。 */
 export function fetchReviewDue(platformCode: string, policyChangedAt: string) {
-  return api<CrmReviewDueReport>(`${base}/review-due${reviewDueQuery(platformCode, policyChangedAt)}`);
+  return api<CrmReviewDueReport>(
+    `${base}/review-due${reviewDueQuery(platformCode, policyChangedAt)}`,
+  );
 }
 
 /**

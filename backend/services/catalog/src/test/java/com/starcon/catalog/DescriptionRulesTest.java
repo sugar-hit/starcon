@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.4.2.2 描述与卖点库纯规则层单测。
  *
- * <p>这些断言与 V21 的 CHECK、前端表单校验、服务层拒绝时给出的话是同一份口径：
- * 服务层 {@code firstNonNull(...)} 报出去的第一条原因，用户在页面上看到的也应当是同一句。
+ * <p>这些断言与 V21 的 CHECK、前端表单校验、服务层拒绝时给出的话是同一份口径： 服务层 {@code firstNonNull(...)}
+ * 报出去的第一条原因，用户在页面上看到的也应当是同一句。
  */
 class DescriptionRulesTest {
 
@@ -56,8 +56,7 @@ class DescriptionRulesTest {
   /**
    * 正文**不要求**至少一个占位符 —— 与 3.4.2.1 的标题模板相反。
    *
-   * <p>「请勿进水」「适用于 0~40℃」这种注意事项就是一个变量都没有的固定句子，
-   * 它完全成立；强制加占位符只会逼运营写废话占位。
+   * <p>「请勿进水」「适用于 0~40℃」这种注意事项就是一个变量都没有的固定句子， 它完全成立；强制加占位符只会逼运营写废话占位。
    */
   @Test
   void fixedCautionTextNeedsNoPlaceholder() {
@@ -69,8 +68,7 @@ class DescriptionRulesTest {
   /**
    * 花括号必须配平。
    *
-   * <p>漏写右括号会让占位符解析把后面一整段都吞成变量名，
-   * 而填充时看起来「只是少了几个字」——那是「静默留下占位符」的另一种形态。
+   * <p>漏写右括号会让占位符解析把后面一整段都吞成变量名， 而填充时看起来「只是少了几个字」——那是「静默留下占位符」的另一种形态。
    */
   @Test
   void unbalancedBracesAreRejectedBecauseTheySwallowFollowingText() {
@@ -119,13 +117,13 @@ class DescriptionRulesTest {
   @Test
   void variableBindingIsCheckedInBothDirections() {
     String body = "{brand} 采用 {material} 材质";
-    assertThat(DescriptionRules.variableBindingProblem(body, List.of("brand", "material"))).isNull();
+    assertThat(DescriptionRules.variableBindingProblem(body, List.of("brand", "material")))
+        .isNull();
     String missing = DescriptionRules.variableBindingProblem(body, List.of("brand"));
     assertThat(missing).contains("{material}").contains("没有声明绑定源");
     // 报出来的原因要点明「会被降级成缺变量」——那正是蓝图禁止的静默占位符。
     assertThat(missing).contains("缺变量");
-    String dead =
-        DescriptionRules.variableBindingProblem("{brand}", List.of("brand", "material"));
+    String dead = DescriptionRules.variableBindingProblem("{brand}", List.of("brand", "material"));
     assertThat(dead).contains("material").contains("死配置");
   }
 
@@ -149,18 +147,20 @@ class DescriptionRulesTest {
   /**
    * 译文的占位符必须与源语言**完全一致**，三个方向都拒。
    *
-   * <p>这三条正是 AI 预填最典型的失败模式，所以要在保存译文时就拦住，
-   * 而不是等填充时才发现「每个 SKU 的这段话都一样」。
+   * <p>这三条正是 AI 预填最典型的失败模式，所以要在保存译文时就拦住， 而不是等填充时才发现「每个 SKU 的这段话都一样」。
    */
   @Test
   void translationPlaceholdersMustMatchSourceExactly() {
     String source = "{brand} 采用 {material} 材质";
-    assertThat(DescriptionRules.translationPlaceholdersProblem(source, "{brand} uses {material}")).isNull();
+    assertThat(DescriptionRules.translationPlaceholdersProblem(source, "{brand} uses {material}"))
+        .isNull();
 
-    String leaked = DescriptionRules.translationPlaceholdersProblem(source, "{brand} uses material");
+    String leaked =
+        DescriptionRules.translationPlaceholdersProblem(source, "{brand} uses material");
     assertThat(leaked).contains("{material}").contains("漏掉");
 
-    String invented = DescriptionRules.translationPlaceholdersProblem(source, "{brand} {material} {color}");
+    String invented =
+        DescriptionRules.translationPlaceholdersProblem(source, "{brand} {material} {color}");
     assertThat(invented).contains("{color}").contains("没有");
 
     String typo = DescriptionRules.translationPlaceholdersProblem(source, "{brnad} {material}");

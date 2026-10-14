@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 390" role="img" aria-labelledby="title desc">
+<title id="title">starcon service architecture</title>
+<desc id="desc">The Next.js workspace connects to six Java services, each owning its own PostgreSQL database. Authorized APIs verify identity and permissions.</desc>
+<rect width="1000" height="390" rx="20" fill="#f8fafc"/>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+<path d="M500 74v27M500 155v33M80 188h840" stroke="#94a3b8" stroke-width="2" fill="none"/>
+<rect x="385.0" y="30" width="230" height="44" rx="10" fill="#e0e7ff"/>
+<text x="500" y="58" fill="#0f172a" font-size="17">Browser workspace</text>
+<rect x="375.0" y="101" width="250" height="44" rx="10" fill="#dbeafe"/>
+<text x="500" y="129" fill="#0f172a" font-size="17">Next.js / TypeScript</text>
+<path d="M87 188v20M87 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="15" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="87" y="233" fill="#fff" font-size="16" font-weight="bold">identity</text>
+<text x="87" y="253" fill="#dbeafe" font-size="12">Authorization</text>
+<rect x="15" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="87" y="321" fill="#334155" font-size="13">identity DB</text>
+<path d="M252 188v20M252 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="180" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="252" y="233" fill="#fff" font-size="16" font-weight="bold">catalog</text>
+<text x="252" y="253" fill="#dbeafe" font-size="12">Products</text>
+<rect x="180" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="252" y="321" fill="#334155" font-size="13">catalog DB</text>
+<path d="M417 188v20M417 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="345" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="417" y="233" fill="#fff" font-size="16" font-weight="bold">channel</text>
+<text x="417" y="253" fill="#dbeafe" font-size="12">Channels</text>
+<rect x="345" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="417" y="321" fill="#334155" font-size="13">channel DB</text>
+<path d="M582 188v20M582 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="510" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="582" y="233" fill="#fff" font-size="16" font-weight="bold">trade</text>
+<text x="582" y="253" fill="#dbeafe" font-size="12">Orders</text>
+<rect x="510" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="582" y="321" fill="#334155" font-size="13">trade DB</text>
+<path d="M747 188v20M747 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="675" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="747" y="233" fill="#fff" font-size="16" font-weight="bold">warehouse</text>
+<text x="747" y="253" fill="#dbeafe" font-size="12">Inventory</text>
+<rect x="675" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="747" y="321" fill="#334155" font-size="13">warehouse DB</text>
+<path d="M912 188v20M912 268v26" stroke="#94a3b8" stroke-width="2"/>
+<rect x="840" y="208" width="144" height="60" rx="10" fill="#1d4ed8"/>
+<text x="912" y="233" fill="#fff" font-size="16" font-weight="bold">crm</text>
+<text x="912" y="253" fill="#dbeafe" font-size="12">Support</text>
+<rect x="840" y="294" width="144" height="44" rx="10" fill="#e2e8f0"/>
+<text x="912" y="321" fill="#334155" font-size="13">crm DB</text>
+<text x="500" y="370" fill="#475569" font-size="13">Java 21 / Spring Boot · Authorized APIs · Independent databases · PostgreSQL RLS</text>
+</g></svg>

@@ -28,10 +28,10 @@ catalog 已暴露 V25 文件头第六节明确留给下游的两个接口：
 蓝图 6.4.1.1 关系段的加粗句「加工是『消耗组件产生成品』的库存动作，
 必须在 warehouse 本地事务完成，不能由 trade 直接改库存」拆成两个服务：
 
-| 服务 | 建了什么 | 库存动作 |
-| --- | --- | --- |
-| trade (V97) | 加工单、组件领用记录、状态与进度事件流、入库需求通知 | **一张库存表都不碰** |
-| warehouse（无迁移） | — | 一个本地事务里组件出库 + 成品入库 |
+| 服务                | 建了什么                                             | 库存动作                          |
+| ------------------- | ---------------------------------------------------- | --------------------------------- |
+| trade (V97)         | 加工单、组件领用记录、状态与进度事件流、入库需求通知 | **一张库存表都不碰**              |
+| warehouse（无迁移） | —                                                    | 一个本地事务里组件出库 + 成品入库 |
 
 warehouse 侧复用 V1 既有 `inventory_transaction` / `inventory_entry`
 （`kind='ADJUSTMENT'`、`ref_type='PROCESSING_ORDER'`），
@@ -90,27 +90,33 @@ catalog 不可达显式 503，**不返回空组件冒充「这个 BOM 没有组�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/trade/src/main/resources/db/migration/V97__trade_processing_order.sql`
 
 **后端（trade）**
+
 - `ProcessingModels.java` / `ProcessingOrderService.java` / `ProcessingOrderController.java`
 - `BomVersionPort.java`（catalog 跨服务端口）
 
 **后端（warehouse）**
+
 - `ProcessingOrderModels.java` / `ProcessingOrderService.java` / `ProcessingOrderController.java`
 
 **测试**
+
 - `backend/services/trade/src/test/java/com/starcon/trade/ProcessingOrderIntegrationTest.java`（27 例）
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/ProcessingOrderIntegrationTest.java`（16 例）
 - `apps/web/src/components/purchase/processing-order-model.test.ts`（24 例）
 - `apps/web/src/app/api/trade/processing-order-allowlist.test.ts`（6 例）
 
 **前端**
+
 - `apps/web/src/app/purchase/processing/page.tsx`
 - `apps/web/src/components/purchase/processing-order-workspace.tsx`
 - `apps/web/src/components/purchase/processing-order-model.ts`
 
 **共享文件（追加式改动，并入时需求并）**
+
 - `apps/web/src/lib/api-proxy.ts`（两处追加）
 - `apps/web/src/lib/api.ts`（追加 `trade/` 一项）
 - `packages/api-contracts/src/*`（codegen 产物，只跑脚本不手改）

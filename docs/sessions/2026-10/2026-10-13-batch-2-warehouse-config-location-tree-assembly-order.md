@@ -42,6 +42,7 @@
 并管理本仓的拣货班次（新建 / 改 / 停用）。
 
 **技术落地**
+
 - 迁移：`V104__warehouse_operating_config.sql`（warehouse，建三张表）
   —— **刻意不改 `warehouse` 表**：那里放的是仓库**身份**（编码/类型/货权法人/时区/地址/状态），
   这里放的是**作业行为**（批次/序列号/拣货策略/复核比例/拆零/班次）。
@@ -58,6 +59,7 @@
   含租户隔离三断言（两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）
 
 **关键设计决策**
+
 - 刻意**没有 DELETE 段**：班次的出口是停用（`enabled=false`），配置的出口是改值。
   删配置行等于让仓库「退回没有配置」，而作业单已经在按那套参数执行。
   防线在后端（无 DELETE 端点，Spring 返回 405）与 V104 的表约束上。
@@ -73,6 +75,7 @@
 并在树上新建库位、改属性、调整层级、删除空叶子。
 
 **技术落地**
+
 - 迁移：`V105__warehouse_location_tree.sql`（warehouse，**不建新表**）
   —— 只给 `warehouse_location` 补三列：`parent_id uuid`、`capacity numeric(19,6)`、
   `weight_limit numeric(19,6)`。补的正是 8.1.1.2 交付时点名归属本模块的
@@ -86,6 +89,7 @@
   —— 断言四个形状放行，且「多一层后缀」仍 404 且**不发出请求**
 
 **关键设计决策**
+
 - 静态预检命中过 `ADD COLUMN`（无 DEFAULT），人工核对为**良性**：
   三列都是**可空**的（没写 NOT NULL），可空列不需要默认值，老 INSERT 不受影响。
   迁移注释里也点名记录了「不��任何既有列做 SET NOT NULL」的这条事故教训。
@@ -105,6 +109,7 @@
 组装单保留组件快照明细与账本分录，出问题能一路追到「哪几个组件变成了哪个成品」。
 
 **技术落地**
+
 - 迁移：`V103__warehouse_assembly_order.sql`（warehouse）
   —— `assembly_order` 组装单 + `assembly_order_component` 组件快照明细；
   全部 `tenant_id NOT NULL` + FORCE RLS + `GRANT warehouse_app`，
@@ -119,6 +124,7 @@
   含租户隔离三断言
 
 **关键设计决策**
+
 - 刻意**没有 PUT / DELETE**：组件明细是建单时按 BOM **冻结的快照**，改它等于改账的输入；
   而「把已完成的组装单删掉」更是不可能 —— 组件已出库、成品已入库，
   后端 V103 的终态守卫会拒。
@@ -153,11 +159,13 @@ theirs 那一侧因此丢了开头，在该提交里留下一处语法错误。
 `api-proxy.ts` 仍未纳入 union 驱动器覆盖。本轮的求并脚本是**一次性**的
 （放在 `.tmp/mergefix/`），下一次撞同样的冲突仍然要手工重跑一遍。
 结构性修法两条，建议择一：
+
 - 把 `apps/web/src/lib/api-proxy.ts` 登记进 `merge=contract-union`，
   并给合并器补上「顶层 alternation 分支」这种键（**不能**直接登记 ——
   现在驱动器对无法解析语义的文件会走行级兜底并集，
   对这条单行正则会同时留下新旧两行，直接把文件写坏）。
 - 或者把白名单改成「每条路由一行 + 由键派生的数组」，让行级合并重新可用。
+
 ---
 
 ## 追加：L2 第一次红了 —— 契约被静默改形状（本批最有价值的收获）
@@ -194,12 +202,12 @@ warehouse-config-workspace.tsx(522,36): error TS2339: Property 'code' does not e
 
 **② springdoc 按 record 的简单类名建键，重名即覆盖（危害远大于重复标识符）**
 
-| record | 文件 | 字段 | 服务的 schema |
-|---|---|---|---|
-| `ScopeOption` | `WarehouseConfigModels:323` | `(code, label)` | `ConfigOptions`（本批 8.1.1.3） |
-| `ScopeOption` | `DutyTaxModels:457` | `(value, label)` | `DutyTaxCapabilities`、`AllocationCapabilities` |
-| `StatusOption` | `WarehouseFacilityModels:258` | `(code, label)` | `FacilityOptions` |
-| `StatusOption` | `ReservationModels:262` | `(code, label, terminal)` | `ReservationOptions`、`ExpiryAlertPage`、`SlowMovingPage`、`FirstMilePage` 等十余个 |
+| record         | 文件                          | 字段                      | 服务的 schema                                                                       |
+| -------------- | ----------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `ScopeOption`  | `WarehouseConfigModels:323`   | `(code, label)`           | `ConfigOptions`（本批 8.1.1.3）                                                     |
+| `ScopeOption`  | `DutyTaxModels:457`           | `(value, label)`          | `DutyTaxCapabilities`、`AllocationCapabilities`                                     |
+| `StatusOption` | `WarehouseFacilityModels:258` | `(code, label)`           | `FacilityOptions`                                                                   |
+| `StatusOption` | `ReservationModels:262`       | `(code, label, terminal)` | `ReservationOptions`、`ExpiryAlertPage`、`SlowMovingPage`、`FirstMilePage` 等十余个 |
 
 并入前 JSON 里 `ScopeOption = {value,label}`，并入后变成 `{code,label}` ——
 **`DutyTaxCapabilities` / `AllocationCapabilities` 的字段被静默改了**。

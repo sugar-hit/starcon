@@ -161,7 +161,9 @@ export function InventoryAgingWorkspace() {
     );
   }
 
-  const capitalNote = report ? capitalTieText(report.capitalTie.available, report.capitalTie.reason) : '';
+  const capitalNote = report
+    ? capitalTieText(report.capitalTie.available, report.capitalTie.reason)
+    : '';
   const totalPages = list ? Math.max(1, Math.ceil(list.total / (list.size || 20))) : 1;
 
   return (
@@ -178,7 +180,7 @@ export function InventoryAgingWorkspace() {
       />
 
       {error ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border p-3 text-sm">
           {error}
         </div>
       ) : null}
@@ -186,7 +188,7 @@ export function InventoryAgingWorkspace() {
       <SectionCard title="筛选">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <input
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="border-input bg-background rounded-md border px-3 py-2 text-sm"
             placeholder="SKU 编码 / 名称 / 批次号"
             value={keyword}
             onChange={(e) => {
@@ -195,7 +197,7 @@ export function InventoryAgingWorkspace() {
             }}
           />
           <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="border-input bg-background rounded-md border px-3 py-2 text-sm"
             value={skuId}
             onChange={(e) => {
               setSkuId(e.target.value);
@@ -210,7 +212,7 @@ export function InventoryAgingWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="border-input bg-background rounded-md border px-3 py-2 text-sm"
             value={basis}
             onChange={(e) => {
               setBasis(e.target.value);
@@ -224,7 +226,7 @@ export function InventoryAgingWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="border-input bg-background rounded-md border px-3 py-2 text-sm"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
@@ -238,7 +240,7 @@ export function InventoryAgingWorkspace() {
             ))}
           </select>
           <select
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="border-input bg-background rounded-md border px-3 py-2 text-sm"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
           >
@@ -294,9 +296,7 @@ export function InventoryAgingWorkspace() {
                 <tbody>
                   {report.buckets.map((b) => (
                     <tr key={b.bucket} className="border-b last:border-0">
-                      <td className="py-2 font-medium">
-                        {agingBucketLabel(b.bucket, b.label)}
-                      </td>
+                      <td className="py-2 font-medium">{agingBucketLabel(b.bucket, b.label)}</td>
                       <td className="py-2 text-right">{b.bucketCount}</td>
                       <td className="py-2 text-right">{qty(b.onHand)}</td>
                       <td className="py-2 text-right">{qty(b.available)}</td>
@@ -308,14 +308,14 @@ export function InventoryAgingWorkspace() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-xs">
               报表基准日 {report.asOf}；默认滞销线 {report.defaultSlowMovingDays} 天、呆滞线{' '}
               {report.defaultObsoleteDays} 天。
               {report.distinctSlowMovingDaysCount > 1
                 ? ` 当前租户实际用到 ${report.distinctSlowMovingDaysCount} 种不同的滞销线，跨 SKU 的库龄口径不完全一致属正常。`
                 : ''}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{report.agingBasisNote}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{report.agingBasisNote}</p>
             <p className="mt-1 flex items-start gap-1 text-xs text-amber-600 dark:text-amber-400">
               <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
               {capitalNote}
@@ -327,15 +327,16 @@ export function InventoryAgingWorkspace() {
       <SectionCard
         title="呆滞清单"
         description={
-          list
-            ? `${dispositionNoteText()}${list.salesVelocityNote}`
-            : dispositionNoteText()
+          list ? `${dispositionNoteText()}${list.salesVelocityNote}` : dispositionNoteText()
         }
       >
         {loading && !list ? (
           <EmptyState title="加载中" />
         ) : !list || list.rows.length === 0 ? (
-          <EmptyState title="没有需要处理的库存" description="当前筛选下未命中滞销、临期、残次或呆滞。" />
+          <EmptyState
+            title="没有需要处理的库存"
+            description="当前筛选下未命中滞销、临期、残次或呆滞。"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -356,32 +357,34 @@ export function InventoryAgingWorkspace() {
                   <tr key={r.bucketId} className="border-b align-top last:border-0">
                     <td className="py-2">
                       <div className="font-medium">{r.skuCode}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         {r.lotCode ?? '无批次'} · {r.warehouseCode}
                       </div>
                     </td>
                     <td className="py-2">
                       <div>{r.locationCode}</div>
-                      <div className="text-xs text-muted-foreground">{r.qualityStatusCode}</div>
+                      <div className="text-muted-foreground text-xs">{r.qualityStatusCode}</div>
                     </td>
                     <td className="py-2">
                       <div>{agingDaysText(r.agingDays)}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         {agingBasisText(r.agingBasis, r.agingBasisLabel, r.inboundDate)}
                       </div>
                     </td>
                     <td className="py-2">
-                      <div>{slowMovingStatusLabel(r.slowMovingStatus, r.slowMovingStatusLabel)}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div>
+                        {slowMovingStatusLabel(r.slowMovingStatus, r.slowMovingStatusLabel)}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
                         {thresholdSourceText(r.slowMovingDaysSource)}
                       </div>
                     </td>
                     <td className="py-2 text-right">{qty(r.available)}</td>
                     <td className="py-2">
                       <div>{dispositionLabel(r.disposition, r.dispositionLabel)}</div>
-                      <div className="text-xs text-muted-foreground">{r.dispositionRationale}</div>
+                      <div className="text-muted-foreground text-xs">{r.dispositionRationale}</div>
                     </td>
-                    <td className="max-w-md py-2 text-xs text-muted-foreground">{r.basis}</td>
+                    <td className="text-muted-foreground max-w-md py-2 text-xs">{r.basis}</td>
                     <td className="py-2">
                       {writable ? (
                         <Button
@@ -458,13 +461,13 @@ export function InventoryAgingWorkspace() {
                   <tr key={p.policyId} className="border-b last:border-0">
                     <td className="py-2">
                       <div className="font-medium">{p.skuCode}</div>
-                      <div className="text-xs text-muted-foreground">{p.skuName}</div>
+                      <div className="text-muted-foreground text-xs">{p.skuName}</div>
                     </td>
                     <td className="py-2 text-right">{p.slowMovingDays} 天</td>
                     <td className="py-2 text-right">{p.obsoleteDays} 天</td>
                     <td className="py-2">{p.enabled ? '启用' : '停用（退回默认）'}</td>
                     <td className="py-2 text-right">{qty(p.onHand)}</td>
-                    <td className="py-2 text-xs text-muted-foreground">{p.notes}</td>
+                    <td className="text-muted-foreground py-2 text-xs">{p.notes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -478,22 +481,23 @@ export function InventoryAgingWorkspace() {
           <ModalHeader>
             <ModalTitle>配置库龄阈值</ModalTitle>
             <ModalDescription>
-              呆滞线必须不早于滞销线 —— 呆滞是滞销的更严重档，两条线倒过来会让同一条库存同时命中两档。
+              呆滞线必须不早于滞销线 ——
+              呆滞是滞销的更严重档，两条线倒过来会让同一条库存同时命中两档。
             </ModalDescription>
           </ModalHeader>
           <div className="space-y-3 py-2">
             <label className="block text-sm">
-              <span className="mb-1 block text-muted-foreground">滞销线（天）</span>
+              <span className="text-muted-foreground mb-1 block">滞销线（天）</span>
               <input
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                className="border-input bg-background w-full rounded-md border px-3 py-2"
                 value={slowDays}
                 onChange={(e) => setSlowDays(e.target.value)}
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-1 block text-muted-foreground">呆滞线（天）</span>
+              <span className="text-muted-foreground mb-1 block">呆滞线（天）</span>
               <input
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                className="border-input bg-background w-full rounded-md border px-3 py-2"
                 value={obsoleteDays}
                 onChange={(e) => setObsoleteDays(e.target.value)}
               />
@@ -511,9 +515,10 @@ export function InventoryAgingWorkspace() {
         </ModalContent>
       </Modal>
 
-      <p className="flex items-start gap-1 text-xs text-muted-foreground">
+      <p className="text-muted-foreground flex items-start gap-1 text-xs">
         <Clock className="mt-0.5 size-3.5 shrink-0" />
-        库龄每天都在变，本页所有库龄均在查询时从批次收货日实时算出，不落库 —— 存下来的库龄第二天就会过期。
+        库龄每天都在变，本页所有库龄均在查询时从批次收货日实时算出，不落库 ——
+        存下来的库龄第二天就会过期。
       </p>
     </div>
   );

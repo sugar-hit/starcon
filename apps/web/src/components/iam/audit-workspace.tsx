@@ -80,7 +80,8 @@ export function AuditWorkspace() {
     );
 
   const pages = Math.max(1, Math.ceil(total / size));
-  const update = (patch: Partial<AuditFilters>) => setFilters((current) => ({ ...current, ...patch }));
+  const update = (patch: Partial<AuditFilters>) =>
+    setFilters((current) => ({ ...current, ...patch }));
 
   return (
     <section className="space-y-4">
@@ -290,9 +291,7 @@ export function AuditWorkspace() {
         </p>
       )}
 
-      {detail && (
-        <AuditDetailPanel detail={detail} onClose={() => setDetail(null)} />
-      )}
+      {detail && <AuditDetailPanel detail={detail} onClose={() => setDetail(null)} />}
     </section>
   );
 }
@@ -358,8 +357,10 @@ function AuditDetailPanel({ detail, onClose }: { detail: AuditDetail; onClose: (
               {changes.map((row) => (
                 <tr key={row.field} className="border-b last:border-0">
                   <td className="py-1.5 pr-3 align-top font-medium">{row.field}</td>
-                  <td className="text-muted-foreground py-1.5 pr-3 align-top break-all">{row.from}</td>
-                  <td className="py-1.5 align-top break-all">{row.to}</td>
+                  <td className="text-muted-foreground break-all py-1.5 pr-3 align-top">
+                    {row.from}
+                  </td>
+                  <td className="break-all py-1.5 align-top">{row.to}</td>
                 </tr>
               ))}
             </tbody>

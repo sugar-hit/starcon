@@ -229,7 +229,12 @@ export function ValidationReportWorkspace() {
               ))}
             </select>
             {jobId && (
-              <Button variant="outline" size="sm" onClick={() => void loadReport(jobId, true)} disabled={!writable}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void loadReport(jobId, true)}
+                disabled={!writable}
+              >
                 <RefreshCw className={reportLoading ? 'animate-spin' : ''} />
                 重新生成报告
               </Button>
@@ -261,7 +266,7 @@ export function ValidationReportWorkspace() {
             {summary.stale && (
               <div className="bg-warning-soft text-warning mb-4 flex items-start gap-2 rounded-md p-3">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                <div className="space-y-2 text-copy-13">
+                <div className="text-copy-13 space-y-2">
                   <p>{staleNotice(summary)}</p>
                   <Button
                     size="sm"
@@ -277,15 +282,28 @@ export function ValidationReportWorkspace() {
             )}
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard label="文件总行数" value={summary.totalRowCount} icon={<FileSpreadsheet className="size-4" />} />
+              <StatCard
+                label="文件总行数"
+                value={summary.totalRowCount}
+                icon={<FileSpreadsheet className="size-4" />}
+              />
               <StatCard
                 label="必须修正（不落库）"
                 value={summary.blockingRowCount}
                 polarity="negative"
                 icon={<Ban className="size-4" />}
               />
-              <StatCard label="可跳过（照常落库）" value={summary.skippableRowCount} polarity="neutral" />
-              <StatCard label="校验通过" value={summary.cleanRowCount} polarity="positive" icon={<Check className="size-4" />} />
+              <StatCard
+                label="可跳过（照常落库）"
+                value={summary.skippableRowCount}
+                polarity="neutral"
+              />
+              <StatCard
+                label="校验通过"
+                value={summary.cleanRowCount}
+                polarity="positive"
+                icon={<Check className="size-4" />}
+              />
             </div>
 
             {/* 进度条的口径是行：一条错误落在 1000 行文件里就是 1 行，不是三分之一 */}
@@ -296,7 +314,9 @@ export function ValidationReportWorkspace() {
               </div>
               <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                 <div
-                  className={summary.blockingRowCount > 0 ? 'bg-warning h-full' : 'bg-success h-full'}
+                  className={
+                    summary.blockingRowCount > 0 ? 'bg-warning h-full' : 'bg-success h-full'
+                  }
                   style={{ width: `${percent}%` }}
                 />
               </div>
@@ -312,9 +332,20 @@ export function ValidationReportWorkspace() {
             <div className="grid gap-4 lg:grid-cols-2">
               <ul className="space-y-1.5">
                 {report.categories.map((c) => (
-                  <li key={c.category} className="flex items-center justify-between gap-3 text-copy-13">
+                  <li
+                    key={c.category}
+                    className="text-copy-13 flex items-center justify-between gap-3"
+                  >
                     <span className="flex items-center gap-2">
-                      <Badge tone={categoryIssueCount(c) === 0 ? 'neutral' : c.errorCount > 0 ? 'danger' : 'warning'}>
+                      <Badge
+                        tone={
+                          categoryIssueCount(c) === 0
+                            ? 'neutral'
+                            : c.errorCount > 0
+                              ? 'danger'
+                              : 'warning'
+                        }
+                      >
                         {c.label}
                       </Badge>
                       {c.category}
@@ -326,13 +357,18 @@ export function ValidationReportWorkspace() {
                 ))}
               </ul>
               <div className="space-y-2">
-                <p className="text-copy-13 text-muted-foreground">错得最多的列（按文件里的列头）：</p>
+                <p className="text-copy-13 text-muted-foreground">
+                  错得最多的列（按文件里的列头）：
+                </p>
                 {problemColumns(report.columns).length === 0 ? (
                   <p className="text-copy-13 text-muted-foreground">没有任何一列出错。</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {problemColumns(report.columns).map((c) => (
-                      <li key={c.fieldKey} className="flex items-center justify-between gap-3 text-copy-13">
+                      <li
+                        key={c.fieldKey}
+                        className="text-copy-13 flex items-center justify-between gap-3"
+                      >
                         <span className="text-foreground font-medium">{c.fieldLabel}</span>
                         <span className="text-muted-foreground shrink-0">
                           {c.rowCount} 行 · {c.errorCount + c.warningCount} 条
@@ -426,14 +462,21 @@ export function ValidationReportWorkspace() {
                       </div>
                       <ul className="space-y-1">
                         {g.items.map((it, i) => (
-                          <li key={`${it.id}-${i}`} className="flex flex-wrap items-baseline gap-2 text-xs">
-                            <Badge tone={severityTone(it.severity)}>{severityLabel(it.severity)}</Badge>
+                          <li
+                            key={`${it.id}-${i}`}
+                            className="flex flex-wrap items-baseline gap-2 text-xs"
+                          >
+                            <Badge tone={severityTone(it.severity)}>
+                              {severityLabel(it.severity)}
+                            </Badge>
                             <code className="text-muted-foreground">{it.fieldLabel || '整行'}</code>
                             <Badge tone="neutral">{it.categoryLabel}</Badge>
                             <span className="text-muted-foreground">{it.message}</span>
                             <span className="text-muted-foreground">
                               原值：
-                              <code className="text-foreground">{it.rawValue === '' ? '（空）' : it.rawValue}</code>
+                              <code className="text-foreground">
+                                {it.rawValue === '' ? '（空）' : it.rawValue}
+                              </code>
                             </span>
                           </li>
                         ))}
@@ -504,7 +547,10 @@ export function ValidationReportWorkspace() {
                   ))}
                 </select>
               </label>
-              <Button onClick={() => void runExport()} disabled={!writable || exportBusy || summary.stale}>
+              <Button
+                onClick={() => void runExport()}
+                disabled={!writable || exportBusy || summary.stale}
+              >
                 {exportBusy ? <Loader2 className="animate-spin" /> : <Download />}
                 生成导出文件
               </Button>
@@ -515,9 +561,7 @@ export function ValidationReportWorkspace() {
                 报告已过期，先重新生成再导出 —— 否则导出的标注对应的是上一轮结论。
               </p>
             )}
-            {exportError && (
-              <p className="text-copy-13 text-destructive mt-2">{exportError}</p>
-            )}
+            {exportError && <p className="text-copy-13 text-destructive mt-2">{exportError}</p>}
 
             <div className="mt-4 space-y-2">
               {exports.length === 0 ? (
@@ -529,7 +573,10 @@ export function ValidationReportWorkspace() {
               ) : (
                 <ul className="border-border divide-border divide-y rounded-md border">
                   {exports.map((e) => (
-                    <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
+                    <li
+                      key={e.id}
+                      className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5"
+                    >
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{e.fileName}</span>
@@ -575,7 +622,7 @@ function Loading({ label }: { label: string }) {
 
 function ErrorBox({ message }: { message: string }) {
   return (
-    <div className="bg-destructive-soft text-destructive flex items-start gap-2 rounded-md p-3 text-copy-13">
+    <div className="bg-destructive-soft text-destructive text-copy-13 flex items-start gap-2 rounded-md p-3">
       <AlertTriangle className="mt-0.5 size-4 shrink-0" />
       <span>{message}</span>
     </div>

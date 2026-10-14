@@ -17,19 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.6.1.1 代发模式配置。
  *
- * <p>命名空间 {@code /trade/fulfillment/dropship}：与 9.3.2.2 的
- * {@code /trade/fulfillment/routing}、9.3.2.1 的 {@code /trade/fulfillment/allocation}
- * **并列而不是嵌套** —— 三者是同一条履约链上相邻但不同的三环：
- * 路由选「FBA 还是自发货」、分仓选「从哪个仓发」、代发配置决定「这个 SKU 走不走我方仓」。
- * 混在一个命名空间里会让三种决策在日志与权限上分不开。
+ * <p>命名空间 {@code /trade/fulfillment/dropship}：与 9.3.2.2 的 {@code
+ * /trade/fulfillment/routing}、9.3.2.1 的 {@code /trade/fulfillment/allocation} **并列而不是嵌套** ——
+ * 三者是同一条履约链上相邻但不同的三环： 路由选「FBA 还是自发货」、分仓选「从哪个仓发」、代发配置决定「这个 SKU 走不走我方仓」。 混在一个命名空间里会让三种决策在日志与权限上分不开。
  *
  * <p>权限码沿用 {@code trade.fulfillment.read} / {@code trade.fulfillment.update}：
- * 代发配置直接决定这票货走不走我方仓、货权记在谁名下、成本怎么算，
- * 不是读权限能带过去的动作。
+ * 代发配置直接决定这票货走不走我方仓、货权记在谁名下、成本怎么算， 不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/fulfillment/dropship")
@@ -54,8 +50,7 @@ public class DropshipConfigController {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 我方自有库存这一维度
-   * **刻意不可用**（蓝图明写「代发不查自有库存」），供应商库存观测、店铺与报价
+   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 我方自有库存这一维度 **刻意不可用**（蓝图明写「代发不查自有库存」），供应商库存观测、店铺与报价
    * 走本服务投影。这些必须由接口自己说，而不是让调用方从 404 或空数组里猜。
    */
   @GetMapping("/capabilities")
@@ -147,24 +142,32 @@ public class DropshipConfigController {
         a ->
             dropship.pageConfigs(
                 new DropshipConfigQuery(
-                    configCode, scopeKind, shopCode, skuRef, fulfillmentPath, ownershipMode,
-                    settlementBasis, status, effectiveOnly, countsAgainstOwnInventory, keyword,
-                    page, size)));
+                    configCode,
+                    scopeKind,
+                    shopCode,
+                    skuRef,
+                    fulfillmentPath,
+                    ownershipMode,
+                    settlementBasis,
+                    status,
+                    effectiveOnly,
+                    countsAgainstOwnInventory,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /**
    * 维护一条代发配置。
    *
    * <p>物流（{@code fulfillmentPath}）与货权（{@code ownershipMode}）两个维度分别校验：
-   * 供应商直发必须有代发供应商；自营发货不得挂供应商、也不得声明纯代理；
-   * 货权在我方时必须给出确认时间、确认人与确认依据。
+   * 供应商直发必须有代发供应商；自营发货不得挂供应商、也不得声明纯代理； 货权在我方时必须给出确认时间、确认人与确认依据。
    */
   @PostMapping("/configs")
   public DropshipConfigSaved saveConfig(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody DropshipConfigInput input) {
-    return call(
-        auth, "fulfillment.update", a -> dropship.saveConfig(input, a.membershipId()));
+    return call(auth, "fulfillment.update", a -> dropship.saveConfig(input, a.membershipId()));
   }
 
   /** 配置详情：配置头 + SKU 明细行 + 事件流。跨租户在 RLS 下查不到 → 404。 */
@@ -182,9 +185,7 @@ public class DropshipConfigController {
       @PathVariable UUID configId,
       @Valid @RequestBody DropshipConfigStatusInput input) {
     return call(
-        auth,
-        "fulfillment.update",
-        a -> dropship.advanceStatus(configId, input, a.membershipId()));
+        auth, "fulfillment.update", a -> dropship.advanceStatus(configId, input, a.membershipId()));
   }
 
   /** 维护一条 SKU 明细行（可覆盖供货价 / 参考售价）。 */
@@ -230,8 +231,7 @@ public class DropshipConfigController {
   /**
    * 评估一次代发可售性并落一条**不可改写**的判定凭据。
    *
-   * <p>{@code sellable} 与 {@code listable} 分开返回：不可售不必然要下架。
-   * 无法履约也是业务结论而不是请求失败，因此返回 200。
+   * <p>{@code sellable} 与 {@code listable} 分开返回：不可售不必然要下架。 无法履约也是业务结论而不是请求失败，因此返回 200。
    */
   @PostMapping("/evaluations")
   public DropshipEvaluationSaved evaluate(
@@ -259,8 +259,15 @@ public class DropshipConfigController {
         a ->
             dropship.pageEvaluations(
                 new DropshipEvaluationQuery(
-                    configId, skuRef, shopCode, supplierCode, sellable, listable, reasonCode,
-                    page, size)));
+                    configId,
+                    skuRef,
+                    shopCode,
+                    supplierCode,
+                    sellable,
+                    listable,
+                    reasonCode,
+                    page,
+                    size)));
   }
 
   // ============================================================ 事件流

@@ -181,7 +181,9 @@ export function categoryIssueCount(stat: ImportValidationCategoryStat): number {
 }
 
 /** 「这一列错得最多」的列表：只给真的有问题的列。 */
-export function problemColumns(columns: ImportValidationColumnStat[]): ImportValidationColumnStat[] {
+export function problemColumns(
+  columns: ImportValidationColumnStat[],
+): ImportValidationColumnStat[] {
   return columns.filter((c) => c.errorCount + c.warningCount > 0);
 }
 
@@ -222,7 +224,11 @@ export async function createExport(
   jobId: string,
   input: ImportValidationExportInput,
 ): Promise<ImportValidationExportRow> {
-  return api<ImportValidationExportRow>(`catalog/import-jobs/${jobId}/report/exports`, 'POST', input);
+  return api<ImportValidationExportRow>(
+    `catalog/import-jobs/${jobId}/report/exports`,
+    'POST',
+    input,
+  );
 }
 
 /**

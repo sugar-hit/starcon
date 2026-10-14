@@ -174,7 +174,9 @@ export function AllocationPolicyWorkspace() {
     setPreviewing(true);
     setError('');
     try {
-      setPreview(await previewAllocation({ skuIds: [skuId], availableQuantity: Number(available) }));
+      setPreview(
+        await previewAllocation({ skuIds: [skuId], availableQuantity: Number(available) }),
+      );
     } catch (e) {
       setPreview(null);
       setError(errorText(e));
@@ -198,8 +200,8 @@ export function AllocationPolicyWorkspace() {
       setPreview(results);
       setNotice(
         results[0]?.run?.persisted
-          ? `已落库为分摊批次 ${results[0].run?.runId}。该批次 append-only：改不了也删不掉，`
-            + '下游 7.8.2.1 分摊结果查看读的就是它。'
+          ? `已落库为分摊批次 ${results[0].run?.runId}。该批次 append-only：改不了也删不掉，` +
+              '下游 7.8.2.1 分摊结果查看读的就是它。'
           : '未落库：没有配置生效的分摊策略。',
       );
       await load();
@@ -474,7 +476,11 @@ export function AllocationPolicyWorkspace() {
                       {intervalText(p.effectiveFrom, p.effectiveTo)}
                     </td>
                     <td className="py-2 text-right">
-                      <Button variant="outline" size="sm" onClick={() => void openPolicy(p.id ?? '')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void openPolicy(p.id ?? '')}
+                      >
                         查看 / 换版
                       </Button>
                     </td>
@@ -536,7 +542,11 @@ export function AllocationPolicyWorkspace() {
                       {qty(r.starvedLineCount)}
                     </td>
                     <td className="py-2 text-right">
-                      <Button variant="outline" size="sm" onClick={() => void openRun(r.runId ?? '')}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void openRun(r.runId ?? '')}
+                      >
                         逐店明细
                       </Button>
                     </td>
@@ -587,7 +597,13 @@ function AllocationResultView({ result }: { result: AllocationResult | null | un
         {conservationText(result).map((line) => (
           <p key={line}>{line}</p>
         ))}
-        <p className={consistent ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+        <p
+          className={
+            consistent
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-rose-600 dark:text-rose-400'
+          }
+        >
           前端自算 Σ分摊 = {summed.toLocaleString('zh-CN')} 件，
           {consistent ? '与后端一致' : '与后端不一致 —— 这是必须被看见的错账'}
         </p>
@@ -631,7 +647,8 @@ function AllocationResultView({ result }: { result: AllocationResult | null | un
       <p className="text-muted-foreground text-xs">{result.note}</p>
       {result.run?.persisted ? (
         <p className="text-muted-foreground text-xs">
-          已落库为批次 <span className="font-mono">{result.run.runId}</span>（{new Date(result.run.allocatedAt).toLocaleString('zh-CN')}）。
+          已落库为批次 <span className="font-mono">{result.run.runId}</span>（
+          {new Date(result.run.allocatedAt).toLocaleString('zh-CN')}）。
         </p>
       ) : null}
     </div>
@@ -644,14 +661,16 @@ function RunDetailView({ detail }: { detail: AllocationRunDetail }) {
   return (
     <div className="border-control-border mt-4 space-y-2 rounded-md border p-4">
       <p className="text-sm">
-        批次 <span className="font-mono text-xs">{r.runId}</span> · {r.skuCode || '（未登记编码）'} ·{' '}
-        {methodLabels[r.method] ?? r.method}
+        批次 <span className="font-mono text-xs">{r.runId}</span> · {r.skuCode || '（未登记编码）'}{' '}
+        · {methodLabels[r.method] ?? r.method}
       </p>
       <p className="text-muted-foreground text-xs">
-        分摊时刻 {new Date(r.allocatedAt).toLocaleString('zh-CN')} · 策略「{r.policyLabel || '（未命名）'}」
+        分摊时刻 {new Date(r.allocatedAt).toLocaleString('zh-CN')} · 策略「
+        {r.policyLabel || '（未命名）'}」
       </p>
       <p className="text-muted-foreground text-xs">
-        可用 {qty(r.availableQuantity)} = 缓冲 {qty(r.bufferQuantity)} + 可分配 {qty(r.allocatableQuantity)}
+        可用 {qty(r.availableQuantity)} = 缓冲 {qty(r.bufferQuantity)} + 可分配{' '}
+        {qty(r.allocatableQuantity)}
         ；可分配 {qty(r.allocatableQuantity)} = Σ分摊 {qty(r.allocatedTotal)} + 未分配{' '}
         {qty(r.unallocatedQuantity)}
       </p>
@@ -693,12 +712,16 @@ function PolicyDetail({ detail }: { detail: AllocationPolicyDetail }) {
         {methodLabels[p.method] ?? p.method}
       </p>
       <p className="text-muted-foreground text-xs">
-        缓冲 {p.bufferMode === 'RATIO' ? percent(p.bufferRatio) : `${qty(p.bufferQuantity)} 件`} · 销量回看{' '}
-        {p.salesWindowDays} 天 · 生效区间 {intervalText(p.effectiveFrom, p.effectiveTo)}
+        缓冲 {p.bufferMode === 'RATIO' ? percent(p.bufferRatio) : `${qty(p.bufferQuantity)} 件`} ·
+        销量回看 {p.salesWindowDays} 天 · 生效区间 {intervalText(p.effectiveFrom, p.effectiveTo)}
       </p>
       {p.method === 'SHOP_TYPE_PRIORITY' ? (
         <p className="text-muted-foreground text-xs">
-          店铺类型优先级：{(p.shopTypeOrder ?? '').split(',').map((m) => operatingModeLabels[m] ?? m).join(' → ')}
+          店铺类型优先级：
+          {(p.shopTypeOrder ?? '')
+            .split(',')
+            .map((m) => operatingModeLabels[m] ?? m)
+            .join(' → ')}
         </p>
       ) : null}
       <table className="w-full text-sm">
@@ -716,7 +739,9 @@ function PolicyDetail({ detail }: { detail: AllocationPolicyDetail }) {
             <tr key={m.referenceId ?? ''} className="border-control-border border-t">
               <td className="py-1 text-right">{m.priority}</td>
               <td className="py-1">{m.referenceLabel || m.referenceId}</td>
-              <td className="py-1 text-xs">{operatingModeLabels[m.shopOperatingMode] ?? m.shopOperatingMode}</td>
+              <td className="py-1 text-xs">
+                {operatingModeLabels[m.shopOperatingMode] ?? m.shopOperatingMode}
+              </td>
               <td className="py-1 text-right">
                 {m.shareLimit === null || m.shareLimit === undefined ? (
                   <span className="text-amber-600 dark:text-amber-400">不设上限</span>
@@ -922,7 +947,8 @@ function PolicyEditor({
         referenceLabel: m.referenceLabel,
         mode: m.shopOperatingMode,
         priority: String(m.priority ?? 100),
-        shareLimit: m.shareLimit === null || m.shareLimit === undefined ? '' : String(Number(m.shareLimit)),
+        shareLimit:
+          m.shareLimit === null || m.shareLimit === undefined ? '' : String(Number(m.shareLimit)),
         enabled: Boolean(m.enabled),
       })),
     );
@@ -931,7 +957,9 @@ function PolicyEditor({
   const build = (): AllocationPolicyInput | null => {
     const ratio = bufferMode === 'RATIO' ? Number(bufferRatio) / 100 : 0;
     if (bufferMode === 'RATIO' && (Number.isNaN(ratio) || ratio < 0 || ratio > 1)) {
-      setLocalError('缓冲比例必须在 0% 与 100% 之间。缓冲是防超卖的最后一道防线，越界等于没有防线。');
+      setLocalError(
+        '缓冲比例必须在 0% 与 100% 之间。缓冲是防超卖的最后一道防线，越界等于没有防线。',
+      );
       return null;
     }
     const qtyValue = bufferMode === 'QUANTITY' ? Number(bufferQty) : 0;
@@ -950,7 +978,9 @@ function PolicyEditor({
         return null;
       }
       if (seen.has(row.referenceId.trim())) {
-        setLocalError(`店铺 ${row.referenceId} 出现了两次：同一个店出现两次会让「它一共分到几成」有两套答案。`);
+        setLocalError(
+          `店铺 ${row.referenceId} 出现了两次：同一个店出现两次会让「它一共分到几成」有两套答案。`,
+        );
         return null;
       }
       seen.add(row.referenceId.trim());
@@ -1059,7 +1089,9 @@ function PolicyEditor({
               className="border-control-border bg-card w-full rounded-md border px-2 py-1.5 text-sm"
               value={bufferMode === 'RATIO' ? bufferRatio : bufferQty}
               onChange={(e) =>
-                bufferMode === 'RATIO' ? setBufferRatio(e.target.value) : setBufferQty(e.target.value)
+                bufferMode === 'RATIO'
+                  ? setBufferRatio(e.target.value)
+                  : setBufferQty(e.target.value)
               }
             />
           </label>
@@ -1095,7 +1127,14 @@ function PolicyEditor({
               onClick={() =>
                 setRows([
                   ...rows,
-                  { referenceId: '', referenceLabel: '', mode: 'SELF_FULFILLED', priority: '100', shareLimit: '', enabled: true },
+                  {
+                    referenceId: '',
+                    referenceLabel: '',
+                    mode: 'SELF_FULFILLED',
+                    priority: '100',
+                    shareLimit: '',
+                    enabled: true,
+                  },
                 ])
               }
             >
@@ -1111,13 +1150,18 @@ function PolicyEditor({
           ) : (
             <div className="space-y-2">
               {rows.map((row, index) => (
-                <div key={index} className="border-control-border grid items-end gap-2 rounded-md border p-2 md:grid-cols-6">
+                <div
+                  key={index}
+                  className="border-control-border grid items-end gap-2 rounded-md border p-2 md:grid-cols-6"
+                >
                   <label className="space-y-1 text-sm">
                     <span className="text-muted-foreground block text-xs">店铺 ID</span>
                     <input
                       className="border-control-border bg-card w-full rounded-md border px-2 py-1.5 text-sm"
                       value={row.referenceId}
-                      onChange={(e) => updateRow(rows, setRows, index, { referenceId: e.target.value })}
+                      onChange={(e) =>
+                        updateRow(rows, setRows, index, { referenceId: e.target.value })
+                      }
                     />
                   </label>
                   <label className="space-y-1 text-sm">
@@ -1125,7 +1169,9 @@ function PolicyEditor({
                     <input
                       className="border-control-border bg-card w-full rounded-md border px-2 py-1.5 text-sm"
                       value={row.referenceLabel}
-                      onChange={(e) => updateRow(rows, setRows, index, { referenceLabel: e.target.value })}
+                      onChange={(e) =>
+                        updateRow(rows, setRows, index, { referenceLabel: e.target.value })
+                      }
                     />
                   </label>
                   <label className="space-y-1 text-sm">
@@ -1147,15 +1193,21 @@ function PolicyEditor({
                     <input
                       className="border-control-border bg-card w-full rounded-md border px-2 py-1.5 text-sm"
                       value={row.priority}
-                      onChange={(e) => updateRow(rows, setRows, index, { priority: e.target.value })}
+                      onChange={(e) =>
+                        updateRow(rows, setRows, index, { priority: e.target.value })
+                      }
                     />
                   </label>
                   <label className="space-y-1 text-sm">
-                    <span className="text-muted-foreground block text-xs">份额上限（留空=不限）</span>
+                    <span className="text-muted-foreground block text-xs">
+                      份额上限（留空=不限）
+                    </span>
                     <input
                       className="border-control-border bg-card w-full rounded-md border px-2 py-1.5 text-sm"
                       value={row.shareLimit}
-                      onChange={(e) => updateRow(rows, setRows, index, { shareLimit: e.target.value })}
+                      onChange={(e) =>
+                        updateRow(rows, setRows, index, { shareLimit: e.target.value })
+                      }
                       placeholder="0.5"
                     />
                   </label>
@@ -1164,11 +1216,17 @@ function PolicyEditor({
                       <input
                         type="checkbox"
                         checked={row.enabled}
-                        onChange={(e) => updateRow(rows, setRows, index, { enabled: e.target.checked })}
+                        onChange={(e) =>
+                          updateRow(rows, setRows, index, { enabled: e.target.checked })
+                        }
                       />
                       启用
                     </label>
-                    <Button variant="outline" size="sm" onClick={() => setRows(rows.filter((_, i) => i !== index))}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRows(rows.filter((_, i) => i !== index))}
+                    >
                       移除
                     </Button>
                   </div>
@@ -1262,7 +1320,12 @@ function Pager({
       <Button variant="outline" size="sm" disabled={page <= 0} onClick={() => onChange(page - 1)}>
         上一页
       </Button>
-      <Button variant="outline" size="sm" disabled={page + 1 >= pages} onClick={() => onChange(page + 1)}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page + 1 >= pages}
+        onClick={() => onChange(page + 1)}
+      >
         下一页
       </Button>
     </div>

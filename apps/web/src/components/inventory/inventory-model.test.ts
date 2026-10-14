@@ -320,8 +320,7 @@ describe('7.1.1.2 库存明细 · 行展示口径', () => {
 });
 
 describe('7.1.1.1 → 7.1.1.2 下钻契约', () => {
-  const href =
-    '/inventory?skuId=s1&warehouseId=w1&legalEntityId=l1&qualityStatusId=q1';
+  const href = '/inventory?skuId=s1&warehouseId=w1&legalEntityId=l1&qualityStatusId=q1';
 
   it('解析后端给的 detailHref，取出四个行级维度', () => {
     expect(parseDetailHref(href)).toEqual({
@@ -612,7 +611,12 @@ describe('7.1.3.1 多仓分布：自有账本量与平台观测量必须分区',
   it('周转天数算不出时显示「—」而不是 0', () => {
     // 0 会被读成「瞬间卖完」；空值加原因才是"没算出来"
     const t = turnoverText(
-      ownRow({ turnoverComputable: false, turnoverDays: null, turnoverBasis: 'NONE', turnoverNote: '没有发货出库记录' }),
+      ownRow({
+        turnoverComputable: false,
+        turnoverDays: null,
+        turnoverBasis: 'NONE',
+        turnoverNote: '没有发货出库记录',
+      }),
     );
     expect(t.value).toBe('—');
     expect(t.basis).toBe(turnoverBasisLabels.NONE);
@@ -624,7 +628,10 @@ describe('7.1.3.1 多仓分布：自有账本量与平台观测量必须分区',
     expect(turnoverBasisLabels.PLATFORM_OBSERVATION_DIFF).toBe('平台观测差分');
     const own = turnoverText(ownRow());
     const fba = turnoverText(
-      platformRow({ turnoverBasis: 'PLATFORM_OBSERVATION_DIFF', turnoverNote: '观测快照差分，与自有仓口径不可直接比较' }),
+      platformRow({
+        turnoverBasis: 'PLATFORM_OBSERVATION_DIFF',
+        turnoverNote: '观测快照差分，与自有仓口径不可直接比较',
+      }),
     );
     expect(own.basis).not.toBe(fba.basis);
     expect(own.value).toBe('12.5 天');

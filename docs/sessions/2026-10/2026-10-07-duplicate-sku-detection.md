@@ -76,6 +76,7 @@ BARCODE 按条码值分组（前提：归一化后相等）；CROSS_SPU 按「�
 ## 文件清单
 
 后端
+
 - `backend/services/catalog/src/main/resources/db/migration/V36__sku_duplicate_candidate.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/DuplicateModels.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/DuplicateRules.java`
@@ -85,6 +86,7 @@ BARCODE 按条码值分组（前提：归一化后相等）；CROSS_SPU 按「�
 - `backend/services/catalog/src/test/java/com/starcon/catalog/DuplicateDetectionIntegrationTest.java`（19 例）
 
 前端
+
 - `apps/web/src/components/catalog/duplicate-model.ts`
 - `apps/web/src/components/catalog/duplicate-model.test.ts`（20 例）
 - `apps/web/src/components/catalog/duplicate-workspace.tsx`
@@ -93,6 +95,7 @@ BARCODE 按条码值分组（前提：归一化后相等）；CROSS_SPU 按「�
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（+3 组断言）
 
 共用（codegen 产物，禁手改）
+
 - `packages/api-contracts/src/catalog.ts`（+12 个 `Duplicate*` DTO，纯新增）
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.9.1.1 一行的路由/状态/证据）
 

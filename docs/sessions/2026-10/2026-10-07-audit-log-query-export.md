@@ -8,17 +8,17 @@ V3 建的六个骨架列（`id/tenant_id/actor_id/resource_id/action/occurred_at
 
 补齐的七项（蓝图职责逐条对应）：
 
-| 蓝图要求 | 落地 |
-| --- | --- |
-| 不可篡改 | `identity_audit_immutable()` 触发器 + `REVOKE UPDATE,DELETE`，双层 |
-| 操作人 / 时间 | `actor_name` 快照 + `occurred_at` 显式绑定 UTC |
-| 动作 | 已有 15 个动作名，本轮补上 before/after 与资源类型 |
-| 资源 | `resource_type` + `resource_label`（写入时快照，改名/删除后仍可渲染） |
-| 授权上下文 | `authorization_context` jsonb：角色编码 + 数据范围 + 权限集 |
-| 脱敏的变更前后值 | `changes` jsonb，写入侧经 `AuditRedactor` 处理 |
-| 按资源/操作人/时间检索 | 三组索引 + `GET /identity/audit` |
-| 导出 | `GET /identity/audit/export`，与检索共用同一套条件拼装 |
-| 变更详情 | `GET /identity/audit/{id}` |
+| 蓝图要求               | 落地                                                                  |
+| ---------------------- | --------------------------------------------------------------------- |
+| 不可篡改               | `identity_audit_immutable()` 触发器 + `REVOKE UPDATE,DELETE`，双层    |
+| 操作人 / 时间          | `actor_name` 快照 + `occurred_at` 显式绑定 UTC                        |
+| 动作                   | 已有 15 个动作名，本轮补上 before/after 与资源类型                    |
+| 资源                   | `resource_type` + `resource_label`（写入时快照，改名/删除后仍可渲染） |
+| 授权上下文             | `authorization_context` jsonb：角色编码 + 数据范围 + 权限集           |
+| 脱敏的变更前后值       | `changes` jsonb，写入侧经 `AuditRedactor` 处理                        |
+| 按资源/操作人/时间检索 | 三组索引 + `GET /identity/audit`                                      |
+| 导出                   | `GET /identity/audit/export`，与检索共用同一套条件拼装                |
+| 变更详情               | `GET /identity/audit/{id}`                                            |
 
 ## 关键 trade-off
 
@@ -85,21 +85,25 @@ PG 驱动按 timestamptz 直接解释，不经过任何本地时区换算。注�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql`
 
 **后端**
+
 - `backend/services/identity/src/main/java/com/starcon/identity/AuditController.java`（新增：检索 / 详情 / CSV 导出）
 - `backend/services/identity/src/main/java/com/starcon/identity/AuditLog.java`（新增：写入侧，口径唯一入口）
 - `backend/services/identity/src/main/java/com/starcon/identity/AuditRedactor.java`（新增：脱敏）
 - `backend/services/identity/src/main/java/com/starcon/identity/AdministrationController.java`（15 个写入点接上前后值 + 授权上下文 + 资源类型）
 
 **测试**
+
 - `backend/services/identity/src/test/java/com/starcon/identity/AuditIntegrationTest.java`（新增 10 项）
 - `backend/services/identity/src/test/java/com/starcon/identity/AuditRedactorTest.java`（新增 7 项）
 - `backend/services/identity/src/test/java/com/starcon/identity/IdentityIntegrationTestBase.java`（新增：抽共享底座）
 - `backend/services/identity/src/test/java/com/starcon/identity/IdentityIntegrationTest.java`（改为继承底座，断言未改）
 
 **前端**
+
 - `apps/web/src/app/org/audit/page.tsx`（新增）
 - `apps/web/src/components/iam/audit-workspace.tsx`（新增：检索 / 详情 / 导出 / 空态错误态加载态）
 - `apps/web/src/components/iam/audit-model.ts` + `audit-model.test.ts`（新增：可测逻辑 + 12 项单测）
@@ -108,10 +112,12 @@ PG 驱动按 timestamptz 直接解释，不经过任何本地时区换算。注�
 - `packages/ui/src/lib/task-pages.ts`（`/org/audit` 标记 implemented）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/catalog.ts`（+3 个 DTO：AuditView / AuditDetail / AuditPage）
 - `packages/api-contracts/src/identity.openapi.json`
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（17.5.3.1 → 已交付，`sync.mjs` 同步派生计数）
 
 ## 验证

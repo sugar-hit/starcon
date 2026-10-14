@@ -229,7 +229,14 @@ describe('表单校验', () => {
   });
 
   it('班次时刻格式与零长班被拦下', () => {
-    const good: ShiftDraft = { code: 'D', name: '白班', startLocal: '09:00', endLocal: '18:00', enabled: true, note: '' };
+    const good: ShiftDraft = {
+      code: 'D',
+      name: '白班',
+      startLocal: '09:00',
+      endLocal: '18:00',
+      enabled: true,
+      note: '',
+    };
     expect(shiftProblem(good, false)).toBe('');
     expect(shiftProblem({ ...good, code: '  ' }, false)).toContain('班次编码');
     expect(shiftProblem({ ...good, name: '' }, false)).toContain('班次名称');

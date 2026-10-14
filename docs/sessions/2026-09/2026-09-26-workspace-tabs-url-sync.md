@@ -52,7 +52,7 @@ const prevPathRef = React.useRef<string | null>(null);
 
 React.useEffect(() => {
   if (!hydrated) return;
-  if (prevPathRef.current === pathname) return;  // ← 关键
+  if (prevPathRef.current === pathname) return; // ← 关键
   prevPathRef.current = pathname;
   // ...openTab / activateTab...
 }, [pathname, tabs, activeTabId, hydrated]);

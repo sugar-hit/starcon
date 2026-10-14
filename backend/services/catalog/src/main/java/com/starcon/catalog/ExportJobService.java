@@ -26,15 +26,14 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>四件事的分工：
  *
  * <ul>
- *   <li>{@link #create} 校验并冻结快照 → 落 {@code export_job} → 交给执行器（已受理）；</li>
- *   <li>{@link #jobs} / {@link #job} 读导出记录（条件、字段、行数、时间、操作人）；</li>
- *   <li>{@link #file} 下载：先判有效期，过期就把状态推进到 EXPIRED 并删掉存储对象；</li>
- *   <li>{@link #cancel} 作废一份不该再被下载的导出（导错范围的 PII 导出第一件事就是它）。</li>
+ *   <li>{@link #create} 校验并冻结快照 → 落 {@code export_job} → 交给执行器（已受理）；
+ *   <li>{@link #jobs} / {@link #job} 读导出记录（条件、字段、行数、时间、操作人）；
+ *   <li>{@link #file} 下载：先判有效期，过期就把状态推进到 EXPIRED 并删掉存储对象；
+ *   <li>{@link #cancel} 作废一份不该再被下载的导出（导错范围的 PII 导出第一件事就是它）。
  * </ul>
  *
- * <p><b>不写 audit_event</b>：与 3.8.1.1 的 {@code ImportJobService} 同一口径 ——
- * {@code export_job} 这一行本身就是蓝图点名的那条「导出记录」，
- * 再往 audit_event 抄一份只会多出一个可能与它不一致的副本。
+ * <p><b>不写 audit_event</b>：与 3.8.1.1 的 {@code ImportJobService} 同一口径 —— {@code export_job}
+ * 这一行本身就是蓝图点名的那条「导出记录」， 再往 audit_event 抄一份只会多出一个可能与它不一致的副本。
  */
 @Service
 public class ExportJobService {
@@ -67,8 +66,7 @@ public class ExportJobService {
   /**
    * 可导出数据源清单（每个自带字段、排序与筛选词表）。
    *
-   * <p>前端据此渲染「选数据源 → 勾字段 → 填条件 → 选排序」四步，
-   * 全部由后端声明，不在前端硬编码一份字段列表。
+   * <p>前端据此渲染「选数据源 → 勾字段 → 填条件 → 选排序」四步， 全部由后端声明，不在前端硬编码一份字段列表。
    */
   public ExportSourcePage sourcePage() {
     var items =
@@ -97,11 +95,9 @@ public class ExportJobService {
   /**
    * 受理一次导出，返回任务行（status=PENDING/RUNNING）。
    *
-   * <p><b>返回即「已受理」，不是「已完成」</b>：蓝图写死大文件异步导出，
-   * 文件由 {@link ExportJobExecutor} 在请求之外生成。行数与文件要轮询任务详情才拿得到。
+   * <p><b>返回即「已受理」，不是「已完成」</b>：蓝图写死大文件异步导出， 文件由 {@link ExportJobExecutor} 在请求之外生成。行数与文件要轮询任务详情才拿得到。
    *
-   * <p>校验全部在**开事务之前**做（{@link ExportRules} 是纯函数）：
-   * 一次注定被拒的请求不该先占着一个租户事务。
+   * <p>校验全部在**开事务之前**做（{@link ExportRules} 是纯函数）： 一次注定被拒的请求不该先占着一个租户事务。
    */
   public ExportJobRow create(AccessService.Access actor, ExportJobInput input) {
     var source = sources.require(input.sourceKey());
@@ -109,7 +105,8 @@ public class ExportJobService {
     var sort = ExportRules.resolveSort(source, input.sort());
     boolean desc = ExportRules.resolveDesc(input.sort());
     ExportRules.requireSupportedFilters(source, input.filters());
-    var piiFields = ExportRules.requirePiiAuthorization(columns, input.piiPurpose(), source.label());
+    var piiFields =
+        ExportRules.requirePiiAuthorization(columns, input.piiPurpose(), source.label());
     ExportRules.expiresInSeconds(downloadTtlHours);
 
     UUID id = Ids.next();
@@ -143,14 +140,15 @@ public class ExportJobService {
             : actor.departmentId());
 
     executor.accept(actor, permission, id);
-    return row(sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id), sources);
+    return row(
+        sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id),
+        sources);
   }
 
   // ================================================================ 查询
 
   /** 导出记录分页（条件、字段、行数、时间、操作人都在行上）。 */
-  public ExportJobPage jobs(
-      UUID tenantId, String sourceKey, String status, int page, int size) {
+  public ExportJobPage jobs(UUID tenantId, String sourceKey, String status, int page, int size) {
     sweepExpired(tenantId);
     int effectiveSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
     int effectivePage = Math.max(0, page);
@@ -168,14 +166,17 @@ public class ExportJobService {
     }
     String clause = " where " + String.join(" and ", where);
 
-    long total = sql.fetchOne("select count(*) from export_job" + clause, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from export_job" + clause, binds.toArray())
+            .get(0, Long.class);
     var rows =
         sql.fetch(
             "select * from export_job"
                 + clause
                 + " order by requested_at desc,id desc limit ? offset ?",
             append(binds, effectiveSize, (long) effectivePage * effectiveSize).toArray());
-    return new ExportJobPage(rows.stream().map(this::row).toList(), total, effectivePage, effectiveSize);
+    return new ExportJobPage(
+        rows.stream().map(this::row).toList(), total, effectivePage, effectiveSize);
   }
 
   public ExportJobRow job(UUID tenantId, UUID id) {
@@ -190,15 +191,14 @@ public class ExportJobService {
   /**
    * 取导出文件。
    *
-   * <p><b>有效期在这里生效，而不是只在界面上显示</b>：过了 {@code expires_at} 就把状态
-   * 推进到 EXPIRED、删掉存储对象，并回 410 Gone。一份含 PII 的文件过了有效期还留在磁盘上，
-   * 等于有效期没生效。
+   * <p><b>有效期在这里生效，而不是只在界面上显示</b>：过了 {@code expires_at} 就把状态 推进到 EXPIRED、删掉存储对象，并回 410 Gone。一份含 PII
+   * 的文件过了有效期还留在磁盘上， 等于有效期没生效。
    *
-   * <p>RLS 在此生效：取不到就是「不存在或没有访问权限」，不区分二者，避免泄露
-   * 「这个 id 在别的租户确实存在过」。
+   * <p>RLS 在此生效：取不到就是「不存在或没有访问权限」，不区分二者，避免泄露 「这个 id 在别的租户确实存在过」。
    */
   public ExportFile file(AccessService.Access actor, UUID id) {
-    var found = sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id);
+    var found =
+        sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id);
     if (found == null) throw notFound(id);
 
     String status = found.get("status", String.class);
@@ -207,34 +207,28 @@ public class ExportJobService {
       if (expiresAt != null && expiresAt.isBefore(OffsetDateTime.now(java.time.ZoneOffset.UTC))) {
         expire(actor, found);
         throw new ResponseStatusException(
-            HttpStatus.GONE,
-            "导出文件已过下载有效期（" + expiresAt.toInstant() + "），已清理；请重新发起一次导出。");
+            HttpStatus.GONE, "导出文件已过下载有效期（" + expiresAt.toInstant() + "），已清理；请重新发起一次导出。");
       }
     } else if ("EXPIRED".equals(status)) {
-      throw new ResponseStatusException(
-          HttpStatus.GONE, "导出文件已过下载有效期并被清理；请重新发起一次导出。");
+      throw new ResponseStatusException(HttpStatus.GONE, "导出文件已过下载有效期并被清理；请重新发起一次导出。");
     } else if ("CANCELLED".equals(status)) {
-      throw new ResponseStatusException(
-          HttpStatus.GONE, "这份导出已被作废，不再提供下载。");
+      throw new ResponseStatusException(HttpStatus.GONE, "这份导出已被作废，不再提供下载。");
     } else {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "导出尚未完成（当前状态：" + statusLabel(status) + "），请稍候再下载。");
+          HttpStatus.CONFLICT, "导出尚未完成（当前状态：" + statusLabel(status) + "），请稍候再下载。");
     }
 
     String storageKey = found.get("storage_key", String.class);
     if (!storage.exists(storageKey)) {
       // 记录说成功、存储里却没有：文件被外部清理了。推进到 EXPIRED 让它不再冒充成功。
       expire(actor, found);
-      throw new ResponseStatusException(
-          HttpStatus.GONE, "导出文件已不在存储中（可能被部署侧清理），请重新发起一次导出。");
+      throw new ResponseStatusException(HttpStatus.GONE, "导出文件已不在存储中（可能被部署侧清理），请重新发起一次导出。");
     }
     byte[] content;
     try {
       content = storage.read(storageKey);
     } catch (IOException e) {
-      throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "读取导出文件失败，请联系管理员");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "读取导出文件失败，请联系管理员");
     }
     return new ExportFile(found.get("file_name", String.class), content.length, content);
   }
@@ -254,21 +248,17 @@ public class ExportJobService {
     } catch (IOException e) {
       // 文件删不掉是运维问题，不是请求问题：记录已经是 EXPIRED、下载已被挡住，
       // 这里只记日志，残留文件由存储侧的清理任务兜底。
-      org.slf4j.LoggerFactory.getLogger(ExportJobService.class)
-          .warn("过期导出文件删除失败：{}", key, e);
+      org.slf4j.LoggerFactory.getLogger(ExportJobService.class).warn("过期导出文件删除失败：{}", key, e);
     }
   }
 
   /**
    * 惰性过期扫描：把「已过 expires_at 但状态还没推进」的记录推进到 EXPIRED，**并删掉文件**。
    *
-   * <p>不靠定时任务（本服务没有调度器，也不该为了一个状态位引入一个常驻线程）：
-   * 读列表或读详情时顺手扫一次就够了。
+   * <p>不靠定时任务（本服务没有调度器，也不该为了一个状态位引入一个常驻线程）： 读列表或读详情时顺手扫一次就够了。
    *
-   * <p><b>删除是这个方法的一部分，不是可选项</b>：只把状态改成 EXPIRED 而把文件留在磁盘上，
-   * 等于「有效期过了但文件还在」—— 对一份含联系方式的导出，那是一份没人认领的数据。
-   * 所以这里先取出待过期行的 storage_key，批量推进状态后再逐个删除。
-   * 删除失败只记日志：记录已是 EXPIRED、下载已被挡住，残留由存储侧清理兜底。
+   * <p><b>删除是这个方法的一部分，不是可选项</b>：只把状态改成 EXPIRED 而把文件留在磁盘上， 等于「有效期过了但文件还在」—— 对一份含联系方式的导出，那是一份没人认领的数据。
+   * 所以这里先取出待过期行的 storage_key，批量推进状态后再逐个删除。 删除失败只记日志：记录已是 EXPIRED、下载已被挡住，残留由存储侧清理兜底。
    */
   private void sweepExpired(UUID tenantId) {
     var keys =
@@ -296,13 +286,13 @@ public class ExportJobService {
   /**
    * 作废一份导出。
    *
-   * <p>两种入口：还没跑完的（PENDING/RUNNING）直接取消；已经生成文件的 SUCCEEDED
-   * 也允许作废 —— 「导错范围了」时第一件事就是让它不能再下载，而不是等有效期自然过期。
-   * 作废后清空 storage_key（DB CHECK 要求非成功态无键），而 file_name / row_count /
-   * content_sha256 保留：这些是「当初导出了什么」的事实，删掉它们等于把审计也作废掉。
+   * <p>两种入口：还没跑完的（PENDING/RUNNING）直接取消；已经生成文件的 SUCCEEDED 也允许作废 ——
+   * 「导错范围了」时第一件事就是让它不能再下载，而不是等有效期自然过期。 作废后清空 storage_key（DB CHECK 要求非成功态无键），而 file_name / row_count
+   * / content_sha256 保留：这些是「当初导出了什么」的事实，删掉它们等于把审计也作废掉。
    */
   public ExportJobRow cancel(AccessService.Access actor, UUID id) {
-    var found = sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id);
+    var found =
+        sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id);
     if (found == null) throw notFound(id);
     String status = found.get("status", String.class);
     if (List.of("FAILED", "CANCELLED", "EXPIRED").contains(status))
@@ -320,11 +310,11 @@ public class ExportJobService {
       try {
         storage.delete(key);
       } catch (IOException e) {
-        org.slf4j.LoggerFactory.getLogger(ExportJobService.class)
-            .warn("作废导出文件删除失败：{}", key, e);
+        org.slf4j.LoggerFactory.getLogger(ExportJobService.class).warn("作废导出文件删除失败：{}", key, e);
       }
     }
-    return row(sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id));
+    return row(
+        sql.fetchOne("select * from export_job where tenant_id=? and id=?", actor.tenantId(), id));
   }
 
   // ================================================================ 行组装
@@ -356,7 +346,9 @@ public class ExportJobService {
     var sort = readSort(r);
     var expiresAt = instant(r.get("expires_at", OffsetDateTime.class));
     boolean expired =
-        expiresAt != null && OffsetDateTime.parse(expiresAt).isBefore(OffsetDateTime.now(java.time.ZoneOffset.UTC));
+        expiresAt != null
+            && OffsetDateTime.parse(expiresAt)
+                .isBefore(OffsetDateTime.now(java.time.ZoneOffset.UTC));
     boolean downloadable = "SUCCEEDED".equals(status) && !expired;
     return new ExportJobRow(
         r.get("id", UUID.class),
@@ -471,8 +463,9 @@ public class ExportJobService {
           readStrings(r, "selected_fields"),
           readStrings(r, "field_headers"),
           raw == null || raw.isBlank()
-              ? new ExportFilterInput(null, null, null, null, null, null, null, null, null, null, null, null,
-                  null, null, null, null, null, null)
+              ? new ExportFilterInput(
+                  null, null, null, null, null, null, null, null, null, null, null, null, null,
+                  null, null, null, null, null)
               : MAPPER.readValue(raw, ExportFilterInput.class),
           readSort(r),
           r.get("requested_at", OffsetDateTime.class));

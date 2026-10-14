@@ -344,7 +344,7 @@ export function KnowledgeWorkspace() {
           )}
         </div>
         {scopes.length === 0 && ready && !loading && (
-          <p className="text-muted-foreground mt-3 text-copy-13">
+          <p className="text-muted-foreground text-copy-13 mt-3">
             本租户还没有任何知识格子。先新建一条知识，三个组织维度会随之出现。
           </p>
         )}
@@ -401,16 +401,17 @@ export function KnowledgeWorkspace() {
                     </p>
                     {effective ? (
                       <p className="text-muted-foreground text-copy-13">
-                        生效 v{effective.versionNo}：{formatInterval(effective.effectiveFrom, effective.effectiveTo)}
+                        生效 v{effective.versionNo}：
+                        {formatInterval(effective.effectiveFrom, effective.effectiveTo)}
                       </p>
                     ) : (
-                      <p className="text-destructive flex items-center gap-1 text-copy-13">
+                      <p className="text-destructive text-copy-13 flex items-center gap-1">
                         <ShieldAlert />
                         此刻没有生效版本 —— 这一条现在答复不了买家
                       </p>
                     )}
                   </div>
-                  <div className="text-muted-foreground flex shrink-0 flex-col items-end gap-1 text-copy-13">
+                  <div className="text-muted-foreground text-copy-13 flex shrink-0 flex-col items-end gap-1">
                     <span>{row.versionCount} 个版本</span>
                     <span>{row.referenceCount} 次引用</span>
                     <Button variant="outline" size="sm" onClick={() => void openDetail(row.id)}>
@@ -451,7 +452,7 @@ export function KnowledgeWorkspace() {
           查待复核条目
         </Button>
         {reviewError && (
-          <p role="alert" className="text-destructive mt-3 text-copy-13">
+          <p role="alert" className="text-destructive text-copy-13 mt-3">
             {reviewError}
           </p>
         )}
@@ -480,7 +481,11 @@ export function KnowledgeWorkspace() {
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <Badge>已 {item.staleDays} 天没复核</Badge>
-                      <Button variant="outline" size="sm" onClick={() => void openDetail(item.entryId)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void openDetail(item.entryId)}
+                      >
                         处理
                       </Button>
                     </div>
@@ -493,7 +498,10 @@ export function KnowledgeWorkspace() {
       </SectionCard>
 
       {draft && (
-        <SectionCard title="新建知识档案" description="三个组织维度与适用平台必填 —— 它们决定这条知识管哪个格子、按哪个平台口径写。">
+        <SectionCard
+          title="新建知识档案"
+          description="三个组织维度与适用平台必填 —— 它们决定这条知识管哪个格子、按哪个平台口径写。"
+        >
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="业务键" hint="同一格子里唯一，建后不可改">
               <input
@@ -537,8 +545,7 @@ export function KnowledgeWorkspace() {
                   setDraft({
                     ...draft,
                     categoryId: e.target.value,
-                    categoryName:
-                      categoryOptions.find(([id]) => id === e.target.value)?.[1] ?? '',
+                    categoryName: categoryOptions.find(([id]) => id === e.target.value)?.[1] ?? '',
                   })
                 }
               >
@@ -646,7 +653,9 @@ export function KnowledgeWorkspace() {
                       className={control}
                       value={newVersion.effectiveFrom}
                       placeholder="2026-06-01T00:00:00+08:00"
-                      onChange={(e) => setNewVersion({ ...newVersion, effectiveFrom: e.target.value })}
+                      onChange={(e) =>
+                        setNewVersion({ ...newVersion, effectiveFrom: e.target.value })
+                      }
                     />
                   </Field>
                   <Field label="生效终点" hint="留空 = 一直有效。半开区间 [起点, 终点)">
@@ -705,7 +714,7 @@ export function KnowledgeWorkspace() {
             </div>
           )}
 
-          <h3 className="mt-5 text-copy-14 font-medium">引用记录</h3>
+          <h3 className="text-copy-14 mt-5 font-medium">引用记录</h3>
           <p className="text-muted-foreground text-copy-13">
             引用记录只读：谁在什么时候引用了哪一版是审计事实，允许改删就等于把「没人用过」
             这个答案做出来 —— 而「多少条知识根本没人用」恰恰是运营最该先看到的数。
@@ -717,9 +726,12 @@ export function KnowledgeWorkspace() {
               description="15.1.1.2 消息发送与 15.5.1 自动回复都尚未开发；它们落地后引用会从这里长出来。"
             />
           ) : (
-            <ul className="divide-control-border divide-y mt-2">
+            <ul className="divide-control-border mt-2 divide-y">
               {references.map((reference) => (
-                <li key={reference.id} className="flex flex-wrap items-center gap-3 py-2 text-copy-13">
+                <li
+                  key={reference.id}
+                  className="text-copy-13 flex flex-wrap items-center gap-3 py-2"
+                >
                   <span className="min-w-0 flex-1">
                     {reference.entryTitle} v{reference.versionNo}
                   </span>

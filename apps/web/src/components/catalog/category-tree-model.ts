@@ -212,7 +212,9 @@ export type NodeTone = 'active' | 'disabled' | 'branch';
  * <p>三个计数含义完全不同，分开写而不是拼成一句「共 N 件」：
  * 直接 / 子树 / 辅助，混在一起会让「挪到子类目后数字没变」变成一个查不到的问题。
  */
-export function nodeCounts(node: Pick<CategoryNode, 'directProductCount' | 'subtreeProductCount' | 'secondaryProductCount'>) {
+export function nodeCounts(
+  node: Pick<CategoryNode, 'directProductCount' | 'subtreeProductCount' | 'secondaryProductCount'>,
+) {
   return {
     direct: node.directProductCount,
     subtree: node.subtreeProductCount,

@@ -27,12 +27,15 @@ export default function BomPage() {
         <h1 className="text-copy-20 font-semibold">BOM 版本</h1>
         <p className="text-muted-foreground text-copy-13">
           维护物料清单（成品由哪些组件组成）的版本：成品 SKU、版本号、生效区间、每个组件的
-          <strong>单位用量</strong>（每 1 个成品要多少）与<strong>损耗率</strong>（百分数，5 = 5%）。
-          <strong>发布后整版冻结</strong>，连用量与损耗率一起冻结 —— 08 加工单已经按当时的数领过料了；
+          <strong>单位用量</strong>（每 1 个成品要多少）与<strong>损耗率</strong>（百分数，5 =
+          5%）。
+          <strong>发布后整版冻结</strong>，连用量与损耗率一起冻结 —— 08
+          加工单已经按当时的数领过料了；
           唯一还能做的是「提前停用本版」（把生效终点向前收紧）。生效区间是左闭右开的 [起点, 终点)，
-          重叠一律拒绝，所以<strong>同一时刻至多一个生效版本</strong>。
-          本页算的是<strong>单层</strong>精确需求量（不取整）；多级展开是 3.5.2.2。
-          <strong>BOM 产实物成品，套装卖虚拟组合</strong> —— 两者不合并：套装不持有独立库存，扣的是组件库存。
+          重叠一律拒绝，所以<strong>同一时刻至多一个生效版本</strong>。 本页算的是
+          <strong>单层</strong>精确需求量（不取整）；多级展开是 3.5.2.2。
+          <strong>BOM 产实物成品，套装卖虚拟组合</strong> ——
+          两者不合并：套装不持有独立库存，扣的是组件库存。
         </p>
       </header>
 

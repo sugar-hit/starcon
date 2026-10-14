@@ -5,10 +5,9 @@ import java.util.List;
 /**
  * 僵尸清理覆盖的三种主体。
  *
- * <p>供应商与客户是 {@code party} 的两个**角色**而不是两张表 —— V27 推翻了实体目录旧稿的
- * supplier/customer/carrier 三张表，理由是同一个对手方既是供应商又是客户时建两份记录会让
- * 跨表对账没有稳定锚点。所以这里用两个枚举值表达"以哪个身份被观测"，指向同一张
- * {@code party} 表里的两类 {@code party_role}。
+ * <p>供应商与客户是 {@code party} 的两个**角色**而不是两张表 —— V27 推翻了实体目录旧稿的 supplier/customer/carrier
+ * 三张表，理由是同一个对手方既是供应商又是客户时建两份记录会让 跨表对账没有稳定锚点。所以这里用两个枚举值表达"以哪个身份被观测"，指向同一张 {@code party} 表里的两类 {@code
+ * party_role}。
  */
 public enum ZombieEntityType {
   /** SKU。目标表 {@code sku}，状态枚举 DRAFT/ACTIVE/INACTIVE/ARCHIVED（V1）。 */

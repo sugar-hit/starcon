@@ -1,6 +1,6 @@
 name: Feature Request
 description: 新功能需求
-labels: ["enhancement"]
+labels: ['enhancement']
 body:
   - type: textarea
     id: problem

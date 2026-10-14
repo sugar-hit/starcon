@@ -23,19 +23,15 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>四条纪律贯穿本类：
  *
  * <ol>
- *   <li><b>比例必须版本化且区间不重叠</b>。每条换算关系由若干生效版本组成，每版有
- *       {@code effective_from}/{@code effective_to}。区间不重叠由 V6 的 DB 触发器兜底，
- *       应用层转成可读的 409——"同一时刻只有一个版本生效"是蓝图硬要求，不是建议。
- *   <li><b>查不到就报查不到</b>。按生效日期取版本命中不到时**不**回退到"最近的一版"。
- *       静默回退会让一张按过期比例生成的采购单看起来完全正常，这是最贵的一类错误。
- *   <li><b>基础单位不在换算表里</b>。基础单位是 {@code sku.base_unit}；换算表只放其他单位
- *       相对它的比例。同理，单据直接用基础单位时比例恒为 1，不占换算行。
+ *   <li><b>比例必须版本化且区间不重叠</b>。每条换算关系由若干生效版本组成，每版有 {@code effective_from}/{@code effective_to}。区间不重叠由
+ *       V6 的 DB 触发器兜底， 应用层转成可读的 409——"同一时刻只有一个版本生效"是蓝图硬要求，不是建议。
+ *   <li><b>查不到就报查不到</b>。按生效日期取版本命中不到时**不**回退到"最近的一版"。 静默回退会让一张按过期比例生成的采购单看起来完全正常，这是最贵的一类错误。
+ *   <li><b>基础单位不在换算表里</b>。基础单位是 {@code sku.base_unit}；换算表只放其他单位 相对它的比例。同理，单据直接用基础单位时比例恒为 1，不占换算行。
  *   <li><b>快照不可变</b>。单据冻结把当时的比例与换算结果一起落库，DB 层禁止 UPDATE/DELETE。
  *       之后改比例改不动已发生单据——这是蓝图的硬要求，靠不可变行兑现而不是靠应用自觉。
  * </ol>
  *
- * <p>单位字典与换算行的关系是**软引用**而非外键：V6 之前写入的换算行（导入/历史遗留）的
- * unit_code 可能不在字典里，加外键会让既有数据写不进去。字典的强约束放在本类的写入口
+ * <p>单位字典与换算行的关系是**软引用**而非外键：V6 之前写入的换算行（导入/历史遗留）的 unit_code 可能不在字典里，加外键会让既有数据写不进去。字典的强约束放在本类的写入口
  * （新建换算要求单位已登记），遗留行仍可读并在界面上标记为「未登记」。
  */
 @Service
@@ -56,12 +52,10 @@ public class UnitConversionService {
 
   // ============================================================ 单位字典
 
-  /**
-   * 单位字典列表（含停用）。停用单位也在列里——否则运营会以为单位凭空消失了，
-   * 而它明明还挂着一堆历史换算版本。
-   */
+  /** 单位字典列表（含停用）。停用单位也在列里——否则运营会以为单位凭空消失了， 而它明明还挂着一堆历史换算版本。 */
   public List<UnitOfMeasure> units() {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select u.id,u.code,u.name,u.dimension,u.scale,u.allow_purchase,u.allow_sale,"
                 + "u.allow_storage,u.enabled,u.version,u.created_at,u.updated_at,"
                 + "(select count(*) from sku_unit_conversion c"
@@ -93,8 +87,7 @@ public class UnitConversionService {
   /**
    * 新建或更新单位（id 为空即新建）。
    *
-   * <p>更新走 version 乐观锁，冲突直接 409。单位码与量纲建后**不可改**：
-   * 换算行按 unit_code 文本引用它，改码会让所有历史换算与已冻结快照指向一个不存在的单位，
+   * <p>更新走 version 乐观锁，冲突直接 409。单位码与量纲建后**不可改**： 换算行按 unit_code 文本引用它，改码会让所有历史换算与已冻结快照指向一个不存在的单位，
    * 改量纲会让既有换算在守卫触发器下一次写入时突然报「量纲不匹配」。要改就新建一个单位。
    */
   public UnitOfMeasureSaved saveUnit(
@@ -106,8 +99,7 @@ public class UnitConversionService {
     CatalogService.check(
         UnitRules.DIMENSIONS.containsKey(dimension),
         "量纲只能是 WEIGHT（重量）/ LENGTH（长度）/ VOLUME（体积）/ COUNT（数量）/ PACKAGE（包装）");
-    CatalogService.check(
-        input.scale() >= 0 && input.scale() <= 6, "数量精度需在 0~6 位小数之间");
+    CatalogService.check(input.scale() >= 0 && input.scale() <= 6, "数量精度需在 0~6 位小数之间");
     String code = UnitRules.normalizeCode(input.code());
 
     if (id == null) {
@@ -139,8 +131,7 @@ public class UnitConversionService {
     var row = sql.fetchOne("select code,dimension,version from unit_of_measure where id=?", id);
     if (row == null) throw CatalogService.missing();
     CatalogService.check(
-        row.get("code", String.class).equals(code),
-        "单位编码建后不可修改：换算行与已冻结快照按编码引用它，请新建一个单位");
+        row.get("code", String.class).equals(code), "单位编码建后不可修改：换算行与已冻结快照按编码引用它，请新建一个单位");
     CatalogService.check(
         row.get("dimension", String.class).equals(dimension),
         "量纲建后不可修改：改了会让既有换算在量纲校验时突然不通过，请新建一个单位");
@@ -162,9 +153,10 @@ public class UnitConversionService {
     } catch (DataAccessException e) {
       throw conflict("单位编码已存在或已被占用，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "单位已被他人修改，请刷新后重试");
-    long version = sql.fetchOne("select version from unit_of_measure where id=?", id).get("version", Long.class);
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "单位已被他人修改，请刷新后重试");
+    long version =
+        sql.fetchOne("select version from unit_of_measure where id=?", id)
+            .get("version", Long.class);
     audit(actor, id, "UnitOfMeasureSaved");
     return new UnitOfMeasureSaved(id, version);
   }
@@ -172,8 +164,7 @@ public class UnitConversionService {
   /**
    * 删除单位。
    *
-   * <p>被换算行或快照引用时一律拒绝：删掉单位会让那些换算与快照指向一个查不到的定义。
-   * 这种情况应该停用（enabled=false）而不是删除——停用挡住的是「新建」，历史照常可读。
+   * <p>被换算行或快照引用时一律拒绝：删掉单位会让那些换算与快照指向一个查不到的定义。 这种情况应该停用（enabled=false）而不是删除——停用挡住的是「新建」，历史照常可读。
    */
   public void deleteUnit(AccessService.Access actor, UUID id, long version) {
     var row = sql.fetchOne("select code,version from unit_of_measure where id=?", id);
@@ -186,14 +177,11 @@ public class UnitConversionService {
             .get(0, Long.class);
     CatalogService.check(
         conversions == 0,
-        "单位「" + code + "」已被 " + conversions + " 条换算版本引用，不能删除；"
-            + "请改为停用，停用只挡住新建，历史换算与已冻结快照仍可读");
+        "单位「" + code + "」已被 " + conversions + " 条换算版本引用，不能删除；" + "请改为停用，停用只挡住新建，历史换算与已冻结快照仍可读");
     long snapshots =
-        sql.fetchOne(
-                "select count(*) from sku_unit_conversion_snapshot where unit_code=?", code)
+        sql.fetchOne("select count(*) from sku_unit_conversion_snapshot where unit_code=?", code)
             .get(0, Long.class);
-    CatalogService.check(
-        snapshots == 0, "单位「" + code + "」已被 " + snapshots + " 条单据快照引用，不能删除");
+    CatalogService.check(snapshots == 0, "单位「" + code + "」已被 " + snapshots + " 条单据快照引用，不能删除");
     // 3.3.3.1 补的：单位组（V17 的 unit_group_member）引用着它。
     // 删掉单位会经外键 ON DELETE CASCADE 连带删掉它在所有组里的成员行与组内换算版本——
     // 那是静默的数据丢失，运营根本不知道自己刚删掉了什么。与上面两条同一口径：被引用就拒绝。
@@ -202,7 +190,11 @@ public class UnitConversionService {
             .get(0, Long.class);
     CatalogService.check(
         groups == 0,
-        "单位「" + code + "」已被 " + groups + " 个单位组引用，不能删除；"
+        "单位「"
+            + code
+            + "」已被 "
+            + groups
+            + " 个单位组引用，不能删除；"
             + "请先到计量单位（/products/units）把它移出这些组，或改为停用——"
             + "停用只挡住新建，历史换算与已冻结快照仍可读");
     sql.execute("delete from unit_of_measure where id=?", id);
@@ -214,8 +206,8 @@ public class UnitConversionService {
   /**
    * 概览：字典规模、换算版本数、快照数，以及**基础单位未登记的 SKU 数**。
    *
-   * <p>{@code unregisteredSkus} 是本模块的治理缺口指标——基础单位没进字典的 SKU 量纲校验对它放行，
-   * 数量再多也说明字典没覆盖到货品上。0 与"没查过"含义不同，界面上要分开写。
+   * <p>{@code unregisteredSkus} 是本模块的治理缺口指标——基础单位没进字典的 SKU 量纲校验对它放行， 数量再多也说明字典没覆盖到货品上。0
+   * 与"没查过"含义不同，界面上要分开写。
    */
   public UnitOverview overview() {
     var units =
@@ -229,7 +221,8 @@ public class UnitConversionService {
     long snapshots =
         sql.fetchOne("select count(*) from sku_unit_conversion_snapshot").get(0, Long.class);
     var dimensions =
-        sql.fetch(
+        sql
+            .fetch(
                 "select dimension,count(*) as n from unit_of_measure group by dimension"
                     + " order by dimension")
             .map(
@@ -252,7 +245,8 @@ public class UnitConversionService {
         conversions.get("conversion_count", Long.class),
         snapshots,
         dimensions,
-        conversions.get("open_count", Long.class) + " 条换算版本当前开放生效（effective_to 为空），"
+        conversions.get("open_count", Long.class)
+            + " 条换算版本当前开放生效（effective_to 为空），"
             + "其余为已闭合的历史版本，仍然可读——改比例只影响之后生成的单据。");
   }
 
@@ -261,8 +255,7 @@ public class UnitConversionService {
   /**
    * 单个 SKU 的单位与换算面板。
    *
-   * <p>换算按「单位 + 角色」聚成一组，组内版本按生效起始日倒序：
-   * 运营问的是"箱这个采购单位现在几件一箱、以前是几件"，平铺成长列表反而看不出改过几次。
+   * <p>换算按「单位 + 角色」聚成一组，组内版本按生效起始日倒序： 运营问的是"箱这个采购单位现在几件一箱、以前是几件"，平铺成长列表反而看不出改过几次。
    */
   public UnitPanel panel(UUID skuId) {
     var row =
@@ -270,7 +263,8 @@ public class UnitConversionService {
             "select s.id,s.code,s.name,s.base_unit,s.version from sku s where s.id=?", skuId);
     if (row == null) throw CatalogService.missing();
     String baseUnit = row.get("base_unit", String.class);
-    var baseRow = sql.fetchOne("select id,name,enabled from unit_of_measure where code=?", baseUnit);
+    var baseRow =
+        sql.fetchOne("select id,name,enabled from unit_of_measure where code=?", baseUnit);
     var snapshots = snapshotLines(skuId);
     return new UnitPanel(
         row.get("id", UUID.class),
@@ -353,11 +347,15 @@ public class UnitConversionService {
 
   private List<UnitSnapshotLine> snapshotQuery(String extra, Object... args) {
     Object[] params = new Object[args.length + 1];
-    params[0] = "select s.id,s.line_no,s.sku_id,k.code as sku_code,s.role,s.unit_code,s.base_unit,"
-        + "s.quantity,s.quantity_per_base,s.base_quantity,s.source_conversion_id,"
-        + "s.effective_from,s.effective_to,s.occurred_at"
-        + " from sku_unit_conversion_snapshot s join sku k on k.tenant_id=s.tenant_id and k.id=s.sku_id"
-        + " where true" + extra + " order by s.created_at desc,s.id desc limit " + SNAPSHOT_HISTORY;
+    params[0] =
+        "select s.id,s.line_no,s.sku_id,k.code as sku_code,s.role,s.unit_code,s.base_unit,"
+            + "s.quantity,s.quantity_per_base,s.base_quantity,s.source_conversion_id,"
+            + "s.effective_from,s.effective_to,s.occurred_at"
+            + " from sku_unit_conversion_snapshot s join sku k on k.tenant_id=s.tenant_id and k.id=s.sku_id"
+            + " where true"
+            + extra
+            + " order by s.created_at desc,s.id desc limit "
+            + SNAPSHOT_HISTORY;
     System.arraycopy(args, 0, params, 1, args.length);
     return sql.fetch((String) params[0], Arrays.copyOfRange(params, 1, params.length)).stream()
         .map(r -> toSnapshotLine(r, false))
@@ -378,7 +376,9 @@ public class UnitConversionService {
         r.get("base_quantity", BigDecimal.class),
         r.get("source_conversion_id", UUID.class),
         r.get("effective_from", LocalDate.class).toString(),
-        Optional.ofNullable(r.get("effective_to", LocalDate.class)).map(LocalDate::toString).orElse(null),
+        Optional.ofNullable(r.get("effective_to", LocalDate.class))
+            .map(LocalDate::toString)
+            .orElse(null),
         created,
         instant(r.get("occurred_at", OffsetDateTime.class)));
   }
@@ -388,12 +388,10 @@ public class UnitConversionService {
   /**
    * 为一个 SKU 新增一条换算版本。
    *
-   * <p>区间不重叠由 V6 的触发器在 DB 层保证，这里把它的报错翻译成人话：
-   * 「2026-01-01 ~ 至今」与已有的「2024-01-01 ~ 2025-12-31」不冲突，但与「2025-06-01 ~ 至今」冲突，
-   * 运营看到的必须是后者的日期，而不是一条 23514。
+   * <p>区间不重叠由 V6 的触发器在 DB 层保证，这里把它的报错翻译成人话： 「2026-01-01 ~ 至今」与已有的「2024-01-01 ~
+   * 2025-12-31」不冲突，但与「2025-06-01 ~ 至今」冲突， 运营看到的必须是后者的日期，而不是一条 23514。
    *
-   * <p>单位必须已登记且启用：新建换算引用一个不存在的单位定义，量纲校验无从进行。
-   * 历史遗留行（未登记）仍可读，见本类头部说明。
+   * <p>单位必须已登记且启用：新建换算引用一个不存在的单位定义，量纲校验无从进行。 历史遗留行（未登记）仍可读，见本类头部说明。
    */
   public UnitConversionSaved addConversion(
       AccessService.Access actor, UUID skuId, UnitConversionInput input) {
@@ -410,12 +408,11 @@ public class UnitConversionService {
 
     String baseUnit = sku.get("base_unit", String.class);
     CatalogService.check(
-        !unitCode.equals(baseUnit),
-        "单位「" + unitCode + "」就是该 SKU 的基础单位，比例恒为 1，不需要换算行");
+        !unitCode.equals(baseUnit), "单位「" + unitCode + "」就是该 SKU 的基础单位，比例恒为 1，不需要换算行");
 
-    var unit = sql.fetchOne("select id,dimension,enabled from unit_of_measure where code=?", unitCode);
-    CatalogService.check(
-        unit != null, "单位「" + unitCode + "」尚未登记到单位字典，请先在单位字典中新建后再配置换算");
+    var unit =
+        sql.fetchOne("select id,dimension,enabled from unit_of_measure where code=?", unitCode);
+    CatalogService.check(unit != null, "单位「" + unitCode + "」尚未登记到单位字典，请先在单位字典中新建后再配置换算");
     CatalogService.check(
         Boolean.TRUE.equals(unit.get("enabled", Boolean.class)),
         "单位「" + unitCode + "」已停用，不能再新建换算版本；停用只挡住新建，历史换算与快照仍可读");
@@ -425,20 +422,26 @@ public class UnitConversionService {
     // 这时选择显式拒绝而不是放行——"放行"等于让「件 → 千克」这种错账从后门进来。
     var baseUnitRow = sql.fetchOne("select dimension from unit_of_measure where code=?", baseUnit);
     CatalogService.check(
-        baseUnitRow != null,
-        "基础单位「" + baseUnit + "」尚未登记到单位字典，无法做量纲校验。"
-            + "请先在单位字典中登记该基础单位，再配置换算");
+        baseUnitRow != null, "基础单位「" + baseUnit + "」尚未登记到单位字典，无法做量纲校验。" + "请先在单位字典中登记该基础单位，再配置换算");
     String fromDimension = unit.get("dimension", String.class);
     String toDimension = baseUnitRow.get("dimension", String.class);
     CatalogService.check(
         fromDimension.equals(toDimension),
-        "量纲不匹配：「" + unitCode + "」属于" + UnitRules.dimensionLabel(fromDimension)
-            + "，基础单位「" + baseUnit + "」属于" + UnitRules.dimensionLabel(toDimension)
+        "量纲不匹配：「"
+            + unitCode
+            + "」属于"
+            + UnitRules.dimensionLabel(fromDimension)
+            + "，基础单位「"
+            + baseUnit
+            + "」属于"
+            + UnitRules.dimensionLabel(toDimension)
             + "，两者之间不允许换算");
 
     LocalDate from = date(input.effectiveFrom(), "生效起始日");
-    LocalDate to = input.effectiveTo() == null || input.effectiveTo().isBlank()
-        ? null : date(input.effectiveTo(), "生效截止日");
+    LocalDate to =
+        input.effectiveTo() == null || input.effectiveTo().isBlank()
+            ? null
+            : date(input.effectiveTo(), "生效截止日");
     CatalogService.check(to == null || !to.isBefore(from), "生效截止日不能早于生效起始日");
 
     // 冲突区间在插入前查好：触发器抛错后事务已 aborted，那时再查只会拿到
@@ -465,15 +468,15 @@ public class UnitConversionService {
       throw conflict("换算版本写入失败，请刷新后重试");
     }
     audit(actor, skuId, "SkuUnitConversionAdded");
-    return new UnitConversionSaved(id, skuId, unitCode, role, from.toString(),
-        to == null ? null : to.toString());
+    return new UnitConversionSaved(
+        id, skuId, unitCode, role, from.toString(), to == null ? null : to.toString());
   }
 
   /**
    * V6 触发器用 23514 抛区间重叠；据此把 DB 报错翻译成给运营看的日期说明。
    *
-   * <p>冲突区间在**插入之前**查好并作为参数传进来：触发器一旦抛错，PostgreSQL 就把整个
-   * 事务标记为 aborted，此时再查库只会得到 "current transaction is aborted"。
+   * <p>冲突区间在**插入之前**查好并作为参数传进来：触发器一旦抛错，PostgreSQL 就把整个 事务标记为 aborted，此时再查库只会得到 "current transaction
+   * is aborted"。
    */
   private boolean overlap(DataAccessException e, List<Record> existing) {
     String message = e.getMessage() == null ? "" : e.getMessage();
@@ -520,15 +523,19 @@ public class UnitConversionService {
     if (sku == null) throw CatalogService.missing();
     String baseUnit = sku.get("base_unit", String.class);
     String unitCode = UnitRules.normalizeCode(input.unitCode());
-    String role = input.role() == null || input.role().isBlank() ? null : UnitRules.normalizeRole(input.role());
-    LocalDate at = input.asOf() == null || input.asOf().isBlank()
-        ? LocalDate.now(ZoneOffset.UTC) : date(input.asOf(), "生效日期");
-    CatalogService.check(
-        input.quantity().signum() > 0, "数量必须大于 0");
-    CatalogService.check(
-        input.quantity().scale() <= 6, "数量最多 6 位小数");
+    String role =
+        input.role() == null || input.role().isBlank()
+            ? null
+            : UnitRules.normalizeRole(input.role());
+    LocalDate at =
+        input.asOf() == null || input.asOf().isBlank()
+            ? LocalDate.now(ZoneOffset.UTC)
+            : date(input.asOf(), "生效日期");
+    CatalogService.check(input.quantity().signum() > 0, "数量必须大于 0");
+    CatalogService.check(input.quantity().scale() <= 6, "数量最多 6 位小数");
 
-    var unit = sql.fetchOne("select name,dimension,scale from unit_of_measure where code=?", unitCode);
+    var unit =
+        sql.fetchOne("select name,dimension,scale from unit_of_measure where code=?", unitCode);
     String note;
     if (unitCode.equals(baseUnit)) {
       // 基础单位直接用：比例恒为 1，不占换算行。
@@ -562,7 +569,13 @@ public class UnitConversionService {
     String label = role == null ? "任意角色" : UnitRules.roleLabel(role);
     CatalogService.check(
         ratio != null,
-        "「" + unitCode + "」在 " + at + " 没有生效的" + label + "换算版本。"
+        "「"
+            + unitCode
+            + "」在 "
+            + at
+            + " 没有生效的"
+            + label
+            + "换算版本。"
             + "请先配置该单位的换算版本并让生效区间覆盖这一天——这里不做「取最近一版」的回退，"
             + "否则一张按过期比例生成的采购单会看起来完全正常");
     note = row == null ? null : "命中 " + from + " ~ " + (to == null ? "至今" : to) + " 的换算版本";
@@ -614,8 +627,8 @@ public class UnitConversionService {
   /**
    * 冻结一张单据的换算快照。
    *
-   * <p>这是蓝图点名的那条能力：「单据生成时冻结快照，之后修改比例不影响已发生单据」。
-   * 做法是把**当时生效的比例连同换算结果**一起落库，且这张表在 DB 层禁止 UPDATE/DELETE。
+   * <p>这是蓝图点名的那条能力：「单据生成时冻结快照，之后修改比例不影响已发生单据」。 做法是把**当时生效的比例连同换算结果**一起落库，且这张表在 DB 层禁止
+   * UPDATE/DELETE。
    *
    * <p>幂等：同一 (document_type, document_ref, line_no) 已冻结过时返回原行（{@code created=false}），
    * 不覆盖也不重复计数。上游重跑一次单据生成不应该让数量翻倍。
@@ -643,13 +656,10 @@ public class UnitConversionService {
     // 先全部解析成功再落库：避免前几行已冻结、后一行换算不到时的半张单据。
     var resolved = new ArrayList<Object[]>();
     for (var line : input.lines()) {
-      var result = convert(
-          new UnitConvertInput(
-              line.skuId(),
-              line.quantity(),
-              line.unitCode(),
-              line.role(),
-              asOf));
+      var result =
+          convert(
+              new UnitConvertInput(
+                  line.skuId(), line.quantity(), line.unitCode(), line.role(), asOf));
       resolved.add(new Object[] {line.lineNo(), result});
     }
 
@@ -701,7 +711,11 @@ public class UnitConversionService {
             result.quantityPerBase(),
             result.baseQuantity(),
             result.conversionId(),
-            date(result.effectiveFrom() == null ? LocalDate.now(ZoneOffset.UTC).toString() : result.effectiveFrom(), "生效起始日"),
+            date(
+                result.effectiveFrom() == null
+                    ? LocalDate.now(ZoneOffset.UTC).toString()
+                    : result.effectiveFrom(),
+                "生效起始日"),
             result.effectiveTo() == null ? null : date(result.effectiveTo(), "生效截止日"),
             occurredAt,
             actor.userId());
@@ -744,18 +758,23 @@ public class UnitConversionService {
 
   /** 读回一张单据的冻结快照。documentType 留空则不限类型。 */
   public UnitSnapshot snapshot(String documentRef, String documentType) {
-    var type = documentType == null || documentType.isBlank() ? null : UnitRules.normalizeDocumentType(documentType);
+    var type =
+        documentType == null || documentType.isBlank()
+            ? null
+            : UnitRules.normalizeDocumentType(documentType);
     var rows =
-        sql.fetch(
-            "select s.id,s.line_no,s.sku_id,k.code as sku_code,s.role,s.unit_code,s.base_unit,"
-                + "s.quantity,s.quantity_per_base,s.base_quantity,s.source_conversion_id,"
-                + "s.effective_from,s.effective_to,s.occurred_at,s.created_at,s.document_type,"
-                + "s.document_ref"
-                + " from sku_unit_conversion_snapshot s"
-                + " join sku k on k.tenant_id=s.tenant_id and k.id=s.sku_id"
-                + " where s.document_ref=?" + (type == null ? "" : " and s.document_type=?")
-                + " order by s.document_type,s.line_no",
-            type == null ? new Object[] {documentRef} : new Object[] {documentRef, type})
+        sql
+            .fetch(
+                "select s.id,s.line_no,s.sku_id,k.code as sku_code,s.role,s.unit_code,s.base_unit,"
+                    + "s.quantity,s.quantity_per_base,s.base_quantity,s.source_conversion_id,"
+                    + "s.effective_from,s.effective_to,s.occurred_at,s.created_at,s.document_type,"
+                    + "s.document_ref"
+                    + " from sku_unit_conversion_snapshot s"
+                    + " join sku k on k.tenant_id=s.tenant_id and k.id=s.sku_id"
+                    + " where s.document_ref=?"
+                    + (type == null ? "" : " and s.document_type=?")
+                    + " order by s.document_type,s.line_no",
+                type == null ? new Object[] {documentRef} : new Object[] {documentRef, type})
             .stream()
             .map(r -> toSnapshotLine(r, false))
             .toList();
@@ -767,8 +786,7 @@ public class UnitConversionService {
                 + (type == null ? "" : " and document_type=?")
                 + " order by created_at desc limit 1",
             type == null ? new Object[] {documentRef} : new Object[] {documentRef, type});
-    String label =
-        head.get("document_type", String.class);
+    String label = head.get("document_type", String.class);
     return new UnitSnapshot(
         head.get("id", UUID.class),
         label,

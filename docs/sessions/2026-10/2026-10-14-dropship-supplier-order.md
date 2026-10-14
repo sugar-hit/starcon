@@ -48,15 +48,18 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/trade/src/main/resources/db/migration/V122__trade_dropship_order.sql`（五张表 + 索引 + 5 个触发器 + RLS + GRANT；零 ALTER 既有表）
 
 **后端**
+
 - `SupplierOrderGateway.java`（统一端口）、`SupplierOrderException.java`
 - `ManualEntrySupplierAdapter.java`（已接线）、`Alibaba1688SupplierAdapter.java`（默认未接线）
 - `DropshipOrderModels.java`、`DropshipOrderService.java`、`DropshipOrderController.java`
 - `DropshipOrderIntegrationTest.java`（28 例，Testcontainers PostgreSQL 16，连接池压到 1）
 
 **前端**
+
 - `apps/web/src/components/orders/dropship-order-model.ts` + `.test.ts`（31 例）
 - `apps/web/src/components/orders/dropship-order-workspace.tsx`
 - `apps/web/src/app/orders/fulfillment/dropship-orders/page.tsx`
@@ -64,6 +67,7 @@
 - `apps/web/src/lib/api-proxy.ts`（外科式最小追加 trade 段 `fulfillment/dropship-orders` 一组）
 
 **契约 / 台账**
+
 - `packages/api-contracts/src/contracts/trade.ts`（codegen 重生成）
 - `docs/product/capability-blueprint/module-progress.md`（仅 `| 9.6.1.2 |` 一行）
 

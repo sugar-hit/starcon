@@ -195,12 +195,11 @@ export function agingBasisText(
  * <p>仓库服务没有成本列，显示 0 会被读成「这些呆滞货不占资金」，
  * 那正是蓝图里说的「最容易被忽略的利润黑洞」被反向掩盖。
  */
-export function capitalTieText(
-  available: boolean | undefined,
-  reason?: string | null,
-): string {
+export function capitalTieText(available: boolean | undefined, reason?: string | null): string {
   if (available) return '占用资金已可估算';
-  return reason?.trim() ? `占用资金暂不可估算：${reason.trim()}` : '占用资金暂不可估算（缺少成本口径）';
+  return reason?.trim()
+    ? `占用资金暂不可估算：${reason.trim()}`
+    : '占用资金暂不可估算（缺少成本口径）';
 }
 
 /** 阈值来源文案：让「配成 60 天」与「没人配」在界面上分得开。 */

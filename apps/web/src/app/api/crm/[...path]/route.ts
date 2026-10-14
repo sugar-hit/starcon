@@ -1,4 +1,4 @@
-import { proxy } from '../../../../lib/api-proxy';
+import { routeProxy as proxy } from '../../../../lib/api-proxy';
 export const dynamic = 'force-dynamic';
 export const GET = proxy;
 export const POST = proxy;

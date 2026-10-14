@@ -18,18 +18,14 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 /**
  * 3.4.2.1 标题库：标题模板（变量占位）、标题词根字典、批量生成批次、候选选用与导出。
  *
- * <p>路由挂在 {@code /catalog/titles} 之下，与 {@code /catalog/media}（3.4.1.x）并列：
- * 素材是二进制资产、文案是文本资产，两者被 04 刊登同时引用，但维护节奏与责任人不同
- * （素材跟拍摄与供应商批次走，文案跟平台规则与关键词策略走）。
- * 台账里的 {@code /products/content} 是**前端页面路径**。
+ * <p>路由挂在 {@code /catalog/titles} 之下，与 {@code /catalog/media}（3.4.1.x）并列： 素材是二进制资产、文案是文本资产，两者被 04
+ * 刊登同时引用，但维护节奏与责任人不同 （素材跟拍摄与供应商批次走，文案跟平台规则与关键词策略走）。 台账里的 {@code /products/content} 是**前端页面路径**。
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：标题是挂在 SKU 上的
- * 商品文案、上游是 3.1.1.1 的 SPU/SKU，所以复用已有词表而不是新造
- * （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：标题是挂在 SKU 上的 商品文案、上游是 3.1.1.1 的
+ * SPU/SKU，所以复用已有词表而不是新造 （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  *
- * <p><b>生成接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同：
- * 这里的成本只与单个 SKU 内的候选数有关（重复度比较范围收在单 SKU 内），
- * 几百个 SKU 是几十毫秒。做成异步只会让运营为几百毫秒去盯进度条。
+ * <p><b>生成接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同： 这里的成本只与单个 SKU 内的候选数有关（重复度比较范围收在单 SKU 内）， 几百个 SKU
+ * 是几十毫秒。做成异步只会让运营为几百毫秒去盯进度条。
  */
 @RestController
 @RequestMapping("/catalog/titles")
@@ -92,10 +88,7 @@ public class TitleController {
     return call(auth, "spu.update", a -> service.saveTemplate(a, id, input));
   }
 
-  /**
-   * 删除模板。仍被生成批次引用时返回 400 并说明被引用几次——
-   * 要清理请改用停用（停用后不能再用它新建批次，历史标题与候选照常可读）。
-   */
+  /** 删除模板。仍被生成批次引用时返回 400 并说明被引用几次—— 要清理请改用停用（停用后不能再用它新建批次，历史标题与候选照常可读）。 */
   @DeleteMapping("/templates/{id}")
   public Map<String, Boolean> deleteTemplate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -179,8 +172,7 @@ public class TitleController {
   /**
    * 批量生成标题候选（同步，返回即已完成）。
    *
-   * <p>参数就是蓝图点名的三样：SKU 范围、平台、词根。
-   * 相似度超限的组合会被**拒绝**并给出原因，不会放宽阈值凑数。
+   * <p>参数就是蓝图点名的三样：SKU 范围、平台、词根。 相似度超限的组合会被**拒绝**并给出原因，不会放宽阈值凑数。
    */
   @PostMapping("/generations")
   public TitleGeneration generate(
@@ -235,7 +227,9 @@ public class TitleController {
     return call(
         auth,
         "spu.read",
-        a -> service.listRecords(new TitleRecordQuery(skuId, platform, status, keyword, generationId, page, size)));
+        a ->
+            service.listRecords(
+                new TitleRecordQuery(skuId, platform, status, keyword, generationId, page, size)));
   }
 
   /**

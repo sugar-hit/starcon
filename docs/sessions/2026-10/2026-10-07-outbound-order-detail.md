@@ -8,15 +8,15 @@
 
 理由：蓝图给 8.3.1.2 列的六段内容，逐段核对后**全部落在 8.3.1.1 的 V72 四张表里**：
 
-| 蓝图段落 | 真实来源 | 状态 |
-| --- | --- | --- |
-| 明细行 | `outbound_order_line` | 已有 |
-| 作业时间线 | `outbound_order_event`（append-only） | 已有 |
-| 已拣量 | `outbound_pick_request` 快照 + event 留痕 | 部分，**只是请求量不是实拣量** |
-| 已发量 | `outbound_order.status = SHIPPED` | 部分，SHIPPED 时可给真数 |
-| 关联销售订单 / 买家地址 | 只有 `source_external_ref` 字符串 | **不可得**（9 未交付） |
-| 预占引用 | 7.2.1 预占需求未交付 | **不可得** |
-| 包裹列表 | 8.3.4.1 发货交接未交付 | **不可得** |
+| 蓝图段落                | 真实来源                                  | 状态                           |
+| ----------------------- | ----------------------------------------- | ------------------------------ |
+| 明细行                  | `outbound_order_line`                     | 已有                           |
+| 作业时间线              | `outbound_order_event`（append-only）     | 已有                           |
+| 已拣量                  | `outbound_pick_request` 快照 + event 留痕 | 部分，**只是请求量不是实拣量** |
+| 已发量                  | `outbound_order.status = SHIPPED`         | 部分，SHIPPED 时可给真数       |
+| 关联销售订单 / 买家地址 | 只有 `source_external_ref` 字符串         | **不可得**（9 未交付）         |
+| 预占引用                | 7.2.1 预占需求未交付                      | **不可得**                     |
+| 包裹列表                | 8.3.4.1 发货交接未交付                    | **不可得**                     |
 
 预占引用归 7.2.1、包裹归 8.3.4.1、买家地址归 9 订单履约 —— 在这里建引用表就是给别人的事实抢第二个写入所有者（AGENTS.md）。上游交付后它们自己写入，本端点立即读到，**无需迁移**。
 
@@ -30,6 +30,7 @@
 
 **3. 四段不可得数据一律 `available=false`。**
 照 8.2.1.1 既有约定给 `ownerModule` + `href` + 原因。**刻意不猜 `ref_type` 去 join**：
+
 - `inventory_transaction` 有 `kind='RESERVE'` 预占流水，但引用键由预占侧自己定，当前没有任何指向出库单的形态；
 - `print_target`（V73 已交付）有 `carton_code` / `package_count`，但按 `external_ref` 字符串索引、与出库单无 FK。
 
@@ -44,29 +45,35 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V79__outbound_order_detail.sql` —— 只建一条索引 `(tenant_id, order_id, event_type)`
 
 **后端**
+
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/OutboundOrderDetailModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/OutboundOrderDetailService.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/OutboundOrderDetailController.java`
 
 **测试**
+
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/OutboundOrderDetailIntegrationTest.java` —— 20 项
 
 **前端**
+
 - `apps/web/src/app/warehouse/outbound/[id]/page.tsx`
 - `apps/web/src/components/inventory/outbound-order-detail.tsx`
 - `apps/web/src/components/inventory/outbound-order-detail-model.ts`
 - `apps/web/src/components/inventory/outbound-order-detail-model.test.ts`
 
 **共享文件（联合编辑，未替换他人分支）**
+
 - `apps/web/src/lib/api-proxy.ts` —— 对既有 `outbound-orders` 分支做**联合**：追加 `detail-capabilities` 与 `/{id}`，8.3.1.1 已登记的 `capabilities` / `pick-requests` / `print` / `cancel` / `{id}/transition` 五支**原样保留**
 - `apps/web/src/lib/api-proxy.test.ts` —— 既验新增两支放行，也**反验 8.3.1.1 已交付的分支没被改掉**
 - `apps/web/src/components/inventory/outbound-order-workspace.tsx` —— 单号可点进详情（8.3.1.1 的文件，只加链接不改行为）
 - `packages/api-contracts/` / `packages/sdk/` —— codegen 产物，未手改
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` —— 只改 8.3.1.2 那一行的「状态」「证据」两格
 
 ## 验证

@@ -145,7 +145,13 @@ export function closeHint(row: Pick<BomVersionRow, 'versionNo' | 'effectiveTo'>)
 }
 
 /** 发布后不可变的字段清单（界面上要逐条说清，而不是笼统一句「不能改」）。 */
-export const FROZEN_FIELDS = ['BOM 名称', '版本号', '生效起点', '组件清单（用量与损耗率）', '备注'] as const;
+export const FROZEN_FIELDS = [
+  'BOM 名称',
+  '版本号',
+  '生效起点',
+  '组件清单（用量与损耗率）',
+  '备注',
+] as const;
 
 /** 版本区间的可读写法。半开区间：[起点, 终点)，终点空 = 一直有效。 */
 export function rangeText(from: string | null, to: string | null): string {
@@ -360,7 +366,10 @@ export async function fetchVersion(id: string): Promise<BomVersionDetail> {
 }
 
 /** 单层需求量。结果是精确值不取整，`singleLevel` 决定要不要显示「不含子 BOM 里的料」。 */
-export async function fetchRequirement(versionId: string, outputQuantity: string): Promise<BomRequirement> {
+export async function fetchRequirement(
+  versionId: string,
+  outputQuantity: string,
+): Promise<BomRequirement> {
   return api<BomRequirement>(
     `catalog/bom-versions/${versionId}/requirement?outputQuantity=${encodeURIComponent(outputQuantity)}`,
   );
@@ -687,7 +696,8 @@ export async function explodeBom(filter: ExplosionFilter): Promise<BomExplosionR
     outputQuantity: Number(filter.outputQuantity),
     warehouseId: filter.warehouseId,
     asOf: filter.asOf,
-    maxDepth: filter.maxDepth === null || filter.maxDepth.trim() === '' ? null : Number(filter.maxDepth),
+    maxDepth:
+      filter.maxDepth === null || filter.maxDepth.trim() === '' ? null : Number(filter.maxDepth),
     note: filter.note,
   });
 }

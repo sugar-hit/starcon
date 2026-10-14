@@ -118,7 +118,11 @@ export function customerTermsQuery(params: {
   return parts.length ? `?${parts.join('&')}` : '';
 }
 
-export function priceBooksQuery(params: { customerLevel?: string; skuId?: string; size?: number }): string {
+export function priceBooksQuery(params: {
+  customerLevel?: string;
+  skuId?: string;
+  size?: number;
+}): string {
   const parts: string[] = [];
   if (params.customerLevel) parts.push(`customerLevel=${encodeURIComponent(params.customerLevel)}`);
   if (params.skuId) parts.push(`skuId=${encodeURIComponent(params.skuId)}`);

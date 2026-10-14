@@ -18,42 +18,33 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.1.2.2 库位自动分配。
  *
- * <p>蓝图：「按规则为入库商品推荐库位：同品类聚类、最短上架路径、容量与承重匹配、
- * 待检/残次专用库位强制规则。输入：入库 SKU 与数量；库位属性与占用；路径距离。
- * 输出：推荐库位列表（带推荐理由）。」关系段红线：「**质量状态决定库位类型**：
- * 残次品入残次库位是硬规则，不允许混放。」
+ * <p>蓝图：「按规则为入库商品推荐库位：同品类聚类、最短上架路径、容量与承重匹配、 待检/残次专用库位强制规则。输入：入库 SKU 与数量；库位属性与占用；路径距离。
+ * 输出：推荐库位列表（带推荐理由）。」关系段红线：「**质量状态决定库位类型**： 残次品入残次库位是硬规则，不允许混放。」
  *
  * <p><b>规则分两类：硬规则做过滤，排序规则做打分。</b>
  *
  * <ol>
- *   <li><b>硬规则</b>（不满足就<b>不进候选</b>，不是排在后面扣分）：质量状态推出的库位类型
- *       （V106 触发器 {@code guard_location_allocation_placement} 是权威判据）、
- *       库位启用、同仓、容量/承重不超限、该行尚未被指派。把残次品放进存储位是硬规则错误，
+ *   <li><b>硬规则</b>（不满足就<b>不进候选</b>，不是排在后面扣分）：质量状态推出的库位类型 （V106 触发器 {@code
+ *       guard_location_allocation_placement} 是权威判据）、 库位启用、同仓、容量/承重不超限、该行尚未被指派。把残次品放进存储位是硬规则错误，
  *       而不是一个「不太推荐」的选项 —— 所以它不能出现在候选列表里等人点。
  *   <li><b>排序规则</b>（只影响先后）：同品类聚类、最短上架路径、容量与承重余量、空库位。
  * </ol>
  *
- * <p><b>score = 各条理由的权重之和。</b>这不是巧合而是刻意的：{@link LocationAllocationReason}
- * 里带 weight，所以「它为什么排第一」逐条加起来就是那个 score，不需要额外解释一个算不出
- * 来的数字。无法判定的规则（库位没量过容量 / 调用方没给需求容量）给 <b>0 分并带一条
- * CAPACITY_UNKNOWN / WEIGHT_UNKNOWN 说明</b> —— 「没量过」既不加分也不减分，
- * 悄悄按「够」处理才是把不确定性伪装成结论。
+ * <p><b>score = 各条理由的权重之和。</b>这不是巧合而是刻意的：{@link LocationAllocationReason} 里带
+ * weight，所以「它为什么排第一」逐条加起来就是那个 score，不需要额外解释一个算不出 来的数字。无法判定的规则（库位没量过容量 / 调用方没给需求容量）给 <b>0 分并带一条
+ * CAPACITY_UNKNOWN / WEIGHT_UNKNOWN 说明</b> —— 「没量过」既不加分也不减分， 悄悄按「够」处理才是把不确定性伪装成结论。
  *
- * <p><b>「同品类」不是 catalog 类目。</b>catalog 的类目树（3.3.1.1）未开发，且 AGENTS.md
- * 禁止把上游权威列复制成本地列（sku_ref 明文不存类目）。所以聚类信号取自
- * {@code stock_bucket} 的<b>真实共置关系</b>：这个库位上已有的 SKU 里，有多少个
- * 历史上与入库这批货同过别的库位。这是本服务内可得的真信号，但它不等于 catalog 类目，
- * 所以 {@link LocationAllocationCapabilities} 里 {@code catalogCategoryAvailable=false}
- * 如实标出来。
+ * <p><b>「同品类」不是 catalog 类目。</b>catalog 的类目树（3.3.1.1）未开发，且 AGENTS.md 禁止把上游权威列复制成本地列（sku_ref
+ * 明文不存类目）。所以聚类信号取自 {@code stock_bucket} 的<b>真实共置关系</b>：这个库位上已有的 SKU 里，有多少个
+ * 历史上与入库这批货同过别的库位。这是本服务内可得的真信号，但它不等于 catalog 类目， 所以 {@link LocationAllocationCapabilities} 里 {@code
+ * catalogCategoryAvailable=false} 如实标出来。
  *
- * <p><b>「路径距离」是库位树跳数，不是巷道路径长度。</b>按 V105 的 {@code parent_id}
- * 树算「源库位 → 目标库位」的跳数：两者的最近公共祖先深度用<b>路径共有段数</b>求
- * （库位编码在仓内唯一，所以共有段数就是 LCA 层号），距离 = depth(src)+depth(dst)-2×LCA。
+ * <p><b>「路径距离」是库位树跳数，不是巷道路径长度。</b>按 V105 的 {@code parent_id} 树算「源库位 →
+ * 目标库位」的跳数：两者的最近公共祖先深度用<b>路径共有段数</b>求 （库位编码在仓内唯一，所以共有段数就是 LCA 层号），距离 = depth(src)+depth(dst)-2×LCA。
  * 真正的巷道路径图属 8.3.2.1，未交付，capabilities 里 {@code routingGraphAvailable=false}。
  *
- * <p><b>容量口径只覆盖本模块承诺过的量。</b>capacity 是体积单位而 stock_bucket.on_hand 是件数，
- * 本服务没有「每个 SKU 占多少体积」的真相来源，拿件数凑利用率是单位错配。所以
- * {@code remainingCapacity = capacity − 本模块未取消决策已承诺的容量}，而「库位上既有库存
+ * <p><b>容量口径只覆盖本模块承诺过的量。</b>capacity 是体积单位而 stock_bucket.on_hand 是件数， 本服务没有「每个 SKU
+ * 占多少体积」的真相来源，拿件数凑利用率是单位错配。所以 {@code remainingCapacity = capacity − 本模块未取消决策已承诺的容量}，而「库位上既有库存
  * 占了多少体积」如实标成不可判定（{@code stockVolumeAvailable=false}）。
  *
  * <p><b>租户谓词每条查询都写。</b>RLS 是第一道，显式 {@code tenant_id=} 是第二道。
@@ -99,10 +90,8 @@ public class LocationAllocationService {
   /**
    * 能力声明。
    *
-   * <p>四条 {@code false} 都是本服务**真的拿不到**的东西，逐条写明理由：
-   * catalog 类目树未开发且禁止本地复制（聚类改用 stock_bucket 真实共置）、
-   * 巷道路径图归 8.3.2.1（距离改用库位树跳数）、既有库存的体积口径无真相来源
-   * （容量只覆盖本模块承诺量）、上架任务归 8.2.2.1。
+   * <p>四条 {@code false} 都是本服务**真的拿不到**的东西，逐条写明理由： catalog 类目树未开发且禁止本地复制（聚类改用 stock_bucket 真实共置）、
+   * 巷道路径图归 8.3.2.1（距离改用库位树跳数）、既有库存的体积口径无真相来源 （容量只覆盖本模块承诺量）、上架任务归 8.2.2.1。
    */
   public LocationAllocationCapabilities capabilities() {
     return new LocationAllocationCapabilities(
@@ -136,13 +125,11 @@ public class LocationAllocationService {
   /**
    * 为一张收货单的入库明细推荐库位。
    *
-   * <p>推荐是<b>纯计算</b>，不落库 —— 落库的只有人真正选定的那个库位
-   * （见 {@link #confirm}）。原因写在 V106 文件头：候选列表没人消费，逐次落库只会
+   * <p>推荐是<b>纯计算</b>，不落库 —— 落库的只有人真正选定的那个库位 （见 {@link #confirm}）。原因写在 V106 文件头：候选列表没人消费，逐次落库只会
    * 在用户点两下的功夫里刷出几百行垃圾数据。
    *
-   * @param requiredCapacity / requiredWeight 调用方量出来的这批货要占多少容量/承重。
-   *     <b>可空 = 未量过</b>：此时容量与承重规则判不了，服务层会把 evaluated 标成
-   *     false 并写明原因，而不是当成「够」
+   * @param requiredCapacity / requiredWeight 调用方量出来的这批货要占多少容量/承重。 <b>可空 =
+   *     未量过</b>：此时容量与承重规则判不了，服务层会把 evaluated 标成 false 并写明原因，而不是当成「够」
    */
   public List<LocationAllocationLinePlan> recommend(LocationAllocationRecommendInput input) {
     if (input == null || input.receiptId() == null) {
@@ -225,8 +212,7 @@ public class LocationAllocationService {
           + "」且容量承重不超限的启用库位：先在库位树（8.1.2.1）里建出对应类型的库位，"
           + "再回来推荐。";
     }
-    return "候选按推荐分倒序，score 等于各条理由权重之和；"
-        + "容量与承重无法判定的库位给 0 分并单独标注，既不加分也不当成通过。";
+    return "候选按推荐分倒序，score 等于各条理由权重之和；" + "容量与承重无法判定的库位给 0 分并单独标注，既不加分也不当成通过。";
   }
 
   /**
@@ -235,14 +221,12 @@ public class LocationAllocationService {
    * <p>纪律：
    *
    * <ol>
-   *   <li>结构来自递归 CTE，只带层级字段；占用与承诺都是<b>标量子查询</b>按
-   *       {@code location_id} 收口 —— 在递归项里 join stock_bucket / location_allocation
-   *       会让同一库位随明细行数重复，聚类计数被放大（与 8.1.1.1 / 8.1.1.2 / 8.1.2.1 同纪律）。
-   *   <li>距离用<b>路径共有段数</b>当 LCA 层号：库位编码在仓内唯一
-   *       （{@code UNIQUE(tenant_id,warehouse_id,code)}），所以两条路径共有的段
-   *       必然就是公共祖先链上的段。distance = depth(src)+depth(dst)-2×共有段数。
-   *   <li>聚类排除「同在本库位」的情形：真正的信号是<b>别的</b>库位上的历史共置。
-   *       入库这批货已经在本库位的情况单独由 same_sku_here 表达。
+   *   <li>结构来自递归 CTE，只带层级字段；占用与承诺都是<b>标量子查询</b>按 {@code location_id} 收口 —— 在递归项里 join stock_bucket
+   *       / location_allocation 会让同一库位随明细行数重复，聚类计数被放大（与 8.1.1.1 / 8.1.1.2 / 8.1.2.1 同纪律）。
+   *   <li>距离用<b>路径共有段数</b>当 LCA 层号：库位编码在仓内唯一 （{@code
+   *       UNIQUE(tenant_id,warehouse_id,code)}），所以两条路径共有的段 必然就是公共祖先链上的段。distance =
+   *       depth(src)+depth(dst)-2×共有段数。
+   *   <li>聚类排除「同在本库位」的情形：真正的信号是<b>别的</b>库位上的历史共置。 入库这批货已经在本库位的情况单独由 same_sku_here 表达。
    * </ol>
    */
   private Scored candidates(
@@ -354,12 +338,12 @@ public class LocationAllocationService {
       // 硬规则：容量/承重**超限**就不进候选。装不下的库位不是「差一点的推荐」，
       // 是错的答案 —— 把它留在列表里等人点，等于把硬约束伪装成建议。
       boolean capacityEvaluated = needCapacity != null && capacity != null;
-      BigDecimal remainingCapacity =
-          capacity == null ? null : capacity.subtract(committedCapacity);
+      BigDecimal remainingCapacity = capacity == null ? null : capacity.subtract(committedCapacity);
       if (capacityEvaluated && needCapacity.compareTo(remainingCapacity) > 0) continue;
 
       boolean weightEvaluated = needWeight != null && weightLimit != null;
-      BigDecimal remainingWeight = weightLimit == null ? null : weightLimit.subtract(committedWeight);
+      BigDecimal remainingWeight =
+          weightLimit == null ? null : weightLimit.subtract(committedWeight);
       if (weightEvaluated && needWeight.compareTo(remainingWeight) > 0) continue;
 
       ScoreCard scored = new ScoreCard();
@@ -413,9 +397,11 @@ public class LocationAllocationService {
     // 排序在 Java 侧做，因为 score 由多条规则累加而成（SQL 侧排序拿不到理由列表）。
     // 分数相同再按「路径短 → 聚类多 → 编码」逐级 tie-break，保证同一输入结果稳定可复现。
     eligible.sort(
-        Comparator.comparingInt(LocationAllocationCandidate::score).reversed()
+        Comparator.comparingInt(LocationAllocationCandidate::score)
+            .reversed()
             .thenComparingInt(LocationAllocationCandidate::distance)
-            .thenComparing(Comparator.comparingLong(LocationAllocationCandidate::affinitySkus).reversed())
+            .thenComparing(
+                Comparator.comparingLong(LocationAllocationCandidate::affinitySkus).reversed())
             .thenComparing(LocationAllocationCandidate::code));
 
     long eligibleCount = eligible.size();
@@ -430,11 +416,10 @@ public class LocationAllocationService {
   /**
    * 打分累加器：<b>score 恒等于各条理由权重之和</b>。
    *
-   * <p>{@link #note} 记的是「无法判定 / 需要知道」这类说明，权重恒为 0 ——
-   * 既不加分也不扣分。把「没量过」按「够」处理才是把不确定性伪装成结论。
+   * <p>{@link #note} 记的是「无法判定 / 需要知道」这类说明，权重恒为 0 —— 既不加分也不扣分。把「没量过」按「够」处理才是把不确定性伪装成结论。
    *
-   * <p>刻意做成 {@code Service} 内部的私有类而不是 Models 里的 record：它不进任何
-   * 响应体，springdoc 不会把它扫成 schema，也就不存在与别人的 record 撞名的风险。
+   * <p>刻意做成 {@code Service} 内部的私有类而不是 Models 里的 record：它不进任何 响应体，springdoc 不会把它扫成 schema，也就不存在与别人的
+   * record 撞名的风险。
    */
   private static final class ScoreCard {
     private int score;
@@ -463,12 +448,10 @@ public class LocationAllocationService {
   /**
    * 选定一个库位，落成一条上架决策。
    *
-   * <p><b>分数与理由不采信调用方。</b>入参里根本没有这两个字段 —— 它们由服务端按同一套
-   * 规则重算并冻结成快照，否则「推荐理由」就成了一条可以随便编的字段。
+   * <p><b>分数与理由不采信调用方。</b>入参里根本没有这两个字段 —— 它们由服务端按同一套 规则重算并冻结成快照，否则「推荐理由」就成了一条可以随便编的字段。
    *
    * <p>DB 触发器 {@code guard_location_allocation_placement} 是权威判据（硬规则、
-   * 不许混放、容量不得超占、同一行不得双指派）；应用层先查一遍只为给出可读的中文报错。
-   * 两道都要：只做应用层检查的话，运维脚本或别的写入口照样能把残次品放进存储位。
+   * 不许混放、容量不得超占、同一行不得双指派）；应用层先查一遍只为给出可读的中文报错。 两道都要：只做应用层检查的话，运维脚本或别的写入口照样能把残次品放进存储位。
    */
   @Transactional
   public LocationAllocationSaved confirm(LocationAllocationConfirmInput input, UUID actorId) {
@@ -490,13 +473,10 @@ public class LocationAllocationService {
     BigDecimal outstanding = received.subtract(alreadyAllocated);
 
     BigDecimal quantity =
-        input.allocateQuantity() == null
-            ? outstanding
-            : nonNegative(input.allocateQuantity());
+        input.allocateQuantity() == null ? outstanding : nonNegative(input.allocateQuantity());
     if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "上架数量必须大于 0：该明细行累计实收 " + received + "，已被指派 " + alreadyAllocated);
+          HttpStatus.CONFLICT, "上架数量必须大于 0：该明细行累计实收 " + received + "，已被指派 " + alreadyAllocated);
     }
     if (quantity.compareTo(outstanding) > 0) {
       throw new ResponseStatusException(
@@ -521,8 +501,7 @@ public class LocationAllocationService {
     var target = locationRow(warehouseId, input.locationId());
     if (target == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "目标库位不存在");
     if (!"ACTIVE".equals(target.get("status", String.class))) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "目标库位已停用，不能接上架");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "目标库位已停用，不能接上架");
     }
     WarehouseLocationTreeModels.LocationType targetType =
         WarehouseLocationTreeModels.LocationType.of(target.get("type", String.class));
@@ -539,8 +518,7 @@ public class LocationAllocationService {
               + mixNote(rule));
     }
     if (input.locationId().equals(sourceLocationId)) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "目标库位就是货当前所在的库位，没有发生移动");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "目标库位就是货当前所在的库位，没有发生移动");
     }
 
     // 决策快照：距离与聚化命中数在落库这一刻定住，之后库位占用会变，只有快照留得住。
@@ -569,8 +547,12 @@ public class LocationAllocationService {
         sourceLocationId,
         input.locationId(),
         quantity,
-        needCapacity == null ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class) : needCapacity,
-        needWeight == null ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class) : needWeight,
+        needCapacity == null
+            ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
+            : needCapacity,
+        needWeight == null
+            ? org.jooq.impl.DSL.val((BigDecimal) null, BigDecimal.class)
+            : needWeight,
         distance,
         affinitySkus,
         requiredType.name(),
@@ -588,10 +570,7 @@ public class LocationAllocationService {
         ruleSummary,
         // createdAt 从库里读回来（而不是回显一个本地 new 出来的时间）：
         // timestamptz 的真实写回值是唯一可信的那一个。
-        sql.fetchOne(
-                "select created_at from location_allocation"
-                    + " where id = ?::uuid",
-                id)
+        sql.fetchOne("select created_at from location_allocation" + " where id = ?::uuid", id)
             .get("created_at", OffsetDateTime.class),
         null,
         "上架决策已选定。8.2.2.1 上架任务尚未交付，此刻还没有下游消费它。");
@@ -613,8 +592,7 @@ public class LocationAllocationService {
             actorId,
             allocationId);
     if (updated == 0) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "只有「已选定」状态的决策可以释放");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "只有「已选定」状态的决策可以释放");
     }
     return saved(allocationId, "已释放，等待 8.2.2.1 上架任务消费。");
   }
@@ -622,8 +600,7 @@ public class LocationAllocationService {
   /**
    * 撤销上架决策。
    *
-   * <p><b>必须带原因</b>（V106 的 CHECK 也会拒）——「为什么撤掉这个决定」是现场复盘的必答题。
-   * 撤销后该行可以重新指派（部分唯一索引只约束未取消的决策）。
+   * <p><b>必须带原因</b>（V106 的 CHECK 也会拒）——「为什么撤掉这个决定」是现场复盘的必答题。 撤销后该行可以重新指派（部分唯一索引只约束未取消的决策）。
    */
   @Transactional
   public LocationAllocationSaved cancel(UUID allocationId, LocationAllocationCancelInput input) {
@@ -651,17 +628,26 @@ public class LocationAllocationService {
   /** 某张收货单上的全部上架决策（8.2.2.1 未来按收货单拉上架清单就是这一条）。 */
   public List<LocationAllocationDecision> byReceipt(UUID receiptId) {
     requireReceipt(receiptId);
-    return sql.fetch(DECISION_SQL + " where a.tenant_id = current_setting('app.current_tenant', true)::uuid"
-        + " and a.receipt_id = ?::uuid order by a.created_at desc, a.id",
-        receiptId).stream().map(LocationAllocationService::decision).toList();
+    return sql
+        .fetch(
+            DECISION_SQL
+                + " where a.tenant_id = current_setting('app.current_tenant', true)::uuid"
+                + " and a.receipt_id = ?::uuid order by a.created_at desc, a.id",
+            receiptId)
+        .stream()
+        .map(LocationAllocationService::decision)
+        .toList();
   }
 
   /** 决策清单（真分页 + 排序白名单）。合计**不受分页与筛选影响**。 */
   public LocationAllocationPage list(LocationAllocationQuery query) {
-    LocationAllocationQuery q = query == null ? new LocationAllocationQuery(null, null, null, null, null, null, null) : query;
+    LocationAllocationQuery q =
+        query == null
+            ? new LocationAllocationQuery(null, null, null, null, null, null, null)
+            : query;
 
-    StringBuilder where = new StringBuilder(
-        " where a.tenant_id = current_setting('app.current_tenant', true)::uuid");
+    StringBuilder where =
+        new StringBuilder(" where a.tenant_id = current_setting('app.current_tenant', true)::uuid");
     List<Object> args = new ArrayList<>();
     if (q.warehouseId() != null) {
       where.append(" and a.warehouse_id = ?::uuid");
@@ -676,7 +662,8 @@ public class LocationAllocationService {
       args.add(PlacementRule.of(q.qualityRole()).name());
     }
     if (q.keyword() != null && !q.keyword().isBlank()) {
-      where.append(" and (a.rule_summary like ? or k.code like ? or k.name like ? or l.code like ? or l.name like ? or r.receipt_code like ?)");
+      where.append(
+          " and (a.rule_summary like ? or k.code like ? or k.name like ? or l.code like ? or l.name like ? or r.receipt_code like ?)");
       String kw = "%" + q.keyword().trim() + "%";
       args.add(kw);
       args.add(kw);
@@ -721,10 +708,11 @@ public class LocationAllocationService {
 
     int size = clamp(q.size(), 20, MAX_PAGE_SIZE);
     int page = q.page() == null || q.page() < 1 ? 1 : q.page();
-    int idx = SORT_KEYS.indexOf(
-        q.sort() == null || q.sort().isBlank()
-            ? "CREATED_AT"
-            : q.sort().trim().toUpperCase(Locale.ROOT));
+    int idx =
+        SORT_KEYS.indexOf(
+            q.sort() == null || q.sort().isBlank()
+                ? "CREATED_AT"
+                : q.sort().trim().toUpperCase(Locale.ROOT));
     if (idx < 0) {
       throw new IllegalArgumentException(
           "排序键不在白名单内：" + q.sort() + "（可用：" + String.join(" / ", SORT_KEYS) + "）");
@@ -750,14 +738,15 @@ public class LocationAllocationService {
             totalsRow == null ? 0L : count(totalsRow, "cancelled"),
             totalsRow == null ? 0L : count(totalsRow, "defective"),
             totalsRow == null ? 0L : count(totalsRow, "pending"),
-            totalsRow == null ? BigDecimal.ZERO : nz(totalsRow.get("allocate_quantity", BigDecimal.class)),
+            totalsRow == null
+                ? BigDecimal.ZERO
+                : nz(totalsRow.get("allocate_quantity", BigDecimal.class)),
             totalsRow == null ? 0L : count(totalsRow, "coverage_lines")),
         rows.stream().map(LocationAllocationService::decision).toList(),
         total,
         page,
         size,
-        "筛选与排序都作用在本租户的行上（RLS + 显式 tenant_id 双重）；"
-            + "合计不受分页影响；容量与承重只看本模块已承诺的量。");
+        "筛选与排序都作用在本租户的行上（RLS + 显式 tenant_id 双重）；" + "合计不受分页影响；容量与承重只看本模块已承诺的量。");
   }
 
   /** 决策行公共 SELECT：一条 SQL 供 byReceipt 与 list 复用，两个口径不可能各算各的。 */
@@ -837,7 +826,8 @@ public class LocationAllocationService {
   private LocationAllocationSaved saved(UUID id, String note) {
     var row =
         sql.fetchOne(
-            DECISION_SQL + " where a.tenant_id = current_setting('app.current_tenant', true)::uuid and a.id = ?::uuid",
+            DECISION_SQL
+                + " where a.tenant_id = current_setting('app.current_tenant', true)::uuid and a.id = ?::uuid",
             id);
     if (row == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "上架决策不存在");
     var d = decision(row);
@@ -913,8 +903,7 @@ public class LocationAllocationService {
   /**
    * 源库位：最近一次实收事件落在哪个库位（8.2.1.1 的 {@code goods_receipt_event.location_id}）。
    *
-   * <p><b>必须有。</b>「最短上架路径」要一个起点，没有起点就算不出距离。与其给一个
-   * 编出来的距离（0 或 -1），不如说清楚：这批货还没有任何实收记录，没有可计算的上架起点。
+   * <p><b>必须有。</b>「最短上架路径」要一个起点，没有起点就算不出距离。与其给一个 编出来的距离（0 或 -1），不如说清楚：这批货还没有任何实收记录，没有可计算的上架起点。
    */
   private UUID resolveSourceLocation(UUID receiptId, UUID warehouseId) {
     var row =
@@ -933,14 +922,12 @@ public class LocationAllocationService {
     if (row == null) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "该收货单还没有任何实收记录，没有可计算的上架起点库位："
-              + "先在 8.2.1.1 收货单里登记实收（实收必须落到一个库位），再回来做上架推荐。");
+          "该收货单还没有任何实收记录，没有可计算的上架起点库位：" + "先在 8.2.1.1 收货单里登记实收（实收必须落到一个库位），再回来做上架推荐。");
     }
     UUID locationId = row.get("location_id", UUID.class);
     UUID locWarehouse = row.get("loc_warehouse", UUID.class);
     if (!warehouseId.equals(locWarehouse)) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "该收货单的实收库位属于另一个仓库，与收货单仓库不一致，请先修正数据");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "该收货单的实收库位属于另一个仓库，与收货单仓库不一致，请先修正数据");
     }
     return locationId;
   }
@@ -963,7 +950,8 @@ public class LocationAllocationService {
     return countOfLocations(warehouseId, type, null);
   }
 
-  private long countOfLocations(UUID warehouseId, WarehouseLocationTreeModels.LocationType type, String status) {
+  private long countOfLocations(
+      UUID warehouseId, WarehouseLocationTreeModels.LocationType type, String status) {
     var row =
         sql.fetchOne(
             """
@@ -972,7 +960,8 @@ public class LocationAllocationService {
                and warehouse_id = ?::uuid and type = ?
             """
                 + (status == null ? "" : " and status = ?"),
-            status == null ? new Object[] {warehouseId, type.name()}
+            status == null
+                ? new Object[] {warehouseId, type.name()}
                 : new Object[] {warehouseId, type.name(), status});
     return row == null ? 0L : count(row, "n");
   }
@@ -1019,8 +1008,7 @@ public class LocationAllocationService {
   /**
    * 两个库位之间的树跳数（V105 的 {@code parent_id} 树）。
    *
-   * <p>LCA 层号 = 两条路径<b>共有段数</b>（库位编码在仓内唯一，所以共有段必然落在公共祖先链上）。
-   * 距离 = depth(a) + depth(b) − 2×LCA。
+   * <p>LCA 层号 = 两条路径<b>共有段数</b>（库位编码在仓内唯一，所以共有段必然落在公共祖先链上）。 距离 = depth(a) + depth(b) − 2×LCA。
    */
   private int distanceBetween(UUID warehouseId, UUID from, UUID to) {
     var row =
@@ -1048,15 +1036,15 @@ public class LocationAllocationService {
             from,
             to);
     if (row == null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "源库位与目标库位不在同一棵库位树上，算不出上架路径");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "源库位与目标库位不在同一棵库位树上，算不出上架路径");
     }
     Integer d = row.get("distance", Integer.class);
     return d == null ? 0 : d;
   }
 
   /** 入库这批货与目标库位上已有 SKU 的历史共置数（决策快照用）。 */
-  private long affinitySkus(UUID warehouseId, UUID sourceLocationId, UUID locationId, org.jooq.Record line) {
+  private long affinitySkus(
+      UUID warehouseId, UUID sourceLocationId, UUID locationId, org.jooq.Record line) {
     var row =
         sql.fetchOne(
             """
@@ -1099,8 +1087,7 @@ public class LocationAllocationService {
 
   private static String mixNote(PlacementRule rule) {
     return switch (rule) {
-      case DEFECTIVE ->
-          "残次品混进非残次库位会跟着正常品一起被拣走发出去，蓝图明确禁止";
+      case DEFECTIVE -> "残次品混进非残次库位会跟着正常品一起被拣走发出去，蓝图明确禁止";
       case PENDING_INSPECTION -> "待检品混进非待检库位等于未过质检就进了可发货区";
       case SELLABLE -> "质量状态与库位类型不一致会让「这批货在不在待检区」永远答不出来";
     };

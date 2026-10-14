@@ -172,7 +172,10 @@ describe('组件行的展示', () => {
   });
 
   it('清单总结带上合计与嵌套数量', () => {
-    const rows = [item({ quantity: 2 }), item({ quantity: 0.5, nested: true, linkedBundleCode: 'BND-B' })];
+    const rows = [
+      item({ quantity: 2 }),
+      item({ quantity: 0.5, nested: true, linkedBundleCode: 'BND-B' }),
+    ];
     const summary = componentSummary(rows, 2.5, 1);
     expect(summary).toContain('2 个组件');
     expect(summary).toContain('每件合计 2.5');
@@ -190,8 +193,9 @@ describe('组件行的展示', () => {
 describe('校验结果按问题码分组', () => {
   it('通过时说清「没有发现问题」，不通过时给剩余条数', () => {
     expect(checkSummary(check())).toContain('没有发现');
-    expect(checkSummary(check({ ok: false, problems: [problem('QUANTITY_INVALID')] })))
-      .toContain('1 条问题');
+    expect(checkSummary(check({ ok: false, problems: [problem('QUANTITY_INVALID')] }))).toContain(
+      '1 条问题',
+    );
   });
 
   it('按 PROBLEM_CODES 的顺序分组：先结构性、后具体行', () => {

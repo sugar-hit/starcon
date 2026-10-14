@@ -18,38 +18,31 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.3.1.2 出库单详情：把一屏之内该看到的东西聚到一处，**详情页串联整条出库链路**。
  *
- * <p>蓝图原话：「单出库单作业视图：明细行与已拣/已发量、关联销售订单与买家地址、预占引用、
- * 包裹列表、作业时间线。」输出：「详情 + 作业操作入口。」
+ * <p>蓝图原话：「单出库单作业视图：明细行与已拣/已发量、关联销售订单与买家地址、预占引用、 包裹列表、作业时间线。」输出：「详情 + 作业操作入口。」
  *
- * <p><b>本模块不拥有任何事实表，是纯读投影</b>。8.3.1.1 的 V72 已经建好四张表（单头 /
- * 明细计划快照 / 拣货交接请求 / 作业留痕），蓝图给本模块列的六段内容逐段核对下来全部落在
- * 那四张表里，所以这里**不建占位表** —— 预占引用归 7.2.1、包裹归 8.3.4.1、买家地址归 9 订单履约，
- * 在这里建一张「引用表」就是给别人的事实抢第二个写入所有者。上游交付后它们自己写入，
- * 本端点立即读到，无需迁移。
+ * <p><b>本模块不拥有任何事实表，是纯读投影</b>。8.3.1.1 的 V72 已经建好四张表（单头 / 明细计划快照 / 拣货交接请求 /
+ * 作业留痕），蓝图给本模块列的六段内容逐段核对下来全部落在 那四张表里，所以这里**不建占位表** —— 预占引用归 7.2.1、包裹归 8.3.4.1、买家地址归 9 订单履约，
+ * 在这里建一张「引用表」就是给别人的事实抢第二个写入所有者。上游交付后它们自己写入， 本端点立即读到，无需迁移。
  *
  * <p><b>两个数量口径必须分开说，这是本模块最要紧的地方：</b>
  *
  * <ul>
- *   <li><b>已拣量</b>：8.3.1.1 刻意没建 picking_task（归 8.3.2.1），它只做到
- *       {@code outbound_pick_request} 交接为止 —— 那是**请求量快照**，不是实拣量。所以逐行
- *       {@code pickedQuantity} 恒为 {@code null}，<b>不是 0</b>。填 0 会让作业员以为「一件都没拣」，
- *       那是假数字，比不显示更危险。可给的最强信号是「是否已交接」与「是否已离开待拣」。
- *   <li><b>已发量</b>：归 8.3.4.1，但 {@code status = SHIPPED} 是终态且 DB 层冻结（V72 §4.2），
- *       而明细行是不可改的计划快照（V72 §4.4）—— 所以在这张单上「已发量 = 计划件数」<b>成立</b>。
- *       仅在 SHIPPED 时填值，其余状态一律 {@code null}：绝不按拣货进度推算发货进度。
+ *   <li><b>已拣量</b>：8.3.1.1 刻意没建 picking_task（归 8.3.2.1），它只做到 {@code outbound_pick_request} 交接为止 ——
+ *       那是**请求量快照**，不是实拣量。所以逐行 {@code pickedQuantity} 恒为 {@code null}，<b>不是 0</b>。填 0
+ *       会让作业员以为「一件都没拣」， 那是假数字，比不显示更危险。可给的最强信号是「是否已交接」与「是否已离开待拣」。
+ *   <li><b>已发量</b>：归 8.3.4.1，但 {@code status = SHIPPED} 是终态且 DB 层冻结（V72 §4.2）， 而明细行是不可改的计划快照（V72
+ *       §4.4）—— 所以在这张单上「已发量 = 计划件数」<b>成立</b>。 仅在 SHIPPED 时填值，其余状态一律 {@code null}：绝不按拣货进度推算发货进度。
  * </ul>
  *
- * <p><b>状态机只有一处真相</b>：作业操作入口直接取 {@link OutboundOrderStatus#transitionsFrom()}，
- * 与 8.3.1.1 共用同一个转换矩阵，**不另写一份**；V72 的触发器在库层是同一张白名单的 DB 实现。
+ * <p><b>状态机只有一处真相</b>：作业操作入口直接取 {@link OutboundOrderStatus#transitionsFrom()}， 与 8.3.1.1
+ * 共用同一个转换矩阵，**不另写一份**；V72 的触发器在库层是同一张白名单的 DB 实现。
  *
- * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 后面一定还跟着别的绑定，cast 不落在绑定序列末位
- * （与 7.1.2.2 / 8.3.1.1 同一条）。读 timestamptz 列走 {@link #moment}，它对驱动返回的三种类型
- * （OffsetDateTime / Instant / Timestamp）都收口 —— 直接 get(field, OffsetDateTime.class) 会在
- * 拿到 Instant 时抛 ClassCastException。
+ * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 后面一定还跟着别的绑定，cast 不落在绑定序列末位 （与 7.1.2.2 / 8.3.1.1 同一条）。读
+ * timestamptz 列走 {@link #moment}，它对驱动返回的三种类型 （OffsetDateTime / Instant / Timestamp）都收口 —— 直接
+ * get(field, OffsetDateTime.class) 会在 拿到 Instant 时抛 ClassCastException。
  *
- * <p><b>多租户</b>：每条 SQL 都带 {@code tenant_id = ?} 显式条件（RLS 之外的第一道闸），
- * 租户由 {@code app.current_tenant} 取 —— 它由 AccessService 在事务内从**已认证身份的成员关系**
- * 设置，客户端的 {@code X-Tenant-Id} 头进不来也改不动它。
+ * <p><b>多租户</b>：每条 SQL 都带 {@code tenant_id = ?} 显式条件（RLS 之外的第一道闸）， 租户由 {@code app.current_tenant} 取
+ * —— 它由 AccessService 在事务内从**已认证身份的成员关系** 设置，客户端的 {@code X-Tenant-Id} 头进不来也改不动它。
  */
 @Service
 public class OutboundOrderDetailService {
@@ -68,11 +61,9 @@ public class OutboundOrderDetailService {
   /**
    * 出库单详情。
    *
-   * <p>一次调用返回整屏：单头 + 明细行 + 数量口径 + 拣货交接 + 作业时间线 + 四段不可得能力
-   * + 作业操作入口。作业员不需要在多个页面跳（蓝图点名的那条关系）。
+   * <p>一次调用返回整屏：单头 + 明细行 + 数量口径 + 拣货交接 + 作业时间线 + 四段不可得能力 + 作业操作入口。作业员不需要在多个页面跳（蓝图点名的那条关系）。
    *
-   * <p>单头查不到时 404 —— **跨租户与不存在返回同一个结果**，这是有意的：让 A 租户拿 B 租户的
-   * id 探测存在性，本身就是一个信息泄露面。
+   * <p>单头查不到时 404 —— **跨租户与不存在返回同一个结果**，这是有意的：让 A 租户拿 B 租户的 id 探测存在性，本身就是一个信息泄露面。
    */
   public OutboundOrderDetail detail(UUID orderId) {
     var head =
@@ -90,8 +81,7 @@ public class OutboundOrderDetailService {
             tenant(),
             orderId);
     if (head == null) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "出库单不存在或不属于当前租户：" + orderId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "出库单不存在或不属于当前租户：" + orderId);
     }
 
     var source = OutboundSourceType.valueOf(head.get("source_type", String.class));
@@ -101,9 +91,7 @@ public class OutboundOrderDetailService {
     int lineCount = lines.size();
     BigDecimal total =
         scale(
-            lines.stream()
-                .map(OutboundDetailLine::plannedQuantity)
-                .reduce(ZERO, BigDecimal::add));
+            lines.stream().map(OutboundDetailLine::plannedQuantity).reduce(ZERO, BigDecimal::add));
 
     var pickRequest = pickRequest(orderId);
     var timeline = timeline(orderId);
@@ -154,7 +142,8 @@ public class OutboundOrderDetailService {
    */
   private List<OutboundDetailLine> lines(UUID orderId, OutboundOrderStatus status) {
     boolean shipped = status == OutboundOrderStatus.SHIPPED;
-    return sql.fetch(
+    return sql
+        .fetch(
             "select line_no,sku_id,sku_code,sku_name,quantity "
                 + "from outbound_order_line where tenant_id = ? and order_id = ? "
                 + "order by line_no",
@@ -184,8 +173,7 @@ public class OutboundOrderDetailService {
   /**
    * 已拣量与已发量**各自独立**的可用性说明。
    *
-   * <p>两者放在一起返回而不是合成一个进度条：本模块**没有任何**一个真实数据能算出
-   * 「拣货完成百分比」，硬编一个百分比就是本模块最容易犯也最严重的错。
+   * <p>两者放在一起返回而不是合成一个进度条：本模块**没有任何**一个真实数据能算出 「拣货完成百分比」，硬编一个百分比就是本模块最容易犯也最严重的错。
    */
   private List<OutboundQuantityAvailability> quantities(
       OutboundOrderStatus status, BigDecimal total, OutboundDetailPickRequest pickRequest) {
@@ -207,7 +195,9 @@ public class OutboundOrderDetailService {
             false,
             "8.3.2.1",
             "**8.3.2.1 拣货任务尚未交付**，因此没有 picking_task 可查：实拣量按实际库位/批次/"
-                + "序列号记录在那张表里，不在本服务。当前只能给出作业进度信号 —— " + handover + "。"),
+                + "序列号记录在那张表里，不在本服务。当前只能给出作业进度信号 —— "
+                + handover
+                + "。"),
         new OutboundQuantityAvailability(
             "SHIPPED",
             "已发量",
@@ -215,8 +205,7 @@ public class OutboundOrderDetailService {
             shipped != null,
             shipped != null ? null : "8.3.4.1",
             shipped != null
-                ? "这张单已是终态「已发货」且 DB 层冻结（V72 §4.2），明细行是不可改的计划快照"
-                    + "（V72 §4.4），所以已发量等于计划件数。"
+                ? "这张单已是终态「已发货」且 DB 层冻结（V72 §4.2），明细行是不可改的计划快照" + "（V72 §4.4），所以已发量等于计划件数。"
                 : "**发货交接归 8.3.4.1，尚未交付**，因此没有发货单/运单可查。当前单据状态为「"
                     + status.label()
                     + "」，未到已发，所以已发量为空 —— 空是事实，不是「忘了查」。"));
@@ -247,12 +236,12 @@ public class OutboundOrderDetailService {
   /**
    * 作业时间线（outbound_order_event 全量，append-only）。
    *
-   * <p>按 {@code occurred_at, id} 升序 —— id 兜底是必要的：同一毫秒里发生的两条事件
-   * （批量操作会连着写 CREATED + PICK_REQUESTED）光看 occurred_at 顺序是不确定的，
-   * 界面上时间线会随机跳行。
+   * <p>按 {@code occurred_at, id} 升序 —— id 兜底是必要的：同一毫秒里发生的两条事件 （批量操作会连着写 CREATED + PICK_REQUESTED）光看
+   * occurred_at 顺序是不确定的， 界面上时间线会随机跳行。
    */
   private List<OutboundDetailEvent> timeline(UUID orderId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,event_type,from_status,to_status,actor_user_id,occurred_at,detail "
                 + "from outbound_order_event where tenant_id = ? and order_id = ? "
                 + "order by occurred_at, id",
@@ -307,8 +296,8 @@ public class OutboundOrderDetailService {
   /**
    * 关联销售订单。
    *
-   * <p>TRANSFER 来源是真关联（7.5.1.1 已交付且同服务），单号能给出；其余三类只有外部单号
-   * **字符串**，9 订单履约未交付、跨服务也不建 FK，所以「关联的订单详情」拿不到。
+   * <p>TRANSFER 来源是真关联（7.5.1.1 已交付且同服务），单号能给出；其余三类只有外部单号 **字符串**，9 订单履约未交付、跨服务也不建
+   * FK，所以「关联的订单详情」拿不到。
    */
   private OutboundUnavailableLink linkedOrder(OutboundSourceType source) {
     if (source == OutboundSourceType.TRANSFER) {
@@ -317,8 +306,7 @@ public class OutboundOrderDetailService {
           false,
           "9.1.1.2",
           "/orders",
-          "本单是调拨出库，关联的调拨单号在单头已显示且可真跳转。但**销售订单**本身"
-              + "拿不到：9 订单履约尚未交付，出库单与销售订单之间没有跨服务外键。");
+          "本单是调拨出库，关联的调拨单号在单头已显示且可真跳转。但**销售订单**本身" + "拿不到：9 订单履约尚未交付，出库单与销售订单之间没有跨服务外键。");
     }
     String owner =
         switch (source) {
@@ -428,8 +416,7 @@ public class OutboundOrderDetailService {
   /**
    * 详情页能力声明：六段内容的可用性、两个数量的口径，以及四条必须写在界面上的说明。
    *
-   * <p>前端据此渲染「未接入」的灰块与提示，而不是把六段都画成空的详情表 ——
-   * 空的详情表会被读成「这单没有明细/没有包裹」，而真相是「这段能力还没接入」。
+   * <p>前端据此渲染「未接入」的灰块与提示，而不是把六段都画成空的详情表 —— 空的详情表会被读成「这单没有明细/没有包裹」，而真相是「这段能力还没接入」。
    */
   public OutboundOrderDetailCapabilities capabilities() {
     return new OutboundOrderDetailCapabilities(
@@ -461,7 +448,8 @@ public class OutboundOrderDetailService {
   // ============================================================ 内部
 
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 
   /** numeric(19,6) 口径：统一 scale，避免同一列里混着 "2.5" 与 "2.500000"。 */
@@ -472,9 +460,8 @@ public class OutboundOrderDetailService {
   /**
    * 读 timestamptz 列。
    *
-   * <p>驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或
-   * {@link java.sql.Timestamp}，直接 get(field, OffsetDateTime.class) 会在拿到 Instant 时抛
-   * ClassCastException（与 7.1.2.2 / 8.3.1.1 同一处收口）。
+   * <p>驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或 {@link java.sql.Timestamp}，直接
+   * get(field, OffsetDateTime.class) 会在拿到 Instant 时抛 ClassCastException（与 7.1.2.2 / 8.3.1.1 同一处收口）。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);

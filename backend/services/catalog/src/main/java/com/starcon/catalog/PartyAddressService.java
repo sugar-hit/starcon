@@ -24,26 +24,20 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>当前态可变，历史 append-only</b>。地址行是「现在长什么样」，
- *       {@code party_address_version} 是「每次内容变更当时长什么样」。
- *       版本行只追加、不修改、不删除。这么分层的理由（以及为什么不选「地址行不可变」）
- *       写在 {@code V31__party_addresses_contacts.sql} 第四节 —— 简版是：
- *       「默认地址」在不可变写法下没有落点（当前态会变成「没有后继的那一行」），
- *       而单据要的是按 {@code (address_id, version_no)} <b>精确取回</b>某一版，
- *       差异日志要求读者自己重放历史。
- *   <li><b>用途与默认是标签，不是内容</b>。只改用途 / 默认标记走
- *       {@link #saveUsages}，那条路径<b>不</b>产生版本行（规则 A3）——
+ *   <li><b>当前态可变，历史 append-only</b>。地址行是「现在长什么样」， {@code party_address_version} 是「每次内容变更当时长什么样」。
+ *       版本行只追加、不修改、不删除。这么分层的理由（以及为什么不选「地址行不可变」） 写在 {@code V31__party_addresses_contacts.sql} 第四节 ——
+ *       简版是： 「默认地址」在不可变写法下没有落点（当前态会变成「没有后继的那一行」）， 而单据要的是按 {@code (address_id, version_no)}
+ *       <b>精确取回</b>某一版， 差异日志要求读者自己重放历史。
+ *   <li><b>用途与默认是标签，不是内容</b>。只改用途 / 默认标记走 {@link #saveUsages}，那条路径<b>不</b>产生版本行（规则 A3）——
  *       快照要冻结的是印在面单上的那个地址，而不是这条地址今天挂着什么标签。
  *   <li><b>选中阻断只有一处实现</b>。{@link PartyAddressRules#selectionBlock} 是唯一的
- *       「这条地址能不能被下游新单据选中」判定，列表行、详情、默认地址、候选四个出口都调它。
- *       前端只把原因码翻成话，不在浏览器里再判一次。
- *   <li><b>软删除，且删之前必须先改默认</b>。已发生的 06 采购单 / 10 物流单引用的是
- *       {@code (address_id, version_no)} 指路牌，删掉地址会让指路牌指向不存在的行。
+ *       「这条地址能不能被下游新单据选中」判定，列表行、详情、默认地址、候选四个出口都调它。 前端只把原因码翻成话，不在浏览器里再判一次。
+ *   <li><b>软删除，且删之前必须先改默认</b>。已发生的 06 采购单 / 10 物流单引用的是 {@code (address_id, version_no)}
+ *       指路牌，删掉地址会让指路牌指向不存在的行。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 地址属于商品主数据域（蓝图卷 03），沿用往来单位的同一套词表，不新造权限词表 ——
- * 那要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 地址属于商品主数据域（蓝图卷
+ * 03），沿用往来单位的同一套词表，不新造权限词表 —— 那要改 identity 服务的迁移，属于另一个服务的写入所有权。
  */
 @Service
 public class PartyAddressService {
@@ -53,10 +47,8 @@ public class PartyAddressService {
   /**
    * 地址读出口径的 SELECT 列。
    *
-   * <p>四个聚合子查询全部锚在 {@code a}（当前行）上，没有独立占位符，
-   * 所以主查询的绑定顺序恒为 {@code [tenantId] + 筛选 + limit/offset}。
-   * 全部取自同一次查询：列表每行要显示用途徽章、默认标记与最新版本号，
-   * 拆成四个端点会让「列表上看到的默认」与「详情里看到的默认」有两次实现。
+   * <p>四个聚合子查询全部锚在 {@code a}（当前行）上，没有独立占位符， 所以主查询的绑定顺序恒为 {@code [tenantId] + 筛选 + limit/offset}。
+   * 全部取自同一次查询：列表每行要显示用途徽章、默认标记与最新版本号， 拆成四个端点会让「列表上看到的默认」与「详情里看到的默认」有两次实现。
    */
   private static final String SELECT_COLUMNS =
       "select a.id,a.party_id,a.label,a.country_code,a.state_province,a.city,a.district,"
@@ -74,9 +66,8 @@ public class PartyAddressService {
   /**
    * FROM 子句。
    *
-   * <p>与 {@code party} 做内连接是为了在<b>同一次查询</b>里拿到主体状态与删除标记 ——
-   * 选中阻断判定需要它们（规则 A6）。连接条件带 {@code tenant_id}：
-   * 只按 id 连的话，跨租户的地址会连到别的租户的主体上。
+   * <p>与 {@code party} 做内连接是为了在<b>同一次查询</b>里拿到主体状态与删除标记 —— 选中阻断判定需要它们（规则 A6）。连接条件带 {@code
+   * tenant_id}： 只按 id 连的话，跨租户的地址会连到别的租户的主体上。
    */
   private static final String FROM_ADDRESS =
       " from party_address a join party pp on pp.tenant_id=a.tenant_id and pp.id=a.party_id"
@@ -100,9 +91,8 @@ public class PartyAddressService {
   /**
    * 「这条地址当前可选中」的 SQL 表达式：未删除 + 主体未删除 + 主体 ACTIVE。
    *
-   * <p>与 {@link PartyAddressRules#selectionBlock} 同一口径、同一优先级，
-   * 列表筛选与候选列表都引<b>这一处字符串</b> —— 两处各写一遍的症状是
-   * 「候选列表说没有可用提货地址、详情页却显示可��」。
+   * <p>与 {@link PartyAddressRules#selectionBlock} 同一口径、同一优先级， 列表筛选与候选列表都引<b>这一处字符串</b> ——
+   * 两处各写一遍的症状是 「候选列表说没有可用提货地址、详情页却显示可��」。
    */
   private static final String SELECTABLE =
       "(a.deleted_at is null and pp.deleted_at is null and pp.status='ACTIVE')";
@@ -118,8 +108,8 @@ public class PartyAddressService {
   /**
    * 地址列表：关键词（地址名 / 街道 / 城市）+ 用途 / 国家筛选。
    *
-   * <p>关键词覆盖城市与街道而不只覆盖地址名：运营手里常常只有一张名片上的
-   * 一个城市名，而通配符按 {@code escape '!'} 转义，否则搜 {@code 100%} 会变成「匹配所有」。
+   * <p>关键词覆盖城市与街道而不只覆盖地址名：运营手里常常只有一张名片上的 一个城市名，而通配符按 {@code escape '!'} 转义，否则搜 {@code 100%}
+   * 会变成「匹配所有」。
    */
   public PartyAddressPage list(UUID partyId, PartyAddressQuery query) {
     return listInternal(partyId, query, false);
@@ -128,10 +118,11 @@ public class PartyAddressService {
   /**
    * 列表的共同实现。
    *
-   * @param onlySelectable 只返回「当前可选中」的地址（候选列表用）。这个开关是<b>进 SQL</b> 的，
-   *     不是取一页回来在内存里过滤 —— 见 {@link #candidates} 的说明。
+   * @param onlySelectable 只返回「当前可选中」的地址（候选列表用）。这个开关是<b>进 SQL</b> 的， 不是取一页回来在内存里过滤 —— 见 {@link
+   *     #candidates} 的说明。
    */
-  private PartyAddressPage listInternal(UUID partyId, PartyAddressQuery query, boolean onlySelectable) {
+  private PartyAddressPage listInternal(
+      UUID partyId, PartyAddressQuery query, boolean onlySelectable) {
     partyRow(partyId);
     int page = query.page();
     int size = Math.min(Math.max(query.size(), 1), MAX_PAGE_SIZE);
@@ -155,18 +146,29 @@ public class PartyAddressService {
     // 用户才知道「筛出来的 2 条」之外还有多少地址没设默认、没标用途。
     long defaultCount =
         sql.fetchOne(
-                "select count(*)" + FROM_ADDRESS + " and a.party_id=? and a.deleted_at is null and " + IS_DEFAULT,
-                currentTenantId(), partyId)
+                "select count(*)"
+                    + FROM_ADDRESS
+                    + " and a.party_id=? and a.deleted_at is null and "
+                    + IS_DEFAULT,
+                currentTenantId(),
+                partyId)
             .get(0, Long.class);
     long unassignedCount =
         sql.fetchOne(
-                "select count(*)" + FROM_ADDRESS + " and a.party_id=? and a.deleted_at is null and " + NO_USAGE,
-                currentTenantId(), partyId)
+                "select count(*)"
+                    + FROM_ADDRESS
+                    + " and a.party_id=? and a.deleted_at is null and "
+                    + NO_USAGE,
+                currentTenantId(),
+                partyId)
             .get(0, Long.class);
 
     var rows =
         sql.fetch(
-            SELECT_COLUMNS + FROM_ADDRESS + " and a.party_id=?" + sqlWhere
+            SELECT_COLUMNS
+                + FROM_ADDRESS
+                + " and a.party_id=?"
+                + sqlWhere
                 + " order by a.id limit ? offset ?",
             concat(base, concat(binds, List.of(size, (long) page * size))).toArray());
     return new PartyAddressPage(
@@ -217,8 +219,7 @@ public class PartyAddressService {
   /**
    * 某个用途的默认地址 —— 06 采购（发货 / 收货）与 10 物流（提货）取默认地址走的就是它。
    *
-   * <p>没有默认时 404 而不是返回一个「空的地址」：单据侧要能区分
-   * 「这个主体有地址但没人设默认」（提示去设）与「这个主体一条地址都没有」。
+   * <p>没有默认时 404 而不是返回一个「空的地址」：单据侧要能区分 「这个主体有地址但没人设默认」（提示去设）与「这个主体一条地址都没有」。
    */
   public PartyAddress defaultAddress(UUID partyId, String usage) {
     partyRow(partyId);
@@ -226,10 +227,16 @@ public class PartyAddressService {
     CatalogService.check(problem == null, problem);
     var row =
         sql.fetchOne(
-            SELECT_COLUMNS + FROM_ADDRESS + " and a.party_id=? and a.deleted_at is null and " + HAS_USAGE
+            SELECT_COLUMNS
+                + FROM_ADDRESS
+                + " and a.party_id=? and a.deleted_at is null and "
+                + HAS_USAGE
                 + " and exists (select 1 from party_address_usage d where d.tenant_id=a.tenant_id"
                 + " and d.address_id=a.id and d.is_default and d.usage=?) order by a.id limit 1",
-            currentTenantId(), partyId, normalizeUsage(usage), normalizeUsage(usage));
+            currentTenantId(),
+            partyId,
+            normalizeUsage(usage),
+            normalizeUsage(usage));
     if (row == null)
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, "该往来单位还没有" + usageLabel(usage) + "默认地址");
@@ -239,11 +246,11 @@ public class PartyAddressService {
   /**
    * 引用候选：下游单据的下拉数据源。
    *
-   * <p>用 list 的 SQL（同一套筛选与同一个 {@code SELECTABLE} 表达式）而不是
-   * 取一页再在内存里过滤 —— 内存过滤会让「第 1 页 20 条里有 12 条不可选」的空结果说谎，
-   * 而单据的选择器会显示「没有可用的提货地址」。那正是「假分页」的一种。
+   * <p>用 list 的 SQL（同一套筛选与同一个 {@code SELECTABLE} 表达式）而不是 取一页再在内存里过滤 —— 内存过滤会让「第 1 页 20 条里有 12
+   * 条不可选」的空结果说谎， 而单据的选择器会显示「没有可用的提货地址」。那正是「假分页」的一种。
    */
-  public List<PartyAddress> candidates(UUID partyId, String usage, String keyword, boolean includeBlocked) {
+  public List<PartyAddress> candidates(
+      UUID partyId, String usage, String keyword, boolean includeBlocked) {
     // **软删除的地址在两种模式下都不返回**（includeDeleted 固定为 false）：
     // includeBlocked 只放宽「主体状态」，不放松「已删除」——
     // 新单据永远不该选中一个已删的地址，而它存在的意义只是让历史单据上的地址显示出来。
@@ -258,11 +265,11 @@ public class PartyAddressService {
   /**
    * 建 / 改地址（{@code addressId} 为空即新建）。
    *
-   * <p>三层内容分工：{@code input} 里的地址列是<b>内容</b>（内容真的变了才追加版本行，规则 A3），
-   * {@code input.usages} 是<b>标签</b>（整体替换，不产生版本行）。
-   * 建档时写入版本 1；改地址内容时追加下一版；只改用途时既不追加版本也不动内容。
+   * <p>三层内容分工：{@code input} 里的地址列是<b>内容</b>（内容真的变了才追加版本行，规则 A3）， {@code input.usages}
+   * 是<b>标签</b>（整体替换，不产生版本行）。 建档时写入版本 1；改地址内容时追加下一版；只改用途时既不追加版本也不动内容。
    */
-  public PartyAddressSaved save(AccessService.Access actor, UUID partyId, UUID addressId, PartyAddressInput input) {
+  public PartyAddressSaved save(
+      AccessService.Access actor, UUID partyId, UUID addressId, PartyAddressInput input) {
     var party = partyRow(partyId);
     String contentProblem =
         addressProblem(
@@ -333,8 +340,7 @@ public class PartyAddressService {
     }
 
     var stored = addressRecord(partyId, addressId);
-    if (stored.get("deleted_at", OffsetDateTime.class) != null)
-      throw CatalogService.missing();
+    if (stored.get("deleted_at", OffsetDateTime.class) != null) throw CatalogService.missing();
     String storedFingerprint =
         contentFingerprint(
             stored.get("country_code", String.class),
@@ -346,7 +352,8 @@ public class PartyAddressService {
             stored.get("street_line2", String.class),
             stored.get("label", String.class));
     String submittedFingerprint =
-        contentFingerprint(country, stateProvince, city, district, postalCode, streetLine1, streetLine2, label);
+        contentFingerprint(
+            country, stateProvince, city, district, postalCode, streetLine1, streetLine2, label);
 
     int updated;
     try {
@@ -368,8 +375,7 @@ public class PartyAddressService {
     } catch (DataAccessException e) {
       throw conflict("地址保存失败，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
 
     // 内容真的变了才追加版本（规则 A3）：保存时一字未改、或只改了标签，
     // 都不该在版本链上留下一条无法区分的行。
@@ -391,7 +397,8 @@ public class PartyAddressService {
           defaultChangeNote(input.changeNote(), "内容更新"));
     }
     // 整体替换用途（标签变化，不产生版本行）。
-    replaceUsages(tenantId, partyId, addressId, input.usages() == null ? List.of() : input.usages());
+    replaceUsages(
+        tenantId, partyId, addressId, input.usages() == null ? List.of() : input.usages());
     audit(actor, addressId, "PartyAddressSaved");
     return savedResult(partyId, addressId);
   }
@@ -399,8 +406,7 @@ public class PartyAddressService {
   /**
    * 只改用途与默认标记（{@code PUT /{id}/usages}）。
    *
-   * <p>不碰地址内容，因此<b>不产生版本行</b>（规则 A3）：把默认提货地址改到 3 号仓
-   * 不是「地址变了」，版本列表要回答的是「这个地址被改过几次、每次改成什么样」。
+   * <p>不碰地址内容，因此<b>不产生版本行</b>（规则 A3）：把默认提货地址改到 3 号仓 不是「地址变了」，版本列表要回答的是「这个地址被改过几次、每次改成什么样」。
    * 仍然走地址行的乐观锁 —— 用途与内容共享一个版本号，少一次并发覆盖的入口。
    */
   public PartyAddressSaved saveUsages(
@@ -416,8 +422,7 @@ public class PartyAddressService {
             "update party_address set version=version+1,updated_at=now() where id=? and version=?",
             addressId,
             input.version());
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
     replaceUsages(actor.tenantId(), partyId, addressId, input.usages());
     audit(actor, addressId, "PartyAddressUsagesSaved");
     return savedResult(partyId, addressId);
@@ -426,10 +431,8 @@ public class PartyAddressService {
   /**
    * 设 / 取消某个用途的默认地址（{@code PUT /{id}/default}）。
    *
-   * <p>「默认」按用途分别设，所以要带 {@code usage}；{@code isDefault=false} 是显式取消。
-   * 设成默认时会先把同一主体同一用途下的其它地址取消默认 ——
-   * 「一个主体一个默认提货地址」由 V31 第六节的部分唯一索引在 DB 层钉死，
-   * 这里先清一遍是为了让报错落在服务层（可读中文）而不是索引冲突上。
+   * <p>「默认」按用途分别设，所以要带 {@code usage}；{@code isDefault=false} 是显式取消。 设成默认时会先把同一主体同一用途下的其它地址取消默认 ——
+   * 「一个主体一个默认提货地址」由 V31 第六节的部分唯一索引在 DB 层钉死， 这里先清一遍是为了让报错落在服务层（可读中文）而不是索引冲突上。
    */
   public PartyAddressSaved setDefault(
       AccessService.Access actor, UUID partyId, UUID addressId, PartyAddressDefaultInput input) {
@@ -446,48 +449,57 @@ public class PartyAddressService {
     boolean hasUsage =
         sql.fetchOne(
                 "select 1 from party_address_usage where tenant_id=? and party_id=? and address_id=? and usage=?",
-                currentTenantId(), partyId, addressId, usage)
+                currentTenantId(),
+                partyId,
+                addressId,
+                usage)
             != null;
     if (!hasUsage)
-      throw conflict(
-          "这条地址还没有标"
-              + usageLabel(usage)
-              + "用途：先在「用途」里勾选它，再把它设为该用途的默认（一次做两件事会让回滚说不清）");
+      throw conflict("这条地址还没有标" + usageLabel(usage) + "用途：先在「用途」里勾选它，再把它设为该用途的默认（一次做两件事会让回滚说不清）");
 
     if (input.isDefault()) {
       // 先取消同一主体同一用途下的其它默认。
       sql.execute(
           "update party_address_usage set is_default=false,updated_at=now()"
               + " where tenant_id=? and party_id=? and usage=? and is_default and address_id<>?",
-          currentTenantId(), partyId, usage, addressId);
+          currentTenantId(),
+          partyId,
+          usage,
+          addressId);
       sql.execute(
           "update party_address_usage set is_default=true,updated_at=now()"
               + " where tenant_id=? and party_id=? and address_id=? and usage=?",
-          currentTenantId(), partyId, addressId, usage);
+          currentTenantId(),
+          partyId,
+          addressId,
+          usage);
     } else {
       sql.execute(
           "update party_address_usage set is_default=false,updated_at=now()"
               + " where tenant_id=? and party_id=? and address_id=? and usage=? and is_default",
-          currentTenantId(), partyId, addressId, usage);
+          currentTenantId(),
+          partyId,
+          addressId,
+          usage);
     }
     // 标签变化走乐观锁，但**不**动地址内容，也不产生版本行。
     sql.execute(
         "update party_address set version=version+1,updated_at=now() where id=? and version=?",
         addressId,
         input.version());
-    audit(actor, addressId, input.isDefault() ? "PartyAddressDefaultSet" : "PartyAddressDefaultCleared");
+    audit(
+        actor,
+        addressId,
+        input.isDefault() ? "PartyAddressDefaultSet" : "PartyAddressDefaultCleared");
     return savedResult(partyId, addressId);
   }
 
   /**
    * 软删除地址（规则 A4）。
    *
-   * <p>删除前必须先改默认：报错点名是哪个用途的默认，
-   * 并告诉运营先把默认改到别的地址 —— 直接删掉的后果是「这个供应商没有提货地址了」
-   * 而 10 物流的单子上已经填好了原地址。
+   * <p>删除前必须先改默认：报错点名是哪个用途的默认， 并告诉运营先把默认改到别的地址 —— 直接删掉的后果是「这个供应商没有提货地址了」 而 10 物流的单子上已经填好了原地址。
    *
-   * <p>删掉之后它的用途行<b>保留</b>（{@code is_default=false}），
-   * 这样「它曾经是提货地址」在数据上仍然说得通；版本链一行不动 ——
+   * <p>删掉之后它的用途行<b>保留</b>（{@code is_default=false}）， 这样「它曾经是提货地址」在数据上仍然说得通；版本链一行不动 ——
    * 版本行是历史快照，删除当前态不该改写历史。
    */
   public void delete(AccessService.Access actor, UUID partyId, UUID addressId, long version) {
@@ -502,13 +514,15 @@ public class PartyAddressService {
         sql.execute(
             "update party_address set deleted_at=now(),deleted_by=?,version=version+1,updated_at=now()"
                 + " where id=? and version=? and deleted_at is null",
-            actor.userId(), addressId, version);
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
+            actor.userId(),
+            addressId,
+            version);
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "地址已被他人修改，请刷新后重试");
     sql.execute(
         "update party_address_usage set is_default=false,updated_at=now()"
             + " where tenant_id=? and address_id=? and is_default",
-        currentTenantId(), addressId);
+        currentTenantId(),
+        addressId);
     audit(actor, addressId, "PartyAddressDeleted");
   }
 
@@ -524,8 +538,7 @@ public class PartyAddressService {
   /**
    * 取回<b>某一版</b> —— 单据按 {@code (address_id, version_no)} 回放「当时的内容」走的就是它。
    *
-   * <p>这是本模块交给 06 采购 / 10 物流的只读兜底出口：**权威仍然是单据自己的快照列**
-   * （V31 第四节的三层说明），这里只在快照缺失时才用。
+   * <p>这是本模块交给 06 采购 / 10 物流的只读兜底出口：**权威仍然是单据自己的快照列** （V31 第四节的三层说明），这里只在快照缺失时才用。
    */
   public PartyAddressVersion version(UUID partyId, UUID addressId, int versionNo) {
     partyRow(partyId);
@@ -534,19 +547,22 @@ public class PartyAddressService {
     var row =
         sql.fetchOne(
             "select * from party_address_version where tenant_id=? and address_id=? and version_no=?",
-            currentTenantId(), addressId, versionNo);
+            currentTenantId(),
+            addressId,
+            versionNo);
     if (row == null)
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          "该地址没有第 " + versionNo + " 版（当前最新是第 " + latest + " 版）");
+          HttpStatus.NOT_FOUND, "该地址没有第 " + versionNo + " 版（当前最新是第 " + latest + " 版）");
     return toVersion(row, latest);
   }
 
   private List<PartyAddressVersion> fetchVersions(UUID addressId) {
     int latest = latestVersionNo(addressId);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from party_address_version where tenant_id=? and address_id=? order by version_no desc",
-            currentTenantId(), addressId)
+            currentTenantId(),
+            addressId)
         .stream()
         .map(r -> toVersion(r, latest))
         .toList();
@@ -556,7 +572,8 @@ public class PartyAddressService {
     Integer latest =
         sql.fetchOne(
                 "select max(version_no) from party_address_version where tenant_id=? and address_id=?",
-                currentTenantId(), addressId)
+                currentTenantId(),
+                addressId)
             .get(0, Integer.class);
     return latest == null ? 0 : latest;
   }
@@ -564,9 +581,8 @@ public class PartyAddressService {
   /**
    * 追加一条版本行（append-only）。
    *
-   * <p>{@code changed_at} 用<b>数据库自己的时钟</b>（{@code now()}）而不是服务层传来的时间：
-   * 版本链要回答「第 N 版是什么时候定下来的」，而多实例部署下应用节点的时钟并不对齐。
-   * 读回时用 {@code OffsetDateTime} 取（jOOQ 按 timestamptz 映射），
+   * <p>{@code changed_at} 用<b>数据库自己的时钟</b>（{@code now()}）而不是服务层传来的时间： 版本链要回答「第 N
+   * 版是什么时候定下来的」，而多实例部署下应用节点的时钟并不对齐。 读回时用 {@code OffsetDateTime} 取（jOOQ 按 timestamptz 映射），
    * <b>不能</b>用 {@code Timestamp.valueOf(LocalDateTime)} —— 那会静默偏 −28800s（东八区）。
    */
   private void appendVersion(
@@ -616,10 +632,8 @@ public class PartyAddressService {
   /**
    * 整体替换一条地址的用途与默认标记。
    *
-   * <p>用 {@code on conflict do update} 一条语句同时覆盖「新增」与「更新」：
-   * 整体替换要的是「提交集合的最终态」，逐行先删后插会在
-   * {@code UNIQUE(tenant_id,address_id,usage)} 上撞自己
-   * （先删把同用途行提前腾空，插回时与刚插入的新行相撞）。
+   * <p>用 {@code on conflict do update} 一条语句同时覆盖「新增」与「更新」： 整体替换要的是「提交集合的最终态」，逐行先删后插会在 {@code
+   * UNIQUE(tenant_id,address_id,usage)} 上撞自己 （先删把同用途行提前腾空，插回时与刚插入的新行相撞）。
    *
    * <p>提交集合里没有的用途一律删掉（整体替换语义）。
    */
@@ -637,7 +651,10 @@ public class PartyAddressService {
         sql.execute(
             "update party_address_usage set is_default=false,updated_at=now()"
                 + " where tenant_id=? and party_id=? and usage=? and is_default and address_id<>?",
-            tenantId, partyId, value, addressId);
+            tenantId,
+            partyId,
+            value,
+            addressId);
       sql.execute(
           "insert into party_address_usage(id,tenant_id,party_id,address_id,usage,is_default)"
               + " values(?,?,?,?,?,?) on conflict (tenant_id,address_id,usage)"
@@ -654,7 +671,9 @@ public class PartyAddressService {
       if (!submitted.contains(usage))
         sql.execute(
             "delete from party_address_usage where tenant_id=? and address_id=? and usage=?",
-            tenantId, addressId, usage);
+            tenantId,
+            addressId,
+            usage);
   }
 
   private List<String> storedUsages(UUID addressId) {
@@ -662,8 +681,8 @@ public class PartyAddressService {
     for (Record r :
         sql.fetch(
             "select usage from party_address_usage where tenant_id=? and address_id=?",
-            currentTenantId(), addressId))
-      values.add(r.get("usage", String.class));
+            currentTenantId(),
+            addressId)) values.add(r.get("usage", String.class));
     return values;
   }
 
@@ -672,8 +691,8 @@ public class PartyAddressService {
     for (Record r :
         sql.fetch(
             "select usage from party_address_usage where tenant_id=? and address_id=? and is_default",
-            currentTenantId(), addressId))
-      values.add(r.get("usage", String.class));
+            currentTenantId(),
+            addressId)) values.add(r.get("usage", String.class));
     return orderedUsages(values);
   }
 
@@ -760,7 +779,10 @@ public class PartyAddressService {
   private Record addressRecord(UUID partyId, UUID addressId) {
     var row =
         sql.fetchOne(
-            SELECT_COLUMNS + FROM_ADDRESS + " and a.party_id=? and a.id=?", currentTenantId(), partyId, addressId);
+            SELECT_COLUMNS + FROM_ADDRESS + " and a.party_id=? and a.id=?",
+            currentTenantId(),
+            partyId,
+            addressId);
     if (row == null) throw CatalogService.missing();
     return row;
   }
@@ -825,6 +847,10 @@ public class PartyAddressService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 }

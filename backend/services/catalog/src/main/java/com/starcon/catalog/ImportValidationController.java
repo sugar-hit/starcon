@@ -61,9 +61,8 @@ public class ImportValidationController {
   /**
    * 报告总览：四段行数 + 按蓝图五类分的统计 + 按字段列分的统计。
    *
-   * <p><b>第一次 GET 顺带生成报告</b>（返回 200 而不是 404，客户端不用先吃一个错误再重试）；
-   * 之后每次 GET 返回的都是<b>同一份快照</b>，带 {@code stale} 标记说明它是否已经过期。
-   * 客户端因此只需要处理一种情况：拿到报告，并读 {@code stale} 决定要不要提示重新生成。
+   * <p><b>第一次 GET 顺带生成报告</b>（返回 200 而不是 404，客户端不用先吃一个错误再重试）； 之后每次 GET 返回的都是<b>同一份快照</b>，带 {@code
+   * stale} 标记说明它是否已经过期。 客户端因此只需要处理一种情况：拿到报告，并读 {@code stale} 决定要不要提示重新生成。
    */
   @GetMapping("/import-jobs/{id}/report")
   public ImportValidationSummary report(
@@ -75,22 +74,20 @@ public class ImportValidationController {
   /**
    * 重新生成报告（改了映射或补了规则之后刷新）。
    *
-   * <p>显式刷新是「我知道结论变了」的确认动作 —— 与 GET 的自动物化分开，
-   * 页面上是一个按钮而不是每次打开都悄悄重算。
+   * <p>显式刷新是「我知道结论变了」的确认动作 —— 与 GET 的自动物化分开， 页面上是一个按钮而不是每次打开都悄悄重算。
    */
   @PostMapping("/import-jobs/{id}/report")
   public ImportValidationReportRow regenerate(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.update", a -> reports.regenerate(a.tenantId(), id, a.userId()));
   }
 
   /**
    * 错误明细表（蓝图的「错误明细表」输出）。
    *
-   * <p>三种筛选与三种用户意图一一对应：
-   * {@code severity}（只要必须修正的 / 只要可跳过的）、
-   * {@code category}（按蓝图五类批量改）、{@code rowNo}（定位到某一行）。
-   * 三者可任意组合，因为「只改必填缺失里的第 47 行」是最常见的一种查法。
+   * <p>三种筛选与三种用户意图一一对应： {@code severity}（只要必须修正的 / 只要可跳过的）、 {@code category}（按蓝图五类批量改）、{@code
+   * rowNo}（定位到某一行）。 三者可任意组合，因为「只改必填缺失里的第 47 行」是最常见的一种查法。
    */
   @GetMapping("/import-jobs/{id}/report/issues")
   public ImportValidationIssuePage issues(
@@ -101,24 +98,25 @@ public class ImportValidationController {
       @RequestParam(required = false) Integer rowNo,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int size) {
-    return call(auth, "spu.read",
+    return call(
+        auth,
+        "spu.read",
         a -> reports.issues(a.tenantId(), id, a.userId(), severity, category, rowNo, page, size));
   }
 
   /** 导出登记列表：这批数据导过什么、基于哪一轮结论、谁导的。 */
   @GetMapping("/import-jobs/{id}/report/exports")
   public ImportValidationExportPage exports(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.read", a -> reports.exports(a.tenantId(), id, a.userId()));
   }
 
   /**
    * 发起一次导出（登记，返回登记行而不是字节）。
    *
-   * <p>与 3.1.2.1 的 {@code /catalog/skus/export}、3.8.1.1 的模板下载同一处理方式：
-   * <b>导出文件走普通链接下载</b>，而不是把 CSV 塞进 JSON 响应。
-   * 分两步是为了让「导出了什么」成为一条可查的事实（登记行带内容哈希与生成时刻），
-   * 而不是一次拿完就消失的副作用。
+   * <p>与 3.1.2.1 的 {@code /catalog/skus/export}、3.8.1.1 的模板下载同一处理方式： <b>导出文件走普通链接下载</b>，而不是把 CSV 塞进
+   * JSON 响应。 分两步是为了让「导出了什么」成为一条可查的事实（登记行带内容哈希与生成时刻）， 而不是一次拿完就消失的副作用。
    */
   @PostMapping("/import-jobs/{id}/report/exports")
   public ImportValidationExportRow createExport(
@@ -131,16 +129,19 @@ public class ImportValidationController {
   /**
    * 下载导出文件（CSV，带 UTF-8 BOM）。
    *
-   * <p>字节由报告现算，库里不存 blob。下载链接不带也不接受任何租户参数 ——
-   * 租户上下文由 Authorization 头解析，与 3.8.1.1 的模板下载完全同一处理方式。
+   * <p>字节由报告现算，库里不存 blob。下载链接不带也不接受任何租户参数 —— 租户上下文由 Authorization 头解析，与 3.8.1.1 的模板下载完全同一处理方式。
    */
   @GetMapping(value = "/import-jobs/{id}/report/exports/{exportId}/file", produces = "text/csv")
   public ResponseEntity<byte[]> exportFile(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
-      @PathVariable UUID id, @PathVariable UUID exportId) {
+      @PathVariable UUID id,
+      @PathVariable UUID exportId) {
     var actor = access.require(auth, "catalog.spu.read");
     var file =
-        access.run(actor, "catalog.spu.read", () -> reports.exportFile(actor.tenantId(), id, exportId, actor.userId()));
+        access.run(
+            actor,
+            "catalog.spu.read",
+            () -> reports.exportFile(actor.tenantId(), id, exportId, actor.userId()));
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")

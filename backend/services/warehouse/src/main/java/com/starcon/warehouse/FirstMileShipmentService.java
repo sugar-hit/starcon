@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -21,38 +20,29 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 10.4.1.1 头程发运单。
  *
- * <p>蓝图：「管理国内到海外的货权转移发运：选择货物与批次（国内仓/供应商）、选择运输方式
- * （海运/空运/铁运/快递）、申报信息、目的仓、预计到港时间、成本预估」；
- * 输出「头程发运单 + 发货分录（转在途）+ 报关资料 + 预计到港时间」；
- * 「<b>头程发运是货权与成本的关键节点</b>：从这一刻起成本转嫁方式（FOB/CIF）与风险承担方确定，
- * 直接影响利润口径」。
+ * <p>蓝图：「管理国内到海外的货权转移发运：选择货物与批次（国内仓/供应商）、选择运输方式 （海运/空运/铁运/快递）、申报信息、目的仓、预计到港时间、成本预估」； 输出「头程发运单 +
+ * 发货分录（转在途）+ 报关资料 + 预计到港时间」； 「<b>头程发运是货权与成本的关键节点</b>：从这一刻起成本转嫁方式（FOB/CIF）与风险承担方确定， 直接影响利润口径」。
  *
  * <p>六条实现纪律：
  *
  * <ol>
- *   <li><b>货权与成本节点入库进契约</b>：{@code incoterm} + {@code riskBearer} 是 NOT NULL 列，
- *       有 DB 级 Incoterms 一致性约束（EXW 只能配 BUYER、DDP 只能配 SELLER），
- *       全部查询、详情与列表都返回它们 —— 不是页面上写死的展示项。
- *   <li><b>发出只登记在途腿，不动在手</b>：照抄 7.5.1.2 台账原文的头程口径
- *       （「头程/采购登记时不动在手，到货时才入库目的仓」）。本服务**没有一行 SQL**
- *       写 {@code stock_bucket} / {@code inventory_balance} / {@code inventory_entry}。
- *   <li><b>只调 7.5.1.2 的公开端点</b>：{@link InventoryInTransitService#register}，
- *       {@code transitKind=FIRST_MILE}，{@code source_system='FIRST_MILE'}、
- *       {@code source_reference=发运单号-行号} 指回本单。
- *       {@code inventory_transfer} 与 {@code in_transit_event} 的写入所有者是 7.5.1.2，
- *       直写会越过「每张事实表只有一个写入所有者」并让将来交接双记在途。
- *   <li><b>已发出是终态</b>：在途腿已在 7.5.1.2 名下，回退状态会让货权记录与在途对不上。
- *       要改这批货走 7.5.1.2 的差异登记。
- *   <li><b>同一批货不能发两次</b>：DB 延迟约束触发器 {@code guard_first_mile_over_ship} 钉死
- *       「同一实收批次的累计发运量 ≤ 实收量 − 拒收量」，服务层再给一次可读报错。
- *   <li><b>未交付的来源与下游显式声明</b>：6 采购（36 个模块全未交付）、3.7.1.1 HS 编码字典、
- *       10.5 报关、10.4.2.1 海外仓连接、10.4.1.2 在途跟踪全部在 {@code /capabilities} 里
- *       {@code available=false} + 原因 + {@code ownerModule} + {@code href}，
- *       <b>不建占位表、不返回空集冒充成功</b>，建单直接拒绝未交付的来源。
+ *   <li><b>货权与成本节点入库进契约</b>：{@code incoterm} + {@code riskBearer} 是 NOT NULL 列， 有 DB 级 Incoterms
+ *       一致性约束（EXW 只能配 BUYER、DDP 只能配 SELLER）， 全部查询、详情与列表都返回它们 —— 不是页面上写死的展示项。
+ *   <li><b>发出只登记在途腿，不动在手</b>：照抄 7.5.1.2 台账原文的头程口径 （「头程/采购登记时不动在手，到货时才入库目的仓」）。本服务**没有一行 SQL** 写
+ *       {@code stock_bucket} / {@code inventory_balance} / {@code inventory_entry}。
+ *   <li><b>只调 7.5.1.2 的公开端点</b>：{@link InventoryInTransitService#register}， {@code
+ *       transitKind=FIRST_MILE}，{@code source_system='FIRST_MILE'}、 {@code
+ *       source_reference=发运单号-行号} 指回本单。 {@code inventory_transfer} 与 {@code in_transit_event}
+ *       的写入所有者是 7.5.1.2， 直写会越过「每张事实表只有一个写入所有者」并让将来交接双记在途。
+ *   <li><b>已发出是终态</b>：在途腿已在 7.5.1.2 名下，回退状态会让货权记录与在途对不上。 要改这批货走 7.5.1.2 的差异登记。
+ *   <li><b>同一批货不能发两次</b>：DB 延迟约束触发器 {@code guard_first_mile_over_ship} 钉死 「同一实收批次的累计发运量 ≤ 实收量 −
+ *       拒收量」，服务层再给一次可读报错。
+ *   <li><b>未交付的来源与下游显式声明</b>：6 采购（36 个模块全未交付）、3.7.1.1 HS 编码字典、 10.5 报关、10.4.2.1 海外仓连接、10.4.1.2
+ *       在途跟踪全部在 {@code /capabilities} 里 {@code available=false} + 原因 + {@code ownerModule} + {@code
+ *       href}， <b>不建占位表、不返回空集冒充成功</b>，建单直接拒绝未交付的来源。
  * </ol>
  *
- * <p>状态机只有一处真相：{@link ShipmentStatus#allowedNext}。确认、发出、取消三个动作
- * 都不各自拼状态判定表。
+ * <p>状态机只有一处真相：{@link ShipmentStatus#allowedNext}。确认、发出、取消三个动作 都不各自拼状态判定表。
  */
 @Service
 public class FirstMileShipmentService {
@@ -77,13 +67,11 @@ public class FirstMileShipmentService {
   // ================================================================ 能力
 
   /**
-   * 头程发运能力：来源维度、**未交付依赖逐条声明**、四态状态机、运输方式与贸易术语词表，
-   * 以及四条必须如实讲清楚的口径说明。
+   * 头程发运能力：来源维度、**未交付依赖逐条声明**、四态状态机、运输方式与贸易术语词表， 以及四条必须如实讲清楚的口径说明。
    *
-   * <p>本车道的依赖自检结论（对集成头实际查证，不凭蓝图的「上游 =」假定）：
-   * 8.2.1.1 收货（迁移 V70）**已交付**，因此 {@code GOODS_RECEIPT} 来源是真通的 ——
-   * 建单时会真去校验来源收货单存在、属于本租户，且每一行指明的实收批次真的属于那张收货单。
-   * 其余五个维度在本车道**未交付**，一律显式 {@code available=false}。
+   * <p>本车道的依赖自检结论（对集成头实际查证，不凭蓝图的「上游 =」假定）： 8.2.1.1 收货（迁移 V70）**已交付**，因此 {@code GOODS_RECEIPT}
+   * 来源是真通的 —— 建单时会真去校验来源收货单存在、属于本租户，且每一行指明的实收批次真的属于那张收货单。 其余五个维度在本车道**未交付**，一律显式 {@code
+   * available=false}。
    */
   public FirstMileCapabilities capabilities() {
     List<FirstMileDimension> sources =
@@ -165,13 +153,10 @@ public class FirstMileShipmentService {
                 ok
                     ? (from == to ? "允许：改单（状态不变，整份替换明细）" : "允许")
                     : switch (from) {
-                        case DISPATCHED ->
-                            "已发出是终态：货权已转移、在途腿已在 7.5.1.2 名下。"
-                                + "要改这批货请走 7.5.1.2 的差异登记";
-                        case CANCELLED -> "已取消是终态";
-                        default ->
-                            "非法跳转：状态由建单/确认/发出/取消四个动作推导，不接受手工设置";
-                      }));
+                      case DISPATCHED -> "已发出是终态：货权已转移、在途腿已在 7.5.1.2 名下。" + "要改这批货请走 7.5.1.2 的差异登记";
+                      case CANCELLED -> "已取消是终态";
+                      default -> "非法跳转：状态由建单/确认/发出/取消四个动作推导，不接受手工设置";
+                    }));
       }
     }
 
@@ -262,9 +247,8 @@ public class FirstMileShipmentService {
   /**
    * 每单的聚合：行数、申报货值、计划量、发出量、在途腿数。
    *
-   * <p>{@code lateral} 在没有明细行时也返回一行全 0，一张没有明细的发运单不该从列表里「查不到」。
-   * {@code declared_value} 用 coalesce 到 0 而不是留空：申报货值是成本核算的基数，
-   * 空值会在前端变成 NaN，而 0 至少是个能被质疑的数。
+   * <p>{@code lateral} 在没有明细行时也返回一行全 0，一张没有明细的发运单不该从列表里「查不到」。 {@code declared_value} 用 coalesce 到 0
+   * 而不是留空：申报货值是成本核算的基数， 空值会在前端变成 NaN，而 0 至少是个能被质疑的数。
    */
   private static String aggJoin() {
     return " left join lateral (select count(*) as line_count,"
@@ -289,7 +273,8 @@ public class FirstMileShipmentService {
         + " (r.freight_cost+r.insurance_cost+r.duty_estimate+r.handling_cost) as total_cost,"
         + " r.status,r.depart_at,r.expected_arrive_at,r.dispatched_at,r.cancelled_at,"
         + " r.cancel_reason,r.version,"
-        + " r.created_at,r.updated_at,"        + " coalesce(agg.line_count,0) as line_count,coalesce(agg.declared_value,0) as declared_value,"
+        + " r.created_at,r.updated_at,"
+        + " coalesce(agg.line_count,0) as line_count,coalesce(agg.declared_value,0) as declared_value,"
         + " coalesce(agg.planned,0) as planned_quantity,coalesce(agg.shipped,0) as shipped_quantity,"
         + " coalesce(lg.leg_count,0) as leg_count";
   }
@@ -331,10 +316,23 @@ public class FirstMileShipmentService {
       // 真实模糊检索：发运单号、来源单号、订舱号、船名航班号、承运商、目的仓名、备注。
       // **不是**假搜索。
       where.add(
-          "(" + a + "shipment_code ilike ? or " + a + "source_ref_code ilike ? or "
-              + a + "booking_no ilike ? or " + a + "vessel_or_flight_no ilike ? or "
-              + a + "carrier_name ilike ? or " + a + "destination_name ilike ? or "
-              + a + "customs_broker ilike ? or " + a + "notes ilike ?)");
+          "("
+              + a
+              + "shipment_code ilike ? or "
+              + a
+              + "source_ref_code ilike ? or "
+              + a
+              + "booking_no ilike ? or "
+              + a
+              + "vessel_or_flight_no ilike ? or "
+              + a
+              + "carrier_name ilike ? or "
+              + a
+              + "destination_name ilike ? or "
+              + a
+              + "customs_broker ilike ? or "
+              + a
+              + "notes ilike ?)");
       String kw = "%" + q.keyword().trim() + "%";
       for (int i = 0; i < 8; i++) {
         binds.add(kw);
@@ -351,8 +349,7 @@ public class FirstMileShipmentService {
     return switch (sort) {
       case "CREATED_AT" -> " order by r.created_at desc,r.id";
       case "SHIPMENT_CODE" -> " order by r.shipment_code,r.id";
-      case "EXPECTED_ARRIVE_AT" ->
-          " order by r.expected_arrive_at asc nulls last,r.id";
+      case "EXPECTED_ARRIVE_AT" -> " order by r.expected_arrive_at asc nulls last,r.id";
       case "DEPART_AT" -> " order by r.depart_at asc nulls last,r.id";
       default -> " order by r.updated_at desc,r.id";
     };
@@ -393,7 +390,8 @@ public class FirstMileShipmentService {
                 + " coalesce(sum(case when r.transport_mode='AIR' then 1 else 0 end),0) as air,"
                 + " coalesce(sum(case when r.transport_mode='RAIL' then 1 else 0 end),0) as rail,"
                 + " coalesce(sum(case when r.transport_mode='EXPRESS' then 1 else 0 end),0) as express"
-                + " from first_mile_shipment r" + sqlWhere,
+                + " from first_mile_shipment r"
+                + sqlWhere,
             binds.toArray());
     return new FirstMileSummary(
         n(r, "shipment_count"),
@@ -424,8 +422,9 @@ public class FirstMileShipmentService {
     conditions(q, "r", where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
-    long total = sql.fetchOne("select count(*)" + fromClause() + sqlWhere, binds.toArray())
-        .get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*)" + fromClause() + sqlWhere, binds.toArray())
+            .get(0, Long.class);
     var rows =
         sql.fetch(
             rowSelect() + fromClause() + aggJoin() + sqlWhere + orderBy(q) + " limit ? offset ?",
@@ -444,7 +443,8 @@ public class FirstMileShipmentService {
   }
 
   private List<WarehouseOption> warehouseOptions() {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,code,name,country_code from warehouse where tenant_id="
                 + "nullif(current_setting('app.current_tenant',true),'')::uuid"
                 + " and status='ACTIVE' order by country_code,code")
@@ -472,9 +472,7 @@ public class FirstMileShipmentService {
         eventRows(shipmentId),
         ShipmentStatus.allowedNext(status).stream()
             .map(
-                to ->
-                    new ShipmentTransition(
-                        status.name(), to.name(), true, "允许：已确认 → 已发出（登记在途腿）"))
+                to -> new ShipmentTransition(status.name(), to.name(), true, "允许：已确认 → 已发出（登记在途腿）"))
             .toList(),
         capabilities().transitRegistrationNote(),
         capabilities().titleTransferNote());
@@ -489,7 +487,8 @@ public class FirstMileShipmentService {
   }
 
   private List<FirstMileLineRow> lineRows(UUID shipmentId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select l.*,s.code as sku_code,s.name as sku_name,"
                 + " q.code as quality_status_code,q.name as quality_status_name,"
                 + " lo.lot_code,lo.expires_on as lot_expiry,"
@@ -557,11 +556,12 @@ public class FirstMileShipmentService {
   /**
    * 发货分录（在途腿）。
    *
-   * <p>左连 {@code inventory_transfer} 读回 7.5.1.2 那一侧的真实在途状态与已了结量：
-   * 发运单只记「我登记了哪条腿」，到货了多少是 7.5.1.2 的权威，本模块不另算一份。
+   * <p>左连 {@code inventory_transfer} 读回 7.5.1.2 那一侧的真实在途状态与已了结量： 发运单只记「我登记了哪条腿」，到货了多少是 7.5.1.2
+   * 的权威，本模块不另算一份。
    */
   public List<FirstMileTransitLegRow> transitLegs(UUID shipmentId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select g.*,l.line_no,s.code as sku_code,s.name as sku_name,"
                 + " t.transit_kind,t.status as transit_status,t.quantity as transit_quantity,"
                 + " t.settled_quantity,t.shipped_at,t.expected_arrive_at,t.carrier_name,"
@@ -605,7 +605,8 @@ public class FirstMileShipmentService {
   }
 
   private List<FirstMileEventRow> eventRows(UUID shipmentId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from first_mile_shipment_event where shipment_id=?"
                 + " order by occurred_at desc,id",
             shipmentId)
@@ -629,19 +630,12 @@ public class FirstMileShipmentService {
   /**
    * 可发批次候选：8.2.1.1 逐次实收行 + 还能发走多少。
    *
-   * <p>头程发运的输入是「选择货物与批次」，而批次挂在**逐次实收**上（同一 SKU 分三车到货
-   * 可以是三个批次）。所以候选项精确到实收行而不是精确到 SKU。
+   * <p>头程发运的输入是「选择货物与批次」，而批次挂在**逐次实收**上（同一 SKU 分三车到货 可以是三个批次）。所以候选项精确到实收行而不是精确到 SKU。
    *
-   * <p>可发量 = 实收 − 拒收 − 已被其他发运单发走。拒收的那部分从未入库（8.2.1.1 口径），
-   * 算进可发量就是凭空多出一批不存在的货。
+   * <p>可发量 = 实收 − 拒收 − 已被其他发运单发走。拒收的那部分从未入库（8.2.1.1 口径）， 算进可发量就是凭空多出一批不存在的货。
    */
   public SourceCandidatePage sourceCandidates(
-      UUID receiptId,
-      UUID skuId,
-      UUID warehouseId,
-      String keyword,
-      Integer page,
-      Integer size) {
+      UUID receiptId, UUID skuId, UUID warehouseId, String keyword, Integer page, Integer size) {
     int limit = Math.min(MAX_PAGE_SIZE, Math.max(1, size == null ? 50 : size));
     int pageNumber = Math.max(0, page == null ? 0 : page);
 
@@ -660,7 +654,8 @@ public class FirstMileShipmentService {
       binds.add(warehouseId);
     }
     if (keyword != null && !keyword.isBlank()) {
-      where.add("(r.receipt_code ilike ? or s.code ilike ? or s.name ilike ? or coalesce(lo.lot_code,'') ilike ?)");
+      where.add(
+          "(r.receipt_code ilike ? or s.code ilike ? or s.name ilike ? or coalesce(lo.lot_code,'') ilike ?)");
       String kw = "%" + keyword.trim() + "%";
       for (int i = 0; i < 4; i++) {
         binds.add(kw);
@@ -709,7 +704,10 @@ public class FirstMileShipmentService {
             candidateSql + " limit ? offset ?",
             append(binds, limit, (long) pageNumber * limit).toArray());
 
-    Record totals = sql.fetchOne("select count(*) as n,coalesce(sum(shippable),0) as q from (" + candidateSql + ") c", binds.toArray());
+    Record totals =
+        sql.fetchOne(
+            "select count(*) as n,coalesce(sum(shippable),0) as q from (" + candidateSql + ") c",
+            binds.toArray());
 
     return new SourceCandidatePage(
         rows.stream()
@@ -777,8 +775,7 @@ public class FirstMileShipmentService {
     UUID destinationId = require(request.destinationWarehouseId(), "目的仓");
     requireRef(tenantId, "warehouse", destinationId, "目的仓");
     if (originId.equals(destinationId)) {
-      throw new IllegalArgumentException(
-          "起运仓与目的仓不能是同一个：头程的定义就是国内到海外，起点终点同仓是录反了");
+      throw new IllegalArgumentException("起运仓与目的仓不能是同一个：头程的定义就是国内到海外，起点终点同仓是录反了");
     }
     String country = required(request.destinationCountryCode(), "目的地国家").toUpperCase(Locale.ROOT);
     if (country.length() != 2) {
@@ -796,8 +793,7 @@ public class FirstMileShipmentService {
 
     if (source == ShipmentSourceType.GOODS_RECEIPT && request.sourceRefId() == null) {
       throw new IllegalArgumentException(
-          "来源为 8.2.1.1 收货单时必须给出 sourceRefId：发运单必须能指回那张收货单，"
-              + "否则「这批货是哪张单收进来的」永远答不出来");
+          "来源为 8.2.1.1 收货单时必须给出 sourceRefId：发运单必须能指回那张收货单，" + "否则「这批货是哪张单收进来的」永远答不出来");
     }
     if (request.lines() == null || request.lines().isEmpty()) {
       throw new IllegalArgumentException("头程发运单至少要有一条明细：没有货物就没有发运");
@@ -880,8 +876,7 @@ public class FirstMileShipmentService {
         // 累计发运量会被重复计算成两倍。
         if (seenSourceLines.putIfAbsent(sourceLineId.toString(), sourceLineId) != null) {
           throw new IllegalArgumentException(
-              "同一个实收批次 " + sourceLineId + " 在本单出现了多行："
-                  + "同一批货只能有一行，拆行会让累计发运量翻倍");
+              "同一个实收批次 " + sourceLineId + " 在本单出现了多行：" + "同一批货只能有一行，拆行会让累计发运量翻倍");
         }
       }
 
@@ -889,8 +884,7 @@ public class FirstMileShipmentService {
       BigDecimal shippable = shippableOf(tenantId, sourceLineId, null);
       if (shippable != null && planned.compareTo(shippable) > 0) {
         throw new IllegalArgumentException(
-            "计划发运 " + planned + " 超过该实收批次还能发走的量 " + shippable
-                + "（实收 − 拒收 − 已被其他发运单占用）");
+            "计划发运 " + planned + " 超过该实收批次还能发走的量 " + shippable + "（实收 − 拒收 − 已被其他发运单占用）");
       }
 
       // SKU / 批次必须与那一批实物货对得上。与 DB 触发器 guard_first_mile_line_source
@@ -904,14 +898,18 @@ public class FirstMileShipmentService {
                     + " join goods_receipt_line gl on gl.tenant_id=el.tenant_id"
                     + "   and gl.id=el.line_id"
                     + " where el.tenant_id=? and el.id=?",
-                tenantId, sourceLineId);
+                tenantId,
+                sourceLineId);
         if (batch == null) {
           throw new IllegalArgumentException("实收批次不存在或不属于本租户：" + sourceLineId);
         }
         if (!batch.get("sku_id", UUID.class).equals(skuId)) {
           throw new IllegalArgumentException(
-              "该实收批次属于 SKU " + batch.get("sku_id", UUID.class)
-                  + "，与本行填的 SKU " + skuId + " 不是同一个："
+              "该实收批次属于 SKU "
+                  + batch.get("sku_id", UUID.class)
+                  + "，与本行填的 SKU "
+                  + skuId
+                  + " 不是同一个："
                   + "批次与 SKU 对不上会让账实核对永远差一个批次");
         }
         UUID sourceLot = batch.get("lot_id", UUID.class);
@@ -958,8 +956,7 @@ public class FirstMileShipmentService {
   }
 
   /**
-   * 某实收批次还能发走多少；{@code excludeShipmentId} 非空时把该单的占用量加回来
-   * （改单时本单自己已占的那部分要重算，不能把自己算成别人）。
+   * 某实收批次还能发走多少；{@code excludeShipmentId} 非空时把该单的占用量加回来 （改单时本单自己已占的那部分要重算，不能把自己算成别人）。
    *
    * <p>{@code sourceLineId} 为空（供应商来源）时返回 null —— 没有可核的实物批次口径。
    */
@@ -1026,7 +1023,8 @@ public class FirstMileShipmentService {
 
     // 整份替换明细：先删后建。已发出是终态，所以这里不可能有在途腿引用要处理。
     sql.execute("delete from first_mile_shipment_line where shipment_id=?", shipmentId);
-    insertLines(tenantId, shipmentId, source, head.get("source_ref_id", UUID.class), request.lines());
+    insertLines(
+        tenantId, shipmentId, source, head.get("source_ref_id", UUID.class), request.lines());
 
     sql.execute(
         "update first_mile_shipment set source_ref_code=?,destination_warehouse_id=?,"
@@ -1092,8 +1090,7 @@ public class FirstMileShipmentService {
             : request.expectedArriveAt();
     if (eta == null) {
       throw new IllegalArgumentException(
-          "确认前必须给出预计到港时间：它是 7.5.1.2 逾期预警的计算依据，"
-              + "没有 ETA 的在途腿只能显示「未登记预计到达」，预警会立刻变成噪声");
+          "确认前必须给出预计到港时间：它是 7.5.1.2 逾期预警的计算依据，" + "没有 ETA 的在途腿只能显示「未登记预计到达」，预警会立刻变成噪声");
     }
     if (departAt != null && eta.isBefore(departAt)) {
       throw new IllegalArgumentException("预计到港不能早于计划开船");
@@ -1102,7 +1099,9 @@ public class FirstMileShipmentService {
     sql.execute(
         "update first_mile_shipment set status='CONFIRMED',depart_at=?::timestamptz,"
             + " expected_arrive_at=?::timestamptz,version=version+1,updated_at=now() where id=?",
-        departAt, eta, shipmentId);
+        departAt,
+        eta,
+        shipmentId);
     recordEvent(
         shipmentId,
         "CONFIRMED",
@@ -1132,12 +1131,10 @@ public class FirstMileShipmentService {
       }
       if (decimal(r, "declared_value").compareTo(BigDecimal.ZERO) <= 0) {
         throw new IllegalArgumentException(
-            "第 " + lineNo + " 行申报货值为 0：货值是关税与 12 财务到岸成本的基数，"
-                + "为 0 会让整条成本链算错");
+            "第 " + lineNo + " 行申报货值为 0：货值是关税与 12 财务到岸成本的基数，" + "为 0 会让整条成本链算错");
       }
       if (decimal(r, "gross_weight_kg").compareTo(BigDecimal.ZERO) <= 0) {
-        throw new IllegalArgumentException(
-            "第 " + lineNo + " 行毛重为 0：海运/空运计费与报关都按毛重算");
+        throw new IllegalArgumentException("第 " + lineNo + " 行毛重为 0：海运/空运计费与报关都按毛重算");
       }
       if (n(r, "carton_count") <= 0) {
         throw new IllegalArgumentException("第 " + lineNo + " 行箱数为 0：装箱单与货代提箱按箱数算");
@@ -1150,13 +1147,10 @@ public class FirstMileShipmentService {
   /**
    * 发出：**货权转移与转在途就在这一刻发生**。
    *
-   * <p>顺序是「先登记在途腿，再落发出量与状态」：在途腿登记失败（SKU/批次/仓库校验不过、
-   * 或撞 7.5.1.2 的幂等唯一索引）时整个事务回滚，不会留下一张「已发出但货不在路上」的单。
+   * <p>顺序是「先登记在途腿，再落发出量与状态」：在途腿登记失败（SKU/批次/仓库校验不过、 或撞 7.5.1.2 的幂等唯一索引）时整个事务回滚，不会留下一张「已发出但货不在路上」的单。
    *
-   * <p>{@code lines} 是**逐行发出量的覆盖值**而不是选择集：没列出的行按计划量整行发出。
-   * 这样不会出现「发运单已发出、某行发 0」—— 那行会永远留在计划里发不出去
-   * （已发出是终态）。部分发运的正确做法是本行发一部分、余量另开一张发运单，
-   * DB 触发器 {@code guard_first_mile_over_ship} 按批次累计，不会双发。
+   * <p>{@code lines} 是**逐行发出量的覆盖值**而不是选择集：没列出的行按计划量整行发出。 这样不会出现「发运单已发出、某行发 0」—— 那行会永远留在计划里发不出去
+   * （已发出是终态）。部分发运的正确做法是本行发一部分、余量另开一张发运单， DB 触发器 {@code guard_first_mile_over_ship} 按批次累计，不会双发。
    */
   @Transactional
   public FirstMileSaved dispatch(UUID tenantId, UUID shipmentId, FirstMileDispatchRequest request) {
@@ -1179,7 +1173,11 @@ public class FirstMileShipmentService {
     OffsetDateTime eta = head.get("expected_arrive_at", OffsetDateTime.class);
     if (eta != null && eta.isBefore(shippedAt)) {
       throw new IllegalArgumentException(
-          "预计到港 " + eta + " 早于发出时间 " + shippedAt + "："
+          "预计到港 "
+              + eta
+              + " 早于发出时间 "
+              + shippedAt
+              + "："
               + "7.5.1.2 登记在途腿时会直接拒绝这种 ETA，逾期预警也会从第一天起全量误报");
     }
 
@@ -1229,21 +1227,22 @@ public class FirstMileShipmentService {
       BigDecimal planned = decimal(l, "planned_quantity");
       BigDecimal qty = legQuantity(overrides.getOrDefault(lineId, planned), planned, lineNo);
       if (qty.compareTo(planned) > 0) {
-        throw new IllegalArgumentException(
-            "第 " + lineNo + " 行实际发出 " + qty + " 超过计划量 " + planned);
+        throw new IllegalArgumentException("第 " + lineNo + " 行实际发出 " + qty + " 超过计划量 " + planned);
       }
       if (qty.signum() <= 0) {
         throw new IllegalArgumentException(
-            "第 " + lineNo + " 行实际发出为 0：已发出是终态，这一行会永远留在计划里发不出去。"
+            "第 "
+                + lineNo
+                + " 行实际发出为 0：已发出是终态，这一行会永远留在计划里发不出去。"
                 + "不发这一行请在改单时删掉它；只发一部分请发正数，余量另开一张发运单");
       }
       // 累计口径在 DB 层还有一道延迟约束（guard_first_mile_over_ship）；
       // 这里先给一次可读报错，避免等到提交时才知道。
-      BigDecimal shippable = shippableOf(tenantId, l.get("source_receipt_event_line_id", UUID.class), null);
+      BigDecimal shippable =
+          shippableOf(tenantId, l.get("source_receipt_event_line_id", UUID.class), null);
       if (shippable != null && qty.compareTo(shippable) > 0) {
         throw new IllegalArgumentException(
-            "第 " + lineNo + " 行实际发出 " + qty + " 超过该实收批次还能发走的量 " + shippable
-                + "（同一批货不能发两次）");
+            "第 " + lineNo + " 行实际发出 " + qty + " 超过该实收批次还能发走的量 " + shippable + "（同一批货不能发两次）");
       }
 
       // 先落发出量：在途腿回执的 DB 触发器 guard_first_mile_leg_line 是**即时**触发器，
@@ -1252,7 +1251,8 @@ public class FirstMileShipmentService {
       sql.execute(
           "update first_mile_shipment_line set shipped_quantity=?,version=version+1,"
               + " updated_at=now() where id=?",
-          qty, lineId);
+          qty,
+          lineId);
 
       // ===== 唯一的在途登记入口：调 7.5.1.2 的公开端点，绝不直写 inventory_transfer =====
       var savedLeg =
@@ -1301,7 +1301,9 @@ public class FirstMileShipmentService {
     sql.execute(
         "update first_mile_shipment set status='DISPATCHED',dispatched_at=?::timestamptz,"
             + " dispatched_by=?,version=version+1,updated_at=now() where id=?",
-        shippedAt, actorId, shipmentId);
+        shippedAt,
+        actorId,
+        shipmentId);
     recordEvent(
         shipmentId,
         "DISPATCHED",
@@ -1309,25 +1311,27 @@ public class FirstMileShipmentService {
         "DISPATCHED",
         "",
         (request == null ? "" : fit(request.notes(), 2000, "发出备注"))
-            + (dispatchedLines > 0 ? "（已在 7.5.1.2 登记 " + dispatchedLines + " 条在途腿；"
-                + "本动作不扣在手库存 —— 头程货到货前从未进过我方库存账）" : ""));
+            + (dispatchedLines > 0
+                ? "（已在 7.5.1.2 登记 " + dispatchedLines + " 条在途腿；" + "本动作不扣在手库存 —— 头程货到货前从未进过我方库存账）"
+                : ""));
     return savedOf(shipmentId);
   }
 
   /**
    * 发运量对齐 7.5.1.2 在途腿的 {@code numeric(19,4)} 口径。
    *
-   * <p>计划量沿用 8.2.1.1 的 {@code numeric(19,6)}，但在途腿是 7.5.1.2 建的
-   * {@code numeric(19,4)} 且它的服务层**显式拒绝超过 4 位小数**。所以发出时刻把量
-   * 归一到 4 位：能无损归一就归一，归一不掉就报出来 —— 静默四舍五入会让「发出 60.000001 件」
-   * 变成在途账上的 60，货权与在途从此对不上。
+   * <p>计划量沿用 8.2.1.1 的 {@code numeric(19,6)}，但在途腿是 7.5.1.2 建的 {@code numeric(19,4)} 且它的服务层**显式拒绝超过
+   * 4 位小数**。所以发出时刻把量 归一到 4 位：能无损归一就归一，归一不掉就报出来 —— 静默四舍五入会让「发出 60.000001 件」 变成在途账上的 60，货权与在途从此对不上。
    */
   private static BigDecimal legQuantity(BigDecimal raw, BigDecimal planned, int lineNo) {
     try {
       return raw.setScale(4, java.math.RoundingMode.UNNECESSARY);
     } catch (ArithmeticException e) {
       throw new IllegalArgumentException(
-          "第 " + lineNo + " 行发出量 " + raw
+          "第 "
+              + lineNo
+              + " 行发出量 "
+              + raw
               + " 有超过 4 位小数：7.5.1.2 的在途腿是 numeric(19,4)，"
               + "四舍五入会让在途账上的量与发运单对不上。请按 4 位小数重新下发。");
     }
@@ -1350,8 +1354,7 @@ public class FirstMileShipmentService {
       throw statusError(
           current,
           current == ShipmentStatus.DISPATCHED
-              ? "已发出不能取消：货权已转移、在途腿已在 7.5.1.2 名下。"
-                  + "要改这批货请走 7.5.1.2 的差异登记"
+              ? "已发出不能取消：货权已转移、在途腿已在 7.5.1.2 名下。" + "要改这批货请走 7.5.1.2 的差异登记"
               : "当前状态不能取消");
     }
     String reason = request == null ? "" : fit(request.reason(), 200, "取消原因");
@@ -1361,9 +1364,16 @@ public class FirstMileShipmentService {
     sql.execute(
         "update first_mile_shipment set status='CANCELLED',cancelled_at=?::timestamptz,"
             + " cancelled_by=?,cancel_reason=?,version=version+1,updated_at=now() where id=?",
-        OffsetDateTime.now(), UUID.randomUUID(), reason, shipmentId);
+        OffsetDateTime.now(),
+        UUID.randomUUID(),
+        reason,
+        shipmentId);
     recordEvent(
-        shipmentId, "CANCELLED", current.name(), "CANCELLED", reason,
+        shipmentId,
+        "CANCELLED",
+        current.name(),
+        "CANCELLED",
+        reason,
         request == null ? "" : fit(request.notes(), 2000, "取消备注"));
     return savedOf(shipmentId);
   }
@@ -1371,8 +1381,7 @@ public class FirstMileShipmentService {
   // ================================================================ 内部
 
   private Record lockHead(UUID shipmentId) {
-    Record r =
-        sql.fetchOne("select * from first_mile_shipment where id=? for update", shipmentId);
+    Record r = sql.fetchOne("select * from first_mile_shipment where id=? for update", shipmentId);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "头程发运单不存在或无权查看");
     }
@@ -1380,7 +1389,12 @@ public class FirstMileShipmentService {
   }
 
   private void recordEvent(
-      UUID shipmentId, String kind, String fromStatus, String toStatus, String reason, String notes) {
+      UUID shipmentId,
+      String kind,
+      String fromStatus,
+      String toStatus,
+      String reason,
+      String notes) {
     sql.execute(
         "insert into first_mile_shipment_event(id,tenant_id,shipment_id,kind,occurred_at,"
             + "from_status,to_status,actor_id,reason,notes)"
@@ -1399,15 +1413,13 @@ public class FirstMileShipmentService {
 
   /** 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。 */
   private UUID currentTenant() {
-    return sql.fetchOne(
-            "select nullif(current_setting('app.current_tenant',true),'')::uuid")
+    return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")
         .get(0, UUID.class);
   }
 
   private void requireRef(UUID tenantId, String table, UUID id, String label) {
     if (id == null
-        || sql.fetchOne(
-                "select id from " + table + " where tenant_id=? and id=?", tenantId, id)
+        || sql.fetchOne("select id from " + table + " where tenant_id=? and id=?", tenantId, id)
             == null) {
       throw new IllegalArgumentException(label + "不存在或无权访问：" + id);
     }
@@ -1439,13 +1451,13 @@ public class FirstMileShipmentService {
     long actual = head.get("version", Long.class);
     if (actual != expected) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "头程发运单已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "），请刷新后重试");
+          HttpStatus.CONFLICT, "头程发运单已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "），请刷新后重试");
     }
   }
 
   private ResponseStatusException statusError(ShipmentStatus current, String detail) {
-    return new ResponseStatusException(HttpStatus.CONFLICT, detail + "（当前状态：" + current.label() + "）");
+    return new ResponseStatusException(
+        HttpStatus.CONFLICT, detail + "（当前状态：" + current.label() + "）");
   }
 
   /** 建单/改单/确认/发出/取消后回读：响应是「库里真实存了什么」。 */

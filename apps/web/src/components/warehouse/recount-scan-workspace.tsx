@@ -126,18 +126,15 @@ export function RecountScanWorkspace() {
     void load();
   }, [load]);
 
-  const openSession = useCallback(
-    async (sessionId: string) => {
-      setActionError('');
-      setActionNote('');
-      try {
-        setDetail(await fetchRecount(sessionId));
-      } catch (e) {
-        setActionError(e instanceof Error ? e.message : '复核单详情读取失败');
-      }
-    },
-    [],
-  );
+  const openSession = useCallback(async (sessionId: string) => {
+    setActionError('');
+    setActionNote('');
+    try {
+      setDetail(await fetchRecount(sessionId));
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : '复核单详情读取失败');
+    }
+  }, []);
 
   const run = async (work: () => Promise<unknown>, sessionId?: string) => {
     setActionError('');
@@ -203,18 +200,16 @@ export function RecountScanWorkspace() {
         <StatCard label="复核中" value={String(summary?.openSessions ?? 0)} />
         <StatCard label="复核通过" value={String(summary?.passedSessions ?? 0)} />
         <StatCard label="复核异常" value={String(summary?.failedSessions ?? 0)} />
-        <StatCard
-          label="待处理异常"
-          value={String(summary?.pendingExceptions ?? 0)}
-        />
+        <StatCard label="待处理异常" value={String(summary?.pendingExceptions ?? 0)} />
       </div>
 
       {caps && (
         <SectionCard title="这一页的口径" description="复核是错发拦截的最后机会">
           <ul className="space-y-2 text-sm text-slate-300">
             <li>
-              漏件 <b>{summary?.missingItems ?? 0}</b> · 错件 <b>{summary?.wrongItems ?? 0}</b> · 多件{' '}
-              <b>{summary?.extraItems ?? 0}</b> · 序列号集合不符 <b>{summary?.serialMismatches ?? 0}</b> · 转人工处理{' '}
+              漏件 <b>{summary?.missingItems ?? 0}</b> · 错件 <b>{summary?.wrongItems ?? 0}</b> ·
+              多件 <b>{summary?.extraItems ?? 0}</b> · 序列号集合不符{' '}
+              <b>{summary?.serialMismatches ?? 0}</b> · 转人工处理{' '}
               <b>{summary?.manualExceptions ?? 0}</b>
             </li>
             <li>
@@ -234,7 +229,10 @@ export function RecountScanWorkspace() {
         </SectionCard>
       )}
 
-      <SectionCard title="复核单" description="一张出库单同时只能有一张复核中的复核单；返工轮次是新会话">
+      <SectionCard
+        title="复核单"
+        description="一张出库单同时只能有一张复核中的复核单；返工轮次是新会话"
+      >
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="text-sm text-slate-400">
@@ -325,7 +323,9 @@ export function RecountScanWorkspace() {
                       </td>
                       <td className="py-2">
                         {row.exceptionCount}
-                        {row.pendingExceptionCount > 0 ? `（${row.pendingExceptionCount} 条待处理）` : ''}
+                        {row.pendingExceptionCount > 0
+                          ? `（${row.pendingExceptionCount} 条待处理）`
+                          : ''}
                       </td>
                       <td className="py-2 text-xs">
                         {row.openBox ? '已开箱' : row.highValue ? '建议开箱' : ''}
@@ -369,10 +369,7 @@ export function RecountScanWorkspace() {
                 label="实扫 / 应发"
                 value={`${qtyText(recount.scannedQuantity)} / ${qtyText(recount.baselineQuantity)}`}
               />
-              <StatCard
-                label="待处理异常"
-                value={String(recount.pendingExceptionCount)}
-              />
+              <StatCard label="待处理异常" value={String(recount.pendingExceptionCount)} />
             </div>
 
             <p className="mt-3 text-xs text-slate-400">{recount.verifyBasis}</p>
@@ -411,14 +408,9 @@ export function RecountScanWorkspace() {
                     const warnings = lineWarnings(line);
                     const gap = shortfallText(line.expectedQuantity, line.scannedQuantity);
                     return (
-                      <div
-                        key={line.id}
-                        className="rounded border border-slate-800 p-3 text-sm"
-                      >
+                      <div key={line.id} className="rounded border border-slate-800 p-3 text-sm">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-xs text-slate-400">
-                            #{line.lineNo}
-                          </span>
+                          <span className="font-mono text-xs text-slate-400">#{line.lineNo}</span>
                           <span className="font-medium">{line.skuCode}</span>
                           <span className="text-xs text-slate-400">{line.skuName}</span>
                           <span className={TONE_CLASS[lineStatusTone(line.lineStatus)]}>
@@ -436,8 +428,7 @@ export function RecountScanWorkspace() {
                           <span>应发（订单明细）：{qtyText(line.expectedQuantity)} 件</span>
                           <span>实拣（8.3.2.1）：{qtyText(line.pickedQuantity)} 件</span>
                           <span>
-                            实扫：{qtyText(line.scannedQuantity)} 件
-                            {gap !== '' ? `（${gap}）` : ''}
+                            实扫：{qtyText(line.scannedQuantity)} 件{gap !== '' ? `（${gap}）` : ''}
                           </span>
                         </div>
 
@@ -455,7 +446,9 @@ export function RecountScanWorkspace() {
                               <span className="text-slate-400">已扫：</span>
                               <span
                                 className={
-                                  line.serialMatch ? 'ml-1 font-mono' : 'ml-1 font-mono text-rose-200'
+                                  line.serialMatch
+                                    ? 'ml-1 font-mono'
+                                    : 'ml-1 font-mono text-rose-200'
                                 }
                               >
                                 {line.scannedSerials.length > 0
@@ -550,9 +543,7 @@ export function RecountScanWorkspace() {
             }
           >
             {recount.openBox ? (
-              <p className="text-sm text-slate-300">
-                这一单已开箱复核。{highValueHint(verdict)}
-              </p>
+              <p className="text-sm text-slate-300">这一单已开箱复核。{highValueHint(verdict)}</p>
             ) : canOpenBox(recount.status, recount.openBox) ? (
               <div className="space-y-3">
                 <Input
@@ -583,13 +574,17 @@ export function RecountScanWorkspace() {
             description="漏件、错件、多件、重复扫、序列号集合不符、未知码；异常单可转人工处理"
           >
             {detail.exceptions.length === 0 ? (
-              <EmptyState title="没有异常" description="扫到目前没有检出任何与订单明细对不上的地方。" />
+              <EmptyState
+                title="没有异常"
+                description="扫到目前没有检出任何与订单明细对不上的地方。"
+              />
             ) : (
               <div className="space-y-3">
                 {canEscalate(recount.pendingExceptionCount, recount.status) && (
                   <div className="rounded border border-slate-800 p-3">
                     <p className="text-sm text-slate-300">
-                      把这一单全部 <b>{recount.pendingExceptionCount}</b> 条待处理异常一次性转人工处理。
+                      把这一单全部 <b>{recount.pendingExceptionCount}</b>{' '}
+                      条待处理异常一次性转人工处理。
                       <b>转人工不等于放行</b> —— 它清的是「谁来管」，不是「这一行核过了」。
                     </p>
                     <div className="mt-2 flex gap-2">
@@ -630,9 +625,7 @@ export function RecountScanWorkspace() {
                         <td className="py-2">
                           <span
                             className={
-                              e.resolution === 'PENDING'
-                                ? TONE_CLASS.danger
-                                : TONE_CLASS.neutral
+                              e.resolution === 'PENDING' ? TONE_CLASS.danger : TONE_CLASS.neutral
                             }
                           >
                             {exceptionKindLabel(e.kind)}
@@ -733,10 +726,10 @@ export function RecountScanWorkspace() {
                       const report = await completeRecount(recount.id);
                       setActionNote(
                         report.verdict === 'PASSED'
-                          ? '复核通过：出库单已交到「待打包」。复核不写库存分录、不释放预占 —— '
-                            + '货与占用都还在打包区，发货由 8.3.4.1 写。'
-                          : `复核没通过：${report.blockingReasons.join('；')}。`
-                            + '检出拣错或漏件时的出口是退回拣货（8.3.2.1 重开），本模块不改库存。',
+                          ? '复核通过：出库单已交到「待打包」。复核不写库存分录、不释放预占 —— ' +
+                              '货与占用都还在打包区，发货由 8.3.4.1 写。'
+                          : `复核没通过：${report.blockingReasons.join('；')}。` +
+                              '检出拣错或漏件时的出口是退回拣货（8.3.2.1 重开），本模块不改库存。',
                       );
                     }, recount.id)
                   }
@@ -747,10 +740,7 @@ export function RecountScanWorkspace() {
                   disabled={!writable}
                   onClick={() =>
                     void run(async () => {
-                      await cancelRecount(
-                        recount.id,
-                        window.prompt('取消原因（必填）') ?? '',
-                      );
+                      await cancelRecount(recount.id, window.prompt('取消原因（必填）') ?? '');
                     }, recount.id)
                   }
                 >
@@ -759,8 +749,8 @@ export function RecountScanWorkspace() {
               </div>
               <p className="mt-2 text-xs text-slate-400">
                 「完成复核」**不是发货、也不是打包**：它只把出库单交到「待打包」。
-                检出拣错或漏件时出口是<b>退回拣货</b>（出库单「待复核」→「拣货中」，
-                由 8.3.2.1 重开），本模块不改库存、不释放预占。
+                检出拣错或漏件时出口是<b>退回拣货</b>（出库单「待复核」→「拣货中」， 由 8.3.2.1
+                重开），本模块不改库存、不释放预占。
                 {canComplete(recount.status, verdict)
                   ? '当前无拦路项，可以完成。'
                   : verdict && verdict.blocking

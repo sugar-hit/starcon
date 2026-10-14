@@ -28,19 +28,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 8.2.1.2 收货差异（处理）：**破损与短少不得入可售的硬规则**（服务层 + 数据库层两道）、
- * 拒收不入账与真撤出两条库存路径、部分接收的数量不变式、拍照留证字节真落库、
+ * 8.2.1.2 收货差异（处理）：**破损与短少不得入可售的硬规则**（服务层 + 数据库层两道）、 拒收不入账与真撤出两条库存路径、部分接收的数量不变式、拍照留证字节真落库、
  * 索赔状态机与「不建假采购索赔单」边界，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link GoodsReceiptIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 派生 id 的前缀不同，避免两条车道的夹具互相污染。
+ * <p>夹具写法与 {@link GoodsReceiptIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 派生 id 的前缀不同，避免两条车道的夹具互相污染。
  *
- * <p>差异事实一律走 8.2.1.1 的**真实入口**登记（实收请求的 discrepancies 数组），
- * 不直连 SQL 造差异 —— 否则测的是夹具而不是「上游真的交付了没有」。
+ * <p>差异事实一律走 8.2.1.1 的**真实入口**登记（实收请求的 discrepancies 数组）， 不直连 SQL 造差异 —— 否则测的是夹具而不是「上游真的交付了没有」。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -183,33 +179,64 @@ class GoodsReceiptDiscrepancyIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, "PENDING_INSPECTION", "待检", "PENDING_INSPECTION");
+                idFor(tenant, 7),
+                tenant,
+                "PENDING_INSPECTION",
+                "待检",
+                "PENDING_INSPECTION");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "DEFECTIVE", "残次", "DEFECTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "DEFECTIVE",
+                "残次",
+                "DEFECTIVE");
             return null;
           });
     }
@@ -222,7 +249,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on)"
                   + " values(?,?,?,?,?)",
-              lotA1, a, skuA, "LOT-1", java.time.LocalDate.of(2027, 3, 1));
+              lotA1,
+              a,
+              skuA,
+              "LOT-1",
+              java.time.LocalDate.of(2027, 3, 1));
           return null;
         });
   }
@@ -231,7 +262,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        id, a, warehouse, code, "库位 " + code);
+        id,
+        a,
+        warehouse,
+        code,
+        "库位 " + code);
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -276,18 +311,37 @@ class GoodsReceiptDiscrepancyIntegrationTest {
               "insert into transfer_order(id,tenant_id,order_code,from_warehouse_id,"
                   + "to_warehouse_id,legal_entity_id,status,confirmed_at,shipped_at,created_by)"
                   + " values(?,?,?,?,?,?,'IN_TRANSIT',now(),now(),?)",
-              id, a, "TO-" + id.toString().substring(0, 8), whB2, whA, leA, user);
+              id,
+              a,
+              "TO-" + id.toString().substring(0, 8),
+              whB2,
+              whA,
+              leA,
+              user);
           var lineId = UUID.randomUUID();
           sql.execute(
               "insert into transfer_order_line(id,tenant_id,order_id,sku_id,quality_status_id,"
                   + "requested_quantity,shipped_quantity) values(?,?,?,?,?,100,100)",
-              lineId, a, id, skuA, qSellable, new BigDecimal("100"));
+              lineId,
+              a,
+              id,
+              skuA,
+              qSellable,
+              new BigDecimal("100"));
           sql.execute(
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,"
                   + "ref_type,ref_id,shipped_at,line_id)"
                   + " values(?,?,?,?,?,?,?,100,'IN_TRANSIT','TRANSFER_ORDER',?,now(),?)",
-              UUID.randomUUID(), a, skuA, leA, whB2, whA, qSellable, id, lineId);
+              UUID.randomUUID(),
+              a,
+              skuA,
+              leA,
+              whB2,
+              whA,
+              qSellable,
+              id,
+              lineId);
           return id;
         });
   }
@@ -305,35 +359,35 @@ class GoodsReceiptDiscrepancyIntegrationTest {
       UUID receiptId, String received, String type, String discrepancyQty, String reason) {
     UUID line = lineIdOf(receiptId);
     return asA(
-            () -> {
-              receipts.receive(
-                  receiptId,
-                  new GoodsReceiptModels.GoodsReceiptReceiveRequest(
-                      asA(() -> receipts.detail(receiptId)).receipt().version(),
-                      null,
-                      locA1,
-                      "SF123-A",
-                      "第一车",
-                      List.of(
-                          new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
-                              line, new BigDecimal(received), BigDecimal.ZERO, null, null,
-                              List.of())),
-                      List.of(
-                          new GoodsReceiptModels.ReceiptDiscrepancyRequest(
-                              line, type, new BigDecimal(discrepancyQty), reason, "现场判定", ""))));
-              return discrepancyIdOf(receiptId, type);
-            });
+        () -> {
+          receipts.receive(
+              receiptId,
+              new GoodsReceiptModels.GoodsReceiptReceiveRequest(
+                  asA(() -> receipts.detail(receiptId)).receipt().version(),
+                  null,
+                  locA1,
+                  "SF123-A",
+                  "第一车",
+                  List.of(
+                      new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
+                          line, new BigDecimal(received), BigDecimal.ZERO, null, null, List.of())),
+                  List.of(
+                      new GoodsReceiptModels.ReceiptDiscrepancyRequest(
+                          line, type, new BigDecimal(discrepancyQty), reason, "现场判定", ""))));
+          return discrepancyIdOf(receiptId, type);
+        });
   }
 
   /** 最近一条该类型的差异事实 id（8.2.1.1 落的那张表）。 */
   UUID discrepancyIdOf(UUID receiptId, String type) {
     return asA(
-            () ->
-                sql.fetchOne(
-                        "select id from goods_receipt_discrepancy where receipt_id=?"
-                            + " and discrepancy_type=? order by recorded_at desc limit 1",
-                        receiptId, type)
-                    .get("id", UUID.class));
+        () ->
+            sql.fetchOne(
+                    "select id from goods_receipt_discrepancy where receipt_id=?"
+                        + " and discrepancy_type=? order by recorded_at desc limit 1",
+                    receiptId,
+                    type)
+                .get("id", UUID.class));
   }
 
   DiscrepancyHandlingSaved intake(UUID discrepancyId) {
@@ -346,7 +400,9 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             sql.fetchOne(
                     "select coalesce(sum(on_hand),0) from inventory_balance"
                         + " where sku_id=? and warehouse_id=? and quality_status_id=?",
-                    sku, warehouse, quality)
+                    sku,
+                    warehouse,
+                    quality)
                 .get(0, BigDecimal.class));
   }
 
@@ -385,14 +441,22 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             receipts.receive(
                 receipt.id(),
                 new GoodsReceiptModels.GoodsReceiptReceiveRequest(
-                    0L, null, locA1, "SF123-A", "第一车",
+                    0L,
+                    null,
+                    locA1,
+                    "SF123-A",
+                    "第一车",
                     List.of(
                         new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
                             line, new BigDecimal("100"), BigDecimal.ZERO, null, null, List.of())),
                     List.of(
                         new GoodsReceiptModels.ReceiptDiscrepancyRequest(
-                            line, "DAMAGED", new BigDecimal("10"), "外箱压塌",
-                            "现场开箱发现 10 件外箱压塌", "")))));
+                            line,
+                            "DAMAGED",
+                            new BigDecimal("10"),
+                            "外箱压塌",
+                            "现场开箱发现 10 件外箱压塌",
+                            "")))));
     UUID discrepancyId = discrepancyIdOf(receipt.id(), "DAMAGED");
     assertThat(onHand(skuA, whA, qSellable)).isEqualByComparingTo("100");
 
@@ -407,25 +471,38 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var evidence =
         asA(
             () ->
-                handling.addEvidence(actorA, 
+                handling.addEvidence(
+                    actorA,
                     intake.id(),
                     new DiscrepancyEvidenceRequest(
-                        "PHOTO", "damage.jpg", "image/jpeg",
-                        Base64.getEncoder().encodeToString(photo), null, "外箱压塌照片")));
+                        "PHOTO",
+                        "damage.jpg",
+                        "image/jpeg",
+                        Base64.getEncoder().encodeToString(photo),
+                        null,
+                        "外箱压塌照片")));
     assertThat(evidence.byteSize()).isEqualTo(photo.length);
-    assertThat(evidence.sha256())
-        .isEqualTo(HexFormat.of().formatHex(sha256(photo)));
+    assertThat(evidence.sha256()).isEqualTo(HexFormat.of().formatHex(sha256(photo)));
     assertThat(evidence.dataUrl()).startsWith("data:image/jpeg;base64,");
 
     // 拒收并真从库存撤出：可售 100 → 90
     var decided =
         asA(
             () ->
-                handling.decide(actorA, 
+                handling.decide(
+                    actorA,
                     intake.id(),
                     new DiscrepancyDecisionRequest(
-                        0L, "REJECT", null, null, null, qSellable, locA1, null,
-                        "外箱压塌整箱拒收", "承运方到场确认")));
+                        0L,
+                        "REJECT",
+                        null,
+                        null,
+                        null,
+                        qSellable,
+                        locA1,
+                        null,
+                        "外箱压塌整箱拒收",
+                        "承运方到场确认")));
     assertThat(decided.status()).isEqualTo("DECIDED");
     assertThat(decided.disposition()).isEqualTo("REJECT");
     assertThat(decided.acceptedQuantity()).isEqualByComparingTo("0");
@@ -439,11 +516,18 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var claimed =
         asA(
             () ->
-                handling.claim(actorA, 
+                handling.claim(
+                    actorA,
                     intake.id(),
                     new DiscrepancyClaimRequest(
-                        1L, "DAMAGE", null, new BigDecimal("380.00"), "CNY",
-                        null, null, "外箱压塌 10 件，按采购单价索赔")));
+                        1L,
+                        "DAMAGE",
+                        null,
+                        new BigDecimal("380.00"),
+                        "CNY",
+                        null,
+                        null,
+                        "外箱压塌 10 件，按采购单价索赔")));
     assertThat(claimed.status()).isEqualTo("CLAIMED");
     assertThat(claimed.claimed()).isTrue();
     assertThat(claimed.claimStatus()).isEqualTo("INITIATED");
@@ -458,7 +542,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
 
     // 结案
     // 提交索赔只推进索赔自己的状态，不动处理记录的版本 —— 所以这里沿用版本 2。
-    var closed = asA(() -> handling.close(actorA, intake.id(), new DiscrepancyHandlingCloseRequest(2L, "已提交索赔")));
+    var closed =
+        asA(
+            () ->
+                handling.close(
+                    actorA, intake.id(), new DiscrepancyHandlingCloseRequest(2L, "已提交索赔")));
     assertThat(closed.status()).isEqualTo("CLOSED");
     assertThat(closed.closedAt()).isNotNull();
 
@@ -481,11 +569,12 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "ACCEPT", null, null, qSellable, null, locA1, null,
-                                "当可售处理", ""))))
+                                0L, "ACCEPT", null, null, qSellable, null, locA1, null, "当可售处理",
+                                ""))))
         .hasMessageContaining("不允许按「正常入库」处理")
         .hasMessageContaining("破损与短少必须拒收或待检入库");
     // 决定被拒 → 库存一行都没动，仍是收货时的 100（而不是 0，也不是 110）
@@ -496,23 +585,25 @@ class GoodsReceiptDiscrepancyIntegrationTest {
   void 硬规则_短少按正常入库被服务层拒绝() {
     // 短少由 8.2.1.1 关单时如实登记：预期 100、实收 0
     var receipt = createReceipt("100", qSellable);
-    UUID discrepancyId = asA(
-        () -> {
-          receipts.close(
-              receipt.id(),
-              new GoodsReceiptModels.GoodsReceiptCloseRequest(0L, "整批没到", "供应商未发货"));
-          return discrepancyIdOf(receipt.id(), "SHORT_RECEIPT");
-        });
+    UUID discrepancyId =
+        asA(
+            () -> {
+              receipts.close(
+                  receipt.id(),
+                  new GoodsReceiptModels.GoodsReceiptCloseRequest(0L, "整批没到", "供应商未发货"));
+              return discrepancyIdOf(receipt.id(), "SHORT_RECEIPT");
+            });
     var handlingId = intake(discrepancyId).id();
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "ACCEPT", null, null, qSellable, null, locA1, null,
-                                "当可售处理", ""))))
+                                0L, "ACCEPT", null, null, qSellable, null, locA1, null, "当可售处理",
+                                ""))))
         .hasMessageContaining("不允许按「正常入库」处理");
   }
 
@@ -521,30 +612,41 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     for (var type : List.of("WRONG_ITEM", "EXPIRED")) {
       var receipt = createReceipt("100", qSellable);
       UUID line = lineIdOf(receipt.id());
-      UUID discrepancyId = asA(
-          () -> {
-            receipts.receive(
-                receipt.id(),
-                new GoodsReceiptModels.GoodsReceiptReceiveRequest(
-                    0L, null, locA1, "SF123-A", "第一车",
-                    List.of(
-                        new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
-                            line, new BigDecimal("100"), BigDecimal.ZERO, null, null, List.of())),
-                    List.of(
-                        new GoodsReceiptModels.ReceiptDiscrepancyRequest(
-                            line, type, new BigDecimal("5"), "现场判定", "现场发现", ""))));
-            return discrepancyIdOf(receipt.id(), type);
-          });
+      UUID discrepancyId =
+          asA(
+              () -> {
+                receipts.receive(
+                    receipt.id(),
+                    new GoodsReceiptModels.GoodsReceiptReceiveRequest(
+                        0L,
+                        null,
+                        locA1,
+                        "SF123-A",
+                        "第一车",
+                        List.of(
+                            new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
+                                line,
+                                new BigDecimal("100"),
+                                BigDecimal.ZERO,
+                                null,
+                                null,
+                                List.of())),
+                        List.of(
+                            new GoodsReceiptModels.ReceiptDiscrepancyRequest(
+                                line, type, new BigDecimal("5"), "现场判定", "现场发现", ""))));
+                return discrepancyIdOf(receipt.id(), type);
+              });
       var handlingId = intake(discrepancyId).id();
       assertThatThrownBy(
               () ->
                   asA(
                       () ->
-                          handling.decide(actorA, 
+                          handling.decide(
+                              actorA,
                               handlingId,
                               new DiscrepancyDecisionRequest(
-                                  0L, "ACCEPT", null, null, qSellable, null, locA1, null,
-                                  "当可售处理", ""))))
+                                  0L, "ACCEPT", null, null, qSellable, null, locA1, null, "当可售处理",
+                                  ""))))
           .as(type + " 必须禁止正常入库")
           .hasMessageContaining("不允许按「正常入库」处理");
     }
@@ -567,7 +669,9 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                                 + "disposition='ACCEPT',accepted_quantity=10,rejected_quantity=0,"
                                 + "inbound_quality_status_id=?,decided_at=now(),decided_by=?"
                                 + " where id=?",
-                            qSellable, user, handlingId)))
+                            qSellable,
+                            user,
+                            handlingId)))
         .hasMessageContaining("不允许按「正常入库」处理");
   }
 
@@ -589,8 +693,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                                 + "location_id,lot_id,quantity,transaction_id,occurred_at,actor_id,note)"
                                 + " values(?,?,?,?,?,?,?,'INBOUND_TO_SELLABLE',null,?,?,null,10,null,"
                                 + "now(),?,'绕过服务层直连')",
-                            UUID.randomUUID(), a, handlingId, discrepancyId, skuA, whA, leA,
-                            qSellable, locA1, user)))
+                            UUID.randomUUID(),
+                            a,
+                            handlingId,
+                            discrepancyId,
+                            skuA,
+                            whA,
+                            leA,
+                            qSellable,
+                            locA1,
+                            user)))
         .hasMessageContaining("不允许入可售");
   }
 
@@ -601,11 +713,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "HOLD_FOR_INSPECTION", null, null, qSellable, null, locA1,
-                                null, "待检", ""))))
+                                0L,
+                                "HOLD_FOR_INSPECTION",
+                                null,
+                                null,
+                                qSellable,
+                                null,
+                                locA1,
+                                null,
+                                "待检",
+                                ""))))
         .hasMessageContaining("待检入库的去向质量状态必须是待检或残次");
   }
 
@@ -620,11 +741,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "PARTIAL_ACCEPT", new BigDecimal("4"), new BigDecimal("6"),
-                                qSellable, null, locA1, null, "部分接收", ""))))
+                                0L,
+                                "PARTIAL_ACCEPT",
+                                new BigDecimal("4"),
+                                new BigDecimal("6"),
+                                qSellable,
+                                null,
+                                locA1,
+                                null,
+                                "部分接收",
+                                ""))))
         .hasMessageContaining("不允许入可售");
   }
 
@@ -634,22 +764,22 @@ class GoodsReceiptDiscrepancyIntegrationTest {
   void 拒收不入账_货从未入库只留不入账痕迹() {
     // 短少：货压根没到，拒收它唯一的库存痕迹就是 NOT_POSTED
     var receipt = createReceipt("100", qSellable);
-    UUID discrepancyId = asA(
-        () -> {
-          receipts.close(
-              receipt.id(),
-              new GoodsReceiptModels.GoodsReceiptCloseRequest(0L, "整批没到", "未发货"));
-          return discrepancyIdOf(receipt.id(), "SHORT_RECEIPT");
-        });
+    UUID discrepancyId =
+        asA(
+            () -> {
+              receipts.close(
+                  receipt.id(), new GoodsReceiptModels.GoodsReceiptCloseRequest(0L, "整批没到", "未发货"));
+              return discrepancyIdOf(receipt.id(), "SHORT_RECEIPT");
+            });
     var handlingId = intake(discrepancyId).id();
     var decided =
         asA(
             () ->
-                handling.decide(actorA, 
+                handling.decide(
+                    actorA,
                     handlingId,
                     new DiscrepancyDecisionRequest(
-                        0L, "REJECT", null, null, null, null, null, null,
-                        "整批短少，放弃该部分并索赔", "")));
+                        0L, "REJECT", null, null, null, null, null, null, "整批短少，放弃该部分并索赔", "")));
     assertThat(decided.rejectedQuantity()).isEqualByComparingTo("100");
     // 没有任何库存分录：拒收不入账
     assertThat(countAdjustmentTransactions()).isEqualTo(0);
@@ -669,24 +799,27 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             receipts.receive(
                 receipt.id(),
                 new GoodsReceiptModels.GoodsReceiptReceiveRequest(
-                    0L, null, locA1, "SF123-A", "第一车",
+                    0L,
+                    null,
+                    locA1,
+                    "SF123-A",
+                    "第一车",
                     List.of(
                         new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
                             line, new BigDecimal("100"), BigDecimal.ZERO, null, null, List.of())),
                     List.of(
                         new GoodsReceiptModels.ReceiptDiscrepancyRequest(
-                            line, "DAMAGED", new BigDecimal("12"), "运输破损",
-                            "12 件外箱破损", "")))));
+                            line, "DAMAGED", new BigDecimal("12"), "运输破损", "12 件外箱破损", "")))));
     UUID discrepancyId = discrepancyIdOf(receipt.id(), "DAMAGED");
     var handlingId = intake(discrepancyId).id();
     assertThat(onHand(skuA, whA, qSellable)).isEqualByComparingTo("100");
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
-                    0L, "REJECT", null, null, null, qSellable, locA1, null,
-                    "破损整批拒收", "")));
+                    0L, "REJECT", null, null, null, qSellable, locA1, null, "破损整批拒收", "")));
     assertThat(onHand(skuA, whA, qSellable)).isEqualByComparingTo("88");
     assertThat(adjustmentEntryDelta()).isEqualByComparingTo("-12");
     var move = asA(() -> handling.detail(handlingId)).stockMoves().get(0);
@@ -706,25 +839,29 @@ class GoodsReceiptDiscrepancyIntegrationTest {
           sql.execute(
               "update inventory_balance set on_hand=on_hand-15 where sku_id=? and warehouse_id=?"
                   + " and quality_status_id=?",
-              skuA, whA, qSellable);
+              skuA,
+              whA,
+              qSellable);
           // V2 的 guard_bucket_movement_time 要求数量一变 last_movement_at 就得跟着动，
           // 夹具也得守这条，否则报错指向夹具而不是被测代码。
           sql.execute(
               "update stock_bucket set on_hand=on_hand-15,"
                   + " last_movement_at=last_movement_at + interval '1 microsecond'"
                   + " where sku_id=? and warehouse_id=? and quality_status_id=?",
-              skuA, whA, qSellable);
+              skuA,
+              whA,
+              qSellable);
           return null;
         });
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "REJECT", null, null, null, qSellable, locA1, null,
-                                "拒收", ""))))
+                                0L, "REJECT", null, null, null, qSellable, locA1, null, "拒收", ""))))
         .hasMessageContaining("撤出失败")
         .hasMessageContaining("先处理占用再撤出");
   }
@@ -739,11 +876,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "REJECT", null, null, null, qSellable, locA2, null,
-                                "拒收", ""))))
+                                0L, "REJECT", null, null, null, qSellable, locA2, null, "拒收", ""))))
         .hasMessageContaining("拒收不入账请不要传 locationId");
   }
 
@@ -755,11 +892,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var decided =
         asA(
             () ->
-                handling.decide(actorA, 
+                handling.decide(
+                    actorA,
                     handlingId,
                     new DiscrepancyDecisionRequest(
-                        0L, "PARTIAL_ACCEPT", new BigDecimal("4"), new BigDecimal("6"),
-                        qPending, qSellable, locA1, null, "4 件转待检、6 件退回", "")));
+                        0L,
+                        "PARTIAL_ACCEPT",
+                        new BigDecimal("4"),
+                        new BigDecimal("6"),
+                        qPending,
+                        qSellable,
+                        locA1,
+                        null,
+                        "4 件转待检、6 件退回",
+                        "")));
     assertThat(decided.acceptedQuantity()).isEqualByComparingTo("4");
     assertThat(decided.rejectedQuantity()).isEqualByComparingTo("6");
     // 4 件从可售**流转到**待检：待检 +4，可售 −4（总量不变）
@@ -768,14 +914,15 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     // 三条流转：质量状态转出 + 转入待检 + 拒收撤出
     var moves = asA(() -> handling.detail(handlingId)).stockMoves();
     assertThat(moves).hasSize(3);
-    assertThat(moves).extracting(DiscrepancyStockMoveRow::direction)
+    assertThat(moves)
+        .extracting(DiscrepancyStockMoveRow::direction)
         .containsExactlyInAnyOrder("WITHDRAW", "INBOUND_TO_HOLD", "WITHDRAW");
     // 总库存守恒：100 件还在库里，只是 14 件离开了可售
     assertThat(
             asA(
-                    () ->
-                        sql.fetchOne("select coalesce(sum(on_hand),0) from inventory_balance")
-                            .get(0, BigDecimal.class)))
+                () ->
+                    sql.fetchOne("select coalesce(sum(on_hand),0) from inventory_balance")
+                        .get(0, BigDecimal.class)))
         .isEqualByComparingTo("94");
   }
 
@@ -788,11 +935,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                0L, "PARTIAL_ACCEPT", new BigDecimal("4"), new BigDecimal("5"),
-                                qPending, null, locA1, null, "对不上", ""))))
+                                0L,
+                                "PARTIAL_ACCEPT",
+                                new BigDecimal("4"),
+                                new BigDecimal("5"),
+                                qPending,
+                                null,
+                                locA1,
+                                null,
+                                "对不上",
+                                ""))))
         .hasMessageContaining("必须恰好等于差异数量");
   }
 
@@ -809,7 +965,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                             "update goods_receipt_discrepancy_handling set status='DECIDED',"
                                 + "disposition='REJECT',accepted_quantity=0,rejected_quantity=3,"
                                 + "decided_at=now(),decided_by=? where id=?",
-                            user, handlingId)))
+                            user,
+                            handlingId)))
         .hasMessageContaining("接受量与拒收量之和必须恰好等于差异数量");
   }
 
@@ -821,18 +978,28 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var decided =
         asA(
             () ->
-                handling.decide(actorA, 
+                handling.decide(
+                    actorA,
                     handlingId,
                     new DiscrepancyDecisionRequest(
-                        0L, "HOLD_FOR_INSPECTION", null, null, qPending, qSellable, locA1, null,
-                        "转待检等质检", "")));
+                        0L,
+                        "HOLD_FOR_INSPECTION",
+                        null,
+                        null,
+                        qPending,
+                        qSellable,
+                        locA1,
+                        null,
+                        "转待检等质检",
+                        "")));
     assertThat(decided.acceptedQuantity()).isEqualByComparingTo("10");
     // 这 10 件收货时已经进了可售，转待检是**挪走**不是新增
     assertThat(onHand(skuA, whA, qPending)).isEqualByComparingTo("10");
     assertThat(onHand(skuA, whA, qSellable)).isEqualByComparingTo("90");
     var holdMoves = asA(() -> handling.detail(handlingId)).stockMoves();
     assertThat(holdMoves).hasSize(2);
-    assertThat(holdMoves).extracting(DiscrepancyStockMoveRow::direction)
+    assertThat(holdMoves)
+        .extracting(DiscrepancyStockMoveRow::direction)
         .containsExactlyInAnyOrder("WITHDRAW", "INBOUND_TO_HOLD");
   }
 
@@ -842,30 +1009,43 @@ class GoodsReceiptDiscrepancyIntegrationTest {
   void 超收可以正常入库因为货本身没问题() {
     var receipt = createReceipt("100", qSellable);
     UUID line = lineIdOf(receipt.id());
-    UUID discrepancyId = asA(
-        () -> {
-          receipts.receive(
-              receipt.id(),
-              new GoodsReceiptModels.GoodsReceiptReceiveRequest(
-                  0L, null, locA1, "SF123-A", "第一车",
-                  List.of(
-                      new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
-                          line, new BigDecimal("105"), BigDecimal.ZERO, null, null, List.of())),
-                  List.of(
-                      new GoodsReceiptModels.ReceiptDiscrepancyRequest(
-                          line, "OVER_RECEIPT", new BigDecimal("5"), "多发",
-                          "供应商多发 5 件", ""))));
-          return discrepancyIdOf(receipt.id(), "OVER_RECEIPT");
-        });
+    UUID discrepancyId =
+        asA(
+            () -> {
+              receipts.receive(
+                  receipt.id(),
+                  new GoodsReceiptModels.GoodsReceiptReceiveRequest(
+                      0L,
+                      null,
+                      locA1,
+                      "SF123-A",
+                      "第一车",
+                      List.of(
+                          new GoodsReceiptModels.GoodsReceiptReceiveLineRequest(
+                              line, new BigDecimal("105"), BigDecimal.ZERO, null, null, List.of())),
+                      List.of(
+                          new GoodsReceiptModels.ReceiptDiscrepancyRequest(
+                              line, "OVER_RECEIPT", new BigDecimal("5"), "多发", "供应商多发 5 件", ""))));
+              return discrepancyIdOf(receipt.id(), "OVER_RECEIPT");
+            });
     var handlingId = intake(discrepancyId).id();
     var decided =
         asA(
             () ->
-                handling.decide(actorA, 
+                handling.decide(
+                    actorA,
                     handlingId,
                     new DiscrepancyDecisionRequest(
-                        0L, "ACCEPT", null, null, qSellable, qSellable, locA1, null,
-                        "货没问题，确认入可售", "")));
+                        0L,
+                        "ACCEPT",
+                        null,
+                        null,
+                        qSellable,
+                        qSellable,
+                        locA1,
+                        null,
+                        "货没问题，确认入可售",
+                        "")));
     assertThat(decided.disposition()).isEqualTo("ACCEPT");
     // 关键：这 5 件在收货那一步就已经进了可售 bucket，确认接受**不能再加一次** ——
     // 再加一次会凭空多出 5 件可售货，而这 5 件本来就在库里会被直接卖掉。
@@ -886,11 +1066,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var evidence =
         asA(
             () ->
-                handling.addEvidence(actorA, 
+                handling.addEvidence(
+                    actorA,
                     handlingId,
                     new DiscrepancyEvidenceRequest(
-                        "PHOTO", "damage.jpg", "image/jpeg",
-                        Base64.getEncoder().encodeToString(photo), null, "外箱压塌")));
+                        "PHOTO",
+                        "damage.jpg",
+                        "image/jpeg",
+                        Base64.getEncoder().encodeToString(photo),
+                        null,
+                        "外箱压塌")));
     assertThat(evidence.byteSize()).isEqualTo(4096);
     assertThat(evidence.sha256()).isEqualTo(HexFormat.of().formatHex(sha256(photo)));
     // 读回数据库里的原始字节，逐字节相等
@@ -914,12 +1099,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var evidence =
         asA(
             () ->
-                handling.addEvidence(actorA, 
+                handling.addEvidence(
+                    actorA,
                     handlingId,
                     new DiscrepancyEvidenceRequest(
-                        "PHOTO", "p.jpg", "image/jpeg",
+                        "PHOTO",
+                        "p.jpg",
+                        "image/jpeg",
                         "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(photo),
-                        null, "")));
+                        null,
+                        "")));
     assertThat(evidence.byteSize()).isEqualTo(photo.length);
   }
 
@@ -931,11 +1120,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.addEvidence(actorA, 
+                        handling.addEvidence(
+                            actorA,
                             handlingId,
                             new DiscrepancyEvidenceRequest(
-                                "PHOTO", "big.jpg", "image/jpeg",
-                                Base64.getEncoder().encodeToString(tooBig), null, ""))))
+                                "PHOTO",
+                                "big.jpg",
+                                "image/jpeg",
+                                Base64.getEncoder().encodeToString(tooBig),
+                                null,
+                                ""))))
         .hasMessageContaining("不能超过");
     assertThat(countRows("goods_receipt_discrepancy_evidence")).isEqualTo(0);
   }
@@ -947,7 +1141,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.addEvidence(actorA, 
+                        handling.addEvidence(
+                            actorA,
                             handlingId,
                             new DiscrepancyEvidenceRequest(
                                 "PHOTO", "empty.jpg", "image/jpeg", "", null, ""))))
@@ -961,7 +1156,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
@@ -970,12 +1166,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.addEvidence(actorA, 
+                        handling.addEvidence(
+                            actorA,
                             handlingId,
                             new DiscrepancyEvidenceRequest(
-                                "PHOTO", "late.jpg", "image/jpeg",
+                                "PHOTO",
+                                "late.jpg",
+                                "image/jpeg",
                                 Base64.getEncoder().encodeToString("late".getBytes()),
-                                null, ""))))
+                                null,
+                                ""))))
         .hasMessageContaining("已关闭的处理记录不再接受新凭证");
   }
 
@@ -988,24 +1188,24 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
     asA(
         () ->
-            handling.claim(actorA, 
+            handling.claim(
+                actorA,
                 handlingId,
-                new DiscrepancyClaimRequest(
-                    1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
+                new DiscrepancyClaimRequest(1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
     asA(() -> handling.submitClaim(actorA, handlingId, new DiscrepancyClaimSubmitRequest(2L)));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
-                        handling.withdrawClaim(actorA, 
-                            handlingId,
-                            new DiscrepancyClaimWithdrawRequest(2L, "反悔了"))))
+                        handling.withdrawClaim(
+                            actorA, handlingId, new DiscrepancyClaimWithdrawRequest(2L, "反悔了"))))
         .hasMessageContaining("已提交不可撤回");
     // 数据库层同样拦得住（绕过服务层改状态）
     assertThatThrownBy(
@@ -1027,21 +1227,22 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
     asA(
         () ->
-            handling.claim(actorA, 
+            handling.claim(
+                actorA,
                 handlingId,
-                new DiscrepancyClaimRequest(
-                    1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
+                new DiscrepancyClaimRequest(1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
     var withdrawn =
         asA(
             () ->
-                handling.withdrawClaim(actorA, 
-                    handlingId, new DiscrepancyClaimWithdrawRequest(2L, "供应商已补货")));
+                handling.withdrawClaim(
+                    actorA, handlingId, new DiscrepancyClaimWithdrawRequest(2L, "供应商已补货")));
     assertThat(withdrawn.status()).isEqualTo("WITHDRAWN");
     assertThat(withdrawn.withdrawnAt()).isNotNull();
     // 处理记录退回「已决定」：它不再已索赔，但决定与库存流转原样保留
@@ -1057,22 +1258,23 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
     asA(
         () ->
-            handling.claim(actorA, 
+            handling.claim(
+                actorA,
                 handlingId,
-                new DiscrepancyClaimRequest(
-                    1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
+                new DiscrepancyClaimRequest(1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
-                        handling.withdrawClaim(actorA, 
-                            handlingId, new DiscrepancyClaimWithdrawRequest(2L, "  "))))
+                        handling.withdrawClaim(
+                            actorA, handlingId, new DiscrepancyClaimWithdrawRequest(2L, "  "))))
         .hasMessageContaining("必须给出原因");
   }
 
@@ -1083,16 +1285,17 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
     asA(
         () ->
-            handling.claim(actorA, 
+            handling.claim(
+                actorA,
                 handlingId,
-                new DiscrepancyClaimRequest(
-                    1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
+                new DiscrepancyClaimRequest(1L, "DAMAGE", null, null, null, null, null, "货损索赔")));
     // claim_ref_id 归 6.5.1 拥有，上游未交付时不允许自行填写
     assertThatThrownBy(
             () ->
@@ -1101,7 +1304,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                         sql.execute(
                             "update goods_receipt_discrepancy_claim set claim_ref_id=?"
                                 + " where handling_id=?",
-                            UUID.randomUUID(), handlingId)))
+                            UUID.randomUUID(),
+                            handlingId)))
         .hasMessageContaining("上游未交付时不允许自行填写");
   }
 
@@ -1112,7 +1316,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
@@ -1120,10 +1325,17 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.claim(actorA, 
+                        handling.claim(
+                            actorA,
                             handlingId,
                             new DiscrepancyClaimRequest(
-                                1L, "DAMAGE", null, new BigDecimal("100"), null, null, null,
+                                1L,
+                                "DAMAGE",
+                                null,
+                                new BigDecimal("100"),
+                                null,
+                                null,
+                                null,
                                 "只有金额"))))
         .hasMessageContaining("必须同时给币种");
   }
@@ -1135,7 +1347,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
@@ -1143,10 +1356,17 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.claim(actorA, 
+                        handling.claim(
+                            actorA,
                             handlingId,
                             new DiscrepancyClaimRequest(
-                                1L, "DAMAGE", null, new BigDecimal("100"), "人民币", null, null,
+                                1L,
+                                "DAMAGE",
+                                null,
+                                new BigDecimal("100"),
+                                "人民币",
+                                null,
+                                null,
                                 "币种不对"))))
         .hasMessageContaining("ISO 4217");
   }
@@ -1158,21 +1378,23 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
     asA(
         () ->
-            handling.claim(actorA, 
+            handling.claim(
+                actorA,
                 handlingId,
-                new DiscrepancyClaimRequest(
-                    1L, "DAMAGE", null, null, null, null, null, "第一次")));
+                new DiscrepancyClaimRequest(1L, "DAMAGE", null, null, null, null, null, "第一次")));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
-                        handling.claim(actorA, 
+                        handling.claim(
+                            actorA,
                             handlingId,
                             new DiscrepancyClaimRequest(
                                 2L, "DAMAGE", null, null, null, null, null, "第二次"))))
@@ -1191,7 +1413,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.claim(actorA, 
+                        handling.claim(
+                            actorA,
                             handlingId,
                             new DiscrepancyClaimRequest(
                                 0L, "DAMAGE", null, null, null, null, null, "没决定就索赔"))))
@@ -1207,7 +1430,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
@@ -1215,11 +1439,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
-                                1L, "HOLD_FOR_INSPECTION", null, null, qPending, null, locA1,
-                                null, "改判", ""))))
+                                1L,
+                                "HOLD_FOR_INSPECTION",
+                                null,
+                                null,
+                                qPending,
+                                null,
+                                locA1,
+                                null,
+                                "改判",
+                                ""))))
         .hasMessageContaining("只有待处理状态才能提交处理决定");
   }
 
@@ -1230,7 +1463,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var handlingId = intake(discrepancyId).id();
     asA(
         () ->
-            handling.decide(actorA, 
+            handling.decide(
+                actorA,
                 handlingId,
                 new DiscrepancyDecisionRequest(
                     0L, "REJECT", null, null, null, null, null, null, "拒收", "")));
@@ -1239,7 +1473,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.close(actorA, handlingId, new DiscrepancyHandlingCloseRequest(2L, "再结"))))
+                        handling.close(
+                            actorA, handlingId, new DiscrepancyHandlingCloseRequest(2L, "再结"))))
         .hasMessageContaining("当前状态不能关闭");
   }
 
@@ -1258,7 +1493,9 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                                 + "disposition='REJECT',accepted_quantity=0,"
                                 + "rejected_quantity=quantity,decided_at=now(),decided_by=?,"
                                 + "closed_at=now(),closed_by=? where id=?",
-                            user, user, handlingId)))
+                            user,
+                            user,
+                            handlingId)))
         .hasMessageContaining("等于把货损痕迹抹掉");
   }
 
@@ -1266,7 +1503,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
   void 状态机_待处理不能直接关闭() {
     var handlingId = damagedPending("10");
     assertThatThrownBy(
-            () -> asA(() -> handling.close(actorA, handlingId, new DiscrepancyHandlingCloseRequest(0L, "直接结"))))
+            () ->
+                asA(
+                    () ->
+                        handling.close(
+                            actorA, handlingId, new DiscrepancyHandlingCloseRequest(0L, "直接结"))))
         .hasMessageContaining("当前状态不能关闭");
   }
 
@@ -1277,7 +1518,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
                                 null, "REJECT", null, null, null, null, null, null, "拒收", ""))))
@@ -1286,7 +1528,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 asA(
                     () ->
-                        handling.decide(actorA, 
+                        handling.decide(
+                            actorA,
                             handlingId,
                             new DiscrepancyDecisionRequest(
                                 99L, "REJECT", null, null, null, null, null, null, "拒收", ""))))
@@ -1298,15 +1541,13 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var receipt = createReceipt("100", qSellable);
     UUID discrepancyId = receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", "10", "破损");
     intake(discrepancyId);
-    assertThatThrownBy(() -> intake(discrepancyId))
-        .hasMessageContaining("这条差异已经在处理中");
+    assertThatThrownBy(() -> intake(discrepancyId)).hasMessageContaining("这条差异已经在处理中");
     assertThat(countRows("goods_receipt_discrepancy_handling")).isEqualTo(1);
   }
 
   @Test
   void 接手不存在的差异报404() {
-    assertThatThrownBy(() -> intake(UUID.randomUUID()))
-        .hasMessageContaining("差异记录不存在");
+    assertThatThrownBy(() -> intake(UUID.randomUUID())).hasMessageContaining("差异记录不存在");
   }
 
   // ================================================================ 列表与查询
@@ -1323,19 +1564,22 @@ class GoodsReceiptDiscrepancyIntegrationTest {
         asA(
             () ->
                 handling.page(
-                    new DiscrepancyHandlingQuery(null, null, null, null, null, null, null, null, 0, 2),
+                    new DiscrepancyHandlingQuery(
+                        null, null, null, null, null, null, null, null, 0, 2),
                     actorA));
     var second =
         asA(
             () ->
                 handling.page(
-                    new DiscrepancyHandlingQuery(null, null, null, null, null, null, null, null, 1, 2),
+                    new DiscrepancyHandlingQuery(
+                        null, null, null, null, null, null, null, null, 1, 2),
                     actorA));
     assertThat(first.total()).isEqualTo(3);
     assertThat(second.total()).isEqualTo(3);
     assertThat(first.rows()).hasSize(2);
     assertThat(second.rows()).hasSize(1);
-    assertThat(first.rows()).extracting(DiscrepancyHandlingRow::id)
+    assertThat(first.rows())
+        .extracting(DiscrepancyHandlingRow::id)
         .doesNotContainAnyElementsOf(
             second.rows().stream().map(DiscrepancyHandlingRow::id).toList());
     // 汇总是全量的，不受分页影响
@@ -1359,7 +1603,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
             () ->
                 handling.page(
                     new DiscrepancyHandlingQuery(
-                        null, null, null, null, null, null, null, "id; drop table goods_receipt", 0, 50),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "id; drop table goods_receipt",
+                        0,
+                        50),
                     actorA));
     assertThat(page.total()).isEqualTo(1);
     assertThat(countRows("goods_receipt")).isEqualTo(1);
@@ -1434,7 +1687,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
       assertThat(d.note()).as(d.key() + " 必须说明为什么不可用").isNotBlank();
     }
     // 四态状态机
-    assertThat(caps.statusOptions()).extracting(DiscrepancyHandlingOption::value)
+    assertThat(caps.statusOptions())
+        .extracting(DiscrepancyHandlingOption::value)
         .containsExactly("PENDING", "DECIDED", "CLAIMED", "CLOSED");
     // 风险类型与硬规则说明
     assertThat(caps.riskDiscrepancyTypes())
@@ -1458,11 +1712,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
         OffsetDateTime.of(2026, 3, 14, 15, 9, 26, 0, java.time.ZoneOffset.ofHours(8));
     asA(
         () ->
-            handling.addEvidence(actorA, 
+            handling.addEvidence(
+                actorA,
                 handlingId,
                 new DiscrepancyEvidenceRequest(
-                    "PHOTO", "t.jpg", "image/jpeg",
-                    Base64.getEncoder().encodeToString("t".getBytes()), captured, "带偏移的时间")));
+                    "PHOTO",
+                    "t.jpg",
+                    "image/jpeg",
+                    Base64.getEncoder().encodeToString("t".getBytes()),
+                    captured,
+                    "带偏移的时间")));
     var stored =
         asA(
             () ->
@@ -1510,8 +1769,7 @@ class GoodsReceiptDiscrepancyIntegrationTest {
 
     // B 租户看不到 A 的处理记录
     assertThat(
-            asB(
-                () ->
+            asB(() ->
                     handling.page(
                         new DiscrepancyHandlingQuery(
                             null, null, null, null, null, null, null, null, 0, 50),
@@ -1522,15 +1780,14 @@ class GoodsReceiptDiscrepancyIntegrationTest {
         .hasMessageContaining("不存在或无权查看");
     // B 租户的汇总也看不到 A 的量
     assertThat(
-            asB(
-                    () ->
-                        handling
-                            .page(
-                                new DiscrepancyHandlingQuery(
-                                    null, null, null, null, null, null, null, null, 0, 50),
-                                actorB)
-                            .summary()
-                            .discrepancyQuantity())
+            asB(() ->
+                    handling
+                        .page(
+                            new DiscrepancyHandlingQuery(
+                                null, null, null, null, null, null, null, null, 0, 50),
+                            actorB)
+                        .summary()
+                        .discrepancyQuantity())
                 .toString())
         .isEqualTo("0");
   }
@@ -1542,25 +1799,29 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var mine = intake(discrepancyId);
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的（这里是空）
-    http.perform(get("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据
-    http.perform(get("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].id").value(mine.id().toString()));
     // 详情端点同样不受伪造头影响
-    http.perform(get("/warehouse/goods-receipt-discrepancies/" + mine.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies/" + mine.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 未认证 401
-    http.perform(get("/warehouse/goods-receipt-discrepancies")).andExpect(status().isUnauthorized());
+    http.perform(get("/warehouse/goods-receipt-discrepancies"))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -1571,10 +1832,20 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     // 池大小为 1，同一条连接被反复借还：交替访问两个租户 20 轮，
     // 每一轮都校验列表与详情两条路径都不串租户。
     for (int i = 0; i < 20; i++) {
-      var pa = asA(() -> handling.page(new DiscrepancyHandlingQuery(null, null, null, null, null,
-          null, null, null, 0, 50), actorA));
-      var pb = asB(() -> handling.page(new DiscrepancyHandlingQuery(null, null, null, null, null,
-          null, null, null, 0, 50), actorB));
+      var pa =
+          asA(
+              () ->
+                  handling.page(
+                      new DiscrepancyHandlingQuery(
+                          null, null, null, null, null, null, null, null, 0, 50),
+                      actorA));
+      var pb =
+          asB(
+              () ->
+                  handling.page(
+                      new DiscrepancyHandlingQuery(
+                          null, null, null, null, null, null, null, null, 0, 50),
+                      actorB));
       assertThat(pa.total()).as("第 %d 轮 A 租户应看到自己的 1 条", i).isEqualTo(1);
       assertThat(pb.total()).as("第 %d 轮 B 租户应看到 0 条", i).isZero();
       assertThat(asA(() -> handling.detail(mine.id())).handling().id()).isEqualTo(mine.id());
@@ -1591,26 +1862,30 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     http.perform(get("/warehouse/goods-receipt-discrepancies"))
         .andExpect(status().isUnauthorized());
     // 只读角色能读不能写
-    http.perform(get("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
-    http.perform(post("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer read-only")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"discrepancyId\":\"" + UUID.randomUUID() + "\"}"))
+    http.perform(
+            post("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer read-only")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"discrepancyId\":\"" + UUID.randomUUID() + "\"}"))
         .andExpect(status().isForbidden());
   }
 
   @Test
   void 端点_详情不存在404且坏请求400() throws Exception {
-    http.perform(get("/warehouse/goods-receipt-discrepancies/" + UUID.randomUUID())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies/" + UUID.randomUUID())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isNotFound());
     // 空 body 必须报可读的 400，而不是 NPE
-    http.perform(post("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{}"))
+    http.perform(
+            post("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
         .andExpect(status().isBadRequest());
   }
 
@@ -1619,10 +1894,11 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var receipt = createReceipt("100", qSellable);
     UUID discrepancyId = receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", "10", "破损");
     var mine = intake(discrepancyId);
-    http.perform(post("/warehouse/goods-receipt-discrepancies/" + mine.id() + "/decide")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{\"expectedVersion\":99,\"disposition\":\"REJECT\",\"reason\":\"拒收\"}"))
+    http.perform(
+            post("/warehouse/goods-receipt-discrepancies/" + mine.id() + "/decide")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"expectedVersion\":99,\"disposition\":\"REJECT\",\"reason\":\"拒收\"}"))
         .andExpect(status().isConflict());
   }
 
@@ -1631,12 +1907,16 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var receipt = createReceipt("100", qSellable);
     UUID discrepancyId = receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", "10", "破损");
     var mine = intake(discrepancyId);
-    http.perform(post("/warehouse/goods-receipt-discrepancies/" + mine.id() + "/decide")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(
-                "{\"expectedVersion\":0,\"disposition\":\"ACCEPT\",\"inboundQualityStatusId\":\""
-                    + qSellable + "\",\"locationId\":\"" + locA1 + "\",\"reason\":\"当可售处理\"}"))
+    http.perform(
+            post("/warehouse/goods-receipt-discrepancies/" + mine.id() + "/decide")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"expectedVersion\":0,\"disposition\":\"ACCEPT\",\"inboundQualityStatusId\":\""
+                        + qSellable
+                        + "\",\"locationId\":\""
+                        + locA1
+                        + "\",\"reason\":\"当可售处理\"}"))
         .andExpect(status().isBadRequest());
     assertThat(onHand(skuA, whA, qSellable)).isEqualByComparingTo("100");
   }
@@ -1646,15 +1926,17 @@ class GoodsReceiptDiscrepancyIntegrationTest {
     var receipt = createReceipt("100", qSellable);
     UUID discrepancyId = receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", "10", "破损");
     intake(discrepancyId);
-    http.perform(get("/warehouse/goods-receipt-discrepancies/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statusOptions.length()").value(4))
         .andExpect(jsonPath("$.riskDiscrepancyTypes.length()").value(4))
         .andExpect(jsonPath("$.downstream.length()").value(6))
         .andExpect(jsonPath("$.downstream[0].available").value(false));
-    http.perform(get("/warehouse/goods-receipt-discrepancies")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/goods-receipt-discrepancies")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.summary.handlingCount").value(1))
@@ -1691,7 +1973,8 @@ class GoodsReceiptDiscrepancyIntegrationTest {
   /** 建一条「已收 100 件进可售、并登记 10 件破损」的夹具，返回待处理记录 id。 */
   UUID damagedPending(String discrepancyQty) {
     var receipt = createReceipt("100", qSellable);
-    UUID discrepancyId = receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", discrepancyQty, "外箱压塌");
+    UUID discrepancyId =
+        receiveWithDiscrepancy(receipt.id(), "100", "DAMAGED", discrepancyQty, "外箱压塌");
     return intake(discrepancyId).id();
   }
 

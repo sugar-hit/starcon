@@ -36,14 +36,12 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 17.1.2.2 本位币与账簿。
  *
- * <p>账簿挂在**法人**上而不是租户上：一个租户可以有多个法人，每个法人都有自己的记账基准。
- * 本位币同样归法人——租户的默认币种只是界面展示默认，两者不能混（实体目录 §5）。
- * 所以这里读出的 {@code baseCurrency} 必须等于 {@code legalEntityCurrency}，
- * 两者不一致时 {@code currencyAligned} 为 false：真相源在法人档案，本表只是落地副本。
+ * <p>账簿挂在**法人**上而不是租户上：一个租户可以有多个法人，每个法人都有自己的记账基准。 本位币同样归法人——租户的默认币种只是界面展示默认，两者不能混（实体目录 §5）。 所以这里读出的
+ * {@code baseCurrency} 必须等于 {@code legalEntityCurrency}， 两者不一致时 {@code currencyAligned} 为
+ * false：真相源在法人档案，本表只是落地副本。
  *
- * <p>独立成 {@code AccountingBookController} 而不是并进 {@code AdministrationController}：
- * 17.1.2.1 的法人档案与本模块是两个 L4 单元，同一个文件里各自生长会让两侧的改动
- * 在合并时互相打架。
+ * <p>独立成 {@code AccountingBookController} 而不是并进 {@code AdministrationController}： 17.1.2.1
+ * 的法人档案与本模块是两个 L4 单元，同一个文件里各自生长会让两侧的改动 在合并时互相打架。
  */
 @RestController
 @RequestMapping("/identity")
@@ -64,13 +62,11 @@ public class AccountingBookController {
   /**
    * 账簿配置记录。
    *
-   * <p>三块职责各有一个真实读出口：本位币（{@code baseCurrency} 与法人的 {@code
-   * legalEntityCurrency} 并列给出）、记账规则（金额与数量各自的精度与舍入）、
-   * 期间设置（粒度、起始月、首期起点，以及按规则算出的当前会计年度区间）。
+   * <p>三块职责各有一个真实读出口：本位币（{@code baseCurrency} 与法人的 {@code legalEntityCurrency}
+   * 并列给出）、记账规则（金额与数量各自的精度与舍入）、 期间设置（粒度、起始月、首期起点，以及按规则算出的当前会计年度区间）。
    *
    * <p>{@code fiscalYearStart}/{@code fiscalYearEnd} 是**按本账期间设置算出来的**当前会计年度
-   * 边界，不是存储字段：它让"这套期间设置是否合理"在列表里就能读出来，而不必等到 12.5
-   * 生成期间行才发现起始月配错。
+   * 边界，不是存储字段：它让"这套期间设置是否合理"在列表里就能读出来，而不必等到 12.5 生成期间行才发现起始月配错。
    */
   public record AccountingBookView(
       UUID id,
@@ -107,21 +103,13 @@ public class AccountingBookController {
   /**
    * 账簿配置输入。
    *
-   * <p>{@code code} 在法人内唯一而不是租户内唯一：账簿编码是"这个法人这本账"的编号，
-   * 跨法人同码是正常的（每家法人都从 BK-001 开始编）。
+   * <p>{@code code} 在法人内唯一而不是租户内唯一：账簿编码是"这个法人这本账"的编号， 跨法人同码是正常的（每家法人都从 BK-001 开始编）。
    */
   public record AccountingBookInput(
-      @NotBlank
-          @Pattern(
-              regexp = "[A-Z0-9_-]{1,64}",
-              message = "账簿编码只允许大写字母数字下划线中划线")
-          String code,
+      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "账簿编码只允许大写字母数字下划线中划线") String code,
       @NotBlank @Size(max = 200) String name,
-      @NotNull @Pattern(regexp = "BOOK|CASH|BANK", message = "账簿类型只能是总账、现金账簿或银行账簿")
-          String bookType,
-      @NotBlank
-          @Pattern(regexp = "[A-Z]{3}", message = "本位币需为三位大写币种代码")
-          String baseCurrency,
+      @NotNull @Pattern(regexp = "BOOK|CASH|BANK", message = "账簿类型只能是总账、现金账簿或银行账簿") String bookType,
+      @NotBlank @Pattern(regexp = "[A-Z]{3}", message = "本位币需为三位大写币种代码") String baseCurrency,
       @Min(0) @Max(6) Integer amountScale,
       @Pattern(regexp = "HALF_UP|HALF_EVEN|DOWN|UP") String amountRounding,
       @Min(0) @Max(6) Integer quantityScale,
@@ -131,8 +119,7 @@ public class AccountingBookController {
       @NotNull OffsetDateTime firstPeriodStart,
       @NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status,
       // ---- 17.6.1.1 新增入参，全部可空且缺省与 17.1.2.2 行为一致 ----
-      @Pattern(regexp = "BUSINESS|STATUTORY", message = "账簿分类只能是业务账或法定账")
-          String bookCategory,
+      @Pattern(regexp = "BUSINESS|STATUTORY", message = "账簿分类只能是业务账或法定账") String bookCategory,
       @Pattern(regexp = "INHERIT|OWN", message = "本位币来源只能是 INHERIT（继承法人）或 OWN（账簿自定）")
           String baseCurrencyMode,
       @Pattern(regexp = "STANDARD|LOCAL|GROUP", message = "科目体系来源只能是 STANDARD、LOCAL 或 GROUP")
@@ -145,13 +132,16 @@ public class AccountingBookController {
   private static final String BOOK_DELETE = "identity.accounting_book.delete";
 
   /**
-   * 与 {@code AdministrationController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code AdministrationController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 →
+   * 组织变更要求 OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头在这里从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -163,7 +153,8 @@ public class AccountingBookController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "账簿配置变更需由当前租户所有者执行");
           return work.apply(a);
@@ -202,8 +193,8 @@ public class AccountingBookController {
   /**
    * 本租户全部账簿，可按法人过滤。
    *
-   * <p>{@code legalEntityId} 缺失时返回全租户账簿：跨法人看账簿清单是配置页的常态
-   * （"这个法人有几本账、哪本是总账"），过滤只是收窄，不是越权——租户边界仍然由 RLS 兜住。
+   * <p>{@code legalEntityId} 缺失时返回全租户账簿：跨法人看账簿清单是配置页的常态 （"这个法人有几本账、哪本是总账"），过滤只是收窄，不是越权——租户边界仍然由 RLS
+   * 兜住。
    */
   @GetMapping("/accounting-books")
   public List<AccountingBookView> accountingBooks(
@@ -214,9 +205,12 @@ public class AccountingBookController {
         BOOK_READ,
         false,
         a ->
-            sql.fetch(selectBooks() + (legalEntityId == null ? "" : " where b.legal_entity_id=?")
-                    + " order by e.code,b.book_type='BOOK' desc,b.code",
-                legalEntityId == null ? new Object[] {} : new Object[] {legalEntityId})
+            sql
+                .fetch(
+                    selectBooks()
+                        + (legalEntityId == null ? "" : " where b.legal_entity_id=?")
+                        + " order by e.code,b.book_type='BOOK' desc,b.code",
+                    legalEntityId == null ? new Object[] {} : new Object[] {legalEntityId})
                 .stream()
                 .map(AccountingBookController::toView)
                 .toList());
@@ -295,7 +289,10 @@ public class AccountingBookController {
           var entity =
               legalEntity(
                   a.tenantId(),
-                  sql.fetchOne("select legal_entity_id from accounting_book where tenant_id=? and id=?", a.tenantId(), id)
+                  sql.fetchOne(
+                          "select legal_entity_id from accounting_book where tenant_id=? and id=?",
+                          a.tenantId(),
+                          id)
                       .get("legal_entity_id", UUID.class));
           String currency = input.baseCurrency().trim().toUpperCase();
           String currencyMode = currencyMode(input.baseCurrencyMode());
@@ -335,21 +332,15 @@ public class AccountingBookController {
                   a.tenantId(),
                   id);
           check(updated == 1, "账簿不存在或不属于当前租户");
-          audit(
-              a,
-              auth,
-              id,
-              input.name().trim(),
-              "AccountingBookUpdated",
-              before,
-              snapshot(id));
+          audit(a, auth, id, input.name().trim(), "AccountingBookUpdated", before, snapshot(id));
           return null;
         });
   }
 
   @DeleteMapping("/accounting-books/{id}")
   public void delete(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     call(
         auth,
         BOOK_DELETE,
@@ -357,7 +348,9 @@ public class AccountingBookController {
         a -> {
           var before = snapshot(id);
           check(before != null, "账簿不存在或不属于当前租户");
-          int deleted = sql.execute("delete from accounting_book where tenant_id=? and id=?", a.tenantId(), id);
+          int deleted =
+              sql.execute(
+                  "delete from accounting_book where tenant_id=? and id=?", a.tenantId(), id);
           check(deleted == 1, "账簿不存在或不属于当前租户");
           audit(a, auth, id, (String) before.get("name"), "AccountingBookDeleted", before, null);
           return null;
@@ -371,9 +364,8 @@ public class AccountingBookController {
   /**
    * 本位币必须等于所属法人的本位币——租户默认币种只是展示默认，两者不能混。
    *
-   * <p>17.6.1.1 起这条只在 INHERIT 模式下生效：跨境常见同一主体同时用人民币与美元记账，
-   * OWN 模式下账簿自己决定本位币（"海外账 USD"），再拿法人本位币去卡它就把多账簿堵死了。
-   * 两种模式都在同一列上留痕，所以事后能回答"这本账的币是继承来的还是自定的"。
+   * <p>17.6.1.1 起这条只在 INHERIT 模式下生效：跨境常见同一主体同时用人民币与美元记账， OWN 模式下账簿自己决定本位币（"海外账
+   * USD"），再拿法人本位币去卡它就把多账簿堵死了。 两种模式都在同一列上留痕，所以事后能回答"这本账的币是继承来的还是自定的"。
    */
   private void checkBaseCurrency(String mode, String currency, String entityCurrency) {
     if ("OWN".equals(mode)) return;
@@ -401,10 +393,10 @@ public class AccountingBookController {
   /**
    * 首期起点必须落在会计年度的期界上。
    *
-   * <p>MONTH 看 12、QUARTER 看 3、WEEK 不看（周不对齐月份）。迁移里的触发器是同一规则的
-   * 数据库侧兜底，这里先拦一次是为了给出能照着改的中文原因，而不是抛一条 409。
+   * <p>MONTH 看 12、QUARTER 看 3、WEEK 不看（周不对齐月份）。迁移里的触发器是同一规则的 数据库侧兜底，这里先拦一次是为了给出能照着改的中文原因，而不是抛一条 409。
    */
-  private void checkPeriodAlignment(String periodType, int startMonth, OffsetDateTime firstPeriodStart) {
+  private void checkPeriodAlignment(
+      String periodType, int startMonth, OffsetDateTime firstPeriodStart) {
     if ("WEEK".equals(periodType)) return;
     int step = "QUARTER".equals(periodType) ? 3 : 12;
     int month = firstPeriodStart.atZoneSameInstant(ZoneOffset.UTC).getMonthValue();
@@ -423,23 +415,20 @@ public class AccountingBookController {
   /**
    * 唯一约束冲突翻译成能照着改的原因：一个法人只能一本总账，编码在法人内唯一。
    *
-   * <p>读 PG 报错文本里的约束名而不是靠异常类型猜：部分唯一索引与普通唯一约束抛出的是
-   * 同一个 {@code DataIntegrityViolationException}，不区分就会把"第二本总账"报成"编码重复"。
+   * <p>读 PG 报错文本里的约束名而不是靠异常类型猜：部分唯一索引与普通唯一约束抛出的是 同一个 {@code
+   * DataIntegrityViolationException}，不区分就会把"第二本总账"报成"编码重复"。
    */
   private RuntimeException duplicate(Exception e) {
     String detail = String.valueOf(e.getMessage() == null ? "" : e.getMessage());
     if (detail.contains("accounting_book_main"))
       return IdentityController.error(
           HttpStatus.CONFLICT,
-          "该法人在该本位币下已有一本总账（BOOK）；另一本请换一个本位币（如海外账 USD 走 OWN 模式）"
-              + "或改用现金账簿/银行账簿");
+          "该法人在该本位币下已有一本总账（BOOK）；另一本请换一个本位币（如海外账 USD 走 OWN 模式）" + "或改用现金账簿/银行账簿");
     if (detail.contains("accounting_book_default"))
-      return IdentityController.error(
-          HttpStatus.CONFLICT, "该法人已有默认账簿，请先取消原默认账簿或改选其他账簿作为默认账簿");
+      return IdentityController.error(HttpStatus.CONFLICT, "该法人已有默认账簿，请先取消原默认账簿或改选其他账簿作为默认账簿");
     // 默认账簿必须启用：触发器抛的 23514 别被误报成"编码重复"，那会把人引向错误方向
     if (detail.contains("默认账簿必须处于启用状态"))
-      return IdentityController.error(
-          HttpStatus.CONFLICT, "默认账簿必须处于启用状态，请先启用该账簿或改选其他账簿作为默认账簿");
+      return IdentityController.error(HttpStatus.CONFLICT, "默认账簿必须处于启用状态，请先启用该账簿或改选其他账簿作为默认账簿");
     return IdentityController.error(HttpStatus.CONFLICT, "该法人下已存在同编码的账簿，请更换编码");
   }
 
@@ -466,12 +455,15 @@ public class AccountingBookController {
     snap.put("periodType", row.get("period_type", String.class));
     snap.put("fiscalYearStartMonth", row.get("fiscal_year_start_month", Integer.class));
     snap.put("firstPeriodStart", str(row.get("first_period_start", OffsetDateTime.class)));
-    snap.put("baseCurrencyChangedAt", str(row.get("base_currency_changed_at", OffsetDateTime.class)));
+    snap.put(
+        "baseCurrencyChangedAt", str(row.get("base_currency_changed_at", OffsetDateTime.class)));
     snap.put("status", row.get("status", String.class));
     snap.put("bookCategory", row.get("book_category", String.class));
     snap.put("baseCurrencyMode", row.get("base_currency_mode", String.class));
     snap.put("chartOfAccountsSource", row.get("chart_of_accounts_source", String.class));
-    snap.put("defaultBook", row.get("is_default", Boolean.class) != null && row.get("is_default", Boolean.class));
+    snap.put(
+        "defaultBook",
+        row.get("is_default", Boolean.class) != null && row.get("is_default", Boolean.class));
     snap.put("version", row.get("version", Long.class));
     return snap;
   }
@@ -547,8 +539,8 @@ public class AccountingBookController {
   /**
    * 按本账的期间设置算出当前会计年度区间。
    *
-   * <p>月/季粒度按起始月切：起始月 4 时，2026-05 属于 2026 财年（2026-04-01 起）。
-   * 周粒度下起始月无意义，改用 ISO 周历年——周不对齐月份，硬套起始月会算出不存在的边界。
+   * <p>月/季粒度按起始月切：起始月 4 时，2026-05 属于 2026 财年（2026-04-01 起）。 周粒度下起始月无意义，改用 ISO
+   * 周历年——周不对齐月份，硬套起始月会算出不存在的边界。
    */
   private static FiscalYearSpan fiscalYear(String periodType, int startMonth, OffsetDateTime now) {
     if ("WEEK".equals(periodType)) {

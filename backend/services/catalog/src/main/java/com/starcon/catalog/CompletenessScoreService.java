@@ -3,11 +3,11 @@ package com.starcon.catalog;
 import static com.starcon.catalog.CompletenessScoreModels.*;
 import static com.starcon.catalog.CompletenessScoreRules.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starcon.tenancy.Ids;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -21,37 +21,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 3.9.2.1 完整度评分：给每个 SPU/SKU 打主数据完整度分（必填属性、类目必填、
- * 图片数量与尺寸、报关属性、包装尺寸重量、认证），按分数分档，
- * 输出蓝图点名的三件东西：评分卡 + 缺失项清单 + 批量补全入口。
+ * 3.9.2.1 完整度评分：给每个 SPU/SKU 打主数据完整度分（必填属性、类目必填、 图片数量与尺寸、报关属性、包装尺寸重量、认证），按分数分档， 输出蓝图点名的三件东西：评分卡 +
+ * 缺失项清单 + 批量补全入口。
  *
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>评分一律现算（规则 R1）</b>。评分卡永远从主数据实时算，不读快照 ——
- *       完整度的输入每时每刻都在变，缓存的分数一旦过期就是错的分数，
- *       而错分数比没有分数危险得多（它看起来是有依据的）。
- *       {@code completeness_evaluation} 只回答「过去某一刻」，不参与任何读出口。
- *   <li><b>SPU 与 SKU 用同一套「检查项」列形状</b>（{@code c_<dim>_ok} / {@code c_<dim>_total}），
- *       于是两条 {@code UNION ALL} 之后是一张同构表，列表 / 概览 / 评分卡 / 预检
- *       四条读出口都只需要一个查询，且加一个新维度时不必改 UNION 两侧的形状。
- *       每个维度的 {@code total >= 1} 由规则 R4 保证（无变体的 SPU 记一条缺失项，
- *       而不是把权重摊给别人），所以比率那边<b>永远不除零</b>。
- *   <li><b>口径不散成几份</b>（V37 第七节）：权重 / 分档阈值 / 两个就绪门槛的唯一实现
- *       是 {@link CompletenessScoreRules}；本类用 {@link #weightedScoreExpression(String)}
- *       把它们<b>拼</b>进 SQL（用于列表按分档筛选与概览分组），SQL 里没有第二份常量。
- *       认证四态的唯一实现是 {@code sku_cert} 聚合，四条读出口全部读它。
+ *   <li><b>评分一律现算（规则 R1）</b>。评分卡永远从主数据实时算，不读快照 —— 完整度的输入每时每刻都在变，缓存的分数一旦过期就是错的分数，
+ *       而错分数比没有分数危险得多（它看起来是有依据的）。 {@code completeness_evaluation} 只回答「过去某一刻」，不参与任何读出口。
+ *   <li><b>SPU 与 SKU 用同一套「检查项」列形状</b>（{@code c_<dim>_ok} / {@code c_<dim>_total}）， 于是两条 {@code
+ *       UNION ALL} 之后是一张同构表，列表 / 概览 / 评分卡 / 预检 四条读出口都只需要一个查询，且加一个新维度时不必改 UNION 两侧的形状。 每个维度的 {@code
+ *       total >= 1} 由规则 R4 保证（无变体的 SPU 记一条缺失项， 而不是把权重摊给别人），所以比率那边<b>永远不除零</b>。
+ *   <li><b>口径不散成几份</b>（V37 第七节）：权重 / 分档阈值 / 两个就绪门槛的唯一实现 是 {@link CompletenessScoreRules}；本类用 {@link
+ *       #weightedScoreExpression(String)} 把它们<b>拼</b>进 SQL（用于列表按分档筛选与概览分组），SQL 里没有第二份常量。 认证四态的唯一实现是
+ *       {@code sku_cert} 聚合，四条读出口全部读它。
  *   <li><b>两个就绪结论分开判（规则 R3）</b>：刊登链与清关链各判各的。
- *   <li><b>缺失项必须可解释</b>：每条缺失带缺失码、主体名、下一步动作，
- *       而不是只给一个计数 —— 「缺 3 条必填属性」没法让人去补。
- *   <li><b>分页是真分页</b>：筛选、排序与 {@code LIMIT/OFFSET} 全部落在 SQL 上，
- *       评分在 SQL 里现算，不在内存里分页。
+ *   <li><b>缺失项必须可解释</b>：每条缺失带缺失码、主体名、下一步动作， 而不是只给一个计数 —— 「缺 3 条必填属性」没法让人去补。
+ *   <li><b>分页是真分页</b>：筛选、排序与 {@code LIMIT/OFFSET} 全部落在 SQL 上， 评分在 SQL 里现算，不在内存里分页。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}，
- * 与同章的 3.6.2.1 供应商报价完全一致 —— 本模块是商品主数据的数据质量面。
- * <b>刻意不混用两套权限</b>：报关与认证虽属合规域，但混用会出现
- * 「能看评分却改不了报关属性」「能改认证却看不到评分卡」这种半截权限。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}， 与同章的 3.6.2.1 供应商报价完全一致 ——
+ * 本模块是商品主数据的数据质量面。 <b>刻意不混用两套权限</b>：报关与认证虽属合规域，但混用会出现 「能看评分却改不了报关属性」「能改认证却看不到评分卡」这种半截权限。
  *
  * <p>租户一律来自已认证成员关系经 RLS 生效的连接上下文，<b>不读 {@code X-Tenant-Id} 头</b>。
  */
@@ -62,28 +52,24 @@ public class CompletenessScoreService {
   /**
    * {@code sku_cert}：某个 SKU 的认证四态（规则 R5 的<b>唯一</b>实现）。
    *
-   * <p>只统计 {@code scored=true}：运营显式标了「这张证书不影响评分」的记录
-   * 不该让维度变红（它仍留在档案里可查）。
+   * <p>只统计 {@code scored=true}：运营显式标了「这张证书不影响评分」的记录 不该让维度变红（它仍留在档案里可查）。
    *
-   * <p>顺序刻意是 NOT_REQUIRED → 有效 HELD → EXPIRED → PENDING → NONE。
-   * 到期日当天仍然有效（闭区间），避免「到期当天变红」这种必然踩坑。
+   * <p>顺序刻意是 NOT_REQUIRED → 有效 HELD → EXPIRED → PENDING → NONE。 到期日当天仍然有效（闭区间），避免「到期当天变红」这种必然踩坑。
    */
   /**
    * 当前租户的 SQL 表达式：<b>从连接上下文读</b>，不从参数传。
    *
-   * <p>{@code AccessService.run} 已经把租户用 {@code set_config('app.current_tenant', ...)}
-   * 绑在这条连接上（RLS 策略读的也正是它）。评分 SQL 刻意<b>不</b>再把租户作为
-   * {@code ?} 绑一遍，理由有两条，都不是风格问题：
+   * <p>{@code AccessService.run} 已经把租户用 {@code set_config('app.current_tenant', ...)} 绑在这条连接上（RLS
+   * 策略读的也正是它）。评分 SQL 刻意<b>不</b>再把租户作为 {@code ?} 绑一遍，理由有两条，都不是风格问题：
    *
    * <ul>
-   *   <li><b>少一处能错的地方</b>：十个 CTE 各带一个 {@code tenant_id = ?}，
-   *       少绑一个就在运行时报「未设定参数值 N」，而 N 指向的参数恰好是另一个合法
+   *   <li><b>少一处能错的地方</b>：十个 CTE 各带一个 {@code tenant_id = ?}， 少绑一个就在运行时报「未设定参数值 N」，而 N 指向的参数恰好是另一个合法
    *       租户 id 时，报错完全指不到真正的原因（症状是某条筛选神秘失效或分数错乱）。
-   *   <li><b>更贴 AGENTS.md</b>：租户来自已认证成员关系，绑定在连接上就是它的落点；
-   *       再从入参传一遍，等于给了一条"理论上能传错租户"的旁路。
+   *   <li><b>更贴 AGENTS.md</b>：租户来自已认证成员关系，绑定在连接上就是它的落点； 再从入参传一遍，等于给了一条"理论上能传错租户"的旁路。
    * </ul>
    */
-  private static final String TENANT = "nullif(current_setting('app.current_tenant',true),'')::uuid";
+  private static final String TENANT =
+      "nullif(current_setting('app.current_tenant',true),'')::uuid";
 
   private static final String CTE_SKU_CERT =
       """
@@ -121,16 +107,14 @@ public class CompletenessScoreService {
       )""";
 
   /**
-   * 变体级类目规则：取 SKU 所属 SPU 的主分类下 {@code requirement='REQUIRED'} 的规则，
-   * 用 SKU 的<b>有效值</b>（变体值或公共值）判是否已填。
+   * 变体级类目规则：取 SKU 所属 SPU 的主分类下 {@code requirement='REQUIRED'} 的规则， 用 SKU 的<b>有效值</b>（变体值或公共值）判是否已填。
    *
-   * <p>刻意只取无条件规则（规则 R9）：条件必填是录入期的表单规则，
-   * 求值必须复用 3.3.1.2 的 {@code conditionHolds} 唯一实现，抄进评分 SQL 就是第二份算子语义。
+   * <p>刻意只取无条件规则（规则 R9）：条件必填是录入期的表单规则， 求值必须复用 3.3.1.2 的 {@code conditionHolds} 唯一实现，抄进评分 SQL
+   * 就是第二份算子语义。
    *
-   * <p>别名用 {@code pcat} 而不是 {@code sc}：PG 会把只被引用一次的 CTE <b>内联</b>展开到外层，
-   * 而外层已经用 {@code sc} 指 {@code sku_cat} —— 内层的 {@code sc} 与外层的 {@code sc}
-   * 同名时 PG 会把引用解析到内层去，于是报 {@code missing FROM-clause entry for table "sc"}。
-   * 这个别名冲突只在<b>运行期</b>出现（编译与单测都看不出来），所以别名必须全局唯一。
+   * <p>别名用 {@code pcat} 而不是 {@code sc}：PG 会把只被引用一次的 CTE <b>内联</b>展开到外层， 而外层已经用 {@code sc} 指 {@code
+   * sku_cat} —— 内层的 {@code sc} 与外层的 {@code sc} 同名时 PG 会把引用解析到内层去，于是报 {@code missing FROM-clause
+   * entry for table "sc"}。 这个别名冲突只在<b>运行期</b>出现（编译与单测都看不出来），所以别名必须全局唯一。
    */
   private static final String CTE_SKU_CAT =
       """
@@ -157,10 +141,8 @@ public class CompletenessScoreService {
   /**
    * 媒体事实：按 {@code media_reference} 的 {@code owner_type} 分两侧聚合。
    *
-   * <p><b>SPU 侧刻意把「自己挂的图」与「它每个变体挂的图」并起来</b>：
-   * 刊登时取的是变体的图，而一个 SPU 判定为"没图"（图全挂在变体上）会让人以为
-   * 真缺图 —— 症状是 SPU 评分卡说图片维度缺失、而每个变体的评分卡都说图片齐全，
-   * 两边都在讲同一个商品。这类"同一件事在两个层级给出矛盾答案"是最难查的一类错。
+   * <p><b>SPU 侧刻意把「自己挂的图」与「它每个变体挂的图」并起来</b>： 刊登时取的是变体的图，而一个 SPU 判定为"没图"（图全挂在变体上）会让人以为 真缺图 —— 症状是
+   * SPU 评分卡说图片维度缺失、而每个变体的评分卡都说图片齐全， 两边都在讲同一个商品。这类"同一件事在两个层级给出矛盾答案"是最难查的一类错。
    * 变体自己的评分卡仍然只看它自己那几张（变体之间图的数量本就不同）。
    */
   private static final String CTE_SKU_MEDIA =
@@ -200,11 +182,10 @@ public class CompletenessScoreService {
   /**
    * {@code sku_dim}：变体侧的检查项计数。
    *
-   * <p>六个维度全部输出同名的 {@code c_<dim>_ok} / {@code c_<dim>_total}，
-   * 且 {@code total >= 1}：
+   * <p>六个维度全部输出同名的 {@code c_<dim>_ok} / {@code c_<dim>_total}， 且 {@code total >= 1}：
+   *
    * <ul>
-   *   <li>属性：没有必填属性定义时 {@code total=1, ok=1}（"没定义必填属性"不是缺失，
-   *       否则一个还没配必填属性的新 SPU 会永远红着，而运营不知道怎么让它变绿）。
+   *   <li>属性：没有必填属性定义时 {@code total=1, ok=1}（"没定义必填属性"不是缺失， 否则一个还没配必填属性的新 SPU 会永远红着，而运营不知道怎么让它变绿）。
    *   <li>图片：固定三条（有无主图 / 张数 / 主图最短边），每条都能独立报告。
    *   <li>报关：四条（有无报关行 / HS / 申报品名 / 原产国）。
    *   <li>包装：三条（有无包装行 / 三边 / 净毛重）。
@@ -268,11 +249,8 @@ public class CompletenessScoreService {
   /**
    * {@code spu_dim}：SPU 侧的检查项计数。
    *
-   * <p>三条 SKU 侧维度（报关 / 包装 / 认证）按「齐不齐的变体数」汇总，
-   * 分母是 {@code greatest(sku_count, 1)} —— <b>没有变体时记一条
-   * {@code SPU_HAS_NO_SKU} 缺失项</b>而不是把权重摊给别的维度（规则 R4）：
-   * 摊权重会让「一个变体都没有的商品」在属性与图片上拿满分，
-   * 看起来比它实际的状态好得多。
+   * <p>三条 SKU 侧维度（报关 / 包装 / 认证）按「齐不齐的变体数」汇总， 分母是 {@code greatest(sku_count, 1)} —— <b>没有变体时记一条
+   * {@code SPU_HAS_NO_SKU} 缺失项</b>而不是把权重摊给别的维度（规则 R4）： 摊权重会让「一个变体都没有的商品」在属性与图片上拿满分， 看起来比它实际的状态好得多。
    */
   private static final String CTE_SPU_DIM =
       """
@@ -372,20 +350,17 @@ public class CompletenessScoreService {
   /**
    * {@code owner_scored} 里租户占位符的个数。
    *
-   * <p>逐个数过：sku_cert(1) + sku_attr(1) + sku_cat(1) + sku_media(2) + sku_dim(1)
-   * + spu_attr(1) + spu_cat(1) + spu_dim(1) = 9。
-   * 刻意用常量而不是"数一遍问号"：jOOQ 按<b>文本出现顺序</b>绑定，
-   * 少绑一个会在运行时报「未设定参数值 N 的内容」，而 N 指向的参数恰好是另一个合法
-   * 租户 id 时，报错完全指不到真正的原因。
+   * <p>逐个数过：sku_cert(1) + sku_attr(1) + sku_cat(1) + sku_media(2) + sku_dim(1) + spu_attr(1) +
+   * spu_cat(1) + spu_dim(1) = 9。 刻意用常量而不是"数一遍问号"：jOOQ 按<b>文本出现顺序</b>绑定， 少绑一个会在运行时报「未设定参数值 N 的内容」，而
+   * N 指向的参数恰好是另一个合法 租户 id 时，报错完全指不到真正的原因。
    */
   private static final int TENANT_BIND_COUNT = 9; // 仅供文档；实际个数由 tenantBinds 从 SQL 文本数出
 
   /**
    * 快照两列 jsonb 的序列化。
    *
-   * <p>刻意<b>不</b>复用 {@code ImportTemplateService.json}：那是 3.8.1.1 的私有工具，
-   * 签名只吃 {@code Map<String,String>}，而这里要存的是两个结构不同的数组
-   * （维度缺口与缺失项）。跨模块借一个签名不匹配的私有方法，等于把两个模块焊在一起。
+   * <p>刻意<b>不</b>复用 {@code ImportTemplateService.json}：那是 3.8.1.1 的私有工具， 签名只吃 {@code
+   * Map<String,String>}，而这里要存的是两个结构不同的数组 （维度缺口与缺失项）。跨模块借一个签名不匹配的私有方法，等于把两个模块焊在一起。
    */
   private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -400,9 +375,8 @@ public class CompletenessScoreService {
   /**
    * 用 {@link CompletenessScoreRules} 的权重<b>拼</b>出 SQL 里的加权求和表达式。
    *
-   * <p>这是"口径不散成几份"的关键：SQL 里<b>没有</b>第二份 {@code 0.25} 常量。
-   * 改一个权重，表达式自动跟着变，不存在"改了 Java 忘了改 SQL"（那种分叉的症状是
-   * 分数整体偏移且没有任何报错 —— 页面上看不出任何异常，只是全店都低了 2 分）。
+   * <p>这是"口径不散成几份"的关键：SQL 里<b>没有</b>第二份 {@code 0.25} 常量。 改一个权重，表达式自动跟着变，不存在"改了 Java 忘了改
+   * SQL"（那种分叉的症状是 分数整体偏移且没有任何报错 —— 页面上看不出任何异常，只是全店都低了 2 分）。
    *
    * @param columnPrefix 比率列名前缀，例如 {@code ""} 或 {@code "s."}
    */
@@ -426,9 +400,18 @@ public class CompletenessScoreService {
 
   /** 分档 CASE 表达式（阈值同样来自 {@link CompletenessScoreRules}）。 */
   static String gradeCase(String scoreExpression) {
-    return "(case when " + scoreExpression + " >= " + excellentThreshold().toPlainString()
-        + " then 'EXCELLENT' when " + scoreExpression + " >= " + goodThreshold().toPlainString()
-        + " then 'GOOD' when " + scoreExpression + " >= " + fairThreshold().toPlainString()
+    return "(case when "
+        + scoreExpression
+        + " >= "
+        + excellentThreshold().toPlainString()
+        + " then 'EXCELLENT' when "
+        + scoreExpression
+        + " >= "
+        + goodThreshold().toPlainString()
+        + " then 'GOOD' when "
+        + scoreExpression
+        + " >= "
+        + fairThreshold().toPlainString()
         + " then 'FAIR' else 'POOR' end)";
   }
 
@@ -438,9 +421,18 @@ public class CompletenessScoreService {
     for (CompletenessScoreRules.Dimension dimension : dimensions()) {
       String key = dimension.code().toLowerCase(java.util.Locale.ROOT);
       if (sql.length() > 0) sql.append(", ");
-      sql.append("round(").append(prefix).append("c_").append(key).append("_ok::numeric / ")
-          .append(prefix).append("c_").append(key).append("_total::numeric, ")
-          .append(SCORE_SCALE).append(") as ").append(ratioColumn(dimension.code()));
+      sql.append("round(")
+          .append(prefix)
+          .append("c_")
+          .append(key)
+          .append("_ok::numeric / ")
+          .append(prefix)
+          .append("c_")
+          .append(key)
+          .append("_total::numeric, ")
+          .append(SCORE_SCALE)
+          .append(") as ")
+          .append(ratioColumn(dimension.code()));
     }
     return sql.toString();
   }
@@ -462,8 +454,7 @@ public class CompletenessScoreService {
   /**
    * {@code owner_scored}：给 {@code owner_dim} 补上六个比率、缺失数、分数与分档。
    *
-   * <p>这是列表 / 概览 / 评分卡 / 预检四条读出口共用的最后一层，
-   * 所以「按分档筛选」与「按就绪状态筛选」才能真的下推到 SQL（真分页的前提）。
+   * <p>这是列表 / 概览 / 评分卡 / 预检四条读出口共用的最后一层， 所以「按分档筛选」与「按就绪状态筛选」才能真的下推到 SQL（真分页的前提）。
    */
   private String ownerScoredSql() {
     String ratios = ratioColumnSql("");
@@ -479,23 +470,42 @@ public class CompletenessScoreService {
     // 出现的顺序**拼 —— 顺序错了绑定就会错位（且不会编译报错）。
     return new StringBuilder()
         .append("with ")
-        .append(CTE_SKU_CERT).append(",\n")
-        .append(CTE_SKU_ATTR).append(",\n")
-        .append(CTE_SKU_CAT).append(",\n")
-        .append(CTE_SKU_MEDIA).append(",\n")
-        .append(String.format(CTE_SKU_DIM, MIN_IMAGE_COUNT, MIN_PRIMARY_IMAGE_EDGE_PX)).append(",\n")
-        .append(String.format(CTE_SPU_DIM, MIN_IMAGE_COUNT, MIN_PRIMARY_IMAGE_EDGE_PX)).append(",\n")
-        .append(CTE_OWNER_DIM).append(",\n")
+        .append(CTE_SKU_CERT)
+        .append(",\n")
+        .append(CTE_SKU_ATTR)
+        .append(",\n")
+        .append(CTE_SKU_CAT)
+        .append(",\n")
+        .append(CTE_SKU_MEDIA)
+        .append(",\n")
+        .append(String.format(CTE_SKU_DIM, MIN_IMAGE_COUNT, MIN_PRIMARY_IMAGE_EDGE_PX))
+        .append(",\n")
+        .append(String.format(CTE_SPU_DIM, MIN_IMAGE_COUNT, MIN_PRIMARY_IMAGE_EDGE_PX))
+        .append(",\n")
+        .append(CTE_OWNER_DIM)
+        .append(",\n")
         .append("owner_ratios as (\n")
-        .append("  select d.*, ").append(ratios).append("\n")
+        .append("  select d.*, ")
+        .append(ratios)
+        .append("\n")
         .append("  from owner_dim d\n")
         .append("),\n")
         .append("owner_scored as (\n")
-        .append("  select r.*, ").append(missingCountSql("r.")).append(" as missing_count,\n")
-        .append("    ").append(score).append(" as score,\n")
-        .append("    ").append(grade).append(" as grade,\n")
-        .append("    (").append(listingReadySql(score)).append(") as listing_ready,\n")
-        .append("    (").append(customsReadySql(score)).append(") as customs_ready\n")
+        .append("  select r.*, ")
+        .append(missingCountSql("r."))
+        .append(" as missing_count,\n")
+        .append("    ")
+        .append(score)
+        .append(" as score,\n")
+        .append("    ")
+        .append(grade)
+        .append(" as grade,\n")
+        .append("    (")
+        .append(listingReadySql(score))
+        .append(") as listing_ready,\n")
+        .append("    (")
+        .append(customsReadySql(score))
+        .append(") as customs_ready\n")
         .append("  from owner_ratios r\n")
         .append(")\n")
         .toString();
@@ -527,10 +537,8 @@ public class CompletenessScoreService {
   /**
    * 构造 {@code owner_scored} 的租户绑定参数。
    *
-   * <p><b>个数从 SQL 文本里数出来</b>而不是写死常量：每个 CTE 各带一个
-   * {@code tenant_id = ?}，而 CTE 增删是常事。写死个数的那天起，
-   * 少绑一个会在运行时报「未设定参数值 N 的内容」—— 而 N 指向的那个参数
-   * 恰好是另一个合法租户 id 时，报错完全指不到真正的原因（症状是某条筛选
+   * <p><b>个数从 SQL 文本里数出来</b>而不是写死常量：每个 CTE 各带一个 {@code tenant_id = ?}，而 CTE 增删是常事。写死个数的那天起，
+   * 少绑一个会在运行时报「未设定参数值 N 的内容」—— 而 N 指向的那个参数 恰好是另一个合法租户 id 时，报错完全指不到真正的原因（症状是某条筛选
    * 神秘失效或分数错乱，而不是"少了一个绑定"）。
    */
   private List<Object> tenantBinds(UUID tenantId) {
@@ -565,17 +573,26 @@ public class CompletenessScoreService {
         "完整度分 6 个维度加权求和，权重合计 1.0000（必填属性 0.25 / 图片 0.20 / 类目必填 0.15 /"
             + " 报关属性 0.15 / 包装尺寸重量 0.15 / 认证 0.10）。分档阈值作用在 0~1 的比值上："
             + "优秀 ≥ 0.90、良好 ≥ 0.75、一般 ≥ 0.60、较差 < 0.60。"
-            + "图片阈值：主图至少 1 张、图片总数至少 " + MIN_IMAGE_COUNT + " 张、主图最短边至少 "
-            + MIN_PRIMARY_IMAGE_EDGE_PX + "px。"
-            + "刊登就绪要求总分 ≥ " + LISTING_GATE.toPlainString() + " 且必填属性/图片/类目必填/认证四个维度无缺失；"
-            + "清关就绪要求总分 ≥ " + CUSTOMS_GATE.toPlainString() + " 且报关属性与包装尺寸重量两个维度无缺失。"
+            + "图片阈值：主图至少 1 张、图片总数至少 "
+            + MIN_IMAGE_COUNT
+            + " 张、主图最短边至少 "
+            + MIN_PRIMARY_IMAGE_EDGE_PX
+            + "px。"
+            + "刊登就绪要求总分 ≥ "
+            + LISTING_GATE.toPlainString()
+            + " 且必填属性/图片/类目必填/认证四个维度无缺失；"
+            + "清关就绪要求总分 ≥ "
+            + CUSTOMS_GATE.toPlainString()
+            + " 且报关属性与包装尺寸重量两个维度无缺失。"
             + "认证的「无需认证」与「已取得」都算齐全 —— 否则不需要认证的商品会永远缺一条。");
   }
 
   /** 概览：台账顶部的治理数字。全部在 SQL 里聚合，不在内存里遍历。 */
   public CompletenessOverview overview() {
     UUID tenantId = currentTenantId();
-    String sqlText = ownerScoredSql() + """
+    String sqlText =
+        ownerScoredSql()
+            + """
         select
           count(*) filter (where owner_type = 'SPU') as spu_count,
           count(*) filter (where owner_type = 'SKU') as sku_count,
@@ -609,8 +626,11 @@ public class CompletenessScoreService {
   /** 分档计数（全量，不受列表筛选影响 —— 它回答的是「全店各档有多少」）。 */
   private List<GradeCount> gradeCounts(UUID tenantId, String ownerType) {
     String where = ownerType == null ? "" : " where owner_type = '" + ownerType + "'";
-    String sqlText = ownerScoredSql() + " select grade, count(*) as c from owner_scored" + where
-        + " group by grade";
+    String sqlText =
+        ownerScoredSql()
+            + " select grade, count(*) as c from owner_scored"
+            + where
+            + " group by grade";
     var counts = new LinkedHashMap<String, Long>();
     for (String grade : List.of("POOR", "FAIR", "GOOD", "EXCELLENT")) counts.put(grade, 0L);
     for (Record r : sql.fetch(sqlText, tenantBinds(tenantId).toArray()))
@@ -624,18 +644,25 @@ public class CompletenessScoreService {
   /**
    * 各维度的缺失项数（补全清单顶部的"按维度归集"视图）。
    *
-   * <p>在 SQL 里对每个维度各求一次 {@code sum(total - ok)}：
-   * 比在 Java 里遍历所有主体再统计省一次全量往返，而结果完全一致
-   * （同一份 {@code owner_scored}，同一个定义）。
+   * <p>在 SQL 里对每个维度各求一次 {@code sum(total - ok)}： 比在 Java 里遍历所有主体再统计省一次全量往返，而结果完全一致 （同一份 {@code
+   * owner_scored}，同一个定义）。
    */
   private List<DimensionGap> dimensionGaps(UUID tenantId, String ownerType) {
     var selects = new ArrayList<String>();
     for (CompletenessScoreRules.Dimension dimension : dimensions()) {
       String key = dimension.code().toLowerCase(java.util.Locale.ROOT);
-      selects.add("coalesce(sum(c_" + key + "_total - c_" + key + "_ok), 0) as \"" + dimension.code() + "\"");
+      selects.add(
+          "coalesce(sum(c_"
+              + key
+              + "_total - c_"
+              + key
+              + "_ok), 0) as \""
+              + dimension.code()
+              + "\"");
     }
     String where = ownerType == null ? "" : " where owner_type = '" + ownerType + "'";
-    String sqlText = ownerScoredSql() + " select " + String.join(", ", selects) + " from owner_scored" + where;
+    String sqlText =
+        ownerScoredSql() + " select " + String.join(", ", selects) + " from owner_scored" + where;
     Record r = sql.fetchOne(sqlText, tenantBinds(tenantId).toArray());
     var result = new ArrayList<DimensionGap>();
     for (CompletenessScoreRules.Dimension dimension : dimensions()) {
@@ -650,8 +677,7 @@ public class CompletenessScoreService {
   /**
    * 评分列表：分页 + 关键词 / 主体类型 / 分档 / 变体数 / 状态 / 就绪状态筛选。
    *
-   * <p>排序字段走白名单（{@link #normalizeOrderBy}）：排序字段要进 {@code order by}，
-   * 而列名不能参数化，不做白名单就是一个注入口。
+   * <p>排序字段走白名单（{@link #normalizeOrderBy}）：排序字段要进 {@code order by}， 而列名不能参数化，不做白名单就是一个注入口。
    */
   public CompletenessPage list(CompletenessQuery query) {
     UUID tenantId = currentTenantId();
@@ -669,34 +695,47 @@ public class CompletenessScoreService {
     String where = String.join(" and ", filter);
     String order = orderClause(query);
     // 分页在 SQL 上做：评分是现算的，不能在内存里先全算一遍再切页（那是假分页）。
-    String listSql = ownerScoredSql() + """
+    String listSql =
+        ownerScoredSql()
+            + """
         select owner_type, tenant_id, spu_id, owner_id, owner_code, owner_name, owner_status,
           category_name, score, grade, missing_count, sku_count, listing_ready, customs_ready,
           attribute_ratio, media_ratio, category_ratio, customs_ratio, packaging_ratio, certification_ratio
         from owner_scored
-        """ + (where.isEmpty() ? "" : " where " + where) + " order by " + order + " limit ? offset ?";
+        """
+            + (where.isEmpty() ? "" : " where " + where)
+            + " order by "
+            + order
+            + " limit ? offset ?";
     var itemsBinds = new ArrayList<Object>(filterBinds);
     itemsBinds.add(size);
     itemsBinds.add(page * size);
 
-    String countSql = ownerScoredSql() + " select count(*) from owner_scored"
-        + (where.isEmpty() ? "" : " where " + where);
+    String countSql =
+        ownerScoredSql()
+            + " select count(*) from owner_scored"
+            + (where.isEmpty() ? "" : " where " + where);
     long total = sql.fetchOne(countSql, filterBinds.toArray()).get(0, Long.class);
-
 
     var items = new ArrayList<CompletenessRow>();
     for (Record r : sql.fetch(listSql, itemsBinds.toArray())) items.add(toRow(r));
 
     String readinessWhere = where.isEmpty() ? "" : " where " + where;
-    String readySql = ownerScoredSql() + " select"
-        + " count(*) filter (where listing_ready) as lr,"
-        + " count(*) filter (where customs_ready) as cr,"
-        + " count(*) filter (where not listing_ready and not customs_ready) as blocked"
-        + " from owner_scored" + readinessWhere;
+    String readySql =
+        ownerScoredSql()
+            + " select"
+            + " count(*) filter (where listing_ready) as lr,"
+            + " count(*) filter (where customs_ready) as cr,"
+            + " count(*) filter (where not listing_ready and not customs_ready) as blocked"
+            + " from owner_scored"
+            + readinessWhere;
     Record ready = sql.fetchOne(readySql, filterBinds.toArray());
 
     return new CompletenessPage(
-        items, total, page, size,
+        items,
+        total,
+        page,
+        size,
         longOf(ready.get("lr", Long.class)),
         longOf(ready.get("cr", Long.class)),
         longOf(ready.get("blocked", Long.class)),
@@ -755,7 +794,7 @@ public class CompletenessScoreService {
       case "missing" -> "missing_count" + direction + ", owner_code asc";
       case "owner" -> "owner_code" + direction;
       case "updatedAt" -> "updated_at" + direction + " nulls last, owner_code asc";
-      // 默认按分数升序（最差的排前面）：治理页先看要补的，而不是先看最好的。
+        // 默认按分数升序（最差的排前面）：治理页先看要补的，而不是先看最好的。
       default -> "score" + direction + ", owner_code asc";
     };
   }
@@ -787,8 +826,7 @@ public class CompletenessScoreService {
   /**
    * 完整度评分卡（蓝图「输出」那一行的读出口）。
    *
-   * <p>检查项逐条列出（含已满足的），所以页面能显示"3/4 已完成"而不是一个孤立的比例；
-   * 缺失项另外给一份（{@code missing}），补全清单直接用它。
+   * <p>检查项逐条列出（含已满足的），所以页面能显示"3/4 已完成"而不是一个孤立的比例； 缺失项另外给一份（{@code missing}），补全清单直接用它。
    */
   public CompletenessScorecard card(String ownerType, UUID ownerId) {
     UUID tenantId = currentTenantId();
@@ -840,18 +878,19 @@ public class CompletenessScoreService {
     var dims = new ArrayList<CompletenessScoreModels.CompletenessDimension>();
     for (CompletenessScoreRules.Dimension definition : dimensions()) {
       String key = definition.code().toLowerCase(java.util.Locale.ROOT);
-      dims.add(dimensionScore(
-          definition.code(),
-          longOf(row.get("c_" + key + "_ok", Long.class)),
-          longOf(row.get("c_" + key + "_total", Long.class))));
+      dims.add(
+          dimensionScore(
+              definition.code(),
+              longOf(row.get("c_" + key + "_ok", Long.class)),
+              longOf(row.get("c_" + key + "_total", Long.class))));
     }
     return sortDimensions(dims);
   }
 
   /** 评分卡的一条主体行（找不到返回 null，由调用方转 404）。 */
   private Record scoredRow(UUID tenantId, String ownerType, UUID ownerId) {
-    String sqlText = ownerScoredSql()
-        + " select * from owner_scored where owner_type = ? and owner_id = ?";
+    String sqlText =
+        ownerScoredSql() + " select * from owner_scored where owner_type = ? and owner_id = ?";
     var binds = tenantBinds(tenantId);
     binds.add(ownerType);
     binds.add(ownerId);
@@ -861,58 +900,95 @@ public class CompletenessScoreService {
   /**
    * 把一条主体行展开成逐条检查项（含已满足的）。
    *
-   * <p>每条缺失都带主体名与下一步动作：「缺 3 条必填属性」没法让人去补，
-   * 而「缺 HS 编码 / 申报品名 / 原产国」可以直接点进那三个字段。
+   * <p>每条缺失都带主体名与下一步动作：「缺 3 条必填属性」没法让人去补， 而「缺 HS 编码 / 申报品名 / 原产国」可以直接点进那三个字段。
    */
   private List<CompletenessScoreModels.CompletenessCheck> checksOf(Record row, String ownerType) {
     var checks = new ArrayList<CompletenessScoreModels.CompletenessCheck>();
     long skuCount = longOf(row.get("sku_count", Long.class));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_REQUIRED_ATTRIBUTE, "ATTRIBUTE", "ATTRIBUTE",
-        OWNER_SPU.equals(ownerType) ? "SPU 必填属性" : "该 SKU 的必填属性",
-        attrDetail(row), attrOk(row) >= attrTotal(row) ? null : missingRemedy(MISSING_REQUIRED_ATTRIBUTE),
-        attrOk(row) >= attrTotal(row)));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_REQUIRED_ATTRIBUTE,
+            "ATTRIBUTE",
+            "ATTRIBUTE",
+            OWNER_SPU.equals(ownerType) ? "SPU 必填属性" : "该 SKU 的必填属性",
+            attrDetail(row),
+            attrOk(row) >= attrTotal(row) ? null : missingRemedy(MISSING_REQUIRED_ATTRIBUTE),
+            attrOk(row) >= attrTotal(row)));
 
     boolean hasCategory = Boolean.TRUE.equals(row.get("has_category", Boolean.class));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_PRIMARY_CATEGORY, "CATEGORY", "CATEGORY", "主分类",
-        hasCategory ? "已挂在主分类下" : missingDetail(MISSING_PRIMARY_CATEGORY, null),
-        hasCategory ? null : missingRemedy(MISSING_PRIMARY_CATEGORY), hasCategory));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_PRIMARY_CATEGORY,
+            "CATEGORY",
+            "CATEGORY",
+            "主分类",
+            hasCategory ? "已挂在主分类下" : missingDetail(MISSING_PRIMARY_CATEGORY, null),
+            hasCategory ? null : missingRemedy(MISSING_PRIMARY_CATEGORY),
+            hasCategory));
 
     long ruleTotal = longOf(row.get("rule_total", Long.class));
     long ruleOk = longOf(row.get("rule_ok", Long.class));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_CATEGORY_RULE_VALUE, "CATEGORY", "ATTRIBUTE", "类目必填属性",
-        ruleTotal == 0 ? "该类目未配置必填属性要求，无规则缺失"
-                       : "类目必填属性已填 " + ruleOk + "/" + ruleTotal + " 条",
-        ruleOk >= ruleTotal ? null : missingRemedy(MISSING_CATEGORY_RULE_VALUE),
-        ruleTotal == 0 || ruleOk >= ruleTotal));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_CATEGORY_RULE_VALUE,
+            "CATEGORY",
+            "ATTRIBUTE",
+            "类目必填属性",
+            ruleTotal == 0 ? "该类目未配置必填属性要求，无规则缺失" : "类目必填属性已填 " + ruleOk + "/" + ruleTotal + " 条",
+            ruleOk >= ruleTotal ? null : missingRemedy(MISSING_CATEGORY_RULE_VALUE),
+            ruleTotal == 0 || ruleOk >= ruleTotal));
 
     long imageCount = longOf(row.get("image_count", Long.class));
     long primaryCount = longOf(row.get("primary_count", Long.class));
     long primaryEdge = longOf(row.get("primary_edge", Long.class));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_PRIMARY_IMAGE, "MEDIA", "MEDIA_ASSET", "主图",
-        primaryCount >= 1 ? "已有 " + primaryCount + " 张主图" : missingDetail(MISSING_PRIMARY_IMAGE, null),
-        primaryCount >= 1 ? null : missingRemedy(MISSING_PRIMARY_IMAGE), primaryCount >= 1));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_IMAGE_COUNT, "MEDIA", "MEDIA_ASSET", "图片数量",
-        imageCount >= MIN_IMAGE_COUNT ? "图片 " + imageCount + " 张，已达下限"
-                                      : missingDetail(MISSING_IMAGE_COUNT, String.valueOf(imageCount)),
-        imageCount >= MIN_IMAGE_COUNT ? null : missingRemedy(MISSING_IMAGE_COUNT), imageCount >= MIN_IMAGE_COUNT));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_PRIMARY_IMAGE_EDGE, "MEDIA", "MEDIA_ASSET", "主图分辨率",
-        primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX ? "主图最短边 " + primaryEdge + "px，已达标"
-                                                 : missingDetail(MISSING_PRIMARY_IMAGE_EDGE, String.valueOf(primaryEdge)),
-        primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX ? null : missingRemedy(MISSING_PRIMARY_IMAGE_EDGE),
-        primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_PRIMARY_IMAGE,
+            "MEDIA",
+            "MEDIA_ASSET",
+            "主图",
+            primaryCount >= 1
+                ? "已有 " + primaryCount + " 张主图"
+                : missingDetail(MISSING_PRIMARY_IMAGE, null),
+            primaryCount >= 1 ? null : missingRemedy(MISSING_PRIMARY_IMAGE),
+            primaryCount >= 1));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_IMAGE_COUNT,
+            "MEDIA",
+            "MEDIA_ASSET",
+            "图片数量",
+            imageCount >= MIN_IMAGE_COUNT
+                ? "图片 " + imageCount + " 张，已达下限"
+                : missingDetail(MISSING_IMAGE_COUNT, String.valueOf(imageCount)),
+            imageCount >= MIN_IMAGE_COUNT ? null : missingRemedy(MISSING_IMAGE_COUNT),
+            imageCount >= MIN_IMAGE_COUNT));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_PRIMARY_IMAGE_EDGE,
+            "MEDIA",
+            "MEDIA_ASSET",
+            "主图分辨率",
+            primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX
+                ? "主图最短边 " + primaryEdge + "px，已达标"
+                : missingDetail(MISSING_PRIMARY_IMAGE_EDGE, String.valueOf(primaryEdge)),
+            primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX
+                ? null
+                : missingRemedy(MISSING_PRIMARY_IMAGE_EDGE),
+            primaryEdge >= MIN_PRIMARY_IMAGE_EDGE_PX));
 
     if (OWNER_SPU.equals(ownerType) && skuCount == 0) {
       // 规则 R4：没有变体时三条 SKU 侧维度各记一条缺失项，而不是把权重摊给别人。
       for (String dimension : List.of("CUSTOMS", "PACKAGING", "CERTIFICATION")) {
-        checks.add(new CompletenessScoreModels.CompletenessCheck(
-            MISSING_SPU_WITHOUT_SKU, dimension, "SKU", "变体",
-            missingDetail(MISSING_SPU_WITHOUT_SKU, null), missingRemedy(MISSING_SPU_WITHOUT_SKU), false));
+        checks.add(
+            new CompletenessScoreModels.CompletenessCheck(
+                MISSING_SPU_WITHOUT_SKU,
+                dimension,
+                "SKU",
+                "变体",
+                missingDetail(MISSING_SPU_WITHOUT_SKU, null),
+                missingRemedy(MISSING_SPU_WITHOUT_SKU),
+                false));
       }
       return sortChecks(checks);
     }
@@ -922,19 +998,23 @@ public class CompletenessScoreService {
 
     long certOk = longOf(row.get("c_certification_ok", Long.class));
     long certTotal = longOf(row.get("c_certification_total", Long.class));
-    String certCode = OWNER_SKU.equals(ownerType)
-        ? certificationMissingCode(row.get("cert_completeness", String.class))
-        : MISSING_CERTIFICATION_NONE;
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        certOk >= certTotal ? "CERTIFICATION_OK" : certCode,
-        "CERTIFICATION", "CERTIFICATION",
-        OWNER_SPU.equals(ownerType) ? certTotal + " 个变体的认证" : "认证",
-        OWNER_SPU.equals(ownerType)
-            ? (certOk >= certTotal ? certTotal + "/" + certTotal + " 个变体认证齐全"
-                                   : certOk + "/" + certTotal + " 个变体认证齐全")
-            : certificationCompletenessLabel(row.get("cert_completeness", String.class)),
-        certOk >= certTotal ? null : missingRemedy(certCode),
-        certOk >= certTotal));
+    String certCode =
+        OWNER_SKU.equals(ownerType)
+            ? certificationMissingCode(row.get("cert_completeness", String.class))
+            : MISSING_CERTIFICATION_NONE;
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            certOk >= certTotal ? "CERTIFICATION_OK" : certCode,
+            "CERTIFICATION",
+            "CERTIFICATION",
+            OWNER_SPU.equals(ownerType) ? certTotal + " 个变体的认证" : "认证",
+            OWNER_SPU.equals(ownerType)
+                ? (certOk >= certTotal
+                    ? certTotal + "/" + certTotal + " 个变体认证齐全"
+                    : certOk + "/" + certTotal + " 个变体认证齐全")
+                : certificationCompletenessLabel(row.get("cert_completeness", String.class)),
+            certOk >= certTotal ? null : missingRemedy(certCode),
+            certOk >= certTotal));
     return sortChecks(checks);
   }
 
@@ -956,11 +1036,15 @@ public class CompletenessScoreService {
   private void appendCustomsChecks(
       List<CompletenessScoreModels.CompletenessCheck> checks, Record row) {
     boolean present = Boolean.TRUE.equals(row.get("customs_present", Boolean.class));
-    for (String code : customsMissingCodes(
-        present, str(row.get("hs_code", String.class)), str(row.get("declared_name", String.class)),
-        str(row.get("origin_country", String.class)))) {
-      checks.add(new CompletenessScoreModels.CompletenessCheck(
-          code, "CUSTOMS", "CUSTOMS", "报关属性", customsDetail(code), customsRemedy(code), false));
+    for (String code :
+        customsMissingCodes(
+            present,
+            str(row.get("hs_code", String.class)),
+            str(row.get("declared_name", String.class)),
+            str(row.get("origin_country", String.class)))) {
+      checks.add(
+          new CompletenessScoreModels.CompletenessCheck(
+              code, "CUSTOMS", "CUSTOMS", "报关属性", customsDetail(code), customsRemedy(code), false));
     }
   }
 
@@ -968,21 +1052,37 @@ public class CompletenessScoreService {
       List<CompletenessScoreModels.CompletenessCheck> checks, Record row) {
     boolean present = Boolean.TRUE.equals(row.get("pkg_present", Boolean.class));
     if (!present) {
-      checks.add(new CompletenessScoreModels.CompletenessCheck(
-          MISSING_PACKAGE_RECORD, "PACKAGING", "PACKAGE", "包装尺寸重量",
-          missingDetail(MISSING_PACKAGE_RECORD, null), missingRemedy(MISSING_PACKAGE_RECORD), false));
+      checks.add(
+          new CompletenessScoreModels.CompletenessCheck(
+              MISSING_PACKAGE_RECORD,
+              "PACKAGING",
+              "PACKAGE",
+              "包装尺寸重量",
+              missingDetail(MISSING_PACKAGE_RECORD, null),
+              missingRemedy(MISSING_PACKAGE_RECORD),
+              false));
       return;
     }
     boolean dimsOk = Boolean.TRUE.equals(row.get("pkg_dims_ok", Boolean.class));
     boolean weightsOk = Boolean.TRUE.equals(row.get("pkg_weights_ok", Boolean.class));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_PACKAGE_DIMENSION, "PACKAGING", "PACKAGE", "包装尺寸",
-        dimsOk ? "长宽高齐全" : missingDetail(MISSING_PACKAGE_DIMENSION, "长/宽/高"),
-        dimsOk ? null : missingRemedy(MISSING_PACKAGE_DIMENSION), dimsOk));
-    checks.add(new CompletenessScoreModels.CompletenessCheck(
-        MISSING_PACKAGE_WEIGHT, "PACKAGING", "PACKAGE", "包装重量",
-        weightsOk ? "净重与毛重齐全" : missingDetail(MISSING_PACKAGE_WEIGHT, "净重/毛重"),
-        weightsOk ? null : missingRemedy(MISSING_PACKAGE_WEIGHT), weightsOk));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_PACKAGE_DIMENSION,
+            "PACKAGING",
+            "PACKAGE",
+            "包装尺寸",
+            dimsOk ? "长宽高齐全" : missingDetail(MISSING_PACKAGE_DIMENSION, "长/宽/高"),
+            dimsOk ? null : missingRemedy(MISSING_PACKAGE_DIMENSION),
+            dimsOk));
+    checks.add(
+        new CompletenessScoreModels.CompletenessCheck(
+            MISSING_PACKAGE_WEIGHT,
+            "PACKAGING",
+            "PACKAGE",
+            "包装重量",
+            weightsOk ? "净重与毛重齐全" : missingDetail(MISSING_PACKAGE_WEIGHT, "净重/毛重"),
+            weightsOk ? null : missingRemedy(MISSING_PACKAGE_WEIGHT),
+            weightsOk));
   }
 
   // ================================================================ 缺失项清单（批量补全入口）
@@ -990,11 +1090,9 @@ public class CompletenessScoreService {
   /**
    * 缺失项清单：按缺失码聚合，补全工作台的主数据源。
    *
-   * <p>每条给出<b>受影响的全部主体数</b>与前若干个样本主体，
-   * 让运营看到"全店 137 个 SKU 缺 HS 编码"并能直接跳到第一个去补。
+   * <p>每条给出<b>受影响的全部主体数</b>与前若干个样本主体， 让运营看到"全店 137 个 SKU 缺 HS 编码"并能直接跳到第一个去补。
    *
-   * <p>排序按 {@code affectedCount} 降序：补全工作要从影响面最大的那条开始 ——
-   * 修好一条报关规则可能同时让几十个 SKU 的清关就绪结论翻转。
+   * <p>排序按 {@code affectedCount} 降序：补全工作要从影响面最大的那条开始 —— 修好一条报关规则可能同时让几十个 SKU 的清关就绪结论翻转。
    */
   public CompletenessGapPage gaps(CompletenessQuery query) {
     UUID tenantId = currentTenantId();
@@ -1012,17 +1110,22 @@ public class CompletenessScoreService {
     List<CompletenessGap> all = new ArrayList<>();
     for (CompletenessScoreRules.Dimension dimension : dimensions())
       addDimensionGaps(tenantId, dimension.code(), where, extraBinds, all, query);
-    all.sort((a, b) -> {
-      int byCount = Long.compare(b.affectedCount(), a.affectedCount());
-      if (byCount != 0) return byCount;
-      return dimensionOrder().indexOf(a.dimension()) - dimensionOrder().indexOf(b.dimension());
-    });
+    all.sort(
+        (a, b) -> {
+          int byCount = Long.compare(b.affectedCount(), a.affectedCount());
+          if (byCount != 0) return byCount;
+          return dimensionOrder().indexOf(a.dimension()) - dimensionOrder().indexOf(b.dimension());
+        });
 
     int from = Math.min(page * size, all.size());
     int to = Math.min(from + size, all.size());
     long affectedOwners = all.stream().mapToLong(CompletenessGap::affectedCount).max().orElse(0L);
     return new CompletenessGapPage(
-        new ArrayList<>(all.subList(from, to)), all.size(), page, size, affectedOwners,
+        new ArrayList<>(all.subList(from, to)),
+        all.size(),
+        page,
+        size,
+        affectedOwners,
         dimensionGaps(tenantId, query.ownerType()),
         "缺失项按缺失码聚合：同一条规则在多少个主体上不成立（affectedCount），"
             + "以及前几个代表性主体。补全从影响面最大的那条开始 —— "
@@ -1032,8 +1135,12 @@ public class CompletenessScoreService {
 
   /** 一个维度下逐个缺失码的受影响主体数。 */
   private void addDimensionGaps(
-      UUID tenantId, String dimensionCode, String where, List<Object> extraBinds,
-      List<CompletenessGap> sink, CompletenessQuery query) {
+      UUID tenantId,
+      String dimensionCode,
+      String where,
+      List<Object> extraBinds,
+      List<CompletenessGap> sink,
+      CompletenessQuery query) {
     String dimensionFilter = normalizeEnum(query.dimension());
     if (dimensionFilter != null && !dimensionFilter.equals(dimensionCode)) return;
     String dimension = dimensionCode;
@@ -1041,39 +1148,59 @@ public class CompletenessScoreService {
     var conditions = new ArrayList<Map.Entry<String, String>>();
     switch (dimension) {
       case "MEDIA" -> {
-        conditions.add(Map.entry("c_media_total - (case when c_media_ok >= 1 then 1 else 0 end)",
-            MISSING_PRIMARY_IMAGE));
-        conditions.add(Map.entry("c_media_total - (case when c_media_ok >= 2 then 1 else 0 end)",
-            MISSING_IMAGE_COUNT));
+        conditions.add(
+            Map.entry(
+                "c_media_total - (case when c_media_ok >= 1 then 1 else 0 end)",
+                MISSING_PRIMARY_IMAGE));
+        conditions.add(
+            Map.entry(
+                "c_media_total - (case when c_media_ok >= 2 then 1 else 0 end)",
+                MISSING_IMAGE_COUNT));
         conditions.add(Map.entry("c_media_total - c_media_ok", MISSING_PRIMARY_IMAGE_EDGE));
       }
       case "CUSTOMS" -> {
         // 四条报关检查项各缺一条就各报一次：它们的补全动作不同（建档 vs 补字段）。
-        conditions.add(Map.entry("4 - (case when customs_present then 1 else 0 end)",
-            MISSING_CUSTOMS_DECLARATION));
-        conditions.add(Map.entry("4 - (case when btrim(coalesce(hs_code,'')) <> '' then 1 else 0 end)",
-            MISSING_HS_CODE));
-        conditions.add(Map.entry("4 - (case when btrim(coalesce(declared_name,'')) <> '' then 1 else 0 end)",
-            MISSING_DECLARED_NAME));
-        conditions.add(Map.entry("4 - (case when btrim(coalesce(origin_country,'')) <> '' then 1 else 0 end)",
-            MISSING_ORIGIN_COUNTRY));
+        conditions.add(
+            Map.entry(
+                "4 - (case when customs_present then 1 else 0 end)", MISSING_CUSTOMS_DECLARATION));
+        conditions.add(
+            Map.entry(
+                "4 - (case when btrim(coalesce(hs_code,'')) <> '' then 1 else 0 end)",
+                MISSING_HS_CODE));
+        conditions.add(
+            Map.entry(
+                "4 - (case when btrim(coalesce(declared_name,'')) <> '' then 1 else 0 end)",
+                MISSING_DECLARED_NAME));
+        conditions.add(
+            Map.entry(
+                "4 - (case when btrim(coalesce(origin_country,'')) <> '' then 1 else 0 end)",
+                MISSING_ORIGIN_COUNTRY));
       }
       case "PACKAGING" -> {
-        conditions.add(Map.entry("3 - (case when pkg_present then 1 else 0 end)", MISSING_PACKAGE_RECORD));
-        conditions.add(Map.entry("3 - (case when pkg_present and pkg_dims_ok then 1 else 0 end)",
-            MISSING_PACKAGE_DIMENSION));
-        conditions.add(Map.entry("3 - (case when pkg_present and pkg_weights_ok then 1 else 0 end)",
-            MISSING_PACKAGE_WEIGHT));
+        conditions.add(
+            Map.entry("3 - (case when pkg_present then 1 else 0 end)", MISSING_PACKAGE_RECORD));
+        conditions.add(
+            Map.entry(
+                "3 - (case when pkg_present and pkg_dims_ok then 1 else 0 end)",
+                MISSING_PACKAGE_DIMENSION));
+        conditions.add(
+            Map.entry(
+                "3 - (case when pkg_present and pkg_weights_ok then 1 else 0 end)",
+                MISSING_PACKAGE_WEIGHT));
       }
-      case "CERTIFICATION" -> conditions.add(
-          Map.entry("c_certification_total - c_certification_ok", MISSING_CERTIFICATION_NONE));
+      case "CERTIFICATION" ->
+          conditions.add(
+              Map.entry("c_certification_total - c_certification_ok", MISSING_CERTIFICATION_NONE));
       case "CATEGORY" -> {
-        conditions.add(Map.entry("c_category_total - (case when has_category then 1 else 0 end)",
-            MISSING_PRIMARY_CATEGORY));
+        conditions.add(
+            Map.entry(
+                "c_category_total - (case when has_category then 1 else 0 end)",
+                MISSING_PRIMARY_CATEGORY));
         conditions.add(Map.entry("c_category_total - c_category_ok", MISSING_CATEGORY_RULE_VALUE));
       }
-      default -> conditions.add(
-          Map.entry("c_" + key + "_total - c_" + key + "_ok", MISSING_REQUIRED_ATTRIBUTE));
+      default ->
+          conditions.add(
+              Map.entry("c_" + key + "_total - c_" + key + "_ok", MISSING_REQUIRED_ATTRIBUTE));
     }
     for (var condition : conditions) {
       String code = condition.getValue();
@@ -1088,12 +1215,16 @@ public class CompletenessScoreService {
       //    —— 复制两处迟早只改一处，而两处的条件一旦不同步，
       //    "受影响主体数"与"样本主体"就会来自两个不同的集合。
       // ownerScoredSql() 以最后一个 CTE 的右括号结尾（不带逗号），这里补上逗号再接 hits。
-      String sqlText = ownerScoredSql()
-          + ", hits as (select owner_code from owner_scored"
-          + (where.isEmpty() ? "" : where + " and ") + "(" + condition.getKey() + ") > 0) "
-          + "select (select count(*) from hits) as affected,"
-          + " coalesce((select array_agg(owner_code) from"
-          + " (select owner_code from hits order by owner_code limit 5) t), array[]::text[]) as samples";
+      String sqlText =
+          ownerScoredSql()
+              + ", hits as (select owner_code from owner_scored"
+              + (where.isEmpty() ? "" : where + " and ")
+              + "("
+              + condition.getKey()
+              + ") > 0) "
+              + "select (select count(*) from hits) as affected,"
+              + " coalesce((select array_agg(owner_code) from"
+              + " (select owner_code from hits order by owner_code limit 5) t), array[]::text[]) as samples";
       var binds = new ArrayList<Object>(tenantBinds(tenantId));
       binds.addAll(extraBinds);
       Record r = sql.fetchOne(sqlText, binds.toArray());
@@ -1102,12 +1233,19 @@ public class CompletenessScoreService {
       String[] rawSamples = r.get("samples", String[].class);
       {
         List<String> samples = rawSamples == null ? List.of() : List.of(rawSamples);
-        sink.add(new CompletenessGap(
-            code, dimension, dimensionLabel(dimension), missingSubjectType(code),
-            CUSTOMS_CHAIN.contains(dimension) ? customsDetail(code)
-                                              : missingDetail(code, "（按主体统计）"),
-            CUSTOMS_CHAIN.contains(dimension) ? customsRemedy(code) : missingRemedy(code),
-            affected, samples, missingNextEntry(code)));
+        sink.add(
+            new CompletenessGap(
+                code,
+                dimension,
+                dimensionLabel(dimension),
+                missingSubjectType(code),
+                CUSTOMS_CHAIN.contains(dimension)
+                    ? customsDetail(code)
+                    : missingDetail(code, "（按主体统计）"),
+                CUSTOMS_CHAIN.contains(dimension) ? customsRemedy(code) : missingRemedy(code),
+                affected,
+                samples,
+                missingNextEntry(code)));
       }
     }
   }
@@ -1119,18 +1257,22 @@ public class CompletenessScoreService {
     var binds = tenantBinds(tenantId);
     applyIdentityFilters(query, filter, binds);
     String where = filter.isEmpty() ? "" : " where " + String.join(" and ", filter);
-    String sqlText = ownerScoredSql() + " select count(*) as owners,"
-        + " coalesce(sum(missing_count), 0) as missing,"
-        + " count(*) filter (where missing_count = 0) as clean"
-        + " from owner_scored" + where;
+    String sqlText =
+        ownerScoredSql()
+            + " select count(*) as owners,"
+            + " coalesce(sum(missing_count), 0) as missing,"
+            + " count(*) filter (where missing_count = 0) as clean"
+            + " from owner_scored"
+            + where;
     Record r = sql.fetchOne(sqlText, binds.toArray());
 
     return new GapSummary(
-        longOf(r.get("owners", Long.class)), longOf(r.get("missing", Long.class)),
-        dimensionGaps(tenantId, query.ownerType()), gradeCounts(tenantId, query.ownerType()),
+        longOf(r.get("owners", Long.class)),
+        longOf(r.get("missing", Long.class)),
+        dimensionGaps(tenantId, query.ownerType()),
+        gradeCounts(tenantId, query.ownerType()),
         longOf(r.get("clean", Long.class)),
-        "缺失项数是 Σ(每个维度的检查项数 - 已满足数)，一条缺失项对应一个明确的下一步动作。"
-            + "cleanCount 是零缺失的主体数 —— 它是补全工作的进度条。");
+        "缺失项数是 Σ(每个维度的检查项数 - 已满足数)，一条缺失项对应一个明确的下一步动作。" + "cleanCount 是零缺失的主体数 —— 它是补全工作的进度条。");
   }
 
   // ================================================================ 评估快照（批量补全入口）
@@ -1138,12 +1280,9 @@ public class CompletenessScoreService {
   /**
    * 批量评估并落快照（蓝图的「批量补全入口」）。
    *
-   * <p>调用方只传<b>主体 id</b>，分数由服务端现算（规则 R1）：
-   * 一个"把分数传进来让我存一下"的端点等于给完整度发了一张可自填的通行证，
-   * 而完整度直接决定能否刊登与能否清关。
+   * <p>调用方只传<b>主体 id</b>，分数由服务端现算（规则 R1）： 一个"把分数传进来让我存一下"的端点等于给完整度发了一张可自填的通行证， 而完整度直接决定能否刊登与能否清关。
    *
-   * <p>逐条成败都带出来，<b>不做"整体成功/失败"</b>：批量补全天然是"好的补了、
-   * 还差的留着"，一个整体 500 会让人以为一条都没补上。
+   * <p>逐条成败都带出来，<b>不做"整体成功/失败"</b>：批量补全天然是"好的补了、 还差的留着"，一个整体 500 会让人以为一条都没补上。
    */
   public CompletenessEvaluationResult evaluate(
       AccessService.Access actor, CompletenessEvaluationInput input) {
@@ -1151,8 +1290,7 @@ public class CompletenessScoreService {
     String ownerType = normalizeEnum(input.ownerType());
     if (ownerType == null || !OWNER_TYPES.contains(ownerType))
       throw badRequest(ownerTypeProblem(input.ownerType()));
-    if (input.ownerIds() == null || input.ownerIds().isEmpty())
-      throw badRequest("请至少选择一个待评估的主体");
+    if (input.ownerIds() == null || input.ownerIds().isEmpty()) throw badRequest("请至少选择一个待评估的主体");
     if (input.ownerIds().size() > 500) throw badRequest("一次最多评估 500 个主体，请分批提交");
 
     var evaluations = new ArrayList<CompletenessEvaluation>();
@@ -1161,13 +1299,17 @@ public class CompletenessScoreService {
       try {
         evaluations.add(storeEvaluation(actor, ownerType, ownerId, input.note()));
       } catch (ResponseStatusException e) {
-        failures.add(new EvaluationFailure(ownerId, e.getReason() == null ? "主体不存在" : e.getReason()));
+        failures.add(
+            new EvaluationFailure(ownerId, e.getReason() == null ? "主体不存在" : e.getReason()));
       }
     }
     return new CompletenessEvaluationResult(
-        input.ownerIds().size(), evaluations.size(), failures.size(), evaluations, failures,
-        "快照只回答「过去某一刻的分数与缺失项」，读出口一律现算 —— "
-            + "删掉全部快照不影响评分功能。跨租户或不存在的主体按条失败返回，不会中断整批。");
+        input.ownerIds().size(),
+        evaluations.size(),
+        failures.size(),
+        evaluations,
+        failures,
+        "快照只回答「过去某一刻的分数与缺失项」，读出口一律现算 —— " + "删掉全部快照不影响评分功能。跨租户或不存在的主体按条失败返回，不会中断整批。");
   }
 
   private CompletenessEvaluation storeEvaluation(
@@ -1177,8 +1319,8 @@ public class CompletenessScoreService {
     UUID id = Ids.next();
     var dimensionGaps = new ArrayList<DimensionGap>();
     for (CompletenessScoreModels.CompletenessDimension dim : card.dimensions())
-      dimensionGaps.add(new DimensionGap(
-          dim.dimension(), dim.dimensionLabel(), dim.total() - dim.satisfied()));
+      dimensionGaps.add(
+          new DimensionGap(dim.dimension(), dim.dimensionLabel(), dim.total() - dim.satisfied()));
     sql.execute(
         """
         insert into completeness_evaluation(
@@ -1187,21 +1329,30 @@ public class CompletenessScoreService {
           evaluated_by, note, version)
         values(?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?,?,?,0)
         """,
-        id, tenantId, ownerType,
+        id,
+        tenantId,
+        ownerType,
         OWNER_SPU.equals(ownerType) ? ownerId : null,
         OWNER_SKU.equals(ownerType) ? ownerId : null,
-        card.score(), card.grade(), card.listingReady(), card.customsReady(),
-        writeJson(dimensionGaps), writeJson(card.missing()), card.missing().size(),
-        actor.userId(), note == null ? "" : note.trim());
+        card.score(),
+        card.grade(),
+        card.listingReady(),
+        card.customsReady(),
+        writeJson(dimensionGaps),
+        writeJson(card.missing()),
+        card.missing().size(),
+        actor.userId(),
+        note == null ? "" : note.trim());
     // 走 EVALUATION_SELECT 而不是 select *：toEvaluation 要读 owner_code/owner_name，
     // 那两列是 join 出来的，裸 select * 的行类型里没有它们（jOOQ 会报
     // "field owner_code is not contained in row type"）。
-    return toEvaluation(sql.fetchOne(
-        EVALUATION_SELECT + " where e.tenant_id=? and e.id=?", tenantId, id));
+    return toEvaluation(
+        sql.fetchOne(EVALUATION_SELECT + " where e.tenant_id=? and e.id=?", tenantId, id));
   }
 
   /** 评估快照列表。 */
-  public CompletenessEvaluationPage evaluations(UUID ownerId, String ownerType, int page, int size) {
+  public CompletenessEvaluationPage evaluations(
+      UUID ownerId, String ownerType, int page, int size) {
     UUID tenantId = currentTenantId();
     int p = normalizePage(page);
     int s = normalizeSize(size);
@@ -1218,17 +1369,24 @@ public class CompletenessScoreService {
       binds.add(normalized);
     }
     String extra = clause.isEmpty() ? "" : " and " + String.join(" and ", clause);
-    long total = sql.fetchOne(
-            "select count(*) from completeness_evaluation e where e.tenant_id=?" + extra,
-            concatTenant(tenantId, binds)).get(0, Long.class);
+    long total =
+        sql.fetchOne(
+                "select count(*) from completeness_evaluation e where e.tenant_id=?" + extra,
+                concatTenant(tenantId, binds))
+            .get(0, Long.class);
     var items = new ArrayList<CompletenessEvaluation>();
-    for (Record r : sql.fetch(
-        EVALUATION_SELECT + " where e.tenant_id=?" + extra
-            + " order by e.evaluated_at desc, e.id limit ? offset ?",
-        concatTenant(tenantId, binds, s, p * s)))
-      items.add(toEvaluation(r));
+    for (Record r :
+        sql.fetch(
+            EVALUATION_SELECT
+                + " where e.tenant_id=?"
+                + extra
+                + " order by e.evaluated_at desc, e.id limit ? offset ?",
+            concatTenant(tenantId, binds, s, p * s))) items.add(toEvaluation(r));
     return new CompletenessEvaluationPage(
-        items, total, p, s,
+        items,
+        total,
+        p,
+        s,
         "评估历史回答「上周三拦住这批刊登的那个分数是几分、缺哪几项」—— 现算的评分答不了过去。"
             + "分数与分档都是<b>当时</b>的样子：分档阈值以后可能被调整，"
             + "而历史快照必须保持它写入时的结论，否则改一次阈值所有历史分档都跟着变。");
@@ -1258,38 +1416,53 @@ public class CompletenessScoreService {
     String rawGaps = jsonText(r, "dimension_scores");
     if (rawGaps != null && !rawGaps.isBlank())
       for (var node : readJson(rawGaps))
-        gaps.add(new DimensionGap(
-            node.path("dimension").asText(), node.path("dimensionLabel").asText(),
-            node.path("missingCount").asLong()));
+        gaps.add(
+            new DimensionGap(
+                node.path("dimension").asText(),
+                node.path("dimensionLabel").asText(),
+                node.path("missingCount").asLong()));
     List<CompletenessScoreModels.CompletenessCheck> missing = new ArrayList<>();
     String rawMissing = jsonText(r, "missing_checks");
     if (rawMissing != null && !rawMissing.isBlank())
       for (var node : readJson(rawMissing))
-        missing.add(new CompletenessScoreModels.CompletenessCheck(
-            node.path("code").asText(), node.path("dimension").asText(),
-            node.path("subjectType").asText(), node.path("subjectLabel").asText(),
-            node.path("detail").asText(), node.path("remedy").asText(), false));
+        missing.add(
+            new CompletenessScoreModels.CompletenessCheck(
+                node.path("code").asText(),
+                node.path("dimension").asText(),
+                node.path("subjectType").asText(),
+                node.path("subjectLabel").asText(),
+                node.path("detail").asText(),
+                node.path("remedy").asText(),
+                false));
     BigDecimal score = decimalOf(r.get("score", BigDecimal.class));
     return new CompletenessEvaluation(
-        r.get("id", UUID.class), r.get("owner_type", String.class),
+        r.get("id", UUID.class),
+        r.get("owner_type", String.class),
         OWNER_SPU.equals(r.get("owner_type", String.class))
-            ? r.get("spu_id", UUID.class) : r.get("sku_id", UUID.class),
-        r.get("owner_code", String.class), r.get("owner_name", String.class),
-        score, r.get("grade", String.class), gradeLabel(r.get("grade", String.class)),
+            ? r.get("spu_id", UUID.class)
+            : r.get("sku_id", UUID.class),
+        r.get("owner_code", String.class),
+        r.get("owner_name", String.class),
+        score,
+        r.get("grade", String.class),
+        gradeLabel(r.get("grade", String.class)),
         Boolean.TRUE.equals(r.get("listing_ready", Boolean.class)),
         Boolean.TRUE.equals(r.get("customs_ready", Boolean.class)),
-        longOf(r.get("missing_count", Long.class)), gaps, missing,
-        r.get("evaluated_by", UUID.class), instant(r.get("evaluated_at", OffsetDateTime.class)),
-        r.get("note", String.class), longOf(r.get("version", Long.class)));
+        longOf(r.get("missing_count", Long.class)),
+        gaps,
+        missing,
+        r.get("evaluated_by", UUID.class),
+        instant(r.get("evaluated_at", OffsetDateTime.class)),
+        r.get("note", String.class),
+        longOf(r.get("version", Long.class)));
   }
 
   /**
    * jsonb 列取原文。
    *
-   * <p>刻意<b>不</b>只判 {@code instanceof String}：PG 的 jsonb 会被驱动交回成
-   * {@code PGobject} 而不是 {@code String}，只认 String 的那个分支会静默跳过，
-   * 症状是"快照里没有缺失项"而库里明明存了 —— 一个只看现象根本查不出来的 bug。
-   * {@code PGobject.toString()} 就是它的 JSON 原文，所以两种类型都能拿到。
+   * <p>刻意<b>不</b>只判 {@code instanceof String}：PG 的 jsonb 会被驱动交回成 {@code PGobject} 而不是 {@code
+   * String}，只认 String 的那个分支会静默跳过， 症状是"快照里没有缺失项"而库里明明存了 —— 一个只看现象根本查不出来的 bug。 {@code
+   * PGobject.toString()} 就是它的 JSON 原文，所以两种类型都能拿到。
    */
   private static String jsonText(Record r, String column) {
     Object value = r.get(column);
@@ -1314,9 +1487,13 @@ public class CompletenessScoreService {
       }
     }
     return new ListingPrecheck(
-        blockers.isEmpty(), checked, blockers.size(),
-        blocked.stream().map(CompletenessRow::ownerCode).toList(), blockers,
-        "刊登预检：给一组 SPU 判定能否刊登。规则 R3 —— 必须总分 ≥ " + LISTING_GATE.toPlainString()
+        blockers.isEmpty(),
+        checked,
+        blockers.size(),
+        blocked.stream().map(CompletenessRow::ownerCode).toList(),
+        blockers,
+        "刊登预检：给一组 SPU 判定能否刊登。规则 R3 —— 必须总分 ≥ "
+            + LISTING_GATE.toPlainString()
             + " 且必填属性/图片/类目必填/认证四个维度都无缺失。"
             + "报 blockedOwners + blockers 而不是只给一个布尔：布尔答不出「这 3 个 SPU 为什么被拦住」，"
             + "而预检页要把缺失项直接指到字段上。");
@@ -1336,18 +1513,23 @@ public class CompletenessScoreService {
       }
     }
     return new CustomsPrecheck(
-        blockers.isEmpty(), checked, blockers.size(),
-        blocked.stream().map(CompletenessRow::ownerCode).toList(), blockers,
-        "清关预检：给一组 SKU 判定能否报关。规则 R3 —— 必须总分 ≥ " + CUSTOMS_GATE.toPlainString()
+        blockers.isEmpty(),
+        checked,
+        blockers.size(),
+        blocked.stream().map(CompletenessRow::ownerCode).toList(),
+        blockers,
+        "清关预检：给一组 SKU 判定能否报关。规则 R3 —— 必须总分 ≥ "
+            + CUSTOMS_GATE.toPlainString()
             + " 且报关属性与包装尺寸重量两个维度都无缺失。");
   }
 
   private CompletenessRow precheckRow(String ownerType, UUID ownerId) {
     UUID tenantId = currentTenantId();
-    String sqlText = ownerScoredSql()
-        + " select owner_type, tenant_id, spu_id, owner_id, owner_code, owner_name, owner_status,"
-        + " category_name, score, grade, missing_count, sku_count, listing_ready, customs_ready"
-        + " from owner_scored where owner_type = ? and owner_id = ?";
+    String sqlText =
+        ownerScoredSql()
+            + " select owner_type, tenant_id, spu_id, owner_id, owner_code, owner_name, owner_status,"
+            + " category_name, score, grade, missing_count, sku_count, listing_ready, customs_ready"
+            + " from owner_scored where owner_type = ? and owner_id = ?";
     var binds = tenantBinds(tenantId);
     binds.add(ownerType);
     binds.add(ownerId);
@@ -1358,9 +1540,16 @@ public class CompletenessScoreService {
   private CompletenessScoreRules.PrecheckBlocker precheckBlocker(CompletenessRow row) {
     CompletenessScorecard card = card(row.ownerType(), row.ownerId());
     return new CompletenessScoreRules.PrecheckBlocker(
-        card.ownerType(), card.ownerId(), card.ownerCode(), card.ownerName(), card.score(),
+        card.ownerType(),
+        card.ownerId(),
+        card.ownerCode(),
+        card.ownerName(),
+        card.score(),
         card.grade(),
-        card.missing().stream().map(CompletenessScoreModels.CompletenessCheck::code).distinct().toList(),
+        card.missing().stream()
+            .map(CompletenessScoreModels.CompletenessCheck::code)
+            .distinct()
+            .toList(),
         card.listingReady() ? card.customsBlockers() : card.listingBlockers(),
         "评分现算自当前主数据；补齐下列缺失项后重新预检即可放行。");
   }
@@ -1370,10 +1559,13 @@ public class CompletenessScoreService {
   /** 读某个 SKU 的报关属性（无行返回 null，评分据此报「尚未登记」）。 */
   public CustomsDeclaration customsOf(UUID skuId) {
     UUID tenantId = currentTenantId();
-    Record r = sql.fetchOne(
-        "select d.*, k.code as sku_code, k.name as sku_name from sku_customs_declaration d"
-            + " join sku k on k.tenant_id = d.tenant_id and k.id = d.sku_id"
-            + " where d.tenant_id = ? and d.sku_id = ?", tenantId, skuId);
+    Record r =
+        sql.fetchOne(
+            "select d.*, k.code as sku_code, k.name as sku_name from sku_customs_declaration d"
+                + " join sku k on k.tenant_id = d.tenant_id and k.id = d.sku_id"
+                + " where d.tenant_id = ? and d.sku_id = ?",
+            tenantId,
+            skuId);
     return r == null ? null : toCustoms(r);
   }
 
@@ -1382,19 +1574,24 @@ public class CompletenessScoreService {
     Object raw = r.get("declaration_elements");
     if (raw instanceof String[] array) elements.addAll(Arrays.asList(array));
     return new CustomsDeclaration(
-        r.get("id", UUID.class), r.get("sku_id", UUID.class),
-        r.get("sku_code", String.class), r.get("sku_name", String.class),
-        str(r.get("hs_code", String.class)), str(r.get("declared_name", String.class)),
-        str(r.get("origin_country", String.class)), str(r.get("legal_unit", String.class)),
-        elements, Boolean.TRUE.equals(r.get("enabled", Boolean.class)),
-        longOf(r.get("version", Long.class)), instant(r.get("updated_at", OffsetDateTime.class)));
+        r.get("id", UUID.class),
+        r.get("sku_id", UUID.class),
+        r.get("sku_code", String.class),
+        r.get("sku_name", String.class),
+        str(r.get("hs_code", String.class)),
+        str(r.get("declared_name", String.class)),
+        str(r.get("origin_country", String.class)),
+        str(r.get("legal_unit", String.class)),
+        elements,
+        Boolean.TRUE.equals(r.get("enabled", Boolean.class)),
+        longOf(r.get("version", Long.class)),
+        instant(r.get("updated_at", OffsetDateTime.class)));
   }
 
   /**
    * 写报关属性（新建或整体替换，一个 SKU 一份）。
    *
-   * <p>刻意<b>不</b>要求 HS 编码与申报品名必填（V37 第二节）：报关属性是逐步补全的，
-   * 建档时常常只有品名、HS 编码要等供应商确认。要求全填会让"建一行"都做不了，
+   * <p>刻意<b>不</b>要求 HS 编码与申报品名必填（V37 第二节）：报关属性是逐步补全的， 建档时常常只有品名、HS 编码要等供应商确认。要求全填会让"建一行"都做不了，
    * 于是干脆不建 —— 那样连"缺了哪几项"都看不到。必填与否由评分判。
    */
   public CustomsDeclaration saveCustoms(
@@ -1409,12 +1606,16 @@ public class CompletenessScoreService {
     boolean enabled = normalizeFlag(input.enabled());
     String problem = customsProblem(hsCode, declaredName, originCountry, legalUnit, elements);
     if (problem != null) throw badRequest(problem);
-    if (!customsHasContent(hsCode, declaredName, originCountry, legalUnit, elements, input.enabled()))
+    if (!customsHasContent(
+        hsCode, declaredName, originCountry, legalUnit, elements, input.enabled()))
       throw badRequest("报关属性至少要填一项：全空的报关行在评分里与「未登记」完全一样，只会多一条要删的脏数据");
     long version = requireVersion(input.version());
 
-    Record existing = sql.fetchOne(
-        "select id, version from sku_customs_declaration where tenant_id=? and sku_id=?", tenantId, skuId);
+    Record existing =
+        sql.fetchOne(
+            "select id, version from sku_customs_declaration where tenant_id=? and sku_id=?",
+            tenantId,
+            skuId);
     if (existing == null) {
       sql.execute(
           """
@@ -1423,20 +1624,33 @@ public class CompletenessScoreService {
             declaration_elements, enabled, version)
           values(?,?,?,?,?,?,?,?::text[],?,0)
           """,
-          Ids.next(), tenantId, skuId, hsCode == null ? "" : hsCode,
-          declaredName == null ? "" : declaredName, originCountry == null ? "" : originCountry,
-          legalUnit == null ? "" : legalUnit, elements.toArray(new String[0]), enabled);
+          Ids.next(),
+          tenantId,
+          skuId,
+          hsCode == null ? "" : hsCode,
+          declaredName == null ? "" : declaredName,
+          originCountry == null ? "" : originCountry,
+          legalUnit == null ? "" : legalUnit,
+          elements.toArray(new String[0]),
+          enabled);
       audit(actor, skuId, "CUSTOMS_DECLARATION_CREATE");
     } else {
-      int changed = sql.execute(
-          """
+      int changed =
+          sql.execute(
+              """
           update sku_customs_declaration set hs_code=?, declared_name=?, origin_country=?,
             legal_unit=?, declaration_elements=?::text[], enabled=?, version=version+1, updated_at=now()
           where tenant_id=? and sku_id=? and version=?
           """,
-          hsCode == null ? "" : hsCode, declaredName == null ? "" : declaredName,
-          originCountry == null ? "" : originCountry, legalUnit == null ? "" : legalUnit,
-          elements.toArray(new String[0]), enabled, tenantId, skuId, version);
+              hsCode == null ? "" : hsCode,
+              declaredName == null ? "" : declaredName,
+              originCountry == null ? "" : originCountry,
+              legalUnit == null ? "" : legalUnit,
+              elements.toArray(new String[0]),
+              enabled,
+              tenantId,
+              skuId,
+              version);
       if (changed == 0) throw conflict("报关属性已被他人修改，请刷新后重试");
       audit(actor, skuId, "CUSTOMS_DECLARATION_UPDATE");
     }
@@ -1447,9 +1661,12 @@ public class CompletenessScoreService {
   public void deleteCustoms(AccessService.Access actor, UUID skuId, long version) {
     UUID tenantId = currentTenantId();
     requireSku(tenantId, skuId);
-    int changed = sql.execute(
-        "delete from sku_customs_declaration where tenant_id=? and sku_id=? and version=?",
-        tenantId, skuId, version);
+    int changed =
+        sql.execute(
+            "delete from sku_customs_declaration where tenant_id=? and sku_id=? and version=?",
+            tenantId,
+            skuId,
+            version);
     if (changed == 0) throw conflict("报关属性不存在或已被他人修改，请刷新后重试");
     audit(actor, skuId, "CUSTOMS_DECLARATION_DELETE");
   }
@@ -1471,19 +1688,27 @@ public class CompletenessScoreService {
     UUID tenantId = currentTenantId();
     requireSku(tenantId, skuId);
     var items = new ArrayList<Certification>();
-    for (Record r : sql.fetch(
-        "select c.*, k.code as sku_code from sku_certification c"
-            + " join sku k on k.tenant_id = c.tenant_id and k.id = c.sku_id"
-            + " where c.tenant_id = ? and c.sku_id = ? order by c.certification_code", tenantId, skuId))
-      items.add(toCertification(r));
+    for (Record r :
+        sql.fetch(
+            "select c.*, k.code as sku_code from sku_certification c"
+                + " join sku k on k.tenant_id = c.tenant_id and k.id = c.sku_id"
+                + " where c.tenant_id = ? and c.sku_id = ? order by c.certification_code",
+            tenantId,
+            skuId)) items.add(toCertification(r));
     String completeness = certCompleteness(tenantId, skuId);
-    long expired = sql.fetchOne(
-            "select count(*) from sku_certification where tenant_id=? and sku_id=? and scored"
-                + " and status='HELD' and expires_on is not null and expires_on < current_date",
-            tenantId, skuId)
-        .get(0, Long.class);
+    long expired =
+        sql.fetchOne(
+                "select count(*) from sku_certification where tenant_id=? and sku_id=? and scored"
+                    + " and status='HELD' and expires_on is not null and expires_on < current_date",
+                tenantId,
+                skuId)
+            .get(0, Long.class);
     return new CertificationSet(
-        skuId, items, completeness, certificationCompletenessLabel(completeness), expired,
+        skuId,
+        items,
+        completeness,
+        certificationCompletenessLabel(completeness),
+        expired,
         "四态判定（规则 R5）：有「无需认证」或有一张未过期的「已取得」都算齐全。"
             + "「已申请未取得」与「已过期待续期」分开列 —— 前者要等审批、后者要发起续期，"
             + "把两者合成一条「认证缺失」会让人反复去填一个填不了的字段。"
@@ -1493,12 +1718,12 @@ public class CompletenessScoreService {
   /**
    * 认证四态（规则 R5 的读出口，与评分 SQL 的聚合同一口径）。
    *
-   * <p>刻意与 {@code sku_cert} 的 CASE 逐条同序，两处各写一遍的症状是
-   * 「评分卡说已齐全、认证档案说待续期」，而它们读的是同一张表。
+   * <p>刻意与 {@code sku_cert} 的 CASE 逐条同序，两处各写一遍的症状是 「评分卡说已齐全、认证档案说待续期」，而它们读的是同一张表。
    */
   private String certCompleteness(UUID tenantId, UUID skuId) {
-    Record r = sql.fetchOne(
-        """
+    Record r =
+        sql.fetchOne(
+            """
         select case
             when count(*) = 0 then 'NONE'
             when bool_or(status='NOT_REQUIRED') then 'COMPLETE'
@@ -1509,19 +1734,28 @@ public class CompletenessScoreService {
             else 'NONE' end as completeness
         from sku_certification where tenant_id=? and sku_id=? and scored
         """,
-        tenantId, skuId);
+            tenantId,
+            skuId);
     return r == null || r.get("completeness", String.class) == null
-        ? "NONE" : r.get("completeness", String.class);
+        ? "NONE"
+        : r.get("completeness", String.class);
   }
 
   private Certification toCertification(Record r) {
     return new Certification(
-        r.get("id", UUID.class), r.get("sku_id", UUID.class), r.get("sku_code", String.class),
-        r.get("certification_code", String.class), r.get("certification_name", String.class),
-        r.get("status", String.class), r.get("certificate_no", String.class),
-        toLocalDate(r.get("issued_on", LocalDate.class)), toLocalDate(r.get("expires_on", LocalDate.class)),
-        Boolean.TRUE.equals(r.get("scored", Boolean.class)), r.get("note", String.class),
-        longOf(r.get("version", Long.class)), instant(r.get("updated_at", OffsetDateTime.class)));
+        r.get("id", UUID.class),
+        r.get("sku_id", UUID.class),
+        r.get("sku_code", String.class),
+        r.get("certification_code", String.class),
+        r.get("certification_name", String.class),
+        r.get("status", String.class),
+        r.get("certificate_no", String.class),
+        toLocalDate(r.get("issued_on", LocalDate.class)),
+        toLocalDate(r.get("expires_on", LocalDate.class)),
+        Boolean.TRUE.equals(r.get("scored", Boolean.class)),
+        r.get("note", String.class),
+        longOf(r.get("version", Long.class)),
+        instant(r.get("updated_at", OffsetDateTime.class)));
   }
 
   /** 新建（{@code id == null}）或改一条认证声明。 */
@@ -1535,8 +1769,16 @@ public class CompletenessScoreService {
     String certificateNo = emptyToNull(input.certificateNo());
     String note = emptyToNull(input.note());
     boolean scored = normalizeFlag(input.scored());
-    String problem = certificationProblem(
-        code, name, status, certificateNo, input.issuedOn(), input.expiresOn(), input.scored(), input.note());
+    String problem =
+        certificationProblem(
+            code,
+            name,
+            status,
+            certificateNo,
+            input.issuedOn(),
+            input.expiresOn(),
+            input.scored(),
+            input.note());
     if (problem != null) throw badRequest(problem);
 
     if (id == null) {
@@ -1547,32 +1789,52 @@ public class CompletenessScoreService {
             status, certificate_no, issued_on, expires_on, scored, note, version)
           values(?,?,?,?,?,?,?,?,?,?,?,0)
           """,
-          newId, tenantId, skuId, code, name == null ? "" : name, status,
-          certificateNo == null ? "" : certificateNo, input.issuedOn(), input.expiresOn(),
-          scored, note == null ? "" : note);
+          newId,
+          tenantId,
+          skuId,
+          code,
+          name == null ? "" : name,
+          status,
+          certificateNo == null ? "" : certificateNo,
+          input.issuedOn(),
+          input.expiresOn(),
+          scored,
+          note == null ? "" : note);
       audit(actor, skuId, "CERTIFICATION_CREATE");
       return oneCertification(tenantId, newId);
     }
     long version = requireVersion(input.version());
-    int changed = sql.execute(
-        """
+    int changed =
+        sql.execute(
+            """
         update sku_certification set certification_code=?, certification_name=?, status=?,
           certificate_no=?, issued_on=?, expires_on=?, scored=?, note=?, version=version+1, updated_at=now()
         where tenant_id=? and id=? and version=?
         """,
-        code, name == null ? "" : name, status, certificateNo == null ? "" : certificateNo,
-        input.issuedOn(), input.expiresOn(), scored, note == null ? "" : note,
-        tenantId, id, version);
+            code,
+            name == null ? "" : name,
+            status,
+            certificateNo == null ? "" : certificateNo,
+            input.issuedOn(),
+            input.expiresOn(),
+            scored,
+            note == null ? "" : note,
+            tenantId,
+            id,
+            version);
     if (changed == 0) throw conflict("认证记录已被他人修改，请刷新后重试");
     audit(actor, skuId, "CERTIFICATION_UPDATE");
     return oneCertification(tenantId, id);
   }
 
   private Certification oneCertification(UUID tenantId, UUID id) {
-    Record r = sql.fetchOne(
-        "select c.*, k.code as sku_code from sku_certification c"
-            + " join sku k on k.tenant_id = c.tenant_id and k.id = c.sku_id"
-            + " where c.tenant_id = ? and c.id = ?", tenantId, id);
+    Record r =
+        sql.fetchOne(
+            "select c.*, k.code as sku_code from sku_certification c"
+                + " join sku k on k.tenant_id = c.tenant_id and k.id = c.sku_id"
+                + " where c.tenant_id = ? and c.id = ?",
+            tenantId,
+            id);
     if (r == null) throw notFound("认证记录不存在");
     return toCertification(r);
   }
@@ -1580,8 +1842,12 @@ public class CompletenessScoreService {
   /** 删一条认证：删掉之后评分退回该维度的真实结论。 */
   public void deleteCertification(AccessService.Access actor, UUID id, long version) {
     UUID tenantId = currentTenantId();
-    int changed = sql.execute(
-        "delete from sku_certification where tenant_id=? and id=? and version=?", tenantId, id, version);
+    int changed =
+        sql.execute(
+            "delete from sku_certification where tenant_id=? and id=? and version=?",
+            tenantId,
+            id,
+            version);
     if (changed == 0) throw conflict("认证记录不存在或已被他人修改，请刷新后重试");
     audit(actor, id, "CERTIFICATION_DELETE");
   }
@@ -1596,7 +1862,11 @@ public class CompletenessScoreService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   /** 租户来自 RLS 生效的连接上下文（由 AccessService 绑定），<b>不读 X-Tenant-Id 头</b>。 */

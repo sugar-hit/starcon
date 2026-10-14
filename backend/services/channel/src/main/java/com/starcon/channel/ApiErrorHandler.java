@@ -1,7 +1,6 @@
 package com.starcon.channel;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientResponseException;
@@ -13,7 +12,8 @@ public class ApiErrorHandler {
     org.jooq.exception.DataAccessException.class,
     org.springframework.dao.DataAccessException.class
   })
-  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> database(Exception e) {
+  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> database(
+      Exception e) {
     return org.springframework.http.ResponseEntity.status(409)
         .body(
             org.springframework.http.ProblemDetail.forStatusAndDetail(
@@ -21,7 +21,8 @@ public class ApiErrorHandler {
   }
 
   @ExceptionHandler({IllegalArgumentException.class, java.time.format.DateTimeParseException.class})
-  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> invalid(Exception e) {
+  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> invalid(
+      Exception e) {
     return org.springframework.http.ResponseEntity.badRequest()
         .body(
             org.springframework.http.ProblemDetail.forStatusAndDetail(
@@ -38,7 +39,8 @@ public class ApiErrorHandler {
   }
 
   @ExceptionHandler(RestClientResponseException.class)
-  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> upstream(Exception e) {
+  org.springframework.http.ResponseEntity<org.springframework.http.ProblemDetail> upstream(
+      Exception e) {
     return org.springframework.http.ResponseEntity.status(503)
         .body(
             org.springframework.http.ProblemDetail.forStatusAndDetail(

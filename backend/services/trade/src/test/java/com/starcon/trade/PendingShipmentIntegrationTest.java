@@ -31,29 +31,24 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.4.1.1 待发货。
  *
- * <p>本测试是 <b>V124 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是只直连数据库，
+ * <p>本测试是 <b>V124 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是只直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p><b>warehouse 那一格是跨服务替身，不是本模块的数据替身</b>：
- * 8.3.3.2 的打包结果在 warehouse 服务自己的库里，AGENTS.md 禁止 trade 直连那个库，
- * 所以这里用 {@code com.sun.net.httpserver} 起一个 8.3.3.2 形状的只读端点
- * （与本仓库其它跨服务端口测试同一手法，例如 BomVersionPort 读 catalog）。
- * 待发货单元、包裹、批量任务、运单、事件**全部真落 PostgreSQL 16**。
+ * <p><b>warehouse 那一格是跨服务替身，不是本模块的数据替身</b>： 8.3.3.2 的打包结果在 warehouse 服务自己的库里，AGENTS.md 禁止 trade
+ * 直连那个库， 所以这里用 {@code com.sun.net.httpserver} 起一个 8.3.3.2 形状的只读端点 （与本仓库其它跨服务端口测试同一手法，例如
+ * BomVersionPort 读 catalog）。 待发货单元、包裹、批量任务、运单、事件**全部真落 PostgreSQL 16**。
  *
  * <p><b>本测试要钉住的六条</b>：
+ *
  * <ol>
- *   <li><b>数据来源只有一个</b>：同步经 8.3.3.2 授权端点，仓库不可达时 503
- *       而不是空清单；</li>
- *   <li><b>四个分组维度是真 GROUP BY</b>，不是把一页在 Java 里数；</li>
- *   <li><b>一次任务不许跨承运商</b>（蓝图点名的大促期效率闸）；</li>
- *   <li><b>三个批量操作是真任务</b>：SUCCEEDED 要求零失败零跳过，
- *       有跳过只能是 PARTIAL，面单没凭据时必须显式 SKIPPED 而不是伪装成功；</li>
- *   <li><b>本模块最远只到 HANDED_OVER</b>：已发货不是本模块能置的状态；</li>
- *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。</li>
+ *   <li><b>数据来源只有一个</b>：同步经 8.3.3.2 授权端点，仓库不可达时 503 而不是空清单；
+ *   <li><b>四个分组维度是真 GROUP BY</b>，不是把一页在 Java 里数；
+ *   <li><b>一次任务不许跨承运商</b>（蓝图点名的大促期效率闸）；
+ *   <li><b>三个批量操作是真任务</b>：SUCCEEDED 要求零失败零跳过， 有跳过只能是 PARTIAL，面单没凭据时必须显式 SKIPPED 而不是伪装成功；
+ *   <li><b>本模块最远只到 HANDED_OVER</b>：已发货不是本模块能置的状态；
+ *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
  */
 @SpringBootTest
@@ -73,9 +68,8 @@ class PendingShipmentIntegrationTest {
   /**
    * 让 8.3.3.2 的只读替身整体不可用（模拟仓库服务挂了 / 网络不通）。
    *
-   * <p>用标志位而不是真的 {@code stop()} 再 {@code start()}：后者换端口后
-   * {@code @DynamicPropertySource} 已经绑定了旧端口，重启出来的替身根本收不到请求，
-   * 测试会「通过」但其实什么都没验到。
+   * <p>用标志位而不是真的 {@code stop()} 再 {@code start()}：后者换端口后 {@code @DynamicPropertySource}
+   * 已经绑定了旧端口，重启出来的替身根本收不到请求， 测试会「通过」但其实什么都没验到。
    */
   static volatile boolean warehouseDown = false;
 
@@ -162,7 +156,8 @@ class PendingShipmentIntegrationTest {
                 copy.remove("parcels");
                 items.add(copy);
               }
-              send(e, Map.of("items", items, "page", 0, "size", 100, "totalElements", items.size()));
+              send(
+                  e, Map.of("items", items, "page", 0, "size", 100, "totalElements", items.size()));
               return;
             }
             String id = path.substring(path.lastIndexOf('/') + 1);
@@ -180,7 +175,8 @@ class PendingShipmentIntegrationTest {
     }
   }
 
-  static void send(com.sun.net.httpserver.HttpExchange e, Object payload) throws java.io.IOException {
+  static void send(com.sun.net.httpserver.HttpExchange e, Object payload)
+      throws java.io.IOException {
     byte[] body = json.writeValueAsBytes(payload);
     e.getResponseHeaders().add("Content-Type", "application/json");
     e.sendResponseHeaders(200, body.length);
@@ -250,15 +246,24 @@ class PendingShipmentIntegrationTest {
     for (int i = 1; i <= parcels; i++) {
       parcelList.add(
           Map.of(
-              "id", UUID.randomUUID(),
-              "parcelNo", i,
-              "status", "PACKED",
-              "grossWeightKg", new BigDecimal("1.250000").add(new BigDecimal(i)),
-              "lengthMm", new BigDecimal("300.000000"),
-              "widthMm", new BigDecimal("200.000000"),
-              "heightMm", new BigDecimal("150.000000"),
-              "labelPrinted", false,
-              "labelJobRef", ""));
+              "id",
+              UUID.randomUUID(),
+              "parcelNo",
+              i,
+              "status",
+              "PACKED",
+              "grossWeightKg",
+              new BigDecimal("1.250000").add(new BigDecimal(i)),
+              "lengthMm",
+              new BigDecimal("300.000000"),
+              "widthMm",
+              new BigDecimal("200.000000"),
+              "heightMm",
+              new BigDecimal("150.000000"),
+              "labelPrinted",
+              false,
+              "labelJobRef",
+              ""));
     }
     packingOrders.put(
         packingId,
@@ -286,10 +291,8 @@ class PendingShipmentIntegrationTest {
   /**
    * 同步一次并返回该租户当前的全部待发货单元。
    *
-   * <p>每次调用先<b>清空</b>上游替身的内容：真实世界里 8.3.3.2 返回的是「当前」
-   * 的已完成打包单，两次同步之间上游不会凭空多出上一批货。如果不���空，
-   * 第二次同步会把上一批也拉回来、并且用这次的默认承运商把它们**覆盖**掉 ——
-   * 那样测出来的「两个承运商两组」是假的（实际上只剩一组）。
+   * <p>每次调用先<b>清空</b>上游替身的内容：真实世界里 8.3.3.2 返回的是「当前」 的已完成打包单，两次同步之间上游不会凭空多出上一批货。如果不���空，
+   * 第二次同步会把上一批也拉回来、并且用这次的默认承运商把它们**覆盖**掉 —— 那样测出来的「两个承运商两组」是假的（实际上只剩一组）。
    */
   List<PendingShipmentUnitRow> seedUnits(String carrierCode, int count) {
     packingOrders.clear();
@@ -333,11 +336,13 @@ class PendingShipmentIntegrationTest {
 
     var detail = asA(() -> service.unit(units.get(0).id().toString()));
     assertThat(detail.parcels()).hasSize(2);
-    assertThat(detail.parcels()).allSatisfy(p -> {
-      assertThat(p.grossWeightKg()).isGreaterThan(BigDecimal.ZERO);
-      assertThat(p.lengthMm()).isEqualByComparingTo(new BigDecimal("300.000000"));
-      assertThat(p.labelPrinted()).isFalse();
-    });
+    assertThat(detail.parcels())
+        .allSatisfy(
+            p -> {
+              assertThat(p.grossWeightKg()).isGreaterThan(BigDecimal.ZERO);
+              assertThat(p.lengthMm()).isEqualByComparingTo(new BigDecimal("300.000000"));
+              assertThat(p.labelPrinted()).isFalse();
+            });
 
     // 幂等：再同步一次是更新，不是插第二行
     var second =
@@ -386,10 +391,14 @@ class PendingShipmentIntegrationTest {
     seedUnits("SF", 2);
     seedUnits("DHL", 3);
 
-    var board = asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
-    assertThat(board.groups()).extracting(PendingShipmentGroup::groupKey)
+    var board =
+        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
+    assertThat(board.groups())
+        .extracting(PendingShipmentGroup::groupKey)
         .containsExactlyInAnyOrder("SF", "DHL");
-    assertThat(board.groups()).filteredOn(g -> g.groupKey().equals("DHL")).singleElement()
+    assertThat(board.groups())
+        .filteredOn(g -> g.groupKey().equals("DHL"))
+        .singleElement()
         .satisfies(g -> assertThat(g.unitCount()).isEqualTo(3));
     // 汇总不受分页影响，且是全量
     assertThat(board.summary().totalUnits()).isEqualTo(5);
@@ -399,15 +408,24 @@ class PendingShipmentIntegrationTest {
   void 看板_四个分组维度都可用且落在真实列上() {
     seedUnits("SF", 2);
 
-    var byWarehouse = asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.WAREHOUSE));
-    assertThat(byWarehouse.groups()).extracting(PendingShipmentGroup::groupLabel).contains("WH-SH-01");
+    var byWarehouse =
+        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.WAREHOUSE));
+    assertThat(byWarehouse.groups())
+        .extracting(PendingShipmentGroup::groupLabel)
+        .contains("WH-SH-01");
 
     var byChannel =
-        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER_CHANNEL));
-    assertThat(byChannel.groups()).extracting(PendingShipmentGroup::groupKey).contains("THIRD_PARTY");
+        asA(
+            () ->
+                service.board(
+                    null, null, null, null, null, PendingShipmentGroupBy.CARRIER_CHANNEL));
+    assertThat(byChannel.groups())
+        .extracting(PendingShipmentGroup::groupKey)
+        .contains("THIRD_PARTY");
 
     // 未登记时限的单元必须落在 UNSET 桶，而不是被混进「今天到期」
-    var bySla = asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.SLA_DEADLINE));
+    var bySla =
+        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.SLA_DEADLINE));
     assertThat(bySla.groups()).extracting(PendingShipmentGroup::groupKey).contains("UNSET");
     assertThat(bySla.summary().unsetSlaUnits()).isEqualTo(2);
     assertThat(bySla.summary().dueTodayUnits()).isZero();
@@ -447,7 +465,8 @@ class PendingShipmentIntegrationTest {
                     .get(0, OffsetDateTime.class));
     assertThat(fromDb.toInstant()).isEqualTo(deadline.toInstant());
 
-    var board = asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.SLA_DEADLINE));
+    var board =
+        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.SLA_DEADLINE));
     assertThat(board.groups()).extracting(PendingShipmentGroup::groupKey).contains("DUE_TODAY");
     assertThat(board.summary().unsetSlaUnits()).isZero();
 
@@ -500,7 +519,8 @@ class PendingShipmentIntegrationTest {
     asA(
         () ->
             service.sync(
-                new PendingShipmentSyncInput(null, null, "", List.of(assignment(outbound, "OB-NOCARRIER")), 100),
+                new PendingShipmentSyncInput(
+                    null, null, "", List.of(assignment(outbound, "OB-NOCARRIER")), 100),
                 user,
                 "Bearer tenant-a"));
     var unit = asA(() -> service.units(null, null, null, null, null, null, 0, 50)).items().get(0);
@@ -548,16 +568,17 @@ class PendingShipmentIntegrationTest {
 
     var executed = asA(() -> service.executeTask(task.task().id().toString(), user));
     assertThat(executed.task().status()).isEqualTo(ShipmentBatchStatus.SUCCEEDED);
-    assertThat(executed.items()).allSatisfy(i -> assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SUCCEEDED));
+    assertThat(executed.items())
+        .allSatisfy(i -> assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SUCCEEDED));
     // 运单是 REQUESTED（还没有单号）：不伪造已签发
-    var waybills =
-        asA(
-            () ->
-                service.unit(units.get(0).id().toString()).waybills());
-    assertThat(waybills).singleElement().satisfies(w -> {
-      assertThat(w.status()).isEqualTo(ShipmentWaybillStatus.REQUESTED);
-      assertThat(w.waybillNo()).isEmpty();
-    });
+    var waybills = asA(() -> service.unit(units.get(0).id().toString()).waybills());
+    assertThat(waybills)
+        .singleElement()
+        .satisfies(
+            w -> {
+              assertThat(w.status()).isEqualTo(ShipmentWaybillStatus.REQUESTED);
+              assertThat(w.waybillNo()).isEmpty();
+            });
     // 单元还没推进：没有单号就不许标成「已申请运单号」
     assertThat(asA(() -> service.unit(units.get(0).id().toString())).unit().status())
         .isEqualTo(PendingShipmentStatus.PENDING);
@@ -569,7 +590,8 @@ class PendingShipmentIntegrationTest {
                 service.recordWaybillAck(
                     task.task().id().toString(),
                     units.get(0).id(),
-                    new ShipmentWaybillAckInput(ShipmentWaybillStatus.ISSUED, "SF1234567890", "req-1", ""),
+                    new ShipmentWaybillAckInput(
+                        ShipmentWaybillStatus.ISSUED, "SF1234567890", "req-1", ""),
                     user));
     assertThat(acked).isNotNull();
     assertThat(asA(() -> service.unit(units.get(0).id().toString())).unit().status())
@@ -611,10 +633,12 @@ class PendingShipmentIntegrationTest {
     assertThat(task.task().unitCount()).isEqualTo(parcels.size());
 
     var executed = asA(() -> service.executeTask(task.task().id().toString(), user));
-    assertThat(executed.items()).allSatisfy(i -> {
-      assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SKIPPED);
-      assertThat(i.detail()).contains("8.3.4.2");
-    });
+    assertThat(executed.items())
+        .allSatisfy(
+            i -> {
+              assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SKIPPED);
+              assertThat(i.detail()).contains("8.3.4.2");
+            });
     // 有跳过就不许是 SUCCEEDED
     assertThat(executed.task().status()).isNotEqualTo(ShipmentBatchStatus.SUCCEEDED);
     assertThat(asA(() -> service.unit(unitId.toString())).unit().status())
@@ -633,11 +657,12 @@ class PendingShipmentIntegrationTest {
     assertThat(asA(() -> service.unit(unitId.toString())).parcels())
         .filteredOn(p -> p.id().equals(parcel.id()))
         .singleElement()
-        .satisfies(p -> {
-          assertThat(p.labelPrinted()).isTrue();
-          assertThat(p.labelPrintedAt()).isNotNull();
-          assertThat(p.labelJobRef()).isEqualTo("job-8f21c");
-        });
+        .satisfies(
+            p -> {
+              assertThat(p.labelPrinted()).isTrue();
+              assertThat(p.labelPrintedAt()).isNotNull();
+              assertThat(p.labelJobRef()).isEqualTo("job-8f21c");
+            });
   }
 
   @Test
@@ -661,7 +686,11 @@ class PendingShipmentIntegrationTest {
       asA(
           () ->
               service.recordLabelPrinted(
-                  task.task().id().toString(), unitId, p.id(), new PendingShipmentLabelInput("job-1"), user));
+                  task.task().id().toString(),
+                  unitId,
+                  p.id(),
+                  new PendingShipmentLabelInput("job-1"),
+                  user));
     }
     assertThatThrownBy(
             () ->
@@ -701,7 +730,8 @@ class PendingShipmentIntegrationTest {
                     user));
     var executed = asA(() -> service.executeTask(task.task().id().toString(), user));
     assertThat(executed.task().status()).isEqualTo(ShipmentBatchStatus.SUCCEEDED);
-    assertThat(executed.items()).allSatisfy(i -> assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SUCCEEDED));
+    assertThat(executed.items())
+        .allSatisfy(i -> assertThat(i.status()).isEqualTo(ShipmentTaskItemStatus.SUCCEEDED));
 
     for (var u : units) {
       var row = asA(() -> service.unit(u.id().toString())).unit();
@@ -834,14 +864,18 @@ class PendingShipmentIntegrationTest {
         "23514");
     // 先断言这条凭据行**确实存在**：否则「删不掉」可能只是因为压根没这一行，
     // 那样这条断言就什么都没验到。
-    assertThat(asA(() -> countOfHelper("select count(*) from shipment_event where task_id = ?", task.task().id())))
-        .as("被当作凭据保护的事件行必须真实存在").isEqualTo(1);
+    assertThat(
+            asA(
+                () ->
+                    countOfHelper(
+                        "select count(*) from shipment_event where task_id = ?", task.task().id())))
+        .as("被当作凭据保护的事件行必须真实存在")
+        .isEqualTo(1);
     // 注意 {@code asTableOwner(...)} 只是**造**出一条待执行的语句，
     // 不调 .run() 的话这段什么都不会跑 —— 断言会「通过」而其实什么都没验。
     assertDbRefused(
         () ->
-            asTableOwner(
-                    "delete from shipment_event where task_id = '" + task.task().id() + "'")
+            asTableOwner("delete from shipment_event where task_id = '" + task.task().id() + "'")
                 .run(),
         "append-only",
         "23514");
@@ -860,7 +894,9 @@ class PendingShipmentIntegrationTest {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
       for (var t : tables) {
-        try (var rs = s.executeQuery("select relforcerowsecurity from pg_class where relname = '" + t + "'")) {
+        try (var rs =
+            s.executeQuery(
+                "select relforcerowsecurity from pg_class where relname = '" + t + "'")) {
           assertThat(rs.next()).as(t + " 必须存在").isTrue();
           assertThat(rs.getBoolean(1)).as(t + " 必须 FORCE RLS").isTrue();
         }
@@ -917,8 +953,10 @@ class PendingShipmentIntegrationTest {
     assertThat(pageA.items()).isNotEmpty();
     assertThat(pageB.items()).as("B 租户一条都看不到").isEmpty();
 
-    var boardA = asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
-    var boardB = asB(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
+    var boardA =
+        asA(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
+    var boardB =
+        asB(() -> service.board(null, null, null, null, null, PendingShipmentGroupBy.CARRIER));
     assertThat(boardB.groups()).isEmpty();
     assertThat(boardB.summary().totalUnits()).isZero();
     assertThat(boardA.summary().totalUnits()).isEqualTo(3);
@@ -952,7 +990,8 @@ class PendingShipmentIntegrationTest {
   @Test
   void 断言2_伪造租户上下文无效() throws Exception {
     seedUnits("SF", 1);
-    var unitId = asA(() -> service.units(null, null, null, null, null, null, 0, 50)).items().get(0).id();
+    var unitId =
+        asA(() -> service.units(null, null, null, null, null, null, 0, 50)).items().get(0).id();
 
     // (1) 事务外没有「环境租户」：任何租户的行都看不见
     assertThat(sql.fetch("select id from shipment_pending_unit").size()).isZero();
@@ -983,8 +1022,8 @@ class PendingShipmentIntegrationTest {
     var inA =
         asA(
             () ->
-                sql.fetchOne(
-                    "select sla_note from shipment_pending_unit where id = ?", unitId).get(0, String.class));
+                sql.fetchOne("select sla_note from shipment_pending_unit where id = ?", unitId)
+                    .get(0, String.class));
     assertThat(inA).as("伪造头不得把数据写进别的租户").isEqualTo("");
 
     // (2) 提交后租户上下文必须已清空
@@ -1032,7 +1071,8 @@ class PendingShipmentIntegrationTest {
   @Test
   void 未认证与只读角色的写操作被拒() throws Exception {
     seedUnits("SF", 1);
-    var unitId = asA(() -> service.units(null, null, null, null, null, null, 0, 50)).items().get(0).id();
+    var unitId =
+        asA(() -> service.units(null, null, null, null, null, null, 0, 50)).items().get(0).id();
     http.perform(
             post("/trade/fulfillment/pending-shipment/units/{id}/cancel", unitId)
                 .header("Authorization", "Bearer read-only")
@@ -1087,8 +1127,7 @@ class PendingShipmentIntegrationTest {
   /**
    * 以**表所有者**身份直连执行一条 SQL。
    *
-   * <p>存在的理由：append-only 有两层（对运行角色 REVOKE 权限 42501，
-   * 以及 BEFORE 触发器 23514）。只测前者的话触发器就成了永远跑不到的死代码。
+   * <p>存在的理由：append-only 有两层（对运行角色 REVOKE 权限 42501， 以及 BEFORE 触发器 23514）。只测前者的话触发器就成了永远跑不到的死代码。
    * FORCE RLS 对 owner 同样生效，所以仍要显式绑定 {@code app.current_tenant}。
    */
   static OwnerSql asTableOwner(String sqlText) {

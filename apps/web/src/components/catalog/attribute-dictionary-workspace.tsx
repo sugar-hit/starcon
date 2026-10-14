@@ -395,8 +395,8 @@ export function AttributeDictionaryWorkspace() {
       {overview.categoryWithoutRuleCount > 0 && (
         <div className="border-warning/30 bg-warning/5 text-warning rounded-md border p-3 text-sm">
           <p className="flex items-center gap-2 font-medium">
-            <TriangleAlert className="h-4 w-4" />
-            有 {overview.categoryWithoutRuleCount} 个类目还没配任何属性要求
+            <TriangleAlert className="h-4 w-4" />有 {overview.categoryWithoutRuleCount}{' '}
+            个类目还没配任何属性要求
           </p>
           <p className="mt-1 text-xs">
             这些类目下的商品录入不会做必填校验。在下方「类目绑定规则」里选一个类目即可补齐。
@@ -837,33 +837,33 @@ export function AttributeDictionaryWorkspace() {
               {selected.dataType === 'OPTION' && (
                 <div className="md:col-span-2">
                   <Field label="可选值范围" hint="不勾任何一项表示允许全部可用取值">
-                  <div className="flex flex-wrap gap-2">
-                    {enabledOptions.map((option) => {
-                      const checked = ruleDraft.allowedOptions.includes(option.value);
-                      return (
-                        <label key={option.value} className="flex items-center gap-1.5 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() =>
-                              setRuleDraft((draft) => ({
-                                ...draft,
-                                allowedOptions: checked
-                                  ? draft.allowedOptions.filter((v) => v !== option.value)
-                                  : [...draft.allowedOptions, option.value],
-                              }))
-                            }
-                          />
-                          {option.value}
-                        </label>
-                      );
-                    })}
-                    {enabledOptions.length === 0 && (
-                      <span className="text-muted-foreground text-xs">
-                        这条属性还没有启用的取值，先在上方登记取值。
-                      </span>
-                    )}
-                  </div>
+                    <div className="flex flex-wrap gap-2">
+                      {enabledOptions.map((option) => {
+                        const checked = ruleDraft.allowedOptions.includes(option.value);
+                        return (
+                          <label key={option.value} className="flex items-center gap-1.5 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() =>
+                                setRuleDraft((draft) => ({
+                                  ...draft,
+                                  allowedOptions: checked
+                                    ? draft.allowedOptions.filter((v) => v !== option.value)
+                                    : [...draft.allowedOptions, option.value],
+                                }))
+                              }
+                            />
+                            {option.value}
+                          </label>
+                        );
+                      })}
+                      {enabledOptions.length === 0 && (
+                        <span className="text-muted-foreground text-xs">
+                          这条属性还没有启用的取值，先在上方登记取值。
+                        </span>
+                      )}
+                    </div>
                   </Field>
                 </div>
               )}
@@ -871,7 +871,9 @@ export function AttributeDictionaryWorkspace() {
                 <input
                   className={control}
                   value={ruleDraft.position}
-                  onChange={(e) => setRuleDraft((draft) => ({ ...draft, position: e.target.value }))}
+                  onChange={(e) =>
+                    setRuleDraft((draft) => ({ ...draft, position: e.target.value }))
+                  }
                   placeholder="0"
                 />
               </Field>

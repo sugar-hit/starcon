@@ -11,15 +11,11 @@ import java.util.UUID;
 /**
  * 3.7.2.1 物理与安全属性的请求与响应记录。
  *
- * <p><b>为什么单独成文件而不是并进 {@code CatalogModels}</b>：{@code CatalogModels} 是
- * 并行车道都会追加的公共文件，且它<b>不在</b> {@code merge-union} 驱动器的按键求并范围内
- * （驱动器只覆盖 {@code packages/api-contracts} 与台账）。本模块的记录放进公共文件会让
- * 两条车道在同一处各追加一段，行级三方合并必然冲突。模块自成一个文件则天然无交集，
- * 与 {@code CategoryAttributeRequirementForms} 的做法一致。
+ * <p><b>为什么单独成文件而不是并进 {@code CatalogModels}</b>：{@code CatalogModels} 是 并行车道都会追加的公共文件，且它<b>不在</b>
+ * {@code merge-union} 驱动器的按键求并范围内 （驱动器只覆盖 {@code packages/api-contracts} 与台账）。本模块的记录放进公共文件会让
+ * 两条车道在同一处各追加一段，行级三方合并必然冲突。模块自成一个文件则天然无交集， 与 {@code CategoryAttributeRequirementForms} 的做法一致。
  *
- * <p>蓝图 3.7.2.1：
- * 「维护裸品物理参数（长宽高、净重、毛重、包装方式）与安全属性（是否带电、是否液体、
- * 是否危险品、是否磁性），决定可走哪些物流渠道与是否需要特殊申报。」
+ * <p>蓝图 3.7.2.1： 「维护裸品物理参数（长宽高、净重、毛重、包装方式）与安全属性（是否带电、是否液体、 是否危险品、是否磁性），决定可走哪些物流渠道与是否需要特殊申报。」
  */
 public final class PhysicalSafetyModels {
   private PhysicalSafetyModels() {}
@@ -27,17 +23,14 @@ public final class PhysicalSafetyModels {
   // ============================================================ 物理档案
 
   /**
-   * SKU 物理档案：物理参数（{@code sku_package}）+ 安全属性（{@code sku_safety_attribute}）
-   * + 现算的派生值。
+   * SKU 物理档案：物理参数（{@code sku_package}）+ 安全属性（{@code sku_safety_attribute}） + 现算的派生值。
    *
-   * <p><b>{@code safetyCollected} 是本模块最重要的一格</b>（V28 规则 B2）：
-   * {@code false} 表示「还没人采集过安全属性」，与「采集了、结论是都不带」是<b>两件事</b>，
-   * 后者的下一步动作是「确认无需申报」，前者的下一步动作是「去 SKU 建档补采集」。
-   * 渠道判定在 {@code false} 时一律拒发（{@link PhysicalSafetyRules#verdict}），
-   * 正是为了让「不填就能绕过申报」这条路走不通。
+   * <p><b>{@code safetyCollected} 是本模块最重要的一格</b>（V28 规则 B2）： {@code false}
+   * 表示「还没人采集过安全属性」，与「采集了、结论是都不带」是<b>两件事</b>， 后者的下一步动作是「确认无需申报」，前者的下一步动作是「去 SKU 建档补采集」。 渠道判定在 {@code
+   * false} 时一律拒发（{@link PhysicalSafetyRules#verdict}）， 正是为了让「不填就能绕过申报」这条路走不通。
    *
-   * <p>派生值（{@code volumeCm3} / {@code volumetricWeightKg} / {@code chargeableWeightKg}）
-   * 全部为 {@code null} 时表示<b>算不出来</b>，不是 0 —— 规则 R1：缺一维不给体积。
+   * <p>派生值（{@code volumeCm3} / {@code volumetricWeightKg} / {@code chargeableWeightKg}） 全部为 {@code
+   * null} 时表示<b>算不出来</b>，不是 0 —— 规则 R1：缺一维不给体积。
    */
   public record PhysicalSafetyProfile(
       UUID skuId,
@@ -72,13 +65,12 @@ public final class PhysicalSafetyModels {
   /**
    * 保存物理与安全属性的入参。
    *
-   * <p><b>一次提交同时写两张表</b>：物理参数进 {@code sku_package}、安全属性进
-   * {@code sku_safety_attribute}。这是有意的 —— 蓝图的职责句把两者写在同一句里
-   * （「维护裸品物理参数…与安全属性…」），运营在 SKU 建档时也是一次填完。
-   * 分成两个端点只会让「填了尺寸忘了填安全属性」变成常态，而那正是规则 R2 要堵的洞。
+   * <p><b>一次提交同时写两张表</b>：物理参数进 {@code sku_package}、安全属性进 {@code sku_safety_attribute}。这是有意的 ——
+   * 蓝图的职责句把两者写在同一句里 （「维护裸品物理参数…与安全属性…」），运营在 SKU 建档时也是一次填完。 分成两个端点只会让「填了尺寸忘了填安全属性」变成常态，而那正是规则 R2
+   * 要堵的洞。
    *
-   * <p>{@code safetyVersion} 缺省 0（尚无行）；{@code allSafetyFalse} 为真时删除该行，
-   * 回到「未采集」状态 —— 「确认什么都不带」和「什么都没填」在业务上不是一回事。
+   * <p>{@code safetyVersion} 缺省 0（尚无行）；{@code allSafetyFalse} 为真时删除该行， 回到「未采集」状态 ——
+   * 「确认什么都不带」和「什么都没填」在业务上不是一回事。
    */
   public record PhysicalSafetyInput(
       @Schema(nullable = true) @DecimalMin("0") BigDecimal lengthMm,
@@ -105,9 +97,8 @@ public final class PhysicalSafetyModels {
   /**
    * 按安全属性筛选 SKU（供 10 物流渠道筛选）。
    *
-   * <p>三个 {@code containsXxx} 都是 {@link Boolean} 而不是 {@code boolean}：
-   * {@code null} = 不筛，{@code false} = 筛「明确不带这一类」。
-   * 运营真正会问「哪些货<b>不是</b>危险品」，只支持筛 {@code true} 就答不了。
+   * <p>三个 {@code containsXxx} 都是 {@link Boolean} 而不是 {@code boolean}： {@code null} = 不筛，{@code
+   * false} = 筛「明确不带这一类」。 运营真正会问「哪些货<b>不是</b>危险品」，只支持筛 {@code true} 就答不了。
    */
   public record PhysicalSafetyQuery(
       String keyword,
@@ -148,8 +139,7 @@ public final class PhysicalSafetyModels {
   /**
    * 渠道可用性判定入参。
    *
-   * <p><b>渠道限制由调用方给</b>（规则 R3）：本模块<b>不建渠道表</b>，渠道与限制是
-   * 10 物流的事实。本模块提供的是「按你给的限制，这个 SKU 能不能走」。
+   * <p><b>渠道限制由调用方给</b>（规则 R3）：本模块<b>不建渠道表</b>，渠道与限制是 10 物流的事实。本模块提供的是「按你给的限制，这个 SKU 能不能走」。
    */
   public record ChannelVerdictInput(
       @NotNull String channelCode,
@@ -179,7 +169,8 @@ public final class PhysicalSafetyModels {
   // ============================================================ 装箱体积核算
 
   /** 装箱核算的一行入参（8 拣货）。 */
-  public record CartonLineInput(@NotNull UUID skuId, @NotNull @DecimalMin("0") BigDecimal quantity) {}
+  public record CartonLineInput(
+      @NotNull UUID skuId, @NotNull @DecimalMin("0") BigDecimal quantity) {}
 
   /**
    * 装箱核算入参。

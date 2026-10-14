@@ -73,9 +73,11 @@ CHANNEL_OAUTH_X_CLIENT_SECRET 后重启服务」。这是可执行的运维信�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/channel/src/main/resources/db/migration/V4__oauth_authorization_wizard.sql`
 
 **后端（新增）**
+
 - `.../channel/vendor/`：`PlatformOAuthAdapter`、`OAuthProtocol`、`AbstractOAuthAdapter`、
   `VendorRegistry`、`PlatformException` + `vendor/{amazon,ebay,shopee,shopify,temu,tiktok,walmart,lazada}/`
 - `.../channel/oauth/`：`OAuthAuthorizationService`、`PlatformOAuthProperties`、`Timestamps`
@@ -84,19 +86,23 @@ CHANNEL_OAUTH_X_CLIENT_SECRET 后重启服务」。这是可执行的运维信�
 - `.../channel/ChannelModels.java`：新增 6 个 DTO
 
 **前端（新增/改动）**
+
 - `apps/web/src/components/channel/oauth-wizard.tsx`（新增，六步向导）
 - `apps/web/src/components/channel/channel-workspace.tsx`（连接段接入向导，移除旧的两步式建连接表单）
 - `apps/web/src/lib/api-proxy.ts`（白名单加 `oauth/*`）
 - `apps/web/src/app/api/channel/[...path]/route.test.ts`（白名单测试）
 
 **测试**
+
 - `backend/services/channel/src/test/java/com/starcon/channel/StubOAuthServer.java`（本地授权服务器）
 - `backend/services/channel/src/test/java/com/starcon/channel/OAuthAuthorizationIntegrationTest.java`（23 条）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/catalog.ts`（+6 个类型）、`channel.openapi.json`
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` 第 123 行
 
 ## 后续待办

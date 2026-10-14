@@ -3,8 +3,8 @@ package com.starcon.catalog;
 /**
  * SKU 列表列与筛选会用到的字段，并显式标注每个字段的事实归属。
  *
- * <p>归属 catalog 自身的字段可以由本库真实求值；归属其他服务的字段必须经 {@link SkuProjectionPort}
- * 读取，未接入时按 {@link #ownerNote()} 说明原因，而不是静默给出 0。
+ * <p>归属 catalog 自身的字段可以由本库真实求值；归属其他服务的字段必须经 {@link SkuProjectionPort} 读取，未接入时按 {@link #ownerNote()}
+ * 说明原因，而不是静默给出 0。
  */
 public enum SkuField {
   /** 在仓数量。归属 07 库存（阶段 D3），catalog 无权威数据。 */
@@ -87,8 +87,7 @@ public enum SkuField {
 
   public String ownerNote() {
     return switch (source) {
-      case INVENTORY ->
-          "上游投影未接入：库存数量归 07 库存所有（阶段 D3），catalog 无权威数据";
+      case INVENTORY -> "上游投影未接入：库存数量归 07 库存所有（阶段 D3），catalog 无权威数据";
       case PURCHASE -> "上游投影未接入：成本与采购价归 06 采购所有，catalog 无权威数据";
       case PRICING -> "上游投影未接入：售价归 05 定价所有（阶段 D5），catalog 无权威数据";
       case LISTING -> "上游投影未接入：在售平台归 04 刊登所有，catalog 无权威数据";

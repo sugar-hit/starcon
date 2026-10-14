@@ -100,7 +100,11 @@ export function createRule(input: OwnershipRuleInput): Promise<OwnershipRuleSave
 
 /** 换版 = 收口旧档 + 开新档。没有"就地改"的入口。 */
 export function supersedeRule(id: string, input: OwnershipRuleInput): Promise<OwnershipRuleSaved> {
-  return api<OwnershipRuleSaved>(`warehouse/inventory/ownership/rules/${id}/versions`, 'POST', input);
+  return api<OwnershipRuleSaved>(
+    `warehouse/inventory/ownership/rules/${id}/versions`,
+    'POST',
+    input,
+  );
 }
 
 export function retireRule(id: string): Promise<OwnershipRuleSaved> {

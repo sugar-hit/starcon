@@ -23,7 +23,9 @@ import { GET, POST } from './[...path]/route';
 // 相对**本文件**定位而不是 process.cwd()：vitest 从仓库根跑时 cwd 是仓库根，
 // 从 apps/web 跑时又是 apps/web —— 用 cwd 会在「换个地方跑测试」时静默读不到文件。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/inventory/allocation-priority-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/inventory/allocation-priority-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -77,7 +79,7 @@ it('7.8.1.2 源码里真实存在的每个调用点都被放行', async () => {
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的七个形状，否则「放行了三个」也算通过。
@@ -105,7 +107,9 @@ it('新建保底走 POST 裸路径也被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const segments = ['warehouse', 'inventory', 'allocation-priority', 'floors'];
-  const response = await POST(request(segments.join('/'), 'POST'), { params: { path: segments } });
+  const response = await POST(request(segments.join('/'), 'POST'), {
+    params: Promise.resolve({ path: segments }),
+  });
   expect(response.status, 'POST …/floors 裸路径未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/warehouse/inventory/allocation-priority/floors'),
@@ -126,7 +130,9 @@ it('白名单按路径登记：同一条已登记路径的 DELETE 会被转发�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = `warehouse/inventory/allocation-priority/floors/${ID}`;
-  const response = await GET(request(path, 'DELETE'), { params: { path: path.split('/') } });
+  const response = await GET(request(path, 'DELETE'), {
+    params: Promise.resolve({ path: path.split('/') }),
+  });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),
@@ -146,7 +152,7 @@ it('未交付模块的路径仍然被拒 —— 放行不该存在的形状比 4
     `warehouse/inventory/allocation-priority/runs/${ID}`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -165,7 +171,7 @@ it('7.8.1.1 的分摊策略路径没有被 7.8.1.2 的白名单吃掉', async ()
     'warehouse/inventory/allocation-sales',
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
 });

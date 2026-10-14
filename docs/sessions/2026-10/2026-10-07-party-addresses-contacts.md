@@ -52,16 +52,18 @@
   已改成 `{id}`（与其余嵌套路由一致），契约变成**纯新增零删除**。
 - **工作区基线陈旧**：本车道 worktree 实际建在 `020f5b6`，比 `integration/module-dev`
   落后 22 个提交，**不含 V27**（`party` 表）。`lane.mjs` 记录的 `baseSha` 是 `36a871e`，
-  说明调度侧本意就是集成头，是 worktree  provisioned 错了。
+  说明调度侧本意就是集成头，是 worktree provisioned 错了。
   已 `git merge --ff-only integration/module-dev` 对齐（HEAD 当时 0 ahead，
   快进不可能冲突也不会丢工作）。**这属于调度侧缺陷，值得复查 worktree 派发逻辑。**
 
 ## 文件清单
 
 迁移
+
 - `backend/services/catalog/src/main/resources/db/migration/V31__party_addresses_contacts.sql`
 
 后端（catalog 服务）
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/PartyAddressRules.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/PartyContactRules.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/PartyAddressService.java`（新增）
@@ -73,6 +75,7 @@
 - 测试：`PartyAddressContactIntegrationTest.java`（23 例）、`PartyAddressContactRulesTest.java`（18 例）
 
 前端
+
 - `apps/web/src/components/catalog/party-contact-model.ts`（新增，含与后端逐字同口径的校验）
 - `apps/web/src/components/catalog/party-contact-model.test.ts`（新增，14 例）
 - `apps/web/src/components/catalog/party-contacts-workspace.tsx`（新增，真实工作区）
@@ -81,6 +84,7 @@
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（+1 例全路由放行）
 
 共用产物（多车道并入时按类型名/路径/模块 ID 求并）
+
 - `packages/api-contracts/src/catalog.ts` + `catalog.openapi.json`（codegen 生成：+13 路径 / +12 DTO）
 - `docs/product/capability-blueprint/module-progress.md`（**仅** 3.6.3.1 一行 + sync 自动算出的 03 卷已交付计数）
 

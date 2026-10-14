@@ -152,11 +152,7 @@ export function createShift(id: string, draft: ShiftDraft): Promise<ShiftSaved> 
   return api<ShiftSaved>(`${base}/${id}/config/shifts`, 'POST', input);
 }
 
-export function updateShift(
-  id: string,
-  shiftId: string,
-  draft: ShiftDraft,
-): Promise<ShiftSaved> {
+export function updateShift(id: string, shiftId: string, draft: ShiftDraft): Promise<ShiftSaved> {
   const input: ShiftUpdateInput = {
     name: draft.name.trim(),
     startLocal: draft.startLocal,

@@ -19,7 +19,7 @@
 孤儿判据：
 
 ```js
-state === 'running' && (!l.sessionId || laneIsStale(l))
+state === 'running' && (!l.sessionId || laneIsStale(l));
 ```
 
 cron 派发用的是 `plan --lanes 4`，**不带 `--session`**，于是每条车道的

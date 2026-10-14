@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.5.1.2 组件维护的纯规则测试：把 R6..R9（循环引用的判定口径）逐条钉死。
  *
- * <p>这些规则<b>不需要数据库</b>：邻接表就是 {@code Map<套装, List<套装>>}，
- * 给定同样的图永远返回同样的结论，所以「A 含 B 合法、A 含 B 且 B 含 A 不合法」
- * 这件事可以被穷举，而不必起一个 PG16 容器。
+ * <p>这些规则<b>不需要数据库</b>：邻接表就是 {@code Map<套装, List<套装>>}， 给定同样的图永远返回同样的结论，所以「A 含 B 合法、A 含 B 且 B 含 A
+ * 不合法」 这件事可以被穷举，而不必起一个 PG16 容器。
  *
- * <p>钉死它们的意义在于：若哪天有人把判定换成「只查有没有直接反向边」，
- * A→B→C→A 这种三元环会被漏掉，而漏掉的环要到对方版本发布、09 订单展开时才显形。
+ * <p>钉死它们的意义在于：若哪天有人把判定换成「只查有没有直接反向边」， A→B→C→A 这种三元环会被漏掉，而漏掉的环要到对方版本发布、09 订单展开时才显形。
  */
 class BundleComponentRulesTest {
   private final UUID a = UUID.nameUUIDFromBytes("A".getBytes());
@@ -202,7 +200,8 @@ class BundleComponentRulesTest {
     assertThat(BundleComponentRules.componentCountProblem(1)).isNull();
     // 同一套上限：整体替换与单行新增必须用同一个数，否则会出现「替换能过、加一行超限」
     // 这种前后不一致的报错。
-    assertThat(BundleComponentRules.componentCountProblem(BundleRules.MAX_COMPONENTS_PER_VERSION + 1))
+    assertThat(
+            BundleComponentRules.componentCountProblem(BundleRules.MAX_COMPONENTS_PER_VERSION + 1))
         .isNotNull();
   }
 

@@ -24,13 +24,13 @@ public class SyncController {
     this.service = service;
   }
 
-  private <T> T call(String bearer, String permission, java.util.function.Function<AccessService.Access, T> work) {
+  private <T> T call(
+      String bearer, String permission, java.util.function.Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, permission);
     return access.run(actor, permission, () -> work.apply(actor));
   }
 
-  private void callVoid(
-      String bearer, String permission, Consumer<AccessService.Access> work) {
+  private void callVoid(String bearer, String permission, Consumer<AccessService.Access> work) {
     var actor = access.require(bearer, permission);
     access.run(
         actor,
@@ -47,8 +47,7 @@ public class SyncController {
   public List<SyncCursorView> cursors(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) UUID connectionId) {
-    return call(
-        auth, "channel.sync.read", a -> service.cursors(connectionId));
+    return call(auth, "channel.sync.read", a -> service.cursors(connectionId));
   }
 
   @GetMapping("/sync-cursors/{id}")
@@ -160,7 +159,8 @@ public class SyncController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) String status,
       @RequestParam(defaultValue = "50") int limit) {
-    return call(auth, "channel.operation.read", a -> service.operations(a.tenantId(), status, limit));
+    return call(
+        auth, "channel.operation.read", a -> service.operations(a.tenantId(), status, limit));
   }
 
   /** 2.5.2.1 批量回写：幂等键重复时复用既有任务，不会产生第二次平台动作。 */
@@ -200,8 +200,7 @@ public class SyncController {
   /**
    * 2.5.1.2 标记为未知结果。
    *
-   * <p>超时或网络中断时必须走这里而不是 fail——UNKNOWN 表示平台可能已经执行，
-   * 直接当作失败重试会导致重复发货或库存错扣。
+   * <p>超时或网络中断时必须走这里而不是 fail——UNKNOWN 表示平台可能已经执行， 直接当作失败重试会导致重复发货或库存错扣。
    */
   @PostMapping("/platform-operations/{id}/unknown")
   public void operationUnknown(
@@ -217,6 +216,9 @@ public class SyncController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id,
       @RequestBody VerificationInput input) {
-    callVoid(auth, "channel.operation.update", a -> service.verifyOperation(a, id, input.verification()));
+    callVoid(
+        auth,
+        "channel.operation.update",
+        a -> service.verifyOperation(a, id, input.verification()));
   }
 }

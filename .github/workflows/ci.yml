@@ -68,12 +68,22 @@ jobs:
 
   security:
     name: Security Scan
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - uses: github/codeql-action/init@v3
         with:
-          languages: typescript
+          languages: javascript-typescript
       - uses: github/codeql-action/analyze@v3
       - run: pnpm audit --audit-level=high
 
@@ -105,16 +115,24 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chrome
       - run: ./deploy/scripts/catalog-dev.sh
-      - name: Wait for both services
+      - name: Wait for all services
         run: |
-          for port in 8081 8082; do
+          for port in 8081 8082 8083 8084 8085 8086; do
             ready=false
-            for attempt in $(seq 1 60); do
+            for attempt in $(seq 1 150); do
               if curl --fail --silent "http://localhost:$port/v3/api-docs" >/dev/null; then ready=true; break; fi
               sleep 2
             done
-            "$ready"
+            if ! "$ready"; then
+              docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml ps
+              docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml logs --no-color --tail 150 identity catalog postgres
+              exit 1
+            fi
           done
+      - name: Verify writable storage as the runtime user
+        run: |
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T catalog sh -c 'test "$(id -u)" = 10001 && test -w "$MEDIA_STORAGE_ROOT"'
+          docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T channel sh -c 'test "$(id -u)" = 10001 && test -w "$CHANNEL_SECRET_STORE_DIR"'
       - run: pnpm contracts:generate
       - run: git diff --exit-code -- packages/api-contracts/src
       - run: pnpm exec playwright test tests/e2e/catalog.spec.ts

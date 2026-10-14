@@ -257,7 +257,8 @@ export function keywordsProblem(keywords: string): string | null {
   for (const word of words) {
     if (word.length > MAX_KEYWORD_LENGTH)
       return `触发词「${word.slice(0, 20)}…」最长 ${MAX_KEYWORD_LENGTH} 个字符：触发词是短词（客服检索时打的是「退」「换」），不是整句`;
-    if (word.includes('{') || word.includes('}')) return '触发词不能含花括号（那是正文里的占位符写法）';
+    if (word.includes('{') || word.includes('}'))
+      return '触发词不能含花括号（那是正文里的占位符写法）';
   }
   return null;
 }
@@ -284,10 +285,7 @@ export function placeholdersOf(body: string): string[] {
  * <p>两个方向分别报：只报「不一致」的话，运营不知道自己漏的还是多的，
  * 而这两种的修法不同（漏 = 译文没抄全；多 = 译文里有源语言没有的占位符，永远填不上）。
  */
-export function placeholderProblem(
-  sourceBody: string,
-  translationBody: string,
-): string | null {
+export function placeholderProblem(sourceBody: string, translationBody: string): string | null {
   const source = placeholdersOf(sourceBody);
   const translation = placeholdersOf(translationBody);
   const missing = source.filter((p) => !translation.includes(p));
@@ -295,7 +293,8 @@ export function placeholderProblem(
   if (!missing.length && !extra.length) return null;
   let reason = '占位符与源语言正文不一致';
   if (missing.length) reason += `：源语言多出 {${missing.join('} { ')}}（译文漏抄，补上即可）`;
-  if (extra.length) reason += `；译文多出 {${extra.join('} { ')}}（源语言没有这个占位符，永远填不上，删掉）`;
+  if (extra.length)
+    reason += `；译文多出 {${extra.join('} { ')}}（源语言没有这个占位符，永远填不上，删掉）`;
   return reason;
 }
 
@@ -310,7 +309,9 @@ export function percentText(rate: number | string | null | undefined): string {
 }
 
 /** 命中率色调：低于 30% 提醒，高于等于 70% 正常，中间 warn。 */
-export function hitRateTone(rate: number | string | null | undefined): 'neutral' | 'success' | 'warning' {
+export function hitRateTone(
+  rate: number | string | null | undefined,
+): 'neutral' | 'success' | 'warning' {
   if (rate === null || rate === undefined || rate === '') return 'neutral';
   const value = Number(rate);
   if (value >= 0.7) return 'success';
@@ -347,14 +348,18 @@ export function outcomeHint(outcome: string | null | undefined): string {
 
 /** 空态文案：逐条说明「为什么空」而不是画成 0。 */
 export function entryEmptyHint(enabled: string, reviewState: string, keyword: string): string {
-  if (keyword.trim()) return `没有匹配「${keyword.trim()}」的话术 —— 关键词会同时搜编码、标题与正文。`;
-  if (reviewState === 'PENDING') return '当前没有待复核的话术 —— 平台规则版本被标记为「已被接替」时才会自动生成。';
-  if (enabled === 'false') return '当前只看停用的话术 —— 停用后不能再被新引用，历史引用记录与译文照常可读。';
+  if (keyword.trim())
+    return `没有匹配「${keyword.trim()}」的话术 —— 关键词会同时搜编码、标题与正文。`;
+  if (reviewState === 'PENDING')
+    return '当前没有待复核的话术 —— 平台规则版本被标记为「已被接替」时才会自动生成。';
+  if (enabled === 'false')
+    return '当前只看停用的话术 —— 停用后不能再被新引用，历史引用记录与译文照常可读。';
   return '话术库还是空的。新建一条话术后，客服就能在会话里一键引用，并在这里看到它的使用效果。';
 }
 
 export function reviewEmptyHint(status: string, platform: string): string {
-  if (platform) return `当前平台（${platformLabel(platform)}）没有${reviewStatusLabel(status)}的复核任务。`;
+  if (platform)
+    return `当前平台（${platformLabel(platform)}）没有${reviewStatusLabel(status)}的复核任务。`;
   if (status === 'PENDING')
     return '没有待复核任务 —— 在「平台规则版本」里把某一版标记为「已被接替」，挂在它上面的话术会自动各生成一条。';
   return '没有匹配的复核任务。';
@@ -530,10 +535,7 @@ export function bindEntry(entryId: string, ruleVersionId: string, note?: string)
 }
 
 export function unbindEntry(entryId: string, bindingId: string) {
-  return api<DeletedResponse>(
-    `catalog/kb/entries/${entryId}/rule-bindings/${bindingId}`,
-    'DELETE',
-  );
+  return api<DeletedResponse>(`catalog/kb/entries/${entryId}/rule-bindings/${bindingId}`, 'DELETE');
 }
 
 export function fetchReviewTasks(query: ReviewTaskQuery) {
@@ -547,10 +549,18 @@ export function fetchReviewTasks(query: ReviewTaskQuery) {
 }
 
 export function updateReviewTask(taskId: string, reviewStatus: string, note?: string) {
-  return api<ReviewTaskRow>(`catalog/kb/review-tasks/${taskId}`, 'PUT', { reviewStatus, note: note ?? '' });
+  return api<ReviewTaskRow>(`catalog/kb/review-tasks/${taskId}`, 'PUT', {
+    reviewStatus,
+    note: note ?? '',
+  });
 }
 
-export function recordUsage(entryId: string, outcome: string, conversationRef?: string, note?: string) {
+export function recordUsage(
+  entryId: string,
+  outcome: string,
+  conversationRef?: string,
+  note?: string,
+) {
   return api<KbUsageRow>(`catalog/kb/entries/${entryId}/usages`, 'POST', {
     outcome,
     conversationRef: conversationRef ?? '',

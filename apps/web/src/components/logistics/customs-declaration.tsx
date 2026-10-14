@@ -102,7 +102,9 @@ function patchParam(
  */
 export function CustomsWorkspace() {
   const [params, setParams] = useState<CustomsDeclarationParams>({ page: 0, size: 20 });
-  const [data, setData] = useState<Awaited<ReturnType<typeof fetchCustomsDeclarations>> | null>(null);
+  const [data, setData] = useState<Awaited<ReturnType<typeof fetchCustomsDeclarations>> | null>(
+    null,
+  );
   const [caps, setCaps] = useState<CustomsCapabilities | null>(null);
   const [legalEntities, setLegalEntities] = useState<LegalEntityOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,10 +143,7 @@ export function CustomsWorkspace() {
     })();
   }, []);
 
-  const unavailable = useMemo(
-    () => (caps?.dependencies ?? []).filter((d) => !d.available),
-    [caps],
-  );
+  const unavailable = useMemo(() => (caps?.dependencies ?? []).filter((d) => !d.available), [caps]);
   const summary = data?.summary;
 
   return (
@@ -171,17 +170,18 @@ export function CustomsWorkspace() {
         <ul className="text-muted-foreground space-y-1 text-sm">
           <li>
             <strong className="text-foreground">人工复核是硬闸</strong>
-            ：只有「已复核」才能提交报关行，且复核时逐行检查 HS 编码 / 申报要素 /
-            申报货值 / 毛重 / 箱数 / 计量单位是否齐备。
+            ：只有「已复核」才能提交报关行，且复核时逐行检查 HS 编码 / 申报要素 / 申报货值 / 毛重 /
+            箱数 / 计量单位是否齐备。
           </li>
           <li>
             <strong className="text-foreground">罚款由卖家承担</strong>
-            ：报关数据错误导致的扣货与罚款由卖家承担，所以货值与汇率是<strong>快照</strong>而不是实时值 ——
-            海关事后复核时要能回答「当时按哪个汇率申报的」。
+            ：报关数据错误导致的扣货与罚款由卖家承担，所以货值与汇率是<strong>快照</strong>
+            而不是实时值 —— 海关事后复核时要能回答「当时按哪个汇率申报的」。
           </li>
           <li>
             <strong className="text-foreground">一票货只报一次关</strong>
-            ：来源固定是 10.4.1.1 头程发运单，同一张发运单不允许再报第二张。改单走状态机与单据版本链。
+            ：来源固定是 10.4.1.1
+            头程发运单，同一张发运单不允许再报第二张。改单走状态机与单据版本链。
           </li>
           <li>
             <strong className="text-foreground">提交痕迹不会消失</strong>
@@ -326,18 +326,15 @@ export function CustomsWorkspace() {
               type="checkbox"
               checked={Boolean(params.pendingReviewOnly)}
               onChange={(e) =>
-                setParams((p) => patchParam(p, { pendingReviewOnly: e.target.checked ? true : false }))
+                setParams((p) =>
+                  patchParam(p, { pendingReviewOnly: e.target.checked ? true : false }),
+                )
               }
             />
             <span>只看待复核</span>
           </label>
           <div className="flex items-end">
-            <Button
-              variant="ghost"
-              onClick={() =>
-                setParams({ page: 0, size: params.size ?? 20 })
-              }
-            >
+            <Button variant="ghost" onClick={() => setParams({ page: 0, size: params.size ?? 20 })}>
               清除筛选
             </Button>
           </div>
@@ -384,7 +381,8 @@ export function CustomsWorkspace() {
                 上一页
               </Button>
               <span className="text-muted-foreground">
-                第 {(params.page ?? 0) + 1} / {Math.max(1, Math.ceil((data?.total ?? 0) / (params.size ?? 20)))} 页
+                第 {(params.page ?? 0) + 1} /{' '}
+                {Math.max(1, Math.ceil((data?.total ?? 0) / (params.size ?? 20)))} 页
               </span>
               <Button
                 variant="ghost"
@@ -425,7 +423,9 @@ export function CustomsWorkspace() {
                       </div>
                     </td>
                     <td className="px-4 py-3">{row.tradeModeLabel}</td>
-                    <td className="px-4 py-3">{money(row.declarationValue, row.declarationCurrency)}</td>
+                    <td className="px-4 py-3">
+                      {money(row.declarationValue, row.declarationCurrency)}
+                    </td>
                     <td className="text-muted-foreground px-4 py-3 text-xs">
                       {rateText(row.exchangeRate, row.exchangeRateScale, row.exchangeRateDate)}
                     </td>
@@ -433,7 +433,9 @@ export function CustomsWorkspace() {
                       {row.reviewRound}
                       {row.amendmentCount ? ` · 改单 ${row.amendmentCount}` : ''}
                     </td>
-                    <td className="text-muted-foreground px-4 py-3 text-xs">{moment(row.submittedAt)}</td>
+                    <td className="text-muted-foreground px-4 py-3 text-xs">
+                      {moment(row.submittedAt)}
+                    </td>
                     <td className="px-4 py-3">
                       {row.statusLabel || declarationStatusLabels[row.status] || row.status}
                     </td>
@@ -451,7 +453,11 @@ export function CustomsWorkspace() {
       )}
 
       {openId && (
-        <CustomsDetailModal id={openId} onClose={() => setOpenId(null)} onChanged={() => void load()} />
+        <CustomsDetailModal
+          id={openId}
+          onClose={() => setOpenId(null)}
+          onChanged={() => void load()}
+        />
       )}
       {creating && (
         <CustomsCreateModal
@@ -535,9 +541,7 @@ function CustomsDetailModal({
           break;
         }
         case 'rejectReview':
-          await withReason('复核退回原因', (reason) =>
-            rejectCustomsReview(i, { reason }),
-          );
+          await withReason('复核退回原因', (reason) => rejectCustomsReview(i, { reason }));
           break;
         case 'withdrawReview':
           await withReason('撤回复核原因', (reason) => withdrawCustomsReview(i, { reason }));
@@ -649,7 +653,10 @@ function CustomsDetailModal({
 
           {row && (
             <div className="grid gap-3 md:grid-cols-4">
-              <Fact label="状态" value={row.statusLabel || declarationStatusLabels[row.status] || row.status} />
+              <Fact
+                label="状态"
+                value={row.statusLabel || declarationStatusLabels[row.status] || row.status}
+              />
               <Fact label="复核轮次" value={String(row.reviewRound)} />
               <Fact label="改单次数" value={String(row.amendmentCount ?? 0)} />
               <Fact label="明细行数" value={String(row.totalLineCount ?? 0)} />
@@ -671,7 +678,9 @@ function CustomsDetailModal({
             <p className="text-muted-foreground border-l-2 pl-3 text-sm">{detail.reviewGateNote}</p>
           )}
           {detail?.sourceShipmentNote && (
-            <p className="text-muted-foreground border-l-2 pl-3 text-sm">{detail.sourceShipmentNote}</p>
+            <p className="text-muted-foreground border-l-2 pl-3 text-sm">
+              {detail.sourceShipmentNote}
+            </p>
           )}
 
           {/* 三单据：齐备且都定稿才能提交报关行，所以做成一张状态表 */}
@@ -802,7 +811,9 @@ function CustomsDetailModal({
               <ul className="space-y-2 text-sm">
                 {detail.results.map((r) => (
                   <li key={r.id} className="rounded-md border p-3">
-                    <strong>{r.resultTypeLabel || resultTypeLabels[r.resultType] || r.resultType}</strong>
+                    <strong>
+                      {r.resultTypeLabel || resultTypeLabels[r.resultType] || r.resultType}
+                    </strong>
                     <span className="text-muted-foreground ml-2 text-xs">
                       {r.resultReference || '无单号'} · {moment(r.resultAt)}
                     </span>
@@ -819,7 +830,9 @@ function CustomsDetailModal({
             <ul className="space-y-2 text-sm">
               {(detail?.events ?? []).map((e) => (
                 <li key={e.id} className="flex items-start gap-2">
-                  <span className="text-muted-foreground w-40 shrink-0 text-xs">{moment(e.occurredAt)}</span>
+                  <span className="text-muted-foreground w-40 shrink-0 text-xs">
+                    {moment(e.occurredAt)}
+                  </span>
                   <span>
                     <strong>{eventKindLabels[e.kind] ?? e.kind}</strong>
                     {e.fromStatus && e.toStatus && (
@@ -895,9 +908,9 @@ function CustomsCreateModal({
   const [shipmentKeyword, setShipmentKeyword] = useState('');
   const [shipmentId, setShipmentId] = useState('');
   const [shipmentLabel, setShipmentLabel] = useState('');
-  const [shipments, setShipments] = useState<{ id: string; shipmentCode: string; statusLabel: string }[]>(
-    [],
-  );
+  const [shipments, setShipments] = useState<
+    { id: string; shipmentCode: string; statusLabel: string }[]
+  >([]);
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [legalEntityId, setLegalEntityId] = useState('');
   const [tradeMode, setTradeMode] = useState('GENERAL_TRADE');
@@ -1056,7 +1069,8 @@ function CustomsCreateModal({
         <ModalHeader>
           <ModalTitle>新建报关单</ModalTitle>
           <ModalDescription>
-            来源固定是 10.4.1.1 头程发运单（一票货只报一次关）；建出来是草稿，提交报关行前必须走人工复核。
+            来源固定是 10.4.1.1
+            头程发运单（一票货只报一次关）；建出来是草稿，提交报关行前必须走人工复核。
           </ModalDescription>
         </ModalHeader>
         <div className="space-y-4">
@@ -1096,7 +1110,8 @@ function CustomsCreateModal({
             </div>
             {shipmentId && (
               <p className="text-muted-foreground mt-2 text-sm">
-                已选 {shipmentLabel}，明细行已预填 {lines.length} 行 —— 请逐行补齐申报要素并把齐备性标为「已齐备」。
+                已选 {shipmentLabel}，明细行已预填 {lines.length} 行 ——
+                请逐行补齐申报要素并把齐备性标为「已齐备」。
               </p>
             )}
           </SectionCard>
@@ -1126,28 +1141,36 @@ function CustomsCreateModal({
                 options={(caps?.transportModes ?? []).map((o) => [o.value, o.label])}
               />
               <Field label="出口商" value={exporterName} onChange={setExporterName} />
-              <Field
-                label="出口国"
-                value={exporterCountryCode}
-                onChange={setExporterCountryCode}
-              />
+              <Field label="出口国" value={exporterCountryCode} onChange={setExporterCountryCode} />
               <Field label="收货人" value={consigneeName} onChange={setConsigneeName} />
               <Field
                 label="收货国"
                 value={consigneeCountryCode}
                 onChange={setConsigneeCountryCode}
               />
-              <Field label="目的国" value={destinationCountryCode} onChange={setDestinationCountryCode} />
+              <Field
+                label="目的国"
+                value={destinationCountryCode}
+                onChange={setDestinationCountryCode}
+              />
               <Field label="IOR 名称" value={iorName} onChange={setIorName} />
               <Field label="IOR 国别" value={iorCountryCode} onChange={setIorCountryCode} />
               <Field label="报关行" value={brokerName} onChange={setBrokerName} />
               <Field label="报关行代码" value={brokerCode} onChange={setBrokerCode} />
               <Field label="报关行联系人" value={brokerContact} onChange={setBrokerContact} />
-              <Field label="目的关区" value={destinationCustomsDistrict} onChange={setDestinationCustomsDistrict} />
+              <Field
+                label="目的关区"
+                value={destinationCustomsDistrict}
+                onChange={setDestinationCustomsDistrict}
+              />
               <Field label="启运港" value={departurePort} onChange={setDeparturePort} />
               <Field label="目的港" value={destinationPort} onChange={setDestinationPort} />
               <Field label="提单号" value={billOfLadingNo} onChange={setBillOfLadingNo} />
-              <Field label="申报币种" value={declarationCurrency} onChange={setDeclarationCurrency} />
+              <Field
+                label="申报币种"
+                value={declarationCurrency}
+                onChange={setDeclarationCurrency}
+              />
               <Field label="本位币" value={baseCurrency} onChange={setBaseCurrency} />
               <Field label="汇率" value={exchangeRate} onChange={setExchangeRate} />
               <Field
@@ -1171,14 +1194,18 @@ function CustomsCreateModal({
 
           <SectionCard title={`申报明细（${lines.length} 行）`}>
             {lines.length === 0 ? (
-              <p className="text-muted-foreground text-sm">先选择一张来源发运单，明细行会据此预填。</p>
+              <p className="text-muted-foreground text-sm">
+                先选择一张来源发运单，明细行会据此预填。
+              </p>
             ) : (
               <div className="space-y-3">
                 {lines.map((line, index) => (
                   <div key={line.sourceLineId} className="rounded-md border p-3">
                     <div className="mb-2 text-sm">
                       <strong>{line.skuCode}</strong>
-                      <span className="text-muted-foreground ml-2">申报品名与 HS 编码是海关口径，与销售标题独立</span>
+                      <span className="text-muted-foreground ml-2">
+                        申报品名与 HS 编码是海关口径，与销售标题独立
+                      </span>
                     </div>
                     <div className="grid gap-3 md:grid-cols-4">
                       <Field
@@ -1327,7 +1354,12 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
         >
-          {children ?? options?.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          {children ??
+            options?.map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
         </select>
       ) : (
         <input

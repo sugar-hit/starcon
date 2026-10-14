@@ -39,9 +39,7 @@ export function EnumMappingPanel({
   const load = useCallback(async () => {
     setError('');
     try {
-      setMappings(
-        await api<EnumMappingView[]>(`channel/platforms/${platform.code}/enums`),
-      );
+      setMappings(await api<EnumMappingView[]>(`channel/platforms/${platform.code}/enums`));
     } catch (e) {
       setError(e instanceof Error ? e.message : '映射加载失败');
       setMappings([]);
@@ -73,7 +71,11 @@ export function EnumMappingPanel({
   }
 
   async function removeOverride(m: EnumMappingView) {
-    if (!window.confirm(`删除 ${m.enumKind} / ${m.externalValue} 的租户覆盖？删除后会回落到平台默认。`))
+    if (
+      !window.confirm(
+        `删除 ${m.enumKind} / ${m.externalValue} 的租户覆盖？删除后会回落到平台默认。`,
+      )
+    )
       return;
     setBusy(true);
     setError('');
@@ -128,9 +130,9 @@ export function EnumMappingPanel({
           {mappings.map((m) => (
             <li
               key={`${m.enumKind}-${m.externalValue}`}
-              className="flex flex-wrap items-center gap-2 text-copy-12"
+              className="text-copy-12 flex flex-wrap items-center gap-2"
             >
-              <span className="font-mono break-all">
+              <span className="break-all font-mono">
                 {m.enumKind} · {m.externalValue} → {m.internalValue}
               </span>
               <Badge tone={m.source === 'TENANT' ? 'warning' : 'neutral'}>
@@ -178,7 +180,11 @@ export function EnumMappingPanel({
               disabled={busy || !kind.trim() || !external.trim() || !internal.trim()}
               onClick={() => void submit()}
             >
-              {overrideCount > 0 ? <RotateCcw className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+              {overrideCount > 0 ? (
+                <RotateCcw className="h-3.5 w-3.5" />
+              ) : (
+                <Plus className="h-3.5 w-3.5" />
+              )}
               保存租户覆盖
             </Button>
             <p className="text-muted-foreground text-copy-12 mt-1">

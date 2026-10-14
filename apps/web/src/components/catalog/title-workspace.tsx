@@ -134,7 +134,9 @@ export function TitleWorkspace() {
   const [editingKeyword, setEditingKeyword] = useState<TitleKeywordInput | null>(null);
   const [editingKeywordId, setEditingKeywordId] = useState<string | null>(null);
   const [picking, setPicking] = useState<{ templateId: string } | null>(null);
-  const [skus, setSkus] = useState<{ id: string; code: string; name: string; spuName: string }[]>([]);
+  const [skus, setSkus] = useState<{ id: string; code: string; name: string; spuName: string }[]>(
+    [],
+  );
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pickedPlatforms, setPickedPlatforms] = useState<Set<string>>(new Set());
   const [skuKeyword, setSkuKeyword] = useState('');
@@ -175,7 +177,16 @@ export function TitleWorkspace() {
     } finally {
       setLoading(false);
     }
-  }, [generationKeyword, generationStatus, generationPage, keywordType, recordPlatform, recordStatus, recordKeyword, recordPage]);
+  }, [
+    generationKeyword,
+    generationStatus,
+    generationPage,
+    keywordType,
+    recordPlatform,
+    recordStatus,
+    recordKeyword,
+    recordPage,
+  ]);
 
   useEffect(() => {
     void load();
@@ -223,7 +234,11 @@ export function TitleWorkspace() {
       pattern: template.pattern,
       maxSimilarityPermille: template.maxSimilarityPermille,
       candidateCount: template.candidateCount,
-      variables: template.variables.map((v) => ({ name: v.name, source: v.source, slotNo: v.slotNo })),
+      variables: template.variables.map((v) => ({
+        name: v.name,
+        source: v.source,
+        slotNo: v.slotNo,
+      })),
       platforms: template.platforms.map((p) => ({ platform: p.platform, maxLength: p.maxLength })),
       enabled: template.enabled,
       version: template.version,
@@ -379,13 +394,16 @@ export function TitleWorkspace() {
           沉淀可复用的标题模板与标题记录，支持变量占位（品牌 + 品类 + 核心词 + 卖点），
           批量生成差异化标题——同一个商品在多平台给不同标题，用来规避
           <strong className="text-foreground">重复铺货判定</strong>。
-          重复度由生成算法显式控制：每条候选都带着「与本 SKU 已有标题的最大相似度」，
-          相似但不雷同。
+          重复度由生成算法显式控制：每条候选都带着「与本 SKU 已有标题的最大相似度」， 相似但不雷同。
         </p>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="标题模板" value={overview?.templateCount ?? 0} icon={<Sparkles className="h-4 w-4" />} />
+        <StatCard
+          label="标题模板"
+          value={overview?.templateCount ?? 0}
+          icon={<Sparkles className="h-4 w-4" />}
+        />
         <StatCard
           label="词根"
           value={overview?.keywordCount ?? 0}
@@ -463,7 +481,10 @@ export function TitleWorkspace() {
         ) : (
           <ul className="divide-border divide-y">
             {templates.map((template) => (
-              <li key={template.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <li
+                key={template.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
+              >
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{template.name}</span>
@@ -485,7 +506,11 @@ export function TitleWorkspace() {
                   </Button>
                   {writable && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => openTemplateEdit(template)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openTemplateEdit(template)}
+                      >
                         编辑
                       </Button>
                       <Button
@@ -559,7 +584,10 @@ export function TitleWorkspace() {
           <>
             <ul className="divide-border divide-y">
               {keywords.map((keyword) => (
-                <li key={keyword.id} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                <li
+                  key={keyword.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-2"
+                >
                   <div className="flex min-w-0 items-center gap-2">
                     <Badge tone="neutral">{keywordTypeLabel(keyword.keywordType)}</Badge>
                     <span className="font-medium">{keyword.text}</span>
@@ -606,7 +634,9 @@ export function TitleWorkspace() {
                 </li>
               ))}
             </ul>
-            <p className="text-muted-foreground mt-3 text-xs">共 {keywordTotal} 个词根（最多显示 50 个）</p>
+            <p className="text-muted-foreground mt-3 text-xs">
+              共 {keywordTotal} 个词根（最多显示 50 个）
+            </p>
           </>
         )}
       </SectionCard>
@@ -657,7 +687,10 @@ export function TitleWorkspace() {
           <>
             <ul className="divide-border divide-y">
               {generations.map((generation) => (
-                <li key={generation.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <li
+                  key={generation.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                >
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{generation.templateName}</span>
@@ -706,8 +739,7 @@ export function TitleWorkspace() {
                   .filter((s) => skuRejectionText(s))
                   .map((s) => (
                     <li key={s.id}>
-                      <span className="text-foreground">{s.skuCode}</span>：
-                      {skuRejectionText(s)}
+                      <span className="text-foreground">{s.skuCode}</span>：{skuRejectionText(s)}
                     </li>
                   ))}
               </ul>
@@ -740,7 +772,7 @@ export function TitleWorkspace() {
               platform: recordPlatform || null,
               status: recordStatus || null,
             })}
-            className="border-control-border inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm hover:bg-muted"
+            className="border-control-border hover:bg-muted inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm"
           >
             <Download className="h-4 w-4" />
             导出 CSV
@@ -799,17 +831,14 @@ export function TitleWorkspace() {
               records={records}
               writable={writable}
               busy={busy}
-              onSelect={(id) => void act(() => selectRecord(id), '已选用。这条标题可供 04 刊登使用。')}
+              onSelect={(id) =>
+                void act(() => selectRecord(id), '已选用。这条标题可供 04 刊登使用。')
+              }
               onDeselect={(id) => void act(() => deselectRecord(id), '已取消选用。')}
               onReject={(id) => void act(() => rejectRecord(id), '已淘汰这条候选。')}
             />
             {recordTotal > PAGE_SIZE && (
-              <Pager
-                page={recordPage}
-                total={recordTotal}
-                unit="条候选"
-                onChange={setRecordPage}
-              />
+              <Pager page={recordPage} total={recordTotal} unit="条候选" onChange={setRecordPage} />
             )}
           </>
         )}
@@ -896,7 +925,10 @@ export function TitleWorkspace() {
                   onClick={() =>
                     setEditing({
                       ...editing,
-                      variables: [...(editing.variables ?? []), { name: '', source: 'SPU_BRAND', slotNo: (editing.variables ?? []).length }],
+                      variables: [
+                        ...(editing.variables ?? []),
+                        { name: '', source: 'SPU_BRAND', slotNo: (editing.variables ?? []).length },
+                      ],
                     })
                   }
                 >
@@ -1200,7 +1232,9 @@ export function TitleWorkspace() {
               <p className="text-destructive text-sm">{skusSizeProblem(selected.size)}</p>
             )}
             {platformsSizeProblem(pickedPlatforms.size) && (
-              <p className="text-destructive text-sm">{platformsSizeProblem(pickedPlatforms.size)}</p>
+              <p className="text-destructive text-sm">
+                {platformsSizeProblem(pickedPlatforms.size)}
+              </p>
             )}
 
             <div className="flex justify-end gap-2">
@@ -1245,7 +1279,9 @@ function RecordTable({
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{record.title}</span>
-              <Badge tone={recordStatusTone(record.status)}>{recordStatusLabel(record.status)}</Badge>
+              <Badge tone={recordStatusTone(record.status)}>
+                {recordStatusLabel(record.status)}
+              </Badge>
               <Badge tone={similarityTone(record.similarityPermille)}>
                 相似度 {similarityText(record.similarityPermille)}
               </Badge>
@@ -1260,7 +1296,12 @@ function RecordTable({
           {writable && (
             <div className="flex gap-2">
               {record.status === 'SELECTED' ? (
-                <Button size="sm" variant="outline" onClick={() => onDeselect(record.id)} disabled={busy}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onDeselect(record.id)}
+                  disabled={busy}
+                >
                   取消选用
                 </Button>
               ) : (
@@ -1299,7 +1340,12 @@ function Pager({
 }) {
   return (
     <div className="mt-3 flex items-center gap-2 text-sm">
-      <Button size="sm" variant="outline" disabled={page === 0} onClick={() => onChange(Math.max(0, page - 1))}>
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={page === 0}
+        onClick={() => onChange(Math.max(0, page - 1))}
+      >
         上一页
       </Button>
       <span className="text-muted-foreground">

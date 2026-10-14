@@ -7,13 +7,13 @@
 
 与 17.5.3.1 审计日志的分工是硬性的，不是文案差异：
 
-| 维度 | 审计日志（17.5.3.1） | 操作日志（本模块） |
-| --- | --- | --- |
-| 用途 | 合规 | 运维排障 |
-| 内容 | 变更前后值 + 授权上下文 | 耗时、状态码、任务结果、错误堆栈 |
-| 留存 | 长期，不可删 | 短期，`expires_at` 到期可清理 |
+| 维度 | 审计日志（17.5.3.1）     | 操作日志（本模块）                            |
+| ---- | ------------------------ | --------------------------------------------- |
+| 用途 | 合规                     | 运维排障                                      |
+| 内容 | 变更前后值 + 授权上下文  | 耗时、状态码、任务结果、错误堆栈              |
+| 留存 | 长期，不可删             | 短期，`expires_at` 到期可清理                 |
 | 篡改 | 触发器拒绝 UPDATE/DELETE | 授予 DELETE（这正是「可短期留存」的执行方式） |
-| 检索 | 资源 / 操作人 | 用户 / 时间 / **请求 ID** |
+| 检索 | 资源 / 操作人            | 用户 / 时间 / **请求 ID**                     |
 
 两表字段几乎没有交集，这正是蓝图「不可互相替代」的落地证据。集成测试里有一条用例
 直接对照二者：审计行超级用户也删不掉，操作日志行可删。
@@ -53,9 +53,11 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql`
 
 **后端**
+
 - `backend/services/identity/src/main/java/com/starcon/identity/OperationLog.java`（写入侧 + 截断）
 - `backend/services/identity/src/main/java/com/starcon/identity/OperationLogController.java`（检索/详情/链路/导出/清理）
 - `backend/services/identity/src/main/java/com/starcon/identity/OperationLogInterceptor.java`（API 摘要与错误堆栈采集）
@@ -63,6 +65,7 @@
 - `backend/services/identity/src/main/java/com/starcon/identity/IdentityController.java`（登录/登出事件，**已交付文件的最小改动**）
 
 **前端**
+
 - `apps/web/src/app/org/operation-log/page.tsx`
 - `apps/web/src/components/iam/operation-log-workspace.tsx`
 - `apps/web/src/components/iam/operation-log-model.ts`
@@ -71,9 +74,11 @@
 - `apps/web/src/lib/api-proxy.ts`（白名单，并入共享文件）
 
 **测试**
+
 - `backend/services/identity/src/test/java/com/starcon/identity/OperationLogIntegrationTest.java`（14 项）
 
 **契约 / 台账**
+
 - `packages/api-contracts/src/`（codegen 产物，只读）
 - `docs/product/capability-blueprint/module-progress.md`（仅本模块那一行）
 

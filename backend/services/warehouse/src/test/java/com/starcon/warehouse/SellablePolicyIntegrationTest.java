@@ -2,7 +2,6 @@ package com.starcon.warehouse;
 
 import static com.starcon.warehouse.SellablePolicyModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,11 +18,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import org.jooq.DSLContext;
-import org.springframework.dao.DataAccessException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,18 +30,15 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.2.2.1 可售量口径：分档生效、共享池 + 缓冲组合判定、含 FBA 开关、超卖容忍、时区零漂移，
- * 以及租户隔离三断言。
+ * 7.2.2.1 可售量口径：分档生效、共享池 + 缓冲组合判定、含 FBA 开关、超卖容忍、时区零漂移， 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryReconciliationIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryReconciliationIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake
+ * identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>为什么本测试的核心是「共享池 + 缓冲」这一组</b>：蓝图原话「多店铺共享池时，缓冲不足会
- * 在同步延迟期间超卖」。共享池和缓冲分开测都成立，合起来才是真实风险 —— 两个店铺各留 50% 缓冲，
- * 分配之和恰好等于池容量，测试必须能把这个「零余量」判出来，而不是回一个"看起来有货"。
+ * <p><b>为什么本测试的核心是「共享池 + 缓冲」这一组</b>：蓝图原话「多店铺共享池时，缓冲不足会 在同步延迟期间超卖」。共享池和缓冲分开测都成立，合起来才是真实风险 —— 两个店铺各留
+ * 50% 缓冲， 分配之和恰好等于池容量，测试必须能把这个「零余量」判出来，而不是回一个"看起来有货"。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -53,7 +49,10 @@ class SellablePolicyIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID le = idFor(a, 1);
@@ -62,12 +61,15 @@ class SellablePolicyIntegrationTest {
   static final UUID whFba = idFor(a, 4);
   static final UUID qSellable = idFor(a, 5);
   static final UUID qDefective = idFor(a, 6);
+
   /** 店铺是 channel 服务的实体：这里只造一个逻辑 id，warehouse 侧不建外键也不查它的表。 */
   static final UUID shopOne = UUID.randomUUID();
+
   static final UUID shopTwo = UUID.randomUUID();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-sellable-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-sellable-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -88,7 +90,8 @@ class SellablePolicyIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -103,7 +106,8 @@ class SellablePolicyIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -166,22 +170,46 @@ class SellablePolicyIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 3), tenant, "WH-OWN", "自有仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 3),
+                tenant,
+                "WH-OWN",
+                "自有仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-FBA", "美国 FBA", "US", "America/Los_Angeles");
+                idFor(tenant, 4),
+                tenant,
+                "WH-FBA",
+                "美国 FBA",
+                "US",
+                "America/Los_Angeles");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "DEFECTIVE", "残次", "DEFECTIVE");
+                idFor(tenant, 6),
+                tenant,
+                "DEFECTIVE",
+                "残次",
+                "DEFECTIVE");
             return null;
           });
     }
@@ -206,7 +234,13 @@ class SellablePolicyIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-              UUID.randomUUID(), a, sku, warehouse, le, quality, new BigDecimal(onHand),
+              UUID.randomUUID(),
+              a,
+              sku,
+              warehouse,
+              le,
+              quality,
+              new BigDecimal(onHand),
               new BigDecimal(reserved));
           return null;
         });
@@ -222,7 +256,15 @@ class SellablePolicyIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
                   + "to_warehouse_id,quality_status_id,quantity,status,shipped_at) "
                   + "values(?,?,?,?,?,?,?,?,'IN_TRANSIT',?::timestamptz)",
-              UUID.randomUUID(), a, sku, le, whFba, to, qSellable, new BigDecimal(quantity), now());
+              UUID.randomUUID(),
+              a,
+              sku,
+              le,
+              whFba,
+              to,
+              qSellable,
+              new BigDecimal(quantity),
+              now());
           return null;
         });
   }
@@ -236,11 +278,28 @@ class SellablePolicyIntegrationTest {
   }
 
   SellablePolicyInput shopPolicy(
-      UUID shop, String label, PoolMode mode, String poolKey, String buffer, PlatformStockScope scope,
-      List<SellablePolicyInput.SellablePolicyWarehouseBinding> warehouses, boolean inTransitFlag) {
+      UUID shop,
+      String label,
+      PoolMode mode,
+      String poolKey,
+      String buffer,
+      PlatformStockScope scope,
+      List<SellablePolicyInput.SellablePolicyWarehouseBinding> warehouses,
+      boolean inTransitFlag) {
     return new SellablePolicyInput(
-        "SHOP", "CHANNEL", shop, label, mode.name(), poolKey, false, BigDecimal.ZERO,
-        scope.name(), new BigDecimal(buffer), inTransitFlag, null, "夹具",
+        "SHOP",
+        "CHANNEL",
+        shop,
+        label,
+        mode.name(),
+        poolKey,
+        false,
+        BigDecimal.ZERO,
+        scope.name(),
+        new BigDecimal(buffer),
+        inTransitFlag,
+        null,
+        "夹具",
         warehouses);
   }
 
@@ -255,7 +314,8 @@ class SellablePolicyIntegrationTest {
   }
 
   SellablePolicySaved save(UUID supersedeId, SellablePolicyInput input, AccessService.Access who) {
-    return access.run(who, "warehouse.inventory.update", () -> service.save(supersedeId, input, who.userId()));
+    return access.run(
+        who, "warehouse.inventory.update", () -> service.save(supersedeId, input, who.userId()));
   }
 
   SellablePolicySaved save(SellablePolicyInput input) {
@@ -270,7 +330,8 @@ class SellablePolicyIntegrationTest {
     return access.run(
         actorA,
         "warehouse.inventory.read",
-        () -> service.calculate(new SellableQuantityRequest(List.of(sku), null, shop, "SHOP", null)));
+        () ->
+            service.calculate(new SellableQuantityRequest(List.of(sku), null, shop, "SHOP", null)));
   }
 
   // ================================================================ 分档生效
@@ -278,12 +339,23 @@ class SellablePolicyIntegrationTest {
   @Test
   void 新建口径落库并可解析出生效档() {
     standardStock();
-    var saved = save(shopPolicy(
-        shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.20", PlatformStockScope.OWN_WAREHOUSE,
-        ownOnly(), false));
+    var saved =
+        save(
+            shopPolicy(
+                shopOne,
+                "美国店",
+                PoolMode.EXCLUSIVE,
+                null,
+                "0.20",
+                PlatformStockScope.OWN_WAREHOUSE,
+                ownOnly(),
+                false));
 
-    var page = access.run(
-        actorA, "warehouse.inventory.read", () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
+    var page =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
     assertThat(page.total()).isEqualTo(1);
     var row = page.policies().get(0);
     assertThat(row.id()).isEqualTo(saved.policyId());
@@ -293,16 +365,16 @@ class SellablePolicyIntegrationTest {
     assertThat(row.bufferRatio()).isEqualByComparingTo("0.20");
     assertThat(row.effectiveTo()).isNull();
 
-    var hit = access.run(
-        actorA,
-        "warehouse.inventory.read",
-        () -> service.effective("SHOP", shopOne, null));
+    var hit =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
     assertThat(hit.policy()).isNotNull();
     assertThat(hit.resolvedScopeType()).isEqualTo(PolicyScopeType.SHOP);
     assertThat(hit.usedFallback()).isFalse();
 
     // 详情带挂仓关系：池容量的构成单元不是挂在页面上的说明文字。
-    var detail = access.run(actorA, "warehouse.inventory.read", () -> service.detail(saved.policyId()));
+    var detail =
+        access.run(actorA, "warehouse.inventory.read", () -> service.detail(saved.policyId()));
     assertThat(detail.warehouses()).hasSize(1);
     assertThat(detail.warehouses().get(0).warehouseKind()).isEqualTo(WarehouseKind.OWN);
     assertThat(detail.warehouses().get(0).warehouseCode()).isEqualTo("WH-OWN");
@@ -313,34 +385,94 @@ class SellablePolicyIntegrationTest {
     standardStock();
     var t0 = now().minusHours(2);
     var t1 = now().minusHours(1);
-    var first = save(new SellablePolicyInput(
-        "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-        "OWN_WAREHOUSE", new BigDecimal("0.20"), false, t0, "第一档", ownOnly()));
+    var first =
+        save(
+            new SellablePolicyInput(
+                "SHOP",
+                "CHANNEL",
+                shopOne,
+                "美国店",
+                "EXCLUSIVE",
+                null,
+                false,
+                BigDecimal.ZERO,
+                "OWN_WAREHOUSE",
+                new BigDecimal("0.20"),
+                false,
+                t0,
+                "第一档",
+                ownOnly()));
 
-    var second = save(first.policyId(), new SellablePolicyInput(
-        "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-        "OWN_WAREHOUSE", new BigDecimal("0.35"), false, t1, "第二档", ownOnly()), actorA);
+    var second =
+        save(
+            first.policyId(),
+            new SellablePolicyInput(
+                "SHOP",
+                "CHANNEL",
+                shopOne,
+                "美国店",
+                "EXCLUSIVE",
+                null,
+                false,
+                BigDecimal.ZERO,
+                "OWN_WAREHOUSE",
+                new BigDecimal("0.35"),
+                false,
+                t1,
+                "第二档",
+                ownOnly()),
+            actorA);
 
     // 两档并存：第一档的旧值没有被改掉，它仍是「当时真正生效的防线」的凭据。
-    var page = access.run(
-        actorA, "warehouse.inventory.read", () -> service.page(new SellablePolicyQuery("SHOP", shopOne, null, false, null, 0, 50)));
+    var page =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.page(new SellablePolicyQuery("SHOP", shopOne, null, false, null, 0, 50)));
     assertThat(page.total()).isEqualTo(2);
-    assertThat(page.policies().stream().filter(p -> p.bufferRatio().compareTo(new BigDecimal("0.20")) == 0)
-            .findFirst().orElseThrow().effectiveTo())
+    assertThat(
+            page.policies().stream()
+                .filter(p -> p.bufferRatio().compareTo(new BigDecimal("0.20")) == 0)
+                .findFirst()
+                .orElseThrow()
+                .effectiveTo())
         .isEqualTo(t1);
-    assertThat(page.policies().stream().filter(p -> p.id().equals(second.policyId())).findFirst().orElseThrow().effectiveTo())
+    assertThat(
+            page.policies().stream()
+                .filter(p -> p.id().equals(second.policyId()))
+                .findFirst()
+                .orElseThrow()
+                .effectiveTo())
         .isNull();
 
     // 按时刻解析：换版前后各自生效的是哪一档
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, t0.plusMinutes(30)))
-            .policy().bufferRatio())
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.effective("SHOP", shopOne, t0.plusMinutes(30)))
+                .policy()
+                .bufferRatio())
         .isEqualByComparingTo("0.20");
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, t1.plusMinutes(30)))
-            .policy().bufferRatio())
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.effective("SHOP", shopOne, t1.plusMinutes(30)))
+                .policy()
+                .bufferRatio())
         .isEqualByComparingTo("0.35");
     // 落在收口那一刻的那一秒：左闭右开，新档已经生效
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, t1))
-            .policy().bufferRatio())
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.effective("SHOP", shopOne, t1))
+                .policy()
+                .bufferRatio())
         .isEqualByComparingTo("0.35");
   }
 
@@ -348,23 +480,44 @@ class SellablePolicyIntegrationTest {
   void 未配置店铺时回退兜底档并如实报出() {
     standardStock();
     // 没有店铺档也没有兜底档 → 如实报空，而不是静默按 0 处理
-    var none = access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopTwo, null));
+    var none =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopTwo, null));
     assertThat(none.policy()).isNull();
     assertThat(none.usedFallback()).isFalse();
 
-    var result = access.run(
-        actorA, "warehouse.inventory.read",
-        () -> service.calculate(new SellableQuantityRequest(List.of(sku), null, shopTwo, "SHOP", null)));
+    var result =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.calculate(
+                    new SellableQuantityRequest(List.of(sku), null, shopTwo, "SHOP", null)));
     assertThat(result.rows()).isEmpty();
     assertThat(result.verdict()).isNull();
     // 回写 0 = 立刻断货，回写满 = 超卖，两条路都比拒绝更糟。
     assertThat(result.note()).contains("拒绝");
 
     // 只配兜底档时，未命中的店铺回退到它，且 usedFallback 如实标记
-    save(new SellablePolicyInput(
-        "DEFAULT", "", null, "", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-        "OWN_WAREHOUSE", new BigDecimal("0.10"), false, null, "兜底", ownOnly()));
-    var fallback = access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopTwo, null));
+    save(
+        new SellablePolicyInput(
+            "DEFAULT",
+            "",
+            null,
+            "",
+            "EXCLUSIVE",
+            null,
+            false,
+            BigDecimal.ZERO,
+            "OWN_WAREHOUSE",
+            new BigDecimal("0.10"),
+            false,
+            null,
+            "兜底",
+            ownOnly()));
+    var fallback =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopTwo, null));
     assertThat(fallback.policy()).isNotNull();
     assertThat(fallback.resolvedScopeType()).isEqualTo(PolicyScopeType.DEFAULT);
     assertThat(fallback.usedFallback()).isTrue();
@@ -376,62 +529,113 @@ class SellablePolicyIntegrationTest {
   @Test
   void 口径内容与区间由数据库挡住() {
     standardStock();
-    var id = save(shopPolicy(
-        shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.20", PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    var id =
+        save(
+            shopPolicy(
+                shopOne,
+                "美国店",
+                PoolMode.EXCLUSIVE,
+                null,
+                "0.20",
+                PlatformStockScope.OWN_WAREHOUSE,
+                ownOnly(),
+                false));
 
     // 内容列不可改：改缓冲比例必须走换版，否则"当时那道防线"会被悄悄改掉。
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> {
-          sql.execute("update sellable_policy set buffer_ratio = ?::numeric where id = ?",
-              new BigDecimal("0.05"), id.policyId());
-          return null;
-        }))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute(
+                          "update sellable_policy set buffer_ratio = ?::numeric where id = ?",
+                          new BigDecimal("0.05"),
+                          id.policyId());
+                      return null;
+                    }))
         .isInstanceOf(DataAccessException.class)
         .hasMessageContaining("不可修改");
 
     // 区间重叠：同一槽位同一时刻只能有一个生效值，否则解析没有唯一答案。
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> {
-          sql.execute(
-              "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
-                  + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
-                  + "include_in_transit,effective_from,note,created_by_membership_id) "
-                  + "values (?,?,'SHOP','CHANNEL',?,'重叠档','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
-                  + "0.30::numeric,false,?::timestamptz,'重叠',?)",
-              UUID.randomUUID(), a, shopOne, "EXCL-" + shopOne, now().minusDays(1), user);
-          return null;
-        }))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute(
+                          "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
+                              + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
+                              + "include_in_transit,effective_from,note,created_by_membership_id) "
+                              + "values (?,?,'SHOP','CHANNEL',?,'重叠档','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
+                              + "0.30::numeric,false,?::timestamptz,'重叠',?)",
+                          UUID.randomUUID(),
+                          a,
+                          shopOne,
+                          "EXCL-" + shopOne,
+                          now().minusDays(1),
+                          user);
+                      return null;
+                    }))
         .isInstanceOf(DataAccessException.class)
         .hasMessageContaining("区间");
 
     // 缓冲比例的取值范围落在 DB 层：应用层绕不过去。
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> {
-          sql.execute(
-              "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
-                  + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
-                  + "include_in_transit,effective_from,note,created_by_membership_id) "
-                  + "values (?,?,'SHOP','CHANNEL',?,'越界档','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
-                  + "1.500000::numeric,false,now(),'越界',?)",
-              UUID.randomUUID(), a, shopTwo, "EXCL-" + shopTwo, user);
-          return null;
-        }))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute(
+                          "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
+                              + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
+                              + "include_in_transit,effective_from,note,created_by_membership_id) "
+                              + "values (?,?,'SHOP','CHANNEL',?,'越界档','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
+                              + "1.500000::numeric,false,now(),'越界',?)",
+                          UUID.randomUUID(),
+                          a,
+                          shopTwo,
+                          "EXCL-" + shopTwo,
+                          user);
+                      return null;
+                    }))
         .isInstanceOf(DataAccessException.class)
         .hasMessageContaining("sellable_policy_buffer_ratio_check");
 
     // 档位行不物理删除：它是审计凭据。
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> {
-          sql.execute("delete from sellable_policy where id = ?", id.policyId());
-          return null;
-        }))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("delete from sellable_policy where id = ?", id.policyId());
+                      return null;
+                    }))
         .isInstanceOf(DataAccessException.class);
 
     // 作废走收口区间，行还在。
-    var retired = access.run(
-        actorA, "warehouse.inventory.update", () -> service.retire(id.policyId(), now().plusMinutes(5)));
+    var retired =
+        access.run(
+            actorA,
+            "warehouse.inventory.update",
+            () -> service.retire(id.policyId(), now().plusMinutes(5)));
     assertThat(retired.effectiveTo()).isNotNull();
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.detail(id.policyId())).policy().effectiveTo())
+    assertThat(
+            access
+                .run(actorA, "warehouse.inventory.read", () -> service.detail(id.policyId()))
+                .policy()
+                .effectiveTo())
         .isNotNull();
     // 重复作废不会产生第二个收口时刻
-    assertThatThrownBy(() -> access.run(
-            actorA, "warehouse.inventory.update", () -> service.retire(id.policyId(), now().plusMinutes(9))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () -> service.retire(id.policyId(), now().plusMinutes(9))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已被作废");
   }
@@ -440,43 +644,124 @@ class SellablePolicyIntegrationTest {
   void 输入校验把配错的路径挡在门外() {
     standardStock();
     // 共享池必须取名：没有池名解析不出成员集合
-    assertThatThrownBy(() -> save(shopPolicy(
-            shopOne, "美国店", PoolMode.SHARED, "  ", "0.20", PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false)))
+    assertThatThrownBy(
+            () ->
+                save(
+                    shopPolicy(
+                        shopOne,
+                        "美国店",
+                        PoolMode.SHARED,
+                        "  ",
+                        "0.20",
+                        PlatformStockScope.OWN_WAREHOUSE,
+                        ownOnly(),
+                        false)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("共享池必须取池名");
     // 共享池名不能占用独占池的命名空间
-    assertThatThrownBy(() -> save(shopPolicy(
-            shopOne, "美国店", PoolMode.SHARED, "EXCL-x", "0.20", PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false)))
+    assertThatThrownBy(
+            () ->
+                save(
+                    shopPolicy(
+                        shopOne,
+                        "美国店",
+                        PoolMode.SHARED,
+                        "EXCL-x",
+                        "0.20",
+                        PlatformStockScope.OWN_WAREHOUSE,
+                        ownOnly(),
+                        false)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("EXCL-");
     // 兜底档不能共享
-    assertThatThrownBy(() -> save(new SellablePolicyInput(
-            "DEFAULT", "", null, "", "SHARED", "POOL-A", false, BigDecimal.ZERO,
-            "OWN_WAREHOUSE", new BigDecimal("0.20"), false, null, "", ownOnly())))
+    assertThatThrownBy(
+            () ->
+                save(
+                    new SellablePolicyInput(
+                        "DEFAULT",
+                        "",
+                        null,
+                        "",
+                        "SHARED",
+                        "POOL-A",
+                        false,
+                        BigDecimal.ZERO,
+                        "OWN_WAREHOUSE",
+                        new BigDecimal("0.20"),
+                        false,
+                        null,
+                        "",
+                        ownOnly())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("兜底档不能设为共享池");
     // 缓冲比例越界（服务层也拒，不依赖 DB 兜底）
-    assertThatThrownBy(() -> save(shopPolicy(
-            shopOne, "美国店", PoolMode.EXCLUSIVE, null, "1.5", PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false)))
+    assertThatThrownBy(
+            () ->
+                save(
+                    shopPolicy(
+                        shopOne,
+                        "美国店",
+                        PoolMode.EXCLUSIVE,
+                        null,
+                        "1.5",
+                        PlatformStockScope.OWN_WAREHOUSE,
+                        ownOnly(),
+                        false)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("缓冲比例必须在 0 与 1 之间");
     // 不许超卖却留着额度
-    assertThatThrownBy(() -> save(new SellablePolicyInput(
-            "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, new BigDecimal("5"),
-            "OWN_WAREHOUSE", new BigDecimal("0.20"), false, null, "", ownOnly())))
+    assertThatThrownBy(
+            () ->
+                save(
+                    new SellablePolicyInput(
+                        "SHOP",
+                        "CHANNEL",
+                        shopOne,
+                        "美国店",
+                        "EXCLUSIVE",
+                        null,
+                        false,
+                        new BigDecimal("5"),
+                        "OWN_WAREHOUSE",
+                        new BigDecimal("0.20"),
+                        false,
+                        null,
+                        "",
+                        ownOnly())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("超卖容忍必须是 0");
     // 挂到不存在的仓：少算平台可售数看起来更安全，实际是丢单与断货
-    assertThatThrownBy(() -> save(new SellablePolicyInput(
-            "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-            "OWN_WAREHOUSE", new BigDecimal("0.20"), false, null, "",
-            List.of(new SellablePolicyInput.SellablePolicyWarehouseBinding(UUID.randomUUID(), "OWN")))))
+    assertThatThrownBy(
+            () ->
+                save(
+                    new SellablePolicyInput(
+                        "SHOP",
+                        "CHANNEL",
+                        shopOne,
+                        "美国店",
+                        "EXCLUSIVE",
+                        null,
+                        false,
+                        BigDecimal.ZERO,
+                        "OWN_WAREHOUSE",
+                        new BigDecimal("0.20"),
+                        false,
+                        null,
+                        "",
+                        List.of(
+                            new SellablePolicyInput.SellablePolicyWarehouseBinding(
+                                UUID.randomUUID(), "OWN")))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在");
     // 空 SKU 集合
-    assertThatThrownBy(() -> access.run(
-            actorA, "warehouse.inventory.read",
-            () -> service.calculate(new SellableQuantityRequest(List.of(), null, shopOne, "SHOP", null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        service.calculate(
+                            new SellableQuantityRequest(List.of(), null, shopOne, "SHOP", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("至少传一个 SKU");
   }
@@ -487,10 +772,26 @@ class SellablePolicyIntegrationTest {
   void 共享池与缓冲不足的组合判定为没有余量() {
     standardStock();
     // 两个店铺共享同一个池，各留 50% 缓冲 —— 分配之和恰好等于池容量，余量为 0。
-    save(shopPolicy(shopOne, "美国店", PoolMode.SHARED, "US-POOL", "0.50",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
-    save(shopPolicy(shopTwo, "加拿大店", PoolMode.SHARED, "US-POOL", "0.50",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.SHARED,
+            "US-POOL",
+            "0.50",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
+    save(
+        shopPolicy(
+            shopTwo,
+            "加拿大店",
+            PoolMode.SHARED,
+            "US-POOL",
+            "0.50",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
 
     var roster = access.run(actorA, "warehouse.inventory.read", () -> service.pools(null));
     assertThat(roster).hasSize(1);
@@ -509,10 +810,21 @@ class SellablePolicyIntegrationTest {
     assertThat(result.verdict()).isEqualTo(PoolSafetyVerdict.NO_HEADROOM);
 
     // 把其中一个店铺的缓冲提到 80% → 分配比 0.7 → 重新出现 30% 余量
-    var before = access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
-    save(before.policy().id(),
-        shopPolicy(shopOne, "美国店", PoolMode.SHARED, "US-POOL", "0.80",
-            PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false), actorA);
+    var before =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
+    save(
+        before.policy().id(),
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.SHARED,
+            "US-POOL",
+            "0.80",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false),
+        actorA);
 
     var fixed = calculate(shopTwo);
     assertThat(fixed.pool().allocationRatio()).isEqualByComparingTo("0.7");
@@ -520,13 +832,16 @@ class SellablePolicyIntegrationTest {
     assertThat(fixed.verdict()).isEqualTo(PoolSafetyVerdict.GUARDED);
 
     // 池详情给出成员清单与仓构成（同一仓被两个成员引用只算一个仓）
-    var detail = access.run(actorA, "warehouse.inventory.read", () -> service.pool("US-POOL", null));
+    var detail =
+        access.run(actorA, "warehouse.inventory.read", () -> service.pool("US-POOL", null));
     assertThat(detail.members()).hasSize(2);
     assertThat(detail.summary().warehouseCount()).isEqualTo(1);
-    assertThat(detail.members()).extracting(SellablePoolMember::referenceLabel)
+    assertThat(detail.members())
+        .extracting(SellablePoolMember::referenceLabel)
         .containsExactlyInAnyOrder("美国店", "加拿大店");
     // 池名对不上 → 404，不返回一个空壳让人以为"池是干净的"
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> service.pool("NOPE", null)))
+    assertThatThrownBy(
+            () -> access.run(actorA, "warehouse.inventory.read", () -> service.pool("NOPE", null)))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -534,10 +849,26 @@ class SellablePolicyIntegrationTest {
   void 共享池缓冲过低被判为必然超卖() {
     standardStock();
     // 各留 10% 缓冲：2 − 0.2 = 1.8 倍池容量被分配出去 → 必然超卖
-    save(shopPolicy(shopOne, "美国店", PoolMode.SHARED, "US-POOL", "0.10",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
-    save(shopPolicy(shopTwo, "加拿大店", PoolMode.SHARED, "US-POOL", "0.10",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.SHARED,
+            "US-POOL",
+            "0.10",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
+    save(
+        shopPolicy(
+            shopTwo,
+            "加拿大店",
+            PoolMode.SHARED,
+            "US-POOL",
+            "0.10",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
 
     var result = calculate(shopOne);
     assertThat(result.pool().allocationRatio()).isEqualByComparingTo("1.8");
@@ -545,7 +876,11 @@ class SellablePolicyIntegrationTest {
     assertThat(result.verdict()).isEqualTo(PoolSafetyVerdict.OVERSOLD);
     assertThat(result.note()).contains("必然超卖");
     // 名册（无库存数据）按比例给同一结论，不依赖有没有货
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.pools(null)).get(0).verdict())
+    assertThat(
+            access
+                .run(actorA, "warehouse.inventory.read", () -> service.pools(null))
+                .get(0)
+                .verdict())
         .isEqualTo(PoolSafetyVerdict.OVERSOLD);
   }
 
@@ -553,18 +888,47 @@ class SellablePolicyIntegrationTest {
   void 超卖容忍额度内判为有意超卖() {
     standardStock();
     // 独占池 + 零缓冲 + 容忍 3 件：余量 −3，落在额度内 → 有意为之
-    var id = save(new SellablePolicyInput(
-        "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, true, new BigDecimal("3"),
-        "OWN_WAREHOUSE", new BigDecimal("0"), false, null, "允许超卖 3 件", ownOnly()));
+    var id =
+        save(
+            new SellablePolicyInput(
+                "SHOP",
+                "CHANNEL",
+                shopOne,
+                "美国店",
+                "EXCLUSIVE",
+                null,
+                true,
+                new BigDecimal("3"),
+                "OWN_WAREHOUSE",
+                new BigDecimal("0"),
+                false,
+                null,
+                "允许超卖 3 件",
+                ownOnly()));
     var tolerated = calculate(shopOne);
     assertThat(tolerated.pool().headroom()).isEqualByComparingTo("-3");
     assertThat(tolerated.verdict()).isEqualTo(PoolSafetyVerdict.TOLERATED);
     assertThat(tolerated.rows().get(0).platformListing()).isEqualByComparingTo("103");
 
     // 把额度去掉：同样的余量就变成配置错误 → 必然超卖
-    save(id.policyId(), new SellablePolicyInput(
-        "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-        "OWN_WAREHOUSE", new BigDecimal("0"), false, null, "收回超卖容忍", ownOnly()), actorA);
+    save(
+        id.policyId(),
+        new SellablePolicyInput(
+            "SHOP",
+            "CHANNEL",
+            shopOne,
+            "美国店",
+            "EXCLUSIVE",
+            null,
+            false,
+            BigDecimal.ZERO,
+            "OWN_WAREHOUSE",
+            new BigDecimal("0"),
+            false,
+            null,
+            "收回超卖容忍",
+            ownOnly()),
+        actorA);
     var oversold = calculate(shopOne);
     assertThat(oversold.pool().headroom()).isEqualByComparingTo("0");
     assertThat(oversold.verdict()).isEqualTo(PoolSafetyVerdict.NO_HEADROOM);
@@ -576,22 +940,42 @@ class SellablePolicyIntegrationTest {
   void 含Fba开关真实改变池容量() {
     standardStock();
     // 仅自有仓：FBA 的 60 件不计入池容量（7.1.3.1：FBA 是平台观测值不是自有账本）
-    save(shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.20",
-        PlatformStockScope.OWN_WAREHOUSE, ownAndFba(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.20",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownAndFba(),
+            false));
     var ownOnlyResult = calculate(shopOne);
     assertThat(ownOnlyResult.totalPoolCapacity()).isEqualByComparingTo("100");
     assertThat(ownOnlyResult.rows().get(0).platformListing()).isEqualByComparingTo("80");
 
     // 被排除的 FBA 量必须**报出来**，否则用户以为 FBA 已被计入
-    var detail = access.run(actorA, "warehouse.inventory.read", () -> service.pool("EXCL-" + shopOne, null));
+    var detail =
+        access.run(actorA, "warehouse.inventory.read", () -> service.pool("EXCL-" + shopOne, null));
     assertThat(detail.excludedPlatformQuantity()).isEqualByComparingTo("60");
     assertThat(detail.note()).contains("FBA");
 
     // 含 FBA：同一个仓集合下容量变成 160
-    var hit = access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
-    save(hit.policy().id(),
-        shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.20",
-            PlatformStockScope.OWN_PLUS_FBA, ownAndFba(), false), actorA);
+    var hit =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
+    save(
+        hit.policy().id(),
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.20",
+            PlatformStockScope.OWN_PLUS_FBA,
+            ownAndFba(),
+            false),
+        actorA);
     var withFba = calculate(shopOne);
     assertThat(withFba.totalPoolCapacity()).isEqualByComparingTo("160");
     assertThat(withFba.rows().get(0).platformListing()).isEqualByComparingTo("128");
@@ -601,18 +985,37 @@ class SellablePolicyIntegrationTest {
   void 是否含在途真实改变池容量() {
     standardStock();
     // 不含在途：可用 100（残次 500 被排除，不是扣减）
-    save(shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.10",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.10",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
     var withoutTransit = calculate(shopOne);
     assertThat(withoutTransit.totalPoolCapacity()).isEqualByComparingTo("100");
     assertThat(withoutTransit.rows().get(0).qualifiedOnHand()).isEqualByComparingTo("100");
     assertThat(withoutTransit.rows().get(0).inTransitAdded()).isEqualByComparingTo("0");
 
     // 含在途：发往自有仓的 40 件被计入
-    var hit = access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
-    save(hit.policy().id(),
-        shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.10",
-            PlatformStockScope.OWN_WAREHOUSE, ownOnly(), true), actorA);
+    var hit =
+        access.run(
+            actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null));
+    save(
+        hit.policy().id(),
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.10",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            true),
+        actorA);
     var withTransit = calculate(shopOne);
     assertThat(withTransit.totalPoolCapacity()).isEqualByComparingTo("140");
     assertThat(withTransit.rows().get(0).inTransitAdded()).isEqualByComparingTo("40");
@@ -624,8 +1027,16 @@ class SellablePolicyIntegrationTest {
   void 回写件数向下取整而不是四舍五入() {
     // 11 件 × 保留 5% = 10.45 件可回写，四舍五入会变成 10，凭空多卖半件
     balance(whOwn, qSellable, "11", "0");
-    save(shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.05",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.05",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
     var result = calculate(shopOne);
     assertThat(result.totalPoolCapacity()).isEqualByComparingTo("11");
     assertThat(result.rows().get(0).platformListing()).isEqualByComparingTo("10");
@@ -638,22 +1049,51 @@ class SellablePolicyIntegrationTest {
     standardStock();
     // 用一个非本机时区的偏移写入：走 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s。
     var written = OffsetDateTime.parse("2026-10-01T09:00:00+08:00");
-    var id = save(new SellablePolicyInput(
-        "SHOP", "CHANNEL", shopOne, "美国店", "EXCLUSIVE", null, false, BigDecimal.ZERO,
-        "OWN_WAREHOUSE", new BigDecimal("0.20"), false, written, "带偏移写入", ownOnly()));
+    var id =
+        save(
+            new SellablePolicyInput(
+                "SHOP",
+                "CHANNEL",
+                shopOne,
+                "美国店",
+                "EXCLUSIVE",
+                null,
+                false,
+                BigDecimal.ZERO,
+                "OWN_WAREHOUSE",
+                new BigDecimal("0.20"),
+                false,
+                written,
+                "带偏移写入",
+                ownOnly()));
 
     var readBack =
-        access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
-                "select effective_from from sellable_policy where id = ?", id.policyId()))
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.read",
+                () ->
+                    sql.fetchOne(
+                        "select effective_from from sellable_policy where id = ?", id.policyId()))
             .get("effective_from", OffsetDateTime.class);
     assertThat(readBack.toInstant()).isEqualTo(written.toInstant());
     assertThat(readBack.getOffset().getTotalSeconds()).isEqualTo(8 * 3600);
     // 按时刻解析也要认这个偏移：写进去之前那一刻用旧档/未配置，之后用新档
-    assertThat(access.run(actorA, "warehouse.inventory.read",
-            () -> service.effective("SHOP", shopOne, written.minusSeconds(1))).policy())
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.effective("SHOP", shopOne, written.minusSeconds(1)))
+                .policy())
         .isNull();
-    assertThat(access.run(actorA, "warehouse.inventory.read",
-            () -> service.effective("SHOP", shopOne, written)).policy())
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.effective("SHOP", shopOne, written))
+                .policy())
         .isNotNull();
   }
 
@@ -662,39 +1102,58 @@ class SellablePolicyIntegrationTest {
   @Test
   void 端点契约与权限码() throws Exception {
     standardStock();
-    save(shopPolicy(shopOne, "美国店", PoolMode.EXCLUSIVE, null, "0.20",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "美国店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.20",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
 
-    http.perform(get("/warehouse/inventory/sellable-policies").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.policies[0].bufferRatio").value(0.2));
-    http.perform(get("/warehouse/inventory/sellable-policies/effective")
-            .header("Authorization", "Bearer tenant-a")
-            .param("scopeType", "SHOP")
-            .param("referenceId", shopOne.toString()))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies/effective")
+                .header("Authorization", "Bearer tenant-a")
+                .param("scopeType", "SHOP")
+                .param("referenceId", shopOne.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.policy.scopeType").value("SHOP"));
-    http.perform(get("/warehouse/inventory/sellable-policies/pools").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies/pools")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
-    http.perform(post("/warehouse/inventory/sellable-policies/calculation")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"skuIds\":[\"%s\"],\"scopeType\":\"SHOP\",\"referenceId\":\"%s\"}".formatted(sku, shopOne)))
+    http.perform(
+            post("/warehouse/inventory/sellable-policies/calculation")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"skuIds\":[\"%s\"],\"scopeType\":\"SHOP\",\"referenceId\":\"%s\"}"
+                        .formatted(sku, shopOne)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.requestedSkuCount").value(1))
         .andExpect(jsonPath("$.rows[0].platformListing").value(80));
 
     // 未认证 401
-    http.perform(get("/warehouse/inventory/sellable-policies")).andExpect(status().isUnauthorized());
+    http.perform(get("/warehouse/inventory/sellable-policies"))
+        .andExpect(status().isUnauthorized());
 
     // 改防超卖的最后一道防线必须挂写权限：只有读权限的人配不了缓冲比例。
-    http.perform(post("/warehouse/inventory/sellable-policies")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"scopeType\":\"DEFAULT\",\"poolMode\":\"EXCLUSIVE\",\"platformStockScope\":"
-                + "\"OWN_WAREHOUSE\",\"bufferRatio\":0.2}"))
+    http.perform(
+            post("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"DEFAULT\",\"poolMode\":\"EXCLUSIVE\",\"platformStockScope\":"
+                        + "\"OWN_WAREHOUSE\",\"bufferRatio\":0.2}"))
         .andExpect(status().isForbidden());
   }
 
@@ -703,94 +1162,159 @@ class SellablePolicyIntegrationTest {
   @Test
   void 断言一_两租户互不可见() throws Exception {
     standardStock();
-    var policyA = save(shopPolicy(shopOne, "A 的店", PoolMode.EXCLUSIVE, null, "0.20",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    var policyA =
+        save(
+            shopPolicy(
+                shopOne,
+                "A 的店",
+                PoolMode.EXCLUSIVE,
+                null,
+                "0.20",
+                PlatformStockScope.OWN_WAREHOUSE,
+                ownOnly(),
+                false));
 
     // B 租户造一个同名店铺口径，缓冲不同，便于确认读到的是自己那一档而不是 A 的
-    access.run(actorB, "warehouse.inventory.update", () -> {
+    access.run(
+        actorB,
+        "warehouse.inventory.update",
+        () -> {
           sql.execute(
               "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
                   + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
                   + "include_in_transit,effective_from,note,created_by_membership_id) "
                   + "values (?,?,'SHOP','CHANNEL',?,'B 的店','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
                   + "0.60::numeric,false,?::timestamptz,'B 夹具',?)",
-              UUID.randomUUID(), b, shopOne, "EXCL-" + shopOne, now(), user);
+              UUID.randomUUID(),
+              b,
+              shopOne,
+              "EXCL-" + shopOne,
+              now(),
+              user);
           return null;
         });
 
-    var pageA = access.run(actorA, "warehouse.inventory.read",
-        () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
+    var pageA =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
     assertThat(pageA.total()).isEqualTo(1);
     assertThat(pageA.policies().get(0).id()).isEqualTo(policyA.policyId());
     assertThat(pageA.policies().get(0).bufferRatio()).isEqualByComparingTo("0.20");
 
-    var pageB = access.run(actorB, "warehouse.inventory.read",
-        () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
+    var pageB =
+        access.run(
+            actorB,
+            "warehouse.inventory.read",
+            () -> service.page(new SellablePolicyQuery(null, null, null, false, null, 0, 50)));
     assertThat(pageB.total()).isEqualTo(1);
     assertThat(pageB.policies().get(0).bufferRatio()).isEqualByComparingTo("0.60");
 
     // 拿 A 的 id 去 B 那里读 → 404（RLS 下查不到），不泄露"这条存在"
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.detail(policyA.policyId())))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.detail(policyA.policyId())))
         .isInstanceOf(ResponseStatusException.class);
   }
 
   @Test
   void 断言二_伪造租户头无效() throws Exception {
     standardStock();
-    save(shopPolicy(shopOne, "A 的店", PoolMode.EXCLUSIVE, null, "0.20",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false));
+    save(
+        shopPolicy(
+            shopOne,
+            "A 的店",
+            PoolMode.EXCLUSIVE,
+            null,
+            "0.20",
+            PlatformStockScope.OWN_WAREHOUSE,
+            ownOnly(),
+            false));
 
     // 身份是 B、伪造 X-Tenant-Id 指向 A → B 只能看到 B 自己的（空）
-    http.perform(get("/warehouse/inventory/sellable-policies")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
 
     // 身份是 A、伪造 B 的头 → A 仍然只看得到自己的那一档
-    http.perform(get("/warehouse/inventory/sellable-policies")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.policies[0].referenceLabel").value("A 的店"));
 
     // 写入路径同样不受伪造头影响
-    http.perform(post("/warehouse/inventory/sellable-policies")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content("{\"scopeType\":\"DEFAULT\",\"poolMode\":\"EXCLUSIVE\",\"platformStockScope\":"
-                + "\"OWN_WAREHOUSE\",\"bufferRatio\":0.9}"))
+    http.perform(
+            post("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"DEFAULT\",\"poolMode\":\"EXCLUSIVE\",\"platformStockScope\":"
+                        + "\"OWN_WAREHOUSE\",\"bufferRatio\":0.9}"))
         .andExpect(status().isOk());
-    http.perform(get("/warehouse/inventory/sellable-policies")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/sellable-policies")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(jsonPath("$.policies[?(@.scopeType=='DEFAULT')]").isEmpty());
   }
 
   @Test
   void 断言三_连接池归还后不串租户() {
     standardStock();
-    var a1 = save(shopPolicy(shopOne, "A 的店", PoolMode.EXCLUSIVE, null, "0.20",
-        PlatformStockScope.OWN_WAREHOUSE, ownOnly(), false), actorA);
-    access.run(actorB, "warehouse.inventory.update", () -> {
+    var a1 =
+        save(
+            shopPolicy(
+                shopOne,
+                "A 的店",
+                PoolMode.EXCLUSIVE,
+                null,
+                "0.20",
+                PlatformStockScope.OWN_WAREHOUSE,
+                ownOnly(),
+                false),
+            actorA);
+    access.run(
+        actorB,
+        "warehouse.inventory.update",
+        () -> {
           sql.execute(
               "insert into sellable_policy(id,tenant_id,scope_type,source_system,reference_id,reference_label,"
                   + "pool_mode,pool_key,oversell_allowed,oversell_tolerance,platform_stock_scope,buffer_ratio,"
                   + "include_in_transit,effective_from,note,created_by_membership_id) "
                   + "values (?,?,'SHOP','CHANNEL',?,'B 的店','EXCLUSIVE',?,false,0::numeric,'OWN_WAREHOUSE',"
                   + "0.60::numeric,false,?::timestamptz,'B 夹具',?)",
-              UUID.randomUUID(), b, shopOne, "EXCL-" + shopOne, now(), user);
+              UUID.randomUUID(),
+              b,
+              shopOne,
+              "EXCL-" + shopOne,
+              now(),
+              user);
           return null;
         });
 
     // 池大小为 1，同一条连接被反复借还：交替跑两个租户 20 轮，
     // 每一轮都要同时校验写入、回查与解析三条路径都不串租户。
     for (int i = 0; i < 20; i++) {
-      var pageA = access.run(actorA, "warehouse.inventory.read",
-          () -> service.page(new SellablePolicyQuery("SHOP", shopOne, null, true, null, 0, 50)));
-      var pageB = access.run(actorB, "warehouse.inventory.read",
-          () -> service.page(new SellablePolicyQuery("SHOP", shopOne, null, true, null, 0, 50)));
+      var pageA =
+          access.run(
+              actorA,
+              "warehouse.inventory.read",
+              () ->
+                  service.page(new SellablePolicyQuery("SHOP", shopOne, null, true, null, 0, 50)));
+      var pageB =
+          access.run(
+              actorB,
+              "warehouse.inventory.read",
+              () ->
+                  service.page(new SellablePolicyQuery("SHOP", shopOne, null, true, null, 0, 50)));
       assertThat(pageA.policies()).hasSize(1);
       assertThat(pageB.policies()).hasSize(1);
       assertThat(pageA.policies().get(0).id()).isEqualTo(a1.policyId());
@@ -798,11 +1322,23 @@ class SellablePolicyIntegrationTest {
       assertThat(pageB.policies().get(0).bufferRatio()).isEqualByComparingTo("0.60");
 
       // 解析路径：同名店铺在两个租户解析到各自的档
-      assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null))
-              .policy().bufferRatio())
+      assertThat(
+              access
+                  .run(
+                      actorA,
+                      "warehouse.inventory.read",
+                      () -> service.effective("SHOP", shopOne, null))
+                  .policy()
+                  .bufferRatio())
           .isEqualByComparingTo("0.20");
-      assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.effective("SHOP", shopOne, null))
-              .policy().bufferRatio())
+      assertThat(
+              access
+                  .run(
+                      actorB,
+                      "warehouse.inventory.read",
+                      () -> service.effective("SHOP", shopOne, null))
+                  .policy()
+                  .bufferRatio())
           .isEqualByComparingTo("0.60");
     }
   }
@@ -818,8 +1354,9 @@ class SellablePolicyIntegrationTest {
       assertThat(rs.getLong(1)).isZero();
       // 逐张表确认 FORCE（relforcerowsecurity）
       for (var table : List.of("sellable_policy", "sellable_policy_warehouse")) {
-        var meta = s.executeQuery(
-            "select relforcerowsecurity from pg_class where relname = '" + table + "'");
+        var meta =
+            s.executeQuery(
+                "select relforcerowsecurity from pg_class where relname = '" + table + "'");
         meta.next();
         assertThat(meta.getBoolean(1)).as(table + " 必须 FORCE RLS").isTrue();
       }

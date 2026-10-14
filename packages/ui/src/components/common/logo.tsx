@@ -102,7 +102,7 @@ export function Logo({ tone = 'light', size = 'md', markOnly = false, className 
         <span
           className={cn(
             sizes.wordmark,
-            'font-bold leading-none tracking-[0.01em] uppercase select-none',
+            'select-none font-bold uppercase leading-none tracking-[0.01em]',
           )}
         >
           STARCON
@@ -110,7 +110,7 @@ export function Logo({ tone = 'light', size = 'md', markOnly = false, className 
         <span
           className={cn(
             sizes.subtitle,
-            'mt-1 font-normal leading-none tracking-normal select-none',
+            'mt-1 select-none font-normal leading-none tracking-normal',
             subtitleColorClass(tone),
           )}
         >

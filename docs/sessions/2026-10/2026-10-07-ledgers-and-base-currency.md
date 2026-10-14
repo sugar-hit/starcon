@@ -49,15 +49,18 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/identity/src/main/resources/db/migration/V81__ledger_book_category_default_and_fact_ownership.sql`
 
 **后端**
+
 - `backend/services/identity/src/main/java/com/starcon/identity/LedgerBookController.java`（新）
 - `backend/services/identity/src/main/java/com/starcon/identity/AccountingBookController.java`（**只做加法**：
   输入/读出口新增 4 个可空字段，缺省即老行为；`checkBaseCurrency` 变为 INHERIT 生效）
 - `backend/services/identity/src/test/java/com/starcon/identity/LedgerBookIntegrationTest.java`（新，8 例）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（17.6.1.1 一行）
 
 ## 未完成部分（原因）
@@ -97,13 +100,13 @@
 首跑 `./mvnw verify` = BUILD FAILURE，`identity` 191 例中 5 例挂，且
 `catalog` / `channel` / `warehouse` 三个模块根本没跑到（reactor SKIPPED）：
 
-| 失败用例 | 根因 |
-| --- | --- |
-| `AccountingBookIntegrationTest.bookCurrencyMustEqualTheLegalEntityCurrency`（**17.1.2.2 既有测试**） | 被本车道新用例连累 |
-| `LedgerBookIntegrationTest.missingDefaultBookIsRejectedInsteadOfGuessed` | 同上 |
-| `LedgerBookIntegrationTest.onlyOneDefaultBookPerLegalEntityAndItMustBeActive` | 换默认账簿必 409 |
-| `LedgerBookIntegrationTest.theSameBusinessFactCannotBeRecordedInTwoBooks` | 「跨账簿不混记」是死文案 |
-| `LedgerBookIntegrationTest.factAssignmentKeepsItsTimestampAndCurrency` | 断言偏移量而非瞬时值 |
+| 失败用例                                                                                             | 根因                     |
+| ---------------------------------------------------------------------------------------------------- | ------------------------ |
+| `AccountingBookIntegrationTest.bookCurrencyMustEqualTheLegalEntityCurrency`（**17.1.2.2 既有测试**） | 被本车道新用例连累       |
+| `LedgerBookIntegrationTest.missingDefaultBookIsRejectedInsteadOfGuessed`                             | 同上                     |
+| `LedgerBookIntegrationTest.onlyOneDefaultBookPerLegalEntityAndItMustBeActive`                        | 换默认账簿必 409         |
+| `LedgerBookIntegrationTest.theSameBusinessFactCannotBeRecordedInTwoBooks`                            | 「跨账簿不混记」是死文案 |
+| `LedgerBookIntegrationTest.factAssignmentKeepsItsTimestampAndCurrency`                               | 断言偏移量而非瞬时值     |
 
 三个**产品 bug**（不是测试写错，值得单独立项记住）：
 

@@ -11,36 +11,103 @@ import org.junit.jupiter.api.*;
 /**
  * 3.7.2.1 纯规则单测：体积、体积重、计费重、特殊申报、渠道判定、装箱核算。
  *
- * <p>这些判定决定的是「这个 SKU 能不能走这个渠道、要不要申报」，代价出现在
- * <b>真实的面单与报关单</b>上，而判定发生在录入那一刻 —— 所以必须能不碰数据库
- * 逐条穷举。集成测试（{@code PhysicalSafetyIntegrationTest}）只证明这些规则
- * 真的被用上了，证明不了规则本身对不对。
+ * <p>这些判定决定的是「这个 SKU 能不能走这个渠道、要不要申报」，代价出现在 <b>真实的面单与报关单</b>上，而判定发生在录入那一刻 —— 所以必须能不碰数据库
+ * 逐条穷举。集成测试（{@code PhysicalSafetyIntegrationTest}）只证明这些规则 真的被用上了，证明不了规则本身对不对。
  */
 class PhysicalSafetyRulesTest {
   static PhysicalSafetyProfile profile(
       BigDecimal l, BigDecimal w, BigDecimal h, BigDecimal net, BigDecimal gross) {
     boolean collected = true;
     return new PhysicalSafetyProfile(
-        java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1", l, w, h, net, gross, "纸箱",
-        collected, false, false, false, false, "", "", 0L, 0L,
-        null, null, null, null, List.of(), List.of(), false);
+        java.util.UUID.randomUUID(),
+        "SKU-1",
+        "测试商品",
+        "SPU-1",
+        l,
+        w,
+        h,
+        net,
+        gross,
+        "纸箱",
+        collected,
+        false,
+        false,
+        false,
+        false,
+        "",
+        "",
+        0L,
+        0L,
+        null,
+        null,
+        null,
+        null,
+        List.of(),
+        List.of(),
+        false);
   }
 
-  static PhysicalSafetyProfile withFlags(boolean battery, boolean liquid, boolean dg, boolean magnetic) {
+  static PhysicalSafetyProfile withFlags(
+      boolean battery, boolean liquid, boolean dg, boolean magnetic) {
     return new PhysicalSafetyProfile(
-        java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1",
-        null, null, null, null, null, "", true, battery, liquid, dg, magnetic,
+        java.util.UUID.randomUUID(),
+        "SKU-1",
+        "测试商品",
+        "SPU-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        "",
+        true,
+        battery,
+        liquid,
+        dg,
+        magnetic,
         // 危险品必须带类别（规则 B3）：规则函数的入参必须永远是「合法的档案」，
         // 否则测试就在断言一个 DB 层已经拒绝掉的形状。
-        dg ? "UN1266" : "", "", 0L, 0L,
-        null, null, null, null, List.of(), List.of(), false);
+        dg ? "UN1266" : "",
+        "",
+        0L,
+        0L,
+        null,
+        null,
+        null,
+        null,
+        List.of(),
+        List.of(),
+        false);
   }
 
   static PhysicalSafetyProfile notCollected() {
     return new PhysicalSafetyProfile(
-        java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1",
-        null, null, null, null, null, "", false, false, false, false, false, "", "", null, null,
-        null, null, null, null, List.of(), List.of(), false);
+        java.util.UUID.randomUUID(),
+        "SKU-1",
+        "测试商品",
+        "SPU-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        "",
+        false,
+        false,
+        false,
+        false,
+        false,
+        "",
+        "",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        List.of(),
+        List.of(),
+        false);
   }
 
   // ============================================================ 体积（规则 R1）
@@ -143,11 +210,14 @@ class PhysicalSafetyRulesTest {
 
   @Test
   void 申报项与安全标记一一对应() {
-    assertThat(requiredDeclarations(withFlags(true, false, false, false))).containsExactly("BATTERY");
-    assertThat(requiredDeclarations(withFlags(false, true, false, false))).containsExactly("LIQUID");
+    assertThat(requiredDeclarations(withFlags(true, false, false, false)))
+        .containsExactly("BATTERY");
+    assertThat(requiredDeclarations(withFlags(false, true, false, false)))
+        .containsExactly("LIQUID");
     assertThat(requiredDeclarations(withFlags(false, false, true, false)))
         .containsExactly("DANGEROUS_GOODS");
-    assertThat(requiredDeclarations(withFlags(false, false, false, true))).containsExactly("MAGNETIC");
+    assertThat(requiredDeclarations(withFlags(false, false, false, true)))
+        .containsExactly("MAGNETIC");
     assertThat(requiredDeclarations(withFlags(false, false, false, false))).isEmpty();
     // 带电且危险是真实存在的组合，不能被压成一项。
     assertThat(requiredDeclarations(withFlags(true, false, true, false)))
@@ -164,7 +234,12 @@ class PhysicalSafetyRulesTest {
   // ============================================================ 渠道判定（规则 R2 / R3）
 
   static ChannelPolicy policy(
-      String code, boolean battery, boolean liquid, boolean dg, boolean magnetic, boolean requireParams) {
+      String code,
+      boolean battery,
+      boolean liquid,
+      boolean dg,
+      boolean magnetic,
+      boolean requireParams) {
     return new ChannelPolicy(code, battery, liquid, dg, magnetic, requireParams);
   }
 
@@ -185,7 +260,10 @@ class PhysicalSafetyRulesTest {
 
   @Test
   void 已采集且渠道都接受时放行() {
-    var result = verdict(withFlags(false, false, false, false), policy("EXPRESS", true, true, true, true, false));
+    var result =
+        verdict(
+            withFlags(false, false, false, false),
+            policy("EXPRESS", true, true, true, true, false));
     assertThat(result.shippable()).isTrue();
     assertThat(result.blockers()).isEmpty();
     assertThat(result.declarations()).isEmpty();
@@ -193,25 +271,42 @@ class PhysicalSafetyRulesTest {
 
   @Test
   void 带电货物遇到不收带电的渠道被拦下() {
-    var result = verdict(withFlags(true, false, false, false), policy("ROAD", false, true, true, true, false));
+    var result =
+        verdict(
+            withFlags(true, false, false, false), policy("ROAD", false, true, true, true, false));
     assertThat(result.shippable()).isFalse();
     assertThat(result.blockers()).containsExactly("BATTERY_NOT_ALLOWED");
   }
 
   @Test
   void 液体危险品磁性各自独立拦截() {
-    assertThat(verdict(withFlags(false, true, false, false), policy("C", true, false, true, true, false))
-        .blockers()).containsExactly("LIQUID_NOT_ALLOWED");
-    assertThat(verdict(withFlags(false, false, true, false), policy("C", true, true, false, true, false))
-        .blockers()).containsExactly("DANGEROUS_GOODS_NOT_ALLOWED");
-    assertThat(verdict(withFlags(false, false, false, true), policy("C", true, true, true, false, false))
-        .blockers()).containsExactly("MAGNETIC_NOT_ALLOWED");
+    assertThat(
+            verdict(
+                    withFlags(false, true, false, false),
+                    policy("C", true, false, true, true, false))
+                .blockers())
+        .containsExactly("LIQUID_NOT_ALLOWED");
+    assertThat(
+            verdict(
+                    withFlags(false, false, true, false),
+                    policy("C", true, true, false, true, false))
+                .blockers())
+        .containsExactly("DANGEROUS_GOODS_NOT_ALLOWED");
+    assertThat(
+            verdict(
+                    withFlags(false, false, false, true),
+                    policy("C", true, true, true, false, false))
+                .blockers())
+        .containsExactly("MAGNETIC_NOT_ALLOWED");
   }
 
   @Test
   void 可发时也要给出该办的申报() {
     // 渠道接受危险品，但仍需危险品申报 —— 拦截与申报是两件事。
-    var result = verdict(withFlags(false, false, true, false), policy("DG-FREIGHT", true, true, true, true, false));
+    var result =
+        verdict(
+            withFlags(false, false, true, false),
+            policy("DG-FREIGHT", true, true, true, true, false));
     assertThat(result.shippable()).isTrue();
     assertThat(result.declarations()).containsExactly("DANGEROUS_GOODS");
   }
@@ -234,8 +329,13 @@ class PhysicalSafetyRulesTest {
   @Test
   void 拦截原因都有可读的中文说法() {
     for (String code :
-        List.of("SAFETY_NOT_COLLECTED", "BATTERY_NOT_ALLOWED", "LIQUID_NOT_ALLOWED",
-            "DANGEROUS_GOODS_NOT_ALLOWED", "MAGNETIC_NOT_ALLOWED", "PHYSICAL_PARAMETERS_MISSING")) {
+        List.of(
+            "SAFETY_NOT_COLLECTED",
+            "BATTERY_NOT_ALLOWED",
+            "LIQUID_NOT_ALLOWED",
+            "DANGEROUS_GOODS_NOT_ALLOWED",
+            "MAGNETIC_NOT_ALLOWED",
+            "PHYSICAL_PARAMETERS_MISSING")) {
       assertThat(blockerLabel(code)).isNotBlank().isNotEqualTo(code);
     }
   }
@@ -245,8 +345,14 @@ class PhysicalSafetyRulesTest {
   @Test
   void 每箱件数按体积除出来并向下取整() {
     // 单件 3000 cm³、每箱 10000 cm³ → 3 件（3.33 向下取整）
-    var line = carton("SKU-1", decimal("3000"), decimal("500"), decimal("600"),
-        decimal("10000"), decimal("100000"));
+    var line =
+        carton(
+            "SKU-1",
+            decimal("3000"),
+            decimal("500"),
+            decimal("600"),
+            decimal("10000"),
+            decimal("100000"));
     assertThat(line.unitsPerCartonByVolume()).isEqualTo(3);
     assertThat(line.unitsPerCarton()).isEqualTo(3);
     assertThat(line.limitedByWeight()).isFalse();
@@ -255,8 +361,14 @@ class PhysicalSafetyRulesTest {
   @Test
   void 限重更紧时按限重取件数并标明是重量受限() {
     // 单件 1000 cm³（体积上能装 10 件），但毛重 3000g、限重 8000g → 只能装 2 件
-    var line = carton("SKU-1", decimal("1000"), decimal("2800"), decimal("3000"),
-        decimal("10000"), decimal("8000"));
+    var line =
+        carton(
+            "SKU-1",
+            decimal("1000"),
+            decimal("2800"),
+            decimal("3000"),
+            decimal("10000"),
+            decimal("8000"));
     assertThat(line.unitsPerCartonByVolume()).isEqualTo(10);
     assertThat(line.unitsPerCartonByWeight()).isEqualTo(2);
     assertThat(line.unitsPerCarton()).isEqualTo(2);
@@ -265,16 +377,22 @@ class PhysicalSafetyRulesTest {
 
   @Test
   void 体积约束更紧时标明不是重量受限() {
-    var line = carton("SKU-1", decimal("6000"), decimal("100"), decimal("200"),
-        decimal("10000"), decimal("100000"));
+    var line =
+        carton(
+            "SKU-1",
+            decimal("6000"),
+            decimal("100"),
+            decimal("200"),
+            decimal("10000"),
+            decimal("100000"));
     assertThat(line.unitsPerCarton()).isEqualTo(1);
     assertThat(line.limitedByWeight()).isFalse();
   }
 
   @Test
   void 缺体积时件数只按限重算并在附注里说明() {
-    var line = carton("SKU-1", null, decimal("1000"), decimal("2000"),
-        decimal("10000"), decimal("10000"));
+    var line =
+        carton("SKU-1", null, decimal("1000"), decimal("2000"), decimal("10000"), decimal("10000"));
     assertThat(line.unitsPerCartonByVolume()).isZero();
     assertThat(line.unitsPerCartonByWeight()).isEqualTo(5);
     assertThat(line.unitsPerCarton()).isEqualTo(5);

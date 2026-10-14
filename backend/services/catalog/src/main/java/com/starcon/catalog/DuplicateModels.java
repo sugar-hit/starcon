@@ -12,24 +12,19 @@ import java.util.UUID;
 /**
  * 3.9.1.1 重复 SKU 识别的传输对象。
  *
- * <p>蓝图的输出是「<b>重复候选清单（相似度、重叠维度、影响引用数）；确认合并/保留决定</b>」，
- * 所以这里的形状围绕两件事：
+ * <p>蓝图的输出是「<b>重复候选清单（相似度、重叠维度、影响引用数）；确认合并/保留决定</b>」， 所以这里的形状围绕两件事：
  *
  * <ul>
- *   <li>{@link DuplicateCandidateRow} —— 候选清单的一行：那一对 SKU、相似度、命中了几条线、
- *       两侧各自的 catalog 引用数，以及已登记的决定。
- *   <li>{@link DuplicateCandidateDetail} —— 单个候选的详情：两侧商品的完整身份与规格组合、
- *       逐维度得分与<b>可核对的证据</b>，供人工判断该不该合并。
+ *   <li>{@link DuplicateCandidateRow} —— 候选清单的一行：那一对 SKU、相似度、命中了几条线、 两侧各自的 catalog 引用数，以及已登记的决定。
+ *   <li>{@link DuplicateCandidateDetail} —— 单个候选的详情：两侧商品的完整身份与规格组合、 逐维度得分与<b>可核对的证据</b>，供人工判断该不该合并。
  * </ul>
  *
- * <p><b>决定与执行分开</b>：本模块只登记决定（{@link DuplicateDecisionInput}），
- * 执行合并是 3.9.1.2。{@link DuplicateDecisionRow} 因此把
- * {@code primaryVersion} / {@code secondaryVersion} 原样带给下游 ——
- * 它们是登记那一刻的 {@code expected_version}，对上才允许合并。
+ * <p><b>决定与执行分开</b>：本模块只登记决定（{@link DuplicateDecisionInput}）， 执行合并是 3.9.1.2。{@link
+ * DuplicateDecisionRow} 因此把 {@code primaryVersion} / {@code secondaryVersion} 原样带给下游 —— 它们是登记那一刻的
+ * {@code expected_version}，对上才允许合并。
  *
- * <p><b>引用数是 catalog 侧的口径</b>（条码 / 素材 / 属性值 / 报价 / 套装组件 / BOM 组件 /
- * 包装 / 安全属性 / 单位换算快照）。04 映射、07 库存、09 订单的引用在别的服务的库里，
- * 本模块不跨库读（模块边界纪律），所以那部分要由 3.9.1.2 走各自授权 API 补齐。
+ * <p><b>引用数是 catalog 侧的口径</b>（条码 / 素材 / 属性值 / 报价 / 套装组件 / BOM 组件 / 包装 / 安全属性 / 单位换算快照）。04 映射、07
+ * 库存、09 订单的引用在别的服务的库里， 本模块不跨库读（模块边界纪律），所以那部分要由 3.9.1.2 走各自授权 API 补齐。
  */
 final class DuplicateModels {
   private DuplicateModels() {}
@@ -40,10 +35,10 @@ final class DuplicateModels {
    * 一次扫描运行。
    *
    * @param minSimilarity 本次判定阈值（{@code NUMERIC(5,4)}，不是 float）
-   * @param scopeApplied 扫描被范围收窄了 → <b>可能漏掉跨范围的重复</b>，页面必须显式提示。
-   *     「0 个候选」在收窄扫描下和全量扫描下含义完全不同，不提示就等于报了个假的干净结论
-   * @param candidateCount / signalCount 扫描那一刻的快照。候选行在 SKU 被硬删除时随之删除
-   *     （停用不影响），所以 {@code candidateCount} 是这份扫描的**上界**，要当前值请读候选表
+   * @param scopeApplied 扫描被范围收窄了 → <b>可能漏掉跨范围的重复</b>，页面必须显式提示。 「0
+   *     个候选」在收窄扫描下和全量扫描下含义完全不同，不提示就等于报了个假的干净结论
+   * @param candidateCount / signalCount 扫描那一刻的快照。候选行在 SKU 被硬删除时随之删除 （停用不影响），所以 {@code
+   *     candidateCount} 是这份扫描的**上界**，要当前值请读候选表
    */
   public record DuplicateScanRow(
       UUID id,
@@ -63,17 +58,18 @@ final class DuplicateModels {
       int mergeCount,
       int keepCount) {}
 
-  public record DuplicateScanPage(List<DuplicateScanRow> items, int page, int size, long total, int totalCandidates) {}
+  public record DuplicateScanPage(
+      List<DuplicateScanRow> items, int page, int size, long total, int totalCandidates) {}
 
   /**
    * 一个维度的命中分布（详情页与概览共用）。
    *
-   * @param pairCount 命中该维度的候选对数（<b>去重后的对数</b>：同一对命中两条线，
-   *     在两个维度各计一次，但 {@code pairCount} 的语义是「有几对涉及这条线」，
-   *     而候选清单的行数仍然是 {@code overlapDimensionCount} 那一份）
+   * @param pairCount 命中该维度的候选对数（<b>去重后的对数</b>：同一对命中两条线， 在两个维度各计一次，但 {@code pairCount}
+   *     的语义是「有几对涉及这条线」， 而候选清单的行数仍然是 {@code overlapDimensionCount} 那一份）
    * @param label 给运营看的中文维度名
    */
-  public record DuplicateDimensionStat(String dimension, String label, int pairCount, BigDecimal topScore) {}
+  public record DuplicateDimensionStat(
+      String dimension, String label, int pairCount, BigDecimal topScore) {}
 
   /** 扫描总览：最近一次扫描 + 四个维度的分布 + 待确认数。 */
   public record DuplicateOverview(
@@ -136,9 +132,8 @@ final class DuplicateModels {
   /**
    * 单个候选的详情：两侧商品的完整身份 + 逐维度信号 + 已登记的决定。
    *
-   * @param leftVariantCombination / rightVariantCombination 按轴值现算的规格组合签名。
-   *     为空串表示这个 SKU 一个轴值都解析不出来（导入的占位签名 SKU 常见），
-   *     这种 SKU 不参与规格组合维度，但**照样展示出来** —— 运营需要知道它为什么没被这一维命中
+   * @param leftVariantCombination / rightVariantCombination 按轴值现算的规格组合签名。 为空串表示这个 SKU
+   *     一个轴值都解析不出来（导入的占位签名 SKU 常见）， 这种 SKU 不参与规格组合维度，但**照样展示出来** —— 运营需要知道它为什么没被这一维命中
    * @param leftBarcodeValues / rightBarcodeValues 全部条码（{@code sku.barcode} + 物料标识表）
    */
   public record DuplicateCandidateDetail(
@@ -174,9 +169,8 @@ final class DuplicateModels {
   /**
    * 已登记的决定。
    *
-   * @param primaryVersion / secondaryVersion 登记那一刻两个 SKU 的 {@code sku.version} ——
-   *     即 3.9.1.2 说的 {@code expected_version}。执行合并前必须带着它比对，
-   *     对不上说明登记之后商品被人改过，合并的前提已经不成立
+   * @param primaryVersion / secondaryVersion 登记那一刻两个 SKU 的 {@code sku.version} —— 即 3.9.1.2 说的
+   *     {@code expected_version}。执行合并前必须带着它比对， 对不上说明登记之后商品被人改过，合并的前提已经不成立
    */
   public record DuplicateDecisionRow(
       UUID id,

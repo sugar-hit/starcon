@@ -82,7 +82,9 @@ export function dimensionLabel(dimension: string): string {
  * <p>顺序是刻意的：蓝图的输出把「相似度、重叠维度」并列，但决定优先级的是后者 ——
  * 只中一条线的 0.95 与四条全中的 0.83，前者更可能是巧合，后者更可能是真的重复。
  */
-export function signalSummary(row: Pick<DuplicateCandidateRow, 'dimensions' | 'overlapDimensionCount'>): string {
+export function signalSummary(
+  row: Pick<DuplicateCandidateRow, 'dimensions' | 'overlapDimensionCount'>,
+): string {
   const count = row.dimensions.length;
   if (count === 0) return '无命中';
   const labels = row.dimensions.map((d) => dimensionLabel(d.dimension)).join(' + ');
@@ -270,7 +272,13 @@ export function runScan(
 
 export function fetchCandidates(
   scanId: string,
-  options: { dimension?: string; decision?: string; minSimilarity?: string; page?: number; size?: number },
+  options: {
+    dimension?: string;
+    decision?: string;
+    minSimilarity?: string;
+    page?: number;
+    size?: number;
+  },
 ): Promise<DuplicateCandidatePage> {
   const params = new URLSearchParams();
   if (options.dimension) params.set('dimension', options.dimension);
@@ -306,9 +314,11 @@ export function submitDecision(
  */
 export function validateMinSimilarity(raw: string): { ok: boolean; reason: string; value: number } {
   const trimmed = raw.trim();
-  if (trimmed === '') return { ok: false, reason: '请填写相似度阈值', value: Number(DEFAULT_MIN_SIMILARITY) };
+  if (trimmed === '')
+    return { ok: false, reason: '请填写相似度阈值', value: Number(DEFAULT_MIN_SIMILARITY) };
   const value = Number(trimmed);
-  if (!Number.isFinite(value)) return { ok: false, reason: '阈值必须是数字', value: Number(DEFAULT_MIN_SIMILARITY) };
+  if (!Number.isFinite(value))
+    return { ok: false, reason: '阈值必须是数字', value: Number(DEFAULT_MIN_SIMILARITY) };
   if (value < 0 || value > 1) return { ok: false, reason: '阈值必须在 0 到 1 之间', value };
   return { ok: true, reason: '', value };
 }

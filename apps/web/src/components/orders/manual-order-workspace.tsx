@@ -192,7 +192,9 @@ export function ManualOrderWorkspace() {
   }, [load]);
 
   useEffect(() => {
-    void fetchCapabilities().then(setCapabilities).catch(() => setCapabilities(null));
+    void fetchCapabilities()
+      .then(setCapabilities)
+      .catch(() => setCapabilities(null));
   }, []);
 
   const openDetail = useCallback(async (id: string) => {
@@ -277,33 +279,29 @@ export function ManualOrderWorkspace() {
         customer: customer as unknown as SalesOrderCustomerInput,
         lines: lines
           .filter((l) => l.skuCode.trim() !== '' && Number(l.quantity) > 0)
-          .map(
-            (l): SalesOrderLineInput => ({
-              skuId: l.skuId,
-              skuCode: l.skuCode.trim(),
-              skuName: l.skuName.trim(),
-              specSnapshot: l.specSnapshot,
-              skuMappingVersion: l.skuMappingVersion,
-              quantity: Number(l.quantity),
-              unitPrice: Number(l.unitPrice || 0),
-              discountAmount: Number(l.discountAmount || 0),
-              taxAmount: Number(l.taxAmount || 0),
-              note: l.note,
-              attributes: [],
-            }),
-          ),
+          .map((l): SalesOrderLineInput => ({
+            skuId: l.skuId,
+            skuCode: l.skuCode.trim(),
+            skuName: l.skuName.trim(),
+            specSnapshot: l.specSnapshot,
+            skuMappingVersion: l.skuMappingVersion,
+            quantity: Number(l.quantity),
+            unitPrice: Number(l.unitPrice || 0),
+            discountAmount: Number(l.discountAmount || 0),
+            taxAmount: Number(l.taxAmount || 0),
+            note: l.note,
+            attributes: [],
+          })),
         addresses: addresses.filter((a) => a.recipientName.trim() !== ''),
         charges: charges
           .filter((c) => c.amount.trim() !== '' && Number(c.amount) !== 0)
-          .map(
-            (c): SalesOrderChargeInput => ({
-              chargeType: c.chargeType as SalesOrderChargeInput['chargeType'],
-              label: c.label,
-              amount: normalizeChargeAmount(c.chargeType, Number(c.amount)),
-              chargeLevel: c.chargeLevel as SalesOrderChargeInput['chargeLevel'],
-              note: c.note,
-            }),
-          ),
+          .map((c): SalesOrderChargeInput => ({
+            chargeType: c.chargeType as SalesOrderChargeInput['chargeType'],
+            label: c.label,
+            amount: normalizeChargeAmount(c.chargeType, Number(c.amount)),
+            chargeLevel: c.chargeLevel as SalesOrderChargeInput['chargeLevel'],
+            note: c.note,
+          })),
       };
       const saved = await createOrder(input);
       setCreating(false);
@@ -490,8 +488,8 @@ export function ManualOrderWorkspace() {
               <div className="space-y-4">
                 {!isEditable(detail.order.status) && (
                   <div className="text-copy-12 text-muted-foreground rounded-md border px-3 py-2">
-                    已提交进审单队列：商品行、地址、费用与客户快照已冻结，不能再改。
-                    审单结论由 9.2 推进。
+                    已提交进审单队列：商品行、地址、费用与客户快照已冻结，不能再改。 审单结论由 9.2
+                    推进。
                   </div>
                 )}
 
@@ -519,7 +517,10 @@ export function ManualOrderWorkspace() {
 
                 {/* 订单行快照：SKU / 规格 / 单价 / 税 / 折扣 / 映射版本逐项显示，
                     让「历史订单行不跟着商品改」这件事在界面上看得见。 */}
-                <SectionCard title="商品行（快照）" description="商品参数事后被改，这里的取值一个字节都不会变。">
+                <SectionCard
+                  title="商品行（快照）"
+                  description="商品参数事后被改，这里的取值一个字节都不会变。"
+                >
                   <table className="w-full text-left text-sm">
                     <thead className="text-copy-12 text-muted-foreground border-b">
                       <tr>
@@ -545,10 +546,18 @@ export function ManualOrderWorkspace() {
                           <td className="px-2 py-1">{l.specSnapshot || '—'}</td>
                           <td className="px-2 py-1">{l.skuMappingVersion || '—'}</td>
                           <td className="text-copy-13 px-2 py-1 text-right">{fmt(l.quantity)}</td>
-                          <td className="text-copy-13 px-2 py-1 text-right">{money(l.unitPrice)}</td>
-                          <td className="text-copy-13 px-2 py-1 text-right">{money(l.discountAmount)}</td>
-                          <td className="text-copy-13 px-2 py-1 text-right">{money(l.taxAmount)}</td>
-                          <td className="text-copy-13 px-2 py-1 text-right">{money(l.lineAmount)}</td>
+                          <td className="text-copy-13 px-2 py-1 text-right">
+                            {money(l.unitPrice)}
+                          </td>
+                          <td className="text-copy-13 px-2 py-1 text-right">
+                            {money(l.discountAmount)}
+                          </td>
+                          <td className="text-copy-13 px-2 py-1 text-right">
+                            {money(l.taxAmount)}
+                          </td>
+                          <td className="text-copy-13 px-2 py-1 text-right">
+                            {money(l.lineAmount)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -580,7 +589,7 @@ export function ManualOrderWorkspace() {
                 >
                   <ul className="space-y-2 text-sm">
                     {detail.addresses.map((a) => (
-                      <li key={a.id} className="border-b last:border-0 pb-2">
+                      <li key={a.id} className="border-b pb-2 last:border-0">
                         <Badge tone="neutral">{addressRoleLabel(a.addressRole)}</Badge>
                         <div className="mt-1">
                           {a.recipientName}
@@ -618,14 +627,18 @@ export function ManualOrderWorkspace() {
                   </ul>
                 </SectionCard>
 
-                <SectionCard title="事件流" description="订单进了审单队列之后，第一个问题就是「谁在什么时候提上去的」。">
+                <SectionCard
+                  title="事件流"
+                  description="订单进了审单队列之后，第一个问题就是「谁在什么时候提上去的」。"
+                >
                   <ul className="space-y-1 text-sm">
                     {detail.events.map((e) => (
                       <li key={e.id} className="flex items-center justify-between gap-2">
                         <span>
                           {eventTypeLabels[e.eventType] ?? e.eventType}
                           <span className="text-copy-12 text-muted-foreground">
-                            （{e.fromStatus || '—'} → {e.toStatus}）{e.reason ? ` · ${e.reason}` : ''}
+                            （{e.fromStatus || '—'} → {e.toStatus}）
+                            {e.reason ? ` · ${e.reason}` : ''}
                           </span>
                         </span>
                         <span className="text-copy-12 text-muted-foreground">
@@ -728,7 +741,10 @@ export function ManualOrderWorkspace() {
               )}
             </div>
 
-            <SectionCard title="客户选择 *" description="收全量快照字段：客户改名 / 改级别不改写历史订单。">
+            <SectionCard
+              title="客户选择 *"
+              description="收全量快照字段：客户改名 / 改级别不改写历史订单。"
+            >
               <div className="grid gap-3 md:grid-cols-2">
                 <Labeled label="客户 ID（catalog 逻辑引用）">
                   <Input
@@ -775,7 +791,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={line.skuCode}
                         onChange={(e) =>
-                          setLines(lines.map((l, i) => (i === index ? { ...l, skuCode: e.target.value } : l)))
+                          setLines(
+                            lines.map((l, i) =>
+                              i === index ? { ...l, skuCode: e.target.value } : l,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -783,7 +803,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={line.skuName}
                         onChange={(e) =>
-                          setLines(lines.map((l, i) => (i === index ? { ...l, skuName: e.target.value } : l)))
+                          setLines(
+                            lines.map((l, i) =>
+                              i === index ? { ...l, skuName: e.target.value } : l,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -792,7 +816,9 @@ export function ManualOrderWorkspace() {
                         value={line.specSnapshot}
                         onChange={(e) =>
                           setLines(
-                            lines.map((l, i) => (i === index ? { ...l, specSnapshot: e.target.value } : l)),
+                            lines.map((l, i) =>
+                              i === index ? { ...l, specSnapshot: e.target.value } : l,
+                            ),
                           )
                         }
                       />
@@ -813,7 +839,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={line.quantity}
                         onChange={(e) =>
-                          setLines(lines.map((l, i) => (i === index ? { ...l, quantity: e.target.value } : l)))
+                          setLines(
+                            lines.map((l, i) =>
+                              i === index ? { ...l, quantity: e.target.value } : l,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -821,7 +851,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={line.unitPrice}
                         onChange={(e) =>
-                          setLines(lines.map((l, i) => (i === index ? { ...l, unitPrice: e.target.value } : l)))
+                          setLines(
+                            lines.map((l, i) =>
+                              i === index ? { ...l, unitPrice: e.target.value } : l,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -830,7 +864,9 @@ export function ManualOrderWorkspace() {
                         value={line.discountAmount}
                         onChange={(e) =>
                           setLines(
-                            lines.map((l, i) => (i === index ? { ...l, discountAmount: e.target.value } : l)),
+                            lines.map((l, i) =>
+                              i === index ? { ...l, discountAmount: e.target.value } : l,
+                            ),
                           )
                         }
                       />
@@ -839,19 +875,32 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={line.taxAmount}
                         onChange={(e) =>
-                          setLines(lines.map((l, i) => (i === index ? { ...l, taxAmount: e.target.value } : l)))
+                          setLines(
+                            lines.map((l, i) =>
+                              i === index ? { ...l, taxAmount: e.target.value } : l,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
                     <div className="text-copy-13 flex items-end pb-2 md:col-span-4">
                       行小计：
                       <span className="ml-1 font-medium">
-                        {money(lineAmount({ unitPrice: Number(line.unitPrice || 0), quantity: Number(line.quantity || 0) }))}
+                        {money(
+                          lineAmount({
+                            unitPrice: Number(line.unitPrice || 0),
+                            quantity: Number(line.quantity || 0),
+                          }),
+                        )}
                       </span>
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" size="sm" onClick={() => setLines([...lines, emptyLine()])}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLines([...lines, emptyLine()])}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   添加一行
                 </Button>
@@ -867,7 +916,11 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.recipientName ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, recipientName: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) =>
+                          i === 0 ? { ...a, recipientName: e.target.value } : a,
+                        ),
+                      )
                     }
                   />
                 </Labeled>
@@ -875,7 +928,11 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.recipientPhone ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, recipientPhone: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) =>
+                          i === 0 ? { ...a, recipientPhone: e.target.value } : a,
+                        ),
+                      )
                     }
                   />
                 </Labeled>
@@ -883,7 +940,11 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.countryCode ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, countryCode: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) =>
+                          i === 0 ? { ...a, countryCode: e.target.value } : a,
+                        ),
+                      )
                     }
                   />
                 </Labeled>
@@ -891,7 +952,11 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.addressLine1 ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, addressLine1: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) =>
+                          i === 0 ? { ...a, addressLine1: e.target.value } : a,
+                        ),
+                      )
                     }
                   />
                 </Labeled>
@@ -899,7 +964,9 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.province ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, province: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) => (i === 0 ? { ...a, province: e.target.value } : a)),
+                      )
                     }
                   />
                 </Labeled>
@@ -907,7 +974,9 @@ export function ManualOrderWorkspace() {
                   <Input
                     value={addresses[0]?.postcode ?? ''}
                     onChange={(e) =>
-                      setAddresses(addresses.map((a, i) => (i === 0 ? { ...a, postcode: e.target.value } : a)))
+                      setAddresses(
+                        addresses.map((a, i) => (i === 0 ? { ...a, postcode: e.target.value } : a)),
+                      )
                     }
                   />
                 </Labeled>
@@ -923,7 +992,11 @@ export function ManualOrderWorkspace() {
                         className="border-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                         value={charge.chargeType}
                         onChange={(e) =>
-                          setCharges(charges.map((c, i) => (i === index ? { ...c, chargeType: e.target.value } : c)))
+                          setCharges(
+                            charges.map((c, i) =>
+                              i === index ? { ...c, chargeType: e.target.value } : c,
+                            ),
+                          )
                         }
                       >
                         {Object.entries(chargeTypeLabels).map(([v, l]) => (
@@ -937,7 +1010,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={charge.label}
                         onChange={(e) =>
-                          setCharges(charges.map((c, i) => (i === index ? { ...c, label: e.target.value } : c)))
+                          setCharges(
+                            charges.map((c, i) =>
+                              i === index ? { ...c, label: e.target.value } : c,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -945,7 +1022,11 @@ export function ManualOrderWorkspace() {
                       <Input
                         value={charge.amount}
                         onChange={(e) =>
-                          setCharges(charges.map((c, i) => (i === index ? { ...c, amount: e.target.value } : c)))
+                          setCharges(
+                            charges.map((c, i) =>
+                              i === index ? { ...c, amount: e.target.value } : c,
+                            ),
+                          )
                         }
                       />
                     </Labeled>
@@ -954,7 +1035,11 @@ export function ManualOrderWorkspace() {
                         className="border-border bg-card text-copy-13 h-9 w-full rounded-md border px-2"
                         value={charge.chargeLevel}
                         onChange={(e) =>
-                          setCharges(charges.map((c, i) => (i === index ? { ...c, chargeLevel: e.target.value } : c)))
+                          setCharges(
+                            charges.map((c, i) =>
+                              i === index ? { ...c, chargeLevel: e.target.value } : c,
+                            ),
+                          )
                         }
                       >
                         {Object.entries(chargeLevelLabels).map(([v, l]) => (
@@ -979,7 +1064,9 @@ export function ManualOrderWorkspace() {
 
             {/* 试算：与服务层、DB 触发器同一条公式。让人在下单**之前**看见总额。 */}
             <div className="bg-muted/40 rounded-md px-3 py-2 text-sm">
-              <div className="text-copy-12 text-muted-foreground mb-1">订单总额试算（提交后由 DB 独立复算）</div>
+              <div className="text-copy-12 text-muted-foreground mb-1">
+                订单总额试算（提交后由 DB 独立复算）
+              </div>
               <div className="text-copy-12 text-muted-foreground grid gap-x-6 gap-y-0.5 md:grid-cols-3">
                 <span>商品小计 {money(preview.subtotal)}</span>
                 <span>折扣 −{money(preview.discount)}</span>

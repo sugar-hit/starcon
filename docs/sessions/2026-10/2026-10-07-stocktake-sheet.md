@@ -17,10 +17,10 @@
 
 「冻结」有两种实现：
 
-| 实现 | 账面列的数据来源 | 盘点期间卖货后 |
-| --- | --- | --- |
-| (A) 实时查 `stock_bucket` | 查询 | 账面列被改写 → 虚假差异 |
-| (B) 复制成行 | 数据 | 账面列不动 |
+| 实现                      | 账面列的数据来源 | 盘点期间卖货后          |
+| ------------------------- | ---------------- | ----------------------- |
+| (A) 实时查 `stock_bucket` | 查询             | 账面列被改写 → 虚假差异 |
+| (B) 复制成行              | 数据             | 账面列不动              |
 
 取 (B)，并且**不只靠应用层自觉**：`stocktake_line_frozen` 触发器把 `book_on_hand` 与八个维度列
 钉成不可更新。拿到连接直接 UPDATE 也改不动。
@@ -56,12 +56,12 @@ SQL 各自接收两个参数。
 
 蓝图列了四种，实际交付：
 
-| 范围 | 状态 | 理由 |
-| --- | --- | --- |
-| 按仓库 | ✅ 可用 | 本服务自有数据 |
-| 按库位 | ✅ 可用 | 本服务自有数据 |
-| 按类目 | ⚠️ 枚举保留，**显式拒绝 422** | `sku_ref` 刻意不存类目（V1 文件头），catalog 读取投影未接入 → `UnwiredCatalogProjectionPort`。按 7.1.1.1 已建立的同一套约定：未接入的维度显式拒绝，而不是返回空集（空集会被读成「盘不出东西」） |
-| 按 ABC 分类 | ❌ **连枚举都不给** | 全库（warehouse 与 catalog 两侧所有迁移 + `db/schemas`）不存在任何 ABC 字段，也没有动销率/帕累托之类可推导它的原始列 |
+| 范围        | 状态                          | 理由                                                                                                                                                                                            |
+| ----------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 按仓库      | ✅ 可用                       | 本服务自有数据                                                                                                                                                                                  |
+| 按库位      | ✅ 可用                       | 本服务自有数据                                                                                                                                                                                  |
+| 按类目      | ⚠️ 枚举保留，**显式拒绝 422** | `sku_ref` 刻意不存类目（V1 文件头），catalog 读取投影未接入 → `UnwiredCatalogProjectionPort`。按 7.1.1.1 已建立的同一套约定：未接入的维度显式拒绝，而不是返回空集（空集会被读成「盘不出东西」） |
+| 按 ABC 分类 | ❌ **连枚举都不给**           | 全库（warehouse 与 catalog 两侧所有迁移 + `db/schemas`）不存在任何 ABC 字段，也没有动销率/帕累托之类可推导它的原始列                                                                            |
 
 ABC 之所以连枚举都不给：臆造一个按金额分位的算法冒充已有数据，会让盘点员以为盘的是公司认定的
 A 类货，实际是一个没人批准过的猜测 —— 比明说「没有这个维度」危险得多。它改由
@@ -100,6 +100,7 @@ ABC 分类」的折叠区里对用户讲清楚。
 ## 文件清单
 
 **后端**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V59__warehouse_stocktake_sheet.sql`（新增）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/StocktakeModels.java`（新增）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/StocktakeService.java`（新增）
@@ -107,9 +108,11 @@ ABC 分类」的折叠区里对用户讲清楚。
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/StocktakeIntegrationTest.java`（新增，19 例）
 
 **契约**（codegen 产物，按流程生成不手改）
+
 - `packages/api-contracts/src/warehouse.openapi.json`、`packages/api-contracts/src/catalog.ts`
 
 **前端**
+
 - `apps/web/src/app/inventory/count/page.tsx`（新增）
 - `apps/web/src/components/inventory/stocktake-workspace.tsx`（新增）
 - `apps/web/src/components/inventory/stocktake-model.ts`（新增）
@@ -117,6 +120,7 @@ ABC 分类」的折叠区里对用户讲清楚。
 - `apps/web/src/lib/api-proxy.ts`（放行盘点路径形状）
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（仅 7.4.2.1 那一行的状态与证据）
 - 本文件
 

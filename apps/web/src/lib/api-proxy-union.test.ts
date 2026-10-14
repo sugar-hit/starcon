@@ -65,7 +65,9 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
       headers: { cookie: 'starcon_session=test' },
     });
     // the service matches on its prefix (e.g. 'identity/') then tests the remainder
-    return proxy(req, { params: { path: [service, ...path.split('/')] } } as never);
+    return proxy(req, {
+      params: Promise.resolve({ path: [service, ...path.split('/')] }),
+    } as never);
   }
 
   it('extracts a non-empty allow-set (guards against a broken extractor)', () => {
@@ -187,17 +189,12 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
   // living only in someone's head. It is NOT fixed by 4.2.2.2: the `descriptions`
   // branch belongs to 3.4.2.2's lane. When that lane fixes the token, this test
   // goes red and the entry moves to CATALOG_ALLOW.
-  const CATALOG_KNOWN_BROKEN = [
-    `descriptions/templates/${UUID}/translations`,
-  ];
+  const CATALOG_KNOWN_BROKEN = [`descriptions/templates/${UUID}/translations`];
 
-  it.each(CATALOG_KNOWN_BROKEN)(
-    'CATALOG KNOWN-BROKEN (3.4.2.2 owns the fix) %s',
-    async (path) => {
-      const res = await callProxy(path, 'catalog');
-      expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
-    },
-  );
+  it.each(CATALOG_KNOWN_BROKEN)('CATALOG KNOWN-BROKEN (3.4.2.2 owns the fix) %s', async (path) => {
+    const res = await callProxy(path, 'catalog');
+    expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
+  });
 
   const WH_BLOCK = ['customs-declarationz', `transit-trackings/${UUID}/bogus-shape`];
 

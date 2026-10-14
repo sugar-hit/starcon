@@ -96,7 +96,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了一条」也算通过。
@@ -126,7 +128,9 @@ it('写动作的 POST 形状被放行，且真的转发到 8084', async () => {
     `warehouse/putaway-tasks/${ID}/complete`,
     `warehouse/putaway-tasks/${ID}/cancel`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -153,7 +157,9 @@ it('字面量 capabilities 不会被 uuid 通配分支吃掉（alternation 首�
     'warehouse/putaway-tasks/capabilities/advanced',
     'warehouse/putaway-tasks/PUT-000001',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行：只有 uuid 与已知动作可以过`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -175,17 +181,18 @@ it('上架任务是独立顶层分支，不挂在 8.2.1.1 的 goods-receipts 底
     'warehouse/goods-receipts/putaway',
     'warehouse/goods-receipts/capabilities/putaway-tasks',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行：上架任务必须用自己的顶层分支`).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 
   // 反向钉住：上游模块的原有形状一个都没被本车道吃掉
-  for (const path of [
-    'warehouse/goods-receipts/capabilities',
-    `warehouse/goods-receipts/${ID}`,
-  ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+  for (const path of ['warehouse/goods-receipts/capabilities', `warehouse/goods-receipts/${ID}`]) {
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `8.2.1.1 的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
   }
 });
@@ -202,7 +209,9 @@ it('PUT / DELETE 不由代理拦：路径在白名单内就会被转发，方法
   vi.stubGlobal('fetch', fetcher);
 
   for (const path of [`warehouse/putaway-tasks/${ID}`, 'warehouse/putaway-tasks']) {
-    const response = await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } });
+    const response = await DELETE(request(path, 'DELETE'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(
       response.status,
       `DELETE ${path} 应转发给后端（凭据不可删，交给后端 405 / 终态守卫）`,
@@ -230,7 +239,9 @@ it('未交付 / 不该存在的形状仍然被拒，且「多一层后缀」也�
     'warehouse/putaway-task/{id}/scan',
     'warehouse/put-away-tasks',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -259,7 +270,9 @@ it('不误伤本车道之前已放行的仓库分支（求并，不是二选一�
     `warehouse/disassembly-orders/${ID}/execute`,
     `warehouse/disassembly-orders/${ID}/cancel`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
   }
 });
@@ -275,7 +288,7 @@ it('跨源写请求被 403 拒绝，不转发', async () => {
       headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
       body: '{}',
     }),
-    { params: { path: path.split('/') } },
+    { params: Promise.resolve({ path: path.split('/') }) },
   );
   expect(response.status).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();

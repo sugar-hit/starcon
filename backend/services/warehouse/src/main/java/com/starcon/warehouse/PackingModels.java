@@ -1,43 +1,33 @@
 package com.starcon.warehouse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
  * 8.3.3.2 打包与称重的传输模型。
  *
  * <p>蓝图 08 卷 8.3.3.2 原文：「<b>打包作业：选择包材、填充物、打印面单、称重与体积测量、记录包装尺寸（用于体积重与平台申报）。</b>
- * 输入：复核结果；包材选择；称重数据；申报信息（3.7.2 物理属性）。
- * 输出：包裹记录（parcel + parcel_item）+ 实测重量体积。」
- * 关系段：「上游 = 8.3.3.1；下游 = 8.3.4.1 发货、10 物流（取重算费）。
- * <b>包裹必须含明细项</b>（哪些 SKU、多少件），只有重量和运单号无法追溯与对账。」
+ * 输入：复核结果；包材选择；称重数据；申报信息（3.7.2 物理属性）。 输出：包裹记录（parcel + parcel_item）+ 实测重量体积。」 关系段：「上游 = 8.3.3.1；下游
+ * = 8.3.4.1 发货、10 物流（取重算费）。 <b>包裹必须含明细项</b>（哪些 SKU、多少件），只有重量和运单号无法追溯与对账。」
  *
- * <p><b>命名空间：全部 {@code Packing} / {@code Parcel} / {@code Material} 前缀。</b>
- * springdoc 用 record 的<b>简单类名</b>做 {@code components.schemas} 的键，重名会被
- * <b>静默覆盖</b>（别人的字段形状被改掉、单测全绿、只有跨服务契约比对才红）。
- * 开工前 grep 过 backend 全部 Java 源码，三个前缀下无同名类型。
+ * <p><b>命名空间：全部 {@code Packing} / {@code Parcel} / {@code Material} 前缀。</b> springdoc 用 record
+ * 的<b>简单类名</b>做 {@code components.schemas} 的键，重名会被 <b>静默覆盖</b>（别人的字段形状被改掉、单测全绿、只有跨服务契约比对才红）。 开工前
+ * grep 过 backend 全部 Java 源码，三个前缀下无同名类型。
  *
  * <p><b>五个刻意不给默认值的地方：</b>
  *
  * <ul>
- *   <li><b>打包完成 ≠ 已发货。</b>{@link PackingStatus} 四态里没有「已发货」：
- *       打包完成只是把包裹交给 8.3.4.1（运单号与承运渠道是下游的事），
- *       与 8.3.3.1「复核通过 ≠ 已发货」同一纪律。</li>
- *   <li><b>没量 ≠ 量出来是 0。</b>{@code outerLengthCm} / {@code measuredGrossWeightG}
- *       / {@code volumeCbm} 未测时返回 <b>null</b>，不返回 0 —— 0 会被读成
- *       「这个箱子重 0 克」，而真实含义是「还没上秤」。</li>
- *   <li><b>净重与体积是派生量，界面不自己算。</b>{@code netContentWeightG} 与
- *       {@code volumeCbm} 由 DB 触发器从毛重与三边算出（V121），前端展示即可，
- *       在页面再乘一遍会与账上的数差一位。</li>
- *   <li><b>体积重不在本模块算。</b>{@code divisor} 一律不出现：除数（6000/5000/…）
- *       是承运商渠道口径，归 10 物流。这里给的是实测三边与实测体积，
- *       10 物流按自己的除数去算 —— 在此先乘一个除数就是替渠道定价。</li>
- *   <li><b>「高价值」与金额在本模块一律不出现。</b>出库单上没有金额列（V72 §1），
- *       申报货值归 9/10/报关侧，本模块的重量与体积<b>不是</b>金额也不参与计价。</li>
+ *   <li><b>打包完成 ≠ 已发货。</b>{@link PackingStatus} 四态里没有「已发货」： 打包完成只是把包裹交给 8.3.4.1（运单号与承运渠道是下游的事）， 与
+ *       8.3.3.1「复核通过 ≠ 已发货」同一纪律。
+ *   <li><b>没量 ≠ 量出来是 0。</b>{@code outerLengthCm} / {@code measuredGrossWeightG} / {@code volumeCbm}
+ *       未测时返回 <b>null</b>，不返回 0 —— 0 会被读成 「这个箱子重 0 克」，而真实含义是「还没上秤」。
+ *   <li><b>净重与体积是派生量，界面不自己算。</b>{@code netContentWeightG} 与 {@code volumeCbm} 由 DB
+ *       触发器从毛重与三边算出（V121），前端展示即可， 在页面再乘一遍会与账上的数差一位。
+ *   <li><b>体积重不在本模块算。</b>{@code divisor} 一律不出现：除数（6000/5000/…） 是承运商渠道口径，归 10 物流。这里给的是实测三边与实测体积， 10
+ *       物流按自己的除数去算 —— 在此先乘一个除数就是替渠道定价。
+ *   <li><b>「高价值」与金额在本模块一律不出现。</b>出库单上没有金额列（V72 §1）， 申报货值归 9/10/报关侧，本模块的重量与体积<b>不是</b>金额也不参与计价。
  * </ul>
  */
 public final class PackingModels {
@@ -49,8 +39,7 @@ public final class PackingModels {
   /**
    * 打包单状态。四态：打包中 / 已打包 / 打包失败 / 已取消。
    *
-   * <p><b>没有「已发货」与「已交接」</b> —— 那是 8.3.4.1 的事（与 8.3.3.1
-   * 「复核通过 ≠ 已发货」同一纪律）。
+   * <p><b>没有「已发货」与「已交接」</b> —— 那是 8.3.4.1 的事（与 8.3.3.1 「复核通过 ≠ 已发货」同一纪律）。
    */
   public enum PackingStatus {
     /** 打包中：可以建包裹、装明细、称重、量尺寸、记面单打印。 */
@@ -149,11 +138,10 @@ public final class PackingModels {
   /**
    * 明细项的申报信息来源。
    *
-   * <p>蓝图输入写「申报信息（<b>3.7.2 物理属性</b>）」，但 3.7.2.1 的 SKU 物理档案属
-   * <b>catalog</b>（V6 sku_detail 的 length_mm/width_mm/height_mm/net_weight_g，
-   * V28 安全属性），本服务跨服务读表被模块边界纪律禁止，且该模块尚未交付读取端口。
-   * 所以本服务只快照<b>自己真读得到</b>的 customs_declaration_line（V85，同服务），
-   * 取不到就如实记 NOT_FOUND —— <b>绝不猜一个 HS 编码填上去</b>。
+   * <p>蓝图输入写「申报信息（<b>3.7.2 物理属性</b>）」，但 3.7.2.1 的 SKU 物理档案属 <b>catalog</b>（V6 sku_detail 的
+   * length_mm/width_mm/height_mm/net_weight_g， V28 安全属性），本服务跨服务读表被模块边界纪律禁止，且该模块尚未交付读取端口。
+   * 所以本服务只快照<b>自己真读得到</b>的 customs_declaration_line（V85，同服务）， 取不到就如实记 NOT_FOUND —— <b>绝不猜一个 HS
+   * 编码填上去</b>。
    */
   public enum DeclarationSource {
     /** 取自本服务的报关单明细（V85 customs_declaration_line）。 */
@@ -204,7 +192,8 @@ public final class PackingModels {
    * @param packerUserId 打包人（可空，稍后完成时补；完成时必须有）
    */
   public record PackingOpenInput(
-      UUID recountSessionId, @Schema(nullable = true) UUID packerUserId,
+      UUID recountSessionId,
+      @Schema(nullable = true) UUID packerUserId,
       @Schema(nullable = true) String note) {}
 
   /**
@@ -251,8 +240,8 @@ public final class PackingModels {
   /**
    * 记面单打印入参。
    *
-   * <p>只<b>引用</b> 8.3.4.2 已交付的 print_job，不在本模块渲染 ZPL：
-   * 面单内容与打印次数的权威是 V73 的 print_job / label_print_log。
+   * <p>只<b>引用</b> 8.3.4.2 已交付的 print_job，不在本模块渲染 ZPL： 面单内容与打印次数的权威是 V73 的 print_job /
+   * label_print_log。
    */
   public record ParcelLabelInput(
       UUID labelPrintJobId,
@@ -274,10 +263,8 @@ public final class PackingModels {
   /**
    * 能力与边界声明。
    *
-   * <p>刻意把三段「拿不到 / 不该由本模块算」的事<b>显式报出来</b>：
-   * 体积重除数（归 10 物流）、3.7.2 SKU 物理属性（归 catalog，未接入）、
-   * 运单号与承运渠道（归 8.3.4.1）。空的包裹列表会被读成「这单没有包裹」，
-   * 而不是「这段能力还没接入」—— 与 8.3.1.2 已建立的约定一致。
+   * <p>刻意把三段「拿不到 / 不该由本模块算」的事<b>显式报出来</b>： 体积重除数（归 10 物流）、3.7.2 SKU 物理属性（归 catalog，未接入）、 运单号与承运渠道（归
+   * 8.3.4.1）。空的包裹列表会被读成「这单没有包裹」， 而不是「这段能力还没接入」—— 与 8.3.1.2 已建立的约定一致。
    */
   public record PackingCapabilities(
       List<String> responsibilities,
@@ -299,7 +286,8 @@ public final class PackingModels {
       List<String> downstreamModules) {}
 
   /** 本模块尚未接入 / 不由本模块负责的相邻能力（照 8.3.1.2 的灰块约定）。 */
-  public record UnavailableLink(String capability, String ownerModule, String href, String reason) {}
+  public record UnavailableLink(
+      String capability, String ownerModule, String href, String reason) {}
 
   /** 包材列表行。 */
   public record PackingMaterialRow(
@@ -325,7 +313,8 @@ public final class PackingModels {
       List<PackingMaterialRow> items, int page, int size, long total) {}
 
   /** 包材详情：包材本身 + 被用过多少次（现算，不是存的列）。 */
-  public record PackingMaterialDetail(PackingMaterialRow material, long parcelCount, long fillerCount) {}
+  public record PackingMaterialDetail(
+      PackingMaterialRow material, long parcelCount, long fillerCount) {}
 
   /** 开单 / 完成 / 失败 / 取消之后返回的单头读数。 */
   public record PackingCreated(
@@ -381,7 +370,8 @@ public final class PackingModels {
       OffsetDateTime completedAt) {}
 
   /** 打包单分页页。汇总不受筛选影响 —— 与 8.3.2.1 / 8.3.2.2 / 8.3.3.1 同一纪律。 */
-  public record PackingPage(List<PackingRow> items, int page, int size, long total, PackingSummary summary) {}
+  public record PackingPage(
+      List<PackingRow> items, int page, int size, long total, PackingSummary summary) {}
 
   /** 打包作业台汇总。 */
   public record PackingSummary(
@@ -400,8 +390,7 @@ public final class PackingModels {
   /**
    * 复核基线行 + 该行<b>已装</b>的件数（现算的差，不存列）。
    *
-   * <p>{@code packedQuantity} 与 {@code expectedQuantity} 分开展示：
-   * 「复核核过的还没全装进去」正是本模块最要紧的一条现场事实。
+   * <p>{@code packedQuantity} 与 {@code expectedQuantity} 分开展示： 「复核核过的还没全装进去」正是本模块最要紧的一条现场事实。
    */
   public record PackingBaselineRow(
       UUID id,
@@ -477,9 +466,7 @@ public final class PackingModels {
       OffsetDateTime occurredAt,
       String detail) {}
 
-  /**
-   * 打包单详情：一次调用返回整屏 = 单头 + 包裹 + 明细 + 基线对齐 + 时间线 + 边界声明。
-   */
+  /** 打包单详情：一次调用返回整屏 = 单头 + 包裹 + 明细 + 基线对齐 + 时间线 + 边界声明。 */
   public record PackingDetail(
       PackingRow order,
       List<ParcelRow> parcels,
@@ -492,8 +479,8 @@ public final class PackingModels {
   /**
    * 能不能打包完成 —— <b>唯一的判据来源</b>。
    *
-   * <p>页面用 {@code blocking} 决定「完成」按钮的可点性，<b>不自己数行、不自己算重量</b>：
-   * 那套数在前端再算一遍就会与账上的数差一位（与 8.3.3.1 的 blocking 同一纪律）。
+   * <p>页面用 {@code blocking} 决定「完成」按钮的可点性，<b>不自己数行、不自己算重量</b>： 那套数在前端再算一遍就会与账上的数差一位（与 8.3.3.1 的
+   * blocking 同一纪律）。
    */
   public record PackingCompletionReport(
       boolean packable,

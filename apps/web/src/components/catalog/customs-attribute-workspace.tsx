@@ -25,7 +25,10 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
-import type { CustomsProfile, DeclarationReady } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CustomsProfile,
+  DeclarationReady,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   blockerLines,
   canEdit,
@@ -233,9 +236,7 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-h-20 text-primary font-semibold tracking-tight">
-            HS 编码与申报要素
-          </h1>
+          <h1 className="text-h-20 text-primary font-semibold tracking-tight">HS 编码与申报要素</h1>
           <p className="text-muted-foreground text-copy-13 mt-1">
             {profile
               ? `${profile.skuCode} · ${profile.skuName}（所属 ${profile.spuCode}）`
@@ -309,7 +310,9 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
               <Badge tone={state.tone}>{state.label}</Badge>
             </p>
             <p className="text-muted-foreground mt-1 text-xs">{readinessText(profile)}</p>
-            {state.next && <p className="text-muted-foreground mt-0.5 text-xs">下一步：{state.next}</p>}
+            {state.next && (
+              <p className="text-muted-foreground mt-0.5 text-xs">下一步：{state.next}</p>
+            )}
             {/* 阻断原因逐条读中文，不显示英文码。 */}
             {blockers.length > 0 && (
               <ul className="text-muted-foreground mt-2 space-y-1 text-xs">
@@ -341,8 +344,8 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
             <div className="border-warning-soft bg-warning-soft/40 rounded-md border px-3 py-2 text-sm">
               <p className="text-warning font-medium">这个 SKU 还没有报关属性</p>
               <p className="text-muted-foreground mt-1 text-xs">
-                在下面填好 HS 编码、原产地与申报要素并保存，才能提交审核。
-                未经审核通过的资料，10 报关取数会被直接拒绝。
+                在下面填好 HS 编码、原产地与申报要素并保存，才能提交审核。 未经审核通过的资料，10
+                报关取数会被直接拒绝。
               </p>
             </div>
           )}
@@ -453,7 +456,7 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
                     return (
                       <li
                         key={index}
-                        className={`rounded-md border p-3 transition-colors duration-base ease-out-expo ${
+                        className={`duration-base ease-out-expo rounded-md border p-3 transition-colors ${
                           incomplete
                             ? 'border-destructive-soft bg-destructive-soft/20'
                             : 'border-control-border'
@@ -469,9 +472,7 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
                             disabled={!editable}
                             placeholder="代码"
                             aria-label={`第 ${index + 1} 条申报要素代码`}
-                            onChange={(e) =>
-                              patchElement(index, { elementCode: e.target.value })
-                            }
+                            onChange={(e) => patchElement(index, { elementCode: e.target.value })}
                           />
                           <input
                             className={control}
@@ -479,9 +480,7 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
                             disabled={!editable}
                             placeholder="名称，例：品牌类型"
                             aria-label={`第 ${index + 1} 条申报要素名称`}
-                            onChange={(e) =>
-                              patchElement(index, { elementName: e.target.value })
-                            }
+                            onChange={(e) => patchElement(index, { elementName: e.target.value })}
                           />
                           <input
                             className={control}
@@ -489,13 +488,11 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
                             disabled={!editable}
                             placeholder={element.required ? '必填，尚未填写' : '选填'}
                             aria-label={`第 ${index + 1} 条申报要素值`}
-                            onChange={(e) =>
-                              patchElement(index, { elementValue: e.target.value })
-                            }
+                            onChange={(e) => patchElement(index, { elementValue: e.target.value })}
                           />
                           <button
                             type="button"
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft/40 self-center rounded-md border p-2 transition-colors duration-base ease-out-expo disabled:opacity-50"
+                            className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft/40 duration-base ease-out-expo self-center rounded-md border p-2 transition-colors disabled:opacity-50"
                             disabled={!editable}
                             aria-label={`删除第 ${index + 1} 条申报要素`}
                             onClick={() => removeElement(index)}
@@ -613,7 +610,12 @@ export function CustomsAttributeWorkspace({ skuId }: { skuId: string }) {
             hint="这就是清关时真正被引用的那份资料。未审核通过时接口直接返回 409，不会外发半成品。"
           >
             <div className="space-y-3">
-              <Button variant="ghost" size="sm" onClick={() => void peekDeclarationReady()} disabled={busy}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void peekDeclarationReady()}
+                disabled={busy}
+              >
                 <RefreshCw className="h-4 w-4" />
                 查看报关将拿到的资料
               </Button>

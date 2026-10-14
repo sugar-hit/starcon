@@ -84,27 +84,27 @@ V3 建表时没有编码列。`ADD COLUMN ... DEFAULT ''` 之后若直接建 `UN
 
 ## 文件清单
 
-| 类型 | 文件 |
-| --- | --- |
-| 迁移 | `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql` |
-| 后端 | `backend/services/identity/src/main/java/com/starcon/identity/AdministrationController.java` |
-| 测试 | `backend/services/identity/src/test/java/com/starcon/identity/IdentityIntegrationTest.java` |
-| 前端 | `apps/web/src/components/iam/department-tree.tsx`（新增，树 + HTML5 拖拽） |
-| 前端 | `apps/web/src/components/iam/administration-panel.tsx`（平铺表格 → 树，表单扩字段） |
-| 前端 | `apps/web/src/components/iam/administration-model.ts`（拍平 / 防环判定 / 移动端点） |
-| 前端 | `apps/web/src/components/iam/administration-model.test.ts` |
+| 类型 | 文件                                                                                                        |
+| ---- | ----------------------------------------------------------------------------------------------------------- |
+| 迁移 | `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql`                         |
+| 后端 | `backend/services/identity/src/main/java/com/starcon/identity/AdministrationController.java`                |
+| 测试 | `backend/services/identity/src/test/java/com/starcon/identity/IdentityIntegrationTest.java`                 |
+| 前端 | `apps/web/src/components/iam/department-tree.tsx`（新增，树 + HTML5 拖拽）                                  |
+| 前端 | `apps/web/src/components/iam/administration-panel.tsx`（平铺表格 → 树，表单扩字段）                         |
+| 前端 | `apps/web/src/components/iam/administration-model.ts`（拍平 / 防环判定 / 移动端点）                         |
+| 前端 | `apps/web/src/components/iam/administration-model.test.ts`                                                  |
 | 契约 | `packages/api-contracts/src/catalog.ts`、`packages/api-contracts/src/identity.openapi.json`（codegen 产物） |
-| 台账 | `docs/product/capability-blueprint/module-progress.md`（17.2.1.1 → 已交付） |
+| 台账 | `docs/product/capability-blueprint/module-progress.md`（17.2.1.1 → 已交付）                                 |
 
 ## 端点
 
-| 方法 | 路径 | 权限码 | 说明 |
-| --- | --- | --- | --- |
-| GET | `/identity/departments` | `identity.department.read` | 树形结构 + 成员分布 |
-| POST | `/identity/departments` | `identity.department.create` | parentId 可空（根节点） |
-| PUT | `/identity/departments/{id}` | `identity.department.update` | 只改字段，不动层级 |
-| PUT | `/identity/departments/{id}/parent` | `identity.department.update` | 拖拽移动，防环 |
-| DELETE | `/identity/departments/{id}` | `identity.department.delete` | 有子部门/成员则 409 + 数量 |
+| 方法   | 路径                                | 权限码                       | 说明                       |
+| ------ | ----------------------------------- | ---------------------------- | -------------------------- |
+| GET    | `/identity/departments`             | `identity.department.read`   | 树形结构 + 成员分布        |
+| POST   | `/identity/departments`             | `identity.department.create` | parentId 可空（根节点）    |
+| PUT    | `/identity/departments/{id}`        | `identity.department.update` | 只改字段，不动层级         |
+| PUT    | `/identity/departments/{id}/parent` | `identity.department.update` | 拖拽移动，防环             |
+| DELETE | `/identity/departments/{id}`        | `identity.department.delete` | 有子部门/成员则 409 + 数量 |
 
 审计沿用既有 `identity_audit` + `identity_outbox`，动作分别为
 `DepartmentCreated` / `DepartmentUpdated` / `DepartmentMoved` / `DepartmentDeleted`。

@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 8.4.1.1 组装单入口（实物套装组装）。
  *
- * <p>命名空间 {@code /warehouse/assembly-orders}：卷 08 的组装单是仓库现场作业，
- * 归 warehouse 服务（与 6.4.1.1 加工单归 trade 同一条纪律 —— 后端路径按服务命名空间走）。
+ * <p>命名空间 {@code /warehouse/assembly-orders}：卷 08 的组装单是仓库现场作业， 归 warehouse 服务（与 6.4.1.1 加工单归 trade
+ * 同一条纪律 —— 后端路径按服务命名空间走）。
  *
  * <p>六个形状，刻意逐个列出、不做通配：
  *
@@ -31,8 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 取消草稿（**不动库存**）
  * </ul>
  *
- * <p>刻意<b>没有</b>任何 PUT / DELETE：组装单的组件明细是「建单时按 BOM 冻结的快照」，
- * 改它等于改账的输入（那张 BOM 可能已经换了版本）；要改就作废重开一张。
+ * <p>刻意<b>没有</b>任何 PUT / DELETE：组装单的组件明细是「建单时按 BOM 冻结的快照」， 改它等于改账的输入（那张 BOM 可能已经换了版本）；要改就作废重开一张。
  * 「把已完成的组装单删掉」更是不可能 —— 组件已经出库、成品已经入库，V103 的终态守卫会直接拒绝。
  *
  * <p>权限码用 {@code warehouse.assembly.read} / {@code warehouse.assembly.update}：
@@ -59,8 +58,7 @@ public class AssemblyOrderController {
   /**
    * 能力声明：跨服务边界、虚拟套装边界与上下游可用性。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来，
-   * 而不是让调用方从 404 或空数组里猜 —— 尤其是「虚拟套装为什么走不到这里」。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来， 而不是让调用方从 404 或空数组里猜 —— 尤其是「虚拟套装为什么走不到这里」。
    */
   @GetMapping("/capabilities")
   public AssemblyCapabilities capabilities(
@@ -71,8 +69,8 @@ public class AssemblyOrderController {
   /**
    * 建组装单（草稿，**不动库存**）。
    *
-   * <p>BOM 组件明细由调用方按 catalog 规则 R7 的结果冻结传入 —— 本服务不跨库回查 catalog，
-   * 也不重算 BOM。成品 SKU 必须是 catalog 真实 SKU，虚拟套装填不出来。
+   * <p>BOM 组件明细由调用方按 catalog 规则 R7 的结果冻结传入 —— 本服务不跨库回查 catalog， 也不重算 BOM。成品 SKU 必须是 catalog 真实
+   * SKU，虚拟套装填不出来。
    */
   @PostMapping
   public AssemblyOrderCreated create(
@@ -99,7 +97,14 @@ public class AssemblyOrderController {
         "assembly.read",
         a ->
             assembly.page(
-                status, productSkuId, warehouseId, sourceSystem, referenceId, keyword, sort, page,
+                status,
+                productSkuId,
+                warehouseId,
+                sourceSystem,
+                referenceId,
+                keyword,
+                sort,
+                page,
                 size));
   }
 
@@ -114,8 +119,7 @@ public class AssemblyOrderController {
   /**
    * 执行组装：组件出库 + 成品入库，**一个本地事务**。
    *
-   * <p>任一环节失败（组件不足 / 库位不存在 / 已执行过）整体回滚，不会留下
-   * 「组件扣了成品没进」或反之的半截状态。同一张组装单重复执行是 409。
+   * <p>任一环节失败（组件不足 / 库位不存在 / 已执行过）整体回滚，不会留下 「组件扣了成品没进」或反之的半截状态。同一张组装单重复执行是 409。
    */
   @PostMapping("/{id}/issue")
   public AssemblyOrderIssued issue(

@@ -19,34 +19,27 @@ import org.springframework.stereotype.Service;
  * 7.2.1.1 预占需求列表。
  *
  * <p>蓝图：「展示所有预占需求（来自订单履约、加工领料、其他占用），含需求来源、数量、
- * 状态（held/committed/consumed/released/expired）、剩余量、超时时长。」输出「预占需求列表
- * + 状态汇总」。
+ * 状态（held/committed/consumed/released/expired）、剩余量、超时时长。」输出「预占需求列表 + 状态汇总」。
  *
- * <p><b>服务归属偏离说明</b>：蓝图关系句写「预占需求由 trade 持久化协调」，本实现不采纳。
- * 对集成头全库实查确认 inventory_reservation 表在任何服务里都不存在，V1 文件头早已把该表
- * 预留给 warehouse 并注明「reservation 属 7.2.1.x，本期不建空表占位」。详见 V102 文件头第零节。
+ * <p><b>服务归属偏离说明</b>：蓝图关系句写「预占需求由 trade 持久化协调」，本实现不采纳。 对集成头全库实查确认 inventory_reservation
+ * 表在任何服务里都不存在，V1 文件头早已把该表 预留给 warehouse 并注明「reservation 属 7.2.1.x，本期不建空表占位」。详见 V102 文件头第零节。
  *
  * <p>五条实现纪律：
  *
  * <ol>
- *   <li><b>状态汇总用标量子查询聚合，不 join 展开</b>。五个状态各一个
- *       {@code count(*) filter (where status=…)}，合计口径与列表逐行同源；
- *       若把分配明细 join 进来再 group by，五态计数会被分配行数放大 ——
- *       这正是 7.2.1.2 交付后最容易踩的坑，所以本期就把口径钉死。
- *   <li><b>合计不受分页与筛选影响</b>。它回答「我名下总共有多少预占」，拿筛选后的数当合计
- *       会让「切了个筛选条件怎么总量变了」看起来像数据丢了。
- *   <li><b>超时长从真实写入时刻算</b>。用库里的 held_at / expires_at 算，不用
- *       {@code now() - created_at}：两者在本表里可能不同（跨服务调用方显式传 held_at），
- *       而 created_at 是「本服务什么时候收到的」而不是「业务什么时候提的需求」。
- *   <li><b>超时为 null 而不是 0</b>。终态行与未过期行的 overtimeSeconds 恒 null ——
- *       给 0 会把「没超时」与「超时 0 秒」混成同一个数，前端无法区分。
+ *   <li><b>状态汇总用标量子查询聚合，不 join 展开</b>。五个状态各一个 {@code count(*) filter (where status=…)}，合计口径与列表逐行同源；
+ *       若把分配明细 join 进来再 group by，五态计数会被分配行数放大 —— 这正是 7.2.1.2 交付后最容易踩的坑，所以本期就把口径钉死。
+ *   <li><b>合计不受分页与筛选影响</b>。它回答「我名下总共有多少预占」，拿筛选后的数当合计 会让「切了个筛选条件怎么总量变了」看起来像数据丢了。
+ *   <li><b>超时长从真实写入时刻算</b>。用库里的 held_at / expires_at 算，不用 {@code now() -
+ *       created_at}：两者在本表里可能不同（跨服务调用方显式传 held_at）， 而 created_at 是「本服务什么时候收到的」而不是「业务什么时候提的需求」。
+ *   <li><b>超时为 null 而不是 0</b>。终态行与未过期行的 overtimeSeconds 恒 null —— 给 0 会把「没超时」与「超时 0
+ *       秒」混成同一个数，前端无法区分。
  *   <li><b>COMMITTED 不参与自动过期</b>（蓝图 7.2.1.3 红线：「承诺分配后不再自动 TTL 释放，
  *       否则已承诺发货的货会被误释放导致超卖」）。所以超时筛选与超时计数只认 HELD。
  * </ol>
  *
- * <p>本模块<b>登记 + 列表只读</b>：分配明细由 7.2.1.2 承担（本列表的 allocated_quantity
- * 由那张表的分配行回写），释放与过期仍属 7.2.1.3 未交付，所以**终态行在本库仍然不可达** ——
- * 这件事由 {@code capabilities()} 如实报出，不在列表上装成已经跑通。
+ * <p>本模块<b>登记 + 列表只读</b>：分配明细由 7.2.1.2 承担（本列表的 allocated_quantity 由那张表的分配行回写），释放与过期仍属 7.2.1.3
+ * 未交付，所以**终态行在本库仍然不可达** —— 这件事由 {@code capabilities()} 如实报出，不在列表上装成已经跑通。
  *
  * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离。
  */
@@ -64,9 +57,8 @@ public class ReservationService {
   /**
    * 超时谓词，带表别名。
    *
-   * <p>必须带别名：{@code legal_entity_ref} 也有一个 {@code status} 列，
-   * 行查询 join 了它之后裸写 {@code status=} 会得到「column reference is ambiguous」。
-   * 而歧义错误只在带 join 的那条查询上出现、汇总那条不出现 ——
+   * <p>必须带别名：{@code legal_entity_ref} 也有一个 {@code status} 列， 行查询 join 了它之后裸写 {@code status=}
+   * 会得到「column reference is ambiguous」。 而歧义错误只在带 join 的那条查询上出现、汇总那条不出现 ——
    * 只按汇总调试会以为谓词没问题，直到列表接口上线才炸。
    *
    * <p>{@code alias} 传 null 表示不限定表（汇总查询里没有 join）。
@@ -130,10 +122,9 @@ public class ReservationService {
   /**
    * 行查询。
    *
-   * <p>sku_ref 与 legal_entity_ref 各用**一次左连接**取 code/name：两张表的主键都是
-   * {@code UNIQUE(tenant_id,id)}，所以连接不会放大行数（与「按 warehouse_id 聚合余额」
-   * 那种一行对多行的表不同，那类必须用标量子查询）。连接条件带上 tenant_id 两侧相等，
-   * 不靠 RLS 单独兜住跨租户误连。
+   * <p>sku_ref 与 legal_entity_ref 各用**一次左连接**取 code/name：两张表的主键都是 {@code
+   * UNIQUE(tenant_id,id)}，所以连接不会放大行数（与「按 warehouse_id 聚合余额」 那种一行对多行的表不同，那类必须用标量子查询）。连接条件带上
+   * tenant_id 两侧相等， 不靠 RLS 单独兜住跨租户误连。
    */
   private static String selectRows() {
     return """
@@ -150,22 +141,20 @@ public class ReservationService {
                  cast(extract(epoch from (now() - r.expires_at)) as bigint)
                else null end as overdue_seconds
         """
-        .formatted(overdue("r"))
+            .formatted(overdue("r"))
         + FROM_CLAUSE;
   }
 
   /**
    * FROM + 两个左连接，**行查询与计数查询共用同一段**。
    *
-   * <p>共用不是洁癖：关键字筛选要匹配 {@code sk.code / sk.name}（用户在 SKU 列上看到的那两列），
-   * 所以 where 子句会引用 {@code sk}。若计数查询只写 {@code from inventory_reservation r}，
-   * 带关键字的请求会在 count 那一步报「bad SQL grammar」——
+   * <p>共用不是洁癖：关键字筛选要匹配 {@code sk.code / sk.name}（用户在 SKU 列上看到的那两列）， 所以 where 子句会引用 {@code
+   * sk}。若计数查询只写 {@code from inventory_reservation r}， 带关键字的请求会在 count 那一步报「bad SQL grammar」——
    * 而且只在用户真的敲了关键字时才炸，不敲关键字的用例全绿，很难在联调前发现。
    *
-   * <p>sku_ref 与 legal_entity_ref 各用**一次左连接**取 code/name：两张表的主键都是
-   * {@code UNIQUE(tenant_id,id)}，所以连接不会放大行数（与「按 warehouse_id 聚合余额」
-   * 那种一行对多行的表不同，那类必须用标量子查询）。连接条件带上 tenant_id 两侧相等，
-   * 不靠 RLS 单独兜住跨租户误连。
+   * <p>sku_ref 与 legal_entity_ref 各用**一次左连接**取 code/name：两张表的主键都是 {@code
+   * UNIQUE(tenant_id,id)}，所以连接不会放大行数（与「按 warehouse_id 聚合余额」 那种一行对多行的表不同，那类必须用标量子查询）。连接条件带上
+   * tenant_id 两侧相等， 不靠 RLS 单独兜住跨租户误连。
    */
   private static final String FROM_CLAUSE =
       """
@@ -188,7 +177,8 @@ public class ReservationService {
         names.add(name);
       }
       if (!names.isEmpty()) {
-        String placeholders = names.stream().map(n -> "?").collect(java.util.stream.Collectors.joining(","));
+        String placeholders =
+            names.stream().map(n -> "?").collect(java.util.stream.Collectors.joining(","));
         where.add("r.status in (" + placeholders + ")");
         binds.addAll(names);
       }
@@ -263,10 +253,8 @@ public class ReservationService {
   /**
    * 全量状态汇总。**不受分页与筛选影响** —— 它回答「我名下总共有多少预占、欠多少货」。
    *
-   * <p>五个状态各一个 {@code count(*) filter}，**没有 join 任何明细表**：
-   * 7.2.1.2 交付后 reservation_allocation 会按预占展开成多行，
-   * 届时若改成 join + group by，五个计数会被分配行数放大而与列表逐行求和不一致。
-   * 现在就把口径钉成「只数预占行」，两条车道不必再改这个方法。
+   * <p>五个状态各一个 {@code count(*) filter}，**没有 join 任何明细表**： 7.2.1.2 交付后 reservation_allocation
+   * 会按预占展开成多行， 届时若改成 join + group by，五个计数会被分配行数放大而与列表逐行求和不一致。 现在就把口径钉成「只数预占行」，两条车道不必再改这个方法。
    */
   private ReservationSummary summary() {
     var r =
@@ -350,14 +338,12 @@ public class ReservationService {
   /**
    * 登记一条预占需求。
    *
-   * <p><b>只允许建成 HELD</b>：V102 的 guard_reservation_insert 在 DB 层拒绝任何
-   * 「插一行终态」的写法。这里再查一次 source_system / source_type 的**组合合法性**
-   * —— 两个 CHECK 只保证各自在词表内，不保证「手工登记的销售订单预占」这种自相矛盾的行不出现。
+   * <p><b>只允许建成 HELD</b>：V102 的 guard_reservation_insert 在 DB 层拒绝任何 「插一行终态」的写法。这里再查一次 source_system
+   * / source_type 的**组合合法性** —— 两个 CHECK 只保证各自在词表内，不保证「手工登记的销售订单预占」这种自相矛盾的行不出现。
    *
-   * <p>单号由本服务发（RSV-日期-序号），<b>不采信调用方传入的单号</b>：
-   * 采信的话，两个不同上游各发一次 RSV-000001 就会撞 UNIQUE(tenant_id,reservation_no)，
-   * 而撞车时调用方拿到的是一个指不到具体行的 409。上游的定位键是
-   * {@code source_system + reference_id}，那才是跨服务去重该用的键。
+   * <p>单号由本服务发（RSV-日期-序号），<b>不采信调用方传入的单号</b>： 采信的话，两个不同上游各发一次 RSV-000001 就会撞
+   * UNIQUE(tenant_id,reservation_no)， 而撞车时调用方拿到的是一个指不到具体行的 409。上游的定位键是 {@code source_system +
+   * reference_id}，那才是跨服务去重该用的键。
    */
   public ReservationCreated create(UUID tenantId, ReservationCreateInput input) {
     SourceSystem system = sourceSystem(input.sourceSystem());
@@ -410,7 +396,8 @@ public class ReservationService {
         expiresAt,
         input.note());
 
-    return new ReservationCreated(id, no, ReservationStatus.HELD.name(), ReservationStatus.HELD.label());
+    return new ReservationCreated(
+        id, no, ReservationStatus.HELD.name(), ReservationStatus.HELD.label());
   }
 
   // ================================================================ 能力与下拉项
@@ -418,8 +405,8 @@ public class ReservationService {
   /**
    * 预占链路各环节的接入情况。
    *
-   * <p>分配明细（7.2.1.2）已交付；释放/过期（7.2.1.3）仍未交付，这里逐条报出归哪个模块、缺什么 ——
-   * 前端据此禁用入口，而不是显示一个永远为 0 的「已分配量」让人以为分配已经跑通。
+   * <p>分配明细（7.2.1.2）已交付；释放/过期（7.2.1.3）仍未交付，这里逐条报出归哪个模块、缺什么 —— 前端据此禁用入口，而不是显示一个永远为 0
+   * 的「已分配量」让人以为分配已经跑通。
    */
   public List<ReservationCapability> capabilities() {
     // 注意：本端点**不提供**自动过期动作。蓝图 7.2.1.3 明确「承诺分配后不再自动 TTL 释放」，
@@ -437,11 +424,7 @@ public class ReservationService {
             "已接入 reservation_allocation：分配到具体 bucket（仓 / 货位 / 批次），"
                 + "迁移流水 append-only；入口 /warehouse/inventory/reservations/{id}/allocations"),
         new ReservationCapability(
-            "RELEASE",
-            "释放与过期",
-            false,
-            "7.2.1.3",
-            "7.2.1.3 释放与过期尚未交付，没有释放入口也没有批量过期清理，终态行需要由该模块写入"));
+            "RELEASE", "释放与过期", false, "7.2.1.3", "7.2.1.3 释放与过期尚未交付，没有释放入口也没有批量过期清理，终态行需要由该模块写入"));
   }
 
   /** 筛选与录入下拉项。 */
@@ -466,8 +449,7 @@ public class ReservationService {
             new StatusOption("QUANTITY", "按需求量", false),
             new StatusOption("REMAINING", "按剩余量", false),
             new StatusOption("RESERVATION_NO", "按预占单号", false)),
-        "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，"
-            + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）",
+        "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，" + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）",
         OWNER_NOTE);
   }
 
@@ -480,7 +462,9 @@ public class ReservationService {
   }
 
   private static boolean terminal(ReservationStatus s) {
-    return s == ReservationStatus.CONSUMED || s == ReservationStatus.RELEASED || s == ReservationStatus.EXPIRED;
+    return s == ReservationStatus.CONSUMED
+        || s == ReservationStatus.RELEASED
+        || s == ReservationStatus.EXPIRED;
   }
 
   private static SourceSystem sourceSystem(String raw) {
@@ -511,8 +495,8 @@ public class ReservationService {
    *   <li>{@code OTHER_HOLD}（其他占用）只能来自 {@code MANUAL} —— 没有上游单据。
    * </ul>
    *
-   * <p>反过来 {@code PROCESSING} 系统也不许登记 SALES_ORDER：那会让 6.4.1.2 按
-   * 「加工来源」去找 BOM 关联时读到一张销售订单预占，去 trade 查时找不到而卡住。
+   * <p>反过来 {@code PROCESSING} 系统也不许登记 SALES_ORDER：那会让 6.4.1.2 按 「加工来源」去找 BOM 关联时读到一张销售订单预占，去 trade
+   * 查时找不到而卡住。
    */
   private static boolean validCombination(SourceSystem system, SourceType type) {
     return switch (type) {

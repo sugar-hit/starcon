@@ -174,8 +174,7 @@ export function matrixHint(panel: SpecAxisPanel): string {
  * 否则用户会以为同一个颜色值在两个地方各存了一份。
  */
 export function optionSourceText(option: SpecAxisOption): string {
-  if (!option.sourceAttributeId)
-    return '⚠️ 找不到承载属性：该值不在属性选项值源中，请检查绑定关系';
+  if (!option.sourceAttributeId) return '⚠️ 找不到承载属性：该值不在属性选项值源中，请检查绑定关系';
   return `值源：属性「${option.sourceAttributeName || option.sourceAttributeCode}」的选项`;
 }
 

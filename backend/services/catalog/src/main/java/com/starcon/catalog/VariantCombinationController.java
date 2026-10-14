@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.*;
  * 3.1.3.2 组合唯一性校验：重复检测、矩阵生成前预校验、生成待建 SKU 草稿。
  *
  * <p>路由挂在 {@code /catalog/variant-combination} 之下，与 3.1.3.1 的 {@code /catalog/spec-axis}
- * 分开：规格轴管的是**结构**（有哪些轴、每个轴有哪些取值），本模块管的是**组合**（一组轴值
- * 是否重复、能不能生成草稿）。混在一个前缀下会让"改一个取值"和"生成一批 SKU"变成同一个动作。
+ * 分开：规格轴管的是**结构**（有哪些轴、每个轴有哪些取值），本模块管的是**组合**（一组轴值 是否重复、能不能生成草稿）。混在一个前缀下会让"改一个取值"和"生成一批
+ * SKU"变成同一个动作。
  *
- * <p>权限与规格轴同口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}。
- * {@code POST .../check} 是纯查询（不写库），所以按读授权——只读角色也要能看到冲突清单，
- * 否则他会在点「生成」时才第一次知道自己填错了。
+ * <p>权限与规格轴同口径：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}。 {@code POST
+ * .../check} 是纯查询（不写库），所以按读授权——只读角色也要能看到冲突清单， 否则他会在点「生成」时才第一次知道自己填错了。
  */
 @RestController
 @RequestMapping("/catalog/variant-combination")
@@ -81,8 +80,7 @@ public class VariantCombinationController {
   // ------------------------------------------------------------ 写
 
   /**
-   * 生成 SKU 矩阵前的预校验。**不写任何东西**：返回结构化冲突清单与合法组合，
-   * 供界面在点「生成草稿」之前就把问题显示出来。
+   * 生成 SKU 矩阵前的预校验。**不写任何东西**：返回结构化冲突清单与合法组合， 供界面在点「生成草稿」之前就把问题显示出来。
    *
    * <p>返回的是清单不是布尔值：运营要按条改，"有重复"三个字没法干活。
    */

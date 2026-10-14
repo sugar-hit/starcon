@@ -53,10 +53,7 @@ export function fetchWarehouseDetail(id: string): Promise<WarehouseDetail> {
   return api<WarehouseDetail>(`${base}/${id}`);
 }
 
-export function fetchWarehouseLocations(
-  id: string,
-  params: LocationParams,
-): Promise<LocationPage> {
+export function fetchWarehouseLocations(id: string, params: LocationParams): Promise<LocationPage> {
   return api<LocationPage>(`${base}/${id}/locations${query(params)}`);
 }
 
@@ -90,7 +87,10 @@ export function draftOf(detail: WarehouseDetail): UpdateWarehouseDraft {
   };
 }
 
-export function updateWarehouse(id: string, draft: UpdateWarehouseDraft): Promise<WarehouseUpdated> {
+export function updateWarehouse(
+  id: string,
+  draft: UpdateWarehouseDraft,
+): Promise<WarehouseUpdated> {
   const input: WarehouseUpdateInput = {
     name: draft.name.trim(),
     countryCode: draft.countryCode.trim().toUpperCase(),

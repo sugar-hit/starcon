@@ -1,11 +1,11 @@
 package com.starcon.channel.vendor;
 
 import com.starcon.channel.vendor.OAuthProtocol.AccountPayload;
+import com.starcon.channel.vendor.OAuthProtocol.Authorization;
 import com.starcon.channel.vendor.OAuthProtocol.AuthorizeRequest;
 import com.starcon.channel.vendor.OAuthProtocol.OAuthFailure;
 import com.starcon.channel.vendor.OAuthProtocol.OAuthProfile;
 import com.starcon.channel.vendor.OAuthProtocol.TokenRequest;
-import com.starcon.channel.vendor.OAuthProtocol.Authorization;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -14,18 +14,16 @@ import java.util.List;
  * 2.2.1.2 平台适配器统一接口。
  *
  * <p>AGENTS.md 要求外部适配器放在 {@code com.starcon.channel.vendor} 下、每个 vendor 独立包、
- * 只暴露统一接口。这个接口就是那个"统一接口"：授权服务只跟它打交道，永远不写死任何平台的
- * URL、参数名或字段名。
+ * 只暴露统一接口。这个接口就是那个"统一接口"：授权服务只跟它打交道，永远不写死任何平台的 URL、参数名或字段名。
  *
  * <p>分工：
+ *
  * <ul>
  *   <li><b>配置</b>（{@code platform_oauth_profile} 表）放端点与字段名——这些是数据，换环境只改数据。
- *   <li><b>适配器</b>放行为差异——scope 用逗号还是空格、授权 URL 要不要拼店铺域名、
- *       token 请求是表单还是 JSON、账号响应套了几层壳、平台错误码怎么翻译。
+ *   <li><b>适配器</b>放行为差异——scope 用逗号还是空格、授权 URL 要不要拼店铺域名、 token 请求是表单还是 JSON、账号响应套了几层壳、平台错误码怎么翻译。
  * </ul>
  *
- * <p>所以新增一个平台通常只需要插一行配置；只有当新平台的协议行为超出下面这些方法能表达的
- * 范围时，才需要新写一个 vendor 包。
+ * <p>所以新增一个平台通常只需要插一行配置；只有当新平台的协议行为超出下面这些方法能表达的 范围时，才需要新写一个 vendor 包。
  */
 public interface PlatformOAuthAdapter {
 
@@ -52,8 +50,8 @@ public interface PlatformOAuthAdapter {
   /**
    * 授权跳转前的最后一道路闸，返回非 null 即为拒绝原因（可执行文案）。
    *
-   * <p>默认放行。各 vendor 在这里挡掉自己协议上的硬性前置条件，例如 Shopify 缺店铺域名
-   * 就拼不出授权地址 —— 那时必须明确告诉用户"还差什么"，而不是跳到一个必然 404 的地址。
+   * <p>默认放行。各 vendor 在这里挡掉自己协议上的硬性前置条件，例如 Shopify 缺店铺域名 就拼不出授权地址 —— 那时必须明确告诉用户"还差什么"，而不是跳到一个必然 404
+   * 的地址。
    */
   default String rejectAuthorize(OAuthProfile profile, AuthorizeRequest request) {
     return null;
@@ -73,8 +71,7 @@ public interface PlatformOAuthAdapter {
   /**
    * 解析账号信息。
    *
-   * <p>账号 ID 缺失时必须抛异常而不是返回空串：账号 ID 是"同一平台账号只能绑定一个租户"
-   * 的判定依据，缺失时宁可直接失败，也不能让一个空账号名去建连接。
+   * <p>账号 ID 缺失时必须抛异常而不是返回空串：账号 ID 是"同一平台账号只能绑定一个租户" 的判定依据，缺失时宁可直接失败，也不能让一个空账号名去建连接。
    */
   AccountPayload readAccount(OAuthProfile profile, String body);
 

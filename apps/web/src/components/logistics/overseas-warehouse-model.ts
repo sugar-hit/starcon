@@ -164,7 +164,11 @@ export function recordInboundLine(
   accountId: string,
   input: InboundStockLineInput,
 ): Promise<string> {
-  return api<string>(`channel/warehouse-providers/accounts/${accountId}/inbound-stock-lines`, 'POST', input);
+  return api<string>(
+    `channel/warehouse-providers/accounts/${accountId}/inbound-stock-lines`,
+    'POST',
+    input,
+  );
 }
 
 export function setConnectionSyncPaused(connectionId: string, paused: boolean): Promise<void> {
@@ -179,7 +183,10 @@ export function setConnectionSyncPaused(connectionId: string, paused: boolean): 
 // ---------------------------------------------------------------------------
 
 /** 观测新鲜度。观测陈旧而不知情，比没有观测更危险，所以这里显式给出时点。 */
-export function freshness(observedAt?: string, now: number = Date.now()): {
+export function freshness(
+  observedAt?: string,
+  now: number = Date.now(),
+): {
   label: string;
   stale: boolean;
 } {

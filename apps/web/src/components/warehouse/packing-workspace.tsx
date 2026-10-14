@@ -131,7 +131,11 @@ export function PackingWorkspace() {
         }
       />
 
-      {error ? <Notice tone="danger" title="操作未完成">{error}</Notice> : null}
+      {error ? (
+        <Notice tone="danger" title="操作未完成">
+          {error}
+        </Notice>
+      ) : null}
 
       {page ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -168,7 +172,7 @@ export function PackingWorkspace() {
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground mt-4 text-sm">加载中…</p>
         ) : page && page.items.length === 0 ? (
           <EmptyState
             className="mt-4"
@@ -216,14 +220,18 @@ export function PackingWorkspace() {
       {selected ? (
         <SectionCard title="打包详情">
           {detailLoading ? (
-            <p className="text-sm text-muted-foreground">加载中…</p>
+            <p className="text-muted-foreground text-sm">加载中…</p>
           ) : !detail ? (
             <EmptyState title="详情不可用" description="该打包单在当前租户下读不到。" />
           ) : (
             <div className="space-y-4">
-              {actionError ? <Notice tone="danger" title="操作未完成">{actionError}</Notice> : null}
+              {actionError ? (
+                <Notice tone="danger" title="操作未完成">
+                  {actionError}
+                </Notice>
+              ) : null}
 
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {detail.order.packingBasis}
                 {detail.order.outboundOrderStatusLabel ? (
                   <> · 出库单当前：{detail.order.outboundOrderStatusLabel}</>
@@ -294,7 +302,7 @@ export function PackingWorkspace() {
                             <span>面单已打印 {parcel.labelPrintCount} 次</span>
                           ) : null}
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground mt-2 text-xs">
                           {items.length === 0
                             ? '未装任何明细 —— 蓝图要求「包裹必须含明细项」，空箱不能结算。'
                             : items
@@ -304,11 +312,14 @@ export function PackingWorkspace() {
                                 )
                                 .join('、')}
                         </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          申报：{declarationCell(
-                            items[0]?.declarationSource as DeclarationSource | undefined,
-                            items[0]?.hsCode,
-                          ).text}
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          申报：
+                          {
+                            declarationCell(
+                              items[0]?.declarationSource as DeclarationSource | undefined,
+                              items[0]?.hsCode,
+                            ).text
+                          }
                         </p>
                       </div>
                     );
@@ -337,7 +348,8 @@ export function PackingWorkspace() {
                 </div>
               ) : (
                 <Notice tone="info" title="打包单已结束">
-                  打包单已结束（{packingStatusLabel(detail.order.status)}），包裹与明细项不再允许改动。
+                  打包单已结束（{packingStatusLabel(detail.order.status)}
+                  ），包裹与明细项不再允许改动。
                   {detail.order.status === 'PACKED' ? shippedHandoffNote() : ''}
                 </Notice>
               )}
@@ -345,7 +357,7 @@ export function PackingWorkspace() {
               {detail.unavailable.length ? (
                 <div>
                   <h3 className="text-sm font-semibold">不由本模块负责的相邻能力</h3>
-                  <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                  <ul className="text-muted-foreground mt-1 space-y-1 text-xs">
                     {detail.unavailable.map((u) => (
                       <li key={u.capability}>
                         {u.capability} —— 归属 {u.ownerModule}（{u.href}）。{u.reason}
@@ -357,7 +369,7 @@ export function PackingWorkspace() {
 
               <div>
                 <h3 className="text-sm font-semibold">作业流水</h3>
-                <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                <ul className="text-muted-foreground mt-1 space-y-1 text-xs">
                   {detail.timeline.map((e) => (
                     <li key={e.id}>
                       {e.occurredAt} · {e.eventTypeLabel}：{e.detail}
@@ -372,7 +384,7 @@ export function PackingWorkspace() {
 
       {caps ? (
         <SectionCard title="口径与边界">
-          <ul className="space-y-1 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground space-y-1 text-xs">
             <li>重量：{caps.weightBasis}</li>
             <li>尺寸与体积：{caps.dimensionBasis}</li>
             <li>体积重：{caps.volumetricWeightBasis}</li>
@@ -396,12 +408,19 @@ function PackActions({
   busy: string | null;
   detail: PackingDetail;
   form: { materialId: string; gross: string; l: string; w: string; h: string; reason: string };
-  setForm: (f: { materialId: string; gross: string; l: string; w: string; h: string; reason: string }) => void;
+  setForm: (f: {
+    materialId: string;
+    gross: string;
+    l: string;
+    w: string;
+    h: string;
+    reason: string;
+  }) => void;
   onAct: (name: string, run: () => Promise<unknown>) => Promise<void>;
 }) {
-  const [materials, setMaterials] = useState<{ id: string; materialCode: string; materialRole: string }[]>(
-    [],
-  );
+  const [materials, setMaterials] = useState<
+    { id: string; materialCode: string; materialRole: string }[]
+  >([]);
 
   useEffect(() => {
     void (async () => {
@@ -464,8 +483,9 @@ function PackActions({
       {firstParcel && openLine ? (
         <>
           <div className="flex flex-wrap items-end gap-2">
-            <span className="text-xs text-muted-foreground">
-              往 {firstParcel.parcelCode} 装：{openLine.skuCode}，还差 {openLine.remainingQuantity} 件
+            <span className="text-muted-foreground text-xs">
+              往 {firstParcel.parcelCode} 装：{openLine.skuCode}，还差 {openLine.remainingQuantity}{' '}
+              件
             </span>
             <Button
               disabled={busy !== null}
@@ -487,7 +507,13 @@ function PackActions({
           <div className="flex flex-wrap items-end gap-2">
             {(['gross', 'l', 'w', 'h'] as const).map((key) => (
               <label key={key} className="text-xs">
-                {key === 'gross' ? '毛重(g)' : key === 'l' ? '长(cm)' : key === 'w' ? '宽(cm)' : '高(cm)'}
+                {key === 'gross'
+                  ? '毛重(g)'
+                  : key === 'l'
+                    ? '长(cm)'
+                    : key === 'w'
+                      ? '宽(cm)'
+                      : '高(cm)'}
                 <Input
                   className="mt-1 w-24"
                   value={form[key]}
@@ -539,12 +565,14 @@ function PackActions({
         </Button>
         <Button
           disabled={!form.reason || busy !== null}
-          onClick={() => void onAct('cancel', () => cancelPackingOrder(detail.order.id, form.reason))}
+          onClick={() =>
+            void onAct('cancel', () => cancelPackingOrder(detail.order.id, form.reason))
+          }
         >
           取消
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {declarationSourceLabel(null)} —— 界面不会给一个没人能填的 HS 编码框。
       </p>
     </div>

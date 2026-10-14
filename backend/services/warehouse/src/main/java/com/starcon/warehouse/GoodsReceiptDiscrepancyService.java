@@ -22,32 +22,25 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.2.1.2 收货差异（**处理**）。
  *
- * <p>蓝图：「处理收货差异：短少、破损、型号不符、过期、错发；支持拍照留证、拒收、部分接收、索赔发起」；
- * 输出「差异处理记录 + 索赔单（6 采购）+ 库存拒收不入账记录」；
+ * <p>蓝图：「处理收货差异：短少、破损、型号不符、过期、错发；支持拍照留证、拒收、部分接收、索赔发起」； 输出「差异处理记录 + 索赔单（6 采购）+ 库存拒收不入账记录」；
  * 「**破损与短少必须拒收或待检入库**，直接入可售会把问题货卖出去」。
  *
  * <p>七条实现纪律：
  *
  * <ol>
- *   <li><b>只处理，不重记事实</b>：差异类型 / 数量 / 原因 / 凭证说明 / 记录人归 8.2.1.1
- *       （{@code goods_receipt_discrepancy}），本模块**不改它的任何一列**，只在处理记录上
- *       固化一份快照（快照让列表页不必每次回表 join 一张别人拥有的表）。
- *   <li><b>可售硬规则钉两处</b>：服务层拦「风险差异类型 + 正常入库」，DB 触发器
- *       {@code guard_discrepancy_disposition} 与 {@code guard_discrepancy_stock_move}
- *       各拦一半。改决定绕不过前者，绕过决定直连 SQL 写库存流转绕不过后者。
- *   <li><b>接受量 + 拒收量恒等于差异数量</b>：DB 触发器钉死。「哪部分留下、哪部分赔掉」
- *       必须能从一行里算出来，而不是靠回忆当初点的是哪个按钮。
- *   <li><b>拒收不入账有真实痕迹</b>：货从没进过库记 {@code NOT_POSTED}，
- *       货已入库又改判的才真扣余额记 {@code WITHDRAW}。
+ *   <li><b>只处理，不重记事实</b>：差异类型 / 数量 / 原因 / 凭证说明 / 记录人归 8.2.1.1 （{@code
+ *       goods_receipt_discrepancy}），本模块**不改它的任何一列**，只在处理记录上 固化一份快照（快照让列表页不必每次回表 join 一张别人拥有的表）。
+ *   <li><b>可售硬规则钉两处</b>：服务层拦「风险差异类型 + 正常入库」，DB 触发器 {@code guard_discrepancy_disposition} 与 {@code
+ *       guard_discrepancy_stock_move} 各拦一半。改决定绕不过前者，绕过决定直连 SQL 写库存流转绕不过后者。
+ *   <li><b>接受量 + 拒收量恒等于差异数量</b>：DB 触发器钉死。「哪部分留下、哪部分赔掉」 必须能从一行里算出来，而不是靠回忆当初点的是哪个按钮。
+ *   <li><b>拒收不入账有真实痕迹</b>：货从没进过库记 {@code NOT_POSTED}， 货已入库又改判的才真扣余额记 {@code WITHDRAW}。
  *       两者都留痕，因为「为什么不入库」答不出来才是真问题。
- *   <li><b>入账走带符号增量</b>：与 8.2.1.1 收货、7.5.1.1 调拨同一条路 ——
- *       {@code on_hand += qty}，不是覆盖式写回；余额与库位两处同动（V2 守恒触发器要求）。
- *   <li><b>不回写来源单据、不建假索赔单</b>：蓝图输出写「索赔单（6 采购）」，
- *       但 6.3.2.2 未交付，反向写别人的表会越过「每张事实表只有一个写入所有者」。
- *       本模块在 {@code goods_receipt_discrepancy_claim} 如实记来源单据与索赔意图 / 状态，
- *       上游交付后由上游订阅事件建自己的索赔单并回填 {@code claim_ref_id}。
- *   <li><b>乐观锁是硬约束</b>：每个写动作先 {@code select ... for update} 锁行再比版本，
- *       不匹配一律 409，不做「读到什么就写什么」。
+ *   <li><b>入账走带符号增量</b>：与 8.2.1.1 收货、7.5.1.1 调拨同一条路 —— {@code on_hand += qty}，不是覆盖式写回；余额与库位两处同动（V2
+ *       守恒触发器要求）。
+ *   <li><b>不回写来源单据、不建假索赔单</b>：蓝图输出写「索赔单（6 采购）」， 但 6.3.2.2 未交付，反向写别人的表会越过「每张事实表只有一个写入所有者」。 本模块在
+ *       {@code goods_receipt_discrepancy_claim} 如实记来源单据与索赔意图 / 状态， 上游交付后由上游订阅事件建自己的索赔单并回填 {@code
+ *       claim_ref_id}。
+ *   <li><b>乐观锁是硬约束</b>：每个写动作先 {@code select ... for update} 锁行再比版本， 不匹配一律 409，不做「读到什么就写什么」。
  * </ol>
  *
  * <p>状态机只有一处真相：{@link HandlingStatus#allowedNext}。
@@ -61,10 +54,7 @@ public class GoodsReceiptDiscrepancyService {
   private static final List<String> SORTS =
       List.of("CREATED_AT", "UPDATED_AT", "DECIDED_AT", "QUANTITY");
 
-  /**
-   * 凭证单条上限（字节）。与迁移 V78 的 {@code CHECK(byte_size<=1500000)} 同值：
-   * 服务层先挡一次给可读报错，DB 再兜一次防绕过。
-   */
+  /** 凭证单条上限（字节）。与迁移 V78 的 {@code CHECK(byte_size<=1500000)} 同值： 服务层先挡一次给可读报错，DB 再兜一次防绕过。 */
   static final int MAX_EVIDENCE_BYTES = 1_500_000;
 
   /** 差异处理库存分录的来源类型。inventory_transaction.ref_type 上限 32 字符。 */
@@ -111,10 +101,8 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 差异处理能力：四态状态机、四种处理决定、索赔与凭证词表、五条下游出口接入情况。
    *
-   * <p>本车道的依赖自检结论（对集成头实际查证，不凭蓝图的「下游 =」假定）：
-   * 6 采购单（6.3.2.2）、6.4.2.1 质检单、6.4.2.2 不良品处理、6.5.1 对账索赔、
-   * 11.2.1.1 退货授权与 10.x 平台仓回货**全部未交付**，按仓库既有约定显式
-   * {@code available=false} 并给出原因与 ownerModule，
+   * <p>本车道的依赖自检结论（对集成头实际查证，不凭蓝图的「下游 =」假定）： 6 采购单（6.3.2.2）、6.4.2.1 质检单、6.4.2.2 不良品处理、6.5.1 对账索赔、
+   * 11.2.1.1 退货授权与 10.x 平台仓回货**全部未交付**，按仓库既有约定显式 {@code available=false} 并给出原因与 ownerModule，
    * **不建占位表、不返回空集冒充成功**。
    */
   public GoodsReceiptDiscrepancyCapabilities capabilities() {
@@ -141,19 +129,32 @@ public class GoodsReceiptDiscrepancyService {
       }
     }
 
-    List<DiscrepancyDispositionOption> dispositions = List.of(
-        new DiscrepancyDispositionOption("REJECT", "拒收", true, "否",
-            "全部不要。给了落库库位就是「货已入库、真从库存撤出」；"
-                + "不给就只留「拒收不入账」痕迹（货从没进过库，典型是短少）。"),
-        new DiscrepancyDispositionOption("PARTIAL_ACCEPT", "部分接收", true, "是",
-            "一部分入库、一部分拒收。两个数量都要填，去向质量状态与落库库位必填 —— "
-                + "接受与拒收之和必须恰好等于差异数量。"),
-        new DiscrepancyDispositionOption("HOLD_FOR_INSPECTION", "待检入库", true, "是",
-            "全部转入待检或残次质量状态，等 6.4.2.1 质检结论（该模块尚未交付）。"
-                + "去向质量状态必须是待检或残次，入可售会被数据库层拒绝。"),
-        new DiscrepancyDispositionOption("ACCEPT", "正常入库", false, "是",
-            "按给定质量状态入可售。**只对超收与错发开放** —— "
-                + "破损 / 短少 / 型号不符 / 过期一律禁止，直接入可售会把问题货卖出去。"));
+    List<DiscrepancyDispositionOption> dispositions =
+        List.of(
+            new DiscrepancyDispositionOption(
+                "REJECT",
+                "拒收",
+                true,
+                "否",
+                "全部不要。给了落库库位就是「货已入库、真从库存撤出」；" + "不给就只留「拒收不入账」痕迹（货从没进过库，典型是短少）。"),
+            new DiscrepancyDispositionOption(
+                "PARTIAL_ACCEPT",
+                "部分接收",
+                true,
+                "是",
+                "一部分入库、一部分拒收。两个数量都要填，去向质量状态与落库库位必填 —— " + "接受与拒收之和必须恰好等于差异数量。"),
+            new DiscrepancyDispositionOption(
+                "HOLD_FOR_INSPECTION",
+                "待检入库",
+                true,
+                "是",
+                "全部转入待检或残次质量状态，等 6.4.2.1 质检结论（该模块尚未交付）。" + "去向质量状态必须是待检或残次，入可售会被数据库层拒绝。"),
+            new DiscrepancyDispositionOption(
+                "ACCEPT",
+                "正常入库",
+                false,
+                "是",
+                "按给定质量状态入可售。**只对超收与错发开放** —— " + "破损 / 短少 / 型号不符 / 过期一律禁止，直接入可售会把问题货卖出去。"));
 
     List<DiscrepancyHandlingOption> claimTypes = new ArrayList<>();
     for (var t : ClaimType.values()) {
@@ -162,14 +163,12 @@ public class GoodsReceiptDiscrepancyService {
 
     List<DiscrepancyHandlingOption> evidenceTypes = new ArrayList<>();
     for (var t : EvidenceType.values()) {
-      evidenceTypes.add(
-          new DiscrepancyHandlingOption(t.name(), t.label(), countByEvidenceType(t)));
+      evidenceTypes.add(new DiscrepancyHandlingOption(t.name(), t.label(), countByEvidenceType(t)));
     }
 
     List<DiscrepancyHandlingOption> directions = new ArrayList<>();
     for (var d : StockMoveDirection.values()) {
-      directions.add(
-          new DiscrepancyHandlingOption(d.name(), d.label(), countByDirection(d)));
+      directions.add(new DiscrepancyHandlingOption(d.name(), d.label(), countByDirection(d)));
     }
 
     List<DiscrepancyDependencyCapability> downstream =
@@ -207,8 +206,7 @@ public class GoodsReceiptDiscrepancyService {
                 false,
                 "6.5.1",
                 "/finance/reconciliation/claims",
-                "上游 6.5.1 尚未交付：对账侧索赔的受理、核准与结算都不存在。"
-                    + "因此索赔状态只到「已提交」为止；受理与结算是对方的写入所有者，本模块不代写。"),
+                "上游 6.5.1 尚未交付：对账侧索赔的受理、核准与结算都不存在。" + "因此索赔状态只到「已提交」为止；受理与结算是对方的写入所有者，本模块不代写。"),
             dependency(
                 "RETURN_AUTH",
                 "退货授权",
@@ -280,7 +278,8 @@ public class GoodsReceiptDiscrepancyService {
 
   /** 可选入库去向质量状态。role 决定它是可售还是待检 / 残次。 */
   public List<DiscrepancyQualityStatusOption> qualityStatusOptions() {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,code,name,role from inventory_quality_status where tenant_id="
                 + "nullif(current_setting('app.current_tenant',true),'')::uuid order by code")
         .stream()
@@ -311,8 +310,7 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 每条处理记录的聚合：凭证数、库存流转数、索赔状态。
    *
-   * <p>lateral 在没有凭证 / 没有流转 / 没有索赔时也返回一行（count 为 0），
-   * 一条刚接手还没留证的差异不该从列表里「查不到」。
+   * <p>lateral 在没有凭证 / 没有流转 / 没有索赔时也返回一行（count 为 0）， 一条刚接手还没留证的差异不该从列表里「查不到」。
    */
   private static String aggJoin() {
     return " left join lateral (select count(*) as n from goods_receipt_discrepancy_evidence e"
@@ -531,9 +529,7 @@ public class GoodsReceiptDiscrepancyService {
   }
 
   private DiscrepancyFactRow discrepancyFact(UUID discrepancyId) {
-    Record d =
-        sql.fetchOne(
-            "select * from goods_receipt_discrepancy where id=?", discrepancyId);
+    Record d = sql.fetchOne("select * from goods_receipt_discrepancy where id=?", discrepancyId);
     if (d == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "差异记录不存在或无权查看");
     }
@@ -552,7 +548,8 @@ public class GoodsReceiptDiscrepancyService {
   }
 
   private List<DiscrepancyEvidenceRow> evidenceRows(UUID handlingId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from goods_receipt_discrepancy_evidence where handling_id=?"
                 + " order by captured_at,id",
             handlingId)
@@ -580,7 +577,8 @@ public class GoodsReceiptDiscrepancyService {
   }
 
   private List<DiscrepancyStockMoveRow> stockMoveRows(UUID handlingId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select m.*,qf.name as from_quality_name,qt.name as to_quality_name,"
                 + " loc.code as location_code,lo.lot_code"
                 + " from goods_receipt_discrepancy_stock_move m"
@@ -625,8 +623,7 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 接手一条 8.2.1.1 记录下来的差异事实，建处理记录（进入待处理）。
    *
-   * <p>差异类型与数量在这里被**固化**成快照：列表页要按类型筛、要按数量算索赔比例，
-   * 不该每次都回表 join 一张别人拥有的表。8.2.1.1 后续不再改事实行，所以快照不会漂。
+   * <p>差异类型与数量在这里被**固化**成快照：列表页要按类型筛、要按数量算索赔比例， 不该每次都回表 join 一张别人拥有的表。8.2.1.1 后续不再改事实行，所以快照不会漂。
    */
   @Transactional
   public DiscrepancyHandlingSaved intake(
@@ -635,8 +632,7 @@ public class GoodsReceiptDiscrepancyService {
       throw new IllegalArgumentException("接手请求不能为空");
     }
     UUID discrepancyId = require(request.discrepancyId(), "差异记录");
-    Record d =
-        sql.fetchOne("select * from goods_receipt_discrepancy where id=?", discrepancyId);
+    Record d = sql.fetchOne("select * from goods_receipt_discrepancy where id=?", discrepancyId);
     if (d == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "差异记录不存在或无权查看");
     }
@@ -645,8 +641,7 @@ public class GoodsReceiptDiscrepancyService {
             discrepancyId)
         != null) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "这条差异已经在处理中：一条差异一个处理过程，要改判请另登记一条差异（见 /capabilities）");
+          HttpStatus.CONFLICT, "这条差异已经在处理中：一条差异一个处理过程，要改判请另登记一条差异（见 /capabilities）");
     }
     UUID tenantId = d.get("tenant_id", UUID.class);
     UUID lineId = d.get("line_id", UUID.class);
@@ -677,8 +672,7 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 拍照留证：凭证本体落 PostgreSQL（bytea），单条上限 1.5 MB。
    *
-   * <p>待处理与已决定状态都能留证：货损照片常常是在「先拒收、后补证据」时补拍的。
-   * 已关闭是终态，不再接受任何动作 —— 关闭之后再往一条结案记录上挂证据，
+   * <p>待处理与已决定状态都能留证：货损照片常常是在「先拒收、后补证据」时补拍的。 已关闭是终态，不再接受任何动作 —— 关闭之后再往一条结案记录上挂证据，
    * 等于让「当时结案时有什么证据」这个问题永远答不出来。
    */
   @Transactional
@@ -703,8 +697,11 @@ public class GoodsReceiptDiscrepancyService {
     }
     if (content.length > MAX_EVIDENCE_BYTES) {
       throw new IllegalArgumentException(
-          "单个凭证不能超过 " + (MAX_EVIDENCE_BYTES / 1024) + " KB（当前 "
-              + (content.length / 1024) + " KB）：请在拍照时用长边 1280px 以内的画质上传");
+          "单个凭证不能超过 "
+              + (MAX_EVIDENCE_BYTES / 1024)
+              + " KB（当前 "
+              + (content.length / 1024)
+              + " KB）：请在拍照时用长边 1280px 以内的画质上传");
     }
     OffsetDateTime capturedAt =
         request.capturedAt() == null ? OffsetDateTime.now() : request.capturedAt();
@@ -763,12 +760,10 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 提交处理决定：拒收 / 部分接收 / 待检入库 / 正常入库，并写对应的库存流转。
    *
-   * <p>蓝图硬规则在**服务层**先拦一次：「破损与短少必须拒收或待检入库」。
-   * DB 触发器 {@code guard_discrepancy_disposition} 与 {@code guard_discrepancy_stock_move}
-   * 各再拦一半（改决定绕不过这里，绕过这里直连 SQL 也绕不过 DB）。
+   * <p>蓝图硬规则在**服务层**先拦一次：「破损与短少必须拒收或待检入库」。 DB 触发器 {@code guard_discrepancy_disposition} 与 {@code
+   * guard_discrepancy_stock_move} 各再拦一半（改决定绕不过这里，绕过这里直连 SQL 也绕不过 DB）。
    *
-   * <p>一个事务里完成：处理记录 + 库存分录 + 余额 / 库位增量 + 流转痕迹。
-   * 任何一步失败整体回滚，不会留下「货撤了但记录没改」的半截状态。
+   * <p>一个事务里完成：处理记录 + 库存分录 + 余额 / 库位增量 + 流转痕迹。 任何一步失败整体回滚，不会留下「货撤了但记录没改」的半截状态。
    */
   @Transactional
   public DiscrepancyHandlingSaved decide(
@@ -788,13 +783,15 @@ public class GoodsReceiptDiscrepancyService {
     UUID skuId = head.get("sku_id", UUID.class);
     String type = head.get("discrepancy_type", String.class);
     BigDecimal quantity = decimal(head, "quantity");
-    HandlingDisposition disposition = HandlingDisposition.parse(require(request.disposition(), "处理决定"));
+    HandlingDisposition disposition =
+        HandlingDisposition.parse(require(request.disposition(), "处理决定"));
     boolean risk = RISK_DISCREPANCY_TYPES.contains(type);
 
     // 硬规则第一道（服务层）：风险差异类型不得按正常入库处理。
     if (risk && disposition == HandlingDisposition.ACCEPT) {
       throw new IllegalArgumentException(
-          GoodsReceiptModels.DiscrepancyType.parse(type).label() + "不允许按「正常入库」处理："
+          GoodsReceiptModels.DiscrepancyType.parse(type).label()
+              + "不允许按「正常入库」处理："
               + "蓝图要求破损与短少必须拒收或待检入库，直接入可售会把问题货卖出去。"
               + "可选处理：拒收 / 部分接收 / 待检入库");
     }
@@ -814,16 +811,22 @@ public class GoodsReceiptDiscrepancyService {
         accepted = stock(request.acceptedQuantity(), "接受数量");
         rejected = stock(request.rejectedQuantity(), "拒收数量");
         if (accepted.signum() == 0 || rejected.signum() == 0) {
-          throw new IllegalArgumentException(
-              "部分接收要求接受量与拒收量都大于 0：全都要就是「拒收」或「正常入库」，不是部分接收");
+          throw new IllegalArgumentException("部分接收要求接受量与拒收量都大于 0：全都要就是「拒收」或「正常入库」，不是部分接收");
         }
       }
       default -> throw new IllegalStateException("未覆盖的处理决定：" + disposition);
     }
     if (accepted.add(rejected).compareTo(quantity) != 0) {
       throw new IllegalArgumentException(
-          "处理数量对不上：差异数量 " + quantity + "，接受 " + accepted + " + 拒收 " + rejected
-              + " = " + accepted.add(rejected) + "。接受量与拒收量之和必须恰好等于差异数量");
+          "处理数量对不上：差异数量 "
+              + quantity
+              + "，接受 "
+              + accepted
+              + " + 拒收 "
+              + rejected
+              + " = "
+              + accepted.add(rejected)
+              + "。接受量与拒收量之和必须恰好等于差异数量");
     }
 
     // 入库去向：接受量 > 0 时必填。待检入库还必须是待检 / 残次。
@@ -835,13 +838,13 @@ public class GoodsReceiptDiscrepancyService {
       if (disposition == HandlingDisposition.HOLD_FOR_INSPECTION
           && !("PENDING_INSPECTION".equals(inboundRole) || "DEFECTIVE".equals(inboundRole))) {
         throw new IllegalArgumentException(
-            "待检入库的去向质量状态必须是待检或残次（当前是" + roleLabel(inboundRole)
-                + "）：待检的意思就是先不入可售");
+            "待检入库的去向质量状态必须是待检或残次（当前是" + roleLabel(inboundRole) + "）：待检的意思就是先不入可售");
       }
     }
 
     Record receipt =
-        sql.fetchOne("select warehouse_id,legal_entity_id from goods_receipt where id=?", receiptId);
+        sql.fetchOne(
+            "select warehouse_id,legal_entity_id from goods_receipt where id=?", receiptId);
     if (receipt == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "收货单不存在或无权查看");
     }
@@ -855,8 +858,11 @@ public class GoodsReceiptDiscrepancyService {
       requireLocation(tenantId, locationId, warehouseId);
     }
     if (request.lotId() != null
-        && sql.fetchOne("select id from inventory_lot where id=? and tenant_id=?",
-            request.lotId(), tenantId) == null) {
+        && sql.fetchOne(
+                "select id from inventory_lot where id=? and tenant_id=?",
+                request.lotId(),
+                tenantId)
+            == null) {
       throw new IllegalArgumentException("批次不存在或无权访问：" + request.lotId());
     }
     UUID actorId = actor.userId();
@@ -885,8 +891,7 @@ public class GoodsReceiptDiscrepancyService {
     if (movesStock) {
       if (skuId == null) {
         throw new IllegalArgumentException(
-            "这条差异没有对应 SKU（单级差异），无法动库存：只能记为「拒收不入账」。"
-                + "要真的撤出或入库，请在收货单明细行上登记差异");
+            "这条差异没有对应 SKU（单级差异），无法动库存：只能记为「拒收不入账」。" + "要真的撤出或入库，请在收货单明细行上登记差异");
       }
       transactionId = UUID.randomUUID();
       // 分录用 V1 已有的 kind='ADJUSTMENT'：这是库存调整而不是一次新的到货收货，
@@ -894,9 +899,20 @@ public class GoodsReceiptDiscrepancyService {
       sql.execute(
           "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,"
               + "notes) values(?,?,?,?,?,cast(? as timestamptz),?,?)",
-          transactionId, tenantId, "ADJUSTMENT", REF_TYPE, handlingId, at, actorId,
-          "收货差异处理：接受 " + accepted + "，拒收 " + rejected + "；"
-              + "去向质量状态 " + (inboundQualityId == null ? "无（全部拒收）" : inboundQualityId));
+          transactionId,
+          tenantId,
+          "ADJUSTMENT",
+          REF_TYPE,
+          handlingId,
+          at,
+          actorId,
+          "收货差异处理：接受 "
+              + accepted
+              + "，拒收 "
+              + rejected
+              + "；"
+              + "去向质量状态 "
+              + (inboundQualityId == null ? "无（全部拒收）" : inboundQualityId));
     }
 
     // 接受部分。方向由**实际去向质量状态的 role** 推导，而不是由差异类型推导 ——
@@ -914,11 +930,27 @@ public class GoodsReceiptDiscrepancyService {
         sql.execute(
             "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                 + "reserved_delta) values(?,?,?,?,?,0)",
-            UUID.randomUUID(), tenantId, transactionId, fromBalance, accepted.negate());
+            UUID.randomUUID(),
+            tenantId,
+            transactionId,
+            fromBalance,
+            accepted.negate());
         insertStockMove(
-            tenantId, handlingId, head.get("discrepancy_id", UUID.class), skuId, warehouseId,
-            legalEntityId, StockMoveDirection.WITHDRAW, fromQualityId, null, locationId,
-            request.lotId(), accepted, transactionId, at, actorId,
+            tenantId,
+            handlingId,
+            head.get("discrepancy_id", UUID.class),
+            skuId,
+            warehouseId,
+            legalEntityId,
+            StockMoveDirection.WITHDRAW,
+            fromQualityId,
+            null,
+            locationId,
+            request.lotId(),
+            accepted,
+            transactionId,
+            at,
+            actorId,
             "质量状态流转出：" + fromQualityId + " 转出 " + accepted);
       }
       UUID toBalance = balanceId(tenantId, skuId, warehouseId, legalEntityId, inboundQualityId);
@@ -926,21 +958,53 @@ public class GoodsReceiptDiscrepancyService {
       sql.execute(
           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
               + "reserved_delta) values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenantId, transactionId, toBalance, accepted);
+          UUID.randomUUID(),
+          tenantId,
+          transactionId,
+          toBalance,
+          accepted);
       insertStockMove(
-          tenantId, handlingId, head.get("discrepancy_id", UUID.class), skuId, warehouseId,
-          legalEntityId, direction, null, inboundQualityId, locationId, request.lotId(), accepted,
-          transactionId, at, actorId,
+          tenantId,
+          handlingId,
+          head.get("discrepancy_id", UUID.class),
+          skuId,
+          warehouseId,
+          legalEntityId,
+          direction,
+          null,
+          inboundQualityId,
+          locationId,
+          request.lotId(),
+          accepted,
+          transactionId,
+          at,
+          actorId,
           (fromQualityId == null ? "差异处理接受入库 " : "质量状态流转入：")
-              + accepted + "，去向质量状态 " + inboundQualityId);
-    } else if (accepted.signum() > 0 && locationId != null && fromQualityId != null
+              + accepted
+              + "，去向质量状态 "
+              + inboundQualityId);
+    } else if (accepted.signum() > 0
+        && locationId != null
+        && fromQualityId != null
         && fromQualityId.equals(inboundQualityId)) {
       // 情形 a：货已经在这个质量状态里（例如超收确认 —— 收货时就入了可售，现在只是确认）。
       // **不重复加减**：再来一次就会凭空翻倍。这也是「超收确认后库存仍是 105 而不是 110」的依据。
       insertStockMove(
-          tenantId, handlingId, head.get("discrepancy_id", UUID.class), skuId, warehouseId,
-          legalEntityId, StockMoveDirection.NO_MOVE, fromQualityId, inboundQualityId, locationId,
-          request.lotId(), accepted, null, at, actorId,
+          tenantId,
+          handlingId,
+          head.get("discrepancy_id", UUID.class),
+          skuId,
+          warehouseId,
+          legalEntityId,
+          StockMoveDirection.NO_MOVE,
+          fromQualityId,
+          inboundQualityId,
+          locationId,
+          request.lotId(),
+          accepted,
+          null,
+          at,
+          actorId,
           "货已在去向质量状态（" + inboundQualityId + "）内，接受 " + accepted + " 无需移动库存");
     }
 
@@ -953,17 +1017,46 @@ public class GoodsReceiptDiscrepancyService {
         sql.execute(
             "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                 + "reserved_delta) values(?,?,?,?,?,0)",
-            UUID.randomUUID(), tenantId, transactionId, balanceId, rejected.negate());
+            UUID.randomUUID(),
+            tenantId,
+            transactionId,
+            balanceId,
+            rejected.negate());
         insertStockMove(
-            tenantId, handlingId, head.get("discrepancy_id", UUID.class), skuId, warehouseId,
-            legalEntityId, StockMoveDirection.WITHDRAW, withdrawFrom, null, locationId,
-            request.lotId(), rejected, transactionId, at, actorId,
+            tenantId,
+            handlingId,
+            head.get("discrepancy_id", UUID.class),
+            skuId,
+            warehouseId,
+            legalEntityId,
+            StockMoveDirection.WITHDRAW,
+            withdrawFrom,
+            null,
+            locationId,
+            request.lotId(),
+            rejected,
+            transactionId,
+            at,
+            actorId,
             "差异处理拒收，从库存撤出 " + rejected);
       } else {
         insertStockMove(
-            tenantId, handlingId, head.get("discrepancy_id", UUID.class), skuId, warehouseId,
-            legalEntityId, StockMoveDirection.NOT_POSTED, null, null, null, null, rejected, null,
-            at, actorId, "差异处理拒收：这批货从未进入库存，不写分录、不改余额");
+            tenantId,
+            handlingId,
+            head.get("discrepancy_id", UUID.class),
+            skuId,
+            warehouseId,
+            legalEntityId,
+            StockMoveDirection.NOT_POSTED,
+            null,
+            null,
+            null,
+            null,
+            rejected,
+            null,
+            at,
+            actorId,
+            "差异处理拒收：这批货从未进入库存，不写分录、不改余额");
       }
     }
 
@@ -1006,9 +1099,23 @@ public class GoodsReceiptDiscrepancyService {
             + "sku_id,warehouse_id,legal_entity_id,direction,from_quality_status_id,"
             + "to_quality_status_id,location_id,lot_id,quantity,transaction_id,occurred_at,actor_id,note)"
             + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,cast(? as timestamptz),?,?)",
-        UUID.randomUUID(), tenantId, handlingId, discrepancyId, skuId, warehouseId, legalEntityId,
-        direction.name(), fromQualityId, toQualityId, locationId, lotId, quantity, transactionId, at,
-        actorId, note);
+        UUID.randomUUID(),
+        tenantId,
+        handlingId,
+        discrepancyId,
+        skuId,
+        warehouseId,
+        legalEntityId,
+        direction.name(),
+        fromQualityId,
+        toQualityId,
+        locationId,
+        lotId,
+        quantity,
+        transactionId,
+        at,
+        actorId,
+        note);
   }
 
   // ================================================================ 索赔
@@ -1016,8 +1123,7 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 发起索赔：只记来源单据与索赔意图 / 状态，**不建假采购索赔单**（见迁移文件头「三」）。
    *
-   * <p>金额可空：供应商还没报价时先把索赔发起 —— 「金额必填」会让现场因为等一个
-   * 还没有人给的数字而把货损压着不报，那才是真损失。
+   * <p>金额可空：供应商还没报价时先把索赔发起 —— 「金额必填」会让现场因为等一个 还没有人给的数字而把货损压着不报，那才是真损失。
    */
   @Transactional
   public DiscrepancyHandlingSaved claim(
@@ -1034,10 +1140,10 @@ public class GoodsReceiptDiscrepancyService {
     }
     UUID tenantId = head.get("tenant_id", UUID.class);
     UUID receiptId = head.get("receipt_id", UUID.class);
-    if (sql.fetchOne("select id from goods_receipt_discrepancy_claim where handling_id=?",
-        handlingId) != null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "这条处理记录已经有一条索赔了：同一批差异发两次索赔会让对账收到重复金额");
+    if (sql.fetchOne(
+            "select id from goods_receipt_discrepancy_claim where handling_id=?", handlingId)
+        != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "这条处理记录已经有一条索赔了：同一批差异发两次索赔会让对账收到重复金额");
     }
 
     ClaimType claimType = ClaimType.parse(require(request.claimType(), "索赔类型"));
@@ -1046,7 +1152,8 @@ public class GoodsReceiptDiscrepancyService {
     // 用 stock() 校验会让「不填索赔数量、默认取整条差异」这条最自然的用法直接报错。
     BigDecimal claimedQuantity =
         positive6(
-            request.claimedQuantity() == null ? decimal(head, "quantity")
+            request.claimedQuantity() == null
+                ? decimal(head, "quantity")
                 : request.claimedQuantity(),
             "索赔数量");
     BigDecimal amount = null;
@@ -1080,7 +1187,8 @@ public class GoodsReceiptDiscrepancyService {
     }
     String sourceRefCode = fit(request.sourceRefCode(), 64, "来源单号");
     if (sourceRefCode.isBlank() && sourceRefId != null) {
-      Record receipt = sql.fetchOne("select source_ref_code from goods_receipt where id=?", receiptId);
+      Record receipt =
+          sql.fetchOne("select source_ref_code from goods_receipt where id=?", receiptId);
       sourceRefCode = receipt == null ? "" : receipt.get("source_ref_code", String.class);
     }
 
@@ -1091,9 +1199,19 @@ public class GoodsReceiptDiscrepancyService {
         "insert into goods_receipt_discrepancy_claim(id,tenant_id,claim_code,handling_id,receipt_id,"
             + "source_ref_id,source_ref_code,claim_type,claimed_quantity,claimed_amount,currency,"
             + "reason,created_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        UUID.randomUUID(), tenantId, code, handlingId, receiptId, sourceRefId, sourceRefCode,
-        claimType.name(), claimedQuantity, amount, currency,
-        fit(request.reason(), 2000, "索赔说明"), actor.userId());
+        UUID.randomUUID(),
+        tenantId,
+        code,
+        handlingId,
+        receiptId,
+        sourceRefId,
+        sourceRefCode,
+        claimType.name(),
+        claimedQuantity,
+        amount,
+        currency,
+        fit(request.reason(), 2000, "索赔说明"),
+        actor.userId());
     sql.execute(
         "update goods_receipt_discrepancy_handling set status='CLAIMED',version=version+1,"
             + "updated_at=now() where id=?",
@@ -1114,14 +1232,17 @@ public class GoodsReceiptDiscrepancyService {
     if (!claim.get("status", String.class).equals(ClaimStatus.INITIATED.name())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "索赔当前是「" + ClaimStatus.parse(claim.get("status", String.class)).label()
+          "索赔当前是「"
+              + ClaimStatus.parse(claim.get("status", String.class)).label()
               + "」：只有已发起的索赔能提交");
     }
     sql.execute(
         "update goods_receipt_discrepancy_claim set status='SUBMITTED',"
             + "submitted_at=cast(? as timestamptz),submitted_by=?,version=version+1,"
             + "updated_at=now() where id=?",
-        OffsetDateTime.now(), actor.userId(), claim.get("id", UUID.class));
+        OffsetDateTime.now(),
+        actor.userId(),
+        claim.get("id", UUID.class));
     return claimOf(handlingId);
   }
 
@@ -1138,7 +1259,8 @@ public class GoodsReceiptDiscrepancyService {
     if (!claim.get("status", String.class).equals(ClaimStatus.INITIATED.name())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "索赔当前是「" + ClaimStatus.parse(claim.get("status", String.class)).label()
+          "索赔当前是「"
+              + ClaimStatus.parse(claim.get("status", String.class)).label()
               + "」：只有已发起的索赔能撤回（已提交不可撤回，"
               + "否则对账那边会出现一笔凭空消失的索赔）");
     }
@@ -1150,7 +1272,9 @@ public class GoodsReceiptDiscrepancyService {
         "update goods_receipt_discrepancy_claim set status='WITHDRAWN',"
             + "withdrawn_at=cast(? as timestamptz),withdrawn_reason=?,version=version+1,"
             + "updated_at=now() where id=?",
-        OffsetDateTime.now(), reason, claim.get("id", UUID.class));
+        OffsetDateTime.now(),
+        reason,
+        claim.get("id", UUID.class));
     // 撤回后处理记录退回已决定：它不再「已索赔」，但处理决定与库存流转原样保留。
     sql.execute(
         "update goods_receipt_discrepancy_handling set status='DECIDED',version=version+1,"
@@ -1173,9 +1297,8 @@ public class GoodsReceiptDiscrepancyService {
   // ================================================================ 关单
 
   /**
-   * 关闭处理。要求已决定，且必须有凭证 / 库存流转 / 索赔三者之一 ——
-   * DB 触发器 {@code guard_discrepancy_handling_close} 钉死，关掉一条空白的差异处理
-   * 等于把货损痕迹抹掉。
+   * 关闭处理。要求已决定，且必须有凭证 / 库存流转 / 索赔三者之一 —— DB 触发器 {@code guard_discrepancy_handling_close}
+   * 钉死，关掉一条空白的差异处理 等于把货损痕迹抹掉。
    */
   @Transactional
   public DiscrepancyHandlingSaved close(
@@ -1183,8 +1306,7 @@ public class GoodsReceiptDiscrepancyService {
     Record head = lockHandling(handlingId);
     requireVersion(head, request == null ? null : request.expectedVersion());
     String status = head.get("status", String.class);
-    if (!HandlingStatus.allowedNext(HandlingStatus.parse(status))
-        .contains(HandlingStatus.CLOSED)) {
+    if (!HandlingStatus.allowedNext(HandlingStatus.parse(status)).contains(HandlingStatus.CLOSED)) {
       throw statusError(status, "当前状态不能关闭");
     }
     String reason = fit(request == null ? null : request.reason(), 200, "关闭原因");
@@ -1193,7 +1315,10 @@ public class GoodsReceiptDiscrepancyService {
         "update goods_receipt_discrepancy_handling set status='CLOSED',"
             + "closed_at=cast(? as timestamptz),closed_by=?,close_reason=?,version=version+1,"
             + "updated_at=now() where id=?",
-        OffsetDateTime.now(), actor.userId(), finalReason, handlingId);
+        OffsetDateTime.now(),
+        actor.userId(),
+        finalReason,
+        handlingId);
     return savedOf(handlingId);
   }
 
@@ -1202,11 +1327,10 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 入库：加余额 + 同步加库位明细（V2 守恒触发器要求两处同动）。
    *
-   * <p>用**带符号增量**而不是覆盖式写回：覆盖式写回（{@code set on_hand = 期望值}）
-   * 会把处理期间真实发生的其他交易（并行的出库、预占、盘点调整）整段抹掉。
+   * <p>用**带符号增量**而不是覆盖式写回：覆盖式写回（{@code set on_hand = 期望值}） 会把处理期间真实发生的其他交易（并行的出库、预占、盘点调整）整段抹掉。
    *
-   * <p>{@code last_movement_at} 用 {@code greatest(...)} 保证严格单调：
-   * V2 的 {@code guard_bucket_movement_time} 会挡住倒退。
+   * <p>{@code last_movement_at} 用 {@code greatest(...)} 保证严格单调： V2 的 {@code
+   * guard_bucket_movement_time} 会挡住倒退。
    */
   private void addInbound(
       UUID balanceId, UUID locationId, UUID lotId, BigDecimal qty, OffsetDateTime at) {
@@ -1214,36 +1338,47 @@ public class GoodsReceiptDiscrepancyService {
         sql.fetchOne(
             "select id from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (existing != null) {
       sql.execute(
           "update stock_bucket set on_hand=on_hand+?,"
               + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          qty, at, existing.get("id", UUID.class));
+          qty,
+          at,
+          existing.get("id", UUID.class));
     } else {
       Record bal = sql.fetchOne("select * from inventory_balance where id=?", balanceId);
       sql.execute(
           "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
               + "lot_id,quality_status_id,balance_id,on_hand,reserved,last_movement_at)"
               + " values(?,?,?,?,?,?,?,?,?,?,0,cast(? as timestamptz))",
-          UUID.randomUUID(), bal.get("tenant_id", UUID.class),
-          bal.get("legal_entity_id", UUID.class), bal.get("sku_id", UUID.class),
-          bal.get("warehouse_id", UUID.class), locationId, lotId,
-          bal.get("quality_status_id", UUID.class), balanceId, qty, at);
+          UUID.randomUUID(),
+          bal.get("tenant_id", UUID.class),
+          bal.get("legal_entity_id", UUID.class),
+          bal.get("sku_id", UUID.class),
+          bal.get("warehouse_id", UUID.class),
+          locationId,
+          lotId,
+          bal.get("quality_status_id", UUID.class),
+          balanceId,
+          qty,
+          at);
     }
     sql.execute(
         "update inventory_balance set on_hand=on_hand+?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   /**
    * 出库（拒收撤出）：减余额 + 同步减库位明细。
    *
    * <p>先查库位上的实际在手量并给出可读报错：V1 / V2 的 {@code CHECK(available>=0)}
-   * 确实会挡住扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、
-   * 在哪个库位、差多少。这里先说人话 —— 常见真实原因是货已经被销售预占。
+   * 确实会挡住扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、 在哪个库位、差多少。这里先说人话 —— 常见真实原因是货已经被销售预占。
    */
   private void addOutbound(
       UUID balanceId, UUID locationId, UUID lotId, BigDecimal qty, OffsetDateTime at) {
@@ -1251,17 +1386,21 @@ public class GoodsReceiptDiscrepancyService {
         sql.fetchOne(
             "select id,on_hand,reserved from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (bucket == null) {
       throw new IllegalArgumentException(
-          "撤出失败：库位上没有这条 SKU 的库存行。拒收不入账请不要传 locationId —— "
-              + "传了 locationId 就表示货已入库，要真从库存里撤出去");
+          "撤出失败：库位上没有这条 SKU 的库存行。拒收不入账请不要传 locationId —— " + "传了 locationId 就表示货已入库，要真从库存里撤出去");
     }
     BigDecimal onHand = decimal(bucket, "on_hand");
     BigDecimal reserved = decimal(bucket, "reserved");
     if (onHand.compareTo(qty) < 0) {
       throw new IllegalArgumentException(
-          "撤出失败：库位上只有 " + onHand + "，要撤 " + qty
+          "撤出失败：库位上只有 "
+              + onHand
+              + "，要撤 "
+              + qty
               + (reserved.signum() > 0 ? "（其中 " + reserved + " 已被预占）" : "")
               + "。货可能已被销售预占或已出库，先处理占用再撤出");
     }
@@ -1269,11 +1408,14 @@ public class GoodsReceiptDiscrepancyService {
         "update stock_bucket set on_hand=on_hand-?,"
             + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
             + " + interval '1 microsecond') where id=?",
-        qty, at, bucket.get("id", UUID.class));
+        qty,
+        at,
+        bucket.get("id", UUID.class));
     sql.execute(
         "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   /** 取（或建）一条余额行。跨租户塞进来的仓/SKU 会被 UNIQUE 或 RLS 挡住。 */
@@ -1283,7 +1425,11 @@ public class GoodsReceiptDiscrepancyService {
         sql.fetchOne(
             "select id from inventory_balance where tenant_id=? and sku_id=? and warehouse_id=?"
                 + " and legal_entity_id=? and quality_status_id=?",
-            tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+            tenantId,
+            skuId,
+            warehouseId,
+            legalEntityId,
+            qualityStatusId);
     if (found != null) {
       return found.get("id", UUID.class);
     }
@@ -1291,7 +1437,12 @@ public class GoodsReceiptDiscrepancyService {
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,0,0)",
-        id, tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+        id,
+        tenantId,
+        skuId,
+        warehouseId,
+        legalEntityId,
+        qualityStatusId);
     return id;
   }
 
@@ -1300,8 +1451,8 @@ public class GoodsReceiptDiscrepancyService {
   /** 锁行 + 读租户。并发决定 / 索赔时同一条被串行化，版本比对才可靠。 */
   private Record lockHandling(UUID handlingId) {
     Record head =
-        sql.fetchOne("select * from goods_receipt_discrepancy_handling where id=? for update",
-            handlingId);
+        sql.fetchOne(
+            "select * from goods_receipt_discrepancy_handling where id=? for update", handlingId);
     if (head == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "差异处理记录不存在或无权查看");
     }
@@ -1316,22 +1467,21 @@ public class GoodsReceiptDiscrepancyService {
     long actual = head.get("version", Long.class);
     if (actual != expected) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "差异处理记录已被他人修改（当前版本 " + actual + "，你的版本 " + expected
-              + "），请刷新后重试");
+          HttpStatus.CONFLICT, "差异处理记录已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "），请刷新后重试");
     }
   }
 
   private static ResponseStatusException statusError(String actual, String hint) {
     return new ResponseStatusException(
-        HttpStatus.CONFLICT,
-        "差异处理当前是「" + HandlingStatus.parse(actual).label() + "」：" + hint);
+        HttpStatus.CONFLICT, "差异处理当前是「" + HandlingStatus.parse(actual).label() + "」：" + hint);
   }
 
   private String requireQualityRole(UUID tenantId, UUID qualityStatusId) {
     Record q =
-        sql.fetchOne("select role from inventory_quality_status where id=? and tenant_id=?",
-            qualityStatusId, tenantId);
+        sql.fetchOne(
+            "select role from inventory_quality_status where id=? and tenant_id=?",
+            qualityStatusId,
+            tenantId);
     if (q == null) {
       throw new IllegalArgumentException("质量状态不存在或无权访问：" + qualityStatusId);
     }
@@ -1341,9 +1491,11 @@ public class GoodsReceiptDiscrepancyService {
   private void requireLocation(UUID tenantId, UUID locationId, UUID warehouseId) {
     if (sql.fetchOne(
             "select id from warehouse_location where id=? and tenant_id=? and warehouse_id=?",
-            locationId, tenantId, warehouseId) == null) {
-      throw new IllegalArgumentException(
-          "落库库位不存在，或不属于收货仓（差异处理只能动本仓的库位）：" + locationId);
+            locationId,
+            tenantId,
+            warehouseId)
+        == null) {
+      throw new IllegalArgumentException("落库库位不存在，或不属于收货仓（差异处理只能动本仓的库位）：" + locationId);
     }
   }
 
@@ -1373,9 +1525,8 @@ public class GoodsReceiptDiscrepancyService {
   /**
    * 会真的动库存的数量：最多 4 位小数。
    *
-   * <p>为什么比 8.2.1.1 的 6 位更严：{@code inventory_balance.on_hand} 与
-   * {@code stock_bucket.on_hand} 都是 {@code numeric(19,4)}。给 6 位小数会被数据库
-   * **静默四舍五入**，于是处理记录上写着接受 1.000001、库存余额上却是 1.0000 ——
+   * <p>为什么比 8.2.1.1 的 6 位更严：{@code inventory_balance.on_hand} 与 {@code stock_bucket.on_hand} 都是
+   * {@code numeric(19,4)}。给 6 位小数会被数据库 **静默四舍五入**，于是处理记录上写着接受 1.000001、库存余额上却是 1.0000 ——
    * 两个数对不上却谁都不报错。这里直接拒绝并说清原因。
    */
   private static BigDecimal stock(BigDecimal value, String label) {
@@ -1384,8 +1535,7 @@ public class GoodsReceiptDiscrepancyService {
     }
     if (value.scale() > 4) {
       throw new IllegalArgumentException(
-          label + "最多 4 位小数：这批货要真的动库存，而库存余额列是 numeric(19,4)，"
-              + "给更多小数会被数据库静默四舍五入，两处数量就对不上了");
+          label + "最多 4 位小数：这批货要真的动库存，而库存余额列是 numeric(19,4)，" + "给更多小数会被数据库静默四舍五入，两处数量就对不上了");
     }
     return value;
   }
@@ -1505,8 +1655,7 @@ public class GoodsReceiptDiscrepancyService {
 
   /** 每个写动作后回读：响应是「库里真实存了什么」。 */
   private DiscrepancyHandlingSaved savedOf(UUID handlingId) {
-    Record r =
-        sql.fetchOne(rowSelect() + fromClause() + aggJoin() + " where h.id=?", handlingId);
+    Record r = sql.fetchOne(rowSelect() + fromClause() + aggJoin() + " where h.id=?", handlingId);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "差异处理记录不存在或无权查看");
     }

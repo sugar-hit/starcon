@@ -25,7 +25,9 @@ import { DELETE, GET, POST, PUT } from './[...path]/route';
 // 相对**本文件**定位而不是 process.cwd()：vitest 从仓库根跑时 cwd 是仓库根，
 // 从 apps/web 跑时又是 apps/web —— 用 cwd 会在「换个地方跑测试」时静默读不到文件。
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/logistics/customs-declaration-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/logistics/customs-declaration-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -82,7 +84,7 @@ it('源码里真实存在的每个报关单调用点都被放行并转发', asyn
 
   for (const path of sites) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenCalledWith(
       expect.stringContaining(':8084/' + path),
@@ -122,7 +124,9 @@ it('建单走 POST 裸路径也被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const segments = BASE.split('/');
-  const response = await POST(request(BASE, 'POST'), { params: { path: segments } });
+  const response = await POST(request(BASE, 'POST'), {
+    params: Promise.resolve({ path: segments }),
+  });
   expect(response.status, 'POST 报关单裸路径未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + BASE),
@@ -136,7 +140,7 @@ it('改单走 PUT {id} 被放行', async () => {
   vi.stubGlobal('fetch', fetcher);
   const path = `${BASE}/${ID}`;
   const segments = path.split('/');
-  const response = await PUT(request(path, 'PUT'), { params: { path: segments } });
+  const response = await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: segments }) });
   expect(response.status, 'PUT 报关单改单未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),
@@ -156,7 +160,9 @@ it('白名单按路径登记：已登记路径的 DELETE 会被转发，防线�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = `${BASE}/${ID}`;
-  const response = await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } });
+  const response = await DELETE(request(path, 'DELETE'), {
+    params: Promise.resolve({ path: path.split('/') }),
+  });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),
@@ -179,7 +185,7 @@ it('不存在的报关单子路径仍然被拒 —— 放行不该存在的形�
     `${BASE}/statistics`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -204,7 +210,7 @@ it('头程发运单的形状没有被报关单的白名单吃掉，且它自己�
     `warehouse/first-mile-shipments/${ID}/transit-legs`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行（被报关单段吃掉了？）`).toBe(200);
   }
 
@@ -213,7 +219,7 @@ it('头程发运单的形状没有被报关单的白名单吃掉，且它自己�
     `warehouse/first-mile-shipments/${ID}/declarations`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
 });

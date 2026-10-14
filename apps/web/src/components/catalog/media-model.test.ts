@@ -120,9 +120,9 @@ describe('media-model', () => {
 
     it('整表校验返回第一条可执行原因', () => {
       expect(uploadProblem(emptyUploadInput())).toContain('名称');
-      expect(
-        uploadProblem({ ...emptyUploadInput(), name: 'x', mediaType: 'AUDIO' }),
-      ).toContain('IMAGE');
+      expect(uploadProblem({ ...emptyUploadInput(), name: 'x', mediaType: 'AUDIO' })).toContain(
+        'IMAGE',
+      );
       expect(
         uploadProblem({ ...emptyUploadInput(), name: 'x', mediaType: 'IMAGE', purpose: 'BANNER' }),
       ).toContain('用途');
@@ -158,7 +158,13 @@ describe('media-model', () => {
 
     it('详情转表单：标签取编码，version 带过来做乐观锁', () => {
       const detail = {
-        asset: row({ name: '主图', purpose: 'PRIMARY', description: '', altText: '正面', version: 7 }),
+        asset: row({
+          name: '主图',
+          purpose: 'PRIMARY',
+          description: '',
+          altText: '正面',
+          version: 7,
+        }),
         tags: { 'WHITE-BG': '白底', HERO: '主图' },
         versions: [],
         references: [],

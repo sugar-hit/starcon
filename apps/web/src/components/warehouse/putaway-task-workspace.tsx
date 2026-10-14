@@ -362,7 +362,8 @@ export function PutawayTaskWorkspace() {
                       {formatQuantity(t.putawayQuantity)}
                       {Number(t.putawayQuantity) !== Number(t.plannedQuantity) && (
                         <span className="text-muted-foreground ml-1 text-xs">
-                          （差 {formatQuantity(Number(t.plannedQuantity) - Number(t.putawayQuantity))}）
+                          （差{' '}
+                          {formatQuantity(Number(t.plannedQuantity) - Number(t.putawayQuantity))}）
                         </span>
                       )}
                     </td>
@@ -406,29 +407,15 @@ export function PutawayTaskWorkspace() {
               await assignPutawayTask(detail.task.taskId, { assigneeId, note: null });
             }, detail.task.taskId)
           }
-          onStart={() =>
-            void run(
-              () => startPutawayTask(detail.task.taskId),
-              detail.task.taskId,
-            )
-          }
+          onStart={() => void run(() => startPutawayTask(detail.task.taskId), detail.task.taskId)}
           onScan={(input) =>
-            void run(
-              () => scanPutawayTask(detail.task.taskId, input),
-              detail.task.taskId,
-            )
+            void run(() => scanPutawayTask(detail.task.taskId, input), detail.task.taskId)
           }
           onComplete={() =>
-            void run(
-              () => completePutawayTask(detail.task.taskId),
-              detail.task.taskId,
-            )
+            void run(() => completePutawayTask(detail.task.taskId), detail.task.taskId)
           }
           onCancel={(reason) =>
-            void run(
-              () => cancelPutawayTask(detail.task.taskId, { reason }),
-              detail.task.taskId,
-            )
+            void run(() => cancelPutawayTask(detail.task.taskId, { reason }), detail.task.taskId)
           }
         />
       )}
@@ -436,15 +423,7 @@ export function PutawayTaskWorkspace() {
   );
 }
 
-function Reading({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-}) {
+function Reading({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-md border p-3">
       <dt className="text-muted-foreground text-xs">{label}</dt>
@@ -600,7 +579,11 @@ function DetailModal({
 
   const scanLine = lines.find((l) => l.lineId === scanLineId) ?? lines[0];
   const qtyCheck = scanLine
-    ? validateScanQuantity(scanQty, Number(scanLine.putawayQuantity), Number(scanLine.plannedQuantity))
+    ? validateScanQuantity(
+        scanQty,
+        Number(scanLine.putawayQuantity),
+        Number(scanLine.plannedQuantity),
+      )
     : { ok: false, reason: '没有可扫码的明细行' };
   const balanced = netIsBalanced(detail.netOnHandDelta);
 
@@ -620,8 +603,16 @@ function DetailModal({
         <div className="flex flex-col gap-4">
           {/* 只改位置不改数量：两量并排 + 差额直接摆在最上面 */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <Reading label="应上架合计" value={formatQuantity(task.plannedQuantity)} hint="取自收货实收量，建单时冻结" />
-            <Reading label="实上架合计" value={formatQuantity(task.putawayQuantity)} hint="逐行扫码累加" />
+            <Reading
+              label="应上架合计"
+              value={formatQuantity(task.plannedQuantity)}
+              hint="取自收货实收量，建单时冻结"
+            />
+            <Reading
+              label="实上架合计"
+              value={formatQuantity(task.putawayQuantity)}
+              hint="逐行扫码累加"
+            />
             <Reading
               label="差额"
               value={formatQuantity(Number(task.plannedQuantity) - Number(task.putawayQuantity))}
@@ -699,9 +690,7 @@ function DetailModal({
                       <tr key={s.scanId} className="border-t">
                         <td className="px-2 py-1">{s.scannedAt}</td>
                         <td className="px-2 py-1">{deviceTypeLabel(s.deviceType)}</td>
-                        <td className="px-2 py-1 font-mono text-xs">
-                          {s.scanReference || '—'}
-                        </td>
+                        <td className="px-2 py-1 font-mono text-xs">{s.scanReference || '—'}</td>
                         <td className="px-2 py-1">{formatQuantity(s.scannedQuantity)}</td>
                       </tr>
                     ))}

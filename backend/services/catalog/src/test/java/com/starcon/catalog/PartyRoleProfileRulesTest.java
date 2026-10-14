@@ -10,11 +10,9 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.6.1.2 角色档案的纯规则离线单测。
  *
- * <p>与 {@code PartyRulesTest}（21 例）同一纪律：能在保存前判定的规则必须有
- * 可以穷举的单测，因为集成测试里每加一条规则就多一轮 Testcontainers 启动。
+ * <p>与 {@code PartyRulesTest}（21 例）同一纪律：能在保存前判定的规则必须有 可以穷举的单测，因为集成测试里每加一条规则就多一轮 Testcontainers 启动。
  *
- * <p>本文件<b>刻意</b>钉死四组断言，它们是「两处各说一套」最容易漂的地方：
- * R1 的双向拒绝、R2 的额度零非法、R4 的风险客户、R3 的缺身份文案。
+ * <p>本文件<b>刻意</b>钉死四组断言，它们是「两处各说一套」最容易漂的地方： R1 的双向拒绝、R2 的额度零非法、R4 的风险客户、R3 的缺身份文案。
  */
 class PartyRoleProfileRulesTest {
 
@@ -130,7 +128,8 @@ class PartyRoleProfileRulesTest {
   void MOQ精度上限六位小数且归一() {
     assertThat(moqProblem(new BigDecimal("1.1234567"), "PCS")).contains("6 位小数");
     assertThat(moqProblem(new BigDecimal("1.123456"), "PCS")).isNull();
-    assertThat(normalizeQuantity(new BigDecimal("1.0000001"), MOQ_SCALE)).isEqualByComparingTo("1.000000");
+    assertThat(normalizeQuantity(new BigDecimal("1.0000001"), MOQ_SCALE))
+        .isEqualByComparingTo("1.000000");
     assertThat(normalizeQuantity(null, MOQ_SCALE)).isNull();
     // 归一到 0 视为"没设"，而不是把 0 存进库（0 在业务上是"不设起订量"的意思）
     assertThat(normalizeQuantity(new BigDecimal("0.0000001"), MOQ_SCALE)).isNull();
@@ -153,7 +152,8 @@ class PartyRoleProfileRulesTest {
     // 固定顺序（不随输入顺序抖动）
     assertThat(normalizeCapabilities(List.of("URGENT", "AIR", "CUSTOMS")))
         .containsExactly("AIR", "CUSTOMS", "URGENT");
-    assertThat(normalizeCapabilities(java.util.Arrays.asList(" sea ", "SEA", null, ""))).containsExactly("SEA");
+    assertThat(normalizeCapabilities(java.util.Arrays.asList(" sea ", "SEA", null, "")))
+        .containsExactly("SEA");
     assertThat(normalizeCapabilities(null)).isEmpty();
   }
 

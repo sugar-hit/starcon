@@ -198,7 +198,9 @@ describe('请求形状', () => {
       expect(urls(fetcher, 0)).toBe(
         `/api/warehouse/warehouse/inventory/reservations/${id}/allocations`,
       );
-      expect(bodyOf(fetcher, 0)).toMatchObject({ body: '{"warehouseId":"wh-1","allocatedQuantity":12}' });
+      expect(bodyOf(fetcher, 0)).toMatchObject({
+        body: '{"warehouseId":"wh-1","allocatedQuantity":12}',
+      });
 
       await commitReservationAllocation(id, allocationId, {});
       expect(urls(fetcher, 1)).toBe(

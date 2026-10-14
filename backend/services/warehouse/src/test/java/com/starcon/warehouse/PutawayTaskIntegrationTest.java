@@ -35,22 +35,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <p><b>本测试最要紧的两节</b>：
  *
  * <ol>
- *   <li><b>蓝图加粗句</b>：「上架只改位置不改数量，数量在收货时已确定。」它落成三条
- *       可被数据库裁决的不变量 P1/P2/P3，所以这里不只测「走服务层时成立」，还用
- *       <b>绕过服务层直连 SQL</b> 的写法去证明同样被 V109 的守卫触发器挡下 ——
- *       否则那三条只是应用层的一行 if，绕过服务就能造出「货凭空增减」的记录。<br>
- *   <li><b>幂等</b>：PDA 网络抖动重发是现场常态。同一个 scanReference 重复提交会撞
- *       部分唯一索引 —— 少了这道，同一批货会被搬两遍（源位扣两次、目标位加两次）
- *       <b>而 P1 的净额仍然是 0</b>。这是「只改位置」这条不变量唯一抓不到的 bug 形态。</li>
+ *   <li><b>蓝图加粗句</b>：「上架只改位置不改数量，数量在收货时已确定。」它落成三条 可被数据库裁决的不变量 P1/P2/P3，所以这里不只测「走服务层时成立」，还用
+ *       <b>绕过服务层直连 SQL</b> 的写法去证明同样被 V109 的守卫触发器挡下 —— 否则那三条只是应用层的一行 if，绕过服务就能造出「货凭空增减」的记录。<br>
+ *   <li><b>幂等</b>：PDA 网络抖动重发是现场常态。同一个 scanReference 重复提交会撞 部分唯一索引 —— 少了这道，同一批货会被搬两遍（源位扣两次、目标位加两次）
+ *       <b>而 P1 的净额仍然是 0</b>。这是「只改位置」这条不变量唯一抓不到的 bug 形态。
  * </ol>
  *
- * <p>还有一节是<b>时间</b>：{@code scanned_at} 是业务时间（作业员扫的那一下），
- * 不是行写入库的时刻。所以有一例直接断言<b>写回来的值</b> —— 用
- * {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800s，
- * 而偏 8 小时的时间戳在任何断言里都「看起来是个时间」，极难发现。
+ * <p>还有一节是<b>时间</b>：{@code scanned_at} 是业务时间（作业员扫的那一下）， 不是行写入库的时刻。所以有一例直接断言<b>写回来的值</b> —— 用 {@code
+ * Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800s， 而偏 8 小时的时间戳在任何断言里都「看起来是个时间」，极难发现。
  *
- * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,7 +54,8 @@ class PutawayTaskIntegrationTest {
   static HttpServer identity;
   // 注册 JSR310：请求体里有 OffsetDateTime（scannedAt），裸 ObjectMapper 不认 Java 8 时间类型。
   static final ObjectMapper json = new ObjectMapper().findAndRegisterModules();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("putaway")
           .flatMap(
@@ -70,7 +65,8 @@ class PutawayTaskIntegrationTest {
           .toList();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-putaway-test-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-putaway-test-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(
@@ -151,9 +147,8 @@ class PutawayTaskIntegrationTest {
   @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
 
   /**
-   * warehouse 服务<b>没有</b> {@code TenantTransactions} Bean（它的租户绑定点只有
-   * {@link AccessService#run} 一处）。这里按同一个类、同一个绑定语义就地构造一个，
-   * 供「连接池归还后不串租户」断言使用 —— 不给生产代码新增第二条绑定路径。
+   * warehouse 服务<b>没有</b> {@code TenantTransactions} Bean（它的租户绑定点只有 {@link AccessService#run}
+   * 一处）。这里按同一个类、同一个绑定语义就地构造一个， 供「连接池归还后不串租户」断言使用 —— 不给生产代码新增第二条绑定路径。
    */
   TenantTransactions tenants() {
     return new TenantTransactions(
@@ -212,48 +207,89 @@ class PutawayTaskIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-A", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-A",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-B", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-B",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, "DEFECTIVE", "残次", "DEFECTIVE");
+                idFor(tenant, 7),
+                tenant,
+                "DEFECTIVE",
+                "残次",
+                "DEFECTIVE");
             // 收货暂存位（货现在压着的地方）
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'RECEIVING','ACTIVE',false)",
-                idFor(tenant, 10), tenant, idFor(tenant, 5), "RCV-01", "收货暂存位");
+                idFor(tenant, 10),
+                tenant,
+                idFor(tenant, 5),
+                "RCV-01",
+                "收货暂存位");
             // 正式存储库位 ×2（容量 / 承重留给 8.1.2.1 的量测，这里先不给）
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'STORAGE','ACTIVE',true)",
-                idFor(tenant, 11), tenant, idFor(tenant, 5), "A-01", "存储一");
+                idFor(tenant, 11),
+                tenant,
+                idFor(tenant, 5),
+                "A-01",
+                "存储一");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'STORAGE','ACTIVE',true)",
-                idFor(tenant, 12), tenant, idFor(tenant, 5), "A-02", "存储二");
+                idFor(tenant, 12),
+                tenant,
+                idFor(tenant, 5),
+                "A-02",
+                "存储二");
             // 残次专用库位（用来验证硬规则）
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'DEFECTIVE','ACTIVE',false)",
-                idFor(tenant, 13), tenant, idFor(tenant, 5), "D-01", "残次库位");
+                idFor(tenant, 13),
+                tenant,
+                idFor(tenant, 5),
+                "D-01",
+                "残次库位");
             // 批次（用来验证无批次 / 有批次两种定位）
             sql.execute(
                 "insert into inventory_lot(id,tenant_id,sku_id,lot_code) values(?,?,?,?)",
-                idFor(tenant, 24), tenant, idFor(tenant, 2), "LOT-1");
+                idFor(tenant, 24),
+                tenant,
+                idFor(tenant, 2),
+                "LOT-1");
             return null;
           });
     }
@@ -267,19 +303,40 @@ class PutawayTaskIntegrationTest {
               "insert into goods_receipt(id,tenant_id,receipt_code,source_type,source_ref_code,"
                   + "warehouse_id,legal_entity_id,status,created_by)"
                   + " values(?,?,?,'PURCHASE','PO-1',?,?,'RECEIVED',?)",
-              receiptA, a, "GR-A-1", whA, leA, user);
+              receiptA,
+              a,
+              "GR-A-1",
+              whA,
+              leA,
+              user);
           sql.execute(
               "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
                   + "expected_quantity,received_quantity) values(?,?,?,?,?,?,?)",
-              lineA, a, receiptA, skuA, qSellA, new BigDecimal("100"), new BigDecimal("100"));
+              lineA,
+              a,
+              receiptA,
+              skuA,
+              qSellA,
+              new BigDecimal("100"),
+              new BigDecimal("100"));
           sql.execute(
               "insert into goods_receipt_event(id,tenant_id,receipt_id,received_at,location_id,"
                   + "actor_id) values(?,?,?,?::timestamptz,?,?)",
-              eventA, a, receiptA, OffsetDateTime.now(), locReceivingA, user);
+              eventA,
+              a,
+              receiptA,
+              OffsetDateTime.now(),
+              locReceivingA,
+              user);
           sql.execute(
               "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,"
                   + "received_quantity,lot_id) values(?,?,?,?,?,?)",
-              eventLineA, a, eventA, lineA, new BigDecimal("100"), lotA);
+              eventLineA,
+              a,
+              eventA,
+              lineA,
+              new BigDecimal("100"),
+              lotA);
           return null;
         });
     stockAt(a, skuA, whA, leA, qSellA, locReceivingA, lotA, "100");
@@ -293,19 +350,39 @@ class PutawayTaskIntegrationTest {
               "insert into goods_receipt(id,tenant_id,receipt_code,source_type,source_ref_code,"
                   + "warehouse_id,legal_entity_id,status,created_by)"
                   + " values(?,?,?,'PURCHASE','PO-B',?,?,'RECEIVED',?)",
-              receiptB, b, "GR-B-1", whB, leB, user);
+              receiptB,
+              b,
+              "GR-B-1",
+              whB,
+              leB,
+              user);
           sql.execute(
               "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
                   + "expected_quantity,received_quantity) values(?,?,?,?,?,?,?)",
-              lineB, b, receiptB, skuB2, qSellB, new BigDecimal("50"), new BigDecimal("50"));
+              lineB,
+              b,
+              receiptB,
+              skuB2,
+              qSellB,
+              new BigDecimal("50"),
+              new BigDecimal("50"));
           sql.execute(
               "insert into goods_receipt_event(id,tenant_id,receipt_id,received_at,location_id,"
                   + "actor_id) values(?,?,?,?::timestamptz,?,?)",
-              eventB, b, receiptB, OffsetDateTime.now(), locReceivingB, user);
+              eventB,
+              b,
+              receiptB,
+              OffsetDateTime.now(),
+              locReceivingB,
+              user);
           sql.execute(
               "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,"
                   + "received_quantity,lot_id) values(?,?,?,?,?,null)",
-              eventLineB, b, eventB, lineB, new BigDecimal("50"));
+              eventLineB,
+              b,
+              eventB,
+              lineB,
+              new BigDecimal("50"));
           return null;
         });
     stockAt(b, skuB2, whB, leB, qSellB, locReceivingB, null, "50");
@@ -333,8 +410,14 @@ class PutawayTaskIntegrationTest {
 
   /** 造一条库存：bucket 与 balance 同时写，守恒触发器会核对两者。 */
   void stockAt(
-      UUID tenant, UUID skuId, UUID warehouseId, UUID legalEntityId, UUID qualityId,
-      UUID locationId, UUID lotId, String onHand) {
+      UUID tenant,
+      UUID skuId,
+      UUID warehouseId,
+      UUID legalEntityId,
+      UUID qualityId,
+      UUID locationId,
+      UUID lotId,
+      String onHand) {
     access.run(
         actorFor(tenant),
         "warehouse.putaway.update",
@@ -343,13 +426,28 @@ class PutawayTaskIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balance, tenant, skuId, warehouseId, legalEntityId, qualityId, new BigDecimal(onHand));
+              balance,
+              tenant,
+              skuId,
+              warehouseId,
+              legalEntityId,
+              qualityId,
+              new BigDecimal(onHand));
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,?,?,?,?,0,?::timestamptz)",
-              UUID.randomUUID(), tenant, legalEntityId, skuId, warehouseId, locationId, lotId,
-              qualityId, balance, new BigDecimal(onHand), OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              legalEntityId,
+              skuId,
+              warehouseId,
+              locationId,
+              lotId,
+              qualityId,
+              balance,
+              new BigDecimal(onHand),
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -357,8 +455,7 @@ class PutawayTaskIntegrationTest {
   /**
    * 给 A 的收货单补一条**第二条**明细行（另一个 SKU、无批次）。
    *
-   * <p>需要它的原因：一条收货明细行同时只能有一个未取消的上架任务
-   * （V109 的 putaway_task_line_open 部分唯一索引），所以「两张任务单」这个夹具
+   * <p>需要它的原因：一条收货明细行同时只能有一个未取消的上架任务 （V109 的 putaway_task_line_open 部分唯一索引），所以「两张任务单」这个夹具
    * 只能靠第二条收货明细行来造，不能靠把同一行指两次。
    */
   void addSecondReceiptLine(String received) {
@@ -367,12 +464,21 @@ class PutawayTaskIntegrationTest {
           sql.execute(
               "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
                   + "expected_quantity,received_quantity) values(?,?,?,?,?,?,?)",
-              idFor(a, 25), a, receiptA, skuB, qSellA, new BigDecimal(received),
+              idFor(a, 25),
+              a,
+              receiptA,
+              skuB,
+              qSellA,
+              new BigDecimal(received),
               new BigDecimal(received));
           sql.execute(
               "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,"
                   + "received_quantity,lot_id) values(?,?,?,?,?,null)",
-              idFor(a, 26), a, eventA, idFor(a, 25), new BigDecimal(received));
+              idFor(a, 26),
+              a,
+              eventA,
+              idFor(a, 25),
+              new BigDecimal(received));
           return null;
         });
   }
@@ -385,11 +491,22 @@ class PutawayTaskIntegrationTest {
           sql.execute(
               "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
                   + "expected_quantity,received_quantity) values(?,?,?,?,?,?,?)",
-              lineId, a, receiptA, skuA, qDefA, new BigDecimal(received), new BigDecimal(received));
+              lineId,
+              a,
+              receiptA,
+              skuA,
+              qDefA,
+              new BigDecimal(received),
+              new BigDecimal(received));
           sql.execute(
               "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,"
                   + "received_quantity,lot_id) values(?,?,?,?,?,?)",
-              idFor(a, 28), a, eventA, lineId, new BigDecimal(received), lotA);
+              idFor(a, 28),
+              a,
+              eventA,
+              lineId,
+              new BigDecimal(received),
+              lotA);
           return null;
         });
     return lineId;
@@ -414,8 +531,7 @@ class PutawayTaskIntegrationTest {
     return newTask(locStorageA);
   }
 
-  PutawayTaskModels.PutawayTaskScanInput scanInput(
-      UUID lineId, String quantity, String reference) {
+  PutawayTaskModels.PutawayTaskScanInput scanInput(UUID lineId, String quantity, String reference) {
     return new PutawayTaskModels.PutawayTaskScanInput(
         lineId, new BigDecimal(quantity), reference, "PDA", OffsetDateTime.now(), "扫码");
   }
@@ -428,7 +544,8 @@ class PutawayTaskIntegrationTest {
           Record row =
               sql.fetchOne(
                   "select on_hand from stock_bucket where sku_id=? and location_id=?",
-                  skuId, locationId);
+                  skuId,
+                  locationId);
           return row == null ? null : row.get("on_hand", BigDecimal.class);
         });
   }
@@ -464,10 +581,8 @@ class PutawayTaskIntegrationTest {
   @DisplayName("三张业务表都 tenant_id NOT NULL 且 relforcerowsecurity")
   void rlsIsForcedOnEveryTable() throws Exception {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-        var p = c.prepareStatement(
-            "select relforcerowsecurity from pg_class where relname = ?")) {
-      for (var table :
-          List.of("putaway_task", "putaway_task_line", "putaway_task_scan")) {
+        var p = c.prepareStatement("select relforcerowsecurity from pg_class where relname = ?")) {
+      for (var table : List.of("putaway_task", "putaway_task_line", "putaway_task_scan")) {
         p.setString(1, table);
         boolean forced;
         try (var rs = p.executeQuery()) {
@@ -477,12 +592,13 @@ class PutawayTaskIntegrationTest {
         assertThat(forced).as(table).isTrue();
       }
     }
-    for (var table :
-        List.of("putaway_task", "putaway_task_line", "putaway_task_scan")) {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-          var p = c.prepareStatement(
-              "select is_nullable from information_schema.columns"
-                  + " where table_name = ? and column_name = 'tenant_id'")) {
+    for (var table : List.of("putaway_task", "putaway_task_line", "putaway_task_scan")) {
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+          var p =
+              c.prepareStatement(
+                  "select is_nullable from information_schema.columns"
+                      + " where table_name = ? and column_name = 'tenant_id'")) {
         p.setString(1, table);
         try (var rs = p.executeQuery()) {
           assertThat(rs.next()).as(table).isTrue();
@@ -536,10 +652,12 @@ class PutawayTaskIntegrationTest {
           // 「收货方事后改数不会影响已建的上架任务」，不该去碰别的模块的差异流程。
           sql.execute(
               "update goods_receipt_line set expected_quantity=? where id=?",
-              new BigDecimal("1000"), lineA);
+              new BigDecimal("1000"),
+              lineA);
           sql.execute(
               "update goods_receipt_line set received_quantity=? where id=?",
-              new BigDecimal("999"), lineA);
+              new BigDecimal("999"),
+              lineA);
           return null;
         });
     // 已建任务仍是 100：收货时定下的量被冻结进了作业单
@@ -604,8 +722,8 @@ class PutawayTaskIntegrationTest {
     // 把货从收货暂存位挪走（造一个「源位没货」的场景）
     asAU(
         () -> {
-          sql.execute("update goods_receipt_event set location_id=? where id=?", locStorageA2,
-              eventA);
+          sql.execute(
+              "update goods_receipt_event set location_id=? where id=?", locStorageA2, eventA);
           return null;
         });
     // 源位（locStorageA2）没有这批货 → 触发器 5.4 拒
@@ -622,8 +740,10 @@ class PutawayTaskIntegrationTest {
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("putaway_task_line_open");
     // 取消之后释放占用，可以重新指派（货没搬过，取消不动库存）
-    asAU(() -> putaway.cancel(first.taskId(),
-        new PutawayTaskModels.PutawayTaskCancelInput("重新指派"), user));
+    asAU(
+        () ->
+            putaway.cancel(
+                first.taskId(), new PutawayTaskModels.PutawayTaskCancelInput("重新指派"), user));
     var second = newTask();
     assertThat(second.taskId()).isNotEqualTo(first.taskId());
   }
@@ -662,12 +782,14 @@ class PutawayTaskIntegrationTest {
   void scanMovesQuantityBetweenBucketsWithoutChangingTheTotal() {
     var task = newTask();
     var line = asA(() -> putaway.detail(task.taskId())).lines().get(0);
-    BigDecimal balanceBefore = asA(
-        () ->
-            sql.fetchOne("select on_hand from inventory_balance where id = ?", line.balanceId())
-                .get("on_hand", BigDecimal.class));
+    BigDecimal balanceBefore =
+        asA(
+            () ->
+                sql.fetchOne("select on_hand from inventory_balance where id = ?", line.balanceId())
+                    .get("on_hand", BigDecimal.class));
 
-    var scanned = asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "100", "SCAN-1"), user));
+    var scanned =
+        asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "100", "SCAN-1"), user));
 
     // 一减一加，两个 delta 互为相反数 —— 这就是「只改位置不改数量」在单次作业上的读数
     assertThat(scanned.scannedQuantity()).isEqualByComparingTo("100");
@@ -682,17 +804,17 @@ class PutawayTaskIntegrationTest {
     assertThat(onHand(a, skuA, locStorageA)).isEqualByComparingTo("100");
     assertThat(
             asA(
-                    () ->
-                        sql.fetchOne(
-                                "select on_hand from inventory_balance where id = ?",
-                                line.balanceId())
-                            .get("on_hand", BigDecimal.class)))
+                () ->
+                    sql.fetchOne(
+                            "select on_hand from inventory_balance where id = ?", line.balanceId())
+                        .get("on_hand", BigDecimal.class)))
         .isEqualByComparingTo(balanceBefore);
 
     // 分录成对，且都落在同一条余额行上（这是 P1 净额为 0 的前提）
     var detail = asA(() -> putaway.detail(task.taskId()));
     assertThat(detail.entries()).hasSize(2);
-    assertThat(detail.entries()).allSatisfy(e -> assertThat(e.balanceId()).isEqualTo(line.balanceId()));
+    assertThat(detail.entries())
+        .allSatisfy(e -> assertThat(e.balanceId()).isEqualTo(line.balanceId()));
     assertThat(detail.netOnHandDelta()).isEqualByComparingTo("0");
     assertThat(detail.scans()).hasSize(1);
     assertThat(detail.task().scanCount()).isEqualTo(1);
@@ -714,12 +836,12 @@ class PutawayTaskIntegrationTest {
     assertThat(onHand(a, skuA, locReceivingA)).isEqualByComparingTo("60");
     // 净额**仍然是 0**：一次扫码写的就是一对反向分录，成对的两条加起来恒为 0。
     // 所以净额不是「做完没做完」的判据 —— 做没做完看明细量（这才是 P2/P3 管的）。
-    assertThat(asA(() -> putaway.detail(task.taskId())).netOnHandDelta())
-        .isEqualByComparingTo("0");
+    assertThat(asA(() -> putaway.detail(task.taskId())).netOnHandDelta()).isEqualByComparingTo("0");
     assertThat(asA(() -> putaway.detail(task.taskId())).task().putawayQuantity())
         .isEqualByComparingTo("40");
 
-    var second = asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "60", "S2"), user));
+    var second =
+        asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "60", "S2"), user));
     assertThat(second.lineCompleted()).isTrue();
     assertThat(onHand(a, skuA, locStorageA)).isEqualByComparingTo("100");
     assertThat(onHand(a, skuA, locReceivingA)).isEqualByComparingTo("0");
@@ -731,7 +853,9 @@ class PutawayTaskIntegrationTest {
     var task = newTask();
     var line = asA(() -> putaway.detail(task.taskId())).lines().get(0);
     asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "90", "S1"), user));
-    assertThatThrownBy(() -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "20", "S2"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "20", "S2"), user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("超过应上架量");
     assertThat(onHand(a, skuA, locStorageA)).isEqualByComparingTo("90");
@@ -748,15 +872,20 @@ class PutawayTaskIntegrationTest {
           OffsetDateTime later = OffsetDateTime.now().plusMinutes(1);
           sql.execute(
               "update stock_bucket set on_hand=5, last_movement_at=?::timestamptz where id=?",
-              later, line.sourceBucketId());
+              later,
+              line.sourceBucketId());
           // V2 的守恒触发器要求 Σ bucket == balance，所以两边必须同步改。
           // （这不是本模块的写路径 —— 它只是把夹具摆成「货已经不在源位了」的现实状态。）
           sql.execute(
               "update inventory_balance set on_hand=5, updated_at=?::timestamptz where id=?",
-              later, line.balanceId());
+              later,
+              line.balanceId());
           return null;
         });
-    assertThatThrownBy(() -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "100", "S1"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(
+                    () -> putaway.scan(task.taskId(), scanInput(line.lineId(), "100", "S1"), user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("在手");
     // 关键：目标位一个数都没被加 —— 失败即回滚，不留半截账
@@ -771,7 +900,12 @@ class PutawayTaskIntegrationTest {
     // 第一次：搬 50。第二次是**完全相同的重发**（累计恰好 100，不会被超量检查先拒），
     // 于是它一定能走到写扫码台账那一步 —— 只有幂等索引能挡下它。
     asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "50", "PDA-DUP-1"), user));
-    assertThatThrownBy(() -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "50", "PDA-DUP-1"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(
+                    () ->
+                        putaway.scan(
+                            task.taskId(), scanInput(line.lineId(), "50", "PDA-DUP-1"), user)))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("putaway_task_scan_idempotent");
     // 货只搬了一遍：一次重发没有变成「搬两遍」
@@ -786,7 +920,12 @@ class PutawayTaskIntegrationTest {
   void overScaleQuantityIsRejected() {
     var task = newTask();
     var line = asA(() -> putaway.detail(task.taskId())).lines().get(0);
-    assertThatThrownBy(() -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "1.00005", "S1"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(
+                    () ->
+                        putaway.scan(
+                            task.taskId(), scanInput(line.lineId(), "1.00005", "S1"), user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("4 位小数");
   }
@@ -809,7 +948,8 @@ class PutawayTaskIntegrationTest {
     OffsetDateTime written =
         asA(
             () ->
-                sql.fetchOne("select scanned_at from putaway_task_scan where task_id = ?", task.taskId())
+                sql.fetchOne(
+                        "select scanned_at from putaway_task_scan where task_id = ?", task.taskId())
                     .get("scanned_at", OffsetDateTime.class));
     // 断言写回的值本身，而不是「大概对」：同一个瞬间，秒级一致
     assertThat(written.toInstant()).isEqualTo(businessTime.toInstant());
@@ -862,7 +1002,11 @@ class PutawayTaskIntegrationTest {
           sql.execute(
               "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
                   + "reserved_delta) values(?,?,?,?,?,0)",
-              UUID.randomUUID(), a, tx, line.balanceId(), new BigDecimal("-10"));
+              UUID.randomUUID(),
+              a,
+              tx,
+              line.balanceId(),
+              new BigDecimal("-10"));
           return null;
         });
     // 完成任务时守卫回读账本，发现净额 -10 ≠ 0 → 拒绝
@@ -885,7 +1029,8 @@ class PutawayTaskIntegrationTest {
         () -> {
           sql.execute(
               "update putaway_task_line set putaway_quantity=? where id=?",
-              new BigDecimal("100"), line.lineId());
+              new BigDecimal("100"),
+              line.lineId());
           return null;
         });
     // 此时 P2 已经过了（每行 100 = 100），P1 也会过（净额仍是 0）。
@@ -907,18 +1052,26 @@ class PutawayTaskIntegrationTest {
             () ->
                 asAU(
                     () -> {
-                      sql.execute("update putaway_task set status='PENDING' where id=?", task.taskId());
+                      sql.execute(
+                          "update putaway_task set status='PENDING' where id=?", task.taskId());
                       return null;
                     }))
         .hasMessageContaining("终态");
 
     // 再扫一次 → 409（货已经在正式库位上了）
-    assertThatThrownBy(() -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "1", "X"), user)))
+    assertThatThrownBy(
+            () -> asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "1", "X"), user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能继续扫码");
     // 取消已完成的 → 409
-    assertThatThrownBy(() -> asAU(() -> putaway.cancel(task.taskId(),
-        new PutawayTaskModels.PutawayTaskCancelInput("反悔"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(
+                    () ->
+                        putaway.cancel(
+                            task.taskId(),
+                            new PutawayTaskModels.PutawayTaskCancelInput("反悔"),
+                            user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能取消");
   }
@@ -927,8 +1080,11 @@ class PutawayTaskIntegrationTest {
   @DisplayName("取消：只对尚未扫码的任务开放，且一条分录都不产生")
   void cancelBeforeAnyScanMovesNoStock() {
     var task = newTask();
-    var cancelled = asAU(() -> putaway.cancel(task.taskId(),
-        new PutawayTaskModels.PutawayTaskCancelInput("货还没到齐"), user));
+    var cancelled =
+        asAU(
+            () ->
+                putaway.cancel(
+                    task.taskId(), new PutawayTaskModels.PutawayTaskCancelInput("货还没到齐"), user));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     assertThat(cancelled.cancelReason()).isEqualTo("货还没到齐");
 
@@ -945,8 +1101,14 @@ class PutawayTaskIntegrationTest {
     var task = newTask();
     var line = asA(() -> putaway.detail(task.taskId())).lines().get(0);
     asAU(() -> putaway.scan(task.taskId(), scanInput(line.lineId(), "10", "S1"), user));
-    assertThatThrownBy(() -> asAU(() -> putaway.cancel(task.taskId(),
-        new PutawayTaskModels.PutawayTaskCancelInput("反悔"), user)))
+    assertThatThrownBy(
+            () ->
+                asAU(
+                    () ->
+                        putaway.cancel(
+                            task.taskId(),
+                            new PutawayTaskModels.PutawayTaskCancelInput("反悔"),
+                            user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已经扫了");
   }
@@ -964,7 +1126,8 @@ class PutawayTaskIntegrationTest {
                     () -> {
                       sql.execute(
                           "update putaway_task_line set target_location_id=? where id=?",
-                          locStorageA2, line.lineId());
+                          locStorageA2,
+                          line.lineId());
                       return null;
                     }))
         .hasMessageContaining("锁死");
@@ -1000,8 +1163,12 @@ class PutawayTaskIntegrationTest {
                                 idFor(a, 25), locStorageA2, null, null, null, null)),
                         null),
                     user));
-    asAU(() -> putaway.assign(second.taskId(),
-        new PutawayTaskModels.PutawayTaskAssignInput(UUID.randomUUID(), null), user));
+    asAU(
+        () ->
+            putaway.assign(
+                second.taskId(),
+                new PutawayTaskModels.PutawayTaskAssignInput(UUID.randomUUID(), null),
+                user));
 
     var all = asA(() -> putaway.page(null, null, null, null, null, null, null, 0, 50));
     assertThat(all.total()).isEqualTo(2);
@@ -1029,7 +1196,8 @@ class PutawayTaskIntegrationTest {
         .hasSize(1);
 
     // 真筛选
-    assertThat(asA(() -> putaway.page("PENDING", null, null, null, null, null, null, 0, 50)).total())
+    assertThat(
+            asA(() -> putaway.page("PENDING", null, null, null, null, null, null, 0, 50)).total())
         .isEqualTo(2);
     assertThat(
             asA(() -> putaway.page("COMPLETED", null, null, null, null, null, null, 0, 50)).total())
@@ -1043,9 +1211,10 @@ class PutawayTaskIntegrationTest {
         .isEqualTo(1);
     assertThat(
             asA(
-                    () ->
-                        putaway.page(null, null, null, null, UUID.randomUUID(), null, null, 0, 50)
-                            .total()))
+                () ->
+                    putaway
+                        .page(null, null, null, null, UUID.randomUUID(), null, null, 0, 50)
+                        .total()))
         .isEqualTo(0L);
     // 真关键词搜索
     assertThat(asA(() -> putaway.page(null, null, null, null, null, "GR-A-1", null, 0, 50)).total())
@@ -1054,11 +1223,14 @@ class PutawayTaskIntegrationTest {
         .isZero();
 
     // 排序白名单：非法键直接报错，而不是静默忽略
-    assertThatThrownBy(() -> asA(() -> putaway.page(null, null, null, null, null, null, "DROP TABLE", 0, 50)))
+    assertThatThrownBy(
+            () -> asA(() -> putaway.page(null, null, null, null, null, null, "DROP TABLE", 0, 50)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的排序键");
     // 非法状态同样
-    assertThatThrownBy(() -> asA(() -> putaway.page("NOT_A_STATUS", null, null, null, null, null, null, 0, 50)))
+    assertThatThrownBy(
+            () ->
+                asA(() -> putaway.page("NOT_A_STATUS", null, null, null, null, null, null, 0, 50)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的状态");
   }
@@ -1106,7 +1278,11 @@ class PutawayTaskIntegrationTest {
 
     assertThat(asA(() -> putaway.page(null, null, null, null, null, null, null, 0, 50)).total())
         .isEqualTo(1);
-    assertThat(asA(() -> putaway.page(null, null, null, null, null, null, null, 0, 50)).items().get(0).taskId())
+    assertThat(
+            asA(() -> putaway.page(null, null, null, null, null, null, null, 0, 50))
+                .items()
+                .get(0)
+                .taskId())
         .isEqualTo(taskA.taskId());
     assertThatThrownBy(() -> asA(() -> putaway.detail(taskB.taskId())))
         .isInstanceOf(ResponseStatusException.class)
@@ -1166,9 +1342,7 @@ class PutawayTaskIntegrationTest {
     Long count =
         tenants()
             .run(
-                tenant,
-                () ->
-                    sql.fetchOne("select count(*) from putaway_task").get(0, Long.class));
+                tenant, () -> sql.fetchOne("select count(*) from putaway_task").get(0, Long.class));
     return count == null ? 0L : count;
   }
 
@@ -1182,10 +1356,11 @@ class PutawayTaskIntegrationTest {
   @Test
   @DisplayName("HTTP 契约：401 未认证 / 403 只读 / 404 不存在 / 400 数量非法")
   void httpContract() throws Exception {
-    http.perform(get("/warehouse/putaway-tasks/capabilities"))
-        .andExpect(status().isUnauthorized());
+    http.perform(get("/warehouse/putaway-tasks/capabilities")).andExpect(status().isUnauthorized());
 
-    http.perform(get("/warehouse/putaway-tasks/capabilities").header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/putaway-tasks/capabilities")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
 
     // 只读身份不能扫码（那会真的搬货）
@@ -1230,7 +1405,8 @@ class PutawayTaskIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     json.writeValueAsString(
-                        new PutawayTaskModels.PutawayTaskCreateInput(receiptA, null, List.of(), null))))
+                        new PutawayTaskModels.PutawayTaskCreateInput(
+                            receiptA, null, List.of(), null))))
         .andExpect(status().isBadRequest());
   }
 
@@ -1256,8 +1432,7 @@ class PutawayTaskIntegrationTest {
     // 少这一道的话「改作业记录」对 DBA 就是一扇开着的门。
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      assertThatThrownBy(
-              () -> s.execute("update putaway_task_scan set scanned_quantity=1"))
+      assertThatThrownBy(() -> s.execute("update putaway_task_scan set scanned_quantity=1"))
           .hasMessageContaining("append-only");
       assertThatThrownBy(() -> s.execute("delete from putaway_task_scan"))
           .hasMessageContaining("append-only");
@@ -1311,7 +1486,12 @@ class PutawayTaskIntegrationTest {
     var lines = new ArrayList<>(asA(() -> putaway.detail(task.taskId())).lines());
     assertThat(lines).hasSize(2);
     for (var l : lines) {
-      asAU(() -> putaway.scan(task.taskId(), scanInput(l.lineId(), l.plannedQuantity().toPlainString(), "M-" + l.skuCode()), user));
+      asAU(
+          () ->
+              putaway.scan(
+                  task.taskId(),
+                  scanInput(l.lineId(), l.plannedQuantity().toPlainString(), "M-" + l.skuCode()),
+                  user));
     }
     var done = asAU(() -> putaway.complete(task.taskId(), null, user));
     assertThat(done.status()).isEqualTo("COMPLETED");

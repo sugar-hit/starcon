@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,10 +28,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <p>本测试类钉两件事：
  *
  * <ol>
- *   <li><b>多租户三断言</b>（AGENTS.md 硬性要求，缺一不可）：两租户互不可见、
- *       伪造 tenant header 无效、连接池归还后不串租户
- *   <li><b>蓝图加粗约束</b>：外部仓库存是观测值不是自有账本，分开存储且<b>不能覆盖</b>。
- *       这一条不靠服务层自觉，而是同时用三种方式证明：
+ *   <li><b>多租户三断言</b>（AGENTS.md 硬性要求，缺一不可）：两租户互不可见、 伪造 tenant header 无效、连接池归还后不串租户
+ *   <li><b>蓝图加粗约束</b>：外部仓库存是观测值不是自有账本，分开存储且<b>不能覆盖</b>。 这一条不靠服务层自觉，而是同时用三种方式证明：
  *       <ul>
  *         <li>同步后观测表有数据（功能真的跑了，不是空转）
  *         <li>观测行<b>不可 UPDATE / DELETE</b>——绕过服务层直接写 SQL 也被拒（DB 触发器）
@@ -57,14 +54,19 @@ class WarehouseConnectionIntegrationTest {
                       java.util.stream.Stream.of("read", "create", "update", "delete")
                           .map(op -> "channel." + p + "." + op),
                       p.equals("sync")
-                          ? java.util.stream.Stream.of("channel.sync.trigger", "channel.sync.complete")
+                          ? java.util.stream.Stream.of(
+                              "channel.sync.trigger", "channel.sync.complete")
                           : java.util.stream.Stream.empty()))
           .distinct()
           .toList();
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
         grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
         grants);
   }
@@ -76,12 +78,15 @@ class WarehouseConnectionIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
-            + " then create role starcon_app nologin; end if; end $$");
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
-            + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
+                + " then create role starcon_app nologin; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
+                + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
         s.execute("alter role channel_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
@@ -157,12 +162,15 @@ class WarehouseConnectionIntegrationTest {
   }
 
   UUID providerId(AccessService.Access who) {
-    return as(who, "channel.connection.read",
-        () -> warehouses.providers().stream()
-            .filter(p -> p.code().equals("GENERIC_3PL"))
-            .findFirst()
-            .orElseThrow()
-            .id());
+    return as(
+        who,
+        "channel.connection.read",
+        () ->
+            warehouses.providers().stream()
+                .filter(p -> p.code().equals("GENERIC_3PL"))
+                .findFirst()
+                .orElseThrow()
+                .id());
   }
 
   UUID account(AccessService.Access who, UUID connectionId) {
@@ -180,7 +188,8 @@ class WarehouseConnectionIntegrationTest {
                     WarehouseAccountKind.OVERSEAS)));
   }
 
-  void inbound(AccessService.Access who, UUID accountId, String sku, String qty, String reportedAt) {
+  void inbound(
+      AccessService.Access who, UUID accountId, String sku, String qty, String reportedAt) {
     as(
         who,
         "channel.sync.create",
@@ -212,11 +221,12 @@ class WarehouseConnectionIntegrationTest {
     List<ExternalStockObservationView> observed =
         as(actorA, "channel.sync.read", () -> warehouses.observations(acct, 100));
     assertThat(observed).hasSize(2);
-    assertThat(observed).allSatisfy(
-        o -> {
-          assertThat(o.source()).isEqualTo("REPORTED_FEED");
-          assertThat(o.observedAt()).isNotNull();
-        });
+    assertThat(observed)
+        .allSatisfy(
+            o -> {
+              assertThat(o.source()).isEqualTo("REPORTED_FEED");
+              assertThat(o.observedAt()).isNotNull();
+            });
     // 数量 HALF_UP 到 6 位，禁浮点
     assertThat(observed)
         .filteredOn(o -> o.externalSku().equals("SKU-002"))
@@ -226,13 +236,15 @@ class WarehouseConnectionIntegrationTest {
     // 2) 同步记录落库且计数正确
     List<WarehouseSyncRunView> runs =
         as(actorA, "channel.sync.read", () -> warehouses.syncRuns(conn, 10));
-    assertThat(runs).singleElement().satisfies(
-        r -> {
-          assertThat(r.id()).isEqualTo(run);
-          assertThat(r.status()).isEqualTo("SUCCEEDED");
-          assertThat(r.fetchedCount()).isEqualTo(2);
-          assertThat(r.observedCount()).isEqualTo(2);
-        });
+    assertThat(runs)
+        .singleElement()
+        .satisfies(
+            r -> {
+              assertThat(r.id()).isEqualTo(run);
+              assertThat(r.status()).isEqualTo("SUCCEEDED");
+              assertThat(r.fetchedCount()).isEqualTo(2);
+              assertThat(r.observedCount()).isEqualTo(2);
+            });
 
     // 3) 🔴 不可覆盖：绕过服务层直接写 SQL 做 UPDATE，DB 触发器必须拒绝。
     //    注意这里用的是**应用账号 channel_app**（不是迁移账号），所以走的是真实权限面。
@@ -276,7 +288,8 @@ class WarehouseConnectionIntegrationTest {
     // 4 行而不是 3 行：一次同步观测的是该账户**此刻的全部**报送行，不是「变化的那几行」。
     // 第二批把 SKU-001 改成 7 之后重新观测，SKU-002（仍是 5.5）也被盖上同一个观测时点——
     // 这正是观测快照该有的样子：每个时点留下的是一张完整画面，而不是增量补丁。
-    assertThat(as(actorA, "channel.sync.read", () -> warehouses.observations(acct, 100))).hasSize(4);
+    assertThat(as(actorA, "channel.sync.read", () -> warehouses.observations(acct, 100)))
+        .hasSize(4);
     List<ExternalStockLatestView> latest =
         as(actorA, "channel.sync.read", () -> warehouses.latestObservations(acct));
     assertThat(latest)
@@ -285,8 +298,7 @@ class WarehouseConnectionIntegrationTest {
         .satisfies(
             o -> {
               assertThat(o.quantity()).isEqualByComparingTo("7.000000");
-              assertThat(o.observedAt())
-                  .isEqualTo(java.time.Instant.parse("2026-10-02T10:00:00Z"));
+              assertThat(o.observedAt()).isEqualTo(java.time.Instant.parse("2026-10-02T10:00:00Z"));
             });
   }
 
@@ -324,8 +336,10 @@ class WarehouseConnectionIntegrationTest {
                               + " account_id,external_sku,quantity,source,observed_at)"
                               + " values (gen_random_uuid(),"
                               + " current_setting('app.current_tenant',true)::uuid,'"
-                              + conn + "','"
-                              + acct + "','SKU-NOSOURCE',1,'',now()::timestamptz)"));
+                              + conn
+                              + "','"
+                              + acct
+                              + "','SKU-NOSOURCE',1,'',now()::timestamptz)"));
           // source 为空串会被 CHECK 拒（追不回来的数字对不了账）
           assertThat(rootMessage(e)).isNotBlank();
           return null;
@@ -333,7 +347,7 @@ class WarehouseConnectionIntegrationTest {
   }
 
   @Test
-@DisplayName("10.4.2.1 服务商改正过的数必须观测到最新值（不得被同批旧行静默吞掉）")
+  @DisplayName("10.4.2.1 服务商改正过的数必须观测到最新值（不得被同批旧行静默吞掉）")
   void correctedInboundValueWins() {
     UUID conn = connection(actorA);
     UUID acct = account(actorA, conn);
@@ -357,7 +371,8 @@ class WarehouseConnectionIntegrationTest {
 
     as(actorA, "channel.sync.trigger", () -> warehouses.triggerSync(acct, "MANUAL"));
     // 同一批再触发 → 明确拒绝，而不是并排再插一条运行
-    assertThatThrownBy(() -> as(actorA, "channel.sync.trigger", () -> warehouses.triggerSync(acct, "MANUAL")))
+    assertThatThrownBy(
+            () -> as(actorA, "channel.sync.trigger", () -> warehouses.triggerSync(acct, "MANUAL")))
         .hasMessageContaining("已同步过");
 
     // 新一批报送 → 可以再跑（这正是「按批次幂等」而不是「一个账户只能同步一次」）
@@ -383,7 +398,8 @@ class WarehouseConnectionIntegrationTest {
         .noneMatch(c -> c.id().equals(connA));
     assertThat(as(actorB, "channel.connection.read", () -> warehouses.accounts(null)))
         .noneMatch(x -> x.connectionId().equals(connA));
-    assertThatThrownBy(() -> as(actorB, "channel.connection.read", () -> warehouses.connection(connA)))
+    assertThatThrownBy(
+            () -> as(actorB, "channel.connection.read", () -> warehouses.connection(connA)))
         .hasMessageContaining("连接不存在");
 
     // B 自己建一套，两边数据各自独立：A 只看得到自己的连接
@@ -404,16 +420,20 @@ class WarehouseConnectionIntegrationTest {
 
     // 用 A 的合法会话，但请求头里塞 B 的租户标识 —— 结果仍必须是 A 的视图
     UUID connB = connection(actorB);
-    http.perform(get("/channel/warehouse-providers/connections").header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/channel/warehouse-providers/connections")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.hasItem(connA.toString())))
-        .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem(
-            connB.toString()))));
+        .andExpect(
+            jsonPath(
+                "$[*].id",
+                org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem(connB.toString()))));
 
     // 无会话一律 401：租户不可能由客户端头决定
-    http.perform(get("/channel/warehouse-providers/connections")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/channel/warehouse-providers/connections").header("X-Tenant-Id", b.toString()))
         .andExpect(status().isUnauthorized());
   }
 
@@ -443,32 +463,38 @@ class WarehouseConnectionIntegrationTest {
   void endpointsDriveTheWholeFlow() throws Exception {
     http.perform(get("/channel/warehouse-providers").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[?(@.code=='GENERIC_3PL')].code").value(org.hamcrest.Matchers.hasItem("GENERIC_3PL")));
+        .andExpect(
+            jsonPath("$[?(@.code=='GENERIC_3PL')].code")
+                .value(org.hamcrest.Matchers.hasItem("GENERIC_3PL")));
 
     UUID conn = connection(actorA);
     UUID acct = account(actorA, conn);
 
-    http.perform(post("/channel/warehouse-providers/accounts/{id}/inbound-stock-lines", acct)
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"externalSku\":\"SKU-E2E\",\"quantity\":\"12.25\",\"unit\":\"PCS\","
-                    + "\"source\":\"REPORTED_FEED\",\"reportedAt\":\"2026-10-04T12:00:00Z\"}"))
+    http.perform(
+            post("/channel/warehouse-providers/accounts/{id}/inbound-stock-lines", acct)
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"externalSku\":\"SKU-E2E\",\"quantity\":\"12.25\",\"unit\":\"PCS\","
+                        + "\"source\":\"REPORTED_FEED\",\"reportedAt\":\"2026-10-04T12:00:00Z\"}"))
         .andExpect(status().isOk());
 
-    http.perform(post("/channel/warehouse-providers/accounts/{id}/sync", acct)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/channel/warehouse-providers/accounts/{id}/sync", acct)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
 
-    http.perform(get("/channel/warehouse-providers/accounts/{id}/observations/latest", acct)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/channel/warehouse-providers/accounts/{id}/observations/latest", acct)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].externalSku").value("SKU-E2E"))
         .andExpect(jsonPath("$[0].quantity").value(org.hamcrest.Matchers.closeTo(12.25, 0.0001)))
         .andExpect(jsonPath("$[0].source").value("REPORTED_FEED"));
 
-    http.perform(get("/channel/warehouse-providers/sync-runs")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/channel/warehouse-providers/sync-runs")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].status").value("SUCCEEDED"));
 
@@ -491,10 +517,7 @@ class WarehouseConnectionIntegrationTest {
     }
   }
 
-  /**
-   * 以迁移账号（超级权限）执行 DML —— 等价于「绕过服务层与权限面直连数据库」。
-   * 触发器必须在这条路上依然拦住覆盖行为，否则不变量就只是靠约定。
-   */
+  /** 以迁移账号（超级权限）执行 DML —— 等价于「绕过服务层与权限面直连数据库」。 触发器必须在这条路上依然拦住覆盖行为，否则不变量就只是靠约定。 */
   private void adminUpdate(String statement) {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {

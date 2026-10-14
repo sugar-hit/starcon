@@ -17,10 +17,14 @@ it('IAM 不暴露商品接口，真实会话仅由 HttpOnly cookie 传递', asyn
   const fetcher = vi.fn().mockResolvedValue(new Response('{}'));
   vi.stubGlobal('fetch', fetcher);
   expect(
-    (await GET(request('catalog/products'), { params: { path: ['catalog', 'products'] } })).status,
+    (
+      await GET(request('catalog/products'), {
+        params: Promise.resolve({ path: ['catalog', 'products'] }),
+      })
+    ).status,
   ).toBe(404);
   expect(fetcher).not.toHaveBeenCalled();
-  await GET(request('auth/session'), { params: { path: ['auth', 'session'] } });
+  await GET(request('auth/session'), { params: Promise.resolve({ path: ['auth', 'session'] }) });
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8081/auth/session'),
     expect.objectContaining({
@@ -36,7 +40,7 @@ it('登录 token 不返回浏览器脚本，新 cookie 是应用级并删除旧 
       .mockResolvedValue(new Response(JSON.stringify({ token: 'secret-token', memberships: [] }))),
   );
   const response = await POST(request('auth/login', 'POST'), {
-    params: { path: ['auth', 'login'] },
+    params: Promise.resolve({ path: ['auth', 'login'] }),
   });
   expect(await response.json()).toEqual({ memberships: [] });
   expect(response.cookies.get('starcon_session')).toMatchObject({
@@ -49,7 +53,9 @@ it('登录 token 不返回浏览器脚本，新 cookie 是应用级并删除旧 
 });
 it('认证失效删除所有兼容会话 cookie', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{}', { status: 401 })));
-  const response = await GET(request('auth/session'), { params: { path: ['auth', 'session'] } });
+  const response = await GET(request('auth/session'), {
+    params: Promise.resolve({ path: ['auth', 'session'] }),
+  });
   expect(response.cookies.get('starcon_session')?.value).toBe('');
   expect(response.cookies.get('starcon_catalog_session')?.value).toBe('');
 });
@@ -67,7 +73,9 @@ it('identity/tenants 的两个形状被放行，按 uuid 读取仍被拒绝', as
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
   for (const path of ['identity/tenants', 'identity/tenants/current']) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
       expect.objectContaining({
@@ -78,13 +86,15 @@ it('identity/tenants 的两个形状被放行，按 uuid 读取仍被拒绝', as
   expect(
     (
       await PUT(request('identity/tenants/current', 'PUT'), {
-        params: { path: ['identity', 'tenants', 'current'] },
+        params: Promise.resolve({ path: ['identity', 'tenants', 'current'] }),
       })
     ).status,
   ).toBe(200);
   const id = '11111111-1111-1111-1111-111111111111';
   for (const path of [`identity/tenants/${id}`, `identity/tenants/current/${id}`]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalledWith(
     expect.stringContaining(`:8081/identity/tenants/${id}`),
@@ -115,8 +125,8 @@ it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余
     const method = path.endsWith('/revoke') || path.endsWith('/check') ? 'POST' : 'GET';
     const response =
       method === 'POST'
-        ? await POST(request(path, 'POST'), { params: { path: path.split('/') } })
-        : await GET(request(path), { params: { path: path.split('/') } });
+        ? await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) })
+        : await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
@@ -129,7 +139,7 @@ it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余
   expect(
     (
       await PUT(request(`identity/hierarchy-authorizations/${id}`, 'PUT'), {
-        params: { path: ['identity', 'hierarchy-authorizations', id] },
+        params: Promise.resolve({ path: ['identity', 'hierarchy-authorizations', id] }),
       })
     ).status,
   ).toBe(200);
@@ -138,7 +148,9 @@ it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余
     `identity/hierarchy-authorizations/${id}/restore`,
     'identity/hierarchy-authorizations/check/extra',
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining(`/restore`), expect.anything());
 });
@@ -165,7 +177,9 @@ it('department-leaders 与 departments/{id}/leader 的四个子资源被放行�
     `identity/departments/${id}/approval-chain`,
   ];
   for (const path of allowed) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
       expect.anything(),
@@ -176,7 +190,9 @@ it('department-leaders 与 departments/{id}/leader 的四个子资源被放行�
     `identity/departments/${id}/leader/proxies/${id}/unknown`,
     `identity/departments/${id}/approval-chain/unknown`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
 });
 
@@ -201,7 +217,9 @@ it('identity 的三段账簿路径被放行，多一层子路径仍被拒绝', a
     `identity/accounting-books/${id}/fact-assignments`,
     `identity/accounting-books/${id}/fact-assignments/${id}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
       expect.objectContaining({
@@ -214,21 +232,23 @@ it('identity 的三段账簿路径被放行，多一层子路径仍被拒绝', a
   expect(
     (
       await PUT(request(`identity/legal-entities/${id}/default-book`, 'PUT'), {
-        params: { path: ['identity', 'legal-entities', id, 'default-book'] },
+        params: Promise.resolve({ path: ['identity', 'legal-entities', id, 'default-book'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await POST(request(`identity/accounting-books/${id}/fact-assignments`, 'POST'), {
-        params: { path: ['identity', 'accounting-books', id, 'fact-assignments'] },
+        params: Promise.resolve({ path: ['identity', 'accounting-books', id, 'fact-assignments'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await DELETE(request(`identity/accounting-books/${id}/fact-assignments/${id}`, 'DELETE'), {
-        params: { path: ['identity', 'accounting-books', id, 'fact-assignments', id] },
+        params: Promise.resolve({
+          path: ['identity', 'accounting-books', id, 'fact-assignments', id],
+        }),
       })
     ).status,
   ).toBe(200);
@@ -237,7 +257,9 @@ it('identity 的三段账簿路径被放行，多一层子路径仍被拒绝', a
     `identity/legal-entities/${id}/default-books`,
     `identity/accounting-books/${id}/fact-assignments/${id}/transfer`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
 });
 
@@ -263,7 +285,9 @@ it('identity/offboarding 的案卷、撤销与两张台账形状被放行，其�
     `identity/offboarding/${id}/reclaim-items/${id}/reclaim`,
   ];
   for (const path of post) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
@@ -274,7 +298,9 @@ it('identity/offboarding 的案卷、撤销与两张台账形状被放行，其�
   }
   // 读形状：列表与详情
   for (const path of ['identity/offboarding', `identity/offboarding/${id}`]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   // 反向：动作后缀之外一律 404
   for (const path of [
@@ -283,7 +309,9 @@ it('identity/offboarding 的案卷、撤销与两张台账形状被放行，其�
     `identity/offboarding/${id}/reclaim-items/${id}/reclaim/extra`,
     `identity/offboarding/${id}/responsibility-items/extra`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining('/restore'), expect.anything());
 });

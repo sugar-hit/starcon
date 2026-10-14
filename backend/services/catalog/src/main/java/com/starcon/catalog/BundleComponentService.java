@@ -24,39 +24,32 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.5.1.2 组件维护：套装组件 SKU 与数量的逐行维护、循环检测与结构化校验结果。
  *
- * <p>蓝图原文：「职责：维护套装组件 SKU 与数量，校验不出现循环引用（套装 A 含套装 B 且 B 含 A）
- * 与组件数量必须大于 0。」「输入：组件增删改；{@code bundle_component} 记录；循环检测。」
- * 「输出：组件清单；校验结果（循环、数量非法、组件不存在均拒绝保存）。」
- * 「关系：上游 = 3.5.1.1；下游 = 07 库存（预占组件）、09 订单（{@code order_line_component}
- * 冻结展开结果）。**已发布版本的组件不可改**，只能新建版本 —— 历史订单冻结的是当时版本。」
+ * <p>蓝图原文：「职责：维护套装组件 SKU 与数量，校验不出现循环引用（套装 A 含套装 B 且 B 含 A） 与组件数量必须大于 0。」「输入：组件增删改；{@code
+ * bundle_component} 记录；循环检测。」 「输出：组件清单；校验结果（循环、数量非法、组件不存在均拒绝保存）。」 「关系：上游 = 3.5.1.1；下游 = 07
+ * 库存（预占组件）、09 订单（{@code order_line_component} 冻结展开结果）。**已发布版本的组件不可改**，只能新建版本 —— 历史订单冻结的是当时版本。」
  *
  * <p><b>与 3.5.1.1 的分工</b>（V23 文件头第四节已经写死，本类只是照做）：
  *
  * <ul>
- *   <li>3.5.1.1 交付「随草稿版本整体替换组件清单 + 发布时校验齐备」，
- *       本类<b>不</b>改那条路径的语义（整体替换仍归它）。
+ *   <li>3.5.1.1 交付「随草稿版本整体替换组件清单 + 发布时校验齐备」， 本类<b>不</b>改那条路径的语义（整体替换仍归它）。
  *   <li>本类交付<b>独立组件工作台</b>：跨版本看清单、逐行增删改、以及成环检测。
  * </ul>
  *
  * <p><b>三条校验分别落在哪一层</b>：
  *
  * <ol>
- *   <li><b>数量必须大于 0</b> —— DB 的 CHECK（V23）已经拦得住；服务层用
- *       {@link BundleComponentRules#quantityProblem} 提前拒并给人话原因。
- *   <li><b>组件必须存在</b> —— {@code bundle_component} 上有指向 {@code sku} 的复合外键，
- *       但外键报错是英文的 {@code violates foreign key constraint}。这里一次查询问齐、
- *       缺哪个点名哪个。
- *   <li><b>循环引用</b> —— 本模块新增的判定（V24 规则 R6）。判定口径在
- *       {@link BundleComponentRules#cyclePath}（纯函数，可单测），
+ *   <li><b>数量必须大于 0</b> —— DB 的 CHECK（V23）已经拦得住；服务层用 {@link BundleComponentRules#quantityProblem}
+ *       提前拒并给人话原因。
+ *   <li><b>组件必须存在</b> —— {@code bundle_component} 上有指向 {@code sku} 的复合外键， 但外键报错是英文的 {@code violates
+ *       foreign key constraint}。这里一次查询问齐、 缺哪个点名哪个。
+ *   <li><b>循环引用</b> —— 本模块新增的判定（V24 规则 R6）。判定口径在 {@link BundleComponentRules#cyclePath}（纯函数，可单测），
  *       DB 侧 {@code find_bundle_cycle_path} + 两个触发器是纵深防线。
  *       两边必须给出同一个答案，所以服务层查完环之后<b>直接用同一条路径生成报错文案</b>。
  * </ol>
  *
- * <p>「已发布版本的组件不可改」由 V23 的 {@code guard_bundle_component_published} 兜底，
- * 本类只在服务层先给一句可执行的中文原因。
+ * <p>「已发布版本的组件不可改」由 V23 的 {@code guard_bundle_component_published} 兜底， 本类只在服务层先给一句可执行的中文原因。
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}，
- * 与 3.5.1.1 完全一致（同一份商品数据，不该有两套权限）。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}， 与 3.5.1.1 完全一致（同一份商品数据，不该有两套权限）。
  */
 @Service
 public class BundleComponentService {
@@ -66,9 +59,7 @@ public class BundleComponentService {
   /**
    * 组件清单的连接形状（清单与计数共用）。
    *
-   * <p>计数必须复用<b>同一段 FROM</b>：如果 count 用一张简化过的表，
-   * 那么「清单按版本过滤」和「总数按版本过滤」就会给出两个不同的数字，
-   * 翻页时页数与实际行数对不上。
+   * <p>计数必须复用<b>同一段 FROM</b>：如果 count 用一张简化过的表， 那么「清单按版本过滤」和「总数按版本过滤」就会给出两个不同的数字， 翻页时页数与实际行数对不上。
    */
   private static final String COMPONENT_FROM =
       "from bundle_component c "
@@ -101,8 +92,7 @@ public class BundleComponentService {
   /**
    * 指向的读形状。
    *
-   * <p>{@code used_by_published} 单独算而不是从 {@code used_by_count} 推：
-   * 「被草稿引用」和「被已发布版本引用」的结论完全相反 ——
+   * <p>{@code used_by_published} 单独算而不是从 {@code used_by_count} 推： 「被草稿引用」和「被已发布版本引用」的结论完全相反 ——
    * 前者解开指向只是少一条嵌套，后者会改写已冻结的展开结果。
    */
   private static final String LINK_SELECT =
@@ -127,9 +117,8 @@ public class BundleComponentService {
   /**
    * 组件工作台概览。
    *
-   * <p>{@code selfReferencingCount} 与 {@code nonPositiveQuantityCount} 是<b>纪律的体检指标</b>，
-   * 正常恒为 0。写出来不是为了好看，而是让「一条都没坏」这件事可核对 ——
-   * 约束建了不等于数据一定对，把这两个数摆在页面上，坏了当场看得见。
+   * <p>{@code selfReferencingCount} 与 {@code nonPositiveQuantityCount} 是<b>纪律的体检指标</b>， 正常恒为
+   * 0。写出来不是为了好看，而是让「一条都没坏」这件事可核对 —— 约束建了不等于数据一定对，把这两个数摆在页面上，坏了当场看得见。
    */
   public BundleComponentOverview overview() {
     UUID tenantId = currentTenantId();
@@ -150,7 +139,13 @@ public class BundleComponentService {
                 + "       on v.tenant_id=c.tenant_id and v.id=c.version_id"
                 + "     where lk.tenant_id=c.tenant_id and lk.sku_id=c.sku_id and lk.bundle_id=v.bundle_id)) as self_ref,"
                 + " (select count(*) from bundle_component where tenant_id=? and quantity<=0) as bad_quantity",
-            tenantId, tenantId, tenantId, tenantId, tenantId, tenantId, tenantId);
+            tenantId,
+            tenantId,
+            tenantId,
+            tenantId,
+            tenantId,
+            tenantId,
+            tenantId);
     return new BundleComponentOverview(
         counts.get("component_count", Long.class),
         counts.get("version_with_component", Long.class),
@@ -177,9 +172,10 @@ public class BundleComponentService {
     binds.add(currentTenantId());
     String keyword = BundleComponentRules.normalize(query.keyword());
     if (!keyword.isEmpty()) {
-      where.append(" and (lower(s.code) like ? escape '!' or lower(s.name) like ? escape '!'"
-          + " or lower(b.code) like ? escape '!' or lower(v.version_no) like ? escape '!'"
-          + " or lower(c.role) like ? escape '!')");
+      where.append(
+          " and (lower(s.code) like ? escape '!' or lower(s.name) like ? escape '!'"
+              + " or lower(b.code) like ? escape '!' or lower(v.version_no) like ? escape '!'"
+              + " or lower(c.role) like ? escape '!')");
       String like = escapeLike(keyword.toLowerCase(Locale.ROOT));
       for (int i = 0; i < 5; i++) binds.add(like);
     }
@@ -200,7 +196,9 @@ public class BundleComponentService {
       throw bad("「是否嵌套」只能是 true 或 false");
     }
     // count 复用同一段 FROM：总数与清单必须是同一个集合，否则翻页页数会对不上。
-    long total = sql.fetchOne("select count(*) " + COMPONENT_FROM + where, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) " + COMPONENT_FROM + where, binds.toArray())
+            .get(0, Long.class);
     if (total == 0) return new BundleComponentPage(List.of(), page, size, 0, 0);
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(size);
@@ -211,12 +209,14 @@ public class BundleComponentService {
             pageBinds.toArray());
     List<BundleComponentItem> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(componentItem(r));
-    return new BundleComponentPage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new BundleComponentPage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   /** 单行组件详情。跨租户读不到（RLS + 显式 tenant_id 过滤）。 */
   public BundleComponentItem component(UUID id) {
-    Record r = sql.fetchOne(COMPONENT_SELECT + " where c.tenant_id=? and c.id=?", currentTenantId(), id);
+    Record r =
+        sql.fetchOne(COMPONENT_SELECT + " where c.tenant_id=? and c.id=?", currentTenantId(), id);
     if (r == null) throw notFound("组件不存在");
     return componentItem(r);
   }
@@ -226,8 +226,7 @@ public class BundleComponentService {
   /**
    * 结构化校验结果：把一个版本上的组件问题<b>一次列全</b>。
    *
-   * <p>为什么要「一次列全」而不是只给第一条：蓝图的输出写的是「校验结果（循环、数量非法、
-   * 组件不存在均拒绝保存）」，运营的下一个动作是「一次改完」，不是「改一个提交一次」。
+   * <p>为什么要「一次列全」而不是只给第一条：蓝图的输出写的是「校验结果（循环、数量非法、 组件不存在均拒绝保存）」，运营的下一个动作是「一次改完」，不是「改一个提交一次」。
    * 逐条报错会让人把同一个错误改三遍。
    *
    * <p>检查项：
@@ -247,7 +246,8 @@ public class BundleComponentService {
             "select v.id,v.bundle_id,v.version_no,v.name,v.status,b.code as bundle_code"
                 + " from bundle_version v join bundle b on b.tenant_id=v.tenant_id and b.id=v.bundle_id"
                 + " where v.tenant_id=? and v.id=?",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     if (v == null) throw notFound("套装版本不存在");
     UUID bundleId = v.get("bundle_id", UUID.class);
     String versionNo = v.get("version_no", String.class);
@@ -263,7 +263,8 @@ public class BundleComponentService {
                 + "left join sku s on s.tenant_id=c.tenant_id and s.id=c.sku_id "
                 + "left join bundle_sku lk on lk.tenant_id=c.tenant_id and lk.sku_id=c.sku_id "
                 + "where c.tenant_id=? and c.version_id=? order by s.code",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     // 包含链邻接表只加载一次：整个租户的边（不是只有这一个版本的），否则查环会漏掉
     // 「经由别的版本的组件绕回来」这种环。
     Map<UUID, List<UUID>> edges = containmentEdges(tenantId);
@@ -271,16 +272,16 @@ public class BundleComponentService {
     List<BundleComponentProblem> problems = new ArrayList<>();
     if (!editable) {
       problems.add(
-          problem("VERSION_FROZEN", BundleComponentRules.publishedComponentProblem(versionNo), null, null, null));
-    }
-    if (rows.isEmpty()) {
-      problems.add(
           problem(
-              "EMPTY_COMPONENT_LIST",
-              BundleRules.componentCountProblem(0),
+              "VERSION_FROZEN",
+              BundleComponentRules.publishedComponentProblem(versionNo),
               null,
               null,
               null));
+    }
+    if (rows.isEmpty()) {
+      problems.add(
+          problem("EMPTY_COMPONENT_LIST", BundleRules.componentCountProblem(0), null, null, null));
     }
     Map<UUID, Long> seen = new HashMap<>();
     BigDecimal total = BigDecimal.ZERO;
@@ -311,8 +312,7 @@ public class BundleComponentService {
         problems.add(
             problem(
                 "COMPONENT_SKU_MISSING",
-                "组件 SKU（" + skuId + "）在本租户不存在：套装组件必须指向真实存在的 SKU，"
-                    + "否则扣组件库存时扣的是一个不存在的东西",
+                "组件 SKU（" + skuId + "）在本租户不存在：套装组件必须指向真实存在的 SKU，" + "否则扣组件库存时扣的是一个不存在的东西",
                 skuId,
                 null,
                 componentId));
@@ -348,7 +348,9 @@ public class BundleComponentService {
         problems,
         ok
             ? "校验通过：这个版本可以发布（生效区间不重叠的判定归 3.5.1.1 的发布接口）"
-            : "上面 " + problems.size() + " 条都要处理完才能发布。校验是保存前的体检，"
+            : "上面 "
+                + problems.size()
+                + " 条都要处理完才能发布。校验是保存前的体检，"
                 + "点保存时同样会被拒 —— 这里只是让你一次看全，不用反复提交试错");
   }
 
@@ -359,8 +361,7 @@ public class BundleComponentService {
    *
    * <p>校验顺序按「先说最根本的那条」排：版本冻结 → 数量 → 组件存在 → 重复 → 环。
    *
-   * <p>与 3.5.1.1 的整体替换并存：整体替换是「把清单改成提交的那份」，
-   * 这里是「加一行」——工作台上一行一行地加更顺手，而整体替换留给「我已经在别处整理好了一份清单」。
+   * <p>与 3.5.1.1 的整体替换并存：整体替换是「把清单改成提交的那份」， 这里是「加一行」——工作台上一行一行地加更顺手，而整体替换留给「我已经在别处整理好了一份清单」。
    */
   public BundleComponentItem addComponent(
       AccessService.Access actor, UUID versionId, BundleComponentInput input) {
@@ -379,24 +380,23 @@ public class BundleComponentService {
     UUID skuId = input.skuId();
     var sku = sql.fetchOne("select code,name from sku where tenant_id=? and id=?", tenantId, skuId);
     if (sku == null) {
-      throw bad(
-          "组件 SKU（"
-              + skuId
-              + "）在本租户不存在：套装组件必须指向真实存在的 SKU，"
-              + "否则扣组件库存时扣的是一个不存在的东西");
+      throw bad("组件 SKU（" + skuId + "）在本租户不存在：套装组件必须指向真实存在的 SKU，" + "否则扣组件库存时扣的是一个不存在的东西");
     }
     long existing =
         sql.fetchOne(
                 "select count(*) from bundle_component where tenant_id=? and version_id=? and sku_id=?",
-                tenantId, versionId, skuId)
+                tenantId,
+                versionId,
+                skuId)
             .get(0, Long.class);
     check(
         existing == 0,
-        "这个 SKU 已经在这个版本的组件清单里了：每个组件「每件套装要几件」只能有一个答案，"
-            + "两行时订单展开只能取其中一条，而扣库存会按取到的那条走。要改数量请直接改那一行");
+        "这个 SKU 已经在这个版本的组件清单里了：每个组件「每件套装要几件」只能有一个答案，" + "两行时订单展开只能取其中一条，而扣库存会按取到的那条走。要改数量请直接改那一行");
     long count =
         sql.fetchOne(
-                "select count(*) from bundle_component where tenant_id=? and version_id=?", tenantId, versionId)
+                "select count(*) from bundle_component where tenant_id=? and version_id=?",
+                tenantId,
+                versionId)
             .get(0, Long.class);
     checkRule(BundleComponentRules.componentCountProblem((int) count + 1));
 
@@ -407,7 +407,13 @@ public class BundleComponentService {
       sql.execute(
           "insert into bundle_component(id,tenant_id,version_id,sku_id,quantity,role,note,version)"
               + " values(?,?,?,?,?,?,?,0)",
-          id, tenantId, versionId, skuId, input.quantity(), role, note);
+          id,
+          tenantId,
+          versionId,
+          skuId,
+          input.quantity(),
+          role,
+          note);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
@@ -418,12 +424,10 @@ public class BundleComponentService {
   /**
    * 改一行组件的数量 / 角色 / 备注。
    *
-   * <p>SKU 不可改（见 {@link BundleComponentEditInput}）：组件行的身份是
-   * 「这个版本里的这个 SKU」，换 SKU 走「删一行 + 加一行」，历史更清楚。
+   * <p>SKU 不可改（见 {@link BundleComponentEditInput}）：组件行的身份是 「这个版本里的这个 SKU」，换 SKU 走「删一行 + 加一行」，历史更清楚。
    *
-   * <p>数量可以改不会引入新的环（指向没变），所以这里不重查环 —— 环只由「换了哪个 SKU」决定。
-   * 这不是省事：{@code guard_bundle_component_cycle} 挂在 INSERT 上，
-   * 「改数量导致成环」在数学上不存在。
+   * <p>数量可以改不会引入新的环（指向没变），所以这里不重查环 —— 环只由「换了哪个 SKU」决定。 这不是省事：{@code guard_bundle_component_cycle}
+   * 挂在 INSERT 上， 「改数量导致成环」在数学上不存在。
    */
   public BundleComponentItem editComponent(
       AccessService.Access actor, UUID id, BundleComponentEditInput input) {
@@ -434,7 +438,8 @@ public class BundleComponentService {
                 + " from bundle_component c"
                 + " join bundle_version v on v.tenant_id=c.tenant_id and v.id=c.version_id"
                 + " where c.tenant_id=? and c.id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("组件不存在");
     requireEditableVersion(tenantId, current.get("version_id", UUID.class));
     checkVersion(current.get("row_version", Long.class), input.rowVersion());
@@ -450,7 +455,12 @@ public class BundleComponentService {
           sql.execute(
               "update bundle_component set quantity=?,role=?,note=?,version=version+1,updated_at=now()"
                   + " where tenant_id=? and id=? and version=?",
-              input.quantity(), role, note, tenantId, id, input.rowVersion());
+              input.quantity(),
+              role,
+              note,
+              tenantId,
+              id,
+              input.rowVersion());
       check(affected == 1, "这行组件刚被别人改过（行版本不是 " + input.rowVersion() + "），请刷新后重试");
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
@@ -468,14 +478,17 @@ public class BundleComponentService {
                 + " from bundle_component c"
                 + " join bundle_version v on v.tenant_id=c.tenant_id and v.id=c.version_id"
                 + " where c.tenant_id=? and c.id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("组件不存在");
     requireEditableVersion(tenantId, current.get("version_id", UUID.class));
     checkVersion(current.get("row_version", Long.class), rowVersion);
     try {
       sql.execute(
           "delete from bundle_component where tenant_id=? and id=? and version=?",
-          tenantId, id, rowVersion);
+          tenantId,
+          id,
+          rowVersion);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
@@ -487,8 +500,7 @@ public class BundleComponentService {
   /**
    * 指向列表。
    *
-   * <p>这一层是「嵌套套装」的唯一可见面：没有它，「套装 A 含套装 B」在数据上无法表达，
-   * 循环也就无从发生（V24 文件头第二节）。
+   * <p>这一层是「嵌套套装」的唯一可见面：没有它，「套装 A 含套装 B」在数据上无法表达， 循环也就无从发生（V24 文件头第二节）。
    */
   public BundleSkuPage links(BundleSkuQuery query) {
     int page = Math.max(0, query.page());
@@ -498,17 +510,21 @@ public class BundleComponentService {
     binds.add(currentTenantId());
     String keyword = BundleComponentRules.normalize(query.keyword());
     if (!keyword.isEmpty()) {
-      where.append(" and (lower(s.code) like ? escape '!' or lower(s.name) like ? escape '!'"
-          + " or lower(b.code) like ? escape '!')");
+      where.append(
+          " and (lower(s.code) like ? escape '!' or lower(s.name) like ? escape '!'"
+              + " or lower(b.code) like ? escape '!')");
       String like = escapeLike(keyword.toLowerCase(Locale.ROOT));
       for (int i = 0; i < 3; i++) binds.add(like);
     }
-    long total = sql.fetchOne("select count(*) " + LINK_FROM + where, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) " + LINK_FROM + where, binds.toArray()).get(0, Long.class);
     if (total == 0) return new BundleSkuPage(List.of(), page, size, 0, 0);
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(size);
     pageBinds.add((long) page * size);
-    var rows = sql.fetch(LINK_SELECT + where + " order by b.code,s.code limit ? offset ?", pageBinds.toArray());
+    var rows =
+        sql.fetch(
+            LINK_SELECT + where + " order by b.code,s.code limit ? offset ?", pageBinds.toArray());
     List<BundleSkuRow> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(linkRow(r));
     return new BundleSkuPage(items, page, size, total, (int) Math.ceil(total / (double) size));
@@ -517,13 +533,11 @@ public class BundleComponentService {
   /**
    * 新建指向，或改一个 SKU 代表哪个套装（id 为空即新建）。
    *
-   * <p><b>改指向是本模块里最危险的操作</b>：它一次性改掉所有把该 SKU 当组件的套装的出边。
-   * 所以两件事都要查：
+   * <p><b>改指向是本模块里最危险的操作</b>：它一次性改掉所有把该 SKU 当组件的套装的出边。 所以两件事都要查：
    *
    * <ol>
    *   <li>这个 SKU 是不是已经被别的套装代表（UNIQUE 兜底，但报错要说明「为什么只能一个」）；
-   *   <li>改完之后会不会成环（对每个「把它当组件的套装」查可达性，V24 的
-   *       {@code guard_bundle_sku_cycle} 兜底）。
+   *   <li>改完之后会不会成环（对每个「把它当组件的套装」查可达性，V24 的 {@code guard_bundle_sku_cycle} 兜底）。
    * </ol>
    */
   public BundleSkuRow saveLink(AccessService.Access actor, UUID id, BundleSkuInput input) {
@@ -532,7 +546,8 @@ public class BundleComponentService {
     checkRule(BundleComponentRules.linkNoteProblem(note));
     UUID bundleId = input.bundleId();
     UUID skuId = input.skuId();
-    var bundle = sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, bundleId);
+    var bundle =
+        sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, bundleId);
     if (bundle == null) throw notFound("套装不存在");
     var sku = sql.fetchOne("select code,name from sku where tenant_id=? and id=?", tenantId, skuId);
     if (sku == null) throw bad("SKU（" + skuId + "）在本租户不存在");
@@ -541,11 +556,15 @@ public class BundleComponentService {
     // 不排除的话，「把这条指向改到另一个套装」永远会被自己拦下，改指向功能等于不存在。
     var owner =
         sql.fetchOne(
-            "select bundle_id from bundle_sku where tenant_id=? and sku_id=?" + (id == null ? "" : " and id<>?"),
+            "select bundle_id from bundle_sku where tenant_id=? and sku_id=?"
+                + (id == null ? "" : " and id<>?"),
             id == null ? new Object[] {tenantId, skuId} : new Object[] {tenantId, skuId, id});
     if (owner != null && !owner.get("bundle_id", UUID.class).equals(bundleId)) {
       String currentOwner =
-          sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, owner.get("bundle_id", UUID.class))
+          sql.fetchOne(
+                  "select code from bundle where tenant_id=? and id=?",
+                  tenantId,
+                  owner.get("bundle_id", UUID.class))
               .get("code", String.class);
       throw conflict(
           "SKU「"
@@ -565,7 +584,11 @@ public class BundleComponentService {
         UUID newId = Ids.next();
         sql.execute(
             "insert into bundle_sku(id,tenant_id,bundle_id,sku_id,note,version) values(?,?,?,?,?,0)",
-            newId, tenantId, bundleId, skuId, note);
+            newId,
+            tenantId,
+            bundleId,
+            skuId,
+            note);
         audit(actor, newId, "BundleSkuLinked");
         return link(newId);
       }
@@ -576,7 +599,12 @@ public class BundleComponentService {
       sql.execute(
           "update bundle_sku set bundle_id=?,sku_id=?,note=?,version=version+1,updated_at=now()"
               + " where tenant_id=? and id=? and version=?",
-          bundleId, skuId, note, tenantId, id, input.rowVersion());
+          bundleId,
+          skuId,
+          note,
+          tenantId,
+          id,
+          input.rowVersion());
       audit(actor, id, "BundleSkuRelinked");
       return link(id);
     } catch (DataAccessException e) {
@@ -587,14 +615,13 @@ public class BundleComponentService {
   /**
    * 解开指向。
    *
-   * <p>已发布版本里的组件行引用过这个 SKU 时拒绝：删掉指向后，
-   * 那些**冻结的**组件会从「套装 B 的可售 SKU」静默降级成普通 SKU ——
-   * 展开结果变了，而那一版是已发布的历史。
+   * <p>已发布版本里的组件行引用过这个 SKU 时拒绝：删掉指向后， 那些**冻结的**组件会从「套装 B 的可售 SKU」静默降级成普通 SKU —— 展开结果变了，而那一版是已发布的历史。
    */
   public void deleteLink(AccessService.Access actor, UUID id, long rowVersion) {
     UUID tenantId = actor.tenantId();
     var current =
-        sql.fetchOne("select sku_id,version from bundle_sku where tenant_id=? and id=?", tenantId, id);
+        sql.fetchOne(
+            "select sku_id,version from bundle_sku where tenant_id=? and id=?", tenantId, id);
     if (current == null) throw notFound("指向不存在");
     checkVersion(current.get("version", Long.class), rowVersion);
     UUID skuId = current.get("sku_id", UUID.class);
@@ -603,7 +630,8 @@ public class BundleComponentService {
                 "select count(*) from bundle_component c join bundle_version v"
                     + " on v.tenant_id=c.tenant_id and v.id=c.version_id"
                     + " where c.tenant_id=? and c.sku_id=? and v.status='PUBLISHED'",
-                tenantId, skuId)
+                tenantId,
+                skuId)
             .get(0, Long.class);
     check(
         published == 0,
@@ -613,7 +641,11 @@ public class BundleComponentService {
             + "静默降级成普通 SKU，而已发布版本里的组件是冻结的历史 —— "
             + "09 订单冻结的展开结果会变。要停止使用请归档套装，或新建一个版本接替");
     try {
-      sql.execute("delete from bundle_sku where tenant_id=? and id=? and version=?", tenantId, id, rowVersion);
+      sql.execute(
+          "delete from bundle_sku where tenant_id=? and id=? and version=?",
+          tenantId,
+          id,
+          rowVersion);
     } catch (DataAccessException e) {
       throw conflict(rootMessage(e));
     }
@@ -623,35 +655,35 @@ public class BundleComponentService {
   // ================================================================ 内部
 
   private BundleSkuRow link(UUID id) {
-    Record r =
-        sql.fetchOne(LINK_SELECT + " where l.tenant_id=? and l.id=?", currentTenantId(), id);
+    Record r = sql.fetchOne(LINK_SELECT + " where l.tenant_id=? and l.id=?", currentTenantId(), id);
     if (r == null) throw notFound("指向不存在");
     return linkRow(r);
   }
 
   private UUID currentLinkBundle(UUID tenantId, UUID linkId) {
-    var row = sql.fetchOne("select bundle_id from bundle_sku where tenant_id=? and id=?", tenantId, linkId);
+    var row =
+        sql.fetchOne(
+            "select bundle_id from bundle_sku where tenant_id=? and id=?", tenantId, linkId);
     return row == null ? null : row.get("bundle_id", UUID.class);
   }
 
   /**
    * 校验「把 skuId 当组件放进 bundleId 的版本」不会成环。
    *
-   * <p>口径与 V24 的 {@code find_bundle_cycle_path} 一致：从组件指向的套装出发，
-   * 沿包含边能不能走回 {@code bundleId}（规则 R6）。走不回就是合法的嵌套。
+   * <p>口径与 V24 的 {@code find_bundle_cycle_path} 一致：从组件指向的套装出发， 沿包含边能不能走回 {@code bundleId}（规则
+   * R6）。走不回就是合法的嵌套。
    */
   private void checkNoCycle(UUID tenantId, UUID bundleId, UUID skuId, String versionNo) {
     var linked =
-        sql.fetchOne("select bundle_id from bundle_sku where tenant_id=? and sku_id=?", tenantId, skuId);
+        sql.fetchOne(
+            "select bundle_id from bundle_sku where tenant_id=? and sku_id=?", tenantId, skuId);
     if (linked == null) return; // 普通 SKU：套装之间的边根本不存在
     List<UUID> path =
-        BundleComponentRules.cyclePath(containmentEdges(tenantId), linked.get("bundle_id", UUID.class), bundleId);
+        BundleComponentRules.cyclePath(
+            containmentEdges(tenantId), linked.get("bundle_id", UUID.class), bundleId);
     if (path != null) {
       throw conflict(
-          BundleComponentRules.cycleProblem(ring(tenantId, path))
-              + "（在套装「"
-              + versionNo
-              + "」上）");
+          BundleComponentRules.cycleProblem(ring(tenantId, path)) + "（在套装「" + versionNo + "」上）");
     }
   }
 
@@ -664,7 +696,8 @@ public class BundleComponentService {
                 + " join bundle_version v on v.tenant_id=c.tenant_id and v.id=c.version_id"
                 + " join bundle_sku l on l.tenant_id=c.tenant_id and l.sku_id=c.sku_id"
                 + " where c.tenant_id=? and l.bundle_id=?",
-            tenantId, bundleId);
+            tenantId,
+            bundleId);
     for (Record r : holders) {
       UUID holder = r.get("bundle_id", UUID.class);
       List<UUID> path = BundleComponentRules.cyclePath(edges, bundleId, holder);
@@ -672,7 +705,8 @@ public class BundleComponentService {
         String holderCode = bundleCode(tenantId, holder);
         String targetCode = bundleCode(tenantId, bundleId);
         throw conflict(
-            BundleComponentRules.relinkProblem(ring(tenantId, path), skuCode, holderCode, targetCode));
+            BundleComponentRules.relinkProblem(
+                ring(tenantId, path), skuCode, holderCode, targetCode));
       }
     }
   }
@@ -680,12 +714,10 @@ public class BundleComponentService {
   /**
    * 加载整个租户的包含边：套装 → 它直接包含的套装。
    *
-   * <p>为什么加载全租户而不是只加载这一个版本：环可能绕经<b>别的版本</b>的组件
-   * （A 的组件里有 B，B 的 v2 草稿里有 C，C 的 v1 里有 A）。
+   * <p>为什么加载全租户而不是只加载这一个版本：环可能绕经<b>别的版本</b>的组件 （A 的组件里有 B，B 的 v2 草稿里有 C，C 的 v1 里有 A）。
    * 只看当前版本会漏掉这种环，而漏掉的环会在对方版本发布的那一刻才显形。
    *
-   * <p>只取「SKU 代表套装」的那部分边：普通 SKU 组件不产生套装之间的边。
-   * 这让邻接表的规模等于「嵌套组件数」，而不是「组件总数」。
+   * <p>只取「SKU 代表套装」的那部分边：普通 SKU 组件不产生套装之间的边。 这让邻接表的规模等于「嵌套组件数」，而不是「组件总数」。
    */
   private Map<UUID, List<UUID>> containmentEdges(UUID tenantId) {
     Map<UUID, List<UUID>> edges = new LinkedHashMap<>();
@@ -708,8 +740,7 @@ public class BundleComponentService {
   /**
    * 把一条包含路径接成闭合的环文案 {@code A → B → C → A}。
    *
-   * <p>用<b>编码</b>而不是 UUID：报错是给人看的，运营在页面上看到的是套装编码
-   * （{@code BND-SUMMER-01}），不是一串十六进制。
+   * <p>用<b>编码</b>而不是 UUID：报错是给人看的，运营在页面上看到的是套装编码 （{@code BND-SUMMER-01}），不是一串十六进制。
    */
   private String ring(UUID tenantId, List<UUID> path) {
     Map<UUID, String> codes = new LinkedHashMap<>();
@@ -720,7 +751,8 @@ public class BundleComponentService {
   }
 
   private String bundleCode(UUID tenantId, UUID bundleId) {
-    var row = sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, bundleId);
+    var row =
+        sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, bundleId);
     return row == null ? bundleId.toString() : row.get("code", String.class);
   }
 
@@ -729,7 +761,8 @@ public class BundleComponentService {
     var version =
         sql.fetchOne(
             "select bundle_id,version_no,status from bundle_version where tenant_id=? and id=?",
-            tenantId, versionId);
+            tenantId,
+            versionId);
     if (version == null) throw notFound("套装版本不存在");
     checkEditable(version.get("status", String.class), version.get("version_no", String.class));
     return version;
@@ -808,9 +841,7 @@ public class BundleComponentService {
   }
 
   private static void checkVersion(long current, long submitted) {
-    check(
-        current == submitted,
-        "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
+    check(current == submitted, "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
   }
 
   /** 当前 UTC 时刻。写 timestamptz 列一律配 {@code ?::timestamptz}，不经过 Timestamp.valueOf。 */
@@ -843,6 +874,10 @@ public class BundleComponentService {
   void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 }

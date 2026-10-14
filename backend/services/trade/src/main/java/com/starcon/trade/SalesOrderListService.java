@@ -17,30 +17,25 @@ import org.springframework.stereotype.Service;
 /**
  * 9.1.1.1 订单列表（全渠道统一订单列表读投影）。
  *
- * <p><b>本类是读投影，不是写入者。</b>{@code sales_order} 及其六张子表的写入所有权属于
- * 9.1.2.2（手工单）与将来的 9.1.2.1（平台单同步）；本类只读，不 INSERT / UPDATE / DELETE
- * 任何一张表，也不为蓝图要但当前不存在的维度建占位表。
+ * <p><b>本类是读投影，不是写入者。</b>{@code sales_order} 及其六张子表的写入所有权属于 9.1.2.2（手工单）与将来的 9.1.2.1（平台单同步）；本类只读，不
+ * INSERT / UPDATE / DELETE 任何一张表，也不为蓝图要但当前不存在的维度建占位表。
  *
- * <p><b>「拿不到」与「没有」是两回事，代码里必须分得开。</b>蓝图 9.1.1.1 点名的九个维度里，
- * 支付状态 / 履约状态 / 平台店铺 / 发货仓 / 平台状态 / 售后状态在本服务<b>不存在</b>。
- * 本类的做法（照 8.3.1.2 出库单详情已建立的仓库约定）：
+ * <p><b>「拿不到」与「没有」是两回事，代码里必须分得开。</b>蓝图 9.1.1.1 点名的九个维度里， 支付状态 / 履约状态 / 平台店铺 / 发货仓 / 平台状态 /
+ * 售后状态在本服务<b>不存在</b>。 本类的做法（照 8.3.1.2 出库单详情已建立的仓库约定）：
  *
  * <ul>
- *   <li>存在的维度照常返回，并支持筛选与排序；</li>
- *   <li>不存在的维度在 {@link #capabilities()} 里逐条 {@code available=false} + ownerModule +
- *       原因，列表响应里对应字段是 <b>null</b>；</li>
- *   <li><b>不提供</b>那些维度的筛选参数与排序项 —— 一个永远筛不出东西的下拉框
- *       比没有这个下拉框更糟，它会让人以为这条链路已经通了。</li>
+ *   <li>存在的维度照常返回，并支持筛选与排序；
+ *   <li>不存在的维度在 {@link #capabilities()} 里逐条 {@code available=false} + ownerModule + 原因，列表响应里对应字段是
+ *       <b>null</b>；
+ *   <li><b>不提供</b>那些维度的筛选参数与排序项 —— 一个永远筛不出东西的下拉框 比没有这个下拉框更糟，它会让人以为这条链路已经通了。
  * </ul>
  *
- * <p><b>两个最容易犯的语义造假，本类显式拒绝</b>：
- * {@code status}（DRAFT / SUBMITTED，语义是「有没有进审单队列」）<b>不是</b>履约状态；
+ * <p><b>两个最容易犯的语义造假，本类显式拒绝</b>： {@code status}（DRAFT / SUBMITTED，语义是「有没有进审单队列」）<b>不是</b>履约状态；
  * {@code payment_method}（预付 / 货到付 / 电汇 / 账期，语义是「约定」）<b>不是</b>支付状态。
  * 两者在响应里是<b>两个不同字段</b>，且后者的「真身」字段恒为 null。
  *
- * <p><b>时间绑定</b>：时间筛选一律 {@code ?::timestamptz} + {@link OffsetDateTime}。
- * {@code Timestamp.valueOf(LocalDateTime)} 会静默偏 −28800s（本项目所在时区），
- * 「按下单时间筛选」会因此筛出错的区间。
+ * <p><b>时间绑定</b>：时间筛选一律 {@code ?::timestamptz} + {@link OffsetDateTime}。 {@code
+ * Timestamp.valueOf(LocalDateTime)} 会静默偏 −28800s（本项目所在时区）， 「按下单时间筛选」会因此筛出错的区间。
  *
  * <p><b>分页是真分页</b>：{@code LIMIT ? OFFSET ?} + 一条独立的 {@code count(*)} 总数查询。
  * 汇总条与分页无关（统计的是<b>命中筛选条件</b>的全部行，不是当前页）。
@@ -61,8 +56,7 @@ public class SalesOrderListService {
   /**
    * 能力声明。
    *
-   * <p>存在的理由与 8.3.1.2 / 9.3.2.2 一致：把「哪些维度真有依据」「哪些批量操作能落地」
-   * 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
+   * <p>存在的理由与 8.3.1.2 / 9.3.2.2 一致：把「哪些维度真有依据」「哪些批量操作能落地」 显式报出来，而不是让调用方从 404 或空数组里去猜哪一环没通。
    */
   public SalesOrderListCapabilities capabilities() {
     return new SalesOrderListCapabilities(
@@ -70,8 +64,7 @@ public class SalesOrderListService {
             "订单号 sales_order.order_no",
             "下单时间 sales_order.created_at",
             "订单金额与币种 sales_order.grand_total_amount + currency",
-            "来源 sales_order.order_source（CHECK 已含 MANUAL 与全部平台来源，"
-                + "平台来源当前还没有写入入口）",
+            "来源 sales_order.order_source（CHECK 已含 MANUAL 与全部平台来源，" + "平台来源当前还没有写入入口）",
             "单据状态 sales_order.status（DRAFT / SUBMITTED，语义是「有没有进审单队列」）",
             "买家 sales_order_party_snapshot（客户快照，一单一客户）",
             "SKU 行数与 SKU 筛选 sales_order_line"),
@@ -109,21 +102,15 @@ public class SalesOrderListService {
                 "发货仓",
                 false,
                 "9.3.3.1 履约请求",
-                "8.3 出库侧存在，但**销售订单与出库单之间尚无履约请求关联**，"
-                    + "sales_order 上没有任何列指向发货仓。仓是履约决定的，不是下单时定的。"),
+                "8.3 出库侧存在，但**销售订单与出库单之间尚无履约请求关联**，" + "sales_order 上没有任何列指向发货仓。仓是履约决定的，不是下单时定的。"),
             new SalesOrderListDimension(
-                "platformStatus",
-                "平台状态",
-                false,
-                "9.1.2.1 平台订单同步",
-                "平台同步未交付，没有任何平台回传状态落库。"),
+                "platformStatus", "平台状态", false, "9.1.2.1 平台订单同步", "平台同步未交付，没有任何平台回传状态落库。"),
             new SalesOrderListDimension(
                 "aftersalesStatus",
                 "售后状态",
                 false,
                 "11 售后与退货",
-                "11 售后一条未做，sales_order 簇里没有任何售后列。"
-                    + "已发货订单转售后才会产生这个状态，那是 11 的事。")),
+                "11 售后一条未做，sales_order 簇里没有任何售后列。" + "已发货订单转售后才会产生这个状态，那是 11 的事。")),
         List.of(
             new SalesOrderListBulkOperation(
                 "REVIEW",
@@ -131,8 +118,7 @@ public class SalesOrderListService {
                 false,
                 "9.2 审单与异常（9.2.1.1 待审队列 / 9.2.1.2 审单规则）",
                 "9.2 交付待审队列与审单规则后，批量通过 / 驳回才有判定依据",
-                "审单未交付：订单只能提交到 SUBMITTED（待审），"
-                    + "队列展示与批量通过 / 驳回都还没有出口。本模块是读投影，不抢审单的动作。"),
+                "审单未交付：订单只能提交到 SUBMITTED（待审），" + "队列展示与批量通过 / 驳回都还没有出口。本模块是读投影，不抢审单的动作。"),
             new SalesOrderListBulkOperation(
                 "NOTE",
                 "备注",
@@ -158,8 +144,7 @@ public class SalesOrderListService {
                 false,
                 "15 客户与客服",
                 "15 客服侧交付催付渠道与话术模板",
-                "15 客服侧未交付。发催付是**对外发消息**的动作（邮件 / 站内信 / 平台消息），"
-                    + "需要话术模板与发送渠道记录，两者都不在本模块。")),
+                "15 客服侧未交付。发催付是**对外发消息**的动作（邮件 / 站内信 / 平台消息），" + "需要话术模板与发送渠道记录，两者都不在本模块。")),
         List.of(SalesOrderListSort.values()).stream()
             .map(s -> new SalesOrderListSortOption(s.name(), s.label()))
             .toList(),
@@ -195,8 +180,7 @@ public class SalesOrderListService {
             + " on p.tenant_id = o.tenant_id and p.order_id = o.id"
             + clause;
 
-    long total =
-        sql.fetchOne("select count(*)" + from, binds.toArray()).get(0, Long.class);
+    long total = sql.fetchOne("select count(*)" + from, binds.toArray()).get(0, Long.class);
 
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(size);
@@ -260,10 +244,7 @@ public class SalesOrderListService {
 
   // ================================================================ 内部
 
-  /**
-   * WHERE 条件。**每一条都对应一个真实存在的列或一条真实存在的聚合** ——
-   * 蓝图点名的六个不可得维度刻意不出现在这里。
-   */
+  /** WHERE 条件。**每一条都对应一个真实存在的列或一条真实存在的聚合** —— 蓝图点名的六个不可得维度刻意不出现在这里。 */
   private List<String> conditions(SalesOrderListQuery query, List<Object> binds) {
     List<String> where = new ArrayList<>();
     if (isSet(query.orderSource())) {
@@ -341,8 +322,7 @@ public class SalesOrderListService {
    *
    * <p>统计的是<b>命中筛选条件的全部行</b>（与分页无关），而不是当前页。
    *
-   * <p><b>金额按币种分开报</b>：租户内同时存在多种币种时，把 USD 与 EUR 加成一个数
-   * 没有意义 —— 那不是任何一个金额。
+   * <p><b>金额按币种分开报</b>：租户内同时存在多种币种时，把 USD 与 EUR 加成一个数 没有意义 —— 那不是任何一个金额。
    */
   private SalesOrderListSummary summary(String from, List<Object> binds) {
     Record head =

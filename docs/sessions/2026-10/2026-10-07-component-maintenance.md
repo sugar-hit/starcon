@@ -85,7 +85,7 @@
 
 - 迁移：`backend/services/catalog/src/main/resources/db/migration/V24__bundle_component_maintenance.sql`
   （`bundle_sku` 表 + `bundle_component.version` + `find_bundle_cycle_path` / `bundle_cycle_codes`
-  + 两个成环触发器 + 三条索引 + RLS/GRANT）
+  - 两个成环触发器 + 三条索引 + RLS/GRANT）
 - 后端：`BundleComponentRules.java`（纯规则，R6~R9）、`BundleComponentService.java`（jOOQ 显式 SQL）、
   `BundleComponentController.java`（端点）、`CatalogModels.java`（+9 个 DTO）
 - 测试：`BundleComponentRulesTest.java`（16 例）、`BundleComponentIntegrationTest.java`（15 例）

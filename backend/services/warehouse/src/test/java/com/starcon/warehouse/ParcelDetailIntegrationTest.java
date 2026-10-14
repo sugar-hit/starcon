@@ -31,13 +31,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 10.2.2.1 包裹详情的集成测试。
  *
- * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池
- * 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造 tenant header 无效、
- * 连接池归还后不串租户。
+ * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造
+ * tenant header 无效、 连接池归还后不串租户。
  *
- * <p>夹具走<b>真实表</b>（V72 出库单 / V117 复核单 / V121 打包与包裹 / V73 打印），
- * 不 mock 任何一段：本模块的核心断言「parcel_item → 销售订单行的关联能不能归集到行」
- * 必须在真表、真触发器（V125 的守卫）上成立才有意义。
+ * <p>夹具走<b>真实表</b>（V72 出库单 / V117 复核单 / V121 打包与包裹 / V73 打印）， 不 mock 任何一段：本模块的核心断言「parcel_item →
+ * 销售订单行的关联能不能归集到行」 必须在真表、真触发器（V125 的守卫）上成立才有意义。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,8 +61,13 @@ class ParcelDetailIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -74,7 +77,8 @@ class ParcelDetailIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -89,7 +93,8 @@ class ParcelDetailIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -152,8 +157,9 @@ class ParcelDetailIntegrationTest {
               + " outbound_order_line, outbound_order, inventory_serial, stock_bucket,"
               + " inventory_balance, warehouse_location, inventory_lot,"
               + " inventory_quality_status, legal_entity_ref, sku_ref, warehouse cascade");
-      s.execute("truncate label_print_log, print_job_item, print_job, print_target,"
-          + " print_reprint_rule, print_device, print_template cascade");
+      s.execute(
+          "truncate label_print_log, print_job_item, print_job, print_target,"
+              + " print_reprint_rule, print_device, print_template cascade");
       s.execute("truncate inventory_entry, inventory_transaction restart identity cascade");
     }
     for (var tenant : List.of(a, b)) {
@@ -163,21 +169,37 @@ class ParcelDetailIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 10; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", WAREHOUSE_ZONE.getId(),
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                WAREHOUSE_ZONE.getId(),
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -218,19 +240,32 @@ class ParcelDetailIntegrationTest {
           sql.execute(
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,status,created_by_user_id) values(?,?,?,'SALES',?,?,'PENDING_PICKING',?)",
-              orderId, tenant, orderCode, orderNo, wh(tenant), user);
+              orderId,
+              tenant,
+              orderCode,
+              orderNo,
+              wh(tenant),
+              user);
           UUID lineId = UUID.randomUUID();
           sql.execute(
               "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                   + "sku_name,quantity) values(?,?,?,1,?,?,?,cast(? as numeric))",
-              lineId, tenant, orderId, sku(tenant, 1), "SKU-1", "商品1", String.valueOf(qty));
+              lineId,
+              tenant,
+              orderId,
+              sku(tenant, 1),
+              "SKU-1",
+              "商品1",
+              String.valueOf(qty));
           // 复核单只能在出库单处于「待复核」时开单并判通过（V117 的开单守卫），
           // 所以这里先走到 PENDING_RECHECK 停下 —— 复核通过后由 passedRecount
           // 再推进到 PENDING_PACKING（V72 真实跃迁：PENDING_RECHECK → PENDING_PACKING）。
           for (var step : List.of("PICKING", "PENDING_RECHECK")) {
             sql.execute(
                 "update outbound_order set status=? where tenant_id=? and id=?",
-                step, tenant, orderId);
+                step,
+                tenant,
+                orderId);
           }
           return new Outbound(orderId, lineId);
         });
@@ -243,7 +278,8 @@ class ParcelDetailIntegrationTest {
         () -> {
           sql.execute(
               "update outbound_order set status='PENDING_PACKING' where tenant_id=? and id=?",
-              tenant, ob.orderId());
+              tenant,
+              ob.orderId());
           return null;
         });
   }
@@ -260,14 +296,23 @@ class ParcelDetailIntegrationTest {
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable) values(?,?,?,?,?,'SHIPPING','ACTIVE',true)",
-              staging, tenant, wh(tenant), "STAGE-" + staging.toString().substring(0, 8), "打包区");
+              staging,
+              tenant,
+              wh(tenant),
+              "STAGE-" + staging.toString().substring(0, 8),
+              "打包区");
 
           UUID requestId = UUID.randomUUID();
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at) "
                   + "values(?,?,?,1,cast(? as numeric),?,?::timestamptz)",
-              requestId, tenant, ob.orderId(), String.valueOf(qty), user, OffsetDateTime.now());
+              requestId,
+              tenant,
+              ob.orderId(),
+              String.valueOf(qty),
+              user,
+              OffsetDateTime.now());
 
           UUID taskId = UUID.randomUUID();
           sql.execute(
@@ -277,9 +322,19 @@ class ParcelDetailIntegrationTest {
                   + "completed_at,created_by) "
                   + "values(?,?,?,?,?,?,?,'COMPLETED',?,1,cast(? as numeric),1,cast(? as numeric),"
                   + "'测试路径',?::timestamptz,?::timestamptz,?)",
-              taskId, tenant, "PT-" + UUID.randomUUID().toString().substring(0, 8),
-              ob.orderId(), requestId, wh(tenant), staging, user, String.valueOf(qty),
-              String.valueOf(qty), OffsetDateTime.now(), OffsetDateTime.now(), user);
+              taskId,
+              tenant,
+              "PT-" + UUID.randomUUID().toString().substring(0, 8),
+              ob.orderId(),
+              requestId,
+              wh(tenant),
+              staging,
+              user,
+              String.valueOf(qty),
+              String.valueOf(qty),
+              OffsetDateTime.now(),
+              OffsetDateTime.now(),
+              user);
 
           // 复核单先以 OPEN 建立（PASSED 的前置要求「每行都 MATCHED」，而基线行
           // 还没有，所以先开单），再建基线行并扫成 MATCHED，最后判通过。
@@ -289,8 +344,15 @@ class ParcelDetailIntegrationTest {
                   + "pick_task_id,warehouse_id,status,verify_basis,outbound_status_before,"
                   + "baseline_line_count,baseline_quantity,reviewer_user_id,created_by) "
                   + "values(?,?,?,?,?,?,'OPEN','测试基线','PENDING_RECHECK',1,cast(? as numeric),?,?)",
-              sessionId, tenant, "RS-" + UUID.randomUUID().toString().substring(0, 8),
-              ob.orderId(), taskId, wh(tenant), String.valueOf(qty), user, user);
+              sessionId,
+              tenant,
+              "RS-" + UUID.randomUUID().toString().substring(0, 8),
+              ob.orderId(),
+              taskId,
+              wh(tenant),
+              String.valueOf(qty),
+              user,
+              user);
           UUID lineId = UUID.randomUUID();
           sql.execute(
               "insert into recount_line(id,tenant_id,session_id,outbound_line_id,line_no,sku_id,"
@@ -298,26 +360,36 @@ class ParcelDetailIntegrationTest {
                   + "line_status) "
                   + "values(?,?,?,?,1,?,?,?,cast(? as numeric),cast(? as numeric),"
                   + "cast(? as numeric),'MATCHED')",
-              lineId, tenant, sessionId, ob.lineId(), sku(tenant, 1), "SKU-1", "商品1",
-              String.valueOf(qty), String.valueOf(qty), String.valueOf(qty));
+              lineId,
+              tenant,
+              sessionId,
+              ob.lineId(),
+              sku(tenant, 1),
+              "SKU-1",
+              "商品1",
+              String.valueOf(qty),
+              String.valueOf(qty),
+              String.valueOf(qty));
           // 复核通过（V117 的守卫：每行都 MATCHED + 有复核人 + 完成时刻）。
           sql.execute(
               "update recount_session set status='PASSED',completed_at=?::timestamptz "
                   + "where tenant_id=? and id=?",
-              OffsetDateTime.now(), tenant, sessionId);
+              OffsetDateTime.now(),
+              tenant,
+              sessionId);
           // 复核通过 ⇒ 出库单从「待复核」推进到「待打包」，打包单才能开（V121 的开单守卫）。
           advanceToPacking(tenant, ob);
           return lineId;
         });
   }
 
-  record Pack(UUID packingId, UUID parcelId, UUID itemId, UUID recountLineId, UUID outboundLineId) {}
+  record Pack(
+      UUID packingId, UUID parcelId, UUID itemId, UUID recountLineId, UUID outboundLineId) {}
 
   /**
    * 建包材 + 打包单 + 包裹 + 明细项，最后判完成（走真实触发器：净重/体积由 DB 派生）。
    *
-   * <p>刻意走完整的 OPEN → 装包裹 → 装明细 → 称重 → PACKED 链路，而不是直接插一行
-   * PACKED：V121 的完成守卫（五件事缺一不可）正是本模块要读的那份凭据的成因，
+   * <p>刻意走完整的 OPEN → 装包裹 → 装明细 → 称重 → PACKED 链路，而不是直接插一行 PACKED：V121 的完成守卫（五件事缺一不可）正是本模块要读的那份凭据的成因，
    * 绕过去写出来的包裹不是真实存在的包裹。
    */
   Pack packed(UUID tenant, Outbound ob, UUID recountLineId, int qty, boolean measured) {
@@ -333,35 +405,60 @@ class ParcelDetailIntegrationTest {
                   + "packer_user_id,status,created_by) "
                   + "select ?,?,?,rs.id,?,?,'测试基线','PENDING_PACKING',?,'OPEN',? "
                   + "from recount_session rs where rs.tenant_id=? and rs.id=?",
-              packingId, tenant, "PK-" + UUID.randomUUID().toString().substring(0, 8),
-              ob.orderId(), wh(tenant), user, user, tenant, recountSessionOf(tenant, recountLineId));
+              packingId,
+              tenant,
+              "PK-" + UUID.randomUUID().toString().substring(0, 8),
+              ob.orderId(),
+              wh(tenant),
+              user,
+              user,
+              tenant,
+              recountSessionOf(tenant, recountLineId));
 
           UUID parcelId = UUID.randomUUID();
           sql.execute(
               "insert into parcel(id,tenant_id,packing_order_id,parcel_no,parcel_code,material_id,"
                   + "tare_weight_g,created_by) values(?,?,?,1,?,?,200,?)",
-              parcelId, tenant, packingId, "PC-" + UUID.randomUUID().toString().substring(0, 8),
-              materialId, user);
+              parcelId,
+              tenant,
+              packingId,
+              "PC-" + UUID.randomUUID().toString().substring(0, 8),
+              materialId,
+              user);
 
           UUID itemId = UUID.randomUUID();
           sql.execute(
               "insert into parcel_item(id,tenant_id,parcel_id,item_no,recount_line_id,"
                   + "outbound_line_id,sku_id,sku_code,sku_name,quantity,created_by) "
                   + "values(?,?,?,1,?,?,?,?,?,cast(? as numeric),?)",
-              itemId, tenant, parcelId, recountLineId, ob.lineId(), sku(tenant, 1),
-              "SKU-1", "商品1", String.valueOf(qty), user);
+              itemId,
+              tenant,
+              parcelId,
+              recountLineId,
+              ob.lineId(),
+              sku(tenant, 1),
+              "SKU-1",
+              "商品1",
+              String.valueOf(qty),
+              user);
 
           if (measured) {
             sql.execute(
                 "update parcel set outer_length_cm=30,outer_width_cm=20,outer_height_cm=10,"
                     + "measured_gross_weight_g=cast(? as numeric),measured_at=?::timestamptz,"
                     + "measured_by=? where tenant_id=? and id=?",
-                String.valueOf(1200 + qty), OffsetDateTime.now(), user, tenant, parcelId);
+                String.valueOf(1200 + qty),
+                OffsetDateTime.now(),
+                user,
+                tenant,
+                parcelId);
             // 判完成（V121 §6.1：有箱、有明细、每箱都称过量过、每行实装恰好等于应发、有打包人）。
             sql.execute(
                 "update packing_order set status='PACKED',completed_at=?::timestamptz "
                     + "where tenant_id=? and id=?",
-                OffsetDateTime.now(), tenant, packingId);
+                OffsetDateTime.now(),
+                tenant,
+                packingId);
           }
           // 未称重时打包单留在 OPEN —— 那正是「尚未实测」的真实形态。
           return new Pack(packingId, parcelId, itemId, recountLineId, ob.lineId());
@@ -385,9 +482,21 @@ class ParcelDetailIntegrationTest {
                   + "sku_code,allocated_quantity,sales_line_quantity,match_basis,created_by) "
                   + "select ?,?,?,?,?,?,?,?,?,?,pi.quantity,cast(? as numeric),?,? "
                   + "from parcel_item pi where pi.tenant_id=? and pi.id=?",
-              UUID.randomUUID(), tenant, pack.itemId(), pack.parcelId(),
-              UUID.randomUUID(), salesLine(tenant, lineNo), orderNo, lineNo,
-              sku(tenant, 1), "SKU-1", String.valueOf(salesQty), basis, user, tenant, pack.itemId());
+              UUID.randomUUID(),
+              tenant,
+              pack.itemId(),
+              pack.parcelId(),
+              UUID.randomUUID(),
+              salesLine(tenant, lineNo),
+              orderNo,
+              lineNo,
+              sku(tenant, 1),
+              "SKU-1",
+              String.valueOf(salesQty),
+              basis,
+              user,
+              tenant,
+              pack.itemId());
           return null;
         });
   }
@@ -406,8 +515,8 @@ class ParcelDetailIntegrationTest {
     var labelPack = packedOpen(a, labelOb, labelLine, 3);
     recordLabel(a, labelPack.parcelId(), "SF1234567890");
 
-    http.perform(get("/warehouse/parcels/" + pack.parcelId())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/parcels/" + pack.parcelId()).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         // 实测重量体积：毛重 1203g、自重 200g ⇒ 净重 1003g（DB 触发器派生）。
         .andExpect(jsonPath("$.header.measuredGrossWeightG").value(1203.0))
@@ -430,8 +539,9 @@ class ParcelDetailIntegrationTest {
 
     // 面单段（8.3.4.2 已交付的打印表，本服务真读得到）。
     String labelBody =
-        http.perform(get("/warehouse/parcels/" + labelPack.parcelId())
-                .header("Authorization", "Bearer tenant-a"))
+        http.perform(
+                get("/warehouse/parcels/" + labelPack.parcelId())
+                    .header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -442,10 +552,7 @@ class ParcelDetailIntegrationTest {
     assertThat(labelJson.get("label").get("jobStatusLabel").asText()).isEqualTo("已完成");
   }
 
-  /**
-   * 一只标准纸箱目录项。material_code 在租户内唯一，所以一次夹具建多个包裹时复用同一条
-   * （真实业务里包材目录是共享的，不是一个包裹一只箱子）。
-   */
+  /** 一只标准纸箱目录项。material_code 在租户内唯一，所以一次夹具建多个包裹时复用同一条 （真实业务里包材目录是共享的，不是一个包裹一只箱子）。 */
   UUID carton(UUID tenant) {
     return asWrite(
         tenant,
@@ -461,7 +568,11 @@ class ParcelDetailIntegrationTest {
                   + "material_type,outer_length_cm,outer_width_cm,outer_height_cm,tare_weight_g,"
                   + "max_gross_weight_g,created_by) values(?,?,?,?,'PACKAGING','CARTON',"
                   + "30,20,10,200,50000,?)",
-              id, tenant, "CTN-1", "标准纸箱", user);
+              id,
+              tenant,
+              "CTN-1",
+              "标准纸箱",
+              user);
           return id;
         });
   }
@@ -479,21 +590,40 @@ class ParcelDetailIntegrationTest {
                   + "packer_user_id,status,created_by) "
                   + "select ?,?,?,rs.id,?,?,'测试基线','PENDING_PACKING',?,'OPEN',? "
                   + "from recount_session rs where rs.tenant_id=? and rs.id=?",
-              packingId, tenant, "PK-" + UUID.randomUUID().toString().substring(0, 8),
-              ob.orderId(), wh(tenant), user, user, tenant, recountSessionOf(tenant, recountLineId));
+              packingId,
+              tenant,
+              "PK-" + UUID.randomUUID().toString().substring(0, 8),
+              ob.orderId(),
+              wh(tenant),
+              user,
+              user,
+              tenant,
+              recountSessionOf(tenant, recountLineId));
           UUID parcelId = UUID.randomUUID();
           sql.execute(
               "insert into parcel(id,tenant_id,packing_order_id,parcel_no,parcel_code,material_id,"
                   + "tare_weight_g,created_by) values(?,?,?,1,?,?,200,?)",
-              parcelId, tenant, packingId, "PC-" + UUID.randomUUID().toString().substring(0, 8),
-              materialId, user);
+              parcelId,
+              tenant,
+              packingId,
+              "PC-" + UUID.randomUUID().toString().substring(0, 8),
+              materialId,
+              user);
           UUID itemId = UUID.randomUUID();
           sql.execute(
               "insert into parcel_item(id,tenant_id,parcel_id,item_no,recount_line_id,"
                   + "outbound_line_id,sku_id,sku_code,sku_name,quantity,created_by) "
                   + "values(?,?,?,1,?,?,?,?,?,cast(? as numeric),?)",
-              itemId, tenant, parcelId, recountLineId, ob.lineId(), sku(tenant, 1),
-              "SKU-1", "商品1", String.valueOf(qty), user);
+              itemId,
+              tenant,
+              parcelId,
+              recountLineId,
+              ob.lineId(),
+              sku(tenant, 1),
+              "SKU-1",
+              "商品1",
+              String.valueOf(qty),
+              user);
           return new Pack(packingId, parcelId, itemId, recountLineId, ob.lineId());
         });
   }
@@ -578,7 +708,8 @@ class ParcelDetailIntegrationTest {
     // 未关联的那一条要能追到具体是哪件货。
     assertThat(d.costAllocation().unmatchedItems()).hasSize(1);
     assertThat(d.costAllocation().unmatchedItems().get(0).skuCode()).isEqualTo("SKU-1");
-    assertThat(d.costAllocation().unmatchedItems().get(0).quantity()).isEqualByComparingTo("5.000000");
+    assertThat(d.costAllocation().unmatchedItems().get(0).quantity())
+        .isEqualByComparingTo("5.000000");
     // 明细项自己也要说清为什么没有订单行。
     assertThat(d.items().get(0).salesOrderLines()).isEmpty();
     assertThat(d.items().get(0).orderLineNote()).contains("还没有关联到销售订单行");
@@ -623,8 +754,17 @@ class ParcelDetailIntegrationTest {
                               + "sales_line_quantity,match_basis,created_by) "
                               + "values(?,?,?,?,?,?,?,1,?,'SKU-1',cast(? as numeric),"
                               + "cast(? as numeric),'SKU_UNIQUE_ALIGNED',?)",
-                          UUID.randomUUID(), a, pack.itemId(), pack.parcelId(), UUID.randomUUID(),
-                          salesLine(a, 1), "SO-4001", sku(a, 1), "9", "3", user);
+                          UUID.randomUUID(),
+                          a,
+                          pack.itemId(),
+                          pack.parcelId(),
+                          UUID.randomUUID(),
+                          salesLine(a, 1),
+                          "SO-4001",
+                          sku(a, 1),
+                          "9",
+                          "3",
+                          user);
                       return null;
                     }));
     assertThat(thrown).isNotNull();
@@ -651,8 +791,17 @@ class ParcelDetailIntegrationTest {
                               + "sales_line_quantity,match_basis,created_by) "
                               + "values(?,?,?,?,?,?,?,1,?,'SKU-9',cast(? as numeric),"
                               + "cast(? as numeric),'SKU_UNIQUE_ALIGNED',?)",
-                          UUID.randomUUID(), a, pack.itemId(), pack.parcelId(), UUID.randomUUID(),
-                          salesLine(a, 1), "SO-4002", sku(a, 9), "2", "2", user);
+                          UUID.randomUUID(),
+                          a,
+                          pack.itemId(),
+                          pack.parcelId(),
+                          UUID.randomUUID(),
+                          salesLine(a, 1),
+                          "SO-4002",
+                          sku(a, 9),
+                          "2",
+                          "2",
+                          user);
                       return null;
                     }));
     assertThat(thrown).isNotNull();
@@ -680,8 +829,17 @@ class ParcelDetailIntegrationTest {
                               + "sales_line_quantity,match_basis,created_by) "
                               + "values(?,?,?,?,?,?,?,9,?,'SKU-1',cast(? as numeric),"
                               + "cast(? as numeric),'SKU_UNIQUE_ALIGNED',?)",
-                          UUID.randomUUID(), a, pack.itemId(), pack.parcelId(), UUID.randomUUID(),
-                          salesLine(a, 9), "SO-9999", sku(a, 1), "2", "2", user);
+                          UUID.randomUUID(),
+                          a,
+                          pack.itemId(),
+                          pack.parcelId(),
+                          UUID.randomUUID(),
+                          salesLine(a, 9),
+                          "SO-9999",
+                          sku(a, 1),
+                          "2",
+                          "2",
+                          user);
                       return null;
                     }));
     assertThat(thrown).isNotNull();
@@ -704,7 +862,8 @@ class ParcelDetailIntegrationTest {
                       sql.execute(
                           "update parcel_item_sales_order_line set match_basis='SKU_NAME_FALLBACK'"
                               + " where tenant_id=? and parcel_id=?",
-                          a, pack.parcelId());
+                          a,
+                          pack.parcelId());
                       return null;
                     }));
     assertThat(denied).isNotNull();
@@ -716,13 +875,18 @@ class ParcelDetailIntegrationTest {
         catchThrowable(
             () -> {
               try (var c =
-                      DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                      DriverManager.getConnection(
+                          pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                   var s = c.createStatement()) {
                 // 绕过 warehouse_app 的 GRANT 限制，用超级用户直连复现「即使拿到写权限也改不动」。
                 s.execute("set app.current_tenant = '" + a + "'");
                 s.execute(
                     "update parcel_item_sales_order_line set match_basis='SKU_NAME_FALLBACK'"
-                        + " where tenant_id='" + a + "' and parcel_id='" + pack.parcelId() + "'");
+                        + " where tenant_id='"
+                        + a
+                        + "' and parcel_id='"
+                        + pack.parcelId()
+                        + "'");
               }
             });
     assertThat(guarded).isNotNull();
@@ -807,11 +971,19 @@ class ParcelDetailIntegrationTest {
           .isEqualByComparingTo("5.000000");
       // 归集分母不得跨租户串：A 那一箱永远只看到自己那 2 件。
       assertThat(
-              as(a, () -> service.detail(packA.parcelId())).items().get(0).salesOrderLines().get(0)
+              as(a, () -> service.detail(packA.parcelId()))
+                  .items()
+                  .get(0)
+                  .salesOrderLines()
+                  .get(0)
                   .allocatedQuantity())
           .isEqualByComparingTo("2.000000");
       assertThat(
-              as(b, () -> service.detail(packB.parcelId())).items().get(0).salesOrderLines().get(0)
+              as(b, () -> service.detail(packB.parcelId()))
+                  .items()
+                  .get(0)
+                  .salesOrderLines()
+                  .get(0)
                   .allocatedQuantity())
           .isEqualByComparingTo("5.000000");
     }
@@ -822,11 +994,12 @@ class ParcelDetailIntegrationTest {
   @Test
   void capabilitiesDeclareUnavailableSectionsHonestly() throws Exception {
     var body =
-        http.perform(get("/warehouse/parcels/capabilities").header("Authorization", "Bearer tenant-a"))
+        http.perform(
+                get("/warehouse/parcels/capabilities").header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.costAllocationPolicy.lineLevelSupported").value(true))
-            .andExpect(jsonPath("$.costAllocationPolicy.basis")
-                .value("PARCEL_ITEM_TO_SALES_ORDER_LINE"))
+            .andExpect(
+                jsonPath("$.costAllocationPolicy.basis").value("PARCEL_ITEM_TO_SALES_ORDER_LINE"))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -890,27 +1063,44 @@ class ParcelDetailIntegrationTest {
           sql.execute(
               "insert into print_template(id,tenant_id,code,name,object_type,paper_size,created_by)"
                   + " values(?,?,?,?,'SHIPPING_LABEL','4X6',?)",
-              templateId, tenant, "TPL-1", "面单模板", user);
+              templateId,
+              tenant,
+              "TPL-1",
+              "面单模板",
+              user);
           UUID targetId = UUID.randomUUID();
           sql.execute(
               "insert into print_target(id,tenant_id,object_type,external_ref,waybill_no,"
                   + "created_at) values(?,?,'SHIPPING_LABEL',?,?,now())",
-              targetId, tenant, waybill, waybill);
+              targetId,
+              tenant,
+              waybill,
+              waybill);
           UUID jobId = UUID.randomUUID();
           sql.execute(
               "insert into print_job(id,tenant_id,job_no,template_id,status,copies,target_count,"
                   + "label_count,finished_at,created_by) values(?,?,?,?,'COMPLETED',1,1,1,"
                   + "now(),?)",
-              jobId, tenant, "PJ-" + UUID.randomUUID().toString().substring(0, 8), templateId, user);
+              jobId,
+              tenant,
+              "PJ-" + UUID.randomUUID().toString().substring(0, 8),
+              templateId,
+              user);
           sql.execute(
               "insert into print_job_item(id,tenant_id,job_id,target_id,line_no,object_type,"
                   + "external_ref,print_count_at_render,rendered_content,content_checksum)"
                   + " values(?,?,?,?,1,'SHIPPING_LABEL',?,1,'ZPL-TEST','sum')",
-              UUID.randomUUID(), tenant, jobId, targetId, waybill);
+              UUID.randomUUID(),
+              tenant,
+              jobId,
+              targetId,
+              waybill);
           sql.execute(
               "update parcel set label_print_job_id=?,label_print_count=1,"
                   + "label_printed_at=now() where tenant_id=? and id=?",
-              jobId, tenant, parcelId);
+              jobId,
+              tenant,
+              parcelId);
           return null;
         });
   }

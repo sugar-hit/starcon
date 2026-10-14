@@ -16,11 +16,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * 17.1.1.3 层级授权。
  *
  * <p>本模块的重点不是「能配一条授权」，而是证明**默认是拒绝**：父子关系本身不带来任何访问权
- * （ADR-0005）。所以第一条断言就是本模块的核心——父租户在**没有**任何授权记录时访问子租户必须被拒，
- * 而且要给出可区分的 reason，否则调用方分不清「没配过」和「配了但过期」。
+ * （ADR-0005）。所以第一条断言就是本模块的核心——父租户在**没有**任何授权记录时访问子租户必须被拒， 而且要给出可区分的 reason，否则调用方分不清「没配过」和「配了但过期」。
  *
- * <p>其余用例钉住三件事：授权范围真的生效（域 / 只读可写 / 有效期），
- * 撤销是终态，以及多租户隔离三断言（两租户互不可见、伪造 X-Tenant-Id 无效、
+ * <p>其余用例钉住三件事：授权范围真的生效（域 / 只读可写 / 有效期）， 撤销是终态，以及多租户隔离三断言（两租户互不可见、伪造 X-Tenant-Id 无效、
  * 连接池归还后不串租户——底座把池压到 1，每次请求必然复用同一条物理连接）。
  */
 class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase {
@@ -69,7 +67,8 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     body.put("validFrom", from.toString());
     if (until != null) body.put("validUntil", until.toString());
     try {
-      return UUID.fromString(request(token, "POST", "/identity/hierarchy-authorizations", body, 200).asText());
+      return UUID.fromString(
+          request(token, "POST", "/identity/hierarchy-authorizations", body, 200).asText());
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -78,16 +77,14 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 只取某个子租户对应的授权行。
    *
-   * <p>必须按子租户过滤而不是断言整张列表为空或长度为 1：底座的容器跨测试类共享，
-   * 本地所有者所属的租户会累积其它用例建过的授权。对全局计数做断言等于让这条用例
+   * <p>必须按子租户过滤而不是断言整张列表为空或长度为 1：底座的容器跨测试类共享， 本地所有者所属的租户会累积其它用例建过的授权。对全局计数做断言等于让这条用例
    * 依赖执行顺序，后面接任何一个用例都会把它跑红。
    */
   private List<JsonNode> grantsFor(String token, String childTenantId) {
     try {
       var all = request(token, "GET", "/identity/hierarchy-authorizations", null, 200);
       var mine = new java.util.ArrayList<JsonNode>();
-      for (JsonNode n : all)
-        if (childTenantId.equals(n.get("childTenantId").asText())) mine.add(n);
+      for (JsonNode n : all) if (childTenantId.equals(n.get("childTenantId").asText())) mine.add(n);
       return mine;
     } catch (Exception e) {
       throw new IllegalStateException(e);
@@ -123,12 +120,10 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 本模块的核心断言。
    *
-   * <p>父租户所有者**没有任何授权记录**时访问子租户必须被拒。这条最容易漏做，因为在
-   * 「父能看见子」的直觉下，实现者很容易顺手让层级关系隐含赋权——而那正是 ADR-0005
+   * <p>父租户所有者**没有任何授权记录**时访问子租户必须被拒。这条最容易漏做，因为在 「父能看见子」的直觉下，实现者很容易顺手让层级关系隐含赋权——而那正是 ADR-0005
    * 明令禁止的（`V3` 的闭包注释也写着「listing never expands business access」）。
    *
-   * <p>同时钉住 reason：必须是 {@code NO_GRANT}（没配过）而不是笼统的 false。
-   * 两种拒绝在处置上完全不同，前者找管理员配置，后者等过期或续期。
+   * <p>同时钉住 reason：必须是 {@code NO_GRANT}（没配过）而不是笼统的 false。 两种拒绝在处置上完全不同，前者找管理员配置，后者等过期或续期。
    */
   @Test
   void parentCannotAccessChildWithoutGrant() throws Exception {
@@ -149,8 +144,7 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 授权建立后判定放行，且父子两侧对同一事实的认知一致。
    *
-   * <p>子租户所有者仍然只能看见**自己**配置的授权：授权是父租户单方面开的口，
-   * 子租户不应在父租户的上下文里插一脚（否则它能看见并删掉集团给它的授权）。
+   * <p>子租户所有者仍然只能看见**自己**配置的授权：授权是父租户单方面开的口， 子租户不应在父租户的上下文里插一脚（否则它能看见并删掉集团给它的授权）。
    */
   @Test
   void grantOpensAccessOnlyForGrantedDomain() throws Exception {
@@ -191,8 +185,7 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 只读授权不允许写：WRITE 要求必须被显式满足。
    *
-   * <p>降级方向是单向的：READ 授权永远不能推出 WRITE。写权限比读权限危险得多，
-   * 让它隐式成立等于把「只读观察子公司」变成「可以改子公司单据」。
+   * <p>降级方向是单向的：READ 授权永远不能推出 WRITE。写权限比读权限危险得多， 让它隐式成立等于把「只读观察子公司」变成「可以改子公司单据」。
    */
   @Test
   void readGrantDoesNotSatisfyWrite() throws Exception {
@@ -201,9 +194,11 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     String childTenantId = tenantOf(childToken);
     var now = OffsetDateTime.now();
 
-    UUID grantId = grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", now.minusHours(1), null);
+    UUID grantId =
+        grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", now.minusHours(1), null);
 
-    assertThat(check(ownerToken, childTenantId, "catalog.spu", false).get("allowed").asBoolean()).isTrue();
+    assertThat(check(ownerToken, childTenantId, "catalog.spu", false).get("allowed").asBoolean())
+        .isTrue();
     JsonNode write = check(ownerToken, childTenantId, "catalog.spu", true);
     assertThat(write.get("allowed").asBoolean()).isFalse();
     assertThat(write.get("reason").asText()).isEqualTo("WRITE_NOT_GRANTED");
@@ -219,7 +214,8 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
             "accessLevel", "WRITE",
             "validFrom", now.minusHours(1).toString()),
         200);
-    assertThat(check(ownerToken, childTenantId, "catalog.spu", true).get("allowed").asBoolean()).isTrue();
+    assertThat(check(ownerToken, childTenantId, "catalog.spu", true).get("allowed").asBoolean())
+        .isTrue();
   }
 
   // ------------------------------------------------------------------
@@ -229,9 +225,9 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 有效期写回的是**同一个瞬间**，不是差 8 小时的另一个瞬间。
    *
-   * <p>这是本模块时间语义的重点。用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会
-   * 静默偏 −28800s：接口看起来正常，列表里却是错的到期时间。所以这里同时断言 API 回读与
-   * 直接查库，两处都必须等于输入的 {@link OffsetDateTime#toInstant()}。
+   * <p>这是本模块时间语义的重点。用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会 静默偏
+   * −28800s：接口看起来正常，列表里却是错的到期时间。所以这里同时断言 API 回读与 直接查库，两处都必须等于输入的 {@link
+   * OffsetDateTime#toInstant()}。
    */
   @Test
   void validityWindowRoundTripsWithoutDrift() throws Exception {
@@ -245,21 +241,29 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     UUID id = grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", from, until);
 
     JsonNode row = grantRow(ownerToken, id);
-    assertThat(OffsetDateTime.parse(row.get("validFrom").asText()).toInstant()).isEqualTo(from.toInstant());
-    assertThat(OffsetDateTime.parse(row.get("validUntil").asText()).toInstant()).isEqualTo(until.toInstant());
+    assertThat(OffsetDateTime.parse(row.get("validFrom").asText()).toInstant())
+        .isEqualTo(from.toInstant());
+    assertThat(OffsetDateTime.parse(row.get("validUntil").asText()).toInstant())
+        .isEqualTo(until.toInstant());
 
     // 再直接查一次库：不能只信序列化层，列本身就必须是输入的那个瞬间。
-    var stored = tx().run(UUID.fromString(tenantOf(ownerToken)), () ->
-        sql.fetchOne("select valid_from,valid_until from tenant_hierarchy_grant where id=?", id));
-    assertThat(stored.get("valid_from", OffsetDateTime.class).toInstant()).isEqualTo(from.toInstant());
-    assertThat(stored.get("valid_until", OffsetDateTime.class).toInstant()).isEqualTo(until.toInstant());
+    var stored =
+        tx().run(
+                UUID.fromString(tenantOf(ownerToken)),
+                () ->
+                    sql.fetchOne(
+                        "select valid_from,valid_until from tenant_hierarchy_grant where id=?",
+                        id));
+    assertThat(stored.get("valid_from", OffsetDateTime.class).toInstant())
+        .isEqualTo(from.toInstant());
+    assertThat(stored.get("valid_until", OffsetDateTime.class).toInstant())
+        .isEqualTo(until.toInstant());
   }
 
   /**
    * 过期授权不再放行，且 reason 明确是 EXPIRED。
    *
-   * <p>status 仍是 ACTIVE（没人撤销它），只有 effectiveStatus 变成 EXPIRED。
-   * 这正是列表里两个状态并存的原因：只看 status 会以为权限还在。
+   * <p>status 仍是 ACTIVE（没人撤销它），只有 effectiveStatus 变成 EXPIRED。 这正是列表里两个状态并存的原因：只看 status 会以为权限还在。
    */
   @Test
   void expiredGrantIsDeniedWithExpiredReason() throws Exception {
@@ -324,7 +328,8 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     String childToken = loginUser(childTenant(ownerToken, tag));
     String childTenantId = tenantOf(childToken);
     var now = OffsetDateTime.now();
-    UUID id = grant(ownerToken, childTenantId, List.of("catalog.spu"), "WRITE", now.minusHours(1), null);
+    UUID id =
+        grant(ownerToken, childTenantId, List.of("catalog.spu"), "WRITE", now.minusHours(1), null);
 
     request(ownerToken, "POST", "/identity/hierarchy-authorizations/" + id + "/revoke", null, 200);
 
@@ -338,10 +343,11 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     assertThat(row.get("revokedAt").isNull()).isFalse();
 
     // 终态：不能再改回 ACTIVE，重复撤销也必须失败。
-    var edit = Map.<String, Object>of(
-        "domains", List.of("catalog.spu"),
-        "accessLevel", "WRITE",
-        "validFrom", now.minusHours(1).toString());
+    var edit =
+        Map.<String, Object>of(
+            "domains", List.of("catalog.spu"),
+            "accessLevel", "WRITE",
+            "validFrom", now.minusHours(1).toString());
     request(ownerToken, "PUT", "/identity/hierarchy-authorizations/" + id, edit, 403);
     request(ownerToken, "POST", "/identity/hierarchy-authorizations/" + id + "/revoke", null, 403);
   }
@@ -353,8 +359,7 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 只能授权给真后代，不能授权给自己。
    *
-   * <p>「能管子租户」不等于「能对任意租户开口子」——没有后代关系的租户一律拒绝，
-   * 这里用「授权给本租户自己」验证最省事：自己必然不是 depth>0 的后代。
+   * <p>「能管子租户」不等于「能对任意租户开口子」——没有后代关系的租户一律拒绝， 这里用「授权给本租户自己」验证最省事：自己必然不是 depth>0 的后代。
    */
   @Test
   void grantTargetMustBeRealDescendant() throws Exception {
@@ -397,10 +402,14 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
         "POST",
         "/identity/hierarchy-authorizations",
         Map.of(
-            "childTenantId", childTenantId,
-            "domains", List.of("Not A Domain"),
-            "accessLevel", "READ",
-            "validFrom", now.toString()),
+            "childTenantId",
+            childTenantId,
+            "domains",
+            List.of("Not A Domain"),
+            "accessLevel",
+            "READ",
+            "validFrom",
+            now.toString()),
         400);
     // 域列表为空：授权必须说清楚开放哪些数据域，不接受「全开」的隐式写法
     request(
@@ -408,10 +417,14 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
         "POST",
         "/identity/hierarchy-authorizations",
         Map.of(
-            "childTenantId", childTenantId,
-            "domains", List.of(),
-            "accessLevel", "READ",
-            "validFrom", now.toString()),
+            "childTenantId",
+            childTenantId,
+            "domains",
+            List.of(),
+            "accessLevel",
+            "READ",
+            "validFrom",
+            now.toString()),
         400);
     // 级别非法（枚举外的值连 Bean Validation 都过不去）
     request(
@@ -419,18 +432,21 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
         "POST",
         "/identity/hierarchy-authorizations",
         Map.of(
-            "childTenantId", childTenantId,
-            "domains", List.of("catalog.spu"),
-            "accessLevel", "ADMIN",
-            "validFrom", now.toString()),
+            "childTenantId",
+            childTenantId,
+            "domains",
+            List.of("catalog.spu"),
+            "accessLevel",
+            "ADMIN",
+            "validFrom",
+            now.toString()),
         400);
   }
 
   /**
    * 配置授权是所有者专属；没有层级角色的普通成员也拿不到跨租户访问。
    *
-   * <p>后半句同样重要：**配了授权 ≠ 租户里每个人都能用**。谁有资格用这处开口，
-   * 仍由该租户自己的角色分配决定（ADR-0005：操作与数据范围必须在同一角色分配中满足）。
+   * <p>后半句同样重要：**配了授权 ≠ 租户里每个人都能用**。谁有资格用这处开口， 仍由该租户自己的角色分配决定（ADR-0005：操作与数据范围必须在同一角色分配中满足）。
    */
   @Test
   void onlyOwnerConfiguresAndOnlyHierarchyRolesConsume() throws Exception {
@@ -438,7 +454,13 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     String childToken = loginUser(childTenant(ownerToken, tag));
     String childTenantId = tenantOf(childToken);
     var now = OffsetDateTime.now();
-    grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", now.minusHours(1), now.plusHours(1));
+    grant(
+        ownerToken,
+        childTenantId,
+        List.of("catalog.spu"),
+        "READ",
+        now.minusHours(1),
+        now.plusHours(1));
 
     // 一个不带任何层级权限的自定义角色。
     UUID roleId =
@@ -448,17 +470,24 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
                     "POST",
                     "/identity/roles",
                     Map.of(
-                        "code", "HZR_" + tag,
-                        "name", "层级授权测试角色",
-                        "status", "ACTIVE",
-                        "permissions", List.of("catalog.sku.read")),
+                        "code",
+                        "HZR_" + tag,
+                        "name",
+                        "层级授权测试角色",
+                        "status",
+                        "ACTIVE",
+                        "permissions",
+                        List.of("catalog.sku.read")),
                     200)
                 .asText());
     request(
         ownerToken,
         "POST",
         "/identity/members",
-        memberInput("hz-member-" + tag, null, List.of(Map.of("roleId", roleId.toString(), "scopeMode", "ALL"))),
+        memberInput(
+            "hz-member-" + tag,
+            null,
+            List.of(Map.of("roleId", roleId.toString(), "scopeMode", "ALL"))),
         200);
 
     String memberToken = loginUser("hz-member-" + tag);
@@ -471,10 +500,14 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
         "POST",
         "/identity/hierarchy-authorizations",
         Map.of(
-            "childTenantId", childTenantId,
-            "domains", List.of("catalog.spu"),
-            "accessLevel", "READ",
-            "validFrom", now.toString()),
+            "childTenantId",
+            childTenantId,
+            "domains",
+            List.of("catalog.spu"),
+            "accessLevel",
+            "READ",
+            "validFrom",
+            now.toString()),
         403);
 
     // 关键：授权已经配好、父子关系也是真的，但这个角色没有层级权限，判定照样拒绝。
@@ -490,8 +523,7 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
   /**
    * 两租户互不可见 + 伪造 tenant header 无效 + 连接池归还后不串租户。
    *
-   * <p>三条压在一个用例里，因为它们本质是同一件事的三面：授权表按 tenant_id 隔离，
-   * 租户来自已认证成员关系而不是请求头。底座把连接池压到 1，父 → 子 → 父 三次请求
+   * <p>三条压在一个用例里，因为它们本质是同一件事的三面：授权表按 tenant_id 隔离， 租户来自已认证成员关系而不是请求头。底座把连接池压到 1，父 → 子 → 父 三次请求
    * 必然复用同一条物理连接，父的授权行如果泄漏到连接上，子那一次就会看到它。
    *
    * <p>{@link IdentityIntegrationTestBase#request} 每次都带随机 {@code X-Tenant-Id}，
@@ -504,11 +536,19 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     String childToken = loginUser(childOwner);
     String childTenantId = tenantOf(childToken);
     var now = OffsetDateTime.now();
-    UUID id = grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", now.minusHours(1), now.plusHours(1));
+    UUID id =
+        grant(
+            ownerToken,
+            childTenantId,
+            List.of("catalog.spu"),
+            "READ",
+            now.minusHours(1),
+            now.plusHours(1));
 
     // 父：看得到自己给这个子租户配的那一条。
     assertThat(grantsFor(ownerToken, childTenantId)).hasSize(1);
-    assertThat(grantsFor(ownerToken, childTenantId).get(0).get("id").asText()).isEqualTo(id.toString());
+    assertThat(grantsFor(ownerToken, childTenantId).get(0).get("id").asText())
+        .isEqualTo(id.toString());
 
     // 子：一条都看不到（同一物理连接，上一步刚写过父租户上下文）。
     assertThat(grantsFor(childToken, childTenantId)).isEmpty();
@@ -520,12 +560,22 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
 
     // 运行时角色绕不过 RLS：不带租户上下文直接查表，最多只能看到 app.current_tenant 那一个租户的行，
     // 换个租户上下文就换成另一个集合，两边不会同时可见。
-    var asParent = tx().run(UUID.fromString(tenantOf(ownerToken)),
-            () -> sql.fetch("select id from tenant_hierarchy_grant"))
-        .stream().map(r -> r.get("id", UUID.class)).toList();
-    var asChild = tx().run(UUID.fromString(childTenantId),
-            () -> sql.fetch("select id from tenant_hierarchy_grant"))
-        .stream().map(r -> r.get("id", UUID.class)).toList();
+    var asParent =
+        tx()
+            .run(
+                UUID.fromString(tenantOf(ownerToken)),
+                () -> sql.fetch("select id from tenant_hierarchy_grant"))
+            .stream()
+            .map(r -> r.get("id", UUID.class))
+            .toList();
+    var asChild =
+        tx()
+            .run(
+                UUID.fromString(childTenantId),
+                () -> sql.fetch("select id from tenant_hierarchy_grant"))
+            .stream()
+            .map(r -> r.get("id", UUID.class))
+            .toList();
     assertThat(asParent).contains(id);
     assertThat(asChild).doesNotContain(id).isEmpty();
   }
@@ -542,16 +592,27 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     String childTenantId = tenantOf(childToken);
     var now = OffsetDateTime.now();
 
-    UUID id = grant(ownerToken, childTenantId, List.of("catalog.spu"), "READ", now.minusHours(1), now.plusHours(1));
+    UUID id =
+        grant(
+            ownerToken,
+            childTenantId,
+            List.of("catalog.spu"),
+            "READ",
+            now.minusHours(1),
+            now.plusHours(1));
     request(ownerToken, "POST", "/identity/hierarchy-authorizations/" + id + "/revoke", null, 200);
 
     var tenantId = UUID.fromString(tenantOf(ownerToken));
-    var actions = tx()
-        .run(tenantId, () -> sql.fetch(
-            "select action from identity_audit where resource_type='tenant.hierarchy' order by occurred_at"))
-        .stream()
-        .map(r -> r.get("action", String.class))
-        .toList();
+    var actions =
+        tx()
+            .run(
+                tenantId,
+                () ->
+                    sql.fetch(
+                        "select action from identity_audit where resource_type='tenant.hierarchy' order by occurred_at"))
+            .stream()
+            .map(r -> r.get("action", String.class))
+            .toList();
     assertThat(actions).contains("HierarchyGrantCreated", "HierarchyGrantRevoked");
 
     // outbox 不在这里断言：identity_app 对 identity_outbox 只有 INSERT 权限（V3 的既有设计，
@@ -560,12 +621,15 @@ class HierarchyAuthorizationIntegrationTest extends IdentityIntegrationTestBase 
     //
     // 审计快照里要能还原「授权给了哪个子租户、哪些域、到什么时候」——只有一句
     // 「改过授权」等于没法追责。
-    var changes = tx()
-        .run(tenantId, () -> sql.fetchOne(
-            "select changes from identity_audit where resource_type='tenant.hierarchy'"
-                + " and action='HierarchyGrantRevoked' and resource_id=?",
-            id))
-        .get("changes", String.class);
+    var changes =
+        tx().run(
+                tenantId,
+                () ->
+                    sql.fetchOne(
+                        "select changes from identity_audit where resource_type='tenant.hierarchy'"
+                            + " and action='HierarchyGrantRevoked' and resource_id=?",
+                        id))
+            .get("changes", String.class);
     assertThat(changes).contains(childTenantId).contains("catalog.spu").contains("validUntil");
   }
 }

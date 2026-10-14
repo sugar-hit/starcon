@@ -69,7 +69,9 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/printing/jobs/${id}/items/${id}/content`,
     'warehouse/inventory/printing/logs',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -80,14 +82,18 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   }
   // 阈值写入走 POST / DELETE，同样必须在白名单里
   expect(
-    (await POST(request('warehouse/inventory/policies', 'POST'), {
-      params: { path: ['warehouse', 'inventory', 'policies'] },
-    })).status,
+    (
+      await POST(request('warehouse/inventory/policies', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'policies'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await DELETE(request(`warehouse/inventory/policies/${id}`, 'DELETE'), {
-      params: { path: ['warehouse', 'inventory', 'policies', id] },
-    })).status,
+    (
+      await DELETE(request(`warehouse/inventory/policies/${id}`, 'DELETE'), {
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'policies', id] }),
+      })
+    ).status,
   ).toBe(200);
   // 7.3.1.2 效期与先进先出的七个形状：alerts / policies / policy/{skuId} 读，
   // policy 写（停用改配置而不是删行），allocation POST 试算，warehouses 与 lots/{skuId} 参照。
@@ -99,12 +105,16 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     'warehouse/inventory/expiry/warehouses',
     `warehouse/inventory/expiry/lots/${id}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   expect(
-    (await POST(request('warehouse/inventory/expiry/allocation', 'POST'), {
-      params: { path: ['warehouse', 'inventory', 'expiry', 'allocation'] },
-    })).status,
+    (
+      await POST(request('warehouse/inventory/expiry/allocation', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'expiry', 'allocation'] }),
+      })
+    ).status,
   ).toBe(200);
   // 7.8.1.1 分配策略配置：capabilities / effective / calculation（试算）/ runs（落库）
   // / runs/{runId}（批次明细）/ {id}（详情）/ {id}/versions（换版）/ {id}/retire（作废）
@@ -121,7 +131,9 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/allocation-policies/${id}/versions`,
     `warehouse/inventory/allocation-policies/${id}/retire`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   for (const path of [
     'warehouse/inventory/allocation-policies/calculation',
@@ -131,7 +143,8 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/allocation-policies/${id}/retire`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
   // 序列号与批次的**明细子路径**此前一个都没进白名单：只有集合读
@@ -153,12 +166,16 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/lots/${id}/distribution`,
     `warehouse/inventory/lots/${id}/movements`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   expect(
-    (await POST(request('warehouse/inventory/expiry/policy', 'POST'), {
-      params: { path: ['warehouse', 'inventory', 'expiry', 'policy'] },
-    })).status,
+    (
+      await POST(request('warehouse/inventory/expiry/policy', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'expiry', 'policy'] }),
+      })
+    ).status,
   ).toBe(200);
   // 刻意**不在这里**断言 DELETE 被代理拒绝：代理只按路径形状放行、不看方法，
   // 「策略行不可删除」的两道真实防线是后端控制器没有 DELETE 形状（返回 405）
@@ -172,7 +189,9 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     'warehouse/inventory/in-transit/netting',
     `warehouse/inventory/in-transit/${id}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   // 登记与两个写动作走 POST：同一路径两种方法，白名单只看路径形状不看方法，
   // 所以这里显式跑 POST 以证明写动作也真的被转发（而不是只放行了读）。
@@ -182,7 +201,8 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/in-transit/${id}/discrepancy`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
 });
@@ -200,7 +220,9 @@ it('10.4.1.1 头程发运单白名单：从模型文件反向抽取的每条调�
     `warehouse/first-mile-shipments/${id}`,
     `warehouse/first-mile-shipments/${id}/transit-legs`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   // 建单与三个写动作走 POST：白名单只看路径形状不看方法，
   // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
@@ -211,14 +233,17 @@ it('10.4.1.1 头程发运单白名单：从模型文件反向抽取的每条调�
     `warehouse/first-mile-shipments/${id}/cancel`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
   // 改单走 PUT：后端 FirstMileShipmentController 的改单端点是 @PutMapping
   expect(
-    (await PUT(request(`warehouse/first-mile-shipments/${id}`, 'PUT'), {
-      params: { path: ['warehouse', 'first-mile-shipments', id] },
-    })).status,
+    (
+      await PUT(request(`warehouse/first-mile-shipments/${id}`, 'PUT'), {
+        params: Promise.resolve({ path: ['warehouse', 'first-mile-shipments', id] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -237,7 +262,7 @@ it('头程发运单白名单：后端不存在的子路径仍被拒绝', async (
     `warehouse/first-mile-shipments/source-candidates/${'11111111-1111-1111-1111-111111111111'}`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -265,7 +290,9 @@ it('10.4.1.2 在途跟踪白名单：从模型文件反向抽取的每条调用�
     `warehouse/transit-trackings/alerts/${aid}/close`,
     `warehouse/transit-trackings/thresholds/${tid}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   // 建跟踪与节点登记走 POST：白名单只看路径形状不看方法，
   // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
@@ -280,14 +307,17 @@ it('10.4.1.2 在途跟踪白名单：从模型文件反向抽取的每条调用�
     `warehouse/transit-trackings/alerts/${aid}/close`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
   // 改阈值走 PUT：后端 InTransitTrackingController 的改阈值端点是 @PutMapping
   expect(
-    (await PUT(request(`warehouse/transit-trackings/thresholds/${tid}`, 'PUT'), {
-      params: { path: ['warehouse', 'transit-trackings', 'thresholds', tid] },
-    })).status,
+    (
+      await PUT(request(`warehouse/transit-trackings/thresholds/${tid}`, 'PUT'), {
+        params: Promise.resolve({ path: ['warehouse', 'transit-trackings', 'thresholds', tid] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -312,7 +342,7 @@ it('10.4.1.2 在途跟踪白名单：后端不存在的子路径仍被拒绝', a
     `warehouse/transit-trackings/thresholds/${tid}/history`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -333,7 +363,7 @@ it('在途库存白名单：未交付的子路径仍被拒绝', async () => {
     `warehouse/inventory/in-transit/alerts/${'11111111-1111-1111-1111-111111111111'}`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -354,7 +384,9 @@ it('8.1.1.1 仓库列表的四个调用形状都被放行', async () => {
     'warehouse/facilities/options',
     'warehouse/facilities/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -365,9 +397,11 @@ it('8.1.1.1 仓库列表的四个调用形状都被放行', async () => {
   }
   // 新增走 POST 同一路径
   expect(
-    (await POST(request('warehouse/facilities', 'POST'), {
-      params: { path: ['warehouse', 'facilities'] },
-    })).status,
+    (
+      await POST(request('warehouse/facilities', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'facilities'] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -383,7 +417,9 @@ it('8.1.1.2 仓库详情与库位清单被放行，且不越界到未交付的�
     `warehouse/facilities/${id}/locations`,
     `warehouse/facilities/${id}/entrypoints`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -396,7 +432,7 @@ it('8.1.1.2 仓库详情与库位清单被放行，且不越界到未交付的�
   expect(
     (
       await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
-        params: { path: ['warehouse', 'facilities', id] },
+        params: Promise.resolve({ path: ['warehouse', 'facilities', id] }),
       })
     ).status,
   ).toBe(200);
@@ -407,13 +443,16 @@ it('8.1.1.2 仓库详情与库位清单被放行，且不越界到未交付的�
     'warehouse/facilities/capabilities',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 被详情车道的改动挤掉了`,
     ).toBe(200);
   }
   expect(
-    (await POST(request('warehouse/facilities', 'POST'), { params: { path: ['warehouse', 'facilities'] } }))
-      .status,
+    (
+      await POST(request('warehouse/facilities', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'facilities'] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -432,7 +471,7 @@ it('8.1.1.2 刻意不放行未交付的子路径', async () => {
     'warehouse/facilities/wrong-segment',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 不应被放行`,
     ).toBe(404);
   }
@@ -463,7 +502,9 @@ it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
     `warehouse/facilities/${id}/config/shifts`,
     `warehouse/facilities/${id}/config/shifts/${shiftId}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -476,7 +517,7 @@ it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
   expect(
     (
       await PUT(request(`warehouse/facilities/${id}/config`, 'PUT'), {
-        params: { path: ['warehouse', 'facilities', id, 'config'] },
+        params: Promise.resolve({ path: ['warehouse', 'facilities', id, 'config'] }),
       })
     ).status,
   ).toBe(200);
@@ -484,7 +525,7 @@ it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
   expect(
     (
       await POST(request(`warehouse/facilities/${id}/config/shifts`, 'POST'), {
-        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts'] },
+        params: Promise.resolve({ path: ['warehouse', 'facilities', id, 'config', 'shifts'] }),
       })
     ).status,
   ).toBe(200);
@@ -493,7 +534,9 @@ it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
   expect(
     (
       await PUT(request(`warehouse/facilities/${id}/config/shifts/${shiftId}`, 'PUT'), {
-        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts', shiftId] },
+        params: Promise.resolve({
+          path: ['warehouse', 'facilities', id, 'config', 'shifts', shiftId],
+        }),
       })
     ).status,
   ).toBe(200);
@@ -527,16 +570,15 @@ it('8.1.1.3 仓库配置：不越界到后端不存在的子路径', async () =>
     `warehouse/facilities/${id}/config/${shiftId}/shifts`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 不应被放行`,
     ).toBe(404);
   }
   // DELETE 落到已登记的形状上由后端裁决：代理只看路径不看方法，
   // 后端没有 DELETE 端点会返回 405 —— 「配置不可删」的两道真实防线在服务端与 V104。
-  const notAllowed = await DELETE(
-    request(`warehouse/facilities/${id}/config`, 'DELETE'),
-    { params: { path: ['warehouse', 'facilities', id, 'config'] } },
-  );
+  const notAllowed = await DELETE(request(`warehouse/facilities/${id}/config`, 'DELETE'), {
+    params: Promise.resolve({ path: ['warehouse', 'facilities', id, 'config'] }),
+  });
   expect(notAllowed.status).not.toBe(404);
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
@@ -556,19 +598,23 @@ it('8.1.1.3 仓库配置放行后，8.1.1.1 与 8.1.1.2 的形状一条都没被
     `warehouse/facilities/${id}/entrypoints`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 被仓库配置车道的改动挤掉了`,
     ).toBe(200);
   }
   expect(
-    (await POST(request('warehouse/facilities', 'POST'), {
-      params: { path: ['warehouse', 'facilities'] },
-    })).status,
+    (
+      await POST(request('warehouse/facilities', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'facilities'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
-      params: { path: ['warehouse', 'facilities', id] },
-    })).status,
+    (
+      await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
+        params: Promise.resolve({ path: ['warehouse', 'facilities', id] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -582,11 +628,13 @@ it('8.1.1.3 仓库配置放行后，8.1.1.1 与 8.1.1.2 的形状一条都没被
  * 其余所有前缀不一致，而真正需要拒绝的方法本来就该由拥有该端点的服务裁决。
  */
 it('DELETE 落到同一个路径形状上由后端裁决而不是由代理拦', async () => {
-  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('', { status: 405 })));
+  const fetcher = vi
+    .fn()
+    .mockImplementation(() => Promise.resolve(new Response('', { status: 405 })));
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
   const response = await DELETE(request(`warehouse/facilities/${id}`, 'DELETE'), {
-    params: { path: ['warehouse', 'facilities', id] },
+    params: Promise.resolve({ path: ['warehouse', 'facilities', id] }),
   });
   expect(response.status).toBe(405);
   expect(fetcher).toHaveBeenCalledWith(
@@ -619,14 +667,18 @@ it('7.8.1.1 分配策略与序列号历史的调用形状都被放行', async ()
     'warehouse/inventory/serial-movements',
     'warehouse/inventory/serial-operations',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
   // 新增策略走 POST 裸路径，这条最容易因为「强制要求子路径」被拒
   expect(
-    (await POST(request('warehouse/inventory/allocation-policies', 'POST'), {
-      params: { path: ['warehouse', 'inventory', 'allocation-policies'] },
-    })).status,
+    (
+      await POST(request('warehouse/inventory/allocation-policies', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'allocation-policies'] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -645,12 +697,9 @@ it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   // 注意 ledger 曾在这份拒绝清单里：那是 7.1.2 尚未交付时的状态，
   // 7.1.2.1 已交付并入后它的前端页面就在调这个路径，不放行等于页面在浏览器里 404，
   // 所以已移出拒绝清单（放行覆盖由上面「已放行」用例钉住）。
-  for (const path of [
-    'warehouse/inventory/adjustments',
-    'warehouse/internal/access',
-  ]) {
+  for (const path of ['warehouse/inventory/adjustments', 'warehouse/internal/access']) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -662,7 +711,7 @@ it('跨站写入被拒绝且不发出请求', async () => {
   expect(
     (
       await POST(request('warehouse/inventory/policies', 'POST', 'https://attacker.example'), {
-        params: { path: ['warehouse', 'inventory', 'policies'] },
+        params: Promise.resolve({ path: ['warehouse', 'inventory', 'policies'] }),
       })
     ).status,
   ).toBe(403);
@@ -698,7 +747,9 @@ it('打印内容（ZPL / HTML）原样透传而不是被 JSON 解析吞成 503',
     const path =
       'warehouse/inventory/printing/jobs/11111111-1111-1111-1111-111111111111' +
       '/items/22222222-2222-2222-2222-222222222222/content';
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe(contentType);
@@ -732,12 +783,16 @@ it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行',
     `warehouse/goods-receipts/${id}/receive`,
     `warehouse/goods-receipts/${id}/close`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   expect(
-    (await POST(request('warehouse/goods-receipts', 'POST'), {
-      params: { path: ['warehouse', 'goods-receipts'] },
-    })).status,
+    (
+      await POST(request('warehouse/goods-receipts', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'goods-receipts'] }),
+      })
+    ).status,
   ).toBe(200);
 
   // 8.2.1.2 收货差异：集合读 + 接手 + 详情 + 留证 / 决定 / 索赔 / 提交 / 撤回 / 结案。
@@ -746,7 +801,9 @@ it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行',
     'warehouse/goods-receipt-discrepancies/capabilities',
     `warehouse/goods-receipt-discrepancies/${id}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   for (const path of [
     'warehouse/goods-receipt-discrepancies',
@@ -758,7 +815,8 @@ it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行',
     `warehouse/goods-receipt-discrepancies/${id}/close`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
 });
@@ -777,7 +835,9 @@ it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 
   const RESERVATION = 'warehouse/inventory/reservations';
   // 三个形状逐条钉住：列表读 / 下拉项读 / 能力声明读。
   for (const path of [RESERVATION, `${RESERVATION}/options`, `${RESERVATION}/capabilities`]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -789,7 +849,11 @@ it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 
   // 登记预占走 POST 同一路径：白名单只看形状不看方法，
   // 这里显式跑一次证明写动作也真被转发（而不是只放行了读）。
   expect(
-    (await POST(request(RESERVATION, 'POST'), { params: { path: RESERVATION.split('/') } })).status,
+    (
+      await POST(request(RESERVATION, 'POST'), {
+        params: Promise.resolve({ path: RESERVATION.split('/') }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -822,7 +886,9 @@ it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 w
     `${RESERVATION}/${id}/capabilities`,
   ];
   for (const path of reads) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -837,7 +903,7 @@ it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 w
   expect(
     (
       await POST(request(`${RESERVATION}/${id}/allocations`, 'POST'), {
-        params: { path: `${RESERVATION}/${id}/allocations`.split('/') },
+        params: Promise.resolve({ path: `${RESERVATION}/${id}/allocations`.split('/') }),
       })
     ).status,
   ).toBe(200);
@@ -846,7 +912,9 @@ it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 w
   // 只放行 allocations 会让两个按钮在浏览器里 404。
   for (const action of ['commit', 'consume']) {
     const path = `${RESERVATION}/${id}/allocations/${allocationId}/${action}`;
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -859,7 +927,9 @@ it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 w
   // 注：`${id}/release` 原先在这里断言 404（7.2.1.3 未交付时的诚实标注），
   // 7.2.1.3 落地后由它的放行用例接管，这里改钉它**再多一层后缀**仍然 404。
   for (const path of [`${RESERVATION}/${id}/entries`, `${RESERVATION}/${id}/release/reason`]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
 });
@@ -889,7 +959,7 @@ it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不
     'warehouse/inventory/reservation',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 不应被放行`,
     ).toBe(404);
   }
@@ -917,7 +987,9 @@ it('8.1.2.1 库位树的四个形状被放行并转发到 warehouse 服务', asy
     `warehouse/location-trees/${id}/locations/${id}`,
   ];
   for (const path of paths) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -928,19 +1000,25 @@ it('8.1.2.1 库位树的四个形状被放行并转发到 warehouse 服务', asy
   }
   // 写动作走同一批路径：白名单只看路径形状不看方法，所以要显式跑一遍证明真被转发。
   expect(
-    (await POST(request(`warehouse/location-trees/${id}/locations`, 'POST'), {
-      params: { path: ['warehouse', 'location-trees', id, 'locations'] },
-    })).status,
+    (
+      await POST(request(`warehouse/location-trees/${id}/locations`, 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-trees', id, 'locations'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await PUT(request(`warehouse/location-trees/${id}/locations/${id}`, 'PUT'), {
-      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
-    })).status,
+    (
+      await PUT(request(`warehouse/location-trees/${id}/locations/${id}`, 'PUT'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-trees', id, 'locations', id] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await DELETE(request(`warehouse/location-trees/${id}/locations/${id}`, 'DELETE'), {
-      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
-    })).status,
+    (
+      await DELETE(request(`warehouse/location-trees/${id}/locations/${id}`, 'DELETE'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-trees', id, 'locations', id] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -964,7 +1042,9 @@ it('8.1.2.1 多一层后缀仍是 404 且不发出请求', async () => {
     // 单段根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
     'warehouse/location-trees',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -990,7 +1070,9 @@ it('8.1.2.2 库位自动分配的七个形状被放行并转发到 warehouse 服
     'warehouse/location-allocations',
   ];
   for (const path of paths) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -1001,19 +1083,25 @@ it('8.1.2.2 库位自动分配的七个形状被放行并转发到 warehouse 服
   }
   // 写动作：选定（裸 POST）、释放（POST {id}/release）、撤销（DELETE {id}）
   expect(
-    (await POST(request('warehouse/location-allocations', 'POST'), {
-      params: { path: ['warehouse', 'location-allocations'] },
-    })).status,
+    (
+      await POST(request('warehouse/location-allocations', 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-allocations'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await POST(request(`warehouse/location-allocations/${id}/release`, 'POST'), {
-      params: { path: ['warehouse', 'location-allocations', id, 'release'] },
-    })).status,
+    (
+      await POST(request(`warehouse/location-allocations/${id}/release`, 'POST'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-allocations', id, 'release'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await DELETE(request(`warehouse/location-allocations/${id}`, 'DELETE'), {
-      params: { path: ['warehouse', 'location-allocations', id] },
-    })).status,
+    (
+      await DELETE(request(`warehouse/location-allocations/${id}`, 'DELETE'), {
+        params: Promise.resolve({ path: ['warehouse', 'location-allocations', id] }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -1035,12 +1123,13 @@ it('8.1.2.2 多一层后缀仍是 404 且不发出请求', async () => {
     // 与 8.1.2.1 的命名空间刻意分开：库位树上没有 allocate 端点
     `warehouse/location-trees/${id}/allocate`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
-
 
 /**
  * 8.5.2.1 库位利用率：location-utilization 的三个形状放行 + 反向拒绝。
@@ -1063,7 +1152,9 @@ it('8.5.2.1 库位利用率的三个形状被放行并转发到 warehouse 服务
     `warehouse/location-utilization/${id}`,
     `warehouse/location-utilization/${id}/locations/${id}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8084/${path}`),
@@ -1091,7 +1182,9 @@ it('8.5.2.1 未登记的库位利用率形状是 404 且不发出请求', async 
     // 裸根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
     'warehouse/location-utilization',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -1109,7 +1202,9 @@ it('8.5.2.1 追加分支后 8.1.2.1 的四个库位树形状仍被放行', async
     `warehouse/location-trees/${id}/locations`,
     `warehouse/location-trees/${id}/locations/${id}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
   }
 });
@@ -1133,7 +1228,9 @@ it('7.7.2.1 VMI 白名单：模型文件里每条调用点都被放行', async (
     'warehouse/inventory/vmi/settlements',
     `warehouse/inventory/vmi/settlements/${sid}`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
   }
   // 写动作逐个钉住：建协议、出信号、信号三步流转、记售出、出对账单、确认。
@@ -1153,7 +1250,8 @@ it('7.7.2.1 VMI 白名单：模型文件里每条调用点都被放行', async (
     `warehouse/inventory/vmi/settlements/${sid}/confirm`,
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
     ).toBe(200);
   }
 });
@@ -1174,7 +1272,9 @@ it('7.7.2.1 VMI 白名单：后端不存在的子路径仍被拒绝', async () =
     `warehouse/inventory/vmi/replenishment-signals/${sid}/destroy`,
     `warehouse/inventory/vmi/settlements/${sid}/void`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -1192,7 +1292,9 @@ it('7.7.2.1 追加 vmi 分支后 7.7.1.2 寄售与 7.7.1.1 货权的形状仍被
     'warehouse/inventory/ownership/capabilities',
     'warehouse/inventory/ownership/report',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status).toBe(200);
   }
 });
@@ -1229,7 +1331,9 @@ it('8.3.3.1 复核扫描的全部调用形状被放行并转发到 warehouse 服
     // 否则会被 {id}(exceptions) 提前吃掉半截、把 resolve 留在匹配之外。
     `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -1254,7 +1358,9 @@ it('8.3.3.1 写动作的 POST 形状被放行', async () => {
     `warehouse/recount-scans/${id}/cancel`,
     `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -1287,7 +1393,9 @@ it('8.3.3.1 未登记的形状是 404、不发请求，且不挂在别的分支�
     'warehouse/recount_scans/capabilities',
     'warehouse/recountscans/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -1309,7 +1417,9 @@ it('8.3.3.1 追加 recount-scans 分支后已交付的拣货与波次形状仍�
     'warehouse/location-trees/capabilities',
     'warehouse/inventory/overview',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
   }
 });
@@ -1325,7 +1435,7 @@ it('8.3.3.1 复核的跨源写请求被 403 拒绝，不转发', async () => {
       headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
       body: '{}',
     }),
-    { params: { path: ['warehouse', 'recount-scans', id, 'complete'] } },
+    { params: Promise.resolve({ path: ['warehouse', 'recount-scans', id, 'complete'] }) },
   );
   expect(response.status).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();

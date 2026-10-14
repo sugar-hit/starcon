@@ -26,9 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * 3.8.1.1 导入向导的端点。
  *
- * <p>路由挂在 {@code /catalog/import-*} 之下，与 3.1.2.1 的 {@code /catalog/skus}、
- * 3.1.2.3 的编码条码工作区<b>并列</b>。台账里 3.8.1.1 的 L3 锚点是 {@code —}（没有独立列表页），
- * 所以这里没有「导入列表」页面路由，入口是商品域下的独立向导页。
+ * <p>路由挂在 {@code /catalog/import-*} 之下，与 3.1.2.1 的 {@code /catalog/skus}、 3.1.2.3
+ * 的编码条码工作区<b>并列</b>。台账里 3.8.1.1 的 L3 锚点是 {@code —}（没有独立列表页）， 所以这里没有「导入列表」页面路由，入口是商品域下的独立向导页。
  *
  * <p><b>五个环节各一个端点，顺序即依赖</b>：
  *
@@ -40,17 +39,14 @@ import org.springframework.web.multipart.MultipartFile;
  *   5 执行       POST /catalog/import-jobs/{id}/execute
  * </pre>
  *
- * <p><b>第 4、5 步是「已受理」而不是「已完成」</b>：蓝图写死「导入是异步任务，大文件不阻塞页面」，
- * 所以这两个 POST 推进任务状态就返回，真实结果由页面轮询任务详情拿。
- * 前端**绝不能**在 POST 返回后显示「导入完成」——
- * 任务行上的 applied/failed/skipped 是库里可查的事实，不是这次响应的承诺。
+ * <p><b>第 4、5 步是「已受理」而不是「已完成」</b>：蓝图写死「导入是异步任务，大文件不阻塞页面」， 所以这两个 POST 推进任务状态就返回，真实结果由页面轮询任务详情拿。
+ * 前端**绝不能**在 POST 返回后显示「导入完成」—— 任务行上的 applied/failed/skipped 是库里可查的事实，不是这次响应的承诺。
  *
- * <p><b>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}</b>：
- * 导入写的就是商品主数据，挂在已有词表上（与 3.5.2.1 / 3.5.2.2 同一口径），
- * 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p><b>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}</b>： 导入写的就是商品主数据，挂在已有词表上（与
+ * 3.5.2.1 / 3.5.2.2 同一口径）， 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
  *
- * <p><b>租户只来自已认证成员关系</b>：本控制器没有任何一个参数是 tenantId，
- * 一律取 {@code AccessService.Access.tenantId()}。客户端传 {@code X-Tenant-Id} 不会被读。
+ * <p><b>租户只来自已认证成员关系</b>：本控制器没有任何一个参数是 tenantId， 一律取 {@code AccessService.Access.tenantId()}。客户端传
+ * {@code X-Tenant-Id} 不会被读。
  */
 @RestController
 @RequestMapping("/catalog")
@@ -81,7 +77,8 @@ public class ImportWizardController {
       @RequestParam(required = false) String q,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    return call(auth, "spu.read", a -> templates.templates(a.tenantId(), targetEntity, q, page, size));
+    return call(
+        auth, "spu.read", a -> templates.templates(a.tenantId(), targetEntity, q, page, size));
   }
 
   /** 模板详情（含列定义）。 */
@@ -95,8 +92,8 @@ public class ImportWizardController {
   /**
    * 新建模板。
    *
-   * <p>列不传时套标准列（{@code ImportRules.defaultColumns}），
-   * 所以「先建一个能用的 SPU 模板」只需要给 code / name / targetEntity。
+   * <p>列不传时套标准列（{@code ImportRules.defaultColumns}）， 所以「先建一个能用的 SPU 模板」只需要给 code / name /
+   * targetEntity。
    */
   @PostMapping("/import-templates")
   public ImportTemplateDetail createTemplate(
@@ -116,19 +113,22 @@ public class ImportWizardController {
 
   @DeleteMapping("/import-templates/{id}")
   public Map<String, Object> deleteTemplate(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
-    return call(auth, "spu.update", a -> {
-      templates.delete(a.tenantId(), id);
-      return Map.of("deleted", true);
-    });
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    return call(
+        auth,
+        "spu.update",
+        a -> {
+          templates.delete(a.tenantId(), id);
+          return Map.of("deleted", true);
+        });
   }
 
   /**
    * 下载模板 CSV：列头一行 + 示例行。
    *
-   * <p>用 <b>普通链接下载</b>而不是 {@code api()}：它是 CSV 而非 JSON，
-   * 与 3.1.2.1 的 {@code /catalog/skus/export} 同一处理方式。
-   * 租户上下文由 Authorization 头解析，下载链接本身不带也不接受任何租户参数。
+   * <p>用 <b>普通链接下载</b>而不是 {@code api()}：它是 CSV 而非 JSON， 与 3.1.2.1 的 {@code /catalog/skus/export}
+   * 同一处理方式。 租户上下文由 Authorization 头解析，下载链接本身不带也不接受任何租户参数。
    */
   @GetMapping(value = "/import-templates/{id}/file", produces = "text/csv")
   public ResponseEntity<byte[]> templateFile(
@@ -138,9 +138,7 @@ public class ImportWizardController {
     var file = access.run(actor, "catalog.spu.read", () -> templates.csv(actor.tenantId(), id));
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + file.fileName() + "\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
         .body(file.content());
   }
 
@@ -162,11 +160,15 @@ public class ImportWizardController {
 
   @DeleteMapping("/import-field-mappings/{id}")
   public Map<String, Object> deleteMapping(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
-    return call(auth, "spu.update", a -> {
-      templates.deleteMapping(a.tenantId(), id);
-      return Map.of("deleted", true);
-    });
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    return call(
+        auth,
+        "spu.update",
+        a -> {
+          templates.deleteMapping(a.tenantId(), id);
+          return Map.of("deleted", true);
+        });
   }
 
   // ================================================================ 2 上传文件
@@ -174,12 +176,10 @@ public class ImportWizardController {
   /**
    * 上传文件：解析 → 建任务 → 逐行落库。返回「已受理」。
    *
-   * <p>用 {@code multipart/form-data} 而不是把 CSV 当 JSON 字符串塞进 body：
-   * 运营上传的就是文件，走文件通道才能带上真实文件名与大小，
+   * <p>用 {@code multipart/form-data} 而不是把 CSV 当 JSON 字符串塞进 body： 运营上传的就是文件，走文件通道才能带上真实文件名与大小，
    * 而这两样是「导进去的到底是哪份文件」的凭据。
    *
-   * <p><b>409 的含义</b>：同一租户已有同类导入任务在进行中（DB 部分唯一索引裁决）。
-   * 错误信息里点名当前在跑的那个任务的文件名与状态，运营能直接去取消它。
+   * <p><b>409 的含义</b>：同一租户已有同类导入任务在进行中（DB 部分唯一索引裁决）。 错误信息里点名当前在跑的那个任务的文件名与状态，运营能直接去取消它。
    */
   @PostMapping(value = "/import-jobs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ImportUploadSummary upload(
@@ -188,16 +188,24 @@ public class ImportWizardController {
       @RequestParam String importMode,
       @RequestPart("file") MultipartFile file,
       @RequestParam(required = false) String mapping) {
-    return call(auth, "spu.update", a -> {
-      byte[] content;
-      try {
-        content = file.getBytes();
-      } catch (IOException e) {
-        throw ImportJobService.notFound("文件读取失败，请重新上传");
-      }
-      return jobs.upload(a.tenantId(), templateId, importMode, parseMapping(mapping),
-          file.getOriginalFilename(), content);
-    });
+    return call(
+        auth,
+        "spu.update",
+        a -> {
+          byte[] content;
+          try {
+            content = file.getBytes();
+          } catch (IOException e) {
+            throw ImportJobService.notFound("文件读取失败，请重新上传");
+          }
+          return jobs.upload(
+              a.tenantId(),
+              templateId,
+              importMode,
+              parseMapping(mapping),
+              file.getOriginalFilename(),
+              content);
+        });
   }
 
   /** 改本次任务的映射（可选同时存成可复用配置）。 */
@@ -214,32 +222,33 @@ public class ImportWizardController {
   /**
    * 请求预校验：已受理，结果轮询任务详情。
    *
-   * <p>重跑（已预校验的任务再跑一次）是允许的，且会先清掉上一轮的行结论 ——
-   * 页面上不能同时挂着两轮互相矛盾的结论。
+   * <p>重跑（已预校验的任务再跑一次）是允许的，且会先清掉上一轮的行结论 —— 页面上不能同时挂着两轮互相矛盾的结论。
    */
   @PostMapping("/import-jobs/{id}/prevalidate")
   public ImportJobRow prevalidate(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.update", a -> jobs.requestPrevalidate(a, id));
   }
 
   /** 请求执行：已受理，结果轮询任务详情。 */
   @PostMapping("/import-jobs/{id}/execute")
   public ImportJobRow execute(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.update", a -> jobs.requestExecute(a, id));
   }
 
   /**
    * 取消任务，释放互斥槽位。
    *
-   * <p>蓝图要求「同一租户同时只允许一个同类导入任务」——而没有取消，
-   * 一个卡住的任务会把该目标对象的所有后续导入全部挡在门外。
-   * 只允许取消还没开跑的任务（PENDING / PREVALIDATED），正在导入的请等它跑完。
+   * <p>蓝图要求「同一租户同时只允许一个同类导入任务」——而没有取消， 一个卡住的任务会把该目标对象的所有后续导入全部挡在门外。 只允许取消还没开跑的任务（PENDING /
+   * PREVALIDATED），正在导入的请等它跑完。
    */
   @PostMapping("/import-jobs/{id}/cancel")
   public ImportJobRow cancel(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.update", a -> jobs.cancel(a.tenantId(), id));
   }
 
@@ -257,7 +266,8 @@ public class ImportWizardController {
 
   @GetMapping("/import-jobs/{id}")
   public ImportJobRow job(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "spu.read", a -> jobs.job(a.tenantId(), id));
   }
 
@@ -290,8 +300,7 @@ public class ImportWizardController {
   /**
    * 解析可选的 mapping 查询参数（形如 {@code spu_code:商品编码,spu_name:名称}）。
    *
-   * <p>上传时允许不带映射 —— 服务层会按列名自动猜一套。
-   * 这里只负责把「猜」的那部分留给服务层，显式传入的才按用户的意思解析。
+   * <p>上传时允许不带映射 —— 服务层会按列名自动猜一套。 这里只负责把「猜」的那部分留给服务层，显式传入的才按用户的意思解析。
    */
   private static Map<String, String> parseMapping(String raw) {
     if (raw == null || raw.isBlank()) return Map.of();

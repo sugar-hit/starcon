@@ -29,7 +29,9 @@ it('管理 API 与租户切换路由转发 identity，仅传服务端 cookie 身
     'identity/permissions',
     'auth/memberships',
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8081/${path}`),
       expect.objectContaining({
@@ -38,13 +40,14 @@ it('管理 API 与租户切换路由转发 identity，仅传服务端 cookie 身
     );
   }
   for (const path of ['auth/switch', 'identity/owner-transfer'])
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   expect(
     (
       await PUT(request('identity/roles/abcdef', 'PUT'), {
-        params: { path: ['identity', 'roles', 'abcdef'] },
+        params: Promise.resolve({ path: ['identity', 'roles', 'abcdef'] }),
       })
     ).status,
   ).toBe(200);
@@ -55,17 +58,21 @@ it('跨站写入和非白名单接口被拒绝且不发出请求', async () => {
   expect(
     (
       await POST(request('identity/children', 'POST', 'https://attacker.example'), {
-        params: { path: ['identity', 'children'] },
+        params: Promise.resolve({ path: ['identity', 'children'] }),
       })
     ).status,
   ).toBe(403);
   expect(
-    (await GET(request('internal/access'), { params: { path: ['internal', 'access'] } })).status,
+    (
+      await GET(request('internal/access'), {
+        params: Promise.resolve({ path: ['internal', 'access'] }),
+      })
+    ).status,
   ).toBe(404);
   expect(
     (
       await GET(request('identity/children/abc/members'), {
-        params: { path: ['identity', 'children', 'abc', 'members'] },
+        params: Promise.resolve({ path: ['identity', 'children', 'abc', 'members'] }),
       })
     ).status,
   ).toBe(404);
@@ -92,7 +99,9 @@ it('catalog/spec-axis 的全部路由被放行且转发到 catalog 服务', asyn
     `catalog/spec-axis/spus/${id}/axes`,
     'catalog/spec-axis/category-rules',
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -102,7 +111,11 @@ it('catalog/spec-axis 的全部路由被放行且转发到 catalog 服务', asyn
   }
   const unbind = `catalog/spec-axis/spus/${id}/axes/22222222-2222-2222-2222-222222222222`;
   expect(
-    (await DELETE(request(unbind, 'DELETE'), { params: { path: unbind.split('/') } })).status,
+    (
+      await DELETE(request(unbind, 'DELETE'), {
+        params: Promise.resolve({ path: unbind.split('/') }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -112,7 +125,9 @@ it('spec-axis 放行不等于放行任意 catalog 子路径', async () => {
   const id = '11111111-1111-1111-1111-111111111111';
   // allowlist 是精确路径：多一层未声明的子路径仍应 404，否则拼错的路径会被静默转发。
   for (const path of ['catalog/spec-axis/unknown', `catalog/spec-axis/axes/${id}/options/extra`]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -135,7 +150,9 @@ it('catalog/variant-combination 的全部路由被放行且转发到 catalog 服
     `catalog/variant-combination/spus/${id}/drafts`,
     `catalog/variant-combination/spus/${id}/drafts/${draftId}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -147,11 +164,17 @@ it('catalog/variant-combination 的全部路由被放行且转发到 catalog 服
     `catalog/variant-combination/spus/${id}/check`,
     `catalog/variant-combination/spus/${id}/drafts`,
   ]) {
-    expect((await POST(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await POST(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   const discard = `catalog/variant-combination/spus/${id}/drafts/${draftId}`;
   expect(
-    (await DELETE(request(discard, 'DELETE'), { params: { path: discard.split('/') } })).status,
+    (
+      await DELETE(request(discard, 'DELETE'), {
+        params: Promise.resolve({ path: discard.split('/') }),
+      })
+    ).status,
   ).toBe(200);
 });
 
@@ -163,7 +186,9 @@ it('variant-combination 放行不等于放行任意 catalog 子路径', async ()
     'catalog/variant-combination/unknown',
     `catalog/variant-combination/spus/${id}/drafts/22222222-2222-2222-2222-222222222222/extra`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -191,7 +216,9 @@ it('catalog/categories 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/categories/nodes/${id}`,
     `catalog/categories/spus/${id}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -205,14 +232,15 @@ it('catalog/categories 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/categories/trees/${tree}/nodes`,
     `catalog/categories/spus/${id}`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   expect(
     (
       await PUT(request(`catalog/categories/trees/${tree}`), {
-        params: { path: ['catalog', 'categories', 'trees', tree] },
+        params: Promise.resolve({ path: ['catalog', 'categories', 'trees', tree] }),
       })
     ).status,
   ).toBe(200);
@@ -221,13 +249,18 @@ it('catalog/categories 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/categories/nodes/${id}/move`,
     `catalog/categories/nodes/${id}/enabled`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   for (const path of [`catalog/categories/trees/${tree}`, `catalog/categories/nodes/${id}`]) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } })).status,
+      (
+        await DELETE(request(path, 'DELETE'), {
+          params: Promise.resolve({ path: path.split('/') }),
+        })
+      ).status,
     ).toBe(200);
   }
 });
@@ -247,7 +280,9 @@ it('catalog/brands 的全部路由被放行且转发到 catalog 服务（3.3.2.1
     `catalog/brands/${brand}/authorizations`,
     `catalog/brands/${brand}/authorizations/${credential}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -261,9 +296,10 @@ it('catalog/brands 的全部路由被放行且转发到 catalog 服务（3.3.2.1
     `catalog/brands/${brand}/authorizations`,
     'catalog/brands/listing-eligibility',
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   for (const path of [
     `catalog/brands/${brand}`,
@@ -271,14 +307,15 @@ it('catalog/brands 的全部路由被放行且转发到 catalog 服务（3.3.2.1
     `catalog/brands/${brand}/authorizations/${credential}`,
     `catalog/brands/${brand}/authorizations/${credential}/enabled`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   expect(
     (
       await DELETE(request(`catalog/brands/${brand}`, 'DELETE'), {
-        params: { path: ['catalog', 'brands', brand] },
+        params: Promise.resolve({ path: ['catalog', 'brands', brand] }),
       })
     ).status,
   ).toBe(200);
@@ -294,7 +331,9 @@ it('catalog/unit-groups 的全部路由被放行且转发到 catalog 服务（3.
     'catalog/unit-groups/overview',
     `catalog/unit-groups/${group}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -308,21 +347,22 @@ it('catalog/unit-groups 的全部路由被放行且转发到 catalog 服务（3.
     'catalog/unit-groups/convert',
     `catalog/unit-groups/${group}/conversions`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   expect(
     (
       await PUT(request(`catalog/unit-groups/${group}/enabled`, 'PUT'), {
-        params: { path: ['catalog', 'unit-groups', group, 'enabled'] },
+        params: Promise.resolve({ path: ['catalog', 'unit-groups', group, 'enabled'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/unit-groups/${group}`, 'PUT'), {
-        params: { path: ['catalog', 'unit-groups', group] },
+        params: Promise.resolve({ path: ['catalog', 'unit-groups', group] }),
       })
     ).status,
   ).toBe(200);
@@ -335,14 +375,15 @@ it('catalog/unit-groups 的全部路由被放行且转发到 catalog 服务（3.
     ],
   ] as const) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status,
+      (await DELETE(request(path, 'DELETE'), { params: Promise.resolve({ path: [...segments] }) }))
+        .status,
     ).toBe(200);
   }
   // 不在白名单里的子路径仍然 404：放行不能是前缀通配。
   expect(
     (
       await GET(request(`catalog/unit-groups/${group}/unknown`, 'GET'), {
-        params: { path: ['catalog', 'unit-groups', group, 'unknown'] },
+        params: Promise.resolve({ path: ['catalog', 'unit-groups', group, 'unknown'] }),
       })
     ).status,
   ).toBe(404);
@@ -358,7 +399,9 @@ it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2
     `catalog/categories/attribute-requirements/${category}`,
     `catalog/categories/attribute-requirements/${category}/effective`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -372,16 +415,17 @@ it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2
     `catalog/categories/attribute-requirements/${category}/entry-form-schema`,
     `catalog/categories/attribute-requirements/${category}/validate`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   expect(
     (
       await PUT(
         request(`catalog/categories/attribute-requirements/${category}/${attribute}/enabled`),
         {
-          params: {
+          params: Promise.resolve({
             path: [
               'catalog',
               'categories',
@@ -390,7 +434,7 @@ it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2
               attribute,
               'enabled',
             ],
-          },
+          }),
         },
       )
     ).status,
@@ -398,9 +442,9 @@ it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2
   expect(
     (
       await DELETE(request(`catalog/categories/attribute-requirements/${category}/${attribute}`), {
-        params: {
+        params: Promise.resolve({
           path: ['catalog', 'categories', 'attribute-requirements', category, attribute],
-        },
+        }),
       })
     ).status,
   ).toBe(200);
@@ -418,7 +462,9 @@ it('attribute-requirements 放行不等于放行任意 attribute-requirements �
     `catalog/categories/attribute-requirements/${category}/${attribute}/unknown`,
     `catalog/categories/attribute-requirements/${category}/effective/extra`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -437,7 +483,9 @@ it('categories 放行不等于放行任意 catalog 子路径', async () => {
     `catalog/categories/spus/${id}/extra`,
     'catalog/categoriesx',
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -454,7 +502,9 @@ it('catalog/attributes 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/attributes/${id}/options`,
     `catalog/attributes/${id}/category-rules`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -463,18 +513,21 @@ it('catalog/attributes 的全部路由被放行且转发到 catalog 服务', asy
     );
   }
   for (const path of ['catalog/attributes', `catalog/attributes/${id}/options`]) {
-    expect((await POST(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await POST(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   expect(
     (
       await PUT(request(`catalog/attributes/${id}`), {
-        params: { path: [`catalog`, 'attributes', id] },
+        params: Promise.resolve({ path: [`catalog`, 'attributes', id] }),
       })
     ).status,
   ).toBe(200);
   const rule = `catalog/attributes/${id}/category-rules`;
   expect(
-    (await DELETE(request(rule, 'DELETE'), { params: { path: rule.split('/') } })).status,
+    (await DELETE(request(rule, 'DELETE'), { params: Promise.resolve({ path: rule.split('/') }) }))
+      .status,
   ).toBe(200);
 });
 
@@ -487,7 +540,9 @@ it('attributes 放行不等于放行任意 catalog 子路径', async () => {
     `catalog/attributes/${id}/options/extra`,
     `catalog/attributes/${id}/category-rules/22222222-2222-2222-2222-222222222222`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -505,7 +560,7 @@ it('catalog/attributes/options 的三条路由被放行', async () => {
   expect(
     (
       await GET(request('catalog/attributes/options'), {
-        params: { path: ['catalog', 'attributes', 'options'] },
+        params: Promise.resolve({ path: ['catalog', 'attributes', 'options'] }),
       })
     ).status,
   ).toBe(200);
@@ -516,13 +571,15 @@ it('catalog/attributes/options 的三条路由被放行', async () => {
     }),
   );
   for (const path of ['catalog/attributes/options/lifecycle', 'catalog/attributes/options/order']) {
-    expect((await PUT(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await PUT(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
   }
   // 放行 options 不等于放行 options 底下的任意子路径
   expect(
     (
       await GET(request('catalog/attributes/options/unknown'), {
-        params: { path: ['catalog', 'attributes', 'options', 'unknown'] },
+        params: Promise.resolve({ path: ['catalog', 'attributes', 'options', 'unknown'] }),
       })
     ).status,
   ).toBe(404);
@@ -549,7 +606,9 @@ it('catalog/sku-attribute-override 的全部路由被放行且转发到 catalog 
     `${panel}/attribute-overrides/${attribute}`,
     `${panel}/attribute-overrides/${attribute}/clear`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -562,14 +621,15 @@ it('catalog/sku-attribute-override 的全部路由被放行且转发到 catalog 
     `${panel}/attribute-overrides/${attribute}`,
     `${panel}/attribute-overrides/${attribute}/clear`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   expect(
     (
       await DELETE(request(`${panel}/attribute-overrides/${attribute}`, 'DELETE'), {
-        params: { path: `${panel}/attribute-overrides/${attribute}`.split('/') },
+        params: Promise.resolve({ path: `${panel}/attribute-overrides/${attribute}`.split('/') }),
       })
     ).status,
   ).toBe(200);
@@ -587,7 +647,9 @@ it('sku-attribute-override 放行不等于放行任意 catalog 子路径', async
     `catalog/sku-attribute-override/skus/${sku}/unknown`,
     `catalog/sku-attribute-override/skus/${sku}/attribute-overrides/${attribute}/clear/extra`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -618,7 +680,9 @@ it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3
     'catalog/translations/batches',
     `catalog/translations/batches/${batch}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -639,9 +703,10 @@ it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3
     `catalog/translations/suggestions/${suggestion}/reject`,
     'catalog/translations/batches',
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
 
   // 启停语言需求 / 改译文 / 状态流转（人工校对）是 PUT。
@@ -651,16 +716,17 @@ it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3
     `catalog/translations/entries/${entry}`,
     `catalog/translations/entries/${entry}/status`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
 
   // CSV 导出与删除都带 ?version=，走 DELETE。
   expect(
     (
       await GET(request(`catalog/translations/entries/export?version=0`), {
-        params: { path: 'catalog/translations/entries/export'.split('/') },
+        params: Promise.resolve({ path: 'catalog/translations/entries/export'.split('/') }),
       })
     ).status,
   ).toBe(200);
@@ -672,7 +738,7 @@ it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3
     expect(
       (
         await DELETE(request(`catalog/translations/${prefix}/${id}?version=0`, 'DELETE'), {
-          params: { path: ['catalog', 'translations', prefix, id] },
+          params: Promise.resolve({ path: ['catalog', 'translations', prefix, id] }),
         })
       ).status,
     ).toBe(200);
@@ -693,7 +759,9 @@ it('translations 放行不等于放行任意 catalog 子路径', async () => {
     `catalog/translations/suggestions/${entry}/adopt/extra`,
     'catalog/translations/batches/abc',
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -708,7 +776,7 @@ it('translations 放行不放行 3.4.2.2 的模板译文路径（两套 locale �
   expect(
     (
       await GET(request(`catalog/translations/${suggestion}`), {
-        params: { path: ['catalog', 'translations', suggestion] },
+        params: Promise.resolve({ path: ['catalog', 'translations', suggestion] }),
       })
     ).status,
   ).toBe(404);
@@ -735,7 +803,9 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/requirement?outputQuantity=100`,
     `catalog/bom-components/usage?skuId=${sku}`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -750,9 +820,10 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/publish`,
     `catalog/bom-versions/${version}/copy?versionNo=v2`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: segments(path) } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
+    ).toBe(200);
   }
   // PUT：改 BOM、改草稿版本、向前关闭生效区间、整体替换组件清单。
   for (const path of [
@@ -762,14 +833,16 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/close?effectiveTo=2026-04-01T00:00:00Z`,
     `catalog/bom-versions/${version}/components`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status).toBe(
-      200,
-    );
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
+    ).toBe(200);
   }
   // DELETE：删 BOM、删草稿版本。
   for (const path of [`catalog/boms/${bom}`, `catalog/bom-versions/${version}`]) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: segments(path) } })).status,
+      (await DELETE(request(path, 'DELETE'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
     ).toBe(200);
   }
   // 不在白名单里的相邻路径仍然 404：放行不能是前缀通配。
@@ -781,14 +854,22 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     'catalog/bom-components',
     `catalog/bom-components/${sku}`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
   // 与 3.5.1.1 并列而不合并：放行 boms 绝不代表放行 bundles（反之亦然）。
   for (const path of ['catalog/bundles', `catalog/versions/${version}`]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
   }
   expect(
-    (await GET(request('catalog/bomsx'), { params: { path: ['catalog', 'bomsx'] } })).status,
+    (
+      await GET(request('catalog/bomsx'), {
+        params: Promise.resolve({ path: ['catalog', 'bomsx'] }),
+      })
+    ).status,
   ).toBe(404);
 });
 
@@ -803,19 +884,23 @@ it('catalog/bom-explosions 被放行且只放行展开与读回（3.5.2.2 BOM �
     `catalog/bom-explosions?bomId=${bom}`,
     `catalog/bom-explosions/${run}`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
   }
   // POST：执行一次展开。
   expect(
     (
       await POST(request('catalog/bom-explosions', 'POST'), {
-        params: { path: ['catalog', 'bom-explosions'] },
+        params: Promise.resolve({ path: ['catalog', 'bom-explosions'] }),
       })
     ).status,
   ).toBe(200);
   // 放行不能是前缀通配：展开只有 {id} 段，没有子资源。
   for (const path of [`catalog/bom-explosions/${run}/unknown`, 'catalog/bom-explosions/abc']) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
   // 注意：代理只按**路径**放行，不按 HTTP 方法。所以「展开只有 POST、没有 PUT/DELETE」
   // 不是这里的断言范围 —— 那是后端的映射问题（未映射的方法回 405），
@@ -838,52 +923,57 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
     `catalog/parties/${party}`,
     `catalog/parties/${party}/roles`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
   }
   // 写：新建、编辑、状态流转、指派角色、改角色、解除角色、软删除。
   expect(
-    (await POST(request('catalog/parties', 'POST'), { params: { path: ['catalog', 'parties'] } }))
-      .status,
+    (
+      await POST(request('catalog/parties', 'POST'), {
+        params: Promise.resolve({ path: ['catalog', 'parties'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/status`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'status'] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'status'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await POST(request(`catalog/parties/${party}/roles`, 'POST'), {
-        params: { path: ['catalog', 'parties', party, 'roles'] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'roles'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/roles/${role}`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'roles', role] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'roles', role] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await DELETE(request(`catalog/parties/${party}/roles/${role}`, 'DELETE'), {
-        params: { path: ['catalog', 'parties', party, 'roles', role] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'roles', role] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await DELETE(request(`catalog/parties/${party}`, 'DELETE'), {
-        params: { path: ['catalog', 'parties', party] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party] }),
       })
     ).status,
   ).toBe(200);
@@ -892,46 +982,73 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
   expect(
     (
       await GET(request(`catalog/parties/${party}/role-profiles`), {
-        params: { path: ['catalog', 'parties', party, 'role-profiles'] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'role-profiles'] }),
       })
     ).status,
   ).toBe(200);
   for (const kind of ['supplier', 'customer', 'carrier']) {
     const segments4 = ['catalog', 'parties', party, `${kind}-profile`];
-    expect((await GET(request(`catalog/parties/${party}/${kind}-profile`), { params: { path: segments4 } })).status).toBe(200);
-    expect((await PUT(request(`catalog/parties/${party}/${kind}-profile`, 'PUT'), { params: { path: segments4 } })).status).toBe(200);
-    expect((await DELETE(request(`catalog/parties/${party}/${kind}-profile`, 'DELETE'), { params: { path: segments4 } })).status).toBe(200);
+    expect(
+      (
+        await GET(request(`catalog/parties/${party}/${kind}-profile`), {
+          params: Promise.resolve({ path: segments4 }),
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await PUT(request(`catalog/parties/${party}/${kind}-profile`, 'PUT'), {
+          params: Promise.resolve({ path: segments4 }),
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await DELETE(request(`catalog/parties/${party}/${kind}-profile`, 'DELETE'), {
+          params: Promise.resolve({ path: segments4 }),
+        })
+      ).status,
+    ).toBe(200);
   }
   // 档案台账：overview / options / 列表
   for (const suffix of ['overview', 'options']) {
     expect(
       (
         await GET(request(`catalog/role-profiles/${suffix}`), {
-          params: { path: ['catalog', 'role-profiles', suffix] },
+          params: Promise.resolve({ path: ['catalog', 'role-profiles', suffix] }),
         })
       ).status,
     ).toBe(200);
   }
   expect(
-    (await GET(request('catalog/role-profiles'), { params: { path: ['catalog', 'role-profiles'] } }))
-      .status,
+    (
+      await GET(request('catalog/role-profiles'), {
+        params: Promise.resolve({ path: ['catalog', 'role-profiles'] }),
+      })
+    ).status,
   ).toBe(200);
 
   // 3.6.2.1 供应商报价：台账 + 蓝图点名的「有效报价」输出。
   // 放行的七条路径逐条列出来 —— 白名单只开了这七条，多一段仍然拒绝。
   expect(
-    (await GET(request('catalog/supplier-quotes'), { params: { path: ['catalog', 'supplier-quotes'] } }))
-      .status,
+    (
+      await GET(request('catalog/supplier-quotes'), {
+        params: Promise.resolve({ path: ['catalog', 'supplier-quotes'] }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await POST(request('catalog/supplier-quotes', 'POST'), { params: { path: ['catalog', 'supplier-quotes'] } }))
-      .status,
+    (
+      await POST(request('catalog/supplier-quotes', 'POST'), {
+        params: Promise.resolve({ path: ['catalog', 'supplier-quotes'] }),
+      })
+    ).status,
   ).toBe(200);
   for (const suffix of ['overview', 'options', 'effective']) {
     expect(
       (
         await GET(request(`catalog/supplier-quotes/${suffix}`), {
-          params: { path: ['catalog', 'supplier-quotes', suffix] },
+          params: Promise.resolve({ path: ['catalog', 'supplier-quotes', suffix] }),
         })
       ).status,
     ).toBe(200);
@@ -940,18 +1057,36 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
   expect(
     (
       await GET(request('catalog/supplier-quotes/effective/resolve'), {
-        params: { path: ['catalog', 'supplier-quotes', 'effective', 'resolve'] },
+        params: Promise.resolve({ path: ['catalog', 'supplier-quotes', 'effective', 'resolve'] }),
       })
     ).status,
   ).toBe(200);
   const quoteSegments = ['catalog', 'supplier-quotes', quote];
-  expect((await GET(request(`catalog/supplier-quotes/${quote}`), { params: { path: quoteSegments } })).status).toBe(200);
-  expect((await PUT(request(`catalog/supplier-quotes/${quote}`, 'PUT'), { params: { path: quoteSegments } })).status).toBe(200);
-  expect((await DELETE(request(`catalog/supplier-quotes/${quote}`, 'DELETE'), { params: { path: quoteSegments } })).status).toBe(200);
+  expect(
+    (
+      await GET(request(`catalog/supplier-quotes/${quote}`), {
+        params: Promise.resolve({ path: quoteSegments }),
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/supplier-quotes/${quote}`, 'PUT'), {
+        params: Promise.resolve({ path: quoteSegments }),
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/supplier-quotes/${quote}`, 'DELETE'), {
+        params: Promise.resolve({ path: quoteSegments }),
+      })
+    ).status,
+  ).toBe(200);
   expect(
     (
       await GET(request(`catalog/supplier-quotes/${quote}/tiers`), {
-        params: { path: ['catalog', 'supplier-quotes', quote, 'tiers'] },
+        params: Promise.resolve({ path: ['catalog', 'supplier-quotes', quote, 'tiers'] }),
       })
     ).status,
   ).toBe(200);
@@ -961,7 +1096,9 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
     'catalog/supplier-quotes/effective/resolve/extra',
     'catalog/supplier-quotesx',
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
 
   // 放行仍然不能是前缀通配：3.6.1.2 只开了上面那几条**字面量**路径，
@@ -977,7 +1114,9 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
     'catalog/parties/not-a-uuid',
     'catalog/partiesx',
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
 });
 
@@ -986,7 +1125,9 @@ it('catalog/zombie-candidates 的全部路由被放行，且不放行更深的�
   vi.stubGlobal('fetch', fetcher);
 
   const base = 'catalog/zombie-candidates';
-  expect((await GET(request(base), { params: { path: segments(base) } })).status).toBe(200);
+  expect(
+    (await GET(request(base), { params: Promise.resolve({ path: segments(base) }) })).status,
+  ).toBe(200);
   for (const suffix of [
     'overview',
     'options',
@@ -997,26 +1138,33 @@ it('catalog/zombie-candidates 的全部路由被放行，且不放行更深的�
     'deactivation-targets',
   ]) {
     expect(
-      (await GET(request(`${base}/${suffix}`), { params: { path: segments(`${base}/${suffix}`) } }))
-        .status,
+      (
+        await GET(request(`${base}/${suffix}`), {
+          params: Promise.resolve({ path: segments(`${base}/${suffix}`) }),
+        })
+      ).status,
     ).toBe(200);
     expect(
       (
         await POST(request(`${base}/${suffix}`, 'POST'), {
-          params: { path: segments(`${base}/${suffix}`) },
+          params: Promise.resolve({ path: segments(`${base}/${suffix}`) }),
         })
       ).status,
     ).toBe(200);
   }
   // 规则配置：列表 + 按主体类型的 PUT（entityType 是枚举字面量，不是 uuid）
   expect(
-    (await GET(request(`${base}/rules`), { params: { path: segments(`${base}/rules`) } })).status,
+    (
+      await GET(request(`${base}/rules`), {
+        params: Promise.resolve({ path: segments(`${base}/rules`) }),
+      })
+    ).status,
   ).toBe(200);
   for (const entityType of ['SKU', 'SUPPLIER', 'CUSTOMER']) {
     expect(
       (
         await PUT(request(`${base}/rules/${entityType}`, 'PUT'), {
-          params: { path: segments(`${base}/rules/${entityType}`) },
+          params: Promise.resolve({ path: segments(`${base}/rules/${entityType}`) }),
         })
       ).status,
     ).toBe(200);
@@ -1030,7 +1178,9 @@ it('catalog/zombie-candidates 的全部路由被放行，且不放行更深的�
     `${base}/overview/extra`,
     'catalog/zombie-candidatesx',
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
 });
 
@@ -1056,70 +1206,78 @@ it('catalog/parties/{id}/addresses 与 /contacts 的全部路由被放行（3.6.
     `catalog/parties/${party}/contacts/candidates`,
     `catalog/parties/${party}/contacts/${contact}`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
   }
   // 写：新建 / 改地址（内容变了才追加版本）、只改用途、设默认、软删除；
   // 新建 / 改联系人、设默认、删除。
   expect(
     (
       await POST(request(`catalog/parties/${party}/addresses`, 'POST'), {
-        params: { path: ['catalog', 'parties', party, 'addresses'] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'addresses'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/addresses/${address}`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'addresses', address] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'addresses', address] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/addresses/${address}/usages`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'addresses', address, 'usages'] },
+        params: Promise.resolve({
+          path: ['catalog', 'parties', party, 'addresses', address, 'usages'],
+        }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/addresses/${address}/default`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'addresses', address, 'default'] },
+        params: Promise.resolve({
+          path: ['catalog', 'parties', party, 'addresses', address, 'default'],
+        }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await DELETE(request(`catalog/parties/${party}/addresses/${address}`, 'DELETE'), {
-        params: { path: ['catalog', 'parties', party, 'addresses', address] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'addresses', address] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await POST(request(`catalog/parties/${party}/contacts`, 'POST'), {
-        params: { path: ['catalog', 'parties', party, 'contacts'] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'contacts'] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/contacts/${contact}`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'contacts', contact] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'contacts', contact] }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await PUT(request(`catalog/parties/${party}/contacts/${contact}/primary`, 'PUT'), {
-        params: { path: ['catalog', 'parties', party, 'contacts', contact, 'primary'] },
+        params: Promise.resolve({
+          path: ['catalog', 'parties', party, 'contacts', contact, 'primary'],
+        }),
       })
     ).status,
   ).toBe(200);
   expect(
     (
       await DELETE(request(`catalog/parties/${party}/contacts/${contact}`, 'DELETE'), {
-        params: { path: ['catalog', 'parties', party, 'contacts', contact] },
+        params: Promise.resolve({ path: ['catalog', 'parties', party, 'contacts', contact] }),
       })
     ).status,
   ).toBe(200);
@@ -1138,7 +1296,9 @@ it('catalog/parties/{id}/addresses 与 /contacts 的全部路由被放行（3.6.
     `catalog/parties/${party}/contacts/not-a-uuid`,
     `catalog/parties/${party}/addressesx`,
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(404);
   }
 });
 
@@ -1157,7 +1317,9 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
     'catalog/bundle-skus',
     `catalog/bundle-skus/${link}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -1169,22 +1331,26 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
   expect(
     (
       await GET(request(`catalog/versions/${version}/component-check`), {
-        params: { path: ['catalog', 'versions', version, 'component-check'] },
+        params: Promise.resolve({ path: ['catalog', 'versions', version, 'component-check'] }),
       })
     ).status,
   ).toBe(200);
   // 加一行组件（POST）与新建指向都是 POST。
   for (const path of [`catalog/versions/${version}/components`, 'catalog/bundle-skus']) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
-      200,
-    );
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
   // 改单行组件与改指向都是 PUT。
   for (const [path, segments] of [
     [`catalog/components/${component}`, ['catalog', 'components', component]],
     [`catalog/bundle-skus/${link}`, ['catalog', 'bundle-skus', link]],
   ] as const) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: [...segments] } })).status).toBe(200);
+    expect(
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: [...segments] }) }))
+        .status,
+    ).toBe(200);
   }
   // 删单行组件与解指向都是 DELETE。
   for (const [path, segments] of [
@@ -1192,7 +1358,8 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
     [`catalog/bundle-skus/${link}`, ['catalog', 'bundle-skus', link]],
   ] as const) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status,
+      (await DELETE(request(path, 'DELETE'), { params: Promise.resolve({ path: [...segments] }) }))
+        .status,
     ).toBe(200);
   }
   // 不在白名单里的相邻路径仍然 404：放行不能是前缀通配。
@@ -1203,14 +1370,16 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
     `catalog/bundle-skus/${link}/unknown`,
     `catalog/versions/${version}/component-checks`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   // 3.5.1.1 的整体替换与 3.5.1.2 的加一行是两条不同语义：
   // components/{id} 放行不代表 components/{id}/components 也放行。
   expect(
     (
       await GET(request(`catalog/components/${component}/components`), {
-        params: { path: ['catalog', 'components', component, 'components'] },
+        params: Promise.resolve({ path: ['catalog', 'components', component, 'components'] }),
       })
     ).status,
   ).toBe(404);
@@ -1238,7 +1407,9 @@ it('catalog/import-jobs 的校验报告全路径被放行且转发到 catalog �
     `catalog/import-jobs/${id}/report/exports`,
     `catalog/import-jobs/${id}/report/exports/${exportId}/file`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -1251,7 +1422,10 @@ it('catalog/import-jobs 的校验报告全路径被放行且转发到 catalog �
     `catalog/import-jobs/${id}/report`,
     `catalog/import-jobs/${id}/report/exports`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
+    ).toBe(200);
   }
 });
 
@@ -1264,7 +1438,9 @@ it('校验报告放行不等于放行 import-jobs 的任意子路径', async () 
     `catalog/import-jobs/${id}/report/unknown`,
     `catalog/import-jobs/${id}/report/exports/${exportId}/extra`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
+    ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -1289,7 +1465,7 @@ it('3.8.1.1 导入向导已有的路径没有被报告子段改坏', async () =>
   ]) {
     // 失败时用 path 指出是哪一段被改坏了，而不是只看到一个 404
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 必须仍然放行`,
     ).toBe(200);
   }
@@ -1316,7 +1492,7 @@ it('catalog/duplicate-* 的全部路由被放行且转发到 catalog 服务', as
   ];
   for (const path of forGet) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 必须放行`,
     ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
@@ -1327,14 +1503,26 @@ it('catalog/duplicate-* 的全部路由被放行且转发到 catalog 服务', as
     );
   }
   // 发起扫描与登记决定都是 POST
-  expect((await POST(request('catalog/duplicate-scans'), { params: { path: ['catalog', 'duplicate-scans'] } })).status).toBe(200);
+  expect(
+    (
+      await POST(request('catalog/duplicate-scans'), {
+        params: Promise.resolve({ path: ['catalog', 'duplicate-scans'] }),
+      })
+    ).status,
+  ).toBe(200);
   const decide = `catalog/duplicate-candidates/${id}/decision`;
-  expect((await POST(request(decide), { params: { path: decide.split('/') } })).status).toBe(200);
+  expect(
+    (await POST(request(decide), { params: Promise.resolve({ path: decide.split('/') }) })).status,
+  ).toBe(200);
   // 3.9.1.2 交付之后，merge / merge-preview 子路径才允许放行（此前刻意不放行）
   const preview = `catalog/duplicate-candidates/${id}/merge-preview`;
-  expect((await GET(request(preview), { params: { path: preview.split('/') } })).status).toBe(200);
+  expect(
+    (await GET(request(preview), { params: Promise.resolve({ path: preview.split('/') }) })).status,
+  ).toBe(200);
   const merge = `catalog/duplicate-candidates/${id}/merge`;
-  expect((await POST(request(merge), { params: { path: merge.split('/') } })).status).toBe(200);
+  expect(
+    (await POST(request(merge), { params: Promise.resolve({ path: merge.split('/') }) })).status,
+  ).toBe(200);
 });
 
 it('duplicate-* 放行不等于放行任意 catalog 子路径', async () => {
@@ -1349,7 +1537,7 @@ it('duplicate-* 放行不等于放行任意 catalog 子路径', async () => {
     `catalog/duplicate-scans/${id}/duplicate-candidates`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 不该被放行`,
     ).toBe(404);
   }
@@ -1371,7 +1559,7 @@ it('3.9.1.1 的放行没有改坏相邻已交付模块的路径', async () => {
     `catalog/supplier-quotes/${id}/tiers`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 必须仍然放行`,
     ).toBe(200);
   }
@@ -1401,7 +1589,7 @@ it('3.9.2.1 完整度评分的路径逐条放行且未实现的子路径仍被�
     `completeness/SKU/${uuid}`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: at(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: at(path) }) })).status,
       `${path} 必须放行`,
     ).toBe(200);
   }
@@ -1413,19 +1601,23 @@ it('3.9.2.1 完整度评分的路径逐条放行且未实现的子路径仍被�
     ['completeness/evaluations', POST],
   ] as const) {
     expect(
-      (await method(request(path, 'POST'), { params: { path: at(path) } })).status,
+      (await method(request(path, 'POST'), { params: Promise.resolve({ path: at(path) }) })).status,
       `${path} 必须放行 POST`,
     ).toBe(200);
   }
   expect(
-    (await PUT(request(`completeness/customs/skus/${uuid}`, 'PUT'), {
-      params: { path: seg('customs', 'skus', uuid) },
-    })).status,
+    (
+      await PUT(request(`completeness/customs/skus/${uuid}`, 'PUT'), {
+        params: Promise.resolve({ path: seg('customs', 'skus', uuid) }),
+      })
+    ).status,
   ).toBe(200);
   expect(
-    (await PUT(request(`completeness/certifications/skus/${uuid}/${uuid}`, 'PUT'), {
-      params: { path: seg('certifications', 'skus', uuid, uuid) },
-    })).status,
+    (
+      await PUT(request(`completeness/certifications/skus/${uuid}/${uuid}`, 'PUT'), {
+        params: Promise.resolve({ path: seg('certifications', 'skus', uuid, uuid) }),
+      })
+    ).status,
   ).toBe(200);
 
   // 已被放行的请求都会真的转发到上游一次，记下当前调用数，
@@ -1447,7 +1639,7 @@ it('3.9.2.1 完整度评分的路径逐条放行且未实现的子路径仍被�
     'completenessx',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: at(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: at(path) }) })).status,
       `${path} 必须仍然被拒`,
     ).toBe(404);
   }
@@ -1476,7 +1668,7 @@ it('catalog/sku-merges 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/duplicate-candidates/${id}/merge-preview`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) })).status,
       `${path} 必须放行`,
     ).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
@@ -1488,7 +1680,9 @@ it('catalog/sku-merges 的全部路由被放行且转发到 catalog 服务', asy
   }
   // 执行合并是 POST
   const merge = `catalog/duplicate-candidates/${id}/merge`;
-  expect((await POST(request(merge), { params: { path: merge.split('/') } })).status).toBe(200);
+  expect(
+    (await POST(request(merge), { params: Promise.resolve({ path: merge.split('/') }) })).status,
+  ).toBe(200);
 });
 
 it('sku-merges 放行不等于放行任意 catalog 子路径', async () => {
@@ -1505,7 +1699,7 @@ it('sku-merges 放行不等于放行任意 catalog 子路径', async () => {
     `catalog/duplicate-candidates/${id}/merge-preview/extra`,
   ]) {
     expect(
-      (await GET(request(path), { params: { path: segments(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
       `${path} 不该被放行`,
     ).toBe(404);
   }
@@ -1544,7 +1738,7 @@ it('catalog/kb 的全部路由被放行（11.4.2.2 客服知识库与话术）',
     'catalog/kb/hit-rates?sort=LEAST_USED',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: segments(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
       `${path} 应被放行`,
     ).toBe(200);
   }
@@ -1557,7 +1751,8 @@ it('catalog/kb 的全部路由被放行（11.4.2.2 客服知识库与话术）',
     'catalog/kb/rule-versions',
   ]) {
     expect(
-      (await POST(request(path, 'POST'), { params: { path: segments(path) } })).status,
+      (await POST(request(path, 'POST'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
       `${path} 应被放行`,
     ).toBe(200);
   }
@@ -1571,7 +1766,8 @@ it('catalog/kb 的全部路由被放行（11.4.2.2 客服知识库与话术）',
     `catalog/kb/review-tasks/${task}`,
   ]) {
     expect(
-      (await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status,
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
       `${path} 应被放行`,
     ).toBe(200);
   }
@@ -1583,7 +1779,8 @@ it('catalog/kb 的全部路由被放行（11.4.2.2 客服知识库与话术）',
     `catalog/kb/entries/${entry}/rule-bindings/${binding}`,
   ]) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: segments(path) } })).status,
+      (await DELETE(request(path, 'DELETE'), { params: Promise.resolve({ path: segments(path) }) }))
+        .status,
       `${path} 应被放行`,
     ).toBe(200);
   }
@@ -1608,12 +1805,18 @@ it('catalog/kb 不放行相邻的未知子路径，且引用记录没有改删�
     'catalog/kb/translations',
   ]) {
     expect(
-      (await GET(request(path), { params: { path: segments(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
       `${path} 不该被放行`,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
-  expect((await DELETE(request(`catalog/kb/usages/${entry}`, 'DELETE'), { params: { path: segments(`catalog/kb/usages/${entry}`) } })).status).toBe(404);
+  expect(
+    (
+      await DELETE(request(`catalog/kb/usages/${entry}`, 'DELETE'), {
+        params: Promise.resolve({ path: segments(`catalog/kb/usages/${entry}`) }),
+      })
+    ).status,
+  ).toBe(404);
   expect(fetcher).not.toHaveBeenCalled();
 });
 
@@ -1623,7 +1826,7 @@ it('放行 catalog/kb 绝不代表放行 descriptions 或其它相邻路径', as
   vi.stubGlobal('fetch', fetcher);
   for (const path of ['catalog/kbx', 'catalog/k', 'catalog/kb1/overview']) {
     expect(
-      (await GET(request(path), { params: { path: segments(path) } })).status,
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
       `${path} 不该被放行`,
     ).toBe(404);
   }
@@ -1636,6 +1839,8 @@ it('放行 catalog/kb 绝不代表放行 descriptions 或其它相邻路径', as
     'catalog/sku-merges/overview',
     'catalog/completeness/overview',
   ]) {
-    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+    expect(
+      (await GET(request(path), { params: Promise.resolve({ path: segments(path) }) })).status,
+    ).toBe(200);
   }
 });

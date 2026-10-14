@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.4.2.1 标题库纯规则层单测：相似度算法、模板与词根校验、容量上限。
  *
- * <p>不依赖 Testcontainers：这些是纯函数，相似度是蓝图唯一点名要求的算法，
- * 必须能被逐条断言，而不是只能靠集成测试间接观察。
+ * <p>不依赖 Testcontainers：这些是纯函数，相似度是蓝图唯一点名要求的算法， 必须能被逐条断言，而不是只能靠集成测试间接观察。
  */
 class TitleRulesTest {
 
@@ -55,8 +54,11 @@ class TitleRulesTest {
   @Test
   void similarityIsDeterministicAndWithinRange() {
     String[] samples = {
-      "星云 便携 蓝牙音箱 40W 长续航", "AOOSH 桌面 显示器支架 铝合金",
-      "Kitchen Scale Digital 10kg", "无线蓝牙音箱 长续航 便携 40W", "厨房 不锈钢 砧板 防滑"
+      "星云 便携 蓝牙音箱 40W 长续航",
+      "AOOSH 桌面 显示器支架 铝合金",
+      "Kitchen Scale Digital 10kg",
+      "无线蓝牙音箱 长续航 便携 40W",
+      "厨房 不锈钢 砧板 防滑"
     };
     for (String a : samples)
       for (String b : samples) {
@@ -77,8 +79,9 @@ class TitleRulesTest {
   @Test
   void maxSimilarityTakesTheWorstOfTheComparisonSet() {
     String candidate = "星云 便携 蓝牙音箱 40W";
-    int max = TitleRules.maxSimilarityPermille(candidate,
-        List.of("厨房 不锈钢 砧板", "星云 便携 蓝牙音箱 40W 长续航", "AOOSH 显示器支架"));
+    int max =
+        TitleRules.maxSimilarityPermille(
+            candidate, List.of("厨房 不锈钢 砧板", "星云 便携 蓝牙音箱 40W 长续航", "AOOSH 显示器支架"));
     // 与第二条共享全部词，只多一个「长续航」——所以最大值来自那条。
     assertThat(max).isGreaterThan(700);
     assertThat(max).isEqualTo(TitleRules.similarityPermille(candidate, "星云 便携 蓝牙音箱 40W 长续航"));
@@ -95,7 +98,8 @@ class TitleRulesTest {
     assertThat(TitleRules.tokenize(TitleRules.normalizeForCompare("蓝牙 音箱 bluetooth5")))
         .containsExactly("蓝", "牙", "音", "箱", "bluetooth5");
     // 分隔符被丢掉：它不是词元。
-    assertThat(TitleRules.tokenize(TitleRules.normalizeForCompare("a-b_c、d"))).containsExactly("a", "b", "c", "d");
+    assertThat(TitleRules.tokenize(TitleRules.normalizeForCompare("a-b_c、d")))
+        .containsExactly("a", "b", "c", "d");
     assertThat(TitleRules.tokenize("")).isEmpty();
   }
 
@@ -194,11 +198,16 @@ class TitleRulesTest {
   void placeholdersAndDeclaredVariablesMustMatchInBothDirections() {
     // 文本里写了却没声明绑定源 → 渲染时拿不到词，会静默留下占位符。
     assertThat(TitleRules.variableBindingProblem("{brand} {core}", List.of("brand")))
-        .contains("{core}").contains("没有声明绑定源");
+        .contains("{core}")
+        .contains("没有声明绑定源");
     // 声明了却没在文本里出现 → 死配置，模板含义与实际渲染对不上。
-    assertThat(TitleRules.variableBindingProblem("{brand} {core}", List.of("brand", "core", "selling")))
-        .contains("selling").contains("死配置");
-    assertThat(TitleRules.variableBindingProblem("{brand} {core}", List.of("brand", "core"))).isNull();
+    assertThat(
+            TitleRules.variableBindingProblem(
+                "{brand} {core}", List.of("brand", "core", "selling")))
+        .contains("selling")
+        .contains("死配置");
+    assertThat(TitleRules.variableBindingProblem("{brand} {core}", List.of("brand", "core")))
+        .isNull();
   }
 
   @Test
@@ -208,7 +217,8 @@ class TitleRulesTest {
     assertThat(TitleRules.needsKeywordVariableProblem(List.of("SPU_BRAND", "SPU_CATEGORY")))
         .contains("至少要有一个词根变量");
     assertThat(TitleRules.needsKeywordVariableProblem(List.of())).contains("至少要声明一个变量");
-    assertThat(TitleRules.needsKeywordVariableProblem(List.of("SPU_BRAND", "KEYWORD_MODIFIER"))).isNull();
+    assertThat(TitleRules.needsKeywordVariableProblem(List.of("SPU_BRAND", "KEYWORD_MODIFIER")))
+        .isNull();
   }
 
   @Test
@@ -255,7 +265,8 @@ class TitleRulesTest {
   void vocabulariesHaveNoDuplicatesAndWeightsSumToOneThousand() {
     // 类初始化里的断言：词表有笔误会在类加载时炸掉，这里再显式确认一次上界。
     assertThat(TitleRules.MAX_ATTEMPTS_PER_CANDIDATE).isEqualTo(24);
-    assertThat(TitleRules.DEFAULT_SIMILARITY_PERMILLE).isBetween(0, TitleRules.MAX_SIMILARITY_PERMILLE);
+    assertThat(TitleRules.DEFAULT_SIMILARITY_PERMILLE)
+        .isBetween(0, TitleRules.MAX_SIMILARITY_PERMILLE);
     assertThat(TitleRules.KEYWORD_TYPES).hasSize(3);
     assertThat(TitleRules.RECORD_STATUSES).hasSize(3);
     assertThat(TitleRules.GENERATION_STATUSES).hasSize(3);

@@ -164,19 +164,19 @@ describe('validateAttribute', () => {
     expect(validateAttribute({ ...emptyAttributeDraft(), name: '颜色' }, true).join()).toContain(
       '属性编码不能为空',
     );
-    expect(validateAttribute({ ...emptyAttributeDraft(), name: '颜色', code: 'COLOR' }, false)).toEqual(
-      [],
-    );
+    expect(
+      validateAttribute({ ...emptyAttributeDraft(), name: '颜色', code: 'COLOR' }, false),
+    ).toEqual([]);
   });
 
   it('枚举属性必须给选项，非枚举属性不能给选项', () => {
     const base = { ...emptyAttributeDraft(), code: 'COLOR', name: '颜色' };
-    expect(
-      validateAttribute({ ...base, dataType: 'OPTION', options: '' }, true).join(),
-    ).toContain('枚举属性请至少提供一个选项');
-    expect(
-      validateAttribute({ ...base, dataType: 'TEXT', options: '棉' }, true).join(),
-    ).toContain('只有枚举属性（OPTION）可以配置选项集合');
+    expect(validateAttribute({ ...base, dataType: 'OPTION', options: '' }, true).join()).toContain(
+      '枚举属性请至少提供一个选项',
+    );
+    expect(validateAttribute({ ...base, dataType: 'TEXT', options: '棉' }, true).join()).toContain(
+      '只有枚举属性（OPTION）可以配置选项集合',
+    );
   });
 
   it('拒绝空名称、重复选项与非数字排序', () => {
@@ -224,9 +224,7 @@ describe('optionCountHint', () => {
 
   it('区分「还没配取值」与「取值全被停用」', () => {
     expect(optionCountHint(row({ optionCount: 0 }))).toContain('还没有任何取值');
-    expect(
-      optionCountHint(row({ optionCount: 3, enabledOptionCount: 0 })),
-    ).toContain('都已停用');
+    expect(optionCountHint(row({ optionCount: 3, enabledOptionCount: 0 }))).toContain('都已停用');
     expect(optionCountHint(row({ optionCount: 3, enabledOptionCount: 2 }))).toBeNull();
   });
 });
@@ -270,9 +268,7 @@ describe('validateRule', () => {
   it('数字属性接受上下限，枚举属性拒绝上下限', () => {
     const draft = { ...emptyRuleDraft('服饰'), minValue: '1', maxValue: '5' };
     expect(validateRule(draft, 'DECIMAL', options)).toEqual([]);
-    expect(validateRule(draft, 'OPTION', options).join()).toContain(
-      '取值上下限只对数字属性有意义',
-    );
+    expect(validateRule(draft, 'OPTION', options).join()).toContain('取值上下限只对数字属性有意义');
   });
 
   it('下限大于上限被拒', () => {
@@ -290,10 +286,18 @@ describe('validateRule', () => {
       validateRule({ ...emptyRuleDraft('服饰'), allowedOptions: ['红色'] }, 'OPTION', options),
     ).toEqual([]);
     expect(
-      validateRule({ ...emptyRuleDraft('服饰'), allowedOptions: ['灰色'] }, 'OPTION', options).join(),
+      validateRule(
+        { ...emptyRuleDraft('服饰'), allowedOptions: ['灰色'] },
+        'OPTION',
+        options,
+      ).join(),
     ).toContain('不在该属性的可用选项里');
     expect(
-      validateRule({ ...emptyRuleDraft('服饰'), allowedOptions: ['不存在'] }, 'OPTION', options).join(),
+      validateRule(
+        { ...emptyRuleDraft('服饰'), allowedOptions: ['不存在'] },
+        'OPTION',
+        options,
+      ).join(),
     ).toContain('不在该属性的可用选项里');
   });
 });

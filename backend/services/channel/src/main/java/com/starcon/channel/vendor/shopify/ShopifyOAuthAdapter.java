@@ -14,14 +14,15 @@ import org.springframework.stereotype.Component;
  * Shopify OAuth。
  *
  * <p>这个平台和其他平台有三处结构性差异，都必须由适配器兜住：
+ *
  * <ol>
  *   <li>授权与换令牌都在<b>店铺自己的域名</b>下（{@code {shop}.myshopify.com}），不是平台统一域名；
  *   <li>scope 用<b>逗号</b>分隔；
  *   <li>换令牌是 <b>JSON</b> 请求，且响应里已经带出店铺信息，不需要再查账号接口。
  * </ol>
  *
- * <p>令牌是长期有效的（Shopify 不返回过期时间），因此 2.2.2.2 的到期提醒对它不触发，
- * 失效只可能来自店铺在后台主动解除授权 —— 这种情况由 2.2.2.1 健康诊断读 last_error 暴露。
+ * <p>令牌是长期有效的（Shopify 不返回过期时间），因此 2.2.2.2 的到期提醒对它不触发， 失效只可能来自店铺在后台主动解除授权 —— 这种情况由 2.2.2.1 健康诊断读
+ * last_error 暴露。
  */
 @Component
 public class ShopifyOAuthAdapter extends AbstractOAuthAdapter {
@@ -46,14 +47,15 @@ public class ShopifyOAuthAdapter extends AbstractOAuthAdapter {
     // 店铺域名是拼 URL 的前提，缺了它就没有任何合法跳转可给
     if (request.loginHint().isBlank())
       return "请先填写店铺域名（例如 my-store.myshopify.com），Shopify 的授权在店铺自己的域名下完成";
-    if (!request.loginHint().endsWith(".myshopify.com"))
-      return "店铺域名应以 .myshopify.com 结尾";
+    if (!request.loginHint().endsWith(".myshopify.com")) return "店铺域名应以 .myshopify.com 结尾";
     return null;
   }
 
   @Override
   public URI authorizeUri(OAuthProfile profile, AuthorizeRequest request) {
-    return uri(withShopDomain(profile, request.loginHint()).authorizeUrl(), authorizeParams(profile, request));
+    return uri(
+        withShopDomain(profile, request.loginHint()).authorizeUrl(),
+        authorizeParams(profile, request));
   }
 
   @Override

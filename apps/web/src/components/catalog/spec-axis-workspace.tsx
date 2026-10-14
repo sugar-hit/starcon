@@ -193,9 +193,7 @@ export function SpecAxisWorkspace() {
   const enabledAxes = useMemo(() => axes.filter((axis) => axis.enabled), [axes]);
   const unboundAxes = useMemo(
     () =>
-      panel
-        ? axes.filter((axis) => !panel.axes.some((bound) => bound.specAxisId === axis.id))
-        : [],
+      panel ? axes.filter((axis) => !panel.axes.some((bound) => bound.specAxisId === axis.id)) : [],
     [axes, panel],
   );
 
@@ -401,7 +399,11 @@ export function SpecAxisWorkspace() {
                   <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
                     {axis.name}
                     <Badge tone="neutral">{axis.code}</Badge>
-                    {axis.enabled ? <Badge tone="success">启用中</Badge> : <Badge tone="neutral">已停用</Badge>}
+                    {axis.enabled ? (
+                      <Badge tone="success">启用中</Badge>
+                    ) : (
+                      <Badge tone="neutral">已停用</Badge>
+                    )}
                   </p>
                   <p className="text-muted-foreground mt-1 text-xs">{axisUsageText(axis)}</p>
                 </div>
@@ -544,11 +546,12 @@ export function SpecAxisWorkspace() {
                   登记选项
                 </Button>
               </div>
-              {validateOption(optionDraft, optionRows).length > 0 && optionDraft.value.trim() !== '' && (
-                <p className="text-muted-foreground text-xs">
-                  {validateOption(optionDraft, optionRows).join('；')}
-                </p>
-              )}
+              {validateOption(optionDraft, optionRows).length > 0 &&
+                optionDraft.value.trim() !== '' && (
+                  <p className="text-muted-foreground text-xs">
+                    {validateOption(optionDraft, optionRows).join('；')}
+                  </p>
+                )}
             </div>
           )}
         </Card>
@@ -640,8 +643,8 @@ export function SpecAxisWorkspace() {
                       </Badge>
                     </p>
                     <p className="text-muted-foreground mt-1 text-xs">
-                      承载属性「{axis.attributeName}」（{axis.attributeCode}）· {axis.skuCount} 个 SKU · 排序{' '}
-                      {axis.position}
+                      承载属性「{axis.attributeName}」（{axis.attributeCode}）· {axis.skuCount} 个
+                      SKU · 排序 {axis.position}
                     </p>
                     <p className="text-muted-foreground mt-1 text-xs">
                       选项：
@@ -689,8 +692,7 @@ export function SpecAxisWorkspace() {
                     <option value="">请选择</option>
                     {unboundAxes.map((axis) => (
                       <option key={axis.id} value={axis.id}>
-                        {axis.name}（{axis.code}）
-                        {axis.enabled ? '' : ' · 已停用'}
+                        {axis.name}（{axis.code}）{axis.enabled ? '' : ' · 已停用'}
                       </option>
                     ))}
                   </select>
@@ -779,7 +781,11 @@ export function SpecAxisWorkspace() {
                   <p className="flex flex-wrap items-center gap-2 text-sm">
                     {rule.specAxisName}
                     <Badge tone="neutral">{rule.specAxisCode}</Badge>
-                    {rule.required ? <Badge tone="warning">必绑</Badge> : <Badge tone="neutral">可选</Badge>}
+                    {rule.required ? (
+                      <Badge tone="warning">必绑</Badge>
+                    ) : (
+                      <Badge tone="neutral">可选</Badge>
+                    )}
                   </p>
                   <p className="text-muted-foreground mt-0.5 text-xs">
                     排序 {rule.position} · 该类目下有 {rule.boundSpuCount} 个 SPU
@@ -852,7 +858,8 @@ export function SpecAxisWorkspace() {
           </div>
         )}
         <p className="text-muted-foreground mt-2 text-xs">
-          删除规则**不会**解绑已有 SPU：规则只是新建绑定时的准入条件，已经合法的绑定不该被一条新规则连坐改掉。
+          删除规则**不会**解绑已有
+          SPU：规则只是新建绑定时的准入条件，已经合法的绑定不该被一条新规则连坐改掉。
         </p>
       </Card>
 

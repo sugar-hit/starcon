@@ -58,9 +58,11 @@ V107 已经预留 `reservation_allocation.released_quantity` 与 RELEASED / EXPI
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V112__warehouse_reservation_release_expiry.sql`
 
 **后端**（record 简单类名全部 `ReservationRelease*` 前缀，避开静默覆盖高危裸名）
+
 - `.../ReservationReleaseModels.java`（17 个契约类型）
 - `.../ReservationReleaseService.java`（jOOQ 显式 SQL；读 6 端点 / 写 3 动作）
 - `.../ReservationReleaseController.java`（9 个形状挂在 `/warehouse/inventory/reservations` 之下）
@@ -69,6 +71,7 @@ V107 已经预留 `reservation_allocation.released_quantity` 与 RELEASED / EXPI
   `ALLOCATION_RELEASE` 能力位由 `available=false` 翻成 `true` 并写明入口
 
 **前端**
+
 - `apps/web/src/components/inventory/inventory-reservation-release-model.ts` + `.test.ts`（18 例）
 - `apps/web/src/components/inventory/inventory-reservation-release.tsx`（真实工作区）
 - `apps/web/src/app/inventory/reservation-release/page.tsx`
@@ -82,6 +85,7 @@ V107 已经预留 `reservation_allocation.released_quantity` 与 RELEASED / EXPI
   「`{id}/release` 仍须 404」的旧断言改为「再多一层后缀仍 404」（旧断言编码的是 7.2.1.3 未交付时的真相）
 
 **契约**（codegen 产物，未手改）
+
 - `packages/api-contracts/src/contracts/warehouse.ts`、`.../src/warehouse.openapi.json`
 
 ## 验证

@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, RefreshCw, Scale, ShieldAlert, ShieldCheck, TriangleAlert } from 'lucide-react';
+import {
+  AlertTriangle,
+  RefreshCw,
+  Scale,
+  ShieldAlert,
+  ShieldCheck,
+  TriangleAlert,
+} from 'lucide-react';
 import { Button, EmptyState, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   LegalEntityRef,
@@ -118,27 +125,24 @@ export function InventoryReconciliation() {
   }, [readable]);
 
   /** 打开某次核对：结论 + 两份发现各自真分页。 */
-  const openRun = useCallback(
-    async (runId: string) => {
-      setError('');
-      setNotice('');
-      setSelectedRun(runId);
-      setDiscPage(0);
-      setSuspectPage(0);
-      try {
-        setResult(await fetchReconciliationRun(runId));
-        const [disc, sus] = await Promise.all([
-          fetchReconciliationFindings(runId, { kind: 'DISCREPANCY', page: 0, size: 50 }),
-          fetchReconciliationFindings(runId, { kind: 'SUSPECT', page: 0, size: 50 }),
-        ]);
-        setDiscrepancies(disc);
-        setSuspects(sus);
-      } catch (e) {
-        setError(errorText(e));
-      }
-    },
-    [],
-  );
+  const openRun = useCallback(async (runId: string) => {
+    setError('');
+    setNotice('');
+    setSelectedRun(runId);
+    setDiscPage(0);
+    setSuspectPage(0);
+    try {
+      setResult(await fetchReconciliationRun(runId));
+      const [disc, sus] = await Promise.all([
+        fetchReconciliationFindings(runId, { kind: 'DISCREPANCY', page: 0, size: 50 }),
+        fetchReconciliationFindings(runId, { kind: 'SUSPECT', page: 0, size: 50 }),
+      ]);
+      setDiscrepancies(disc);
+      setSuspects(sus);
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }, []);
 
   async function execute() {
     setError('');
@@ -161,7 +165,12 @@ export function InventoryReconciliation() {
       const res = await runReconciliation(params);
       setResult(res);
       setSelectedRun(res.run.id);
-      setDiscrepancies({ findings: res.discrepancies, total: res.discrepancies.length, page: 0, size: 50 });
+      setDiscrepancies({
+        findings: res.discrepancies,
+        total: res.discrepancies.length,
+        page: 0,
+        size: 50,
+      });
       setSuspects({ findings: res.suspects, total: res.suspects.length, page: 0, size: 50 });
       setNotice(
         res.run.status === 'CONSISTENT'
@@ -177,10 +186,7 @@ export function InventoryReconciliation() {
   }
 
   /** 翻某一类发现的页。合计恒为全量，翻页时数字不会变小。 */
-  async function turnFindings(
-    kind: 'DISCREPANCY' | 'SUSPECT',
-    page: number,
-  ): Promise<void> {
+  async function turnFindings(kind: 'DISCREPANCY' | 'SUSPECT', page: number): Promise<void> {
     if (!selectedRun) return;
     setError('');
     try {
@@ -220,7 +226,7 @@ export function InventoryReconciliation() {
             <span className="block font-medium">区间起（含）</span>
             <input
               type="datetime-local"
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
             />
@@ -229,7 +235,7 @@ export function InventoryReconciliation() {
             <span className="block font-medium">区间止（不含）</span>
             <input
               type="datetime-local"
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={to}
               onChange={(e) => setTo(e.target.value)}
             />
@@ -237,7 +243,7 @@ export function InventoryReconciliation() {
           <label className="space-y-1 text-sm">
             <span className="block font-medium">范围</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={scope}
               onChange={(e) => setScope(e.target.value)}
             >
@@ -263,12 +269,12 @@ export function InventoryReconciliation() {
               {running ? '核对中…' : '执行核对'}
             </Button>
           </div>
-          <div className="flex items-end text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-end text-xs">
             {!writable ? '发起核对需要 warehouse.inventory.update 权限' : '结论会留档且不可修改'}
           </div>
         </div>
         {error && (
-          <div className="mt-3 flex items-start gap-3 rounded-md border border-destructive/40 bg-destructive-soft p-4 text-sm text-destructive">
+          <div className="border-destructive/40 bg-destructive-soft text-destructive mt-3 flex items-start gap-3 rounded-md border p-4 text-sm">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="space-y-2">
               <p>{error}</p>
@@ -279,7 +285,7 @@ export function InventoryReconciliation() {
           </div>
         )}
         {notice && (
-          <div className="mt-3 rounded-md border border-success/40 bg-success-soft p-4 text-sm text-success">
+          <div className="border-success/40 bg-success-soft text-success mt-3 rounded-md border p-4 text-sm">
             {notice}
           </div>
         )}
@@ -315,7 +321,7 @@ export function InventoryReconciliation() {
         extra={
           <div className="flex items-center gap-2">
             <select
-              className="rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card rounded-md border px-3 py-2 text-sm"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -332,7 +338,9 @@ export function InventoryReconciliation() {
               onClick={() => void loadHistory()}
               disabled={loading}
             >
-              <RefreshCw className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'} />
+              <RefreshCw
+                className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'}
+              />
               刷新
             </Button>
           </div>
@@ -347,7 +355,7 @@ export function InventoryReconciliation() {
         ) : (
           <>
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="text-muted-foreground text-left text-xs">
                 <tr>
                   <th className="py-2">核对时间</th>
                   <th className="py-2">范围</th>
@@ -362,16 +370,16 @@ export function InventoryReconciliation() {
                 {history.runs.map((r) => (
                   <tr
                     key={r.id}
-                    className={`border-t border-border ${selectedRun === r.id ? 'bg-muted/50' : ''}`}
+                    className={`border-border border-t ${selectedRun === r.id ? 'bg-muted/50' : ''}`}
                   >
                     <td className="py-2">{formatMoment(r.createdAt)}</td>
                     <td className="py-2">
                       {r.scopeLabel}
-                      <span className="ml-1 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground ml-1 text-xs">
                         {scopeTypeLabels[r.scopeType] ?? r.scopeType}
                       </span>
                     </td>
-                    <td className="py-2 text-xs text-muted-foreground">
+                    <td className="text-muted-foreground py-2 text-xs">
                       {formatMoment(r.windowFrom)} ~ {formatMoment(r.windowTo)}
                     </td>
                     <td className="py-2">
@@ -416,15 +424,15 @@ function Verdict({ run }: { run: ReconciliationRun }) {
     >
       <div className="flex items-start gap-3">
         {consistent ? (
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+          <ShieldCheck className="text-success mt-0.5 h-5 w-5 shrink-0" />
         ) : (
-          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+          <ShieldAlert className="text-destructive mt-0.5 h-5 w-5 shrink-0" />
         )}
         <div className="min-w-0 space-y-2">
           <p className={`text-sm font-medium ${consistent ? 'text-success' : 'text-destructive'}`}>
             {statusLabels[run.status] ?? run.status} · {run.scopeLabel}
           </p>
-          <p className="text-sm text-muted-foreground">{run.verdictNote}</p>
+          <p className="text-muted-foreground text-sm">{run.verdictNote}</p>
         </div>
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -447,7 +455,7 @@ function Verdict({ run }: { run: ReconciliationRun }) {
         />
       </div>
       {/* 口径公式摆在页面上：数字对不上时先让人看懂这几个数是怎么加起来的 */}
-      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+      <div className="text-muted-foreground mt-3 grid gap-2 text-xs sm:grid-cols-2">
         <p>
           在手：期初 <span className="font-mono">{diffText(run.openingOnHand)}</span> + 区间内{' '}
           <span className="font-mono">{diffText(run.periodOnHand)}</span> + 区间后{' '}
@@ -464,7 +472,7 @@ function Verdict({ run }: { run: ReconciliationRun }) {
         </p>
       </div>
       {(run.afterWindowOnHand !== 0 || run.afterWindowReserved !== 0) && (
-        <div className="mt-3 flex items-start gap-2 rounded-md border border-warning/40 bg-warning-soft p-3 text-xs text-warning">
+        <div className="border-warning/40 bg-warning-soft text-warning mt-3 flex items-start gap-2 rounded-md border p-3 text-xs">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>核对区间结束后仍有流水，通常意味着错期录入或事后补记，先查这一段。</span>
         </div>
@@ -485,7 +493,7 @@ function SuspectWindows({ windows }: { windows: ReconciliationSuspectWindow[] })
         {windows.map((w) => (
           <li
             key={w.windowStart}
-            className="flex flex-wrap items-center gap-3 rounded-md border border-border px-3 py-2"
+            className="border-border flex flex-wrap items-center gap-3 rounded-md border px-3 py-2"
           >
             <SeverityBadge severity={w.severity} />
             <span className="font-mono text-xs">{windowLabel(w.windowStart, w.windowEnd)}</span>
@@ -522,7 +530,7 @@ function DiscrepancyTable({
       ) : (
         <>
           <table className="w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
+            <thead className="text-muted-foreground text-left text-xs">
               <tr>
                 <th className="py-2">SKU / 仓库</th>
                 <th className="py-2">流水累计（在手）</th>
@@ -535,23 +543,25 @@ function DiscrepancyTable({
             </thead>
             <tbody>
               {page.findings.map((f) => (
-                <tr key={f.id} className="border-t border-border align-top">
+                <tr key={f.id} className="border-border border-t align-top">
                   <td className="py-2">
                     <div className="font-medium">{f.skuCode}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       {f.warehouseCode} · {f.legalEntityCode} · {f.qualityStatusCode}
                     </div>
                   </td>
                   <td className="py-2 font-mono">{diffText(f.onHandSum)}</td>
                   <td className="py-2 font-mono">{diffText(f.snapshotOnHand)}</td>
-                  <td className={`py-2 font-mono ${diffTone(f.onHandDiff)}`}>{diffText(f.onHandDiff)}</td>
+                  <td className={`py-2 font-mono ${diffTone(f.onHandDiff)}`}>
+                    {diffText(f.onHandDiff)}
+                  </td>
                   <td className={`py-2 font-mono ${diffTone(f.reservedDiff)}`}>
                     {diffText(f.reservedDiff)}
                   </td>
                   <td className="py-2 text-xs">
                     {f.entryCount} / {f.transactionCount}
                   </td>
-                  <td className="py-2 text-xs text-muted-foreground">
+                  <td className="text-muted-foreground py-2 text-xs">
                     {f.transactionId ? (
                       <LedgerHref transactionId={f.transactionId} at={f.occurredAt} />
                     ) : (
@@ -562,7 +572,7 @@ function DiscrepancyTable({
               ))}
             </tbody>
           </table>
-          <p className="mt-2 text-xs text-muted-foreground">{page.findings[0]?.reason}</p>
+          <p className="text-muted-foreground mt-2 text-xs">{page.findings[0]?.reason}</p>
           <Pager total={page.total} page={pageNumber} size={page.size} onTurn={onTurn} />
         </>
       )}
@@ -594,7 +604,7 @@ function SuspectTable({
       ) : (
         <>
           <table className="w-full text-sm">
-            <thead className="text-left text-xs text-muted-foreground">
+            <thead className="text-muted-foreground text-left text-xs">
               <tr>
                 <th className="py-2">类别</th>
                 <th className="py-2">定位</th>
@@ -605,7 +615,7 @@ function SuspectTable({
             </thead>
             <tbody>
               {page.findings.map((f) => (
-                <tr key={f.id} className="border-t border-border align-top">
+                <tr key={f.id} className="border-border border-t align-top">
                   <td className="py-2">
                     <SeverityBadge severity={f.severity} />
                     <div className="mt-1 text-xs">
@@ -616,18 +626,17 @@ function SuspectTable({
                     {f.transactionId ? (
                       <>
                         <LedgerHref transactionId={f.transactionId} at={f.occurredAt} />
-                        <div className="mt-1 text-muted-foreground">
+                        <div className="text-muted-foreground mt-1">
                           {f.refType || '无来源单据'} · {f.skuCode} / {f.warehouseCode}
                         </div>
                         {f.relatedTransactionId ? (
-                          <div className="mt-1 text-muted-foreground">
-                            与{' '}
-                            <LedgerHref transactionId={f.relatedTransactionId} at={null} />
+                          <div className="text-muted-foreground mt-1">
+                            与 <LedgerHref transactionId={f.relatedTransactionId} at={null} />
                             {f.gapSeconds !== null ? ` 相差 ${f.gapSeconds} 秒` : ''}
                           </div>
                         ) : null}
                         {f.latenessSeconds !== null ? (
-                          <div className="mt-1 text-muted-foreground">
+                          <div className="text-muted-foreground mt-1">
                             补录迟了 {f.latenessSeconds} 秒
                           </div>
                         ) : null}
@@ -643,7 +652,7 @@ function SuspectTable({
                   <td className="py-2 font-mono text-xs">
                     {f.windowStart ? windowLabel(f.windowStart, f.windowEnd) : '—'}
                   </td>
-                  <td className="max-w-md py-2 text-xs text-muted-foreground">{f.reason}</td>
+                  <td className="text-muted-foreground max-w-md py-2 text-xs">{f.reason}</td>
                 </tr>
               ))}
             </tbody>
@@ -673,7 +682,11 @@ function SeverityBadge({ severity }: { severity: string }) {
       : severity === 'WARN'
         ? 'bg-warning-soft text-warning'
         : 'bg-muted text-muted-foreground';
-  return <span className={`rounded px-2 py-0.5 text-xs ${tone}`}>{severityLabels[severity] ?? severity}</span>;
+  return (
+    <span className={`rounded px-2 py-0.5 text-xs ${tone}`}>
+      {severityLabels[severity] ?? severity}
+    </span>
+  );
 }
 
 /** 定位的终点是一笔具体的业务：点一下跳到台账里那笔流水的分录明细。 */
@@ -699,7 +712,7 @@ function Pager({
 }) {
   const pages = Math.max(1, Math.ceil(total / Math.max(1, size)));
   return (
-    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="text-muted-foreground mt-3 flex items-center gap-2 text-xs">
       <Button variant="outline" size="sm" disabled={page <= 0} onClick={() => onTurn(page - 1)}>
         上一页
       </Button>

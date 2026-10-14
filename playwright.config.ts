@@ -1,19 +1,22 @@
 import { defineConfig } from '@playwright/test';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
+const port = new URL(baseURL).port || '3000';
+
 export default defineConfig({
   testDir: './tests/e2e',
   outputDir: './work/test-results',
   fullyParallel: false,
   workers: 1,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     headless: true,
     channel: 'chrome',
     screenshot: 'only-on-failure',
   },
   reporter: 'list',
   webServer: {
-    command: 'pnpm --filter @starcon/web dev',
-    url: 'http://localhost:3000/styleguide',
+    command: `pnpm --filter @starcon/web exec next dev -p ${port}`,
+    url: `${baseURL}/styleguide`,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
