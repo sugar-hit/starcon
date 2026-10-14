@@ -416,9 +416,11 @@ class PickTaskIntegrationTest {
     assertThat(caps.balanceUnchangedByPicking()).isTrue();
     assertThat(caps.reservationRetained()).isTrue();
     assertThat(caps.inventoryNote()).contains("不写 inventory_transaction / inventory_entry");
-    // 未交付的邻居如实报 false + 归属模块，不假装存在。
-    assertThat(caps.waveAvailable()).isFalse();
-    assertThat(caps.waveOwnerModule()).isEqualTo("8.3.2.2 波次与合并拣货");
+    // 8.3.2.2 波次已交付（V113 + /warehouse/pick-waves）：合并是**波次那一层**的排班，
+    // 本模块的工单粒度不变 —— 仍然一张出库单一张任务。
+    assertThat(caps.waveAvailable()).isTrue();
+    assertThat(caps.waveOwnerModule()).isEqualTo("8.3.2.2 波次与合并拣货（已交付）");
+    // 未交付的邻居仍然如实报 false + 归属模块，不假装存在。
     assertThat(caps.recheckAvailable()).isFalse();
     assertThat(caps.recheckOwnerModule()).isEqualTo("8.3.3.1 复核扫描");
     // 四态里没有「已发货」。
@@ -1168,7 +1170,7 @@ class PickTaskIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.refType").value("PICK_TASK"))
         .andExpect(jsonPath("$.balanceUnchangedByPicking").value(true))
-        .andExpect(jsonPath("$.waveAvailable").value(false))
+        .andExpect(jsonPath("$.waveAvailable").value(true))
         .andExpect(jsonPath("$.pathBasis").isNotEmpty());
 
     var created = generate(a, order);
