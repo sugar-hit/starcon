@@ -18729,12 +18729,82 @@
         }
       }
     },
+    "/warehouse/parcels/{id}": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "detail_13",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/parcels/capabilities": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "capabilities_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/packing-orders/{id}": {
       "get": {
         "tags": [
           "packing-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18851,7 +18921,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -19032,7 +19102,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -19089,7 +19159,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -19160,7 +19230,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -19281,7 +19351,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -19668,7 +19738,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -19883,7 +19953,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19914,7 +19984,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -20623,7 +20693,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -21370,7 +21440,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -21828,7 +21898,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -22104,7 +22174,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -22517,7 +22587,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -22921,7 +22991,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -23206,7 +23276,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -23383,7 +23453,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "detail_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -23423,7 +23493,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -23454,7 +23524,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -23845,7 +23915,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_17",
+        "operationId": "detail_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -24813,7 +24883,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_18",
+        "operationId": "detail_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -25269,7 +25339,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "capabilities_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -25300,7 +25370,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_23",
+        "operationId": "capabilities_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -25584,7 +25654,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_19",
+        "operationId": "detail_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -25624,7 +25694,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_24",
+        "operationId": "capabilities_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -25800,7 +25870,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_25",
+        "operationId": "capabilities_26",
         "parameters": [
           {
             "name": "Authorization",
@@ -26226,7 +26296,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_26",
+        "operationId": "capabilities_27",
         "parameters": [
           {
             "name": "Authorization",
@@ -26257,7 +26327,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_20",
+        "operationId": "detail_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -26297,7 +26367,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_27",
+        "operationId": "capabilities_28",
         "parameters": [
           {
             "name": "Authorization",
@@ -26457,7 +26527,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_28",
+        "operationId": "capabilities_29",
         "parameters": [
           {
             "name": "Authorization",
@@ -26814,7 +26884,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_29",
+        "operationId": "capabilities_30",
         "parameters": [
           {
             "name": "Authorization",
@@ -26991,7 +27061,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_30",
+        "operationId": "capabilities_31",
         "parameters": [
           {
             "name": "Authorization",
@@ -27022,7 +27092,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_21",
+        "operationId": "detail_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -27062,7 +27132,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "capabilities_31",
+        "operationId": "capabilities_32",
         "parameters": [
           {
             "name": "Authorization",
@@ -27136,7 +27206,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_32",
+        "operationId": "capabilities_33",
         "parameters": [
           {
             "name": "Authorization",
@@ -27167,7 +27237,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_22",
+        "operationId": "detail_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -27207,7 +27277,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_33",
+        "operationId": "capabilities_34",
         "parameters": [
           {
             "name": "Authorization",
@@ -45852,6 +45922,552 @@
             "type": "boolean"
           },
           "contract": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelCostAllocation": {
+        "type": "object",
+        "properties": {
+          "allocatableToLine": {
+            "type": "boolean"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "matchedQuantity": {
+            "type": "number"
+          },
+          "unmatchedQuantity": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unlinkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackLevel": {
+            "type": "string"
+          },
+          "fallbackReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "unmatchedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelUnmatchedItem"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetail": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ParcelDetailHeader"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailItem"
+            }
+          },
+          "label": {
+            "$ref": "#/components/schemas/ParcelDetailLabel"
+          },
+          "costAllocation": {
+            "$ref": "#/components/schemas/ParcelCostAllocation"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailAction"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ParcelDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailHeader": {
+        "type": "object",
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelCode": {
+            "type": "string"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packingOrderCode": {
+            "type": "string"
+          },
+          "packingOrderStatus": {
+            "type": "string"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "outboundSourceType": {
+            "type": "string"
+          },
+          "outboundSourceLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "materialCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fillerMaterialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fillerMaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "outerLengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerWidthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerHeightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measuredGrossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "tareWeightG": {
+            "type": "number"
+          },
+          "netContentWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeCbm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measured": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "measuredBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "volumeDivisorNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "serialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "recountLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "declarationSource": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredOriginCountryCode": {
+            "type": "string"
+          },
+          "salesOrderLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelItemSalesOrderLine"
+            }
+          },
+          "orderLineNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailLabel": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "printJobId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "jobNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "copies": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetType": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrintCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "firstPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "printCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labelPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailUnavailable": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelItemSalesOrderLine": {
+        "type": "object",
+        "properties": {
+          "linkId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "salesOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "salesLineQuantity": {
+            "type": "number"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "matchBasisLabel": {
+            "type": "string"
+          },
+          "strongMatch": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelUnmatchedItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelCostAllocationPolicy": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "lineLevelSupported": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "costAllocationPolicy": {
+            "$ref": "#/components/schemas/ParcelCostAllocationPolicy"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
