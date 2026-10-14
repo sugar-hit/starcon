@@ -443,7 +443,13 @@ class PendingShipmentIntegrationTest {
   @Test
   void 发货时限_登记后落进正确的时间桶_时间零漂移() throws Exception {
     var unit = seedUnits("SF", 1).get(0);
-    OffsetDateTime deadline = OffsetDateTime.now().plusHours(6);
+    // End of the database UTC day, with PostgreSQL-compatible microsecond precision.
+    OffsetDateTime deadline =
+        OffsetDateTime.now(java.time.ZoneOffset.UTC)
+            .withHour(23)
+            .withMinute(59)
+            .withSecond(59)
+            .withNano(999_000_000);
     var registered =
         asA(
             () ->

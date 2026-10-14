@@ -764,7 +764,8 @@ class StockOwnershipIntegrationTest {
     assertThat(readBack.effectiveFrom().toInstant()).isEqualTo(shanghai.toInstant());
     // 偏移量原样保留，不被服务器本地时区改写
     // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
-    assertThat(readBack.effectiveFrom().toLocalTime()).isEqualTo(shanghai.toLocalTime());
+    assertThat(readBack.effectiveFrom().withOffsetSameInstant(shanghai.getOffset()).toLocalTime())
+        .isEqualTo(shanghai.toLocalTime());
   }
 
   // ================================================================ 报表

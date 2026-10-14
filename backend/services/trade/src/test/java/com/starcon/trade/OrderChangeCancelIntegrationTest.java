@@ -659,7 +659,10 @@ class OrderChangeCancelIntegrationTest {
   void 确认那一刻才落终态数量与退款金额_且时间戳零漂移() throws Exception {
     UUID orderId = UUID.fromString(manualOrder("SO-TERM-2", "10", "9.99"));
     UUID lineId = lineIdOf(orderId);
-    OffsetDateTime observed = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.ofHours(8));
+    OffsetDateTime observed =
+        OffsetDateTime.now()
+            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+            .withOffsetSameInstant(ZoneOffset.ofHours(8));
     recordProgress(orderId, lineId, "10", "0", observed);
     UUID cancelId =
         asA(
