@@ -5763,7 +5763,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5954,7 +5954,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "close_1",
+        "operationId": "close_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -6495,7 +6495,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "cancel_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -7139,7 +7139,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "list",
+        "operationId": "list_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9000,7 +9000,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -9280,7 +9280,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "cancel_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -10007,7 +10007,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -10248,7 +10248,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "close_2",
+        "operationId": "close_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -10298,7 +10298,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "cancel_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10348,7 +10348,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -10462,7 +10462,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "suspend",
+        "operationId": "suspend_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10511,7 +10511,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "createSettlement",
+        "operationId": "createSettlement_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10611,7 +10611,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "addLine",
+        "operationId": "addLine_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10661,7 +10661,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "recordSale",
+        "operationId": "recordSale_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10720,7 +10720,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "close_3",
+        "operationId": "close_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -10769,7 +10769,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "activate",
+        "operationId": "activate_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10818,7 +10818,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "confirmSettlement",
+        "operationId": "confirmSettlement_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11150,7 +11150,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -11417,7 +11417,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "policies_2",
+        "operationId": "policies_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11508,7 +11508,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -11938,7 +11938,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -12029,7 +12029,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "close_4",
+        "operationId": "close_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -12347,7 +12347,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "close_5",
+        "operationId": "close_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12673,7 +12673,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -12714,7 +12714,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "dispatch",
+        "operationId": "dispatch_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -12814,7 +12814,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "cancel_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -12864,7 +12864,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "list_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -13178,7 +13178,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_16",
+        "operationId": "create_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -13725,7 +13725,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "create_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -13815,7 +13815,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "cancel_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -13982,7 +13982,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_18",
+        "operationId": "create_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -14514,7 +14514,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_8",
+        "operationId": "cancel_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -14723,7 +14723,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_19",
+        "operationId": "create_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -14813,7 +14813,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_9",
+        "operationId": "cancel_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16187,7 +16187,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "list_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -17112,7 +17112,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "audit",
+        "operationId": "audit_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -17164,7 +17164,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17911,7 +17911,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -19483,7 +19483,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19945,7 +19945,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -20913,7 +20913,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -20993,7 +20993,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlementWindow",
+        "operationId": "settlementWindow_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -21101,7 +21101,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "audit_1",
+        "operationId": "audit_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -21153,7 +21153,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlements",
+        "operationId": "settlements_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -21221,7 +21221,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlementDetail",
+        "operationId": "settlementDetail_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -21684,7 +21684,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -22357,7 +22357,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "detail_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -23122,7 +23122,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_17",
+        "operationId": "detail_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -23267,7 +23267,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_18",
+        "operationId": "detail_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -23338,7 +23338,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_10",
+        "operationId": "cancel_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -24380,6 +24380,1293 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SafetyStockAlertDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/settlements/{settlementId}/confirm": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "confirmSettlement",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSettlement"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/replenishment-signals/{signalId}/fulfil": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "fulfil",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiSignalFulfilInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/replenishment-signals/{signalId}/dispatch": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/replenishment-signals/{signalId}/cancel": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "cancel_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/replenishment-signals/{signalId}/acknowledge": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "acknowledge_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "replenishmentMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreementPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "create_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiAgreementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/suspend": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "suspend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreement"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/snapshots": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "recordSnapshot",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiSnapshotInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSnapshot"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/settlements": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "createSettlement",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiSettlementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSettlementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/replenishment-signals": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "generateSignals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiSignalInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignalBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/lines": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "addLine",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiAddLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/lines/{lineId}/sales": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "recordSale",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiSaleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSale"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/close": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "close_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreement"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/activate": {
+      "post": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "activate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VmiNoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreement"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/settlements": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "settlements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSettlementPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/settlements/{settlementId}": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "settlementDetail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSettlementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/replenishment-signals": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signalTarget",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSignalPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/capabilities": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "capabilities_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "detail_12",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiAgreementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/water-levels": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "waterLevels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiWaterLevelMonitor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/settlement-window": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "settlementWindow",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSettlementWindow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/sales": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "sales_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unsettleableOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VmiSalePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/vmi/agreements/{agreementId}/audit": {
+      "get": {
+        "tags": [
+          "vmi-controller"
+        ],
+        "operationId": "audit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VmiAuditEntry"
+                  }
                 }
               }
             }
@@ -56166,6 +57453,1255 @@
           },
           "suggestion": {
             "$ref": "#/components/schemas/SafetyStockSuggestionRow"
+          }
+        }
+      },
+      "VmiNoteInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSettlement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementCode": {
+            "type": "string"
+          },
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VmiSignalFulfilInput": {
+        "type": "object",
+        "properties": {
+          "fulfilledQuantity": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSignal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "signalCode": {
+            "type": "string"
+          },
+          "agreementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "triggerReason": {
+            "type": "string"
+          },
+          "triggerReasonLabel": {
+            "type": "string"
+          },
+          "currentSellableQuantity": {
+            "type": "number"
+          },
+          "safetyLevel": {
+            "type": "number"
+          },
+          "replenishmentMultiple": {
+            "type": "number"
+          },
+          "suggestedQuantity": {
+            "type": "number"
+          },
+          "signalTarget": {
+            "type": "string"
+          },
+          "signalTargetLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fulfilledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fulfilledQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "VmiAgreementInput": {
+        "type": "object",
+        "properties": {
+          "supplierPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settlementCycle": {
+            "type": "string"
+          },
+          "replenishmentMode": {
+            "type": "string"
+          },
+          "signalTarget": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiLineInput"
+            }
+          }
+        }
+      },
+      "VmiLineInput": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockOwnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "safetyLevel": {
+            "type": "number"
+          },
+          "replenishmentMultiple": {
+            "type": "number",
+            "nullable": true
+          },
+          "settlementPrice": {
+            "type": "number"
+          },
+          "suppliedQuantity": {
+            "type": "number"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "VmiAgreement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementCode": {
+            "type": "string"
+          },
+          "supplierPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "settlementCycle": {
+            "type": "string"
+          },
+          "settlementCycleLabel": {
+            "type": "string"
+          },
+          "replenishmentMode": {
+            "type": "string"
+          },
+          "replenishmentModeLabel": {
+            "type": "string"
+          },
+          "signalTarget": {
+            "type": "string"
+          },
+          "signalTargetLabel": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSafetyLevel": {
+            "type": "number"
+          },
+          "totalSupplied": {
+            "type": "number"
+          },
+          "totalSold": {
+            "type": "number"
+          },
+          "unsettleableQuantity": {
+            "type": "number"
+          },
+          "unsettleableAmount": {
+            "type": "number"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "VmiAgreementDetail": {
+        "type": "object",
+        "properties": {
+          "agreement": {
+            "$ref": "#/components/schemas/VmiAgreement"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiLine"
+            }
+          },
+          "auditTrail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiAuditEntry"
+            }
+          }
+        }
+      },
+      "VmiAuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VmiLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "stockOwnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockOwnerCode": {
+            "type": "string"
+          },
+          "stockOwnerKind": {
+            "type": "string"
+          },
+          "safetyLevel": {
+            "type": "number"
+          },
+          "replenishmentMultiple": {
+            "type": "number"
+          },
+          "settlementPrice": {
+            "type": "number"
+          },
+          "suppliedQuantity": {
+            "type": "number"
+          },
+          "soldQuantity": {
+            "type": "number"
+          },
+          "withdrawnQuantity": {
+            "type": "number"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          },
+          "currentSellableQuantity": {
+            "type": "number"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "stockSourceLabel": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "waterLevelStatus": {
+            "type": "string"
+          },
+          "waterLevelStatusLabel": {
+            "type": "string"
+          },
+          "safetyGap": {
+            "type": "number"
+          },
+          "bufferLine": {
+            "type": "number"
+          },
+          "projectedQuantity": {
+            "type": "number"
+          },
+          "soldQuantity30d": {
+            "type": "number"
+          },
+          "coverageDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "unsettleableQuantity": {
+            "type": "number"
+          },
+          "unsettleableAmount": {
+            "type": "number"
+          },
+          "openSignalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownershipSplit": {
+            "$ref": "#/components/schemas/VmiOwnershipSplit"
+          }
+        }
+      },
+      "VmiOwnershipSplit": {
+        "type": "object",
+        "properties": {
+          "sellableQuantity": {
+            "type": "number"
+          },
+          "sellableValue": {
+            "type": "number"
+          },
+          "ownedAssetQuantity": {
+            "type": "number"
+          },
+          "ownedAssetValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "countsAsOwnedAsset": {
+            "type": "boolean"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "separationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "VmiSnapshotInput": {
+        "type": "object",
+        "properties": {
+          "agreementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedQuantity": {
+            "type": "number"
+          },
+          "coverageDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "stockSourceLabel": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "observedQuantity": {
+            "type": "number"
+          },
+          "coverageDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recordedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VmiSettlementInput": {
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSettlementDetail": {
+        "type": "object",
+        "properties": {
+          "settlement": {
+            "$ref": "#/components/schemas/VmiSettlement"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSettlementLine"
+            }
+          }
+        }
+      },
+      "VmiSettlementLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "saleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "saleRef": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "soldAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VmiSignalInput": {
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSignalBatchResult": {
+        "type": "object",
+        "properties": {
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedOpenCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedHealthyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedVendorOwnCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSignal"
+            }
+          },
+          "skippedReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "VmiAddLineInput": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stockOwnerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "safetyLevel": {
+            "type": "number"
+          },
+          "replenishmentMultiple": {
+            "type": "number",
+            "nullable": true
+          },
+          "settlementPrice": {
+            "type": "number"
+          },
+          "suppliedQuantity": {
+            "type": "number"
+          },
+          "onHandQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "VmiSaleInput": {
+        "type": "object",
+        "properties": {
+          "soldQuantity": {
+            "type": "number"
+          },
+          "saleRef": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "salePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VmiSale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "soldQuantity": {
+            "type": "number"
+          },
+          "salePrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "saleRef": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unsettleable": {
+            "type": "boolean"
+          },
+          "settlementId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "settlementCode": {
+            "type": "string"
+          },
+          "recordedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VmiSettlementPage": {
+        "type": "object",
+        "properties": {
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSettlement"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VmiSignalPage": {
+        "type": "object",
+        "properties": {
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSignal"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VmiCapabilities": {
+        "type": "object",
+        "properties": {
+          "replenishmentModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiOption"
+            }
+          },
+          "signalTargets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiOption"
+            }
+          },
+          "settlementCycles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiOption"
+            }
+          },
+          "triggerReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiOption"
+            }
+          },
+          "stockSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiOption"
+            }
+          },
+          "agreementStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signalStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiUnavailableCapability"
+            }
+          },
+          "sellableNote": {
+            "type": "string"
+          },
+          "ownedAssetNote": {
+            "type": "string"
+          },
+          "separationNote": {
+            "type": "string"
+          },
+          "ownedAssetValueAvailable": {
+            "type": "boolean"
+          },
+          "salesFactNote": {
+            "type": "string"
+          },
+          "availableQuantityNote": {
+            "type": "string"
+          },
+          "signalHandoffNote": {
+            "type": "string"
+          },
+          "settlementHandoffNote": {
+            "type": "string"
+          }
+        }
+      },
+      "VmiOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "VmiUnavailableCapability": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "handoff": {
+            "type": "string"
+          }
+        }
+      },
+      "VmiAgreementPage": {
+        "type": "object",
+        "properties": {
+          "agreements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiAgreement"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VmiSelfOwnedSplit": {
+        "type": "object",
+        "properties": {
+          "selfOwnedQuantity": {
+            "type": "number"
+          },
+          "selfOwnedBucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "VmiWaterLevelMonitor": {
+        "type": "object",
+        "properties": {
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "replenishmentMode": {
+            "type": "string"
+          },
+          "replenishmentModeLabel": {
+            "type": "string"
+          },
+          "signalTarget": {
+            "type": "string"
+          },
+          "signalTargetLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthyLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "belowBufferLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "belowSafetyLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stockoutLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingStockSourceLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSafetyLevel": {
+            "type": "number"
+          },
+          "totalCurrentSellable": {
+            "type": "number"
+          },
+          "totalProjectedQuantity": {
+            "type": "number"
+          },
+          "openSignalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ownershipSplit": {
+            "$ref": "#/components/schemas/VmiOwnershipSplit"
+          },
+          "selfOwnedSplit": {
+            "$ref": "#/components/schemas/VmiSelfOwnedSplit"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiLine"
+            }
+          }
+        }
+      },
+      "VmiSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSnapshot"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VmiSettlementWindow": {
+        "type": "object",
+        "properties": {
+          "agreementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementCycle": {
+            "type": "string"
+          },
+          "settlementCycleLabel": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "today": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "VmiSalePage": {
+        "type": "object",
+        "properties": {
+          "sales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VmiSale"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
