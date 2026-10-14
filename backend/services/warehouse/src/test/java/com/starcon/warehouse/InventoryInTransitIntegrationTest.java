@@ -327,7 +327,11 @@ class InventoryInTransitIntegrationTest {
    */
   InTransitRegisterRequest firstMile(String qty, OffsetDateTime eta) {
     OffsetDateTime shippedAt =
-        eta != null && eta.isBefore(OffsetDateTime.now()) ? eta.minusDays(5) : null;
+        eta != null
+                && eta.isBefore(
+                    OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS))
+            ? eta.minusDays(5)
+            : null;
     return new InTransitRegisterRequest(
         "FIRST_MILE",
         skuA,
@@ -371,7 +375,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 登记头程在途_不动在手且进入四个既有模块同一条在途口径() {
-    var saved = register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    var saved =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .plusDays(20)));
 
     assertThat(saved.transitKind()).isEqualTo("FIRST_MILE");
     assertThat(saved.status()).isEqualTo("IN_TRANSIT");
@@ -413,7 +423,7 @@ class InventoryInTransitIntegrationTest {
                 null,
                 new BigDecimal("30"),
                 null,
-                OffsetDateTime.now().plusDays(10),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(10),
                 "FBA",
                 "FBA-SHP-9001",
                 "亚马逊物流",
@@ -455,8 +465,18 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 登记_同一来源单据重复投递被拒_不双记在途() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
-    assertThatThrownBy(() -> register(firstMile("500", OffsetDateTime.now().plusDays(20))))
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
+    assertThatThrownBy(
+            () ->
+                register(
+                    firstMile(
+                        "500",
+                        OffsetDateTime.now()
+                            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                            .plusDays(20))))
         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     // 关键：不能变成 1000
     assertThat(sharedInTransit()).isEqualByComparingTo("500");
@@ -658,8 +678,10 @@ class InventoryInTransitIntegrationTest {
                         "",
                         null,
                         new BigDecimal("1"),
-                        OffsetDateTime.now(),
-                        OffsetDateTime.now().minusYears(1),
+                        OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS),
+                        OffsetDateTime.now()
+                            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                            .minusYears(1),
                         "P",
                         "R-8",
                         "",
@@ -717,7 +739,7 @@ class InventoryInTransitIntegrationTest {
                 lotA,
                 new BigDecimal("120"),
                 null,
-                OffsetDateTime.now().plusDays(35),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(35),
                 "PURCHASING",
                 "PO-2026-88",
                 "顺丰国际",
@@ -736,7 +758,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 到货_分批入库并结案_事件逐笔留痕() {
-    var leg = register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .plusDays(20)));
 
     var first =
         asA(
@@ -854,7 +882,7 @@ class InventoryInTransitIntegrationTest {
                 null,
                 new BigDecimal("30"),
                 null,
-                OffsetDateTime.now().plusDays(10),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(10),
                 "FBA",
                 "FBA-SHP-1",
                 "亚马逊物流",
@@ -940,7 +968,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 差异登记_原因必填且短少后未达量归零() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(9)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(9)));
     assertThatThrownBy(
             () ->
                 asA(
@@ -1049,7 +1083,7 @@ class InventoryInTransitIntegrationTest {
                 null,
                 new BigDecimal("10"),
                 null,
-                OffsetDateTime.now().plusDays(3),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(3),
                 "P",
                 "OK-1",
                 "",
@@ -1067,8 +1101,10 @@ class InventoryInTransitIntegrationTest {
                 "",
                 null,
                 new BigDecimal("20"),
-                OffsetDateTime.now().minusDays(6),
-                OffsetDateTime.now().minusHours(6),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(6),
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusHours(6),
                 "P",
                 "MILD-1",
                 "",
@@ -1086,8 +1122,10 @@ class InventoryInTransitIntegrationTest {
                 "",
                 null,
                 new BigDecimal("30"),
-                OffsetDateTime.now().minusDays(14),
-                OffsetDateTime.now().minusDays(9),
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(14),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(9),
                 "P",
                 "CRIT-1",
                 "",
@@ -1155,7 +1193,7 @@ class InventoryInTransitIntegrationTest {
         () -> {
           sql.execute(
               "update inventory_transfer set expected_arrive_at=cast(? as timestamptz) where id=?",
-              OffsetDateTime.now().plusDays(2),
+              OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(2),
               critical.id());
           return null;
         });
@@ -1165,7 +1203,7 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 逾期档位与阈值_分档边界由同一套规则给出() {
-    var now = OffsetDateTime.now();
+    var now = OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     assertThat(InTransitOverdueLevel.of(new BigDecimal("1"), null, now))
         .isEqualTo(InTransitOverdueLevel.NO_ETA);
     assertThat(InTransitOverdueLevel.of(new BigDecimal("1"), now.plusDays(1), now))
@@ -1187,7 +1225,7 @@ class InventoryInTransitIntegrationTest {
   @Test
   void 调拨在途_清单可见且ETA从调拨单派生() {
     seedBalance(skuA, whSh, locSh1, "100");
-    var past = OffsetDateTime.now().minusDays(2);
+    var past = OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2);
     var order =
         asA(
             () ->
@@ -1246,7 +1284,10 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 补货净额_按目的仓与SKU聚合_平台仓方向不计入() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
     // 第二个 SKU 的头程，也去深圳仓
     var skuB = idFor(a, 11);
     asA(
@@ -1275,7 +1316,9 @@ class InventoryInTransitIntegrationTest {
                     null,
                     new BigDecimal("300"),
                     null,
-                    OffsetDateTime.now().plusDays(40),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(40),
                     "P",
                     "PO-2",
                     "",
@@ -1298,7 +1341,9 @@ class InventoryInTransitIntegrationTest {
                     null,
                     new BigDecimal("30"),
                     null,
-                    OffsetDateTime.now().plusDays(10),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(10),
                     "FBA",
                     "FBA-9",
                     "",
@@ -1328,7 +1373,10 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 清单_筛选搜索排序分页与汇总不受分页影响() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
     asA(
         () ->
             service.register(
@@ -1344,8 +1392,12 @@ class InventoryInTransitIntegrationTest {
                     "",
                     null,
                     new BigDecimal("300"),
-                    OffsetDateTime.now().minusDays(13),
-                    OffsetDateTime.now().minusDays(8),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .minusDays(13),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .minusDays(8),
                     "P",
                     "PO-77",
                     "顺丰国际",
@@ -1367,7 +1419,9 @@ class InventoryInTransitIntegrationTest {
                     null,
                     new BigDecimal("30"),
                     null,
-                    OffsetDateTime.now().plusDays(5),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(5),
                     "FBA",
                     "FBA-5",
                     "",
@@ -1504,7 +1558,10 @@ class InventoryInTransitIntegrationTest {
                 .content("{\"transitKind\":\"FIRST_MILE\"}"))
         .andExpect(status().isForbidden());
 
-    register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2)));
     http.perform(get("/warehouse/inventory/in-transit").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
@@ -1536,7 +1593,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 断言一_两租户互不可见() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(2)));
 
     // B 有自己的在途夹具
     access.run(
@@ -1598,7 +1661,10 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 断言二_伪造租户头无效() throws Exception {
-    register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2)));
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的（这里是空）
     http.perform(
@@ -1632,7 +1698,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 断言三_连接池归还后不串租户() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(2)));
     access.run(
         actorB,
         "warehouse.inventory.read",
@@ -1713,7 +1785,10 @@ class InventoryInTransitIntegrationTest {
   /** 在途事实仍然只有一张表：外部腿与调拨腿落在同一张 inventory_transfer 上。 */
   @Test
   void 在途只有一个事实表_外部腿与调拨腿同表() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(5)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(5)));
     var kinds =
         asA(
             () ->
