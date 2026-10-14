@@ -4162,7 +4162,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "reportException",
+        "operationId": "reportException_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4415,7 +4415,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -8521,7 +8521,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -10452,7 +10452,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -11187,7 +11187,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -11692,7 +11692,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_16",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -12239,7 +12239,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "create_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -12496,7 +12496,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_18",
+        "operationId": "create_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -13237,7 +13237,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_19",
+        "operationId": "create_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -22245,6 +22245,559 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PutawayCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks": {
+      "get": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "page_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assigneeUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "generate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskGenerateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/reopen": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "reopen",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskReopenInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/picks": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "recordPick",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskPickInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskPickRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/exceptions": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "reportException",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskExceptionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/exceptions/{exceptionId}/resolve": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "resolveException",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exceptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskResolveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskExceptionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/complete": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/cancel": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "cancel_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}/assign": {
+      "post": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "assign",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickTaskAssignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/{id}": {
+      "get": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/pick-tasks/capabilities": {
+      "get": {
+        "tags": [
+          "pick-task-controller"
+        ],
+        "operationId": "capabilities_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickTaskCapabilities"
                 }
               }
             }
@@ -51361,6 +51914,861 @@
             "type": "boolean"
           },
           "usage": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskGenerateInput": {
+        "type": "object",
+        "properties": {
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stagingLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stagingLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stagingLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "nonPickableLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pathBasis": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskReopenInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "assigneeUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stagingLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stagingLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "assigneeUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assigneeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "plannedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "pickedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pickedQuantity": {
+            "type": "number"
+          },
+          "exceptionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nonPickableLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "progress": {
+            "type": "number",
+            "nullable": true
+          },
+          "fullyPicked": {
+            "type": "boolean"
+          },
+          "hasUnresolvedException": {
+            "type": "boolean"
+          },
+          "reopenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskPickInput": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "serialIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "pickedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskPickRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "serialCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pickedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "serials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskSerialRow"
+            }
+          }
+        }
+      },
+      "PickTaskSerialRow": {
+        "type": "object",
+        "properties": {
+          "serialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "pickedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickTaskExceptionInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shortageQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskExceptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortageQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reportedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PickTaskResolveInput": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/PickTaskRow"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "outboundOrderStatus": {
+            "type": "string"
+          },
+          "outboundOrderStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskLine"
+            }
+          },
+          "picks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskPickRow"
+            }
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskExceptionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskEventRow"
+            }
+          },
+          "pathReport": {
+            "$ref": "#/components/schemas/PickTaskPathReport"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequenceNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationCode": {
+            "type": "string"
+          },
+          "sourceLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceLotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationPath": {
+            "type": "string"
+          },
+          "locationDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourcePickable": {
+            "type": "boolean"
+          },
+          "sourceActive": {
+            "type": "boolean"
+          },
+          "onHandAtSource": {
+            "type": "number"
+          },
+          "sourceHasStock": {
+            "type": "boolean"
+          },
+          "skuLocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nonPickableSource": {
+            "type": "boolean"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "pickedQuantity": {
+            "type": "number"
+          },
+          "shortfall": {
+            "type": "number"
+          },
+          "lineStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PICKED",
+              "SHORT"
+            ]
+          },
+          "lineStatusLabel": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskPathReport": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctLocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nonPickableLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dispersionSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "splitLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskPathStop"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskPathStop": {
+        "type": "object",
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationPath": {
+            "type": "string"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "sequenceFrom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sequenceTo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickTaskCancelInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskAssignInput": {
+        "type": "object",
+        "properties": {
+          "assigneeUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PickTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PickTaskSummary"
+          }
+        }
+      },
+      "PickTaskSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPlannedQuantity": {
+            "type": "number"
+          },
+          "totalPickedQuantity": {
+            "type": "number"
+          },
+          "nonPickableTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispersionTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openExceptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "PickTaskCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "pathOptimizationLive": {
+            "type": "boolean"
+          },
+          "actualLocationCapture": {
+            "type": "boolean"
+          },
+          "serialCapture": {
+            "type": "boolean"
+          },
+          "exceptionReporting": {
+            "type": "boolean"
+          },
+          "inventoryMovementLive": {
+            "type": "boolean"
+          },
+          "balanceUnchangedByPicking": {
+            "type": "boolean"
+          },
+          "reservationRetained": {
+            "type": "boolean"
+          },
+          "waveAvailable": {
+            "type": "boolean"
+          },
+          "waveOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "recheckAvailable": {
+            "type": "boolean"
+          },
+          "recheckOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "upstreams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskUpstreamModule"
+            }
+          },
+          "downstreams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickTaskDownstreamModule"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exceptionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pathBasis": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskDownstreamModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "contract": {
+            "type": "string"
+          }
+        }
+      },
+      "PickTaskUpstreamModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "contract": {
             "type": "string"
           }
         }
