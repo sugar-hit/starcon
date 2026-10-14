@@ -1504,6 +1504,758 @@
         }
       }
     },
+    "/trade/fulfillment/allocation/warehouses": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "warehouses",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "regionCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationWarehousePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "saveWarehouse",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationWarehouseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationWarehouseSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/stock-estimates": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "stockEstimates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stockSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationStockPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "saveStockEstimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationStockInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationStockSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/simulations": {
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "simulate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationSimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationSimulation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/shipping-estimates": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "shippingEstimates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "costSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationShippingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "saveShippingEstimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationShippingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationShippingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/rules": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selectionPolicy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fallbackPolicy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "saveRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/allocations": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chosenWarehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chosenLegalEntityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "crossLegalEntity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationDecisionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "allocate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationDecisionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/allocations/{allocationId}/status": {
+      "post": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "advanceStatus_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAllocationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationDecisionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/list": {
       "get": {
         "tags": [
@@ -2128,6 +2880,161 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/FulfillmentRoutingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/holds": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "holds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "holdReason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationHoldPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/capabilities": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "capabilities_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/allocation/allocations/{allocationId}": {
+      "get": {
+        "tags": [
+          "warehouse-allocation-controller"
+        ],
+        "operationId": "allocation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAllocationDecisionDetail"
                 }
               }
             }
@@ -3727,6 +4634,755 @@
             ]
           },
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationWarehouseInput": {
+        "required": [
+          "legalEntityCode",
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouseName": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "regionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "defaultPriority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationWarehouseSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationStockInput": {
+        "required": [
+          "availableQty",
+          "collectedAt",
+          "skuRef",
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationStockSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationSimulationRequest": {
+        "required": [
+          "destinationCountryCode",
+          "orderLegalEntityCode",
+          "orderRef",
+          "requestedQty",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLineRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "destinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "destinationRegionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLegalEntityCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseAllocationCandidateRow": {
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "regionCode": {
+            "type": "string"
+          },
+          "warehousePriority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "availableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "shippingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "scoreStock": {
+            "type": "number"
+          },
+          "scoreCost": {
+            "type": "number"
+          },
+          "scoreLeadTime": {
+            "type": "number"
+          },
+          "scoreLegalEntity": {
+            "type": "number"
+          },
+          "scoreRegion": {
+            "type": "number"
+          },
+          "totalScore": {
+            "type": "number"
+          },
+          "legalEntityMatch": {
+            "type": "boolean"
+          },
+          "feasible": {
+            "type": "boolean"
+          },
+          "infeasibleReasonCode": {
+            "type": "string"
+          },
+          "infeasibleReason": {
+            "type": "string"
+          },
+          "chosen": {
+            "type": "boolean"
+          },
+          "allocatedQty": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseAllocationSimulation": {
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationRegionCode": {
+            "type": "string"
+          },
+          "orderLegalEntityCode": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionPolicy": {
+            "type": "string",
+            "enum": [
+              "HIGHEST_SCORE",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME"
+            ]
+          },
+          "fallbackPolicy": {
+            "type": "string",
+            "enum": [
+              "SUSPEND",
+              "ALLOW_PARTIAL",
+              "CROSS_LEGAL_ENTITY"
+            ]
+          },
+          "legalEntityPolicy": {
+            "type": "string",
+            "enum": [
+              "NEUTRAL",
+              "ORDER_OWNER_FIRST",
+              "PREFERRED_FIRST"
+            ]
+          },
+          "requireLegalEntityMatch": {
+            "type": "boolean"
+          },
+          "weightStock": {
+            "type": "number"
+          },
+          "weightCost": {
+            "type": "number"
+          },
+          "weightLeadTime": {
+            "type": "number"
+          },
+          "weightLegalEntity": {
+            "type": "number"
+          },
+          "weightRegion": {
+            "type": "number"
+          },
+          "feasibleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chosenWarehouseRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "chosenLegalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "crossLegalEntity": {
+            "type": "boolean"
+          },
+          "allocatedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitShippingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "chosenTotalScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "SCORE_BASED",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME",
+              "PARTIAL_ALLOCATION",
+              "NO_ELIGIBLE_WAREHOUSE"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "holdReason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "NO_ELIGIBLE_WAREHOUSE",
+              "NO_STOCK_RECORD",
+              "INSUFFICIENT_STOCK",
+              "NO_SHIPPING_ESTIMATE",
+              "BLOCKED_BY_LEGAL_ENTITY",
+              "BLOCKED_BY_RULE",
+              "PARTIAL_SHORTFALL"
+            ]
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationCandidateRow"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationShippingInput": {
+        "required": [
+          "destinationCountryCode",
+          "shippingCost",
+          "skuRef",
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shippingCost": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "costSource": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationShippingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "shippingCost": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationRuleInput": {
+        "required": [
+          "priority",
+          "ruleCode",
+          "ruleName",
+          "selectionPolicy",
+          "weightCost",
+          "weightLeadTime",
+          "weightStock"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scopePlatformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeDestinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "selectionPolicy": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "fallbackPolicy": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "weightStock": {
+            "type": "number"
+          },
+          "weightCost": {
+            "type": "number"
+          },
+          "weightLeadTime": {
+            "type": "number"
+          },
+          "weightLegalEntity": {
+            "type": "number"
+          },
+          "weightRegion": {
+            "type": "number"
+          },
+          "requireLegalEntityMatch": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "legalEntityPolicy": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "preferredLegalEntityCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "maxLeadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "excludedWarehouseRefs": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationDecisionRequest": {
+        "required": [
+          "destinationCountryCode",
+          "orderLegalEntityCode",
+          "orderRef",
+          "requestedQty",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLineRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "destinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "destinationRegionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLegalEntityCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseAllocationDecisionSaved": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ALLOCATED",
+              "PARTIAL",
+              "SUSPENDED",
+              "CONFIRMED",
+              "RELEASED"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "SCORE_BASED",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME",
+              "PARTIAL_ALLOCATION",
+              "NO_ELIGIBLE_WAREHOUSE"
+            ]
+          },
+          "chosenWarehouseRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "chosenLegalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "crossLegalEntity": {
+            "type": "boolean"
+          },
+          "allocatedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "holdId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "holdReason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "NO_ELIGIBLE_WAREHOUSE",
+              "NO_STOCK_RECORD",
+              "INSUFFICIENT_STOCK",
+              "NO_SHIPPING_ESTIMATE",
+              "BLOCKED_BY_LEGAL_ENTITY",
+              "BLOCKED_BY_RULE",
+              "PARTIAL_SHORTFALL"
+            ]
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "releasedToModule": {
+            "maxLength": 32,
+            "minLength": 0,
             "type": "string"
           }
         }
@@ -6066,6 +7722,722 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationWarehousePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationWarehouseRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAllocationWarehouseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "regionCode": {
+            "type": "string"
+          },
+          "defaultPriority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationStockPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationStockRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAllocationStockRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationShippingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationShippingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAllocationShippingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "shippingCost": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "costSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAllocationRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scopePlatformCode": {
+            "type": "string"
+          },
+          "scopeDestinationCountryCode": {
+            "type": "string"
+          },
+          "selectionPolicy": {
+            "type": "string",
+            "enum": [
+              "HIGHEST_SCORE",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME"
+            ]
+          },
+          "fallbackPolicy": {
+            "type": "string",
+            "enum": [
+              "SUSPEND",
+              "ALLOW_PARTIAL",
+              "CROSS_LEGAL_ENTITY"
+            ]
+          },
+          "weightStock": {
+            "type": "number"
+          },
+          "weightCost": {
+            "type": "number"
+          },
+          "weightLeadTime": {
+            "type": "number"
+          },
+          "weightLegalEntity": {
+            "type": "number"
+          },
+          "weightRegion": {
+            "type": "number"
+          },
+          "requireLegalEntityMatch": {
+            "type": "boolean"
+          },
+          "legalEntityPolicy": {
+            "type": "string",
+            "enum": [
+              "NEUTRAL",
+              "ORDER_OWNER_FIRST",
+              "PREFERRED_FIRST"
+            ]
+          },
+          "preferredLegalEntityCode": {
+            "type": "string"
+          },
+          "maxLeadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "excludedWarehouseRefs": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationHoldPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationHoldRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAllocationHoldRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "holdReason": {
+            "type": "string",
+            "enum": [
+              "NO_ELIGIBLE_WAREHOUSE",
+              "NO_STOCK_RECORD",
+              "INSUFFICIENT_STOCK",
+              "NO_SHIPPING_ESTIMATE",
+              "BLOCKED_BY_LEGAL_ENTITY",
+              "BLOCKED_BY_RULE",
+              "PARTIAL_SHORTFALL"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "exclusionDetail": {
+            "type": "string"
+          },
+          "excludedWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "holdCandidateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shortfallQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "holdSource": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationDimension"
+            }
+          },
+          "selectionPolicies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "HIGHEST_SCORE",
+                "LOWEST_COST",
+                "CLOSEST_LEAD_TIME"
+              ]
+            }
+          },
+          "fallbackPolicies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUSPEND",
+                "ALLOW_PARTIAL",
+                "CROSS_LEGAL_ENTITY"
+              ]
+            }
+          },
+          "legalEntityPolicies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NEUTRAL",
+                "ORDER_OWNER_FIRST",
+                "PREFERRED_FIRST"
+              ]
+            }
+          },
+          "holdReasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NO_ELIGIBLE_WAREHOUSE",
+                "NO_STOCK_RECORD",
+                "INSUFFICIENT_STOCK",
+                "NO_SHIPPING_ESTIMATE",
+                "BLOCKED_BY_LEGAL_ENTITY",
+                "BLOCKED_BY_RULE",
+                "PARTIAL_SHORTFALL"
+              ]
+            }
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean"
+          },
+          "reservesUpstreamStock": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "legalEntityNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseAllocationDecisionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationDecisionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "suspendedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "crossLegalEntityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WarehouseAllocationDecisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "orderLineRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "destinationCountryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "destinationRegionCode": {
+            "type": "string"
+          },
+          "orderLegalEntityCode": {
+            "type": "string"
+          },
+          "chosenWarehouseRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "chosenLegalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "crossLegalEntity": {
+            "type": "boolean"
+          },
+          "allocatedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitShippingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "chosenTotalScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "selectionPolicy": {
+            "type": "string",
+            "enum": [
+              "HIGHEST_SCORE",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME"
+            ]
+          },
+          "fallbackPolicy": {
+            "type": "string",
+            "enum": [
+              "SUSPEND",
+              "ALLOW_PARTIAL",
+              "CROSS_LEGAL_ENTITY"
+            ]
+          },
+          "legalEntityPolicy": {
+            "type": "string",
+            "enum": [
+              "NEUTRAL",
+              "ORDER_OWNER_FIRST",
+              "PREFERRED_FIRST"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "SCORE_BASED",
+              "LOWEST_COST",
+              "CLOSEST_LEAD_TIME",
+              "PARTIAL_ALLOCATION",
+              "NO_ELIGIBLE_WAREHOUSE"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ALLOCATED",
+              "PARTIAL",
+              "SUSPENDED",
+              "CONFIRMED",
+              "RELEASED"
+            ]
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseAllocationDecisionDetail": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/WarehouseAllocationDecisionRow"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationCandidateRow"
+            }
+          },
+          "holds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationHoldRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseAllocationEventRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAllocationEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

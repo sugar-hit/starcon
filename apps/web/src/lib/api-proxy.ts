@@ -585,13 +585,26 @@ const services: readonly {
     //
     // 刻意**没有** DELETE：决策、切换与事件流都是 append-only 的举证凭据
     // （V92 的 REVOKE 与触发器已经这么钉了），放行删除形状等于让界面以为可以。
+    // fulfillment/allocation 是 9.3.2.1 分仓规则的全部端点（**新的一组**，不并进上面的
+    // fulfillment/routing 组 —— 那是 9.3.2.2 的形状，混在一起会让「路由决策」与
+    // 「分仓决策」在权限与日志上分不开）：
+    //   capabilities  能力与上游可用性声明
+    //   rules         分仓规则集合读 + POST 维护（优先级、兜底策略与五维权重）
+    //   warehouses    仓库档案集合读 + POST 维护（**货权法人登记在这里**）
+    //   stock-estimates / shipping-estimates
+    //                 可用量与运费时效估算：集合读 + POST 维护（各两个形状）
+    //   simulations   分仓试算（POST，只读不落库）
+    //   allocations   集合读 + POST 执行分配 + {uuid} 详情 + {uuid}/status 状态流转
+    //   holds         挂起清单（集合读；挂起是 append-only 的凭据，**没有**任何写形状）
+    // 判别顺序与 routing 组一致：字面量子路径排在 allocations/{uuid} 之前，
+    // 否则会被 [0-9a-f-]+ 分支吃掉；两段形状排在单段 {uuid} 之后。
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern:
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
-    // 裸路径 fulfillment/routing 与 processing **刻意不放行**：后端没有对应映射，
-    // 放行它会让界面以为「一条不存在的列表接口」可用。
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
+    // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
+    // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
     // crm 是 15 客户与客服的服务（端口 8086，数据库 starcon_crm），15.4.2.1 知识库
