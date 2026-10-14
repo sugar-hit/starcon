@@ -123,6 +123,7 @@ class SyncRuntimeIntegrationTest {
   @Autowired SyncService sync;
   @Autowired AccessService access;
   @Autowired MockMvc http;
+  @Autowired DSLContext sql;
 
   AccessService.Access actorA, actorB;
 
@@ -456,6 +457,93 @@ class SyncRuntimeIntegrationTest {
                       return null;
                     }))
         .hasMessageContaining("超前");
+  }
+
+  /**
+   * 迁移 V5 把方向约束下沉到 DB：任何绕过 rewindCursor 端点的倒退写都必须被触发器拦下。
+   *
+   * <p>这条纪律单靠服务层代码保证不住——修数据的脚本、后来新增的端点、一次误改，
+   * 都能安静地把游标推回更早的位置，不报错也不留痕。
+   */
+  @Test
+  void dbRejectsCursorRegressionOutsideTheRewindEndpoint() {
+    UUID conn = connection(actorA);
+    UUID c = cursor(actorA, conn, "ORDER");
+
+    as(
+        actorA,
+        "channel.sync.update",
+        () -> {
+          sql.execute(
+              "update sync_cursor set cursor_value=? where id=?",
+              "2026-02-01T00:00:00Z", c);
+          return null;
+        });
+    as(
+        actorA,
+        "channel.sync.update",
+        () -> {
+          sync.rewindCursor(actorA, c, "2026-01-15T00:00:00Z");
+          return null;
+        });
+
+    // 绕过端点直接改表：触发器只认显式意图位，这里没有声明，必须被拦下
+    assertThatThrownBy(
+            () ->
+                as(
+                    actorA,
+                    "channel.sync.update",
+                    () -> {
+                      sql.execute(
+                          "update sync_cursor set cursor_value=? where id=?",
+                          "2026-01-01T00:00:00Z", c);
+                      return null;
+                    }))
+        .hasMessageContaining("Cursor regression must use the explicit rewind endpoint");
+
+    // 游标没有被那次失败的写入改动
+    assertThat(as(actorA, "channel.sync.read", () -> sync.cursor(c)).cursorValue())
+        .isEqualTo("2026-01-15T00:00:00Z");
+  }
+
+  /**
+   * 方向比较必须对纯数字游标按数值定序，否则 "10" 会被判成早于 "9"，
+   * 一次合法的推进会被误拦成倒退——那会把正常同步直接写死。
+   */
+  @Test
+  void numericCursorsAdvanceByValueNotByLexicographicOrder() {
+    UUID conn = connection(actorA);
+    UUID c = cursor(actorA, conn, "ORDER");
+
+    as(
+        actorA,
+        "channel.sync.update",
+        () -> {
+          sql.execute("update sync_cursor set cursor_value=? where id=?", "9", c);
+          return null;
+        });
+    // 9 → 10 必须是合法推进，不能被守卫误判
+    as(
+        actorA,
+        "channel.sync.update",
+        () -> {
+          sql.execute("update sync_cursor set cursor_value=? where id=?", "10", c);
+          return null;
+        });
+    assertThat(as(actorA, "channel.sync.read", () -> sync.cursor(c)).cursorValue()).isEqualTo("10");
+
+    // 但 10 → 9 确实是倒退，仍必须被拦下
+    assertThatThrownBy(
+            () ->
+                as(
+                    actorA,
+                    "channel.sync.update",
+                    () -> {
+                      sql.execute(
+                          "update sync_cursor set cursor_value=? where id=?", "9", c);
+                      return null;
+                    }))
+        .hasMessageContaining("Cursor regression must use the explicit rewind endpoint");
   }
 
   @Test
