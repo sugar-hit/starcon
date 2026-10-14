@@ -6,7 +6,7 @@ const braces = require('braces') as {
   (pattern: string): string[];
   parse(pattern: string): unknown;
   compile(ast: unknown): string;
-  expand(pattern: string): string[];
+  expand(pattern: unknown): string[];
   stringify(ast: unknown): string;
 };
 
@@ -36,6 +36,7 @@ describe('patched braces resource limits (CVE-2026-93687)', () => {
     let ast: unknown = { type: 'text', value: 'x' };
     for (let i = 0; i < 4000; i++) ast = { type: 'root', nodes: [ast] };
     expect(() => braces.compile(ast)).toThrow(/maximum depth of 128/);
+    expect(() => braces.expand(ast)).toThrow(/maximum depth of 128/);
     expect(() => braces.stringify(ast)).toThrow(/maximum depth of 128/);
   });
 });
