@@ -765,6 +765,39 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 10.1.2.1 运费计算器（**本条目是新增一条 services[] 元素**，与 10.1.1.2 渠道配置
+    // 那条并列，**不改也不重排**它）。同批多车道共享这一个文件，而每个服务在
+    // services[] 里是**一段超长单行正则**：两条车道都往同一服务的 alternation 里并分支，
+    // git 必然判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」，
+    // 插入锚点固定在 `prefix: 'trade/'` **之前** —— 那样本车道与其他车道的插入点被
+    // 既有条目隔开，git 能干净合并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   freight/capabilities            能力声明（未交付段 available=false）
+    //   freight/estimate               🔴 运费试算（POST，无副作用，不落库）
+    //   freight/quotes                 试算并落库（POST）/ 试算单集合读（GET，真分页 + 筛选）
+    //   freight/quotes/{uuid}          试算单详情（GET，含逐渠道计算轨迹）
+    //   freight/rate-cards             费率卡与分国家规则（GET）/ 登记改费率卡（POST）
+    //   freight/country-rules          登记改分国家规则（POST）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / estimate / quotes /
+    // rate-cards / country-rules）排在 [0-9a-f-]+ 分支之前，否则会被 uuid 分支提前吃掉。
+    // 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    // 只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `freight/compare` —— 10.1.2.2 渠道比价未交付
+    //   * `freight/quotes/{uuid}/settlement` —— 结算用实际成本，口径不在本模块
+    //     （试算用规则、结算用实际，不能拿试算当实际成本）
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^freight(?:\/(?:capabilities|estimate|quotes|rate\-cards|country\-rules|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+    // 裸路径 freight **不放行**：本模块没有裸集合读，运费计算器的一切入口都带子路径。
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
