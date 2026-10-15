@@ -6,25 +6,32 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 156 |
+| 已交付 | 160 |
 | 进行中 | 0 |
-| **未开发** | **309** |
-| 完成率 | 33.5% |
+| **未开发** | **305** |
+| 完成率 | 34.4% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
-| **D4** | 28 | 0 | 32 | 60 |
-| **D5** | 4 | 0 | 48 | 52 |
+| **D4** | 30 | 0 | 30 | 60 |
+| **D5** | 6 | 0 | 46 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -33,8 +40,8 @@
 | 06 | 采购与供应系统 | D6 | 2 | 26 |
 | 07 | 库存核算系统 | D3 | 26 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 20 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 13 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 9 | 27 |
+| 09 | 订单履约系统 | D4 / D5 | 15 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 11 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -319,7 +336,7 @@
 | 10.1.1.3 | 时效与限制 | — | D5 | 未开发 | — |
 | 10.1.2.1 | 运费计算器 | — | D5 | 未开发 | — |
 | 10.1.2.2 | 渠道比价 | — | D5 | 未开发 | — |
-| 10.2.1.1 | 运单列表 | — | D5 | 已交付 | 迁移 trade `V132__trade_waybill_listing.sql`（**归属 trade**：主上游 10.2.1.2 运单申请已交付在 trade（`V128__trade_waybill_application.sql`），**同服务直接读上游**优先于跨服务调用；蓝图卷 10「trade 拥有运单与报关单据」也指向这里。**零 ALTER 任何既有表**、零触发器挂载、零 FK 指向别模块的表，跨车道 DDL 回归面 = 0）。本模块**只读** `logistics_waybill_request`：运单号的唯一写入所有者永远是 10.2.1.2，本模块不写它任何一列，清单行在**查询时现算**（jOOQ 显式 SQL），**不落投影表** —— 因此不存在「投影没刷新 → 列表空着 → 现场以为今天没单」这种假活，也不需要 sync 定时任务。两张新表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation：**logistics_waybill_freight**（运费**登记**，NUMERIC(19,4)+BigDecimal 禁浮点；更正 = **追加新行 + 撤下旧行**，用 `GRANT UPDATE (is_current)` **列级授权** + `guard_waybill_freight_immutable` 触发器两层钉住「凭据不可改写」；部分唯一索引 `waybill_freight_current` 保证一票同时只有一条现行行；**刻意没有删除形状** —— 运费进了 10.4.1 物流成本口径，删一笔等于让成本报表少一块而没人知道）＋ **logistics_waybill_print_log**（批量打印逐件留痕，批次号 `WPL-yyyyMMdd-000001`，`UNIQUE(tenant_id,batch_no,request_id)` 使重复提交幂等；单号必须已出号，DB CHECK 直接堵死「打印空面单」）。两张表都 append-only（REVOKE UPDATE/DELETE + 触发器），starcon_app 一律 REVOKE ALL。⚠️ **蓝图七个展示态里有四个没有数据源**：加粗句要求「运单状态从承运商侧获取为准」，而 **10.3 未交付**、集成头内**没有任何承运商轨迹数据源** —— 所以**已揽收/运输中/已签收/异常这四个态本模块不产出**：枚举 `WaybillDisplayStatus` 逐个带 `available` 标志（false 的四个 ownerModule=10.3.1.1/10.3.1.2），用它们筛选时**返回空页并在 `statusFilterNote` 说明「没有数据源」而不是退化成「今天一票都没发」**；capabilities 逐条 available=false + ownerModule + impact 三者齐备（另含 FREIGHT_AMOUNT→10.1.2.1/10.1.2.2、LABEL_PRINT→8.3.4.2、WAYBILL_CANCEL→10.2.1.3、HANDOVER_STATE→8.3.4.1 共 5 个缺口）。⚠️ **「已取号」≠「在途中」**：`statusSource` 恒标 `INTERNAL_REQUEST`，`issuedWithoutCarrierTracking` 恒等于已取号数并在汇总里单独成列。另加一个**内部态**「申请失败」并**刻意不并进蓝图的「异常」** —— 申请失败是「我们还没拿到号」，承运商异常是「号有了、货在途中出问题」，混成一个红标签会让现场以为票已在路上而漏跟进。⚠️ **运费是登记不是计算**：全库 grep freight/shipping_cost 只在 V116 命中，那是 9.3.3.1 分仓决策的**每单估算快照**，既不是本票运单的实际运费也不是同一个事实，故不借用；「未登记」是一个**可读状态**（NOT_REGISTERED）而不是空单元格，与「登记为 0」在清单与汇总里**分开计数**，汇总**按币种分组**给（跨币种相加属 10.1.2.1 职责，未交付）。筛选下拉**全部来自真实数据 DISTINCT**（渠道/承运商/目的国/发货仓），不写死词表。**三个批量动作都真作用但写入一律回到唯一写入所有者**：「申请运单」委派 10.2.1.2 的 retry、「取消」委派其 cancel，本模块**不**自己 UPDATE `logistics_waybill_request`；逐条结果把「成功/跳过/失败」**分开**并说清是哪一种跳过（已取号 / 已在队列等窗口 / 已作废）；已取号的取消**逐条点名 10.2.1.3 并不代做**（代做 = 在没有渠道时限规则与承运商接口时把货「取消成功」，是最贵的显示与事实不一致）。打印**不渲染 ZPL、不建第二个打印引擎**，只发 10.2.1.2 登记的凭据并逐件留痕，「有没有凭据」如实标 RECORDED_REFERENCE/NO_REFERENCE。端点 `/trade/logistics/waybills/**`（与 10.2.1.2 的 `/waybill-applications` **并列而非嵌套**：一个是只读清单、一个是写入所有者，权限与日志分得开）：GET /capabilities、GET /filter-options、GET /list、GET /{id}、POST /{id}/freight、POST /actions/apply|cancel|print；清单走 `/list` 而非裸路径（与既有 sales-orders/list 同款）。⚠️ **刻意不引入 8.3.4.1 的跨服务依赖**：清单行在出号那一刻就成立、交运发生在出号之后，为高频读列表引入「仓库不可达就整页 503」会让出号成功但仓库宕机时现场连单号都看不到 —— 故交运状态不进本清单（capabilities 写明理由）。权限码**复用** `trade.fulfillment.read/update`，不新起没被 identity 注册的 `trade.waybill.*`。前端：页面 `/logistics/shipments`（正是 10.2.1.2 页面注释为本模块预留的路径），三区块按现场判断顺序排（① 能力与缺口 → ② 筛选与汇总 → ③ 运单清单+批量操作）；**四个没有数据源的状态在筛选里禁用**（不是灰掉 —— 灰掉看起来像「有但没权限」）、**运费「未登记」画成文字而不是 0.00**、**每个已取号的行都附「不代表货已在路上」**、**页脚汇总标注「筛选结果共 N 张（不受分页影响）」**、**批量结果把成功/跳过/失败分成三色**。api-proxy 白名单在 trade 段**外科式最小追加** `logistics/waybills` 一支（不并进 waybill-applications / pending-shipment / shipment-records / dropship-margin / b2b-orders 任一组、不重排已有分支；已**逐字节验证**去掉新增分支后与原文件完全相同、889 行里只改 1 行）。测试 `WaybillListingIntegrationTest` 24 例（trade，实跑 Testcontainers PostgreSQL 16，连接池压到 1；含**汇总覆盖全量而不随 LIMIT/OFFSET 缩小**、**四个无数据源的态返回空页并说明原因**、运费未登记/零分别计数与按币种分组、**更正=追加+撤下**、**改写金额被两层各拒一次**（应用账号 permission denied + 迁移超级账号仍被触发器拒）、运费挂幽灵运单被拒、打印单号与上游不一致被拒、**timestamptz 往返断言写回值**（写入 18:30+08:00 读回必须是同一瞬间）、批量三动作逐条给不适用原因、**多租户三断言**两租户互不可见/伪造 tenant header 无效/连接池 A→B→A 三轮不串、跨租户与不存在**掩掉 id 后逐字相同**）＋ waybill-listing-model.test.ts 24 例纯函数 ＋ waybill-listing-allowlist.test.ts 6 例（源码反向抽调用点 + 未交付形状与**裸路径** 404 + **兄弟组未被挤掉** + 本模块形状未污染运单申请命名空间 + 真跑 proxy 断言转发到 8085）。契约由 codegen 重生成（trade.ts 新增 13 个 WaybillList*/WaybillListing* DTO；channel 的既有漂移**未并入本车道**，与本模块无关）。验证：backend `./mvnw -q -o compile` 绿、`./mvnw -pl services/trade -am test` **486 例全绿**、`pnpm typecheck` 三包绿、`pnpm lint` 绿、`pnpm vitest run`（api-proxy 与白名单 32 文件 261 例 + 本模块 24 例）绿。⚠️ **已知缺口（如实记录）**：① **四个物流状态无数据源**（10.3 未交付），界面上禁用而不是画成 0 或留空；② **运费只能登记不能计算**（10.1.2.1/10.1.2.2 未交付），未登记是可读状态；③ **面单不可重新渲染**（8.3.4.2 未交付），只发已登记凭据；④ **已取号运单的取消与改址属 10.2.1.3**（未交付），本模块 409 并点名，不代做；⑤ **交运状态不在本清单**（8.3.4.1 跨服务，刻意不引入该依赖）；⑥ 「批量申请运单」只对**申请失败**的票生效（其余状态逐条给跳过原因）—— 一票从无到有的建单动作属 10.2.1.2，本模块只发起不自己建单。 |
+| 10.2.1.1 | 运单列表 | — | D5 | 已交付 | 迁移 trade `V132__trade_waybill_listing.sql`（**归属 trade**：主上游 10.2.1.2 运单申请已交付在 trade（`V128__trade_waybill_application.sql`），**同服务直接读上游**优先于跨服务调用；蓝图卷 10「trade 拥有运单与报关单据」也指向这里。**零 ALTER 任何既有表**、零触发器挂载、零 FK 指向别模块的表，跨车道 DDL 回归面 = 0）。本模块**只读** `logistics_waybill_request`：运单号的唯一写入所有者永远是 10.2.1.2，本模块不写它任何一列，清单行在**查询时现算**（jOOQ 显式 SQL），**不落投影表** —— 因此不存在「投影没刷新 → 列表空着 → 现场以为今天没单」这种假活，也不需要 sync 定时任务。两张新表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation：**logistics_waybill_freight**（运费**登记**，NUMERIC(19,4)+BigDecimal 禁浮点；更正 = **追加新行 + 撤下旧行**，用 `GRANT UPDATE (is_current)` **列级授权** + `guard_waybill_freight_immutable` 触发器两层钉住「凭据不可改写」；部分唯一索引 `waybill_freight_current` 保证一票同时只有一条现行行；**刻意没有删除形状** —— 运费进了 10.4.1 物流成本口径，删一笔等于让成本报表少一块而没人知道）＋ **logistics_waybill_print_log**（批量打印逐件留痕，批次号 `WPL-yyyyMMdd-000001`，`UNIQUE(tenant_id,batch_no,request_id)` 使重复提交幂等；单号必须已出号，DB CHECK 直接堵死「打印空面单」）。两张表都 append-only（REVOKE UPDATE/DELETE + 触发器），starcon_app 一律 REVOKE ALL。⚠️ **蓝图七个展示态里有四个没有数据源**：加粗句要求「运单状态从承运商侧获取为准」，而 **10.3 未交付**、集成头内**没有任何承运商轨迹数据源** —— 所以**已揽收/运输中/已签收/异常这四个态本模块不产出**：枚举 `WaybillDisplayStatus` 逐个带 `available` 标志（false 的四个 ownerModule=10.3.1.1/10.3.1.2），用它们筛选时**返回空页并在 `statusFilterNote` 说明「没有数据源」而不是退化成「今天一票都没发」**；capabilities 逐条 available=false + ownerModule + impact 三者齐备（另含 FREIGHT_AMOUNT→10.1.2.1/10.1.2.2、LABEL_PRINT→8.3.4.2、WAYBILL_CANCEL→10.2.1.3、HANDOVER_STATE→8.3.4.1 共 5 个缺口）。⚠️ **「已取号」≠「在途中」**：`statusSource` 恒标 `INTERNAL_REQUEST`，`issuedWithoutCarrierTracking` 恒等于已取号数并在汇总里单独成列。另加一个**内部态**「申请失败」并**刻意不并进蓝图的「异常」** —— 申请失败是「我们还没拿到号」，承运商异常是「号有了、货在途中出问题」，混成一个红标签会让现场以为票已在路上而漏跟进。⚠️ **运费是登记不是计算**：全库 grep freight/shipping_cost 只在 V116 命中，那是 9.3.3.1 分仓决策的**每单估算快照**，既不是本票运单的实际运费也不是同一个事实，故不借用；「未登记」是一个**可读状态**（NOT_REGISTERED）而不是空单元格，与「登记为 0」在清单与汇总里**分开计数**，汇总**按币种分组**给（跨币种相加属 10.1.2.1 职责，未交付）。筛选下拉**全部来自真实数据 DISTINCT**（渠道/承运商/目的国/发货仓），不写死词表。**三个批量动作都真作用但写入一律回到唯一写入所有者**：「申请运单」委派 10.2.1.2 的 retry、「取消」委派其 cancel，本模块**不**自己 UPDATE `logistics_waybill_request`；逐条结果把「成功/跳过/失败」**分开**并说清是哪一种跳过（已取号 / 已在队列等窗口 / 已作废）；已取号的取消**逐条点名 10.2.1.3 并不代做**（代做 = 在没有渠道时限规则与承运商接口时把货「取消成功」，是最贵的显示与事实不一致）。打印**不渲染 ZPL、不建第二个打印引擎**，只发 10.2.1.2 登记的凭据并逐件留痕，「有没有凭据」如实标 RECORDED_REFERENCE/NO_REFERENCE。端点 `/trade/logistics/waybills/**`（与 10.2.1.2 的 `/waybill-applications` **并列而非嵌套**：一个是只读清单、一个是写入所有者，权限与日志分得开）：GET /capabilities、GET /filter-options、GET /list、GET /{id}、POST /{id}/freight、POST /actions/apply |
 | 10.2.1.2 | 运单申请 | — | D5 | 已交付 | 迁移 trade `V128__trade_waybill_application.sql`（**归属 trade**：蓝图卷 10「trade 拥有运单与报关单据」，且 L2 表 10.2 运单管理「申请运单号…」主责含 trade；**零 ALTER 任何既有表** —— V124 的六张 shipment_* 只读引用，不加触发器不建跨模块 FK，跨车道 DDL 回归面 = 0）。**五张业务表 + 一个限流口径视图** tenant_id NOT NULL + ENABLE/FORCE RLS isolation：logistics_carrier（承运商与渠道**本地登记**事实 · 可登记可扩展，刻意不含 endpoint/凭据列）· logistics_waybill_request（**逐包裹一张申请**，不是逐出库单）· logistics_waybill_queue_entry（**可见的持久化限流队列**，逐票一条）· logistics_customs_declaration_item（申报明细）· logistics_waybill_attempt（逐次尝试与失败原因原文）· logistics_waybill_event（append-only 凭据，连 trade_app 的 UPDATE/DELETE 都 REVOKE）＋ 视图 waybill_channel_rate_limit（限流默认值单一真相，**必须单独 GRANT SELECT**，视图不继承 GRANT ... ON ALL TABLES，漏了症状是「表都读得到，一查视图就 permission denied」）。⚠️ **本模块唯一不可让步的一条：幂等键是输入契约不是可选优化** —— 蓝图输入句第四项写的是 `idempotency_key`，所以 DB 层 `UNIQUE(tenant_id, idempotency_key)` 完整唯一（**不是条件索引**），服务层重复提交**返回原来那一张**并标 `idempotentReplay`，不是「又建一张」；测试有反例：绕过服务层直接 INSERT 第二行撞 23505，证明挡住它的是 DB 而不是应用层的 if。另有条件唯一索引 `waybill_request_parcel_guard`（同包裹 + 同承运商只能一张有效申请，已 CANCELLED 不占位）—— 重复申请 = 重复出号 = 承运商按两张计费。**限流排队是真的排队**：入队时按「基准时刻 + 渠道内序号 ÷ 每窗口上限」算出**可复算**的放行时刻（不引入随机抖动，否则「第几条排第几」变成猜的），放行走 `POST /requests/dispatch` **逐条**取（`for update skip locked`，并发放行互不踩踏），一条限流不拖住后面所有条；蓝图那句「批量申请要按渠道限流排队，否则触发接口限流影响整批」两半都做到：入队不阻塞 + 窗口按承运商算。**一次请求不许跨承运商**（照抄 9.4.1.1 已验证的做法，DB 触发器 guard_waybill_queue_carrier 钉住队列行承运商与申请一致）。失败重试带**退避**（base × 2^失败次数，从承运商登记读，不散落成常量），且区分**可重试**（限流/不可达）与**不可重试**（承运商拒收、渠道未接通）—— 原样重发只会再被拒一次并多烧一次配额。⚠️ **不造运单号**：DB CHECK `(status='ISSUED') = (btrim(waybill_no)<>'')` + 触发器（已出号不可回退、运单号与出号时刻不可改写）保证 ISSUED 只能由**承运商适配器真实返回**时进入。⚠️ **10.1 物流渠道全部未交付**（10.1.1.1/10.1.1.2/10.1.1.3/10.1.2.1/10.1.2.2 台账全「未开发」），即**没有承运商连接配置**；正确做法是把承运商建模成**可登记可扩展的本地事实 + 明确适配器端口**（`CarrierWaybillPort` 统一接口 + `CarrierAdapterRegistry` 按 adapterKey 索引，每个 vendor 独立包由 channel 侧 10.1 接通后提供），**不凭空造一个已接通的承运商、不写死一个假 API 返回运单号**：没有实现时 `resolve` 如实返回 Unavailable(ownerModule=10.1.1.1)，该票 FAILED 并写明原因，capabilities 逐条 available=false。capabilities 共 8 个维度，其中 5 个 **available=false 并点名 ownerModule 与影响**：CARRIER_CONNECTION→10.1.1.1、CARRIER_RATE_LIMIT_CONFIG→10.1.1.3、WAYBILL_CANCEL→10.2.1.3、TRACKING→10.3.1.1、RATE_PREDICTION→10.1.2.1。**跨服务只走授权 API**（AGENTS.md 禁跨库 SQL/FK/视图）：申报走 3.7.1.1 `CustomsAttributePort`（只接受 `declarationReady=true` 的报关属性 —— 草稿态 HS 编码承运商与海关都会拒收，且 HS/原产地对不上时**拒绝并说清「申报 X / 登记 Y」**）；面单模板走 8.3.4.2 `CarrierLabelTemplatePort`（只记 template_ref，**不渲染 ZPL、不建第二个打印引擎**）；待发货包裹同服务同库只读 V124。**申报明细必须自洽**：DB CHECK 逐行验 `单价 × 数量 = 申报额`（NUMERIC(19,6) 数量 + NUMERIC(19,4) 金额，**BigDecimal 禁浮点**），触发器验头尾合计一致（并由此规定写入顺序：①头(合计 0) → ②明细 → ③回填合计 —— 一个自称 120 美元却无明细支撑的申报单会被当场拒）。批量里**每件给各自明细**（`WaybillBatchCustomsInput.pendingParcelId` 必填）：整批共用一份会让件 B 的面单印着件 A 的件数与 HS 编码。⚠️ 任务载荷一律**具名 record**（Map 会被 springdoc 推成 object，codegen 出空对象 `{}`，9.6.1.3 已踩过）。端点挂 `/trade/logistics/waybill-applications`（**与 9.4.1.1 的 /fulfillment/pending-shipment 并列而非嵌套**：待发货说「哪几件还没发」，运单申请说「这票去换号」，权限与日志分得开）：GET /capabilities、GET+POST /carriers、POST /requests、POST /batches、GET /requests、GET /requests/{id}、POST /requests/dispatch、POST /requests/{id}/retry、POST /requests/{id}/cancel、GET /queue；刻意**没有** PUT/DELETE（带凭据的单据，要更正就作废重开）。权限码**复用** `trade.fulfillment.read/update`，不新起没被 identity 注册的 `trade.waybill.*`。前端：页面 `/logistics/waybills`（**刻意不占用蓝图给 10.2 的 /logistics/shipments** —— 那是 10.2.1.1 运单列表未交付的路径，两条车道各写 page.tsx 会互相覆盖），四区块按现场判断顺序排（① 能力与缺口 → ② 承运商登记 → ③ 限流队列 → ④ 申请清单）；**「已入队」画成排队位次而不是转圈**（后者让现场以为已在提交）、**没有运单号必须说清是哪一种没有**（未入队/提交中/失败原因/已作废）、**不可重试的失败不给重试按钮**并说明「改地址或改尺寸」或「等 10.1.1.1 接通」，**批量里跳过（幂等命中）与失败（需处理）分色** —— 合成一个红数字会让现场以为「这批已经办好了」；加载/空/错误三态齐全。api-proxy 白名单在 trade 段**外科式最小追加** `logistics/waybill-applications` 一组（不并进 fulfillment/* 与 b2b-orders 任何一组、不重排已有分支、不拆外层括号）。测试 `WaybillApplicationIntegrationTest` 32 例（trade，实跑 Testcontainers PostgreSQL 16，连接池压到 1；含**幂等重复提交返回同一张 + 直接 INSERT 反例**、同包裹同承运商重复申请被条件唯一索引挡、**批量按窗口分桶且时刻可复算**（断言桶边界而非墙钟，逐字相等的墙钟不是本模块保证的东西）、限流窗口未到不取件、**未接通渠道全库零运单号**、出号后不可回退/不可改写/不可在本模块作废、**timestamptz 往返断言写回值**（负页码曾算出负 OFFSET 被映射成 409，页面笔误显示成「数据冲突」，已钳位并补反例）、申报合计与明细不自洽被触发器拒、草稿态报关属性与 HS 不一致被拒且说清是哪一条、拒收不可重试、**多租户三断言**两租户互不可见/伪造 tenant header 无效/连接池归还后不串租户 A→B→A 三轮、跨租户与不存在返回逐字相同的 404）＋ waybill-model.test.ts 24 例 ＋ waybill-allowlist.test.ts 5 例（源码反向抽调用点 + 未交付形状 404 + **兄弟十组未被挤掉或污染** + 真跑 proxy 断言转发到 8085 且不转发伪造租户头）。契约由 codegen 重生成（trade.ts 新增 24 个 Waybill* DTO；warehouse 的既有漂移**未并入本车道**，与本模块无关）。验证：backend `./mvnw -q compile` 绿、`./mvnw -pl services/trade -am test` **401 例全绿**、`pnpm typecheck` 全绿（web/ui/config-tailwind）、`pnpm lint` 全绿、`pnpm vitest run`（api-proxy 与白名单 14 文件 191 例 + 本模块 29 例）全绿。⚠️ **已知缺口（如实记录）**：① **没有任何渠道真正接通**，所以本模块现在**出不了号** —— 这是 10.1 未交付的如实后果，不是本模块假装能出；10.1 接通后新增 vendor 包即可，本模块表与服务层**一行不用改**。② **批量/放行暂不做跨渠道混排**，一次请求固定一个承运商（各家配额互不相通，混排没法算窗口）。③ 10.2.1.1 运单列表 / 10.2.1.3 改址取消 / 10.3 轨迹均未交付，本模块**不代做**（已出号的运单取消会 409 并指向 10.2.1.3）。 |
 | 10.2.1.3 | 改址与取消 | — | D5 | 未开发 | — |
 | 10.2.2.1 | 包裹详情 | — | D5 | 已交付 | `backend/services/warehouse/src/main/resources/db/migration/V125__parcel_detail.sql`（warehouse，**新建一张** parcel_item_sales_order_line + 4 个索引 + 2 个触发器 + RLS，tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT；版本按调度器预分配取 V125；**纯新建表、不 ALTER parcel / parcel_item，无跨车道回归面**）；**落 warehouse 而不是 channel（这是本模块最容易做错的一处）**：蓝图卷 10 写「主责服务 = channel + trade + warehouse」，那三个字说的是**谁提供物流能力**，不是「单包裹视图落在哪个服务」—— `parcel` / `parcel_item` 由上游 8.3.3.2（warehouse，V121）拥有，AGENTS.md 明令跨服务禁止直读对方的表 / 跨库 FK / 视图，所以**表所有者的读模型只能长在表所有者自己的服务里**；**蓝图点名那句的落点是「销售订单行」而不是已有的 outbound_line_id**：开工会发现 `parcel_item` 已经有 `outbound_line_id` → `outbound_order_line`，但那是**出库单行**（warehouse 自己的计划快照），而 12 财务要摊运费的那一行是 **trade 的 `sales_order_line`（V99）** —— 两者之间跨服务不建 FK，warehouse 手上只有 `outbound_order.source_external_ref` 这个订单号**字符串**；缺这一环运费就只能回答「这一单运费多少」、答不出「第 2 行这件货分摊了多少」，**正是蓝图说的「只能算到订单级」**，故 V125 显式补上这一环；**建成表而不是加一列**（加一列只能存一个 uuid，答不出按什么口径匹配、这一行分到几件）：带 `allocated_quantity` **归集分母**（本箱分给该销售订单行的件数，触发器钉死**等于明细项实装件数** —— 分母错一分运费就错一分）与 `match_basis` **匹配口径**（强关联 `SKU_UNIQUE_ALIGNED` / 弱关联 `SKU_NAME_FALLBACK` 分开标，财务据此决定要不要追加人工复核，把两者画成同一种绿色是最危险的简化）；**匹配靠 SKU 唯一键不靠行号**：`outbound_order_line`（V72）与 `sales_order_line`（V99）**两边都有** `UNIQUE(tenant_id, order_id, sku_id)`，故 `parcel_item.sku_id → outbound_order_line.sku_id → sales_order_line.sku_id` 在两边都唯一；行号在两个服务里各自编号，**按行号对齐是纯猜**；只有 `source_type='SALES'` 的出库单才有销售订单行，调拨/采购退货/加工三类**不写行**、如实报「不是销售来源」，绝不硬造 uuid；**恒等式 `matched + unmatched == total` 是本模块最要紧的不变量**，服务层读回后断言它，对不上宁可 500 也不返回自相矛盾的归集结论，退回订单级时逐条列出没关联上的明细项；**DB 层三道守卫**：`allocated_quantity` 必须等于明细项实装件数（分母编错当场拒）、sku_id 必须与明细项一致（拿 A 件货的号指 B 行比不摊更糟）、parcel_id 必须与明细项所属包裹一致；**事实凭据只增不删**：触发器禁 UPDATE，且 **V125 刻意不给 warehouse_app UPDATE 权限** —— 给权限等于开一个绕过守卫的旁路（测试两层都钉：应用角色 permission denied + 超级用户直连仍被触发器拒）；**一条明细项不许挂两个销售订单行**（那会让同一件货的运费被**重复**摊一次，本表最贵的错，UNIQUE 在 DB 层拦）；**本模块是纯只读视图，一个字节都不改写 8.3.3.2 的包裹凭据**，端点只有 GET /capabilities 与 GET /{id} 两个形状，**刻意没有任何 POST/PUT/DELETE**；命名空间 `/warehouse/parcels` **刻意不挂 packing-orders 之下** —— 10 物流查轨迹、12 财务做运费归集时手里拿的是 parcel_id 不是作业单 id；**三段真读得到 / 三段如实标未接入**：SKU 与数量、重量体积、订单行对应关系 + 面单（读 8.3.4.2 已交付的 print_job / print_target，**不自建第二个打印引擎**，会出现两份「印的是什么」）；轨迹（10.3.1.1）、交运（8.3.4.1）、买家地址（9.1.1.2）、运费与体积重（12 财务 / 10 物流）、异常件（10.3.1.2）、3.7.2 物理属性（catalog）逐段 `available=false` + ownerModule + 原因 —— **不用空列表或 0 冒充「这一票没有轨迹」**（空列表在界面上与「确实没有记录」无法区分）；**未称重是 null 不是 0**（0 会被读成「量出来是 0 克」），**体积重刻意不在本模块算**（除数是承运商渠道口径，在此先乘除数就是替渠道定价）；页面 `/warehouse/parcels` 为真实工作区（能力与边界逐段标注 / 按 parcel_id 查看 / 重量体积口径 / **成本归集块（可归集到行 or 只能归到订单级 + 未关联明细项逐条列名）** / 明细项逐条展开并挂各自销售订单行与强弱关联标签 / 面单 / 只读操作入口 / 未接入段落灰块 / 加载态、空态、错误态、逐条失败提示）；路由白名单在 api-proxy.ts 的 warehouse 分支**内层** alternation **追加** `parcels` 一支（未重写整段正则、未重排任何其他服务分组），`capabilities` 排在 `[0-9a-f-]+` 之前、子路径**不带**可选量（本模块无列表端点，裸 `parcels` 必须 404），并用真实路由验证放行 + 回归 packing-orders / recount-scans / pick-waves 未被改坏；前端模型 13 例单测钉死「未量≠0 / 退回订单级必须说清 / 弱关联绝不显示成强关联 / 未知口径回落枚举名不静默吞掉」；集成测试 `ParcelDetailIntegrationTest` 16 项真实 PostgreSQL 16 + Testcontainers（池容量 1）+ **租户隔离三断言全跑**（两租户互不可见、伪造 X-Tenant-Id 无效、连接池归还后不串租户 A→B→A 三轮），夹具走**真实表与真实守卫**（出库单 PENDING_PICKING→PICKING→PENDING_RECHECK→PENDING_PACKING 真实跃迁链、拣货请求 → 拣货任务 → 复核单 OPEN→每行 MATCHED→PASSED → 打包 OPEN→装箱→装明细→称重→PACKED），**不塞随机 uuid 绕过外键、不直接插一行 PACKED** —— V121 的完成守卫（五件事缺一不可）正是本模块要读的那份凭据的成因；**跨租户与不存在返回同一个 404 且响应体逐字相同**（不给「拿 B 的 id 探测存在性」留信息面）；验证：warehouse 全量测试绿、`pnpm typecheck` 全绿（web/ui/config-tailwind 三包）、`pnpm vitest run`（本模块 13 例）绿；**已知缺口（如实记录）**：`parcel_item_sales_order_line` 的**写入方（对齐作业）尚未交付** —— 目前只有本模块的读模型与 DB 守卫，归集到行需要上游把关联写进来；trade 侧 `GET /trade/sales-orders/detail/fulfillment-reference` 已交付且**带 lines**，是对齐作业的现成授权 API（**跨服务调用刻意留给对齐作业那条车道**，本模块不直连 trade 的表、也不代它写） |
