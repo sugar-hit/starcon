@@ -727,7 +727,28 @@ const services: readonly {
     //   {uuid}/invoice-requests 登记开票需求
     // 判别顺序：字面量子路径排在 {uuid} 之前，否则会被 [0-9a-f-]+ 分支吃掉。
     // 裸路径 b2b-orders 与集合读共用一支（本文件的 pattern 按路径登记、不区分方法）。
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?)|sales-orders\/change\/(?:capabilities|platform-rules(?:\/[0-9a-f-]+)?|fulfillment-progress|requests(?:\/[0-9a-f-]+(?:\/(?:status|writeback-tasks))?)?|cancellations(?:\/[0-9a-f-]+(?:\/(?:status|warehouse-tasks(?:\/[0-9a-f-]+\/status)?|writeback-tasks))?)?|writeback-tasks\/[0-9a-f-]+\/status)|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?)$/,
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?)|sales-orders\/change\/(?:capabilities|platform-rules(?:\/[0-9a-f-]+)?|fulfillment-progress|requests(?:\/[0-9a-f-]+(?:\/(?:status|writeback-tasks))?)?|cancellations(?:\/[0-9a-f-]+(?:\/(?:status|warehouse-tasks(?:\/[0-9a-f-]+\/status)?|writeback-tasks))?)?|writeback-tasks\/[0-9a-f-]+\/status)|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?|fulfillment\/dropship-margin\/(?:capabilities|fee-rates|fx-rates|cycles|events|facts(?:\/evaluate)?|report|alerts(?:\/evaluate)?|alerts\/[0-9a-f-]+\/(?:acknowledge|dismiss)|reconciliations(?:\/[0-9a-f-]+(?:\/status)?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?))$/,
+    // fulfillment/dropship-margin 是 9.6.2.1 代发差价与对账（**新的一组**，与上面
+    // 四组并列而不是并进去）：配置说「走不走代发」，代发单说「怎么下的」，
+    // 跟踪说「到哪了、卡在哪」，本组说「这一票赚没赚、这个周期该付供应商多少」。
+    //   capabilities      能力与上下游可用性（含平台费/头程费/汇率/应付/利润报表五个缺口维度）
+    //   fee-rates         平台费率登记（集合读 + POST；5.2.3.1 未交付前的可登记来源）
+    //   fx-rates          汇率登记（集合读 + POST；跨币种不相加，未登记单列未登记桶）
+    //   cycles            供应商结算周期（集合读 + POST）
+    //   facts             差价毛利明细（集合读）；facts/evaluate 是跑一轮计算
+    //   report            差价与毛利报表（按店铺/供应商/SKU/代发单，金额按币种分组）
+    //   alerts            亏损预警工作台（集合读）；alerts/evaluate 是跑一轮检出
+    //   alerts/{uuid}/acknowledge    处置（必须写明依据）
+    //   alerts/{uuid}/dismiss        判为误报（必须写明理由）
+    //   reconciliations   对账单（集合读 + POST 生成 + {uuid} 详情 + {uuid}/status 流转）
+    //   tasks             应付待办（集合读）；tasks/{uuid}/claim、tasks/{uuid}/complete
+    //   events            事件流（集合读；append-only，**没有**任何写形状）
+    // 判别顺序：字面量子路径（capabilities / fee-rates / fx-rates / cycles / report /
+    // events / facts/evaluate / alerts/evaluate）排在 {uuid} 分支之前，否则会被
+    // [0-9a-f-]+ 分支吃掉半截。**本组末尾刻意不加 `?`** —— 裸路径
+    // `fulfillment/dropship-margin` 不放行（后端没有裸资源映射，放行会让界面
+    // 以为存在一条并不存在的列表接口）；而被它前一个兄弟 `b2b-orders` 的可选组
+    // **不能动**，动了会让裸 `b2b-orders` 也一起被拒。
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
