@@ -50,7 +50,8 @@ function request(path: string, method = 'GET') {
  * 「源码加了新形状、白名单忘了登记」—— 所以这里从源码反向抽。
  */
 function realCallSites(): string[] {
-  const base = SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/logistics/waybill-applications';
+  const base =
+    SOURCE.match(/const base = '([^']+)'/)?.[1] ?? 'trade/logistics/waybill-applications';
   const found = new Set<string>();
   for (const match of SOURCE.matchAll(/`([^`]*)`/g)) {
     const raw = match[1];
@@ -73,7 +74,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了三个」也算通过。
@@ -103,7 +106,9 @@ it('POST 形状同样被放行（提交申请 / 批量 / 放行 / 重试 / 作�
     `trade/logistics/waybill-applications/requests/${ID}/cancel`,
   ];
   for (const path of paths) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
 });
@@ -121,7 +126,9 @@ it('未交付的形状仍然 404（放行一个后端不存在的映射 = 让界
     'trade/logistics/waybill-applications/rates',
     'trade/logistics/waybill-applications/carriers/' + ID,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 被误放行了（本模块没有这个端点）`).toBe(404);
   }
 });
@@ -144,7 +151,9 @@ it('兄弟七组没有被挤掉或污染', async () => {
     'trade/fulfillment/dropship-tracking/capabilities',
     'trade/b2b-orders/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `兄弟组 ${path} 被本车道的白名单改动挤掉了`).toBe(200);
   }
 });
@@ -154,7 +163,9 @@ it('真跑 proxy：放行的路径转发到 TRADE_URL（8085），不是只过�
   vi.stubGlobal('fetch', fetcher);
 
   await GET(request('trade/logistics/waybill-applications/capabilities'), {
-    params: { path: ['trade', 'logistics', 'waybill-applications', 'capabilities'] },
+    params: Promise.resolve({
+      path: ['trade', 'logistics', 'waybill-applications', 'capabilities'],
+    }),
   });
 
   expect(fetcher).toHaveBeenCalled();
