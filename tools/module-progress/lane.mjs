@@ -87,8 +87,9 @@ const readState = () => {
     const s = JSON.parse(readFileSync(STATE_FILE, 'utf8'));
     s.lanes ??= {};
     return s;
-  } catch {
-    return { integrationBranch: INTEGRATION, lanes: {} };
+  } catch (error) {
+    if (error.code === 'ENOENT') return { integrationBranch: INTEGRATION, lanes: {} };
+    throw new Error(`车道状态无法读取，停止调度以免覆盖在途任务：${error.message}`);
   }
 };
 
@@ -228,9 +229,7 @@ function readUpstreamMap() {
 function readVolumeOwners() {
   const readme = join(BLUEPRINT_DIR, 'README.md');
   if (!existsSync(readme)) {
-    throw new Error(
-      `找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`,
-    );
+    throw new Error(`找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`);
   }
   const owners = new Map();
   for (const line of readFileSync(readme, 'utf8').split('\n')) {
@@ -340,7 +339,11 @@ function pickModules(count, ledger, state) {
     .sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 
   const picked = [];
-  const usedL3 = new Set();
+  const usedL3 = new Set(
+    Object.values(state.lanes)
+      .filter((lane) => ['running', 'ready', 'conflict'].includes(lane.state))
+      .map((lane) => lane.l3 ?? l3Of(lane.id)),
+  );
 
   const tryTake = (cands) => {
     for (const r of cands) {
@@ -588,7 +591,16 @@ if (cmd === 'status') {
 
 if (cmd === 'plan') {
   const count = Number(flag('--lanes') ?? 1);
-  ensureIntegration();
+  if (!Number.isSafeInteger(count) || count < 0) {
+    throw new Error('--lanes 必须是非负整数');
+  }
+  const dryRun = flag('--dry-run') === true;
+  // 预览不创建集成分支；需要 init 后才能预览。
+  if (dryRun) {
+    git(['rev-parse', '--verify', INTEGRATION]);
+  } else {
+    ensureIntegration();
+  }
   const state = readState();
   const ledger = readLedger();
 
@@ -597,7 +609,6 @@ if (cmd === 'plan') {
   // 两条车道交出 V27，Flyway 在合并后直接炸 —— 而且是在别人跑测试时才炸。
   const used = usedVersions();
   for (const l of Object.values(state.lanes)) {
-    if (['abandoned', 'merged'].includes(l.state)) continue;
     const n = Number(/^V(\d+)$/.exec(l.migrationVersion ?? '')?.[1]);
     if (Number.isFinite(n)) used.add(n);
   }
@@ -631,7 +642,6 @@ if (cmd === 'plan') {
   const planned = [];
 
   // --dry-run：只算不建。用来回答「为什么 plan 排不出来」而不留 worktree 和分支。
-  const dryRun = flag('--dry-run') === true;
 
   for (const row of picked) {
     const id = row.id;
@@ -650,7 +660,7 @@ if (cmd === 'plan') {
       if (!existsSync(wt)) {
         mkdirSync(WORKTREE_DIR, { recursive: true });
         git(['worktree', 'add', wt, branch]);
-        sh('pnpm install --prefer-offline', wt);
+        sh('pnpm install --frozen-lockfile --prefer-offline', wt);
       }
     }
 
@@ -666,7 +676,7 @@ if (cmd === 'plan') {
       migrationVersion: `V${version}`,
       state: 'running',
       sessionId: session,
-      baseSha: base.slice(0, 7),
+      baseSha: base,
       createdAt: new Date().toISOString(),
       heartbeatAt: new Date().toISOString(),
       note: null,
@@ -773,7 +783,10 @@ if (cmd === 'land') {
     process.exit(1);
   }
   const sha = git(['rev-parse', 'HEAD'], lane.worktree);
-  if (sha === lane.baseSha || !sha) {
+  const base = git(['rev-parse', '--verify', `${lane.baseSha}^{commit}`], lane.worktree);
+  const descendant = git(['merge-base', '--is-ancestor', base, sha], lane.worktree, true) === '';
+  const newCommits = git(['rev-list', '--count', `${base}..${sha}`], lane.worktree);
+  if (!sha || !descendant || newCommits === '0') {
     console.error(`✗ ${id} 没有任何新提交（HEAD 仍是基线 ${lane.baseSha}）`);
     process.exit(1);
   }
@@ -808,7 +821,9 @@ if (cmd === 'merge-ready') {
     if (legacyLock?.module === lane.id) continue; // 还在跑，不碰
     if (trackedDirty) continue; // 主工作区有在途改动，不碰
     const sha = git(['rev-parse', 'HEAD'], ROOT);
-    if (!sha || sha === lane.baseSha) continue; // 没有新提交，等于没开工
+    if (!sha || !lane.baseSha) continue;
+    const base = git(['rev-parse', '--verify', `${lane.baseSha}^{commit}`], ROOT, true);
+    if (!base || git(['rev-list', '--count', `${base}..${sha}`], ROOT) === '0') continue;
     lane.state = 'ready';
     lane.headSha = sha;
     lane.landedAt = new Date().toISOString();
@@ -824,7 +839,8 @@ if (cmd === 'merge-ready') {
     if (lane.state !== 'conflict') continue;
     const mergedAlready =
       lane.headSha &&
-      git(['merge-base', '--is-ancestor', lane.headSha, state.integrationBranch], ROOT, true) === '';
+      git(['merge-base', '--is-ancestor', lane.headSha, state.integrationBranch], ROOT, true) ===
+        '';
     if (mergedAlready) {
       lane.state = 'merged';
       lane.mergedAt = lane.mergedAt ?? new Date().toISOString();
@@ -837,7 +853,8 @@ if (cmd === 'merge-ready') {
   if (conflictUnresolved.length) {
     console.error(
       `⚠ 仍有未解决的并入冲突，请人工处理：${conflictUnresolved.join(', ')}` +
-        `（` + `解决并提交后，下一次 merge-ready 会自动把它们补记为 merged）`,
+        `（` +
+        `解决并提交后，下一次 merge-ready 会自动把它们补记为 merged）`,
     );
   }
 
@@ -949,16 +966,25 @@ if (cmd === 'abandon') {
 if (cmd === 'gc') {
   const state = readState();
   const removed = [];
+  const skipped = [];
   for (const lane of Object.values(state.lanes)) {
-    if (!['merged', 'abandoned'].includes(lane.state)) continue;
+    if (lane.state !== 'merged') continue; // abandoned 成果必须人工确认，禁止强删
+
     const wt = laneWorktree(lane.id);
     if (!existsSync(wt)) continue;
-    git(['worktree', 'remove', '--force', wt], ROOT, true);
-    rmSync(wt, { recursive: true, force: true });
-    removed.push(lane.id);
+    const head = git(['rev-parse', 'HEAD'], wt);
+    const integrated =
+      git(['merge-base', '--is-ancestor', head, state.integrationBranch], ROOT, true) === '';
+    if (!integrated || git(['status', '--porcelain'], wt)) {
+      skipped.push(lane.id);
+      continue;
+    }
+    // git 自己保护锁定、脏或含未跟踪文件的 worktree；失败时保留目录。
+    if (git(['worktree', 'remove', wt], ROOT, true) !== null) removed.push(lane.id);
+    else skipped.push(lane.id);
   }
   git(['worktree', 'prune'], ROOT, true);
-  console.log(JSON.stringify({ ok: true, removed }, null, 2));
+  console.log(JSON.stringify({ ok: true, removed, skipped }, null, 2));
   process.exit(0);
 }
 

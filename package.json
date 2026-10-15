@@ -33,7 +33,8 @@
     "test:codegen": "python3 -m unittest discover -s tools/codegen -p 'test_*.py'",
     "progress:sync": "node tools/module-progress/sync.mjs",
     "progress:check": "node tools/module-progress/sync.mjs --check",
-    "progress:lock": "node tools/module-progress/lock.mjs"
+    "progress:lock": "node tools/module-progress/lock.mjs",
+    "test:workflow": "node tools/module-progress/test-workflow.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
