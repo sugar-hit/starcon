@@ -765,6 +765,37 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 10.2.2.2 面单模板（channel 服务）。纯**增量**追加：既有条目一字未动，
+    // 插入锚点固定在 `logistics-channels` 那组**之后**、`prefix: 'trade/'` **之前** ——
+    // 那样本车道与其它车道的插入点被既有条目隔开，git 能干净合并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   label-templates                    集合读（GET，真分页 + 筛选）/ POST 登记模板
+    //   label-templates/capabilities       能力声明（未交付段 available=false）
+    //   label-templates/overview           全量概览（不受筛选与分页影响）
+    //   label-templates/binding            🔴 渠道规则强绑定判定（POST，只读无副作用）
+    //   label-templates/{uuid}             详情（GET）/ DELETE 撤下模板
+    //   label-templates/{uuid}/status      启用 / 停用（POST）
+    //   label-templates/{uuid}/preview     🔴 真渲染预览（POST，出 ZPL + 真条码）
+    //   label-templates/{uuid}/renders     渲染历史（GET，真分页）
+    //
+    // ⚠️ 字面量子路径（capabilities / overview / binding）**排在** [0-9a-f-] 分支之前：
+    //    写反的话 `binding` 的首字母 b 落在 [0-9a-f] 里，会被 uuid 分支提前吃掉，
+    //    正则静默匹配失败，或更糟：拼出一个「id=binding 的模板」被凭空放行。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `label-templates/{uuid}/print` —— 打印下发是 8.3.4.2 的主权，本模块不建打印引擎
+    //   * `label-templates/{uuid}/deploy` —— 同上，本模块只到模板与渲染产物
+    //   * `label-templates/resolve` —— 运单 ↔ 模板的自动选版未做（见能力声明 ownerModule）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',

@@ -1799,6 +1799,300 @@
         }
       }
     },
+    "/channel/label-templates": {
+      "get": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "get_channel_label_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "readiness",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symbology",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "NAME_ASC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "post_channel_label_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveLabelTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/{id}/status": {
+      "post": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "post_channel_label_templates_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLabelStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/{id}/preview": {
+      "post": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "post_channel_label_templates_id_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelPreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelRenderPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/binding": {
+      "post": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "post_channel_label_templates_binding",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelBindingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelBindingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/handover-batches": {
       "get": {
         "tags": [
@@ -3075,6 +3369,196 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LogisticsChannelCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/{id}": {
+      "get": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "get_channel_label_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "delete_channel_label_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/label-templates/{id}/renders": {
+      "get": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "get_channel_label_templates_id_renders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelRenderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/overview": {
+      "get": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "get_channel_label_templates_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplateOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/label-templates/capabilities": {
+      "get": {
+        "tags": [
+          "label-template-controller"
+        ],
+        "operationId": "get_channel_label_templates_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelTemplateCapabilities"
                 }
               }
             }
@@ -4846,6 +5330,598 @@
           }
         }
       },
+      "LabelBatteryMark": {
+        "type": "object",
+        "properties": {
+          "batteryType": {
+            "type": "string"
+          },
+          "wattHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "batteryWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "un38_3Attested": {
+            "type": "boolean"
+          },
+          "markingSymbol": {
+            "type": "string"
+          },
+          "elementKey": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelDeclaration": {
+        "type": "object",
+        "properties": {
+          "declarationKind": {
+            "type": "string"
+          },
+          "declarationCode": {
+            "type": "string"
+          },
+          "displayText": {
+            "type": "string"
+          },
+          "elementKey": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelElement": {
+        "type": "object",
+        "properties": {
+          "elementKey": {
+            "type": "string"
+          },
+          "elementKind": {
+            "type": "string"
+          },
+          "symbology": {
+            "type": "string",
+            "nullable": true
+          },
+          "xMm": {
+            "type": "number"
+          },
+          "yMm": {
+            "type": "number"
+          },
+          "wMm": {
+            "type": "number"
+          },
+          "hMm": {
+            "type": "number"
+          },
+          "fontPt": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rotation": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SaveLabelTemplateRequest": {
+        "required": [
+          "batteryMarks",
+          "countryCode",
+          "declarations",
+          "dpi",
+          "elements",
+          "languageCode",
+          "orientation",
+          "paperHeightMm",
+          "paperWidthMm",
+          "primaryBarcodeHeightMm",
+          "primaryBarcodeSymbology",
+          "status",
+          "templateCode",
+          "templateName"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "templateCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "templateName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "languageCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "paperWidthMm": {
+            "minimum": 0.01,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "paperHeightMm": {
+            "minimum": 0.01,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "dpi": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orientation": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "originOffsetXMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "originOffsetYMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "primaryBarcodeSymbology": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "primaryBarcodeHeightMm": {
+            "minimum": 0.01,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "humanReadable": {
+            "type": "boolean"
+          },
+          "elements": {
+            "maxItems": 60,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelElement"
+            }
+          },
+          "declarations": {
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelDeclaration"
+            }
+          },
+          "batteryMarks": {
+            "maxItems": 10,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelBatteryMark"
+            }
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LabelTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelReadiness": {
+            "type": "string"
+          },
+          "channelStatus": {
+            "type": "string"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "languageCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paperWidthMm": {
+            "type": "number"
+          },
+          "paperHeightMm": {
+            "type": "number"
+          },
+          "dpi": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orientation": {
+            "type": "string"
+          },
+          "originOffsetXMm": {
+            "type": "number"
+          },
+          "originOffsetYMm": {
+            "type": "number"
+          },
+          "primaryBarcodeSymbology": {
+            "type": "string"
+          },
+          "primaryBarcodeHeightMm": {
+            "type": "number"
+          },
+          "humanReadable": {
+            "type": "boolean"
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelElement"
+            }
+          },
+          "declarations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelDeclaration"
+            }
+          },
+          "batteryMarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelBatteryMark"
+            }
+          },
+          "readiness": {
+            "type": "string"
+          },
+          "readinessMessage": {
+            "type": "string"
+          },
+          "effectiveReadiness": {
+            "type": "string"
+          },
+          "effectiveReadinessMessage": {
+            "type": "string"
+          },
+          "activatable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SetLabelStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LabelPreviewRequest": {
+        "required": [
+          "elementValues"
+        ],
+        "type": "object",
+        "properties": {
+          "elementValues": {
+            "maxItems": 60,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelSampleValue"
+            }
+          },
+          "wattHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "persist": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LabelSampleValue": {
+        "type": "object",
+        "properties": {
+          "elementKey": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelFinding": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelRenderPreview": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictMessage": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelFinding"
+            }
+          },
+          "blockCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "labelFormat": {
+            "type": "string"
+          },
+          "symbology": {
+            "type": "string"
+          },
+          "encodedValue": {
+            "type": "string"
+          },
+          "barcodeModules": {
+            "type": "string"
+          },
+          "zplContent": {
+            "type": "string"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "persisted": {
+            "type": "boolean"
+          },
+          "previewNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelBindingRequest": {
+        "required": [
+          "categoryCodes",
+          "countryCode"
+        ],
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "categoryCodes": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "containsMagnet": {
+            "type": "boolean"
+          },
+          "templateIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          }
+        }
+      },
+      "LabelBindingResult": {
+        "type": "object",
+        "properties": {
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelBindingVerdict"
+            }
+          },
+          "pass": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelBindingVerdict": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveReadiness": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "missingDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingBatteryMarks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "redundantDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelFinding"
+            }
+          }
+        }
+      },
       "CreateBatchRequest": {
         "type": "object",
         "properties": {
@@ -6228,6 +7304,290 @@
             "type": "string"
           },
           "restrictionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelTemplatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelTemplateRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/LabelTemplateSummary"
+          }
+        }
+      },
+      "LabelTemplateSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noLayout": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noBarcode": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "declarationGap": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noChannel": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "active": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withBatteryMark": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "multiLanguage": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LabelRenderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelRenderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LabelRenderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "symbology": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "findingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "zplContent": {
+            "type": "string"
+          },
+          "renderedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LabelTemplateCount": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LabelTemplateOverview": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/LabelTemplateSummary"
+          },
+          "bySymbology": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelTemplateCount"
+            }
+          },
+          "byLanguage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelTemplateCount"
+            }
+          },
+          "byDeclarationKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelTemplateCount"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "LabelTemplateCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelCapabilityDimension"
+            }
+          },
+          "labelFormats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "symbologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "barcodeKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "elementKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarationKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "batteryTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languageCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "storedReadinessCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveReadinessCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verdictCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "bindingNote": {
             "type": "string"
           }
         }
