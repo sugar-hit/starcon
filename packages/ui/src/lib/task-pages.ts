@@ -250,6 +250,30 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['试算阶梯价与起订量', '发货确认账期应收', '按账期开票对账'],
   },
   {
+    // 9.7.1.2 经销与分销管理。与 /orders/b2b 同属订单域且**紧邻**，domain 取域级 'orders'，
+    // 导航条目同样由 SYSTEMS 的 children 从 IMPLEMENTED_TASK_PAGES 派生（见 nav-config），
+    // 这里只登记任务页，不改共享的导航常量文件。
+    // 刻意不是 /orders/b2b 的 tab：那边是「下单 → 发货 → 账期应收」的流转，
+    // 本页是「授权 → 考核 → 计提 → 预警」的台账，四件事与读写边界都不同。
+    href: '/orders/dealers',
+    implemented: true,
+    domain: 'orders',
+    label: '经销商与分销',
+    description:
+      '管理经销商授权区域与产品线、授权期限、经销价与返点，按销量配额与回款考核，并监控跨区域窜货。',
+    fields: [
+      '授权编号',
+      '授权区域',
+      '授权产品线',
+      '授权期限',
+      '经销价',
+      '返点比例',
+      '配额完成率',
+      '窜货预警',
+    ],
+    workflow: ['建授权台账', '登记销售与回款考核', '计提返点并处置窜货'],
+  },
+  {
     href: '/orders/review',
     implemented: false,
     domain: 'orders',
