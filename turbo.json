@@ -1,12 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", "tsconfig.base.json"],
+  "globalDependencies": [
+    "**/.env.*local",
+    "tsconfig.base.json",
+    "packages/config-eslint/**",
+    "packages/config-tsconfig/**",
+    "packages/config-tailwind/**"
+  ],
   "globalEnv": ["NODE_ENV", "DATABASE_URL", "REDIS_URL", "KAFKA_BROKERS"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "build/**"],
-      "inputs": ["src/**", "package.json", "tsconfig.json", "tsconfig.*.json"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "build/**"]
     },
     "dev": {
       "cache": false,
@@ -14,21 +19,18 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"],
-      "inputs": ["src/**", "tests/**", "**/*.test.ts", "**/*.test.tsx"]
+      "outputs": ["coverage/**"]
     },
     "test:e2e": {
       "dependsOn": ["build"],
       "cache": false
     },
     "lint": {
-      "outputs": [],
-      "inputs": ["src/**", "**/*.{ts,tsx,js,jsx}", ".eslintrc*"]
+      "outputs": []
     },
     "typecheck": {
       "dependsOn": ["^build"],
-      "outputs": [],
-      "inputs": ["src/**", "tsconfig.json", "tsconfig.*.json"]
+      "outputs": []
     },
     "clean": {
       "cache": false

@@ -26,13 +26,7 @@
  */
 
 import { execFileSync, spawnSync } from 'node:child_process';
-import {
-  mkdirSync,
-  writeFileSync,
-  readFileSync,
-  rmSync,
-  existsSync,
-} from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -66,8 +60,9 @@ function makeSandbox(services, owners, withReadme = true) {
   mkdirSync(bp, { recursive: true });
 
   if (withReadme) {
-    const rows = Object.entries(owners).map(([v, svc]) =>
-      `| ${v.padStart(2, '0')}  | 卷${v} | 核心业务域 | 测试 | ${svc} | [${v}](x.md) |`,
+    const rows = Object.entries(owners).map(
+      ([v, svc]) =>
+        `| ${v.padStart(2, '0')}  | 卷${v} | 核心业务域 | 测试 | ${svc} | [${v}](x.md) |`,
     );
     writeFileSync(
       join(bp, 'README.md'),
@@ -128,14 +123,10 @@ function makeSandbox(services, owners, withReadme = true) {
   mkdirSync(join(SANDBOX, 'tools', 'module-progress'), { recursive: true });
   const src = readFileSync(LANE, 'utf8');
   const patched = src.replace(
-    "sh('pnpm install --prefer-offline', wt);",
+    "sh('pnpm install --frozen-lockfile --prefer-offline', wt);",
     'void wt; // itest: 屏蔽 pnpm install（闸门逻辑未改动）',
   );
-  check(
-    '沙箱补丁命中 pnpm install 那行',
-    patched !== src,
-    'lane.mjs 结构变了，需要同步更新本测试',
-  );
+  check('沙箱补丁命中 pnpm install 那行', patched !== src, 'lane.mjs 结构变了，需要同步更新本测试');
   writeFileSync(join(SANDBOX, 'tools', 'module-progress', 'lane.mjs'), patched);
 }
 
@@ -158,15 +149,12 @@ function runPlan(laneCount = 6) {
 
 console.log('场景 1：集成头只有 warehouse，卷 1/3 可落地，卷 9/11 主责 trade 缺失\n');
 
-makeSandbox(
-  ['warehouse'],
-  {
-    '01': 'warehouse',
-    '03': 'catalog + warehouse', // 主责 catalog 缺，但 warehouse 在 —— 仍应被挡住
-    '09': 'trade + channel', // channel 也在？不在。主责 trade 缺
-    '11': 'trade + finance + warehouse',
-  },
-);
+makeSandbox(['warehouse'], {
+  '01': 'warehouse',
+  '03': 'catalog + warehouse', // 主责 catalog 缺，但 warehouse 在 —— 仍应被挡住
+  '09': 'trade + channel', // channel 也在？不在。主责 trade 缺
+  11: 'trade + finance + warehouse',
+});
 
 const r1 = runPlan();
 check('plan 正常退出', r1.status === 0, r1.err.slice(0, 300));
@@ -191,8 +179,8 @@ check(
   `got=${j1.newlyPlanned.join(',')} —— 闸门把能干的活也挡掉了`,
 );
 check(
-  '③ 「任一服务存在即可」是错的：卷 3 主责 catalog 缺失，'
-    + '即便列表里第二个 warehouse 存在也必须挡住（否则 worker 会把履约/刊登写进错的服务）',
+  '③ 「任一服务存在即可」是错的：卷 3 主责 catalog 缺失，' +
+    '即便列表里第二个 warehouse 存在也必须挡住（否则 worker 会把履约/刊登写进错的服务）',
   !j1.newlyPlanned.includes('3.3.1.1'),
   `got=${j1.newlyPlanned.join(',')}`,
 );
@@ -216,10 +204,12 @@ check(
 
 console.log('\n场景 2：把 trade 补进集成头，卷 9 应当解锁\n');
 
-makeSandbox(
-  ['warehouse', 'trade'],
-  { '01': 'warehouse', '03': 'catalog', '09': 'trade + channel', '11': 'trade' },
-);
+makeSandbox(['warehouse', 'trade'], {
+  '01': 'warehouse',
+  '03': 'catalog',
+  '09': 'trade + channel',
+  11: 'trade',
+});
 const r2 = runPlan();
 check('plan 正常退出', r2.status === 0, r2.err.slice(0, 300));
 const j2 = JSON.parse(r2.out);

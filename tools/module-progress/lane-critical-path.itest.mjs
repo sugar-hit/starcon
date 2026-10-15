@@ -26,14 +26,7 @@
  */
 
 import { execFileSync, spawnSync } from 'node:child_process';
-import {
-  mkdirSync,
-  writeFileSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  existsSync,
-} from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -106,13 +99,7 @@ const bpDir = join(SANDBOX, 'docs', 'product', 'capability-blueprint');
 mkdirSync(bpDir, { recursive: true });
 
 const section = (id, name, up) =>
-  [
-    `### ${id} ${name}`,
-    '',
-    `- **关系**：上游=${up || '无'}`,
-    '- **职责**：测试用',
-    '',
-  ].join('\n');
+  [`### ${id} ${name}`, '', `- **关系**：上游=${up || '无'}`, '- **职责**：测试用', ''].join('\n');
 
 writeFileSync(
   join(bpDir, '03-test-chain.md'),
@@ -159,13 +146,13 @@ writeFileSync(
 mkdirSync(join(SANDBOX, 'tools', 'module-progress'), { recursive: true });
 const src = readFileSync(LANE, 'utf8');
 const patched = src.replace(
-  "sh('pnpm install --prefer-offline', wt);",
+  "sh('pnpm install --frozen-lockfile --prefer-offline', wt);",
   'void wt; // itest: 屏蔽 pnpm install（排序逻辑未改动）',
 );
 check(
   '沙箱补丁命中 pnpm install 那行',
   patched !== src,
-  '没找到 `sh(\'pnpm install --prefer-offline\', wt);` —— lane.mjs 结构变了，需要同步更新本测试',
+  "没找到 `sh('pnpm install --frozen-lockfile --prefer-offline', wt);` —— lane.mjs 结构变了，需要同步更新本测试",
 );
 writeFileSync(join(SANDBOX, 'tools', 'module-progress', 'lane.mjs'), patched);
 
@@ -193,12 +180,7 @@ const runPlan = (laneCount) => {
 
   const r = spawnSync(
     'node',
-    [
-      join(SANDBOX, 'tools', 'module-progress', 'lane.mjs'),
-      'plan',
-      '--lanes',
-      String(laneCount),
-    ],
+    [join(SANDBOX, 'tools', 'module-progress', 'lane.mjs'), 'plan', '--lanes', String(laneCount)],
     { cwd: SANDBOX, encoding: 'utf8', timeout: 60_000 },
   );
   if (r.status !== 0) {

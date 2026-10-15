@@ -65,7 +65,7 @@ starcon 是一个面向跨境电商（Amazon / Shopify / eBay / TikTok Shop / 16
 - Prettier: 单引号、100 列宽、LF、尾随逗号必加
 - ESLint: 共享 preset 在 `packages/config-eslint`
 - 包命名: `@starcon/<name>`（如 `@starcon/web`、`@starcon/ui`）
-- 提交前必须 `pnpm lint && pnpm typecheck`
+- 本地迭代先检查受影响包；交付前必须 `pnpm lint && pnpm typecheck`（同一批次统一执行，见下方流水线协议）
 
 ### 后端 / Java 侧
 
@@ -178,3 +178,16 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 - 不要跳过测试合入
 - 不要直接 push `main`
 - 不要在 PR description 里贴 token / password
+
+## MiniMax 开发与验收（所有 agent 通用）
+
+自动开发前必读 [流水线协议](tools/module-progress/PIPELINE.md)。它是唯一执行协议；
+cron prompt 只是入口，不得另抄一份规则。优先完成已开工任务和修复，再排新功能。
+
+- 每个任务一个可验收行为，明确输入、输出、依赖、文件所有者与验收测试；禁止凭蓝图标题自行扩展范围。
+- 先检索 main、集成头、在途分支和台账证据，确认没有相同实现；不要再做第二套表/API/页面。
+- worker 只跑受影响服务与前端测试；集成后对同一内容快照跑一次全量检查，由 CI 做 PR 验收。
+- Bugfix 先复现、补回归测试，再修复；租户、权限、金额、库存和时间边界必须覆盖反向用例。
+- `land` 仅代表代码已提交待验收，不能代替测试。测试结果须绑定 commit、命令和退出码；未运行写明原因。
+- 不靠跳过测试、吞异常、扩大白名单、删除断言或修改生成物让门禁变绿。
+- 不自动恢复本地定时任务，不改用户设置的静默窗口/温度/并发/用量阈值；不直接 push main、不自动合并 PR。
