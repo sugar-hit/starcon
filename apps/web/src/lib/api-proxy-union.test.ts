@@ -187,17 +187,12 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
   // living only in someone's head. It is NOT fixed by 4.2.2.2: the `descriptions`
   // branch belongs to 3.4.2.2's lane. When that lane fixes the token, this test
   // goes red and the entry moves to CATALOG_ALLOW.
-  const CATALOG_KNOWN_BROKEN = [
-    `descriptions/templates/${UUID}/translations`,
-  ];
+  const CATALOG_KNOWN_BROKEN = [`descriptions/templates/${UUID}/translations`];
 
-  it.each(CATALOG_KNOWN_BROKEN)(
-    'CATALOG KNOWN-BROKEN (3.4.2.2 owns the fix) %s',
-    async (path) => {
-      const res = await callProxy(path, 'catalog');
-      expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
-    },
-  );
+  it.each(CATALOG_KNOWN_BROKEN)('CATALOG KNOWN-BROKEN (3.4.2.2 owns the fix) %s', async (path) => {
+    const res = await callProxy(path, 'catalog');
+    expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
+  });
 
   const WH_BLOCK = ['customs-declarationz', `transit-trackings/${UUID}/bogus-shape`];
 
@@ -246,6 +241,19 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     'sync-failures/summary',
     `platform-operations/${UUID}/verify`,
     'oauth/sessions',
+    // 10.3.2.1 交运批次 (this lane) — appended to the SAME alternation,
+    // not a sibling group, so the channel baseline above stays asserted.
+    'handover-batches',
+    'handover-batches/capabilities',
+    'handover-batches/group-preview',
+    'handover-batches/candidates',
+    'handover-batches/candidates/sync',
+    `handover-batches/${UUID}`,
+    `handover-batches/${UUID}/manifest`,
+    `handover-batches/${UUID}/timeline`,
+    `handover-batches/${UUID}/dispatch`,
+    `handover-batches/${UUID}/receipt`,
+    `handover-batches/${UUID}/cancel`,
   ];
 
   const CH_BLOCK = [
@@ -257,6 +265,28 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `warehouse-providers/accountz/${UUID}`,
     // observations are append-only: there is deliberately NO delete surface
     `warehouse-providers/accounts/${UUID}/observations/${UUID}/delete`,
+    // --- 10.3.2.1 reverse assertions -------------------------------------
+    // Literal sub-paths must NOT be swallowed by the [0-9a-f-]+ id segment,
+    // and must not carry any optional tail: a shape that does not exist yet
+    // has to 404, otherwise the UI reports a delivered feature that isn't.
+    `handover-batches/${UUID}/manifest/extra`,
+    `handover-batches/${UUID}/dispatch/extra`,
+    `handover-batches/capabilities/extra`,
+    'handover-batches/group-preview/extra',
+    `handover-batches/candidates/${UUID}`,
+    'handover-batches/candidates/extra',
+    // handover-batches/candidates/sync is TWO segments; sync must not hang
+    // off the bare candidates read shape as an optional action.
+    'handover-batches/candidates/sync/extra',
+    // singular typo of an existing segment
+    'handover-batch',
+    'handover-batches/capabilitie',
+    // the handover manifest is a legal record: there is deliberately NO
+    // delete surface, so a DELETE-shaped path must stay blocked.
+    `handover-batches/${UUID}/delete`,
+    // 10.3.2.2 (揽收与签收确认) is NOT delivered — must not look routed
+    `handover-batches/${UUID}/pickup`,
+    `handover-batches/${UUID}/delivery`,
   ];
 
   it.each(CH_ALLOW)('CHANNEL ALLOWS %s', async (path) => {

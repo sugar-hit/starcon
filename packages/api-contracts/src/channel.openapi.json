@@ -1479,6 +1479,317 @@
         }
       }
     },
+    "/channel/handover-batches": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "handoverBucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "HANDOVER_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/{id}/receipt": {
+      "post": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "receipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/{id}/dispatch": {
+      "post": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/{id}/cancel": {
+      "post": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/candidates/sync": {
+      "post": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncCandidatesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncCandidatesResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/connections": {
       "get": {
         "tags": [
@@ -2269,6 +2580,292 @@
         }
       }
     },
+    "/channel/handover-batches/{id}": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/{id}/timeline": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "timeline",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HandoverBatchEventRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/{id}/manifest": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "manifest",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverManifestExport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/group-preview": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "groupPreview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "handoverBucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HandoverGroupBucket"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/capabilities": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/handover-batches/candidates": {
+      "get": {
+        "tags": [
+          "handover-batch-controller"
+        ],
+        "operationId": "candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "HANDED_OVER_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/connections/{id}/health": {
       "get": {
         "tags": [
@@ -2985,6 +3582,371 @@
             "format": "int32"
           },
           "nextRoute": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateBatchRequest": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManifestItemInput"
+            }
+          }
+        }
+      },
+      "ManifestItemInput": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelRef": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "waybillGapCode": {
+            "type": "string"
+          },
+          "waybillGapReason": {
+            "type": "string"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "lengthMm": {
+            "type": "number"
+          },
+          "widthMm": {
+            "type": "number"
+          },
+          "heightMm": {
+            "type": "number"
+          },
+          "remark": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverBatchDetail": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/HandoverBatchRow"
+          },
+          "manifest": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverManifestItemRow"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverBatchEventRow"
+            }
+          },
+          "completionCriteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HandoverBatchEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HandoverBatchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "handoverBucket": {
+            "type": "string",
+            "format": "date"
+          },
+          "unitCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusDetail": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "dispatchedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receiptRef": {
+            "type": "string"
+          },
+          "receiptStatus": {
+            "type": "string"
+          },
+          "receiptStatusLabel": {
+            "type": "string"
+          },
+          "receiptDetail": {
+            "type": "string"
+          },
+          "receiptRecordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "manifestCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HandoverManifestItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "outboundOrderNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "waybillGapReason": {
+            "type": "string"
+          },
+          "waybillGapCode": {
+            "type": "string"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "lengthMm": {
+            "type": "number"
+          },
+          "widthMm": {
+            "type": "number"
+          },
+          "heightMm": {
+            "type": "number"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "handedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReceiptRequest": {
+        "type": "object",
+        "properties": {
+          "receiptRef": {
+            "type": "string"
+          },
+          "receiptStatus": {
+            "type": "string"
+          },
+          "receiptDetail": {
+            "type": "string"
+          },
+          "receiptRecordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DispatchRequest": {
+        "type": "object",
+        "properties": {
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SyncCandidatesRequest": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SyncCandidatesResult": {
+        "type": "object",
+        "properties": {
+          "fetched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -3792,6 +4754,391 @@
           },
           "selected": {
             "type": "boolean"
+          }
+        }
+      },
+      "HandoverBatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverBatchRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/HandoverBatchSummary"
+          }
+        }
+      },
+      "HandoverBatchSummary": {
+        "type": "object",
+        "properties": {
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "handedOverCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "handedOverParcels": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "handedOverWeightKg": {
+            "type": "number"
+          },
+          "receiptMismatchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverStatusBucket"
+            }
+          },
+          "byCarrier": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverGroupBucket"
+            }
+          }
+        }
+      },
+      "HandoverGroupBucket": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "handoverBucket": {
+            "type": "string",
+            "format": "date"
+          },
+          "handoverBucketLabel": {
+            "type": "string"
+          },
+          "unitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          },
+          "missingWaybillCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "HandoverStatusBucket": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "batchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          }
+        }
+      },
+      "HandoverManifestExport": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverManifestItemRow"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HandoverCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverCapabilityDimension"
+            }
+          },
+          "batchStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "carrierChannels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "waybillGapCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "receiptStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "manifestActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "carrierSourceNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverCandidateRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/HandoverCandidateSummary"
+          }
+        }
+      },
+      "HandoverCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceUnitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourcePackingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "outboundOrderNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "waybillGapReason": {
+            "type": "string"
+          },
+          "waybillGapCode": {
+            "type": "string"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "handedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HandoverCandidateSummary": {
+        "type": "object",
+        "properties": {
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "batchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingParcels": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingWeightKg": {
+            "type": "number"
+          },
+          "missingWaybillCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byCarrier": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverGroupBucket"
+            }
+          },
+          "handoverDateOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
