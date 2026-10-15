@@ -11316,6 +11316,629 @@
           }
         }
       }
+    },
+    "/trade/fulfillment/timeliness/sync": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessSyncInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}/promise": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_facts_id_promise",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessPromiseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}/delivery": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_facts_id_delivery",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessDeliveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/report": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/overdue": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_overdue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessOverduePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_facts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shipSlaState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promiseState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "HANDOVER_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessFactPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_facts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/events": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/dimensions": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_dimensions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SHOP"
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessDimensionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/capabilities": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11548,7 +12171,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -17645,7 +18268,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-08,
+            "minimum": 1e-8,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -17757,12 +18380,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -19149,9 +19772,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -27275,6 +27898,859 @@
             "type": "string"
           },
           "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSyncInput": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "description": "每页条数（上限 500）",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessSyncResult": {
+        "type": "object",
+        "properties": {
+          "sourcesAvailable": {
+            "type": "boolean"
+          },
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inserted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unchanged": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withOrderedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutOrderedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withPackedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutPackedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedTimeInversion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessPromiseInput": {
+        "required": [
+          "promisedDeliveryAt",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "description": "更正上一条时的依据（可空）"
+          }
+        }
+      },
+      "OrderTimelinessDetail": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/OrderTimelinessFactRow"
+          },
+          "orderLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessOrderLine"
+            }
+          },
+          "promises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessPromiseCredential"
+            }
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessDeliveryCredential"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessEventRow"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrderTimelinessEventRow": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderTimelinessFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factNo": {
+            "type": "string"
+          },
+          "sourceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRecordNo": {
+            "type": "string"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "orderedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "packedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "handedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderToPackSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipSlaSource": {
+            "type": "string"
+          },
+          "shipOverdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaState": {
+            "type": "string"
+          },
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promiseSource": {
+            "type": "string"
+          },
+          "actualDeliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryState": {
+            "type": "string"
+          },
+          "promiseVsDeliverySeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseVsDeliveryState": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderTimelinessOrderLine": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TimelinessDeliveryCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessPromiseCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessDeliveryInput": {
+        "required": [
+          "deliveredAt",
+          "source",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "minLength": 1,
+            "pattern": "DELIVERED|NOT_DELIVERED",
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "description": "未送达时必填：拒收 / 退回 / 丢失是三件不同的事"
+          }
+        }
+      },
+      "OrderTimelinessReport": {
+        "type": "object",
+        "properties": {
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessSegmentStats"
+            }
+          },
+          "totalFacts": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/TimelinessSlaBreakdown"
+          },
+          "promise": {
+            "$ref": "#/components/schemas/TimelinessPromiseBreakdown"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessPromiseBreakdown": {
+        "type": "object",
+        "properties": {
+          "met": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "late": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noPromise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noActual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metRate": {
+            "type": "number"
+          },
+          "lateSecondsAvg": {
+            "type": "number"
+          },
+          "rateBasis": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSegmentStats": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string"
+          },
+          "segmentLabel": {
+            "type": "string"
+          },
+          "measuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgSeconds": {
+            "type": "number"
+          },
+          "p50Seconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "p90Seconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "minSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "negativeCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TimelinessSlaBreakdown": {
+        "type": "object",
+        "properties": {
+          "unset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "rateBasis": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessOverduePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessOverdueRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shipOverdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseLateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPromiseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TimelinessOverdueRow": {
+        "type": "object",
+        "properties": {
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "handedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueKind": {
+            "type": "string"
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promiseVsDeliveryState": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderTimelinessFactPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessFactRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TimelinessFactSummary"
+          }
+        }
+      },
+      "TimelinessFactSummary": {
+        "type": "object",
+        "properties": {
+          "totalFacts": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withOrderedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withPackedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutPackedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaUnset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseNoPromise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseNoActual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseMet": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseLate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredTotalToPack": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPackToHandover": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPromiseVsDelivery": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OrderTimelinessEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessDimensionPage": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "SHOP",
+              "WAREHOUSE",
+              "CARRIER",
+              "SKU"
+            ]
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessDimensionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessDimensionRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "measuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgOrderToPackSeconds": {
+            "type": "number"
+          },
+          "avgPackToHandoverSeconds": {
+            "type": "number"
+          },
+          "avgOrderToHandoverSeconds": {
+            "type": "number"
+          },
+          "worstOrderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "worstOverdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OrderTimelinessCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessCapabilityDimension"
+            }
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensionsBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "promiseVsDeliveryStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shipSlaStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "durationUnit": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderTimelinessCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "ORDER_TO_PACK"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "handling": {
             "type": "string"
           }
         }
