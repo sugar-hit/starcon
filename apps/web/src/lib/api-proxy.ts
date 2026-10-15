@@ -765,6 +765,40 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 10.1.1.3 时效与限制（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。插入锚点与 10.1.1.2 同款：固定在 `prefix: 'trade/'`
+    // 之前，纯增量，不重排既有条目与 import。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-transit-limits                       裸路径（保留：形态对齐其余模块）
+    //   logistics-transit-limits/capabilities          能力声明（未交付段 available=false）
+    //   logistics-transit-limits/overview              全量概览（不受筛选与分页影响）
+    //   logistics-transit-limits/transit-rules         时效规则集合读 / POST 登记
+    //   logistics-transit-limits/transit-rules/{uuid}  详情（GET）/ DELETE 撤下
+    //   logistics-transit-limits/size-limits           尺寸 / 重量上限集合读 / POST
+    //   logistics-transit-limits/size-limits/{uuid}    详情（GET）/ DELETE
+    //   logistics-transit-limits/markings              标记要求集合读 / POST
+    //   logistics-transit-limits/markings/{uuid}       详情（GET）/ DELETE
+    //   logistics-transit-limits/precheck              🔴 限制命中提示（POST，只读无副作用）
+    //   logistics-transit-limits/estimate              🔴 时效估算（POST，只读无副作用）
+    //
+    // 判别顺序：字面量子路径（capabilities / overview / transit-rules / size-limits /
+    // markings / precheck / estimate）**排在 uuid 段之前**。写反的话 `e`(estimate) /
+    // `c`(capabilities) 落在 [0-9a-f] 里会被 uuid 分支提前吃掉，拼出一个「id 是 e 的
+    // 时效规则」被凭空放行。
+    // ⚠️ uuid 尾巴**只挂在三个集合名后面**，不挂在 precheck / estimate / capabilities
+    // 后面：那两个是判定端点，不存在 `/precheck/{uuid}` 这种形状；写成
+    // `(?:literal|uuid)` 的单层 alternation 会把 `/precheck/{uuid}` 一起放行。
+    // 同理**裸 uuid 也不放行**：`logistics-transit-limits/{uuid}` 不是任何端点。
+    // id 段用**完整 UUID 形状**（照抄本文件里其余 20 处），不是 `[0-9a-f-]+`：
+    // 后者把单字符 `e` 当合法 id，症状是有人 GET .../transit-rules/e 会打到后端。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-transit\-limits(?:\/(?:capabilities|overview|precheck|estimate|transit-rules|size-limits|markings|(?:transit-rules|size-limits|markings)\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
