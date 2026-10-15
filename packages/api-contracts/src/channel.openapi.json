@@ -1595,6 +1595,210 @@
         }
       }
     },
+    "/channel/logistics-channels": {
+      "get": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "get_channel_logistics_channels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierProfileId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "billingMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "readiness",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeValue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "restrictionKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "NAME_ASC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "post_channel_logistics_channels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveChannelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-channels/eligibility": {
+      "post": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "post_channel_logistics_channels_eligibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelEligibilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelEligibilityResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/handover-batches": {
       "get": {
         "tags": [
@@ -2740,6 +2944,137 @@
               "*/*": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-channels/{id}": {
+      "get": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "get_channel_logistics_channels_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "delete_channel_logistics_channels_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/logistics-channels/overview": {
+      "get": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "get_channel_logistics_channels_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-channels/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-channel-controller"
+        ],
+        "operationId": "get_channel_logistics_channels_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsChannelCapabilities"
                 }
               }
             }
@@ -4091,6 +4426,426 @@
           }
         }
       },
+      "ChannelRestrictionItem": {
+        "type": "object",
+        "properties": {
+          "restrictionKind": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "restrictionMode": {
+            "type": "string"
+          },
+          "carrierReason": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelScopeItem": {
+        "type": "object",
+        "properties": {
+          "scopeKind": {
+            "type": "string"
+          },
+          "scopeValue": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelSurchargeItem": {
+        "type": "object",
+        "properties": {
+          "surchargeKind": {
+            "type": "string"
+          },
+          "chargeMode": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SaveChannelRequest": {
+        "required": [
+          "baseRate",
+          "billingCurrency",
+          "billingMode",
+          "channelCode",
+          "channelName",
+          "insuranceMode",
+          "restrictions",
+          "scopes",
+          "status",
+          "surcharges"
+        ],
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "carrierProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "channelName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "billingMode": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "billingCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "baseRate": {
+            "type": "number"
+          },
+          "chargeDivisor": {
+            "type": "number",
+            "nullable": true
+          },
+          "minCharge": {
+            "type": "number",
+            "nullable": true
+          },
+          "declarationMinValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "declarationMaxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "declarationCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "insuranceMode": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "insuranceRatePct": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "insuranceMinFee": {
+            "type": "number",
+            "nullable": true
+          },
+          "insuranceMaxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "scopes": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelScopeItem"
+            }
+          },
+          "surcharges": {
+            "maxItems": 3,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelSurchargeItem"
+            }
+          },
+          "restrictions": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelRestrictionItem"
+            }
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsChannelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "carrierAvailability": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "billingMode": {
+            "type": "string"
+          },
+          "billingCurrency": {
+            "type": "string"
+          },
+          "baseRate": {
+            "type": "number"
+          },
+          "chargeDivisor": {
+            "type": "number"
+          },
+          "minCharge": {
+            "type": "number"
+          },
+          "declarationMinValue": {
+            "type": "number"
+          },
+          "declarationMaxValue": {
+            "type": "number"
+          },
+          "declarationCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "insuranceMode": {
+            "type": "string"
+          },
+          "insuranceRatePct": {
+            "type": "number"
+          },
+          "insuranceMinFee": {
+            "type": "number"
+          },
+          "insuranceMaxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelScopeItem"
+            }
+          },
+          "surcharges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelSurchargeItem"
+            }
+          },
+          "activeSurcharges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelSurchargeItem"
+            }
+          },
+          "restrictions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelRestrictionItem"
+            }
+          },
+          "readiness": {
+            "type": "string"
+          },
+          "readinessMessage": {
+            "type": "string"
+          },
+          "peakSeasonActive": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChannelEligibilityRequest": {
+        "required": [
+          "categoryCodes"
+        ],
+        "type": "object",
+        "properties": {
+          "channelIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string",
+            "nullable": true
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "categoryCodes": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "containsMagnet": {
+            "type": "boolean"
+          },
+          "declaredValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "insuredValue": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ChannelEligibilityResult": {
+        "type": "object",
+        "properties": {
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelEligibilityVerdict"
+            }
+          },
+          "pass": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelEligibilityVerdict": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "blockingReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reviewReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "CreateBatchRequest": {
         "type": "object",
         "properties": {
@@ -5287,6 +6042,193 @@
           },
           "selected": {
             "type": "boolean"
+          }
+        }
+      },
+      "LogisticsChannelPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsChannelRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/LogisticsChannelSummary"
+          }
+        }
+      },
+      "LogisticsChannelSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noBaseRate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noScope": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "suspended": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withRestrictions": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "peakSeasonActive": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsChannelCount": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsChannelOverview": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/LogisticsChannelSummary"
+          },
+          "byBillingMode": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsChannelCount"
+            }
+          },
+          "byRestrictionKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsChannelCount"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsChannelCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelCapabilityDimension"
+            }
+          },
+          "billingModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "surchargeKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "readinessCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopeKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "restrictionNote": {
+            "type": "string"
           }
         }
       },
