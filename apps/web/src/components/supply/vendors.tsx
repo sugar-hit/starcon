@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Factory, Plus } from 'lucide-react';
 import {
   Badge,
@@ -132,7 +133,9 @@ export function VendorWorkspace() {
       await saveVendorSupplyProfile(row.roleId, next);
       setEditing(null);
       setForm(null);
-      setNotice(`${row.partyName} 的采购侧档案已保存，合作状态：${supplyStatusLabel(next.supplyStatus)}。`);
+      setNotice(
+        `${row.partyName} 的采购侧档案已保存，合作状态：${supplyStatusLabel(next.supplyStatus)}。`,
+      );
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '保存失败');
@@ -201,7 +204,9 @@ export function VendorWorkspace() {
                   id="status"
                   className="border-input h-9 w-full rounded-md border px-2 text-sm"
                   value={filters.supplyStatus}
-                  onChange={(e) => setFilters({ ...filters, supplyStatus: e.target.value, page: 0 })}
+                  onChange={(e) =>
+                    setFilters({ ...filters, supplyStatus: e.target.value, page: 0 })
+                  }
                 >
                   <option value="">全部</option>
                   {(options?.supplyStatuses ?? []).map((o) => (
@@ -305,9 +310,7 @@ export function VendorWorkspace() {
                 当前指标窗口：{windowText(page?.metricWindow)}（准时率与合格率按这一段算）
               </span>
             </div>
-            {page?.note ? (
-              <p className="text-muted-foreground mt-2 text-xs">{page.note}</p>
-            ) : null}
+            {page?.note ? <p className="text-muted-foreground mt-2 text-xs">{page.note}</p> : null}
           </SectionCard>
 
           <SectionCard
@@ -367,8 +370,8 @@ export function VendorWorkspace() {
           {editing && form ? (
             <SectionCard title={`登记采购侧档案 · ${editing.partyName}`} className="mt-4">
               <p className="text-muted-foreground mb-3 text-xs">
-                下方只写采购侧的三项。编码 / 名称 / 联系方式在往来单位档案，合作等级 / 账期 / 结算方式在 03
-                的角色档案 —— 本页**不提供**改它们的入口（同一实体只应有一处可编辑）。
+                下方只写采购侧的三项。编码 / 名称 / 联系方式在往来单位档案，合作等级 / 账期 /
+                结算方式在 03 的角色档案 —— 本页**不提供**改它们的入口（同一实体只应有一处可编辑）。
               </p>
               <SupplyProfileForm
                 form={form}
@@ -403,15 +406,21 @@ export function VendorWorkspace() {
                 <Badge tone="success">可写 · 本页</Badge> 合作状态、主供类目、采购侧备注
               </p>
               <p>
-                <Badge tone="success">可写 · 本页（只追加）</Badge> 到货记录、质检记录；录错了作废并留理由，不做编辑
+                <Badge tone="success">可写 · 本页（只追加）</Badge>{' '}
+                到货记录、质检记录；录错了作废并留理由，不做编辑
               </p>
               <p>
-                <Badge tone="neutral">派生 · 不落库</Badge> 供货 SKU 数、采购金额累计、准时交付率、质量合格率 —— 四个指标全部是列表查询里的
-                SQL 聚合，没有一个是存下来的字段
+                <Badge tone="neutral">派生 · 不落库</Badge> 供货 SKU
+                数、采购金额累计、准时交付率、质量合格率 —— 四个指标全部是列表查询里的 SQL
+                聚合，没有一个是存下来的字段
               </p>
             </div>
-            {options?.note ? <p className="text-muted-foreground mt-3 text-xs">{options.note}</p> : null}
-            {overview?.note ? <p className="text-muted-foreground mt-1 text-xs">{overview.note}</p> : null}
+            {options?.note ? (
+              <p className="text-muted-foreground mt-3 text-xs">{options.note}</p>
+            ) : null}
+            {overview?.note ? (
+              <p className="text-muted-foreground mt-1 text-xs">{overview.note}</p>
+            ) : null}
           </SectionCard>
         </TabsContent>
       </Tabs>
@@ -456,7 +465,9 @@ function VendorCard({
             <Badge tone={supplyStatusTone(row.supplyStatus)}>
               {supplyStatusLabel(row.supplyStatus)}
             </Badge>
-            <Badge tone={partyStatusTone(row.partyStatus)}>{partyStatusLabel(row.partyStatus)}</Badge>
+            <Badge tone={partyStatusTone(row.partyStatus)}>
+              {partyStatusLabel(row.partyStatus)}
+            </Badge>
             <Badge tone="info">合作等级 {cooperationLevelLabel(row.cooperationLevel)}</Badge>
             {!row.supplyProfileFound ? <Badge tone="warning">未建采购侧档案</Badge> : null}
           </div>
@@ -469,6 +480,16 @@ function VendorCard({
           <Button size="sm" variant="ghost" onClick={onDetail} disabled={busy}>
             采购视角详情
           </Button>
+          {/* 6.1.1.2 供应商全景：与上面那个「采购视角详情」是**两个不同区块**，
+              那一块回答「采购侧现在是什么状态」，这一块回答全景（账期与开票、报价、
+              采购历史、交期质量、联系人、附件资质 + 操作入口）。 */}
+          <Link
+            className="text-sm underline"
+            href={`/supply/vendors/${row.roleId}`}
+            aria-label="打开供应商全景详情"
+          >
+            供应商详情
+          </Link>
           <Button size="sm" variant="outline" onClick={onEdit} disabled={busy}>
             登记采购侧档案
           </Button>
@@ -483,8 +504,7 @@ function VendorCard({
           采购金额累计 <b className="text-foreground">{amountListText(row.purchaseAmounts)}</b>
         </span>
         <span>
-          准时交付率{' '}
-          <Badge tone={rateTone(row.onTimeRate)}>{rateLabel(row.onTimeRate)}</Badge>
+          准时交付率 <Badge tone={rateTone(row.onTimeRate)}>{rateLabel(row.onTimeRate)}</Badge>
           <span className="ml-1">
             （{row.onTimeDeliveryCount ?? 0}/{row.deliveryCount ?? 0} 次）
           </span>
@@ -553,7 +573,7 @@ function SupplyProfileForm({
           onChange={(e) => onChange({ ...form, note: e.target.value })}
         />
       </FormField>
-      <div className="md:col-span-3 flex gap-2">
+      <div className="flex gap-2 md:col-span-3">
         <Button size="sm" onClick={onSubmit} disabled={busy}>
           保存
         </Button>
@@ -776,7 +796,10 @@ function PurchaseViewDrawer({
         <h4 className="text-sm font-medium">到货记录（{view.deliveries.length}）</h4>
         <div className="mt-2 space-y-2">
           {view.deliveries.map((d) => (
-            <div key={d.id} className="border-border flex flex-wrap items-center gap-2 rounded border p-2 text-xs">
+            <div
+              key={d.id}
+              className="border-border flex flex-wrap items-center gap-2 rounded border p-2 text-xs"
+            >
               <span className="font-medium">{d.deliveryRef}</span>
               <Badge tone={d.onTime ? 'success' : 'warning'}>{daysLateText(d.daysLate)}</Badge>
               {d.isVoid ? <Badge tone="danger">已作废</Badge> : null}
@@ -807,7 +830,10 @@ function PurchaseViewDrawer({
         <h4 className="text-sm font-medium">质检记录（{view.inspections.length}）</h4>
         <div className="mt-2 space-y-2">
           {view.inspections.map((q) => (
-            <div key={q.id} className="border-border flex flex-wrap items-center gap-2 rounded border p-2 text-xs">
+            <div
+              key={q.id}
+              className="border-border flex flex-wrap items-center gap-2 rounded border p-2 text-xs"
+            >
               <span className="font-medium">{q.inspectionRef}</span>
               <Badge tone={rateTone(q.qualifiedRate)}>{rateLabel(q.qualifiedRate)}</Badge>
               {q.isVoid ? <Badge tone="danger">已作废</Badge> : null}
