@@ -308,8 +308,26 @@ const services: readonly {
     // 动作段逐字列出而不是通配：多放一层会让「一个还不存在的动作」看起来像已交付。
     // 刻意**没有** DELETE 段：观测快照不可删（蓝图「不能覆盖」），连接/仓账户也不靠物理删收回。
     // 字面量段（latest）排在 [0-9a-f-]+ 之前判别，两类不会互相吃掉。
+    // handover-batches 是 10.3.2.1 交运批次：候选池、按承运商+交运时间的组批预览、
+    // 批次与逐件交接清单。形状逐个列出：
+    //   handover-batches                     批次列表（GET）+ 组批（POST）
+    //   handover-batches/capabilities        能力声明（未交付段 available=false）
+    //   handover-batches/group-preview       组批预览（真 GROUP BY 读端点）
+    //   handover-batches/candidates          候选池（上游 9.4.1.1 的只读投影）
+    //   handover-batches/candidates/sync     同步候选池（唯一写入口）
+    //   handover-batches/{id}                批次详情
+    //   handover-batches/{id}/manifest       交接清单（法律凭据，追责时导出）
+    //   handover-batches/{id}/timeline       事件时间线
+    //   handover-batches/{id}/dispatch       登记交接（POST）
+    //   handover-batches/{id}/receipt        承运商回执登记（POST）
+    //   handover-batches/{id}/cancel         作废（POST）
+    // 字面量子路径（capabilities / group-preview / candidates）排在 [0-9a-f-]+ **之前**判别，
+    // 否则会被当成一个 id 段静默吃掉 —— 只在真跑 proxy 时才看得见。
+    // candidates/sync 是**两段**：candidates 后面多跟一个字面量 sync，
+    // 刻意不带任何可选量 —— 多放一层会让「一个还不存在的动作」看起来像已交付。
+    // 刻意**没有** DELETE 段：交接清单是法律凭据，交运批次不能靠物理删除收回。
     pattern:
-      /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?)|warehouse-providers(?:\/(?:connections(?:\/[0-9a-f-]+(?:\/(?:sync-paused|accounts))?)?|sync-runs|accounts(?:\/[0-9a-f-]+(?:\/(?:inbound-stock-lines|sync|observations(?:\/latest)?))?)?))?)$/,
+      /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?)|warehouse-providers(?:\/(?:connections(?:\/[0-9a-f-]+(?:\/(?:sync-paused|accounts))?)?|sync-runs|accounts(?:\/[0-9a-f-]+(?:\/(?:inbound-stock-lines|sync|observations(?:\/latest)?))?)?))?|handover-batches(?:\/(?:capabilities|group-preview|candidates(?:\/sync)?|[0-9a-f-]+(?:\/(?:manifest|timeline|dispatch|receipt|cancel))?))?)$/,
   },
   {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
