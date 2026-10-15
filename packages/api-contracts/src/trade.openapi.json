@@ -2629,7 +2629,7 @@
         "tags": [
           "pending-shipment-controller"
         ],
-        "operationId": "post_trade_fulfillment_pending_shipment_sync",
+        "operationId": "sync_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -6833,7 +6833,7 @@
         "tags": [
           "fulfillment-routing-controller"
         ],
-        "operationId": "get_trade_fulfillment_routing_capabilities",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7004,7 +7004,7 @@
         "tags": [
           "pending-shipment-controller"
         ],
-        "operationId": "get_trade_fulfillment_pending_shipment_capabilities",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7035,7 +7035,7 @@
         "tags": [
           "pending-shipment-controller"
         ],
-        "operationId": "get_trade_fulfillment_pending_shipment_board",
+        "operationId": "board_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -7155,7 +7155,7 @@
         "tags": [
           "dropship-config-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_events",
+        "operationId": "events_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -7255,7 +7255,7 @@
         "tags": [
           "dropship-config-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_capabilities",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -7326,7 +7326,7 @@
         "tags": [
           "dropship-tracking-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_tracking_tasks",
+        "operationId": "tasks_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -7501,7 +7501,7 @@
         "tags": [
           "dropship-tracking-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_tracking_events",
+        "operationId": "events_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -7561,7 +7561,7 @@
         "tags": [
           "dropship-tracking-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_tracking_capabilities",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -7632,7 +7632,7 @@
         "tags": [
           "dropship-order-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_orders_events",
+        "operationId": "events_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -7692,7 +7692,7 @@
         "tags": [
           "dropship-order-controller"
         ],
-        "operationId": "get_trade_fulfillment_dropship_orders_capabilities",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -7899,7 +7899,7 @@
         "tags": [
           "warehouse-allocation-controller"
         ],
-        "operationId": "get_trade_fulfillment_allocation_capabilities",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -8086,7 +8086,7 @@
         "tags": [
           "b-2-b-order-controller"
         ],
-        "operationId": "get_trade_b2b_orders_capabilities",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -8105,6 +8105,624 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/B2BCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/sync": {
+      "post": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentRecordSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records/{id}/visibility": {
+      "post": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "registerVisibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentVisibilityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records/{id}/tracking": {
+      "post": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "registerTracking",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentTrackingObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records/{id}/status": {
+      "post": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "changeStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records/{id}/callbacks": {
+      "post": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "registerCallback",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentCallbackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trackingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCallbackStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SHIPPED_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/records/{id}": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "record",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/performance": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "performance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trackingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCallbackStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentPerformanceReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/events": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/capabilities": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "capabilities_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-records/board": {
+      "get": {
+        "tags": [
+          "shipment-record-controller"
+        ],
+        "operationId": "board",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trackingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCallbackStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CARRIER"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentRecordBoard"
                 }
               }
             }
@@ -8343,7 +8961,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -19600,6 +20218,913 @@
           },
           "effect": {
             "type": "string"
+          }
+        }
+      },
+      "ShipmentRecordSyncInput": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ShipmentRecordSyncResult": {
+        "type": "object",
+        "properties": {
+          "fetchedHandovers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "insertedRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedHandovers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelRowsUpserted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordsWithOrderSnapshot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordsWithoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordsWithoutSla": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentVisibilityInput": {
+        "required": [
+          "registeredAt",
+          "source",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "VISIBLE",
+              "HIDDEN",
+              "PUBLISHED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL_ATTESTATION",
+              "PLATFORM_FEED"
+            ]
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentCallbackRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "PENDING",
+              "SUBMITTED",
+              "ACKNOWLEDGED",
+              "REJECTED",
+              "SKIPPED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "requestRef": {
+            "type": "string"
+          },
+          "responseRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ShipmentRecordDetail": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/ShipmentRecordRow"
+          },
+          "parcels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordParcelRow"
+            }
+          },
+          "tracking": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentTrackingObservationRow"
+            }
+          },
+          "visibility": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentVisibilityRow"
+            }
+          },
+          "callbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentCallbackRow"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordEventRow"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentRecordEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentRecordParcelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceParcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelCode": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "grossWeightG": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "currentTrackingStatus": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "NO_TRACE",
+              "PICKED_UP",
+              "IN_TRANSIT",
+              "CUSTOMS",
+              "OUT_FOR_DELIVERY",
+              "DELIVERED",
+              "EXCEPTION",
+              "RETURNED"
+            ]
+          },
+          "currentTrackingStatusLabel": {
+            "type": "string"
+          },
+          "observationCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ShipmentRecordRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordNo": {
+            "type": "string"
+          },
+          "sourceHandoverId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceHandoverCode": {
+            "type": "string"
+          },
+          "outboundOrderNo": {
+            "type": "string"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalGrossWeightG": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SHIPPED",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "RETURNED",
+              "VOID"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "trackingStatus": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "NO_TRACE",
+              "PICKED_UP",
+              "IN_TRANSIT",
+              "CUSTOMS",
+              "OUT_FOR_DELIVERY",
+              "DELIVERED",
+              "EXCEPTION",
+              "RETURNED"
+            ]
+          },
+          "trackingStatusLabel": {
+            "type": "string"
+          },
+          "buyerVisibleStatus": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "VISIBLE",
+              "HIDDEN",
+              "PUBLISHED"
+            ]
+          },
+          "buyerVisibleStatusLabel": {
+            "type": "string"
+          },
+          "platformCallbackStatus": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "PENDING",
+              "SUBMITTED",
+              "ACKNOWLEDGED",
+              "REJECTED",
+              "SKIPPED"
+            ]
+          },
+          "platformCallbackStatusLabel": {
+            "type": "string"
+          },
+          "trackingObservationsPresent": {
+            "type": "boolean"
+          },
+          "lateAgainstSla": {
+            "type": "boolean"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentTrackingObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "NO_TRACE",
+              "PICKED_UP",
+              "IN_TRANSIT",
+              "CUSTOMS",
+              "OUT_FOR_DELIVERY",
+              "DELIVERED",
+              "EXCEPTION",
+              "RETURNED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "observationRef": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentVisibilityRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "VISIBLE",
+              "HIDDEN",
+              "PUBLISHED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ShipmentTrackingObservationInput": {
+        "required": [
+          "observationRef",
+          "observedAt",
+          "source",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "NO_TRACE",
+              "PICKED_UP",
+              "IN_TRANSIT",
+              "CUSTOMS",
+              "OUT_FOR_DELIVERY",
+              "DELIVERED",
+              "EXCEPTION",
+              "RETURNED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL_ATTESTATION",
+              "PLATFORM_FEED",
+              "CARRIER_FEED",
+              "CHANNEL_SERVICE"
+            ]
+          },
+          "parcelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "observationRef": {
+            "pattern": ".{4,200}",
+            "type": "string"
+          },
+          "detail": {
+            "pattern": "^.{0,600}$",
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentStatusInput": {
+        "required": [
+          "reason",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "SHIPPED",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "RETURNED",
+              "VOID"
+            ]
+          },
+          "reason": {
+            "minLength": 1,
+            "pattern": "^.{4,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentCallbackInput": {
+        "required": [
+          "registeredAt",
+          "source",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "PENDING",
+              "SUBMITTED",
+              "ACKNOWLEDGED",
+              "REJECTED",
+              "SKIPPED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL_ATTESTATION",
+              "PLATFORM_FEED",
+              "CARRIER_FEED",
+              "CHANNEL_SERVICE"
+            ]
+          },
+          "requestRef": {
+            "pattern": "^.{0,128}$",
+            "type": "string"
+          },
+          "responseRef": {
+            "pattern": "^.{0,128}$",
+            "type": "string"
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ShipmentRecordSummary"
+          }
+        }
+      },
+      "ShipmentRecordSummary": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deliveredRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnedRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "voidRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalParcels": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsetTrackingRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exceptionTrackingRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetCallbackRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCallbackRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedCallbackRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetVisibilityRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noSlaRecords": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ShipmentPerformanceReport": {
+        "type": "object",
+        "properties": {
+          "evaluatedRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lateRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetSlaRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lateRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "trackableRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "untrackableRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "validTrackingRate": {
+            "type": "number"
+          },
+          "lateRateBasis": {
+            "type": "string"
+          },
+          "validTrackingRateBasis": {
+            "type": "string"
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentRecordEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ShipmentRecordCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "trackingStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformCallbackStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "buyerVisibleStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "groupByOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shipmentFactBasis": {
+            "type": "string"
+          },
+          "performanceBasis": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentRecordCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentRecordBoard": {
+        "type": "object",
+        "properties": {
+          "groupBy": {
+            "type": "string"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentRecordGroup"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ShipmentRecordSummary"
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentRecordGroup": {
+        "type": "object",
+        "properties": {
+          "groupKey": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "recordCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exceptionCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }

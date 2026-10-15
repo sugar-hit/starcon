@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **313** |
 | 完成率 | 32.7% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 2 | 0 | 50 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -321,7 +304,7 @@
 | 9.3.3.1 | 履约请求 | — | D4 | 未开发 | — |
 | 9.3.3.2 | 履约流程监控 | — | D4 | 未开发 | — |
 | 9.4.1.1 | 待发货 | — | D4 | 已交付 | 迁移 trade `V124__trade_pending_shipment.sql`（**归属 trade**：卷 09「后端归属：trade 服务拥有订单与售后单据」＋ L2 表「9.4 履约编排 → 主责服务 trade」；**零 ALTER 既有表**、零跨库访问、跨车道 DDL 回归面 = 0）。**本模块最关键的架构决定：待发货清单的数据来源 = warehouse 8.3.3.2 的授权只读 API ＋ trade 侧只读投影表**。上游 `packing_order` / `parcel` / `parcel_item` 在 **warehouse 服务自己的库**里，AGENTS.md 明令禁止跨服务 SQL / FK / 共享视图，所以一条 SELECT 都不碰对方库、也不建跨库视图：`PackingQueryPort`（与 6.4.1.1 的 `BomVersionPort` 读 catalog 逐字同构）经 `GET /warehouse/packing-orders?status=COMPLETED` 与 `GET /warehouse/packing-orders/{id}` 取数，转发**调用方自己的 bearer**（租户隔离是 trade 侧 RLS ＋ warehouse 侧 RLS **两道**，而不是本服务替对方决定租户）。读到的东西落成两张**只读投影表**，理由写进迁移文件头：①四个分组维度要在**全量**待发货单元上聚合，逐页穿透聚合会漏掉没翻到的页，聚合值本身不可信；②三个批量操作要留下本地任务凭据（哪些单元被哪张任务覆盖、逐条成功失败），这些凭据天然属于 trade。投影表**唯一写入口**是 `POST /sync`，每行都能追溯回 `source_packing_order_id`；上游已不在 COMPLETED 列表的旧行**只报数不删除**（那些行可能已带运单号、打单凭据与交接记录，删掉等于把已发生的交接从台账上抹掉）；仓库不可达时**显式 503** 而不是返回空清单 —— 空清单会被现场当成「今天没有待发货的货」而收工。六张表全部 tenant_id NOT NULL + ENABLE/**FORCE** RLS isolation + GRANT trade_app，并按「授权在前、收回在后」REVOKE UPDATE/DELETE `shipment_event`：`shipment_pending_unit`（待发货单元：仓库 / 承运渠道 / 承运商 / 时限四维分组 + 状态机 PENDING→WAYBILL_REQUESTED→LABEL_PRINTED→HANDED_OVER，**本模块最远只到 HANDED_OVER，从不产生已发货** —— 已发货是下游 8.3.4.1 在揽收后确认的事实，提前置它会让 9.4.1.2 发货记录与 17 绩效的迟发率算在一个从未发生的时刻上）· `shipment_pending_parcel`（包裹投影：**批量打单的对象是包裹**，逐包裹带实测重量与尺寸）· `shipment_batch_task`（批量任务，SBT- 序号由 DB 发，**一次任务不许跨承运商** —— 蓝图那句「按承运商分组是大促期效率关键，混在一起会导致交接混乱」在这一层被钉死）· `shipment_batch_task_item`（逐条结果：打单按**逐包裹**去重、其余按**逐单元**去重，用两个部分唯一索引而不是一条表级 UNIQUE —— 表级 UNIQUE 表达不了「parcel_id 为空按单元、有值按包裹」这个二选一）· `shipment_waybill`（运单回执逐票落库，签发带单号与时刻、同一单元同一承运商只能有一张 ISSUED 的部分唯一索引）· `shipment_event`（append-only 时间线）。**平台 SLA 登记而不伪造**：集成头里 warehouse V121 打包单无 SLA 列、trade V99 sales_order 也无（V100 与 V122 文件头已两次记过此事），2.5.1.1 平台回传未交付 —— 所以本模块**不假装读到了平台时限**：未登记的单元落在 **UNSET 独立一桶**（并进「今天到期」等于把最该盯的货藏起来），时限由 `POST /units/{id}/sla` **登记**（有主体、有时刻、有来源 MANUAL_ATTESTATION/PLATFORM_FEED 四件套互斥），capabilities 里 SLA 维度显式 available=false 并点名 ownerModule 与影响。**三个批量操作是真任务不是返回一个列表**：任务 + 逐条 item + 运单回执 + 事件流四张表；执行时**任务最终状态由逐条结果算出**（不接受调用方直接指定）：SUCCEEDED 要求零失败零跳过，有跳过只能是 PARTIAL，全部失败必须写 failure_reason —— 「交接漏发显示成交接完成」是本模块最贵的失败方式，由 `guard_shipment_batch_task_counts` 触发器在写路径上复查，绕过服务层直接写 SQL 同样被拒；运单单号由承运商回执登记（`/waybill-acks`），**本模块不调用承运商下单接口**（属 10 物流，未交付）；面单渲染属 8.3.4.2（未交付），所以没有真实 jobRef 的包裹在打单任务里被显式记为 **SKIPPED 并写明原因**，而不是伪装成成功，凭据由 `/labels` 回填后重跑才成功 —— 「跳过」与「漏了」必须能区分。端点挂在 `/trade/fulfillment/pending-shipment`（12 个，与 routing / allocation / dropship / dropship-orders 四组**并列**而非嵌套 —— 「选路径」「选仓」「配代发」「下一单」与「这票怎么发」在权限与日志上该分得开）：GET /capabilities、POST /sync、GET /board、GET+POST /units、GET /units/{id}、POST /units/{id}/sla、POST /units/{id}/cancel、GET+POST /batch-tasks、GET /batch-tasks/{id}、POST /batch-tasks/{id}/execute、POST /batch-tasks/{id}/cancel、POST /batch-tasks/{id}/waybill-acks、POST /batch-tasks/{id}/labels；权限复用 trade.fulfillment.read/update，租户只来自已认证成员关系（伪造 X-Tenant-Id 头改不动）。前端：页面 /orders/fulfillment/pending-shipment（真实工作区，六区块：能力声明与上游缺口 → 8.3.3.2 同步入口 → 两排汇总卡 → 分组看板（仓库/承运渠道/承运商/发货时限四选一，全部真 GROUP BY）→ 批量操作建任务 → 待发货清单 → 单元详情（包裹/运单/完成判据/时间线/时限登记）→ 批量任务与逐条结果，加载/空/错误三态齐全；PARTIAL 与 SUCCEEDED 分色、UNSET 桶是提醒色不是红色、界面上刻意**不出现「已发货」字样**）；api-proxy 白名单在 trade 那一段**追加** `fulfillment/pending-shipment` 一组（字面量子路径排在 [0-9a-f-]+ 之前，两段形状排在单段之后，裸路径刻意不放行），已用真 proxy 断言 HTTP 状态码实测。契约由 codegen 重生成（trade.ts / trade.openapi.json **纯新增**：22 个 PendingShipment*/Shipment* schema + 12 条 path，零删除零改写既有条目；六个 spec 全部在本车道 worktree 内重新生成，**未借用主工作区可能带其它车道漂移的 spec**；`ParcelLabelInput` 与 warehouse 8.3.4.2 撞名，已改名 `PendingShipmentLabelInput` —— codegen 在写盘前中止并点名两边的字段差异，撞名的后果是另一条车道的事故）。测试 PendingShipmentIntegrationTest **21 例**（实跑 Testcontainers PostgreSQL 16，连接池压到 1）：同步经授权接口落库且幂等、仓库不可达显式失败而不是空清单、四分组维度是真聚合、时限登记落进正确时间桶且**断言写回值零漂移**、跨承运商当场拒并列出冲突承运商、承运商为空的单元进不了任务、申请运单号任务真落库且回执后才推单元状态、终态不可重复执行、打单逐包裹建行且缺凭据显式跳过、包裹都打过就不该再建任务、交接推到 HANDED_OVER 为止且 DB 层拒 SHIPPED、已交接不能再进任务、任务结束计数与逐条不符被拒、append-only 两层（运行角色 REVOKE 42501 ＋ **以表所有者身份再撞一次证明触发器不是死代码**）、六张表逐张 FORCE RLS 且 starcon_app 拿不到、真分页且汇总不受分页影响、HTTP 边界与只读角色被拒、**多租户三断言**）＋ 前端 pending-shipment-model.test.ts 18 例 ＋ pending-shipment-allowlist.test.ts 5 例（含反向：未交付形状仍 404、兄弟车道四组未被挤掉、本模块路径不得从兄弟组漏过去）。验证：L0 `./mvnw -q compile` 与 `pnpm typecheck` / `pnpm lint` 全绿；L1 `./mvnw -pl services/trade -am test` **268 例 0 失败**；前端 `pnpm vitest run`（本车道两个文件）**23 例 0 失败**。**下游缺口**：9.4.1.2 发货记录与 9.4.2.1 平台回传未交付（本模块只到 HANDED_OVER，不产生已发货与轨迹）；10 物流下单未交付（运单回执靠人工登记，不调承运商接口）；8.3.4.2 面单渲染与 8.3.4.1 交接未交付；平台 SLA 无上游（2.5.1.1 / 9.1）；8.3.3.2 只读契约里没有销售订单号 / 店铺 / 买家快照三个字段，本版本如实留空并在同步结果里说明，**不拿出库单号冒充销售订单号**，9.1 订单侧补齐后由 trade 侧回填。以上缺口 capabilities 里逐条 available=false 并点名 ownerModule 与影响 |
-| 9.4.1.2 | 发货记录 | — | D4 | 未开发 | — |
+| 9.4.1.2 | 发货记录 | — | D4 | 已交付 | 迁移 trade `V127__trade_shipment_records.sql`（**归属 trade**：蓝图 09 卷「后端主责服务：trade」＋ L2 表 9.4 发货与回传主责 trade；**零 ALTER 任何既有表**、不碰 warehouse 任何一张表、唯一同服务引用 9.4.1.1 的 `shipment_pending_unit` 是**只读 join**（无 FK、无触发器、无写入），跨车道 DDL 回归面 = 0）六张表 tenant_id NOT NULL + ENABLE/**FORCE** RLS isolation + GRANT trade_app：`shipment_record`（发货记录头，只读投影 + 状态机）· `shipment_record_parcel`（**逐箱运单号逐箱留**，一票多箱时主运单号不是每箱都能查，而有效追踪与买家举证都按箱走）· `shipment_record_tracking_observation` / `shipment_record_visibility` / `shipment_record_callback`（三张 append-only 凭据表）· `shipment_record_event`（时间线）；四张凭据表按「授权在前、收回在后」REVOKE UPDATE/DELETE + append-only 触发器两层。**本模块就是 9.4.1.1 明写留给它的那个登记处**：9.4.1.1 的状态机最远钉在 HANDED_OVER、**从不产生 SHIPPED**（V124 文件头第四节：「提前置它会让 9.4.1.2 发货记录与 17 绩效的迟发率算在一个从未发生的时刻上」），所以已发货事实**唯一来源是 8.3.4.1 已确认交接的交接单**（warehouse V123 `status=HANDED_OVER`：那一档才同时写死了承运商、主运单号、交接人、交接时刻，并在同一事务里完成实发扣减）。经 `ShipmentHandoverQueryPort` 读 warehouse 授权只读 HTTP 端点（`GET /warehouse/shipment-handovers?status=HANDED_OVER` + `/{id}` 取逐箱），**不直连对方库、不建跨库视图、不建跨库 FK**；仓库不可达一律 503 而不是空清单（空清单会被当成「今天一票都没发」而让运营收工）。**发货时刻取上游 `handover_at` 快照，同步入参刻意不接受调用方指定发货时间** —— 让人手填时间等于允许迟发率当场失去意义。幂等按 `UNIQUE(tenant_id,source_handover_id)` upsert：重复同步翻倍的是迟发率的分母，绩效当场失真。**蓝图职责句七样里的三列（轨迹状态 / 买家可见状态 / 平台回传状态）在集成头里都没有可读上游 ⇒ 登记而不伪造**：轨迹（10.3 未开发，没有承运商轨迹数据源）、买家可见（无可读上游）、平台回传（9.4.2.1 与 2.5.1.1 均未开发，没有平台回执）。照抄 9.4.1.1 已验证过的 SLA 做法：每列有独立的 **UNSET 桶**（绝不并进正常桶）、状态变化一律有主体/时刻/来源/凭据行、凭据行 append-only（改一次留一行）、**快照列由 DB 触发器 `guard_shipment_record_snapshots` 钉死「必须等于最新凭据行」**（先落凭据再更新快照，绕过服务层直接写 SQL 同样被拒）。三处**刻意不合并**的语义：`UNSET`（还没登记 = **漏了**）vs `NO_TRACE`（登记过、承运商明确说没有轨迹）vs `EXCEPTION`；`UNSET`（漏了）vs `SKIPPED`（**决定不回传**，DB CHECK 强制 note 非空）；没登记时限的记录在迟发率里落 UNSET 桶，**既不算准时也不算迟发**（把没时限的当准时会让迟发率系统性偏低，时限越缺那批看起来越完美）。**绩效口径写在服务端一处**（`GET /performance`）而不是散到前端：迟发率 = `shipped_at > sla_deadline_at`，分母只算登记过时限且**非作废**的记录（作废是撤销的错发货，不是迟发货，记进去会把指标做坏）；有效追踪率 = **有主运单号**且**至少一条轨迹观测**，两者都要有（只有号没轨迹 = 承运商没给到、平台照样扣分；有观测没号 = 无法回传与向买家举证）。两项口径**全程不碰墙上时钟**，只比对已落库的两个时刻，所以同一个夹具任何钟点跑结果都一样。端点挂在 `/trade/fulfillment/shipment-records`（**与 9.4.1.1 的 /fulfillment/pending-shipment 并列而非嵌套**：待发货最远到交接、从不产生已发货，挂它下面会让人以为「待发货推进一下就成了发货记录」；白名单测试也反向钉住了这一点）：GET /capabilities、POST /sync（幂等投影，**唯一的写入口之一**）、GET /board（承运商 / 轨迹状态 / 平台回传状态 三选一，真 GROUP BY）、GET /records（真分页 + 真筛选 + 排序白名单，汇总不受分页影响）、GET /records/{id}（单头 + 包裹 + 轨迹 + 可见状态 + 回传 + 时间线 + 边界声明）、POST /records/{id}/tracking、POST /records/{id}/visibility、POST /records/{id}/callbacks、POST /records/{id}/status、GET /performance、GET /events；**刻意没有 PUT/DELETE**（凭据行是 append-only 举证凭据，要更正就追加一条登记 —— 改掉之后「当时到底报的是什么」就再也答不出来）。状态机 SHIPPED → IN_TRANSIT → DELIVERED / RETURNED，任何态 → VOID（VOID 是唯一逃生舱：上游交接作废、或发现这票其实没发出去时必须有路可走，否则只能删行，而删行等于把一笔已记进绩效的错发货抹掉）；**迁移白名单刻意不在服务层再抄一份**，唯一权威是 DB 触发器 `guard_shipment_record_state`（服务层多抄一份，两处就会各自漂移，最后出现「界面点不动但脚本能写」的裂缝）。权限沿用 trade.fulfillment.read/update，租户只来自已认证成员关系（伪造 X-Tenant-Id 头改不动）。前端：页面 `/orders/fulfillment/shipment-records`（真实工作区，四个区块按「会不会掉绩效」排：**绩效口径 → 分组看板 → 发货记录清单 → 记录明细**，外加能力声明与同步入口；加载/空/错误三态齐全，空态区分「一条都没有」与「还没同步过」；**三列状态全部显示为带出处的「未登记」而不是留空或显示成「正常」** —— 留空会被读成「没问题」，而真实情况是这一列还没有数据源；「决定不回传」与「未登记（漏了）」标签与配色都分开；没登记时限的记录**不给「准时」标签**而是「未登记时限 · 无从判定」；终态记录不再渲染登记入口）；api-proxy 白名单**外科式最小追加** trade 段的 `fulfillment/shipment-records` 一支（不并进 pending-shipment / dropship-tracking / dropship-orders / routing / allocation / dropship 任一组），**已逐字节验证：把我那一支从新 pattern 里去掉后与旧 pattern 完全相同（净增 150 字节），六个兄弟组片段新旧各出现且仅出现一次**。测试 ShipmentRecordIntegrationTest **19 例**（trade，实跑 Testcontainers PostgreSQL 16，连接池压到 1；**夹具时刻全部 pin 死**，不用 `now()` 构造任何被断言的时间字段）：只登记 HANDED_OVER（混一张 OPEN 会被 skipped 而不登记成已发货）、幂等（重复同步仍是一行）、仓库不可达 503 且零落库、无订单快照时留空并如实报数、发货时刻**往返零漂移**（同一瞬间断言，拦 `Timestamp.valueOf(LocalDateTime)` 的 −28800s）、三列初始全落 UNSET 桶、登记轨迹后快照等于凭据行且逐箱各自更新、**绕过服务层写 SQL 改快照被 DB 拒**、SKIPPED 无原因 400 且与 UNSET 分属两桶、ACKNOWLEDGED 必带回执凭据、买家可见人工登记必填依据、迟发率与有效追踪率口径（准时 1 / 迟发 1 / 无时限 1 ⇒ 0.5000，补一条轨迹 ⇒ 0.3333，作废一票后分母减 1）、状态单向推进 + 终态不可回退且终态拒绝登记、六张表逐张 FORCE RLS 且 starcon_app 读不到、凭据行 append-only 两层（trade_app 42501 + **以表所有者身份再撞一次证明触发器不是死代码**）、**零跨服务外键且不碰兄弟模块的表**、真分页真筛选且汇总不受分页、**多租户三断言**两租户互不可见 / 伪造 tenant header 无效（含写入路径：伪造头不得把凭据行写进别的租户）/ 连接池归还后不串租户）＋ shipment-records-model.test.ts 15 例 + shipment-records-allowlist.test.ts 6 例（源码反向抽调用点 + 真跑 proxy 断言转发到 8085 + **未交付形状仍 404** + 裸路径 404 + **兄弟六组未被挤掉或污染** + **反向钉住「不存在把待发货推进成已发货的形状」**）。契约由 codegen 重生成（**trade.openapi.json / trade.ts 纯新增：21 个 Shipment* schema，0 条既有条目被改写或删除**；**warehouse.* 的重生成漂移属别的模块，已还原**，六个 spec 均在本 worktree 内重新生成，未借用主工作区的 spec）。**下游缺口**：10.3 物流轨迹、9.4.2.1 与 2.5.1.1 平台回传、2.5 买家可见、11 售后均未交付，capabilities 五个维度里三个显式 available=false 并写明 ownerModule 与影响（另两个 available=true：已发货事实来自 8.3.4.1，订单快照来自同服务 9.4.1.1 只读 join，9.4.1.1 还没同步过这批货时相关列**留空并计入 recordsWithoutOrderSnapshot**，发货事实本身不依赖它） |
 | 9.4.2.1 | 回传状态 | — | D5 | 未开发 | — |
 | 9.5.1.1 | 时效分析 | — | D4 | 未开发 | — |
 | 9.5.2.1 | 履约质量 | — | D4 | 未开发 | — |
