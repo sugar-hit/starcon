@@ -7004,7 +7004,7 @@
         "tags": [
           "pending-shipment-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7255,7 +7255,7 @@
         "tags": [
           "dropship-config-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7561,7 +7561,7 @@
         "tags": [
           "dropship-tracking-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -7692,7 +7692,7 @@
         "tags": [
           "dropship-order-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -9255,6 +9255,1206 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WaybillCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/tasks/{taskId}/complete": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "completeTask_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipPayableTaskResultInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipPayableTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/tasks/{taskId}/claim": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "claimTask_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipPayableTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/reconciliations": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "reconciliations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipReconciliationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "buildReconciliation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipReconciliationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipReconciliationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/reconciliations/{statementId}/status": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "changeStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipReconciliationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipReconciliationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/fx-rates": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "fxRates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "baseCurrency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipFxRatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "saveFxRate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipFxRateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipFxRateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/fee-rates": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "feeRates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipFeeRatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "saveFeeRate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipFeeRateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipFeeRateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/facts/evaluate": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "evaluateFacts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginEvaluateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/cycles": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "cycles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSettlementCyclePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "saveCycle",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipSettlementCycleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSettlementCycleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/alerts/{alertId}/dismiss": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "dismissAlert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipLossAlertDismissInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipLossAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/alerts/{alertId}/acknowledge": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "acknowledgeAlert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipLossAlertAckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipLossAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/alerts/evaluate": {
+      "post": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "evaluateAlerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginEvaluateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/tasks": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "tasks_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipPayableTaskPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/report": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SUPPLIER"
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/reconciliations/{statementId}": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "reconciliation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipReconciliationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/facts": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "facts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lossVerdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginFactPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/events": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "events_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/capabilities": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "capabilities_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipMarginCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-margin/alerts": {
+      "get": {
+        "tags": [
+          "dropship-margin-controller"
+        ],
+        "operationId": "alerts_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "alertKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipLossAlertPage"
                 }
               }
             }
@@ -22738,6 +23938,1440 @@
           },
           "impact": {
             "type": "string"
+          }
+        }
+      },
+      "DropshipPayableTaskResultInput": {
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipPayablePayload": {
+        "type": "object",
+        "properties": {
+          "statementNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "businessModel": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "payableAmount": {
+            "type": "number"
+          },
+          "totalSellAmount": {
+            "type": "number"
+          },
+          "totalSpread": {
+            "type": "number"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undeterminedOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipPayableTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "taskKind": {
+            "type": "string"
+          },
+          "targetSystem": {
+            "type": "string"
+          },
+          "taskStatus": {
+            "type": "string"
+          },
+          "taskStatusLabel": {
+            "type": "string"
+          },
+          "statementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "payableAmount": {
+            "type": "number"
+          },
+          "payableCurrencyCode": {
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/DropshipPayablePayload"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastAttemptAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "claimedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipReconciliationInput": {
+        "required": [
+          "currencyCode",
+          "periodEnd",
+          "periodStart",
+          "supplierCode"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cycleKind": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipReconciliationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cycleKind": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "businessModel": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalSellAmount": {
+            "type": "number"
+          },
+          "totalPurchaseAmount": {
+            "type": "number"
+          },
+          "totalSupplierShipping": {
+            "type": "number"
+          },
+          "totalPlatformFee": {
+            "type": "number"
+          },
+          "totalDropshipCost": {
+            "type": "number"
+          },
+          "totalSpread": {
+            "type": "number"
+          },
+          "totalPayable": {
+            "type": "number"
+          },
+          "undeterminedOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undeterminedPayable": {
+            "type": "number"
+          },
+          "feeUnregisteredOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fxStatus": {
+            "type": "string"
+          },
+          "fxRateValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "ruleEvidence": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "disputeNote": {
+            "type": "string"
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipReconciliationStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "disputeNote": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipFxRateInput": {
+        "required": [
+          "baseCurrency",
+          "effectiveFrom",
+          "observedAt",
+          "quoteCurrency",
+          "rateValue",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "rateValue": {
+            "minimum": 1e-8,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipFxRateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "type": "string"
+          },
+          "rateValue": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipFeeRateInput": {
+        "required": [
+          "chargeBasis",
+          "effectiveFrom",
+          "feeType",
+          "observedAt",
+          "platformCode",
+          "rateCode",
+          "rateName",
+          "settlementCurrencyCode"
+        ],
+        "type": "object",
+        "properties": {
+          "rateCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "rateName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "feeType": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "chargeBasis": {
+            "type": "string",
+            "enum": [
+              "PERCENT_OF_SELL",
+              "FIXED_PER_ORDER"
+            ]
+          },
+          "ratePercent": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "fixedAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "fixedCurrencyCode": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "settlementCurrencyCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipFeeRateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rateCode": {
+            "type": "string"
+          },
+          "rateName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "feeType": {
+            "type": "string"
+          },
+          "chargeBasis": {
+            "type": "string"
+          },
+          "ratePercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "fixedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "fixedCurrencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "settlementCurrencyCode": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginEvaluateResult": {
+        "type": "object",
+        "properties": {
+          "scannedOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "computed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossConfirmed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undetermined": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipSettlementCycleInput": {
+        "required": [
+          "currencyCode",
+          "cycleCode",
+          "cycleKind",
+          "effectiveFrom",
+          "supplierCode"
+        ],
+        "type": "object",
+        "properties": {
+          "cycleCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "cycleKind": {
+            "maxLength": 12,
+            "minLength": 0,
+            "type": "string"
+          },
+          "settleDay": {
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipSettlementCycleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cycleCode": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "cycleKind": {
+            "type": "string"
+          },
+          "settleDay": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipLossAlertDismissInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipLossAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "alertKind": {
+            "type": "string"
+          },
+          "alertKindLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleEvidence": {
+            "type": "string"
+          },
+          "feeRegistrationStatus": {
+            "type": "string"
+          },
+          "platformFeeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sellAmount": {
+            "type": "number"
+          },
+          "dropshipCost": {
+            "type": "number"
+          },
+          "spreadBeforeFee": {
+            "type": "number"
+          },
+          "spreadAfterFee": {
+            "type": "number",
+            "nullable": true
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipLossAlertAckInput": {
+        "required": [
+          "resolutionNote"
+        ],
+        "type": "object",
+        "properties": {
+          "resolutionNote": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipPayableTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipPayableTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginReport": {
+        "type": "object",
+        "properties": {
+          "groupBy": {
+            "type": "string"
+          },
+          "businessModel": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "totalOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "groupCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipMarginReportGroup"
+            }
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "feeNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipMarginReportGroup": {
+        "type": "object",
+        "properties": {
+          "groupKey": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "groupBy": {
+            "type": "string"
+          },
+          "businessModel": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sellAmount": {
+            "type": "number"
+          },
+          "purchaseAmount": {
+            "type": "number"
+          },
+          "supplierShippingAmount": {
+            "type": "number"
+          },
+          "platformFeeAmount": {
+            "type": "number"
+          },
+          "feeUnregisteredOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dropshipCost": {
+            "type": "number"
+          },
+          "spreadBeforeFee": {
+            "type": "number"
+          },
+          "spreadAfterFee": {
+            "type": "number",
+            "nullable": true
+          },
+          "spreadBeforeFeeSum": {
+            "type": "number"
+          },
+          "undeterminedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lossConfirmedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notLossOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "marginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipReconciliationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipReconciliationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipReconciliationDetail": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "$ref": "#/components/schemas/DropshipReconciliationRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipReconciliationLineRow"
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fxNote": {
+            "type": "string"
+          },
+          "taskNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipReconciliationLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "originalCurrencyCode": {
+            "type": "string"
+          },
+          "statementCurrencyCode": {
+            "type": "string"
+          },
+          "sellAmount": {
+            "type": "number"
+          },
+          "purchaseAmount": {
+            "type": "number"
+          },
+          "supplierShippingAmount": {
+            "type": "number"
+          },
+          "feeRegistrationStatus": {
+            "type": "string"
+          },
+          "platformFeeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "lossVerdict": {
+            "type": "string"
+          },
+          "fxStatus": {
+            "type": "string"
+          },
+          "fxRateValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "sellAmountInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "purchaseAmountInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "supplierShippingAmountInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "dropshipCostInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "spreadInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "payableInStatement": {
+            "type": "number",
+            "nullable": true
+          },
+          "inTotals": {
+            "type": "boolean"
+          },
+          "ruleEvidence": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipFxRatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipFxRateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipFeeRatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipFeeRateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginFactPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipMarginFactRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "businessModel": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "sellAmount": {
+            "type": "number"
+          },
+          "purchaseAmount": {
+            "type": "number"
+          },
+          "supplierShippingAmount": {
+            "type": "number"
+          },
+          "dropshipCost": {
+            "type": "number"
+          },
+          "spreadBeforeFee": {
+            "type": "number"
+          },
+          "platformFeeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "spreadAfterFee": {
+            "type": "number",
+            "nullable": true
+          },
+          "marginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "feeRegistrationStatus": {
+            "type": "string"
+          },
+          "lossVerdict": {
+            "type": "string"
+          },
+          "lossVerdictLabel": {
+            "type": "string"
+          },
+          "lossEvidence": {
+            "type": "string"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipMarginEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipMarginEventRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "factId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "statementId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "alertId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DropshipSettlementCyclePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipSettlementCycleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipMarginCapabilities": {
+        "type": "object",
+        "properties": {
+          "lossVerdicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "feeChargeBases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fxStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reportGroupBys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statementStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "payableTaskStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipMarginCapabilityRule"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipMarginCapabilityDimension"
+            }
+          },
+          "platformFeeRegistered": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipMarginCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DropshipMarginCapabilityRule": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ruleSummary": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "suggestedActions": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipLossAlertPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipLossAlertRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lossConfirmedTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "undeterminedTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
