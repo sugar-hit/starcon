@@ -1595,6 +1595,463 @@
         }
       }
     },
+    "/channel/logistics-transit-limits/transit-rules": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_transit_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serviceLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "readiness",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "DEFAULT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "post_channel_logistics_transit_limits_transit_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveTransitRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/size-limits": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_size_limits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SizeLimitPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "post_channel_logistics_transit_limits_size_limits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveSizeLimitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SizeLimitRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/precheck": {
+      "post": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "post_channel_logistics_transit_limits_precheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LimitPrecheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LimitPrecheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/markings": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_markings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "flagKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkingRequirementPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "post_channel_logistics_transit_limits_markings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveMarkingRequirementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkingRequirementRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/estimate": {
+      "post": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "post_channel_logistics_transit_limits_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitEstimateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitEstimateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/logistics-channels": {
       "get": {
         "tags": [
@@ -2944,6 +3401,275 @@
               "*/*": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/transit-rules/{id}": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_transit_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitRuleRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "delete_channel_logistics_transit_limits_transit_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/size-limits/{id}": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_size_limits_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SizeLimitRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "delete_channel_logistics_transit_limits_size_limits_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/overview": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsTransitOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/markings/{id}": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_markings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkingRequirementRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "delete_channel_logistics_transit_limits_markings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/logistics-transit-limits/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-transit-controller"
+        ],
+        "operationId": "get_channel_logistics_transit_limits_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsTransitCapabilities"
                 }
               }
             }
@@ -4422,6 +5148,653 @@
             "format": "int32"
           },
           "nextRoute": {
+            "type": "string"
+          }
+        }
+      },
+      "SaveTransitRuleRequest": {
+        "required": [
+          "countryCode",
+          "cutoffTime",
+          "serviceLevel",
+          "status",
+          "weightMinKg"
+        ],
+        "type": "object",
+        "properties": {
+          "transitRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "serviceLevel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "weightMinKg": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "weightMaxKg": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "transitDaysMin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitDaysMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cutoffTime": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransitRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "serviceLevel": {
+            "type": "string"
+          },
+          "weightMinKg": {
+            "type": "number"
+          },
+          "weightMaxKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "transitDaysMin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitDaysMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cutoffTime": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "readiness": {
+            "type": "string"
+          },
+          "readinessMessage": {
+            "type": "string"
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveSizeLimitRequest": {
+        "type": "object",
+        "properties": {
+          "sizeLimitId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string",
+            "nullable": true
+          },
+          "maxLengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxWidthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxHeightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxGirthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SizeLimitRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxLengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxWidthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxHeightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxGirthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LimitPrecheckRequest": {
+        "required": [
+          "categoryCodes"
+        ],
+        "type": "object",
+        "properties": {
+          "channelIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string",
+            "nullable": true
+          },
+          "categoryCodes": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "containsMagnet": {
+            "type": "boolean"
+          },
+          "containsDangerousGoods": {
+            "type": "boolean"
+          },
+          "weightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "lengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "shipAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LimitHit": {
+        "type": "object",
+        "properties": {
+          "hitKind": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "carrierReason": {
+            "type": "string"
+          }
+        }
+      },
+      "LimitPrecheckResult": {
+        "type": "object",
+        "properties": {
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LimitPrecheckVerdict"
+            }
+          },
+          "pass": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LimitPrecheckVerdict": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LimitHit"
+            }
+          },
+          "transitDaysMin": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "transitDaysMax": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SaveMarkingRequirementRequest": {
+        "required": [
+          "flagKind",
+          "requirementMode"
+        ],
+        "type": "object",
+        "properties": {
+          "markingId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "flagKind": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requirementMode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "markingCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "carrierReason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MarkingRequirementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "flagKind": {
+            "type": "string"
+          },
+          "requirementMode": {
+            "type": "string"
+          },
+          "markingCode": {
+            "type": "string"
+          },
+          "carrierReason": {
+            "type": "string"
+          },
+          "upstreamRestrictionMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "consistentWithUpstream": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransitEstimateRequest": {
+        "required": [
+          "countryCode",
+          "weightKg"
+        ],
+        "type": "object",
+        "properties": {
+          "channelIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "weightKg": {
+            "type": "number"
+          },
+          "serviceLevel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "shipAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TransitEstimateItem": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "serviceLevel": {
+            "type": "string"
+          },
+          "queriedWeightKg": {
+            "type": "number"
+          },
+          "matchedBand": {
+            "type": "string"
+          },
+          "transitDaysMin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitDaysMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cutoffTime": {
+            "type": "string"
+          },
+          "earliestArrival": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latestArrival": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveWindowNote": {
+            "type": "string"
+          },
+          "matchedRuleNote": {
+            "type": "string"
+          }
+        }
+      },
+      "TransitEstimateResult": {
+        "type": "object",
+        "properties": {
+          "shipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransitEstimateItem"
+            }
+          },
+          "matched": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmatched": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -6042,6 +7415,263 @@
           },
           "selected": {
             "type": "boolean"
+          }
+        }
+      },
+      "TransitRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransitRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TransitRuleSummary"
+          }
+        }
+      },
+      "TransitRuleSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noTransit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noBand": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveNow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countries": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channels": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SizeLimitPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizeLimitRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "channelLevel": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countryLevel": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsTransitCount": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsTransitOverview": {
+        "type": "object",
+        "properties": {
+          "transitSummary": {
+            "$ref": "#/components/schemas/TransitRuleSummary"
+          },
+          "byServiceLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsTransitCount"
+            }
+          },
+          "byFlagKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsTransitCount"
+            }
+          },
+          "sizeLimitTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "markingTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MarkingRequirementPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarkingRequirementRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labelRequired": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inconsistent": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsTransitCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransitCapabilityDimension"
+            }
+          },
+          "serviceLevels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "flagKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requirementModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "readinessCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "limitationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "TransitCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       },

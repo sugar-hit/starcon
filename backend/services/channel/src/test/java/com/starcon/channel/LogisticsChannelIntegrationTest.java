@@ -148,7 +148,12 @@ class LogisticsChannelIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      s.execute("truncate logistics_channel_scope, logistics_channel_surcharge,"
+      // 🔴 10.1.1.3 时效与限制（V139）的三张表用复合外键引用 logistics_channel_config，
+      //    truncate 一个被外键引用的表会被 PostgreSQL 拒（必须先把引用方清掉）。
+      //    这三张表是下游模块的数据，本测试用例本就不关心它们，清空即可。
+      s.execute("truncate logistics_transit_rule, logistics_size_limit,"
+          + " logistics_marking_requirement,"
+          + " logistics_channel_scope, logistics_channel_surcharge,"
           + " logistics_channel_restriction, logistics_channel_config,"
           + " carrier_country_coverage, carrier_business_scope, carrier_logistics_profile");
     } catch (java.sql.SQLException e) {
