@@ -1399,6 +1399,56 @@
         }
       }
     },
+    "/catalog/supply/vendors/{roleId}/profile": {
+      "put": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "put_catalog_supply_vendors_roleId_profile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorSupplyProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorFactSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/supplier-quotes/{id}": {
       "get": {
         "tags": [
@@ -9569,6 +9619,230 @@
         }
       }
     },
+    "/catalog/supply/vendors/{roleId}/quality-inspections": {
+      "post": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "post_catalog_supply_vendors_roleId_quality_inspections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorQualityInspectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorFactSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/{roleId}/quality-inspections/{recordId}/void": {
+      "post": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "post_catalog_supply_vendors_roleId_quality_inspections_recordId_void",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/{roleId}/deliveries": {
+      "post": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "post_catalog_supply_vendors_roleId_deliveries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorDeliveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorFactSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/{roleId}/deliveries/{recordId}/void": {
+      "post": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "post_catalog_supply_vendors_roleId_deliveries_recordId_void",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/supplier-quotes": {
       "get": {
         "tags": [
@@ -17649,6 +17923,250 @@
         }
       }
     },
+    "/catalog/supply/vendors": {
+      "get": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "get_catalog_supply_vendors",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplyStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cooperationLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partyStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "missingProfile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "metricFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "metricTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/{roleId}": {
+      "get": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "get_catalog_supply_vendors_roleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorPurchaseView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/overview": {
+      "get": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "get_catalog_supply_vendors_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorListOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supply/vendors/options": {
+      "get": {
+        "tags": [
+          "vendor-list-controller"
+        ],
+        "operationId": "get_catalog_supply_vendors_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorListOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/supplier-quotes/{id}/tiers": {
       "get": {
         "tags": [
@@ -24448,6 +24966,47 @@
           }
         }
       },
+      "VendorSupplyProfileInput": {
+        "required": [
+          "supplyStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "supplyStatus": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "VendorFactSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "SupplierQuoteInput": {
         "required": [
           "currency",
@@ -30933,6 +31492,123 @@
           }
         }
       },
+      "VendorQualityInspectionInput": {
+        "required": [
+          "inspectedAt",
+          "inspectedQuantity",
+          "inspectionRef",
+          "qualifiedQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inspectionRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "inspectedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "inspectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VendorVoidInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "VendorDeliveryInput": {
+        "required": [
+          "amount",
+          "currency",
+          "deliveryRef",
+          "dueDate",
+          "orderedAt",
+          "quantity",
+          "receivedDate"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveryRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "purchaseUnitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receivedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "SpecAxisBindingInput": {
         "required": [
           "specAxisId"
@@ -36472,6 +37148,448 @@
           },
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "VendorListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metricWindow": {
+            "$ref": "#/components/schemas/VendorMetricWindow"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorMetricWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorPurchaseAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "VendorRow": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "partyType": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
+          },
+          "partyStatus": {
+            "type": "string"
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "cooperationLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "settlementMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierProfileFound": {
+            "type": "boolean"
+          },
+          "supplyStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplyNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplyProfileFound": {
+            "type": "boolean"
+          },
+          "supplyProfileVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "supplySkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "purchaseAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorPurchaseAmount"
+            }
+          },
+          "purchaseAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "purchaseAmountCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "onTimeDeliveryCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "deliveryCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "onTimeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "qualifiedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "inspectedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "qualityRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "lastDeliveryAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastInspectionAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VendorDeliveryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deliveryRef": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseUnitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orderedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receivedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "onTime": {
+            "type": "boolean"
+          },
+          "daysLate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isVoid": {
+            "type": "boolean"
+          },
+          "voidReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VendorPurchaseView": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/VendorRow"
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorDeliveryRow"
+            }
+          },
+          "inspections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorQualityInspectionRow"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorQualityInspectionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deliveryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inspectionRef": {
+            "type": "string"
+          },
+          "inspectedQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "qualifiedRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "inspectedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "isVoid": {
+            "type": "boolean"
+          },
+          "voidReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VendorListOverview": {
+        "type": "object",
+        "properties": {
+          "supplierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supplyProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeSupplyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "suspendedSupplyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withDeliveryRecord": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withQualityRecord": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "qualityRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "metricWindow": {
+            "$ref": "#/components/schemas/VendorMetricWindow"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorCategoryOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorListOptions": {
+        "type": "object",
+        "properties": {
+          "supplyStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "cooperationLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "partyStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorCategoryOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorSortOption"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "VendorSortOption": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "defaultDesc": {
+            "type": "boolean"
           }
         }
       },
