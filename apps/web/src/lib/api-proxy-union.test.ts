@@ -256,6 +256,13 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `handover-batches/${UUID}/dispatch`,
     `handover-batches/${UUID}/receipt`,
     `handover-batches/${UUID}/cancel`,
+    // 10.1.1.1 承运商列表 (this lane) — appended to the SAME alternation as a
+    // sibling branch, so the channel baseline above stays asserted.
+    'carriers',
+    'carriers/capabilities',
+    'carriers/overview',
+    'carriers/sync',
+    `carriers/${UUID}`,
   ];
 
   const CH_BLOCK = [
@@ -289,6 +296,20 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     // 10.3.2.2 (揽收与签收确认) is NOT delivered — must not look routed
     `handover-batches/${UUID}/pickup`,
     `handover-batches/${UUID}/delivery`,
+    // --- 10.1.1.1 reverse assertions --------------------------------------
+    // 字面子路径不得被 [0-9a-f-]+ id 段吞掉，也不得带任何可选尾巴：
+    // 不存在的形状必须 404，否则界面会报出一个其实没交付的功能。
+    'carriers/capabilities/extra',
+    'carriers/overview/extra',
+    'carriers/sync/extra',
+    `carriers/${UUID}/extra`,
+    // 10.1.1.2 渠道配置 / 10.1.1.3 时效与限制都**未交付** —— 不得看起来已路由
+    `carriers/${UUID}/channels`,
+    `carriers/${UUID}/transit-times`,
+    `carriers/${UUID}/limits`,
+    // 单数拼写错误
+    'carrier',
+    'carriers/capabilitie',
   ];
 
   it.each(CH_ALLOW)('CHANNEL ALLOWS %s', async (path) => {
