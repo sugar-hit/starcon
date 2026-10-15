@@ -727,7 +727,25 @@ const services: readonly {
     //   {uuid}/invoice-requests 登记开票需求
     // 判别顺序：字面量子路径排在 {uuid} 之前，否则会被 [0-9a-f-]+ 分支吃掉。
     // 裸路径 b2b-orders 与集合读共用一支（本文件的 pattern 按路径登记、不区分方法）。
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?)|sales-orders\/change\/(?:capabilities|platform-rules(?:\/[0-9a-f-]+)?|fulfillment-progress|requests(?:\/[0-9a-f-]+(?:\/(?:status|writeback-tasks))?)?|cancellations(?:\/[0-9a-f-]+(?:\/(?:status|warehouse-tasks(?:\/[0-9a-f-]+\/status)?|writeback-tasks))?)?|writeback-tasks\/[0-9a-f-]+\/status)|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?)$/,
+    // fulfillment/shipment-records 是 9.4.1.2 发货记录（**新起的一支，不并进上面任何组**）：
+    //   capabilities   能力与上下游可用性声明（轨迹 / 买家可见 / 平台回传三列 available=false）
+    //   board          分组看板：承运商 / 轨迹状态 / 平台回传状态 三选一（真 GROUP BY）
+    //   records        发货记录清单：集合读（真分页 + 真筛选 + 排序白名单）
+    //   records/{uuid} 记录明细（单头 + 包裹 + 轨迹 + 可见状态 + 回传 + 时间线）
+    //   records/{uuid}/tracking    登记轨迹观测（10.3 未交付，只登记不抓取）
+    //   records/{uuid}/visibility 登记买家可见状态（无可读上游）
+    //   records/{uuid}/callbacks   登记平台回传状态（9.4.2.1 / 2.5.1.1 未交付）
+    //   records/{uuid}/status      推进 / 更正记录状态（终态不可再动）
+    //   performance    迟发率与有效追踪率（口径定义在服务端一处）
+    //   events         事件流（集合读；append-only，**没有**任何写形状）
+    //   sync           从 8.3.4.1 授权只读接口同步已确认交接的交接单（幂等投影）
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / board / performance / events /
+    //   records / sync）排在 [0-9a-f-]+ 分支之前，否则会被单段分支吃掉半截。
+    // 刻意**没有** DELETE：凭据行是 append-only 的举证凭据，要更正就追加一条登记。
+    // 刻意**不**并进 fulfillment/pending-shipment：待发货最远到已交接、从不产生已发货，
+    //   把两者合在一支会让「待发货推进一下就成了发货记录」看起来成立。
+    // 裸路径 fulfillment/shipment-records **刻意不放行**（与 routing / allocation 同口径）。
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|fulfillment\/shipment-records\/(?:capabilities|board|performance|events|records(?:\/[0-9a-f-]+(?:\/(?:tracking|visibility|callbacks|status))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?)|sales-orders\/change\/(?:capabilities|platform-rules(?:\/[0-9a-f-]+)?|fulfillment-progress|requests(?:\/[0-9a-f-]+(?:\/(?:status|writeback-tasks))?)?|cancellations(?:\/[0-9a-f-]+(?:\/(?:status|warehouse-tasks(?:\/[0-9a-f-]+\/status)?|writeback-tasks))?)?|writeback-tasks\/[0-9a-f-]+\/status)|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?)$/,
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
