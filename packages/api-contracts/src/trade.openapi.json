@@ -2104,6 +2104,178 @@
         }
       }
     },
+    "/trade/logistics/waybills/{id}/freight": {
+      "post": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "post_trade_logistics_waybills_id_freight",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillFreightInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillFreightRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/actions/print": {
+      "post": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "post_trade_logistics_waybills_actions_print",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillBulkActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillBulkActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/actions/cancel": {
+      "post": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "post_trade_logistics_waybills_actions_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillBulkActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillBulkActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/actions/apply": {
+      "post": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "post_trade_logistics_waybills_actions_apply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillBulkActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillBulkActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/waybill-applications/requests": {
       "get": {
         "tags": [
@@ -2516,6 +2688,370 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WaybillBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/rules": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarrierRedirectRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CarrierRedirectRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarrierRedirectRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects/{id}/submit": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_redirects_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillRedirectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/precheck": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_precheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillRedirectPrecheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectPrecheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels/{id}/submit": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_cancels_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/sync": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessSyncInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}/promise": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_facts_id_promise",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessPromiseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}/delivery": {
+      "post": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "post_trade_fulfillment_timeliness_facts_id_delivery",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessDeliveryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
                 }
               }
             }
@@ -8626,6 +9162,240 @@
         }
       }
     },
+    "/trade/logistics/waybills/{id}": {
+      "get": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "get_trade_logistics_waybills_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillListDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/list": {
+      "get": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "get_trade_logistics_waybills_list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierChannel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountry",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "freight",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/filter-options": {
+      "get": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "get_trade_logistics_waybills_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillListFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybills/capabilities": {
+      "get": {
+        "tags": [
+          "waybill-listing-controller"
+        ],
+        "operationId": "get_trade_logistics_waybills_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillListingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/waybill-applications/requests/{id}": {
       "get": {
         "tags": [
@@ -8732,6 +9502,901 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WaybillCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_redirects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects/{id}": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_redirects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/notifications": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_notifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "notificationKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerNotificationTaskPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/capabilities": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_cancels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels/{id}": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_cancels_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/report": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/overdue": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_overdue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessOverduePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_facts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shipSlaState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promiseState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "HANDOVER_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessFactPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/facts/{id}": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_facts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/events": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/dimensions": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_dimensions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SHOP"
+            }
+          },
+          {
+            "name": "shopRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessDimensionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/timeliness/capabilities": {
+      "get": {
+        "tags": [
+          "order-timeliness-controller"
+        ],
+        "operationId": "get_trade_fulfillment_timeliness_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTimelinessCapabilities"
                 }
               }
             }
@@ -11316,1035 +12981,6 @@
           }
         }
       }
-    },
-    "/trade/fulfillment/timeliness/sync": {
-      "post": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "post_trade_fulfillment_timeliness_sync",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimelinessSyncInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimelinessSyncResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/facts/{id}/promise": {
-      "post": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "post_trade_fulfillment_timeliness_facts_id_promise",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimelinessPromiseInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/facts/{id}/delivery": {
-      "post": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "post_trade_fulfillment_timeliness_facts_id_delivery",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TimelinessDeliveryInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/report": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_report",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shopRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessReport"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/overdue": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_overdue",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shopRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimelinessOverduePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/facts": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_facts",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shopRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shipSlaState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "promiseState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "HANDOVER_AT_DESC"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessFactPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/facts/{id}": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_facts_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/events": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_events",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "factId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessEventPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/dimensions": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_dimensions",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "dimensionBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "SHOP"
-            }
-          },
-          {
-            "name": "shopRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimelinessDimensionPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/timeliness/capabilities": {
-      "get": {
-        "tags": [
-          "order-timeliness-controller"
-        ],
-        "operationId": "get_trade_fulfillment_timeliness_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderTimelinessCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/{id}/freight": {
-      "post": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "post_trade_logistics_waybills_id_freight",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillFreightInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillFreightRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/actions/print": {
-      "post": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "post_trade_logistics_waybills_actions_print",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillBulkActionInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillBulkActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/actions/cancel": {
-      "post": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "post_trade_logistics_waybills_actions_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillBulkActionInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillBulkActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/actions/apply": {
-      "post": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "post_trade_logistics_waybills_actions_apply",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillBulkActionInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillBulkActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/{id}": {
-      "get": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "get_trade_logistics_waybills_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillListDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/list": {
-      "get": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "get_trade_logistics_waybills_list",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "carrierChannel",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "destinationCountry",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "freight",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "dateTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillListPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/filter-options": {
-      "get": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "get_trade_logistics_waybills_filter_options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillListFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybills/capabilities": {
-      "get": {
-        "tags": [
-          "waybill-listing-controller"
-        ],
-        "operationId": "get_trade_logistics_waybills_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillListingCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -12577,7 +13213,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -14726,6 +15362,188 @@
           }
         }
       },
+      "WaybillFreightInput": {
+        "required": [
+          "amount",
+          "chargeType",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "chargeType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "evidenceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WaybillFreightRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "chargeType": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WaybillBulkActionInput": {
+        "required": [
+          "requestIds"
+        ],
+        "type": "object",
+        "properties": {
+          "requestIds": {
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "printerTarget": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WaybillBulkActionEntry": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "resultCode": {
+            "type": "string"
+          },
+          "resultMessage": {
+            "type": "string"
+          },
+          "currentStatus": {
+            "type": "string"
+          },
+          "currentStatusLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillBulkActionResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "applied": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillBulkActionEntry"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "WaybillCustomsItemInput": {
         "required": [
           "hsCode",
@@ -15461,6 +16279,844 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CarrierRedirectRuleInput": {
+        "required": [
+          "carrierCode"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z0-9_\\-]{2,64}$",
+            "type": "string"
+          },
+          "redirectSupported": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelSupported": {
+            "type": "boolean"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsupportedReason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CarrierRedirectRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "redirectSupported": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelSupported": {
+            "type": "boolean"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsupportedReason": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WaybillRedirectInput": {
+        "required": [
+          "reason",
+          "recipientCountry",
+          "recipientName"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recipientCountry": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "addressLine": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "postalCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderChangeRequestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "WaybillRedirectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "redirectNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "issuedAtSnapshot": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientCountry": {
+            "type": "string"
+          },
+          "addressLine": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "NOT_ATTEMPTED",
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "outcomeReason": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderChangeRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "orderChangeStatus": {
+            "type": "string"
+          },
+          "orderChangeNote": {
+            "type": "string"
+          },
+          "notificationTaskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAction": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectPrecheckInput": {
+        "required": [
+          "requestIds"
+        ],
+        "type": "object",
+        "properties": {
+          "requestIds": {
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillRedirectPrecheckEntry": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "waybillIssued": {
+            "type": "boolean"
+          },
+          "waybillStatusNote": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "adapterConnected": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaybillRedirectPrecheckResult": {
+        "type": "object",
+        "properties": {
+          "selected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notIssued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canSucceed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cannotSucceed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillRedirectPrecheckEntry"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillCancelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "issuedAtSnapshot": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "NOT_ATTEMPTED",
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "outcomeReason": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderCancellationRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "orderCancellationStatus": {
+            "type": "string"
+          },
+          "orderCancellationNote": {
+            "type": "string"
+          },
+          "notificationTaskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAction": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSyncInput": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "description": "每页条数（上限 500）",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessSyncResult": {
+        "type": "object",
+        "properties": {
+          "sourcesAvailable": {
+            "type": "boolean"
+          },
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inserted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unchanged": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withOrderedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutOrderedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withPackedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutPackedAt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedTimeInversion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessPromiseInput": {
+        "required": [
+          "promisedDeliveryAt",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "description": "更正上一条时的依据（可空）"
+          }
+        }
+      },
+      "OrderTimelinessDetail": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/OrderTimelinessFactRow"
+          },
+          "orderLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessOrderLine"
+            }
+          },
+          "promises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessPromiseCredential"
+            }
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessDeliveryCredential"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessEventRow"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrderTimelinessEventRow": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderTimelinessFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factNo": {
+            "type": "string"
+          },
+          "sourceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRecordNo": {
+            "type": "string"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "orderedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "packedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "handedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderToPackSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "orderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipSlaSource": {
+            "type": "string"
+          },
+          "shipOverdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaState": {
+            "type": "string"
+          },
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promiseSource": {
+            "type": "string"
+          },
+          "actualDeliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryState": {
+            "type": "string"
+          },
+          "promiseVsDeliverySeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseVsDeliveryState": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderTimelinessOrderLine": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TimelinessDeliveryCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessPromiseCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "promisedDeliveryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessDeliveryInput": {
+        "required": [
+          "deliveredAt",
+          "source",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "minLength": 1,
+            "pattern": "DELIVERED|NOT_DELIVERED",
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "description": "未送达时必填：拒收 / 退回 / 丢失是三件不同的事"
           }
         }
       },
@@ -18674,7 +20330,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -18786,12 +20442,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -20178,9 +21834,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -22510,6 +24166,470 @@
           }
         }
       },
+      "WaybillListDetail": {
+        "type": "object",
+        "properties": {
+          "waybill": {
+            "$ref": "#/components/schemas/WaybillListRow"
+          },
+          "freightHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillFreightRow"
+            }
+          },
+          "printHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillPrintLogRow"
+            }
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillListRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "outboundOrderNo": {
+            "type": "string"
+          },
+          "pendingParcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "carrierChannelLabel": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "displayStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING_NUMBER",
+              "NUMBER_ISSUED",
+              "APPLICATION_FAILED",
+              "CANCELLED",
+              "PICKED_UP",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "EXCEPTION"
+            ]
+          },
+          "displayStatusLabel": {
+            "type": "string"
+          },
+          "statusSource": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "upstreamStatus": {
+            "type": "string"
+          },
+          "upstreamStatusLabel": {
+            "type": "string"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "freightAmount": {
+            "type": "number"
+          },
+          "freightCurrency": {
+            "type": "string"
+          },
+          "freightGapCode": {
+            "type": "string",
+            "enum": [
+              "REGISTERED",
+              "NOT_REGISTERED"
+            ]
+          },
+          "freightGapLabel": {
+            "type": "string"
+          },
+          "freightSource": {
+            "type": "string"
+          },
+          "labelAvailability": {
+            "type": "string",
+            "enum": [
+              "RECORDED_REFERENCE",
+              "NO_REFERENCE"
+            ]
+          },
+          "labelAvailabilityLabel": {
+            "type": "string"
+          },
+          "labelFormat": {
+            "type": "string"
+          },
+          "labelUri": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAction": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillPrintLogRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "labelFormat": {
+            "type": "string"
+          },
+          "labelUri": {
+            "type": "string"
+          },
+          "labelAvailability": {
+            "type": "string",
+            "enum": [
+              "RECORDED_REFERENCE",
+              "NO_REFERENCE"
+            ]
+          },
+          "printerTarget": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "printedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WaybillFreightCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "waybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "WaybillListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillListRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/WaybillListSummary"
+          },
+          "statusFilterNote": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillListSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNumber": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "numberIssued": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applicationFailed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issuedWithoutCarrierTracking": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutWaybillNo": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightRegistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightNotRegistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillFreightCurrencyTotal"
+            }
+          },
+          "printableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutLabelReference": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctCarriers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctDestinationCountries": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillCarrierOption": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "waybills": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WaybillDisplayStatusOption": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillListFilterOptions": {
+        "type": "object",
+        "properties": {
+          "carriers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillCarrierOption"
+            }
+          },
+          "carrierChannels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "destinationCountries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warehouseRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillDisplayStatusOption"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillListingCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillListingCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillDisplayStatusOption"
+            }
+          },
+          "carrierChannels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "freightSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "batchActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusRule": {
+            "type": "string"
+          },
+          "freightRule": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillListingCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
       "WaybillRequestPage": {
         "type": "object",
         "properties": {
@@ -22849,6 +24969,867 @@
             "type": "string"
           },
           "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CarrierRedirectRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CarrierRedirectRuleRow"
+            }
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WaybillRedirectPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillRedirectRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withinWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlinePassed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelUnsupported": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleUnregistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "canSucceedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notAttemptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNotificationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillRedirectCarrierState": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "registeredInCarrierMaster": {
+            "type": "boolean"
+          },
+          "redirectSupportedByRule": {
+            "type": "boolean"
+          },
+          "cancelSupportedByRule": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "redirectAdapterConnected": {
+            "type": "boolean"
+          },
+          "cancelAdapterConnected": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectDetail": {
+        "type": "object",
+        "properties": {
+          "redirect": {
+            "$ref": "#/components/schemas/WaybillRedirectRow"
+          },
+          "carrierState": {
+            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BuyerNotificationTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyerNotificationTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "queued": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingForModule15": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BuyerNotificationTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "redirectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "notificationKind": {
+            "type": "string",
+            "enum": [
+              "REDIRECT_ACCEPTED",
+              "REDIRECT_REJECTED",
+              "REDIRECT_EXPIRED",
+              "REDIRECT_UNSUPPORTED",
+              "CANCEL_ACCEPTED",
+              "CANCEL_REJECTED",
+              "CANCEL_EXPIRED",
+              "CANCEL_UNSUPPORTED"
+            ]
+          },
+          "notificationKindLabel": {
+            "type": "string"
+          },
+          "subjectLine": {
+            "type": "string"
+          },
+          "bodySummary": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RedirectCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedirectCapabilityDimension"
+            }
+          },
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "carrierOutcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notificationKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verdictRule": {
+            "type": "string"
+          },
+          "deadlineRule": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillCancelPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillCancelRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withinWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlinePassed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelUnsupported": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleUnregistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "canSucceedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notAttemptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNotificationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillCancelDetail": {
+        "type": "object",
+        "properties": {
+          "cancel": {
+            "$ref": "#/components/schemas/WaybillCancelRow"
+          },
+          "carrierState": {
+            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrderTimelinessReport": {
+        "type": "object",
+        "properties": {
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessSegmentStats"
+            }
+          },
+          "totalFacts": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "sla": {
+            "$ref": "#/components/schemas/TimelinessSlaBreakdown"
+          },
+          "promise": {
+            "$ref": "#/components/schemas/TimelinessPromiseBreakdown"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessPromiseBreakdown": {
+        "type": "object",
+        "properties": {
+          "met": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "late": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noPromise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noActual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metRate": {
+            "type": "number"
+          },
+          "lateSecondsAvg": {
+            "type": "number"
+          },
+          "rateBasis": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSegmentStats": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string"
+          },
+          "segmentLabel": {
+            "type": "string"
+          },
+          "measuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgSeconds": {
+            "type": "number"
+          },
+          "p50Seconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "p90Seconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "minSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "negativeCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TimelinessSlaBreakdown": {
+        "type": "object",
+        "properties": {
+          "unset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "rateBasis": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessOverduePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessOverdueRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shipOverdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseLateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPromiseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TimelinessOverdueRow": {
+        "type": "object",
+        "properties": {
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "handedOverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueKind": {
+            "type": "string"
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promiseVsDeliveryState": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderTimelinessFactPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessFactRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TimelinessFactSummary"
+          }
+        }
+      },
+      "TimelinessFactSummary": {
+        "type": "object",
+        "properties": {
+          "totalFacts": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withOrderedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withPackedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutPackedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipSlaUnset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseNoPromise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseNoActual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseMet": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "promiseLate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredTotalToPack": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPackToHandover": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredPromiseVsDelivery": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OrderTimelinessEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessDimensionPage": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "SHOP",
+              "WAREHOUSE",
+              "CARRIER",
+              "SKU"
+            ]
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessDimensionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessDimensionRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "measuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unsetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgOrderToPackSeconds": {
+            "type": "number"
+          },
+          "avgPackToHandoverSeconds": {
+            "type": "number"
+          },
+          "avgOrderToHandoverSeconds": {
+            "type": "number"
+          },
+          "worstOrderToHandoverSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "worstOverdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withoutOrderSnapshot": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OrderTimelinessCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTimelinessCapabilityDimension"
+            }
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensionsBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "promiseVsDeliveryStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shipSlaStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "durationUnit": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderTimelinessCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "ORDER_TO_PACK"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "handling": {
             "type": "string"
           }
         }
@@ -28304,1505 +31285,6 @@
             "type": "string"
           },
           "effect": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessSyncInput": {
-        "type": "object",
-        "properties": {
-          "pageSize": {
-            "type": "integer",
-            "description": "每页条数（上限 500）",
-            "format": "int32"
-          }
-        }
-      },
-      "TimelinessSyncResult": {
-        "type": "object",
-        "properties": {
-          "sourcesAvailable": {
-            "type": "boolean"
-          },
-          "scanned": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "inserted": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "updated": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unchanged": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "withOrderedAt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "withoutOrderedAt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "withPackedAt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "withoutPackedAt": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "withoutOrderSnapshot": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedTimeInversion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessPromiseInput": {
-        "required": [
-          "promisedDeliveryAt",
-          "source"
-        ],
-        "type": "object",
-        "properties": {
-          "promisedDeliveryAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "source": {
-            "minLength": 1,
-            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "description": "更正上一条时的依据（可空）"
-          }
-        }
-      },
-      "OrderTimelinessDetail": {
-        "type": "object",
-        "properties": {
-          "fact": {
-            "$ref": "#/components/schemas/OrderTimelinessFactRow"
-          },
-          "orderLines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderTimelinessOrderLine"
-            }
-          },
-          "promises": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimelinessPromiseCredential"
-            }
-          },
-          "deliveries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimelinessDeliveryCredential"
-            }
-          },
-          "timeline": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderTimelinessEventRow"
-            }
-          },
-          "boundaries": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "OrderTimelinessEventRow": {
-        "type": "object",
-        "properties": {
-          "seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "factId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "actorMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OrderTimelinessFactRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "factNo": {
-            "type": "string"
-          },
-          "sourceRecordId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceRecordNo": {
-            "type": "string"
-          },
-          "salesOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "shopRef": {
-            "type": "string"
-          },
-          "warehouseRef": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierName": {
-            "type": "string"
-          },
-          "orderedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "packedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "handedOverAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderToPackSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "packToHandoverSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "orderToHandoverSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shipSlaDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "shipSlaSource": {
-            "type": "string"
-          },
-          "shipOverdueSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shipSlaState": {
-            "type": "string"
-          },
-          "promisedDeliveryAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "promiseSource": {
-            "type": "string"
-          },
-          "actualDeliveredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deliveryState": {
-            "type": "string"
-          },
-          "promiseVsDeliverySeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseVsDeliveryState": {
-            "type": "string"
-          },
-          "syncedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OrderTimelinessOrderLine": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "specSnapshot": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          }
-        }
-      },
-      "TimelinessDeliveryCredential": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "deliveredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "state": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "registeredByMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "TimelinessPromiseCredential": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "promisedDeliveryAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "source": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "registeredByMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "TimelinessDeliveryInput": {
-        "required": [
-          "deliveredAt",
-          "source",
-          "state"
-        ],
-        "type": "object",
-        "properties": {
-          "deliveredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "state": {
-            "minLength": 1,
-            "pattern": "DELIVERED|NOT_DELIVERED",
-            "type": "string"
-          },
-          "source": {
-            "minLength": 1,
-            "pattern": "MANUAL_ATTESTATION|PLATFORM_FEED",
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "description": "未送达时必填：拒收 / 退回 / 丢失是三件不同的事"
-          }
-        }
-      },
-      "OrderTimelinessReport": {
-        "type": "object",
-        "properties": {
-          "segments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimelinessSegmentStats"
-            }
-          },
-          "totalFacts": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "windowFrom": {
-            "type": "string"
-          },
-          "windowTo": {
-            "type": "string"
-          },
-          "sla": {
-            "$ref": "#/components/schemas/TimelinessSlaBreakdown"
-          },
-          "promise": {
-            "$ref": "#/components/schemas/TimelinessPromiseBreakdown"
-          },
-          "caveat": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessPromiseBreakdown": {
-        "type": "object",
-        "properties": {
-          "met": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "late": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "noPromise": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "noActual": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "metRate": {
-            "type": "number"
-          },
-          "lateSecondsAvg": {
-            "type": "number"
-          },
-          "rateBasis": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessSegmentStats": {
-        "type": "object",
-        "properties": {
-          "segment": {
-            "type": "string"
-          },
-          "segmentLabel": {
-            "type": "string"
-          },
-          "measuredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unsetCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "avgSeconds": {
-            "type": "number"
-          },
-          "p50Seconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "p90Seconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "minSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "maxSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "negativeCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "TimelinessSlaBreakdown": {
-        "type": "object",
-        "properties": {
-          "unset": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onTime": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overdue": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overdueRate": {
-            "type": "number"
-          },
-          "rateBasis": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessOverduePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimelinessOverdueRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "shipOverdueCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseLateCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmeasuredPromiseCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "TimelinessOverdueRow": {
-        "type": "object",
-        "properties": {
-          "factId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "factNo": {
-            "type": "string"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "shopRef": {
-            "type": "string"
-          },
-          "warehouseRef": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierName": {
-            "type": "string"
-          },
-          "handedOverAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderToHandoverSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overdueKind": {
-            "type": "string"
-          },
-          "overdueSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "deadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "promiseVsDeliveryState": {
-            "type": "string"
-          }
-        }
-      },
-      "OrderTimelinessFactPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderTimelinessFactRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/TimelinessFactSummary"
-          }
-        }
-      },
-      "TimelinessFactSummary": {
-        "type": "object",
-        "properties": {
-          "totalFacts": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withOrderedAt": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutOrderedAt": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withPackedAt": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutPackedAt": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withOrderSnapshot": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutOrderSnapshot": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shipSlaUnset": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onTime": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overdue": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseNoPromise": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseNoActual": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseMet": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "promiseLate": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmeasuredTotalToPack": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmeasuredPackToHandover": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmeasuredPromiseVsDelivery": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "OrderTimelinessEventPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderTimelinessEventRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "TimelinessDimensionPage": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string",
-            "enum": [
-              "SHOP",
-              "WAREHOUSE",
-              "CARRIER",
-              "SKU"
-            ]
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TimelinessDimensionRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "caveat": {
-            "type": "string"
-          }
-        }
-      },
-      "TimelinessDimensionRow": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "dimensionKey": {
-            "type": "string"
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "factCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "measuredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unsetCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "avgOrderToPackSeconds": {
-            "type": "number"
-          },
-          "avgPackToHandoverSeconds": {
-            "type": "number"
-          },
-          "avgOrderToHandoverSeconds": {
-            "type": "number"
-          },
-          "worstOrderToHandoverSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "worstOverdueSeconds": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overdueCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutOrderSnapshot": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "OrderTimelinessCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderTimelinessCapabilityDimension"
-            }
-          },
-          "segments": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "dimensionsBy": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "promiseVsDeliveryStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "shipSlaStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sorts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "durationUnit": {
-            "type": "string"
-          },
-          "definition": {
-            "type": "string"
-          },
-          "caveat": {
-            "type": "string"
-          }
-        }
-      },
-      "OrderTimelinessCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "example": "ORDER_TO_PACK"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "handling": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillFreightInput": {
-        "required": [
-          "amount",
-          "chargeType",
-          "source"
-        ],
-        "type": "object",
-        "properties": {
-          "currency": {
-            "pattern": "^[A-Z]{3}$",
-            "type": "string"
-          },
-          "amount": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number"
-          },
-          "chargeType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "source": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "evidenceRef": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "remark": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "WaybillFreightRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number"
-          },
-          "chargeType": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "evidenceRef": {
-            "type": "string"
-          },
-          "current": {
-            "type": "boolean"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WaybillBulkActionInput": {
-        "required": [
-          "requestIds"
-        ],
-        "type": "object",
-        "properties": {
-          "requestIds": {
-            "maxItems": 200,
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "reason": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          },
-          "printerTarget": {
-            "maxLength": 120,
-            "minLength": 0,
-            "type": "string"
-          },
-          "remark": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "WaybillBulkActionEntry": {
-        "type": "object",
-        "properties": {
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "action": {
-            "type": "string"
-          },
-          "applied": {
-            "type": "boolean"
-          },
-          "resultCode": {
-            "type": "string"
-          },
-          "resultMessage": {
-            "type": "string"
-          },
-          "currentStatus": {
-            "type": "string"
-          },
-          "currentStatusLabel": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillBulkActionResult": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "selected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "applied": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skipped": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "batchNo": {
-            "type": "string"
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillBulkActionEntry"
-            }
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillListDetail": {
-        "type": "object",
-        "properties": {
-          "waybill": {
-            "$ref": "#/components/schemas/WaybillListRow"
-          },
-          "freightHistory": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillFreightRow"
-            }
-          },
-          "printHistory": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillPrintLogRow"
-            }
-          },
-          "nextActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boundaryNotes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillListRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "outboundOrderNo": {
-            "type": "string"
-          },
-          "pendingParcelId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseRef": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierChannel": {
-            "type": "string"
-          },
-          "carrierChannelLabel": {
-            "type": "string"
-          },
-          "destinationCountry": {
-            "type": "string"
-          },
-          "displayStatus": {
-            "type": "string",
-            "enum": [
-              "PENDING_NUMBER",
-              "NUMBER_ISSUED",
-              "APPLICATION_FAILED",
-              "CANCELLED",
-              "PICKED_UP",
-              "IN_TRANSIT",
-              "DELIVERED",
-              "EXCEPTION"
-            ]
-          },
-          "displayStatusLabel": {
-            "type": "string"
-          },
-          "statusSource": {
-            "type": "string"
-          },
-          "statusNote": {
-            "type": "string"
-          },
-          "upstreamStatus": {
-            "type": "string"
-          },
-          "upstreamStatusLabel": {
-            "type": "string"
-          },
-          "grossWeightKg": {
-            "type": "number"
-          },
-          "freightAmount": {
-            "type": "number"
-          },
-          "freightCurrency": {
-            "type": "string"
-          },
-          "freightGapCode": {
-            "type": "string",
-            "enum": [
-              "REGISTERED",
-              "NOT_REGISTERED"
-            ]
-          },
-          "freightGapLabel": {
-            "type": "string"
-          },
-          "freightSource": {
-            "type": "string"
-          },
-          "labelAvailability": {
-            "type": "string",
-            "enum": [
-              "RECORDED_REFERENCE",
-              "NO_REFERENCE"
-            ]
-          },
-          "labelAvailabilityLabel": {
-            "type": "string"
-          },
-          "labelFormat": {
-            "type": "string"
-          },
-          "labelUri": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "issuedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "notBefore": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "nextAction": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillPrintLogRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "batchNo": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "labelFormat": {
-            "type": "string"
-          },
-          "labelUri": {
-            "type": "string"
-          },
-          "labelAvailability": {
-            "type": "string",
-            "enum": [
-              "RECORDED_REFERENCE",
-              "NO_REFERENCE"
-            ]
-          },
-          "printerTarget": {
-            "type": "string"
-          },
-          "remark": {
-            "type": "string"
-          },
-          "printedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WaybillFreightCurrencyTotal": {
-        "type": "object",
-        "properties": {
-          "currency": {
-            "type": "string"
-          },
-          "waybills": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalAmount": {
-            "type": "number"
-          }
-        }
-      },
-      "WaybillListPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillListRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/WaybillListSummary"
-          },
-          "statusFilterNote": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillListSummary": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingNumber": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "numberIssued": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "applicationFailed": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "cancelled": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "issuedWithoutCarrierTracking": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutWaybillNo": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "freightRegistered": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "freightNotRegistered": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "freightByCurrency": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillFreightCurrencyTotal"
-            }
-          },
-          "printableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withoutLabelReference": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "distinctCarriers": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "distinctDestinationCountries": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillCarrierOption": {
-        "type": "object",
-        "properties": {
-          "carrierCode": {
-            "type": "string"
-          },
-          "waybills": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "WaybillDisplayStatusOption": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "source": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillListFilterOptions": {
-        "type": "object",
-        "properties": {
-          "carriers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillCarrierOption"
-            }
-          },
-          "carrierChannels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "destinationCountries": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "warehouseRefs": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillDisplayStatusOption"
-            }
-          },
-          "sortOptions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillListingCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillListingCapabilityDimension"
-            }
-          },
-          "statuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillDisplayStatusOption"
-            }
-          },
-          "carrierChannels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "freightSources": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "batchActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statusRule": {
-            "type": "string"
-          },
-          "freightRule": {
-            "type": "string"
-          },
-          "boundaryNote": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillListingCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "source": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "impact": {
             "type": "string"
           }
         }
