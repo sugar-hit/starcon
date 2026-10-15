@@ -721,6 +721,50 @@ const services: readonly {
     // 判别顺序与既有两组一致：字面量子路径（capabilities / board / units / batch-tasks）
     // 排在 [0-9a-f-]+ 分支之前，否则会被单段分支吃掉半截。
     // 刻意**没有** DELETE：待发货单元与批量任务都带凭据，要更正就作废重开一张。
+    // 10.1.1.2 渠道配置（**本条目是新增一条 services[] 元素，不是往既有 channel 分支的
+    // alternation 里并**）。同批 4 条车道共享这一个文件，而每个服务在 services[] 里是**一段
+    // 超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路，
+    // 插入锚点固定在 `prefix: 'trade/'` **之前** —— 那样本车道与其他三条车道的插入点
+    // 被既有条目隔开，git 能干净合并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-channels                    集合读（GET，真分页 + 筛选）/ POST 登记渠道
+    //   logistics-channels/capabilities       能力声明（未交付段 available=false）
+    //   logistics-channels/overview           全量概览（不受筛选与分页影响）
+    //   logistics-channels/eligibility        🔴 渠道限制判定（POST，只读无副作用）
+    //   logistics-channels/{uuid}             详情（GET）/ DELETE 撤下渠道配置
+    //
+    // 判别顺序：字面量子路径（capabilities / overview / eligibility）**排在
+    // [0-9a-f-]+ 分支之前**。写反了的话 `p`（eligibility 的首字母）落在
+    // `[0-9a-f-]` 里，会被 uuid 分支提前吃掉 —— 而 `logistics-channels/p` 根本不是 uuid，
+    // 正则会静默匹配失败，或者更糟：拼出一个「id=capabilities 的渠道」被凭空放行。
+    // 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    // 只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-channels/{uuid}/transit-times` / `/limits`
+    //     —— 10.1.1.3 时效与限制未交付
+    //   * `logistics-channels/{uuid}/rates` —— 10.1.2.1 运费试算未交付
+    //   * `logistics-channels/{uuid}/quotes`    —— 10.1.2.2 渠道比价未交付
+    //   * `logistics-channels/sync` —— 本模块不经任何跨服务同步：承运商档案同库
+    //     （10.1.1.1 已落在 channel），没有需要投影的上游
+    //   * `logistics-channels/{uuid}/carriers` —— 所属承运商是**建渠道时**的入参，
+    //     不是一个可以单独 GET 的资源（承运商档案在 /channel/carriers 读）
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    //    `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行，
+    //    症状是有人 GET /api/channel/logistics-channels/c 会拿到一个「渠道 id 是 c」
+    //    的请求打到后端，而不是被白名单当场 404。
+    // ⚠️ 字面量子路径**排在** uuid 段之前：写反的话 `capabilities/overview/eligibility`
+    //    里以 [0-9a-f] 开头的那个会被 uuid 分支吃掉一半。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-channels(?:\/(?:capabilities|overview|eligibility|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+    // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',

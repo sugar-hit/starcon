@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **305** |
 | 完成率 | 34.4% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 6 | 0 | 46 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -332,7 +315,7 @@
 | 9.7.1.1 | 批发订单与账期 | — | D4 | 已交付 | 迁移 trade `V120__trade_b2b_order_terms.sql`（十张新表，全部 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT trade_app/starcon_app：b2b_customer_terms 客户投影 · b2b_price_book 价目表头（含起订量）· b2b_price_tier 阶梯档位 · b2b_order 批发订单头 · b2b_order_line 订单行 · b2b_order_event 事件流 · b2b_shipment / b2b_shipment_line 发货 · b2b_receivable / b2b_receivable_line 应收；**只新建表、不 ALTER 任何既有表**，跨车道 DDL 回归面 = 0，不碰 V1 / V92 / V97 / V98 / V99 / V116 的既有表；版本按调度器预分配取 V120）。**B2B 是自己的表族而不是给 sales_order 加一个 order_type 字段**：9.1.2.2 确立的「来源是字段不是表」纪律成立的前提是「一张表的写入所有者只有一个」，而本批 4 条车道同时在 trade 落迁移；且账期到期日、发货确认应收、开票需求这三件事在零售侧根本存在不了，塞进 sales_order 只会产出一半行永远是 NULL 的巨大可空字段表 （catalog V30 拒绝掉的正是那种形状）。「与零售区分」因此是结构性的：订单类型 / 收款方式 / 成本口径三者都写在 b2b_order 上，零售走 sales_order，两边互不覆盖、互不 JOIN。**「未发货不产生应收，发货才确认应收」有四重表达**：①`b2b_receivable.shipment_id` 是 NOT NULL 外键 —— 应收行在数据层挂不到发货单就写不出来，「下单即生成应收」不是没写的代码路径而是走不通的路径；②`b2b_order.receivable_amount ≤ total_amount` 是 CHECK，且订单头这个数由触发器按 SUM(应收) 复算；③服务层只在 `ship()` 一个方法里产生应收；④账期起算点 = 发货确认时刻，到期日 = 该时刻 + 账期天数，由 `guard_b2b_receivable_terms` 用 `make_interval` 独立复算（timestamptz + OffsetDateTime + `?::timestamptz`）。收款方式三分支各写明理由：ORDER_SETTLEMENT 下单结算**不产生应收**（款项已收讫，收进来的是预收不是应收）、ON_RECEIPT 到期日 = 发货确认时刻、CREDIT_TERM 到期日 = 发货确认 + 账期天数。**阶梯价是算出来的不是填进来的**：`B2BOrderLineInput` 没有 unitPrice 字段（允许客户端传单价等于允许绕过起订量与阶梯价两条硬规则），服务层按 `min_quantity ≤ quantity ORDER BY min_quantity DESC LIMIT 1` 落档，区间语义是 `(上一档下界, 本档下界]` —— **「恰好等于阈值」不需要任何特殊分支**，它是 `<=` 的自然结果；DB 的 `guard_b2b_line_tier` 独立复算落档下界与单价是否真属于那一档。两档可能同价，所以只存单价不够，订单行另存 applied_tier_min_quantity 才能事后回答「这行当时按哪一档算的钱」。**起订量是硬校验**（moq=0 表示不限起订量）：低于它 400，落库侧还有行 CHECK 与订单确认时的延迟约束触发器；`guard_b2b_tier_ladder` 反向保证「阶梯必须覆盖得起订量」—— 方向写反会同时制造两种错（MOQ 10 + 最低档 50 产生落不进任何档的空洞，而 MOQ 10 + 起步档 5 是完全正常的形态），故用 AFTER 触发器取含本行的完整阶梯。**上游一律投影、不跨库**：3.6.1.2 客户档案（catalog V27/V30 已交付）只存逻辑 ID + trade 侧只读投影 b2b_customer_terms（客户分级 / 账期天数 / 默认币种 / 信用额度，版本号单调，乱序到达的旧事件被 DB 拒绝覆盖新值）；05 价目 5.1.1.2（D6 未交付）的 b2b_price_book / b2b_price_tier 此刻由本服务的投影写入端点维护（source_system='projection'），价目交付后由事件同步接管同两张表，表结构与所有下游读法都不需要改。集成测试刻意不提供 catalog / 价目服务的 stub —— 测试里出现它们反而说明边界纪律破了。**开票需求只标记不跨库**：invoice_state 由本服务维护，12.6.2 交付后由它消费；应收**核销**（SETTLED）刻意不提供端点 —— 抢在 12 财务前写它的状态会让「谁改了应收」无法回答。金额一律 BigDecimal + NUMERIC（数量 numeric(19,6) / 单价 numeric(19,4) / 金额 numeric(24,4)，生成列 `round(quantity*unit_price,4)`），全链路无浮点。**只新建自己的触发器与函数（b2b_* 前缀）**，不改既有函数；阶梯与客户档案是**可整体替换的投影**（调价时删档是最常见动作），故刻意不给 b2b_price_tier 收回 DELETE，而事件流与应收明细是 append-only 对账凭据，按 V99/V115 同一纪律收回 UPDATE/DELETE。**刻意不提供取消/删除**：单向状态机 DRAFT → CONFIRMED → PARTIALLY_SHIPPED → SHIPPED（无 COMPLETED —— 让它可达成需要核销动作，而核销属于 12 财务，那样只会造出一个走不到的状态）。端点 15 个挂 `/trade/b2b-orders`：GET /capabilities、GET+PUT /customer-terms、GET+PUT /price-books、GET /price-books/{id}、POST /price-quote、GET+POST /、GET /{id}、PUT /{id}、POST /{id}/confirm、POST /{id}/shipments、POST /{id}/invoice-requests、GET /receivables；权限 trade.b2b.read/create/update，租户只来自已认证成员关系，伪造 X-Tenant-Id 无效。前端页面 /orders/b2b（apps/web/src/app/orders/b2b/page.tsx + components/orders/b2b-order-workspace.tsx + b2b-order-model.ts，加载/空/错误三态齐全；列表把「订单总额 / 已确认应收 / 未发货」三列并排，让「钱在哪一环产生」一眼可核对；到期日直接展示后端 ISO 值、前端不做时区换算；下单结算不产生应收时直接展示后端返回的原因而不是留一个空的应收区）。**刻意不进 /orders 的 tab**：那一页是 9.1.1.1 / 9.1.2.2 共用的 tab 容器（别的模块的页面），且本模块账期应收按**到期日**排（资金计划取数顺序），与那里按创建时间排不是一回事。api-proxy 白名单**求并**追加 `b2b-orders` 一支（外层 trade/ 段不动，内层 alternation 逐分支核对既有分支逐字未丢）并写真 proxy 双向断言 7 例（源码反向抽取真实调用点逐条放行 + 反向形状断言 404 + 真跑 proxy 断言转发到 8085 + 正向钉住 9.1.2.2 / 9.1.1.1 / 9.3.2.2 / 6.4.1.1 既有分支不被误伤）。测试 B2BOrderIntegrationTest 32 例（实跑 Testcontainers PostgreSQL 16，连接池压到 1，覆盖蓝图五条硬要求与多租户三断言，含阶梯边界 10/99/100/100.000001/1000 与应收到期日**写回值断言**）+ 前端 b2b-order-model.test.ts 26 例；**trade 全套 227 例全绿**，跨车道零回归。契约由 codegen 重生成（trade.ts **纯新增 31 条 B2B\***，逐名 diff 确认零删除；warehouse 的 codegen 漂移属 7.2.2.2 车道已 revert，不在本车道提交内）。**下游缺口**：12.1.1 应收 / 12.6.2 发票 / 12.1.2.2 资金计划 / 9.3.1.1 履约 / 5.1.1.2 价目项均未交付，capabilities 的 gaps 数组逐条点名模块 ID、归属服务、原因与交接方式；特别是 **9.3 履约当前只认 sales_order 一张表，b2b_order 不在其中，批发订单尚未进入拣货与发货编排**，发货由本模块自己的 shipments 端点登记，交接方式（同服务同库读表，不是跨库读取）写在 capabilities 里而不在迁移里假装已接通 |
 | 9.7.1.2 | 经销与分销管理 | — | D4 | 已交付 | 迁移 trade `V133__trade_dealer_distribution.sql`（七张新表，全部 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT trade_app/starcon_app，**零 ALTER 任何既有表**）：dealer_profile（3.6.1.2 客户角色档案的 trade 侧只读投影）· dealer_authorization + dealer_authorization_event（**输出①授权台账**：授权区域/产品线 text[]、授权期限两个 date、经销价 numeric(19,4)、返点比例 numeric(9,6) CHECK 0..1，变更走 append-only 事件流）· dealer_quota（销量与回款考核目标）· dealer_sale（销售与回款记录，配额完成率与窜货判定的**唯一来源**，amount 由 quantity × 授权价算出、DB 用 CHECK 独立复算）· dealer_rebate（**输出③返点计提**，rebate_rate 为计提时刻快照、base_amount 冻结计提结果）· dealer_diversion_alert（**输出④窜货预警**，一条销售最多一条预警、既越区域又越产品线合并成 BOTH）。**输出②配额完成率**不是落库列而是 SQL 里的 `round(actual/target, 6)` NUMERIC 除法，服务层用 BigDecimal 复算一遍并断言两者一致；目标为 0 时返回 **null**（不限配额），不是 0 也不是 100%——两者都会把「不考核」显示成「一个都没完成」。金额/比率**全链路无浮点**（数量 numeric(19,6)、单价 numeric(19,4)、金额 numeric(24,4)、比例 numeric(9,6)），测试钉**精确值**（0.333333 × 1000.0000 = 333.3330、10 ÷ 300 = 0.033333）。**授权期限是落库的两个 date 的区间比较**，不从写入时刻 + N 天反推（补录历史授权时后者会整体平移）。DealerPartyQueryPort 是读 3.6.1.2 的**跨服务只读 Port**（授权 HTTP、不直连对方库、不建跨库视图/FK），**上游不可达一律 503 且零落库**，绝不返回空清单冒充「这个租户一个经销商都没有」。四条 `available=false` 在 /trade/dealers/capabilities 里如实报出并写明 ownerModule 与理由：**16 合规未交付 ⇒ compliance_state 服务层只写得出 UNVERIFIED**（不是画成 VERIFIED 或默认值）；**12 应付/返点未交付 ⇒ dealer_rebate 是本模块自己的计提口径，finance_confirmed 恒为 false 并在界面显示**（蓝图原文「需与财务确认计提口径」）；**5.5.2 未交付 ⇒ 窜货判定只做授权范围越界一个维度、没有价格倒挂维度，且该口径未与 5.5.2 合并**；13 分析未交付 ⇒ 汇总只在本模块内出。端点 `/trade/dealers`（capabilities / candidates / profiles / authorizations[+/{id}[/status]] / quotas / quota-attainment / sales / rebates[/accrue] / diversion-alerts[/{id}/state]），权限 `trade.dealer.{read,create,update,delete}`，租户来自已认证成员关系（不信任 X-Tenant-Id）。前端 `dealer-channel-model.ts` + `dealer-channel-workspace.tsx` + 页面 `/orders/dealers`（TASK_PAGES 登记为订单域任务页，二级导航由 children 派生、不改共享导航常量），api-proxy 在 trade 段**外科式最小追加** dealers 一支（不并进 b2b-orders / fulfillment / pending-shipment / shipment-records / dropship-margin 任一组，逐字节验证摘掉后与旧 pattern 完全相同）。契约由 `catalog-contracts.py --spec-dir backend/target/openapi` 重新生成（+80 Dealer* DTO，纯新增）。测试 `DealerChannelIntegrationTest`（**29 例**，真实 PG16 Testcontainers + 强制 RLS、连接池压到 1），含 AGENTS.md 要求的三条多租户断言（两租户互不可见 / 伪造 X-Tenant-Id 无效且用超管直连核对行确实落在原租户名下 / 单连接反复交替不串租户）、四类输出各自受隔离、事件流与销售记录的 UPDATE/DELETE 已被 REVOKE、以及上游 503 零落库。L0 `./mvnw -pl services/trade -am compile` 绿、`pnpm typecheck` 绿；L1 `./mvnw -pl services/trade -am test` 491 例全绿。**与 9.7.1.1 的分工**：它是批发订单与账期，本模块是经销商授权/配额/返点/窜货，两者互不覆盖、互不 JOIN，本模块对 b2b_* 零 ALTER。 |
 | 10.1.1.1 | 承运商列表 | — | D5 | 已交付 | 迁移 channel `V134__logistics_carrier_profile.sql`（**纯新建、零 ALTER 任何既有表**，跨车道 DDL 回归面 = 0）：三张表 `carrier_logistics_profile`（物流侧投影头）/ `carrier_country_coverage`（覆盖国家）/ `carrier_business_scope`（支持业务类型）+ 3 个触发器 + ENABLE/FORCE RLS + GRANT，复用 identity 已有的 `channel.operation.*` 权限码，**identity 零改动**。**🔴 蓝图加粗句「承运商是往来单位的一种角色，不在此处重复建档」的物理落点**：本模块**不建任何承运商主档表、不提供建承运商身份的端点**，主体身份（名称/编码/公司类型/国家/联系方式）与接口类型/账号/服务能力全部是 **catalog 只读快照**，写端点一个字段都不接受；V134 文件头第一节用一张归属表把「catalog 主权」与「本模块主权」逐列钉死。**⚠️ 上游归属实查纠正了派单说明**：上游 3.6.1.1/3.6.1.2 已交付但**在 catalog 不在 identity**（`V27__party_profile.sql` 的 `party`+`party_role`、`V30__party_role_profiles.sql` 的 `party_carrier_profile`）；identity 那边是 17.1.2.1 **法人档案**（`V5__legal_entity.sql`，`/legal-entities`），那是「我方法人」不是「上游承运商」，照派单说明去读会把两者搞混（能跑通但业务上完全错误）。**跨服务只经授权 API**：`CarrierProfileQueryPort` 读 `GET /catalog/parties?roleType=CARRIER&page&size` 与 `GET /catalog/parties/{id}/carrier-profile`，**转发调用方自己的 bearer**（照抄 10.3.2.1 的 `PendingShipmentQueryPort`），租户隔离是 channel 侧 RLS + catalog 侧 RLS **两道**，一条跨服务 SQL / 跨库 FK / 视图都没有；**上游不可达一律 503 且零落库，绝不返回空承运商列表**（空列表会被读成「这个租户一个承运商都没有」，而真相是「我们查不到」）。**可用性状态是可判定的依据，不是手填下拉框**：DB 触发器 `guard_carrier_logistics_readiness` 在写入路径上**重算并比对**（凭据引用/覆盖国家/业务类型/是否登记物流档案四项），绕过服务层直接写 SQL 改成 READY 同样被拒（照抄 `guard_handover_batch_counts`）；依赖上游的部分（主体可用性、接口类型能否自动）由服务层与 readiness 合成对外的 `availability`，优先级 **主体不可用 > 配置缺口 > 仅人工**，SQL 侧筛选与统计共用同一条 CASE 表达式。**凭据只存密钥管理器引用**：DB 层 CHECK 钉死 `secret://`/`kv://`/`vault://`/`external-secrets://` 开头，粘一个真实 API token 在**写库那一刻**就被拒；且「有引用必须有真掩码（含 `*`）」，避免只剩引用时界面显示成「没配凭据」而运营重复登记。**覆盖国家与支持业务类型都是真多值关系表**（不是逗号串），可按其真筛选。**零 ALTER V129 的 handover_* 六表**，两张子表的 FK 只指向本迁移自建表。端点 `/channel/carriers/**`（capabilities / overview / 列表真分页真筛选 / sync / {id} 详情 / {id} PUT 改物流侧档案 / {id} DELETE 撤下物流侧档案 —— **DELETE 撤的是物流配置不是承运商**，主体记录在 catalog 本服务无权删）；**刻意没有建承运商端点**，也没有 `carriers/{id}/channels` 之类（那是未交付的 10.1.1.2）。页面 `/logistics/carriers`（概览四卡 / 6 个筛选 / 分页 / 每行直接渲染可用性徽章与**判定理由** / 物流侧档案编辑面板（凭据字段叫「凭据引用」并要求掩码）/ 能力与边界逐段标注）。**api-proxy 白名单**在 channel 既有 alternation **内层追加** `carriers` 一支（字面量 capabilities/overview/sync 排在 `[0-9a-f-]+` **之前**判别），并补 5 条放行 + 9 条反向断言（含 10.1.1.2/10.1.1.3 未交付形状必须 404）。**测试** `CarrierIntegrationTest` 14 例真实 PostgreSQL 16 + Testcontainers 全绿——端到端（同步→半配置→齐备，NOT_REGISTERED→NO_CREDENTIAL→NO_COVERAGE→NO_BUSINESS_SCOPE→READY）、**多租户三断言**（两租户互不可见 / 伪造 X-Tenant-Id 无效 / 连接池交替 A→B→A 三轮不串）、**凭据只存引用**（真实 token 与无掩码都被拒 + 断言库里无真实凭据）、**可用性不可伪造**、**上游快照不可本地改写**（改接口类型 / 改主体编码都被拒）、**上游不可达 503 且零落库**、多值维度可筛选、**真分页（3 页合起来恰好 7 条且互不重叠）且汇总不受分页影响**、关键词 LIKE 通配符已转义（搜 `%` 不会变成匹配全部）、capabilities 每项未交付维度 `available=false` + ownerModule + impact 三者齐备。验证：channel 全量 **103 例零回归**（本模块 14）、`pnpm typecheck` 三包绿、前端 159 例绿（本模块 + api-proxy）。**已知缺口（如实记录）**：10.1.1.2 渠道配置、10.1.1.3 时效与限制、10.1.2.1 运费计算器均未交付，capabilities 逐段 `available=false` + ownerModule + 影响，**不用空列表或 0 冒充「这一项没有数据」** |
-| 10.1.1.2 | 渠道配置 | — | D5 | 未开发 | — |
+| 10.1.1.2 | 渠道配置 | — | D5 | 已交付 | 迁移 channel `V136__logistics_channel_config.sql`（**纯新建、零 ALTER 任何既有表**，唯一被引用的是同库同服务的 V134 `carrier_logistics_profile` 复合外键，带 tenant_id ⇒ **跨租户挂载承运商在 DB 层不可能**；不碰 trade 的任何表，下游经授权 HTTP 端点取数，零跨服务 SQL/FK/视图；复用 identity 已有的 `channel.operation.*` 权限码，**identity 零改动**）。四张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation：`logistics_channel_config`（渠道头，FK 指向承运商）/ `logistics_channel_scope`（适用店铺·国家·品类，**每值一行不是逗号串**，可按其真筛）/ `logistics_channel_surcharge`（附加费）/ `logistics_channel_restriction`（渠道限制）+ 5 个触发器 + GRANT。**蓝图职责句逐项落位**：所属承运商=`carrier_profile_id`·渠道代码=`channel_code`·适用店铺/国家/品类=`_scope`·计费方式=`billing_mode`+`base_rate`+`charge_divisor`·附加费=`_surcharge`·申报限制=`declaration_*`·保价规则=`insurance_*`+`insurance_max_value`。**🔴 加粗句「渠道限制要硬拦截，否则会被承运商拒收产生额外费用」三处同时落地**（不是「存个字段让前端自己判断」）：①**写入路径 DB 层双向钉死** —— trigger `guard_logistics_scope_vs_restriction`（加适用品类撞禁限则拒）与 `guard_logistics_restriction_vs_scope`（加禁限撞已登记适用品类则拒），**双向是必须的**：只做单向的话「先加适用、后加禁限」这条完全正常的运营路径会造出一条自己和自己打架的配置，表现就是下单被拒收；绕过服务层直接写 SQL 同样被拒 ②**服务端判定端点** `POST /channel/logistics-channels/eligibility` 给出 PASS/REVIEW/**BLOCK** 三档与**逐条**理由，规则收在 `restrictionHit`/`eligibility` 一处，判定逻辑不散落到每个调用方（散落就意味着总有一个调用方漏掉磁力）③**承运商不可用时也不放行**：上游 10.1.1.1 判 `PARTY_BLOCKED` 时直接 BLOCK，对已拉黑的对手方下单代价与被拒收同种 ④`ALLOWED` 不许记在 `PROHIBITED_CATEGORY` 行上（「限制」表里躺一行「不限制」会让判定放行，而运营界面上明明勾了禁限）。**计费方式按重/按件/按体积是互斥枚举**，`charge_divisor` 语义随模式变化（按件**必须为 1**，DB CHECK 钉死 —— 否则出现「按件却每件按半公斤算」这种界面上看不出来、试算结果系统性偏低的配置；按体积默认 6000 cm³/kg）。**附加费做成行而不是三个恒为 0 的列**：燃油是百分比、偏远/旺季是固定额、**旺季还带生效区间**，列里放不下区间（任何时候都会有「配了区间但 rate=0」的半配置态，而判定端点必须能唯一回答「这个时刻要不要加旺季费」）；`effective_from/to` 是 timestamptz 且要么都给要么都不给、只允许旺季带。**金额一律 numeric(19,4)+BigDecimal、数量 numeric(19,6)，无 float/double 一列**；申报上下限 min<max、`insurance_mode='NONE'` 时费率与最低保费必须为 0（幽灵配置）、`DECLARED_VALUE` 必须配费率（否则保费恒 0），自相矛盾组合在**写库那一刻**被 CHECK 拒而不是让判定端点自己猜。**可用性 readiness 由 DB 触发器重算比对**（NO_BASE_RATE > NO_SCOPE > SUSPENDED > READY，照抄 10.1.1.1/10.3.2.1 同款），绕服务层改同样被拒；**禁限品类登记了几条不进 readiness** —— 没登记限制的渠道照样能发货，让它进 readiness 会使「先建渠道、后补限制」永远拿不到 READY，而 READY 在这里是**可用性**不是**合规完备度**。渠道代码建后不可改（trigger b，照抄 10.1.1.1 的 party_code：它是下游运单与交运批次对齐的口径，改代码会让已有单据找不到渠道配置）；所属承运商建后不可改（服务层比对，改归属会让费率对不上账）。端点 `/channel/logistics-channels/**`（capabilities / overview / 列表真分页真筛选+独立汇总查询 / {id} 详情 / POST 登记改配置 **整体替换**子表 · 乐观锁 version / {id} DELETE 撤渠道**不动承运商档案** / **POST /eligibility 判定**）—— 写请求**一个承运商身份字段都不接受**（改身份回 10.1.1.1）。页面 `/logistics/channels`（概览 / 筛选分页 / 渠道增改删 / **可承运性试算面板**：把包裹属性发给判定端点换回三档与逐条理由，**页面内没有一处自己比对 restrictions**）。**⚠️ 跨车道修复一处**：`CarrierIntegrationTest.truncateAll` 原为显式三表，本模块对 `carrier_logistics_profile` 建子表后 **TRUNCATE 父表报 23503，致 10.1.1.1 的 14 个用例全红**；改用 `truncate … cascade` 覆盖**任何**引用表（逐个列下游表名会让下一个引用本表的模块再红一次，且症状在别的模块的测试里）。契约由 `catalog-contracts.py` **重新生成**（含 16 个 DTO），codegen 顺带改写的 trade 契约已按类型集合一致判定为纯重排并**回退**，本车道提交只含 channel 契约。验证：channel 全量 **124 例零回归**（本模块 21，含租户隔离三断言 + timestamptz 往返逐字相等 + 绕过服务层写 SQL 仍被拒）、前端 **58 例绿**（白名单 5 + 模型 49 + 既有 route 4）、`pnpm typecheck` 三包绿。**已知缺口（如实记录）**：10.1.1.3 时效与限制、10.1.2.1 运费计算器、10.1.2.2 渠道比价、10.2.1.2 运单申请（trade）均未交付，capabilities 逐段 `available=false` + ownerModule + 影响，**不用空列表或 0 冒充「这一项没有数据」** |
 | 10.1.1.3 | 时效与限制 | — | D5 | 未开发 | — |
 | 10.1.2.1 | 运费计算器 | — | D5 | 未开发 | — |
 | 10.1.2.2 | 渠道比价 | — | D5 | 未开发 | — |
