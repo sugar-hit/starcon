@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **299** |
 | 完成率 | 35.7% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 10 | 0 | 42 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -350,7 +333,7 @@
 | 10.4.2.1 | 海外仓连接 | — | D7 | 已交付 | 迁移 channel `V93__overseas_warehouse_connection.sql`（**归属 channel**（非 warehouse）：蓝图 10 卷卷首「后端归属：channel 拥有物流商连接与轨迹」＋ L2 表「10.4 头程管理 → trade + warehouse + channel」＋ AGENTS.md「外部适配器（Shopify / Amazon / …形态的第三方系统对接）放在 channel，每个 vendor 独立包」；海外仓服务商正是这种外部系统适配，而自营库存账本在 warehouse 独立库（V51），**两者分库存放正是本模块不变量要求的物理边界**）。表：warehouse_provider（服务商目录，含 supports_inventory_sync/forecast/status_callback/billing 四个能力位，不支持的能力显式 false 让前端禁用而不是点了才报错）· warehouse_connection（连接，只存 credential_ref 外键，**任何列都装不下明文凭据**）· warehouse_account（仓账户：一个连接下的物理仓，同步/预报/账单都以它为单位）· warehouse_inbound_stock_line（服务商报送行＝适配器的**真实输入**，本仓库无真实服务商账号与网络出口，用租户可维护的报送表承接外部边界而非写假 HTTP 客户端打真实域名）· warehouse_sync_run（同步记录，append-only，trigger 触发器钉「已结束运行不可改计数」）· **external_stock_observation（🔴 蓝图加粗约束「外部仓库存是观测值不是自有账本…不能覆盖」的物理落点）**。**不变量三重钉死**：①**物理分库**——自营库存账本在 warehouse 库，本迁移落 channel 库，AGENTS.md 禁跨服务 DB 访问，同步路径在物理上就够不到自营库存表；②**快照语义**——每次观测插一行带 observed_at 的新快照，**表里没有 on_hand 这类可被覆盖的余额字段**，「当前值」用 `distinct on (external_sku) … order by observed_at desc` **查出来**而非存出来；③**DB 层拒绝**——`guard_external_stock_append_only` BEFORE UPDATE/DELETE 触发器（ERRCODE 23514）+ `GRANT SELECT,INSERT`（**刻意不给 UPDATE/DELETE**），双保险使**绕过服务层直接写 SQL 也改不动已观测到的值**；另有 `CHECK(source<>'')` + source/observed_at NOT NULL（答不出「从哪来、什么时候观测到」就不该落库，这是「对账」的前提）。**测试**：`WarehouseConnectionIntegrationTest` 9 项全绿——同步后观测表真有数据且计数正确、观测行 UPDATE/DELETE 被拒（**分别用应用账号与迁移超级账号各试一次**，证明权限面与触发器两道都挡得住）、再观测产生新快照旧快照仍在且「最新」取到新值、source 为空被 CHECK 拒；**多租户三断言**两租户互不可见 / 伪造 X-Tenant-Id 头无效（仍返回会话真实租户视图，无会话 401）/ 连接池交替归还后不串租户；**回归** `correctedInboundValueWins` 钉一个真实踩到的坑：适配器早期返回全部历史报送行会被观测表唯一约束 (account,sku,observed_at) 互相吞掉，`on conflict do nothing` **静默丢弃服务商改正过的值**，改为 `distinct on (external_sku) … order by reported_at desc` 取每个 SKU 最新；`sameBatchIsIdempotent` 钉「按批次幂等而非一个账户只能同步一次」。**复用** identity 已有的 `channel.connection.*` / `channel.sync.*` 权限码，**不改 identity 服务，跨车道回归面 = 0**。端点 `/channel/warehouse-providers/**`（连接·仓账户·登记报送·触发同步·同步记录·观测流水/最新观测），页面 `/logistics/overseas-warehouse`。**api-proxy 白名单**把 warehouse-providers 追加进 channel 既有 alternation（**踩到并修正**：sync-runs 一度被写进 connections 的组里变成子路径，`warehouse-providers/sync-runs` 被静默拦成 404——typecheck/lint 全绿，只有真跑 proxy 才发现，已在 `api-proxy-union.test.ts` 里同时断言 24 条放行 + 5 条反向拦截，并把既有 channel 路由列为回归基线）。适配层 `OverseasWarehouseAdapter` 为统一接口，`ReportedFeedWarehouseAdapter` 为可真实驱动的实现（读落库报送行→写观测快照→落同步记录，全链路真落库），将来接真实服务商只需新增一个实现。 |
 | 10.4.2.2 | 备货预报 | — | D7 | 未开发 | — |
 | 10.5.1.1 | 报关单管理 | — | D7 | 已交付 | 迁移 warehouse `V85__warehouse_customs_declaration.sql`（customs_declaration 单头 + customs_declaration_line 申报明细行（HS 编码 / 申报要素 jsonb / 货值 / 毛净重 / 体积 / 箱数 / 计量单位）+ customs_document 三单据版本链 + customs_submission 提交回执 + customs_result 海关结果回执 + customs_declaration_event 事件时间线，六张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **人工复核是硬闸**（蓝图原文：报关数据错误导致的扣货与罚款由卖家承担）：DB 触发器 guard_customs_state 钉死「只有已复核才能提交报关行」且判据是「本次要变 SUBMITTED」而不是「当前状态是什么」（后者会把 REVIEWED→SUBMITTED 这条合法提交误判）；guard_customs_review_completeness 在复核通过时逐行检查申报要素齐备性（只有 MANUAL_COMPLETE / MODULE_3_7_1_1_COMPLETE 放行）· **一票货只报一次关**：唯一约束 customs_declaration_tenant_id_source_shipment_id_key 钉死，来源是 10.4.1.1 头程发运单（同服务复合外键）· 端点 18 个挂在 /warehouse/customs-declarations：GET /capabilities、GET 列表（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
-| 10.5.1.2 | 申报要素 | — | D7 | 未开发 | — |
+| 10.5.1.2 | 申报要素 | — | D7 | 已交付 | 迁移 trade `V138__trade_customs_declaration_elements.sql`（customs_element_set 申报要素集头 + customs_element_set_item 该目的地特有的补充申报要素项（有序，ordinal + element_code 形如 "01"/"A1"），两张表 tenant_id NOT NULL + ENABLE/**FORCE** RLS isolation + GRANT trade_app + REVALL starcon_app）· **纯新建两张表、零 ALTER 既有表、零跨服务 FK**（sku_id 是逻辑引用，核对走 catalog 授权只读 HTTP），因此跨车道 DDL 回归面 = 0 · **九件申报要素是强类型列而不是无结构文本**（品名/规格材质/用途/品牌类型/品牌/数量/单价/币种/产地/原产地规则）：数量 numeric(19,6) + 单价 numeric(19,4) + BigDecimal 全程禁浮点，币种 varchar(3) **枚举真实 ISO 4217 码**（不是 [A-Z]{3} 正则——它会放行 ZZZ/XXX/ABC 这种形状对但根本不是货币的码，而一个填错的币种会让整票货值错一个数量级），Java 侧 ElementSetCurrency 枚举与 DB CHECK 由测试「币种枚举与 DB CHECK 逐项相等」钉死不漂移 · **文本列刻意可空**：蓝图输出句要「缺失项提示」，而缺失项提示只有在**允许缺**时才有对象（全部 NOT NULL 的话提示恒为空集，那是一条永远返回「齐备」的假话）；齐备性由发布闸 + 现算的缺失项提示负责 · **蓝图加粗句「申报品名不能照搬销售标题」落成两道防线**：① 服务层建集/改集时经端口取到真实销售标题（catalog sku_name）后逐字（忽略大小写与首尾空白）比对，取不到销售标题**拒绝建集**（没有基准这道闸形同虚设）；② 建集时把当时的销售标题存进 sales_title_snapshot，DB 层 CHECK customs_element_set_declared_name_not_sales_title + 触发器 guard_element_set 挡「绕过服务层直接 SQL 照抄」；③ 界面上**并排对照**且销售标题固定带「不可直接作为申报品名」前缀出现。**申报品名是独立字段、独立校验**，不是销售标题换个名字，**没有任何自动照搬入口** · **与 catalog 3.7.1.1/3.7.1.2 的边界写死在迁移文件头零之二节**：HS 编码/税号、归类口径原产地、法定计量单位、基础申报品名、基础申报要素清单、享惠资格**全部属 catalog，本模块只读不写**（读 GET /catalog/customs-declaration/resolve 合成结果，**不复制它的行**）；本模块拥有的是 catalog 明确不做的三件：① **按目的地国家差异化**（V95 第二节明文「目的地版本不覆盖申报要素」，那个论证对版本表成立却留下一个真空——各国申报要素体系确实不同，本表是那个差异的唯一安放处，且不接受 '*' 通配目的地）、② **批次实际信息**（数量/单价/币种；catalog 的 declared_value_reference 是**参考值不是申报值**，V94 零之三明文禁止下游拿它当申报货值）、③ **缺失项提示**（逐项点名缺了哪一项、为什么；V94 规则 A4 是审核那一刻的一次性二元判定，形状不同）· **缺失项一律查询时现算不落表**（落一列就得靠触发器每次同步，漏同步一次的后果是「已补齐却仍报缺失」，运营会为一个不存在的缺口再去查一遍报关行）；DB 层只留发布闸那个真二元事实 · **原产地规则与优惠税率有生效区间且双向一致**（主张优惠必须填协定代码：不填则海关无从适用税率、优惠静默失效而运营以为享惠，少缴的税年底可能被追缴；填了不勾则下游同时收到「不能享惠」与「有协定」两个矛盾答案）——两条 CHECK + 触发器中文报错各钉一道；区间是 [effective_from, effective_to) **左闭右开**、必须有（无区间 = 永远「有效」，等于让三年前的税率口径被今天直接引用）· **已发布即不可逆**：触发器 C7 钉死已发布行的申报要素本体/目的地/SKU/生效起点一律不可原地改，只允许把终点**收紧到一个仍在未来的时刻**（放宽 = 让这一版继续用于它覆盖不到的未来申报；收紧到过去 = 追溯改写历史申报），10.5.1.1 已把这一版抄进报关单 jsonb 快照，改这一版会让库里的申报事实与报关单上写的那份对不上；**要改正文 = 新建版本（version_no + 1）**，补充要素项也一起冻住（只钉头表不够：绕过服务层直改子表就能改掉已发布集合的申报内容，而发布闸只在发布那一刻跑过一次）· **发布闸 C4 是跨表触发器**（required 补充项齐备性头表+子表才看得到，CHECK 天然做不到），九件逐项点名报错而不是泛化一句「必填项未填」；同一 SKU 同目的地的**已发布区间一律不许重叠**（重叠 = 「此刻该用哪一版申报」没有答案，而那是海关事后复核必查的第一件事），报错点名与哪一版撞了 · 端点 9 个挂在 /trade/logistics/customs-elements：GET /capabilities（10 个能力维度逐条说清哪个真能用、哪个属别的模块、哪个没上游 + 三张词表（申报币种/品牌类型/原产地规则，**前端不抄一份**）+ 三条常驻口径说明）、GET /filter-options（目的地/状态/SKU **真实数据 DISTINCT**）、GET /list（真分页 + **全量汇总不受分页影响** + 筛选目的地/状态/SKU/只看有缺失/关键词 + 排序白名单 5 键，注入串静默回落默认键且表还在）、GET /{id} 详情（清单行 + 补充要素项 + **缺失项提示逐项带原因** + 可执行动作 + 边界声明）、GET /upstream-preview（3.7.1.2 **跨服务**合成申报资料，含**销售标题**供并排对照；404 = 业务事实「没维护」/ 503 = 服务不可达，两种失败语义分开，**不返回空申报**——空申报会被当成「这票货不用报关」而真实情况是商品中心挂了）、POST 建集、PUT 改集（仅草稿 + 乐观锁）、POST /{id}/publish、POST /{id}/close · **列表与详情刻意不依赖跨服务调用**（给高频读列表引入「商品中心不可达就整页 503」的依赖，会让商品中心宕机时现场连自己的申报要素都看不到）；跨服务核对只发生在**写路径**上 · 权限码**复用** trade.fulfillment.read/update（identity 只注册了既有 fulfillment 资源权限码，用一个没被注册的码会让连 OWNER 都 403）· 测试 CustomsElementSetIntegrationTest **40 例全绿**（实跑 Testcontainers PostgreSQL 16，连接池压到 1）覆盖：申报品名照搬销售标题被服务层拒（**只差首尾空白或大小写仍算照搬**）+ **绕过服务层直改 SQL 照抄被 DB CHECK 挡下**、九件逐项点名缺失（含每条理由长度）、required 补充项没填值也算缺失而非必填空着不算、**清单与详情的缺失条数一致**（同一事实两个页面给两个答案是列表页最常见的假活）、发布闸三道（缺要素/上游无该目的地版本/产地与归类口径不一致——且**建集那一刻就拦**不只拦发布）、齐备后可发布且发布人留痕、**已发布绕过服务层直改 SQL 被挡 + 补充项也一起冻住**、区间只能向前关闭、已发布区间重叠被拒并点名 v1、**生效区间按固定时刻 T0/T1/T2 判定不依赖 now()**（左闭右开，2030 年那一刻为 0 个生效版本）、timestamptz 写入带时区后**断言读回 Instant 零漂移**、币种枚举与 DB CHECK 逐项相等、**建集端点经 HTTP 走的是不带尾斜杠的路径**（@PostMapping 刻意无值写法，尾斜杠那支 404）、真分页两页不重叠且汇总覆盖全量、筛选/排序/只看缺失/筛选下拉真实生效、乐观锁让并发编辑撞 409、capabilities 逐条声明能力与边界、**多租户三断言**（两租户互不可见含按主键直查 B 的行也 404、伪造 X-Tenant-Id 头无效、连接池归还后 5 轮不串租户）、每张表断言 relforcerowsecurity（FORCE 不只 ENABLE）且 starcon_app 拿不到本模块任何表 · **修复了上一份半成品里的 7 个真实缺陷**（本车道开工时 Java 层能编译但测试一行都没编译过）：① jOOQ `fetch(String,Object...)` 收到 `List` **不展开 varargs**，整个 List 被当成一个 ArrayList 参数（报 "Type class java.util.ArrayList is not supported in dialect POSTGRES"）；② 列表与汇总查询里 `effective_now` 的两个 `?::timestamptz` 占位符出现在 SELECT 列表（早于 WHERE），而绑定值把 WHERE 参数放在了最前——**没有筛选条件时恰好蒙对**（f.params 为空），带筛选才炸；③ 详情路径走 load() 时行里没有 effective_now 列，jOOQ 严格模式的 `get(field,type)` 直接抛 IllegalArgumentException（24 例挂在这）；④ 国家码形状只在 DTO 的 @Pattern 上校验，**不经控制器的调用会绕过**它，然后 4 字母去撞 varchar(2) 以 DataIntegrityViolation（500）收场——已补服务层校验（400）；⑤ close() 对 null 终点一路走到 isAfter 抛 NPE（500 + "null"，运营完全看不懂这是「你想放宽区间」）；⑥ 区间重叠只被 DB 触发器拦住，抛出来是 DataAccessException → **业务冲突回的是 500 而非 409**；⑦ 汇总里的 effectiveNow 恒用 now() 而行用传入的 at（按 2030 年看没有生效版本这一问会得到 1）· **前端**：页面 /logistics/customs-elements（apps/web/src/app/logistics/customs-elements/page.tsx + components/logistics/customs-elements.tsx + customs-elements-model.ts）**与 10.5.1.1 报关单分页而不是合页**（那页管「报出去了没有」，这页管「申报资料准不准齐不齐」，混页会让报关操作员在填单时改到清关事实）、汇总卡 6 项 + 目的地国家为首要筛选维度 + 清单（申报品名/品牌/数量/单价/**申报货值**/优惠/状态/缺失项计数）+ 详情（**申报品名与销售标题并排对照且分色** + 缺失项逐项带原因与阻断/提示分级 + 补充要素项有序清单 + 可执行动作）/ 上游资料预览（跨服务，**把销售标题拉来当场对照**）、加载/空/错误三态、「未填」不渲染成 0（申报数量 0 与没填在海关侧是两件事）、「已发布」与「此刻生效」**分开两个标签**（合成一个会出现「绿色 = 一切正常」的误读）、**主张优惠显示「是否真的免税待合规确认」而不是「已享惠」** · 前端模型测试 **27 例** + 白名单测试 **5 例** · 白名单 api-proxy.ts **求和**追加 logistics/customs-elements 分支（capabilities / filter-options / list / upstream-preview / {id} / {id}/publish / {id}/close + 裸路径 POST 建集），route.test.ts 里**从模型文件反向抽取**的调用点逐条断言放行，并断言 4 条**后端不存在**的子路径（单数拼错 / {id}/retract / {id}/edit / 与 10.5.1.1 混组）仍被拒、**尾斜杠那一支不放行**、既有 4 个组仍只放行它们自己的形状 · **契约已重新生成**（本车道 + 顺带把集成头刚合入的时效分析 DTO 补上，之前那份 trade.openapi.json 是旧的）：./mvnw -pl services/trade -am test 跑出 backend/target/openapi，再 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi；**只有 trade 两个文件变化，其余 5 个服务的契约零改动**（把既有 5 份 spec 拷进 spec 目录再生成）· **验证（实跑）**：`./mvnw -pl services/trade -am test` **591 例全绿**（含本模块 40 例与全部既有 trade 用例回归）· pnpm typecheck 3/3 零错误 · pnpm lint 3/3（无新增 warning）· npx vitest run 本车道两个文件 **32 例全过** · **本车道未做**：① 侧栏/搜索导航未登记 /logistics/customs-elements（packages/ui 的共享任务页表未改，避免重排他人条目，与 10.5.1.1 / 10.5.1.3 / 10.4.1.1 现状一致）· ② 前端只开放了「发布」与「向前关闭区间」两个写动作，**建集 / 改集对话框未做**（后端 POST / 与 PUT /{id} 与模型层 emptyElementSetInput / detailToInput 已完整，但界面上还没有录入九件与补充项的表单）· ③ 错误提示文案受仓库既有 ApiErrorHandler 限制：IllegalArgumentException 统一翻成泛化 400，不指出具体字段（该 handler 为多服务共用，改它会动到既有模块的错误体，本车道刻意不改）· ④ 优惠幅度/协定税率数值**不产出**（16 合规与 10.5.2.1 未交付授权可读口径），capabilities 里 TARIFF_RATE 标 available=false 并写明「主张不等于会免」 |
 | 10.5.1.3 | 关税与税费 | — | D7 | 已交付 | 迁移 warehouse `V90__warehouse_duty_and_tax.sql`（duty_tax_rate 税则税率表（目的国 + 适用范围 COUNTRY/HS + HS 前缀 + 生效期，带 tax_source 与出处，**税率是真实落库数据不是代码常量**）+ duty_tax_estimate 税费估算单头 + duty_tax_estimate_line 逐行明细（逐行按 HS 最长前缀匹配税率、把命中的税率值**抄进本行**、按申报货值比例分摊完税价/运费/保险、末行吃余数保证合计精确）+ duty_tax_payment 实际缴纳（**append-only**：REVOKE UPDATE/DELETE + 触发器，多缴走新增 REFUND/ADJUSTMENT 行）+ duty_tax_variance 估算与实缴差异（**append-only**，每次缴款落一条「对到本次为止」的快照 + 归因 + 复核痕迹），五张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation · **「估算与实缴差异要记录」钉进 DB**：蓝图原文加粗要求，延迟约束触发器 duty_payment_has_variance 在提交时核对「有实缴却没有对应差异记录」就报 23514 —— 绕过服务层直接写 SQL 同样被挡，所以「先存实缴、差异以后再补」在本模块做不到；归因建在差异那一刻，不提供事后改写（已归因的差异是纠错闭环的证据）· **0% 税率合法、「没匹配到税率」不合法**：tax_source CHECK 允许 0%（英国零税率/免税供货是真实配置），而 guard_duty_estimate_lock_completeness 拒绝带 NO_MATCH 关税行、无 HS 码行或未配 VAT 税率行的锁定 —— 按 0 税锁定的估算单会让报价与到岸成本少算税 · **DDP/DDU 改变成本归属不改变税率**：guard_duty_landed_cost 钉死 DDU 下 landed_cost_seller 必须等于不含税的货值+运费+保险+其他（否则 `DDP⟹SELLER`/`DDU⟹BUYER` CHECK 也会拒）· 金额 numeric(19,4) + 税率 numeric(9,6) + 数量 numeric(19,6)，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致，延迟约束在提交时复核）· 上游 10.5.1.1 报关单（V85）**只读**、建复合外键，跨车道回归面 = 0；本迁移**不 ALTER 任何既有表** · 端点 13 个挂在 /warehouse/duty-taxes：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(lines |
 | 10.5.2.1 | 贸易单证 | — | D7 | 已交付 | 迁移 warehouse `V91__warehouse_trade_documents.sql`（trade_document_rule 目的地国家单证要求（目的国 × 单证类型 × 必备程度 MANDATORY/CONDITIONAL/OPTIONAL × 有效期，**要求是数据不是代码常量**）+ trade_document_template 单证模板（**版本链** supersedes_template_id，空模板体被拒——空模板生成出来的单证等于没备证）+ trade_certification_status 认证状态登记（**16 合规尚未交付的替代来源**，每行带 certification_source TENANT_MAINTAINED/MODULE_16 + source_reference 如实标注）+ trade_origin_preference_rule FTA 优惠规则（RCEP/CO/FTA + PSR + **substantive_change_criterion 人读条件口径** + requires_business_confirmation）+ trade_document_set 单证包头 + trade_document 单证本体（内容快照 + 版本链 supersedes_document_id + FTA 字段与确认痕迹）+ trade_document_check 完整性校验结论（**append-only**）+ trade_document_reminder 缺失提醒（可处理工作项，处理必须写说明）+ trade_document_event 事件时间线，九张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **「实质性改变」系统不下结论**（蓝图加粗句是硬边界）：本模块**不存在任何自动判定逻辑**，「CONFIRMED」的语义明确是「有人留痕确认过」而非「系统判定法律上成立」；落法是四件事且每件都落库 —— ① 规则表存**条件描述**（人读口径，不做成可执行表达式，否则等于让运营在无评审的情况下定义报关规则）+ requires_business_confirmation 默认 true；② 只校验**流程**事实（有没有 confirmed_at/confirmed_by、确认依据是否非空），不校验法律事实；③ 留档（单证上落 substantive_change_status/note/business_confirmed_at/by/preference_rule_version 并进事件时间线）；④ **把待确认项显式标出来**：DB 触发器 guard_trade_3_preference 钉死「主张优惠但没业务确认 → 不许进 APPROVED/SUBMITTED/ACKNOWLEDGED」，同时写一条 reminder_type='UNCONFIRMED_SUBSTANTIVE_CHANGE' + severity='BLOCKER' · **「待业务确认」刻意不是「通过」**：CheckResult 枚举单列 PENDING_BUSINESS_CONFIRMATION（没有 NOT_CHECKED 混入「查过但没过」），DB CHECK 钉死 result<>'PASS' OR (missing_count=0 AND pending_business_count=0)，前端 checkPassed() 只认 PASS、substantiveChangeBlocking() 只认 PENDING_BUSINESS_CONFIRMATION —— 这样界面不会许诺「优惠已通过」这种还没人拍板的结论 · **有条件必备（CONDITIONAL）的条件是人口径，系统不执行**：缺失时只报 WARNING 级提醒请人判断（items 里标 CONDITIONAL_REVIEW_REQUIRED），**不自动判成必备或可省** · **「没配规则」= 校验不通过**，不是「没有要求就算通过」：没有定义要求就无法断言齐不齐，故此场景 required 与 missing 同时 +1（同时满足 satisfied+missing<=required 的 DB CHECK）· **来源判据用状态机不用时间戳**：`submitted_at` 一旦打上就永不消失（被退回的单也留着），用它判「是否已报关」会把退回草稿的单错判成已报关，所以 createSet 拒绝 DRAFT/PENDING_REVIEW/REJECTED/CANCELLED 的报关单 · **单证内容快照不被报关明细改写**：单证生成时把行明细抄进 content jsonb 并锁版本链，上游报关明细后续变更不会回改已出的单证 · **金额 numeric(19,4) + 数量 numeric(19,6)**，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致；建包金额从报关单快照按 HALF_UP 到分，测试同时断言 Java 侧 2000.01 与读回 2000.0100）· 时间字段一律 timestamptz + `?::timestamptz` 绑 OffsetDateTime（**禁 Timestamp.valueOf(LocalDateTime…)**，会静默偏 −28800s），测试断言往返零漂移 · DEFERRABLE 约束触发器里**不使用 NEW**、回表读当前行（照抄 V85 guard_customs_rate_snapshot 写法；另 UPDATE SET col=(select … 引用本表) 因目标列在子查询不可见会报 column does not exist，故 refreshTotals 改成先 SELECT 算好再 UPDATE）· 提交两道闸：guard_trade_2_submit_gate 要求「最近一次校验 PASS 且无未处理 BLOCKER 提醒」，优惠确认是第一道；校验重跑时把上一轮不再报的提醒**显式自动结清**（带说明与处理人），否则历史阻断会永久挡住已补齐的单证包 · 上游 10.5.1.1 报关单（V85）与 10.5.1.3 关税（V90）**只读** + 建在复合唯一键上的外键，本迁移**不 ALTER 任何既有表**，跨车道回归面 = 0 · 端点挂在 /warehouse/trade-documents（与 customs-declarations / duty-taxes / first-mile-shipments 同级，**不进 inventory/**）：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.6.1.1 | 成本分析 | — | D5 | 未开发 | — |
@@ -557,3 +540,25 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 160 |
+| **未开发** | **305** |
+| 完成率 | 34.4% |
+| **D5** | 6 | 0 | 46 | 52 |
+| **D6** | 3 | 0 | 75 | 78 |
+| 06 | 采购与供应系统 | D6 | 2 | 26 |
+| 10 | 物流与头程系统 | D5 / D7 | 11 | 27 |
+| 已交付 | 165 |
+| **未开发** | **300** |
+| 完成率 | 35.5% |
+| **D5** | 9 | 0 | 43 | 52 |
+| 10 | 物流与头程系统 | D5 / D7 | 14 | 27 |
+| 已交付 | 164 |
+| **未开发** | **301** |
+| 完成率 | 35.3% |
+| **D6** | 4 | 0 | 74 | 78 |
+| 06 | 采购与供应系统 | D6 | 3 | 26 |
+| 已交付 | 163 |
+| **未开发** | **302** |
+| 完成率 | 35.1% |
+| **D5** | 8 | 0 | 44 | 52 |
+| 10 | 物流与头程系统 | D5 / D7 | 13 | 27 |
