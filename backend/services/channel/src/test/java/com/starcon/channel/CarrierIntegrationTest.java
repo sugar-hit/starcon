@@ -203,7 +203,18 @@ class CarrierIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      s.execute("truncate carrier_country_coverage, carrier_business_scope, carrier_logistics_profile");
+      // ⚠️ cascade 是必需的，不是顺手加的：本表是**承运商档案的父表**，而下游模块
+      //   （10.1.1.2 渠道配置 V136 的 logistics_channel_config）按「渠道归属承运商」
+      //   对它建了复合外键。TRUNCATE 一张被引用的表时 PostgreSQL 要求把**全部**引用表
+      //   一并列进同一条语句，否则报 23503「cannot truncate a table referenced in a
+      //   foreign key constraint」—— 症状是本类每个用例在 setUp 里就炸，与本模块
+      //   的任何断言无关。
+      //   刻意用 cascade 而不是把下游表名逐个写进来：后者每多一个引用本表的下游模块
+      //   就得回来改这里一次，漏改的表现是「别的模块的测试红了」而不是「这里漏了一条」，
+      //   根因很难查。cascade 覆盖**任何**引用表，本意（三张承运商表 + 其依赖）一字未改。
+      s.execute(
+          "truncate carrier_country_coverage, carrier_business_scope,"
+              + " carrier_logistics_profile cascade");
     } catch (java.sql.SQLException e) {
       throw new RuntimeException(e);
     }

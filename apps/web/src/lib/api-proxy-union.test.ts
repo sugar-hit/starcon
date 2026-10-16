@@ -383,6 +383,20 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `sales-orders/${UUID}`,
     'sales-orders/list',
     'sales-orders/detail/capabilities',
+    // 10.2.2.1 面单地址变更 (integration side) — the ONE outer alternation branch
+    // that existed only on the integration side of this conflict. If the union
+    // had dropped it, these would 404 while typecheck/lint/vitest stayed green.
+    // Contract keys /trade/logistics/waybill-address-change/*.
+    'logistics/waybill-address-change/capabilities',
+    'logistics/waybill-address-change/rules',
+    'logistics/waybill-address-change/notifications',
+    'logistics/waybill-address-change/redirects',
+    `logistics/waybill-address-change/redirects/${UUID}`,
+    `logistics/waybill-address-change/redirects/${UUID}/submit`,
+    'logistics/waybill-address-change/cancels',
+    `logistics/waybill-address-change/cancels/${UUID}`,
+    `logistics/waybill-address-change/cancels/${UUID}/submit`,
+    'logistics/waybill-address-change/precheck',
   ];
 
   const TR_BLOCK = [
@@ -416,7 +430,7 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
   ];
 
   it('TR_ALLOW is non-empty and unique (guards against a broken list)', () => {
-    expect(TR_ALLOW.length).toBe(39);
+    expect(TR_ALLOW.length).toBe(49);
     expect(new Set(TR_ALLOW).size).toBe(TR_ALLOW.length);
   });
 
