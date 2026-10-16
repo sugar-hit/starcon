@@ -890,6 +890,42 @@ const services: readonly {
       /^rate\-comparison(?:\/(?:capabilities|compare|comparisons|ratings|shop\-priorities)|\/comparisons\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 14.1.2.2 广告类型差异（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有的 `rate-comparison/`（10.1.2.2）、`label-templates`（10.2.2.2）、`freight/`
+    // （10.1.2.1）、`logistics-transit-limits/`（10.1.1.3）、`logistics-channels/`
+    // （10.1.1.2）**一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段
+    // 超长单行正则，往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会自愈。
+    // 插入锚点固定在本文件里 `rate-comparison/` 那条**之后**、`label-templates` 那条**之前**，
+    // 彼此的插入点被既有条目隔开。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   ad-type-diffs/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   ad-type-diffs/resolve                   🔴 走 2.1.2.1 两层解析归一口径（GET，无副作用）
+    //   ad-type-diffs/profiles                  档案集合读（GET，真分页 + 筛选）/ 登记档案（POST）
+    //   ad-type-diffs/profiles/{uuid}           档案详情（GET，含特有字段定义与未定义原始键）
+    //   ad-type-diffs/profiles/{uuid}/field-specs  特有字段定义集合读（GET）/ 登记（POST）
+    //   ad-type-diffs/payloads                  归一后广告集合读（GET）/ 登记（POST）
+    //   ad-type-diffs/payloads/{uuid}           详情（GET，含原始报文原文与特有字段补充展示）
+    //   ad-type-diffs/comparable                归一后的广告类型视图（GET）
+    //   ad-type-diffs/fidelity                  保真概览（GET）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / resolve / profiles / payloads /
+    // comparable / fidelity）排在 uuid 分支之前，否则会被 uuid 分支提前吃掉。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-type-diffs` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-type-diffs/payloads/{uuid}/raw` —— 原文随详情一起返回，不单独开一条
+    //   * `ad-type-diffs/profiles/{uuid}/payloads` —— 广告按自己的集合读筛选，不按档案下钻
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-type-diffs` —— 本模块没有裸集合读，
+    // 放行它会让界面以为「有一条列表接口」，而它转发过去只会拿到 503 / 404。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-type\-diffs(?:\/(?:capabilities|resolve|profiles|payloads|comparable|fidelity)|\/profiles\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/field\-specs)?|\/payloads\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
+  },
+  {
     // 10.2.2.2 面单模板（channel 服务）。纯**增量**追加：既有条目一字未动，
     // 插入锚点固定在 `logistics-channels` 那组**之后**、`prefix: 'trade/'` **之前** ——
     // 那样本车道与其它车道的插入点被既有条目隔开，git 能干净合并。
