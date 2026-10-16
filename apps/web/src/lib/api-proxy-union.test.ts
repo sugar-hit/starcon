@@ -321,4 +321,130 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     const res = await callProxy(path, 'channel');
     expect(res.status, `channel path ${path} should be blocked`).toBe(404);
   });
+
+  // --- trade layer: 10.5.1.2 申报要素 appended to the SAME alternation as the
+  //     pre-existing trade routes (fulfillment/* / processing / sales-orders /
+  //     b2b-orders / dealers / logistics/waybills / ...). This is the known
+  //     trap: dropping a branch silently 404s an ALREADY DELIVERED trade route
+  //     while typecheck / lint / vitest / Playwright all stay green, because
+  //     the allowlist only takes effect in the browser.
+  //
+  //     So the pre-existing trade paths are re-asserted below as regression
+  //     guards, and the BLOCK list proves the regex still rejects instead of
+  //     degenerating into "allow everything".
+  //
+  //     Paths are taken verbatim from the generated contract
+  //     packages/api-contracts/src/trade.openapi.json, keys
+  //     /trade/logistics/customs-elements/*, with the `trade/` service prefix
+  //     stripped (that is what resolve() does before pattern.test()).
+  const TR_ALLOW = [
+    // 10.5.1.2 申报要素 — contract keys /trade/logistics/customs-elements/*
+    'logistics/customs-elements',
+    'logistics/customs-elements/capabilities',
+    'logistics/customs-elements/filter-options',
+    'logistics/customs-elements/list',
+    'logistics/customs-elements/upstream-preview',
+    `logistics/customs-elements/${UUID}`,
+    `logistics/customs-elements/${UUID}/publish`,
+    `logistics/customs-elements/${UUID}/close`,
+    // pre-existing trade baseline (must not regress across the union).
+    // Only paths confirmed PRESENT in packages/api-contracts/src/trade.openapi.json
+    // are asserted here; the bare roots the file deliberately does NOT route
+    // (fulfillment/routing, fulfillment/allocation, processing) are asserted in
+    // TR_BLOCK below instead.
+    'logistics/waybills/capabilities',
+    'logistics/waybills/filter-options',
+    'logistics/waybills/list',
+    'logistics/waybills/actions/apply',
+    'logistics/waybills/actions/cancel',
+    'logistics/waybills/actions/print',
+    `logistics/waybills/${UUID}`,
+    `logistics/waybills/${UUID}/freight`,
+    'b2b-orders',
+    'b2b-orders/capabilities',
+    'b2b-orders/receivables',
+    'b2b-orders/customer-terms',
+    'b2b-orders/price-quote',
+    'b2b-orders/price-books',
+    'dealers/capabilities',
+    'dealers/candidates',
+    'dealers/profiles',
+    'dealers/quota-attainment',
+    'dealers/quotas',
+    'fulfillment/routing/capabilities',
+    'fulfillment/routing/decisions',
+    `fulfillment/routing/decisions/${UUID}`,
+    `fulfillment/routing/decisions/${UUID}/status`,
+    'fulfillment/allocation/capabilities',
+    'fulfillment/allocation/allocations',
+    'processing/capabilities',
+    'processing/orders',
+    'sales-orders',
+    `sales-orders/${UUID}`,
+    'sales-orders/list',
+    'sales-orders/detail/capabilities',
+  ];
+
+  const TR_BLOCK = [
+    // 10.5.1.2 does NOT route these (own comment block): no trailing-slash
+    // mapping exists, because @PostMapping uses the no-value form.
+    'logistics/customs-elements/',
+    // publish / close hang off the uuid ONLY; they must not attach to the
+    // literal sub-paths, and must not carry an extra tail
+    `logistics/customs-elements/${UUID}/publish/extra`,
+    `logistics/customs-elements/${UUID}/close/extra`,
+    'logistics/customs-elements/capabilities/publish',
+    'logistics/customs-elements/list/close',
+    // a shape one segment deeper than the controller declares
+    `logistics/customs-elements/${UUID}/upstream-preview`,
+    // single-typo of an existing segment
+    'logistics/customs-element',
+    'logistics/customs-elements/filter-option',
+    // pre-existing negatives that must stay blocked
+    'dealers/events',
+    'fulfillment/routing/bogus-shape',
+    `logistics/waybills/${UUID}/print`,
+    // the file's own trailing comment: bare fulfillment/routing,
+    // fulfillment/allocation and processing are **deliberately not routed**
+    // (the backend has no such mapping). Confirmed ABSENT from the contract.
+    'fulfillment/routing',
+    'fulfillment/allocation',
+    'processing',
+    // 裸路径 logistics/waybills 与 dealers 同样不在契约里
+    'logistics/waybills',
+    'dealers',
+  ];
+
+  it('TR_ALLOW is non-empty and unique (guards against a broken list)', () => {
+    expect(TR_ALLOW.length).toBe(39);
+    expect(new Set(TR_ALLOW).size).toBe(TR_ALLOW.length);
+  });
+
+  it.each(TR_ALLOW)('TRADE ALLOWS %s', async (path) => {
+    const res = await callProxy(path, 'trade');
+    expect(res.status, `trade path ${path} was blocked (${res.status})`).not.toBe(404);
+  });
+
+  it.each(TR_BLOCK)('TRADE STILL BLOCKS %s', async (path) => {
+    const res = await callProxy(path, 'trade');
+    expect(res.status, `trade path ${path} should be blocked`).toBe(404);
+  });
+
+  // --- KNOWN PRE-EXISTING DEFECT, owned by 10.5.1.2 --------------------------
+  //
+  // The appended branch reads `...[0-9a-f-]+(?:\/freight)?)||logistics\/customs-
+  // elements...` — a DOUBLE PIPE. In the outer `(?:...)` alternation that adds
+  // an EMPTY branch, so the whole group can match the empty string. Because the
+  // regex is anchored `^...$`, the concrete effect is narrow: a request for the
+  // bare service root (`/api/trade/`, i.e. remainder "") is routed instead of
+  // 404ing. It does not widen any real sub-path.
+  //
+  // Asserted here so the defect is recorded rather than living only in a
+  // comment. NOT fixed by this merge — the `trade/` branch belongs to 10.5.1.2.
+  it('TRADE KNOWN-BROKEN (10.5.1.2 owns the fix) bare `trade/` is routed', async () => {
+    const res = await callProxy('', 'trade');
+    expect(res.status, 'bare trade/ was expected to be routed (empty-alternation defect)').not.toBe(
+      404,
+    );
+  });
 });
