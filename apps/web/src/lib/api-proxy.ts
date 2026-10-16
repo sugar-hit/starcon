@@ -925,6 +925,35 @@ const services: readonly {
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
   },
   {
+    // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**：两条车道的插入点被既有条目隔开，
+    // git 能干净求并（与 10.1.1.2 / 10.1.1.3 / 10.2.2.2 的 channel 条目同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力与上下游可用性（含 D5 未交付导致的 shop_code 缺口）
+    //   rule / rule                           合单规则（GET 读 + PUT upsert）
+    //   candidates                            候选订单检索（POST 只读，不落库）
+    //   consolidations                        合并单列表（真分页）
+    //   consolidations                        POST 落一次合并（头 + 成员 + 逐单回传任务）
+    //   {uuid}                                合并单详情（头 + 成员 + 回传任务 + 事件流）
+    //   {uuid}/status                         推进状态（CONFIRMED / DISPATCHED / CANCELLED）
+    //   writeback-tasks                       回传任务列表
+    //   {uuid}/members/{memberUuid}/writeback 按**平台订单**逐单登记物流号回传结果
+    // 判别顺序：字面量子路径（capabilities / rule / candidates / writeback-tasks）
+    // 排在 {uuid} 分支之前，否则会被 [0-9a-f-]+ 分支吃掉半截。
+    // 刻意**没有** DELETE：合并单与事件流是履约凭据，删掉等于抹掉「这批货一起发过」的证据。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^fulfillment\/consolidation\/(?:capabilities|rule|candidates|writeback-tasks|consolidations(?:\/[0-9a-f-]+(?:\/(?:status|members\/[0-9a-f-]+\/writeback))?)?)$/,
+    // 裸路径 fulfillment/consolidation **刻意不放行**：后端没有对应映射，
+    // 放行它会让界面以为「一条不存在的列表接口」可用。
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',

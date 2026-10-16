@@ -323,6 +323,76 @@
         }
       }
     },
+    "/trade/fulfillment/consolidation/rule": {
+      "get": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "get_trade_fulfillment_consolidation_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationRule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "put_trade_fulfillment_consolidation_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/dealers/profiles": {
       "get": {
         "tags": [
@@ -2781,6 +2851,273 @@
         }
       }
     },
+    "/trade/logistics/waybill-address-change/rules": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarrierRedirectRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CarrierRedirectRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarrierRedirectRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects/{id}/submit": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_redirects_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillRedirectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/precheck": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_precheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillRedirectPrecheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectPrecheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels/{id}/submit": {
+      "post": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "post_trade_logistics_waybill_address_change_cancels_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaybillCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/customs-elements": {
+      "post": {
+        "tags": [
+          "customs-element-set-controller"
+        ],
+        "operationId": "post_trade_logistics_customs_elements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElementSetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElementSetSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/customs-elements/{id}/publish": {
       "post": {
         "tags": [
@@ -2860,47 +3197,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ElementSetCloseInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElementSetSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/customs-elements/": {
-      "post": {
-        "tags": [
-          "customs-element-set-controller"
-        ],
-        "operationId": "post_trade_logistics_customs_elements",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElementSetInput"
               }
             }
           },
@@ -7069,6 +7365,279 @@
         }
       }
     },
+    "/trade/fulfillment/consolidation/consolidations": {
+      "get": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "get_trade_fulfillment_consolidation_consolidations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buyerName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "crossShopOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "post_trade_fulfillment_consolidation_consolidations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/consolidation/consolidations/{consolidationId}/status": {
+      "post": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "post_trade_fulfillment_consolidation_consolidations_consolidationId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "consolidationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/consolidation/consolidations/{consolidationId}/members/{memberId}/writeback": {
+      "post": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "post_trade_fulfillment_consolidation_consolidations_consolidationId_members_memberId_writeback",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "consolidationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WritebackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/consolidation/candidates": {
+      "post": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "post_trade_fulfillment_consolidation_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateSet"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/allocation/warehouses": {
       "get": {
         "tags": [
@@ -9501,6 +10070,416 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WaybillCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_redirects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/redirects/{id}": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_redirects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/notifications": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_notifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "notificationKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerNotificationTaskPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/capabilities": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillRedirectCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_cancels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/logistics/waybill-address-change/cancels/{id}": {
+      "get": {
+        "tags": [
+          "waybill-redirect-controller"
+        ],
+        "operationId": "get_trade_logistics_waybill_address_change_cancels_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaybillCancelDetail"
                 }
               }
             }
@@ -12160,6 +13139,161 @@
         }
       }
     },
+    "/trade/fulfillment/consolidation/writeback-tasks": {
+      "get": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "get_trade_fulfillment_consolidation_writeback_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "consolidationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformOrderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/consolidation/consolidations/{consolidationId}": {
+      "get": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "get_trade_fulfillment_consolidation_consolidations_consolidationId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "consolidationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/consolidation/capabilities": {
+      "get": {
+        "tags": [
+          "order-consolidation-controller"
+        ],
+        "operationId": "get_trade_fulfillment_consolidation_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderConsolidationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/allocation/holds": {
       "get": {
         "tags": [
@@ -12796,642 +13930,6 @@
           }
         }
       }
-    },
-    "/trade/logistics/waybill-address-change/rules": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_rules",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CarrierRedirectRulePage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "post_trade_logistics_waybill_address_change_rules",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CarrierRedirectRuleInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CarrierRedirectRuleRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/redirects/{id}/submit": {
-      "post": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "post_trade_logistics_waybill_address_change_redirects_id_submit",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillRedirectInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillRedirectRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/precheck": {
-      "post": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "post_trade_logistics_waybill_address_change_precheck",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "asOf",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillRedirectPrecheckInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillRedirectPrecheckResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/cancels/{id}/submit": {
-      "post": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "post_trade_logistics_waybill_address_change_cancels_id_submit",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WaybillCancelInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillCancelRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/redirects": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_redirects",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "verdict",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "outcome",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "salesOrderNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "dateTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillRedirectPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/redirects/{id}": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_redirects_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillRedirectDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/notifications": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_notifications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "notificationKind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "salesOrderNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BuyerNotificationTaskPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/capabilities": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillRedirectCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/cancels": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_cancels",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "carrierCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "verdict",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "outcome",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "salesOrderNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "dateTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillCancelPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/logistics/waybill-address-change/cancels/{id}": {
-      "get": {
-        "tags": [
-          "waybill-redirect-controller"
-        ],
-        "operationId": "get_trade_logistics_waybill_address_change_cancels_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WaybillCancelDetail"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -13664,7 +14162,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -14264,6 +14762,90 @@
             "$ref": "#/components/schemas/ElementSetDetail"
           }
         }
+      },
+      "ConsolidationRuleInput": {
+        "required": [
+          "maxOrdersPerConsolidation"
+        ],
+        "type": "object",
+        "properties": {
+          "maxOrdersPerConsolidation": {
+            "maximum": 100,
+            "minimum": 2,
+            "type": "integer",
+            "description": "单批最多合几笔订单（下限 2：合单是 N→1）",
+            "format": "int32"
+          },
+          "allowCrossShop": {
+            "type": "boolean",
+            "description": "是否允许跨店铺合并（默认 true）"
+          },
+          "maxWindowHours": {
+            "type": "integer",
+            "description": "可合单时间窗（小时）；null = 不限",
+            "format": "int32"
+          },
+          "requireSameCurrency": {
+            "type": "boolean",
+            "description": "币种是否必须一致（默认 true）"
+          },
+          "requireSamePaymentMethod": {
+            "type": "boolean",
+            "description": "支付方式是否必须一致（默认 true）"
+          },
+          "requireShippingAddress": {
+            "type": "boolean",
+            "description": "是否要求成员订单都有收货地址快照（默认 true）"
+          }
+        },
+        "description": "保存合单规则"
+      },
+      "ConsolidationRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "maxOrdersPerConsolidation": {
+            "type": "integer",
+            "description": "单批最多合几笔订单（下限 2）",
+            "format": "int32"
+          },
+          "allowCrossShop": {
+            "type": "boolean",
+            "description": "是否允许跨店铺合并"
+          },
+          "maxWindowHours": {
+            "type": "integer",
+            "description": "可合单时间窗（小时）；null = 不限，不是 0",
+            "format": "int32"
+          },
+          "requireSameCurrency": {
+            "type": "boolean",
+            "description": "币种是否必须一致"
+          },
+          "requireSamePaymentMethod": {
+            "type": "boolean",
+            "description": "支付方式是否必须一致"
+          },
+          "requireShippingAddress": {
+            "type": "boolean",
+            "description": "是否要求成员订单都有收货地址快照"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        },
+        "description": "合单规则（每租户一条）"
       },
       "DealerProfileInput": {
         "required": [
@@ -17027,6 +17609,489 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CarrierRedirectRuleInput": {
+        "required": [
+          "carrierCode"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z0-9_\\-]{2,64}$",
+            "type": "string"
+          },
+          "redirectSupported": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelSupported": {
+            "type": "boolean"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsupportedReason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CarrierRedirectRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "redirectSupported": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelSupported": {
+            "type": "boolean"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsupportedReason": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "registeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WaybillRedirectInput": {
+        "required": [
+          "reason",
+          "recipientCountry",
+          "recipientName"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recipientCountry": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "addressLine": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "postalCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderChangeRequestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "WaybillRedirectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "redirectNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "issuedAtSnapshot": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientCountry": {
+            "type": "string"
+          },
+          "addressLine": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "NOT_ATTEMPTED",
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "outcomeReason": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderChangeRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "orderChangeStatus": {
+            "type": "string"
+          },
+          "orderChangeNote": {
+            "type": "string"
+          },
+          "notificationTaskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAction": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectPrecheckInput": {
+        "required": [
+          "requestIds"
+        ],
+        "type": "object",
+        "properties": {
+          "requestIds": {
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillRedirectPrecheckEntry": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "waybillIssued": {
+            "type": "boolean"
+          },
+          "waybillStatusNote": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "adapterConnected": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WaybillRedirectPrecheckResult": {
+        "type": "object",
+        "properties": {
+          "selected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notIssued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canSucceed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cannotSucceed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillRedirectPrecheckEntry"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillCancelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "issuedAtSnapshot": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesToDeadline": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "WITHIN_WINDOW",
+              "DEADLINE_PASSED",
+              "CHANNEL_UNSUPPORTED",
+              "RULE_UNREGISTERED"
+            ]
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "canSucceed": {
+            "type": "boolean"
+          },
+          "canSucceedReason": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "NOT_ATTEMPTED",
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "outcomeReason": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderCancellationRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "orderCancellationStatus": {
+            "type": "string"
+          },
+          "orderCancellationNote": {
+            "type": "string"
+          },
+          "notificationTaskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextAction": {
+            "type": "string"
           }
         }
       },
@@ -20624,7 +21689,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -20736,12 +21801,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -21073,6 +22138,424 @@
             "type": "boolean"
           }
         }
+      },
+      "ConsolidationInput": {
+        "required": [
+          "consolidatedAt",
+          "orderIds"
+        ],
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "maxItems": 100,
+            "minItems": 2,
+            "type": "array",
+            "description": "要合并的订单 id 列表；至少两笔（本模块是 N→1）",
+            "items": {
+              "type": "string",
+              "description": "要合并的订单 id 列表；至少两笔（本模块是 N→1）",
+              "format": "uuid"
+            }
+          },
+          "consolidatedAt": {
+            "type": "string",
+            "description": "合并时刻（timestamptz）。由调用方显式给出，不取服务器当前时间",
+            "format": "date-time"
+          },
+          "consolidatedShippingAmount": {
+            "type": "number",
+            "description": "合并成一个包裹的运费报价；不填 = 运费节省为 null（不是 0）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "落一次合并的入参"
+      },
+      "ConsolidationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "合单 id",
+            "format": "uuid"
+          },
+          "consolidationNo": {
+            "type": "string",
+            "description": "合单号"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "提示语（说清这一步实际做了什么，而不是「操作成功」）"
+          }
+        },
+        "description": "操作结果"
+      },
+      "ConsolidationStatusInput": {
+        "required": [
+          "occurredAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "目标状态：CONFIRMED / DISPATCHED / CANCELLED",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "作废原因；status=CANCELLED 时必填"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（timestamptz）；CANCELLED 时也用它作作废时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "推进合并单状态"
+      },
+      "WritebackInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "回传状态",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION"
+            ]
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "物流号；status=CONFIRMED 时必填"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "失败原因；status=REJECTED 时给"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（timestamptz）",
+            "format": "date-time"
+          }
+        },
+        "description": "登记物流号回传结果"
+      },
+      "WritebackTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "memberId": {
+            "type": "string",
+            "description": "成员行 id",
+            "format": "uuid"
+          },
+          "consolidationId": {
+            "type": "string",
+            "description": "合单 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺码"
+          },
+          "platformOrderRef": {
+            "type": "string",
+            "description": "平台单号"
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "物流号"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION"
+            ]
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "description": "尝试次数",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "最后一次错误"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          },
+          "settledAt": {
+            "type": "string",
+            "description": "结算时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "物流号回传任务（一行一个平台订单）"
+      },
+      "CandidateQuery": {
+        "required": [
+          "addressLine1",
+          "recipientName"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "收件人姓名（收货地址快照）"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收件人电话（收货地址快照）"
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收件人邮箱（收货地址快照）"
+          },
+          "addressLine1": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "地址第一行（收货地址快照）"
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "地址第二行"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "国家码（ISO 3166-1 alpha-2）"
+          },
+          "province": {
+            "type": "string",
+            "description": "省"
+          },
+          "city": {
+            "type": "string",
+            "description": "市"
+          },
+          "district": {
+            "type": "string",
+            "description": "区"
+          },
+          "postcode": {
+            "type": "string",
+            "description": "邮编"
+          },
+          "newestFirst": {
+            "type": "boolean",
+            "description": "按最早提交时间倒序（默认 true）"
+          }
+        },
+        "description": "候选订单检索：同一买家 + 同一收货地址 + 可合单状态"
+      },
+      "CandidateOrder": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "外部/平台单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源（MANUAL/PLATFORM/AMAZON/…）"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "推出的平台码；非平台单为空串"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺码；D5 未交付时为空串"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "支付方式"
+          },
+          "orderStatus": {
+            "type": "string",
+            "description": "订单状态"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "行数",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "总件数"
+          },
+          "separateShippingAmount": {
+            "type": "number",
+            "description": "单独发时本来要付的运费（order_charge 的 SHIPPING 行实算）"
+          },
+          "buyerFingerprint": {
+            "type": "string",
+            "description": "买家指纹（收货地址快照实算）"
+          },
+          "addressFingerprint": {
+            "type": "string",
+            "description": "地址指纹（收货地址快照实算）"
+          },
+          "separateShippingTotal": {
+            "type": "number",
+            "description": "实算出的运费合计"
+          }
+        },
+        "description": "候选订单（真实 SQL 检索，不是内存过滤）"
+      },
+      "CandidateSet": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "description": "本批候选（已按规则过滤）",
+            "items": {
+              "$ref": "#/components/schemas/CandidateOrder"
+            }
+          },
+          "excluded": {
+            "type": "array",
+            "description": "被排除的订单及原因",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedOrder"
+            }
+          },
+          "buyerFingerprint": {
+            "type": "string",
+            "description": "同一买家指纹"
+          },
+          "addressFingerprint": {
+            "type": "string",
+            "description": "同一地址指纹"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "description": "候选里的行数合计",
+            "format": "int32"
+          },
+          "candidateQty": {
+            "type": "number",
+            "description": "候选件数合计"
+          },
+          "separateShippingTotal": {
+            "type": "number",
+            "description": "候选运费合计（单独发本来要付的）"
+          },
+          "ruleConfigured": {
+            "type": "boolean",
+            "description": "合单规则是否已配置（false 时不能落合并单）"
+          },
+          "ruleBlockedReason": {
+            "type": "string",
+            "description": "合单规则阻断的原因；未阻断时为 null"
+          }
+        },
+        "description": "候选集合与排除项"
+      },
+      "ExcludedOrder": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "reason": {
+            "type": "string",
+            "description": "排除原因码",
+            "enum": [
+              "NO_SHIPPING_ADDRESS",
+              "BUYER_MISMATCH",
+              "ALREADY_CONSOLIDATED",
+              "PARTIALLY_SHIPPED",
+              "OUTSIDE_TIME_WINDOW",
+              "CURRENCY_MISMATCH",
+              "PAYMENT_METHOD_MISMATCH",
+              "CROSS_SHOP_NOT_ALLOWED",
+              "NOT_SUBMITTED"
+            ]
+          },
+          "reasonLabel": {
+            "type": "string",
+            "description": "排除原因中文说明"
+          }
+        },
+        "description": "被排除的订单及原因"
       },
       "WarehouseAllocationWarehouseInput": {
         "required": [
@@ -22128,9 +23611,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -25264,6 +26747,369 @@
           },
           "impact": {
             "type": "string"
+          }
+        }
+      },
+      "CarrierRedirectRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CarrierRedirectRuleRow"
+            }
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WaybillRedirectPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillRedirectRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withinWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlinePassed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelUnsupported": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleUnregistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "canSucceedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notAttemptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNotificationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillRedirectCarrierState": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "registeredInCarrierMaster": {
+            "type": "boolean"
+          },
+          "redirectSupportedByRule": {
+            "type": "boolean"
+          },
+          "cancelSupportedByRule": {
+            "type": "boolean"
+          },
+          "redirectDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelDeadlineHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "redirectAdapterConnected": {
+            "type": "boolean"
+          },
+          "cancelAdapterConnected": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectDetail": {
+        "type": "object",
+        "properties": {
+          "redirect": {
+            "$ref": "#/components/schemas/WaybillRedirectRow"
+          },
+          "carrierState": {
+            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BuyerNotificationTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyerNotificationTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "queued": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingForModule15": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BuyerNotificationTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationNo": {
+            "type": "string"
+          },
+          "redirectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "notificationKind": {
+            "type": "string",
+            "enum": [
+              "REDIRECT_ACCEPTED",
+              "REDIRECT_REJECTED",
+              "REDIRECT_EXPIRED",
+              "REDIRECT_UNSUPPORTED",
+              "CANCEL_ACCEPTED",
+              "CANCEL_REJECTED",
+              "CANCEL_EXPIRED",
+              "CANCEL_UNSUPPORTED"
+            ]
+          },
+          "notificationKindLabel": {
+            "type": "string"
+          },
+          "subjectLine": {
+            "type": "string"
+          },
+          "bodySummary": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RedirectCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillRedirectCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedirectCapabilityDimension"
+            }
+          },
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "carrierOutcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notificationKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verdictRule": {
+            "type": "string"
+          },
+          "deadlineRule": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "WaybillCancelPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaybillCancelRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withinWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deadlinePassed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelUnsupported": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleUnregistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "canSucceedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notAttemptedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNotificationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WaybillCancelDetail": {
+        "type": "object",
+        "properties": {
+          "cancel": {
+            "$ref": "#/components/schemas/WaybillCancelRow"
+          },
+          "carrierState": {
+            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -29634,6 +31480,453 @@
           }
         }
       },
+      "WritebackPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/WritebackTask"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "description": "汇总：待回传（不含已回传）",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "汇总：平台拒绝",
+            "format": "int64"
+          },
+          "pendingVerificationCount": {
+            "type": "integer",
+            "description": "汇总：结果待查证",
+            "format": "int64"
+          }
+        },
+        "description": "回传任务分页"
+      },
+      "ConsolidationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ConsolidationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "description": "汇总：已下发批次数（不受分页影响）",
+            "format": "int64"
+          },
+          "pendingWritebackCount": {
+            "type": "integer",
+            "description": "汇总：待回传任务数（不受分页影响）",
+            "format": "int64"
+          },
+          "freightSavingTotal": {
+            "type": "number",
+            "description": "汇总：已实算的运费节省合计；null = 没有任何一单报过合并运费价"
+          }
+        },
+        "description": "合并单分页"
+      },
+      "ConsolidationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "合单 id",
+            "format": "uuid"
+          },
+          "consolidationNo": {
+            "type": "string",
+            "description": "合单号"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "buyerFingerprint": {
+            "type": "string",
+            "description": "买家指纹"
+          },
+          "addressFingerprint": {
+            "type": "string",
+            "description": "地址指纹"
+          },
+          "buyerName": {
+            "type": "string",
+            "description": "收件人姓名"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "description": "收件人电话"
+          },
+          "buyerEmail": {
+            "type": "string",
+            "description": "收件人邮箱"
+          },
+          "addressLine": {
+            "type": "string",
+            "description": "可读地址"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "国家码"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "支付方式"
+          },
+          "orderCount": {
+            "type": "integer",
+            "description": "成员订单数（DB 实算）",
+            "format": "int32"
+          },
+          "distinctPlatformCount": {
+            "type": "integer",
+            "description": "跨平台数（DB 实算）",
+            "format": "int32"
+          },
+          "distinctShopCount": {
+            "type": "integer",
+            "description": "跨店铺数（DB 实算）",
+            "format": "int32"
+          },
+          "crossShop": {
+            "type": "boolean",
+            "description": "是否跨店铺（DB 实算）"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "description": "行数合计",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "件数合计"
+          },
+          "separateShippingAmount": {
+            "type": "number",
+            "description": "单独发本来要付的运费合计（order_charge 实算）"
+          },
+          "consolidatedShippingAmount": {
+            "type": "number",
+            "description": "合并运费报价；null = 未报价"
+          },
+          "freightSavingAmount": {
+            "type": "number",
+            "description": "运费节省；null = 未报价（不是 0）"
+          },
+          "consolidatedAt": {
+            "type": "string",
+            "description": "合并时刻",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "description": "确认时刻",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "下发时刻",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "description": "作废时刻",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string",
+            "description": "作废原因"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "合并单一行（汇总数由 DB 从成员行实算回填）"
+      },
+      "ConsolidationDetail": {
+        "type": "object",
+        "properties": {
+          "consolidation": {
+            "$ref": "#/components/schemas/ConsolidationRow"
+          },
+          "members": {
+            "type": "array",
+            "description": "成员行（各原订单的关联记录）",
+            "items": {
+              "$ref": "#/components/schemas/ConsolidationMember"
+            }
+          },
+          "writebackTasks": {
+            "type": "array",
+            "description": "物流号回传任务（逐个平台订单）",
+            "items": {
+              "$ref": "#/components/schemas/WritebackTask"
+            }
+          },
+          "events": {
+            "type": "array",
+            "description": "事件流",
+            "items": {
+              "$ref": "#/components/schemas/ConsolidationEvent"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页时必须知道的事"
+          }
+        },
+        "description": "合并单详情：头 + 成员 + 回传任务 + 事件流"
+      },
+      "ConsolidationEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "事件 id",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "事件类型"
+          },
+          "fromStatus": {
+            "type": "string",
+            "description": "原状态"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "新状态"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "description": "操作人成员 id",
+            "format": "uuid"
+          },
+          "detail": {
+            "type": "string",
+            "description": "说明"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "合并单事件（append-only）"
+      },
+      "ConsolidationMember": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "成员行 id",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "platformOrderRef": {
+            "type": "string",
+            "description": "平台单号（external_order_no）"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码；非平台单为空串"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺码；D5 未交付时为空串"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "支付方式"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "行数（DB 实算）",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "件数（DB 实算）"
+          },
+          "separateShippingAmount": {
+            "type": "number",
+            "description": "该单独发时的运费（DB 实算）"
+          },
+          "memberStatus": {
+            "type": "string",
+            "description": "成员状态",
+            "enum": [
+              "PLANNED",
+              "CONSOLIDATED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "memberStatusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          }
+        },
+        "description": "成员行：各原订单的关联记录（逐单保留平台归属）"
+      },
+      "OrderConsolidationCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "合并状态机取值",
+            "items": {
+              "type": "string",
+              "description": "合并状态机取值",
+              "enum": [
+                "PLANNED",
+                "CONFIRMED",
+                "DISPATCHED",
+                "CANCELLED"
+              ]
+            }
+          },
+          "writebackStatuses": {
+            "type": "array",
+            "description": "回传状态取值",
+            "items": {
+              "type": "string",
+              "description": "回传状态取值",
+              "enum": [
+                "PENDING",
+                "SUBMITTED",
+                "CONFIRMED",
+                "REJECTED",
+                "PENDING_VERIFICATION"
+              ]
+            }
+          },
+          "exclusionReasons": {
+            "type": "array",
+            "description": "候选排除原因词表",
+            "items": {
+              "type": "string",
+              "description": "候选排除原因词表",
+              "enum": [
+                "NO_SHIPPING_ADDRESS",
+                "BUYER_MISMATCH",
+                "ALREADY_CONSOLIDATED",
+                "PARTIALLY_SHIPPED",
+                "OUTSIDE_TIME_WINDOW",
+                "CURRENCY_MISMATCH",
+                "PAYMENT_METHOD_MISMATCH",
+                "CROSS_SHOP_NOT_ALLOWED",
+                "NOT_SUBMITTED"
+              ]
+            }
+          },
+          "ruleConfigured": {
+            "type": "boolean",
+            "description": "本租户是否已配置合单规则（false 时不能落合并单）"
+          },
+          "platformShopResolved": {
+            "type": "boolean",
+            "description": "是否已接入 D5 平台单同步（决定 shop_code 能否真正区分店铺）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "口径与交接说明"
+          },
+          "downstreamGaps": {
+            "type": "string",
+            "description": "下游缺口说明"
+          }
+        },
+        "description": "9.3.1.2 合单能力与上下游可用性"
+      },
       "WarehouseAllocationWarehousePage": {
         "type": "object",
         "properties": {
@@ -31480,852 +33773,6 @@
           },
           "effect": {
             "type": "string"
-          }
-        }
-      },
-      "CarrierRedirectRuleInput": {
-        "required": [
-          "carrierCode"
-        ],
-        "type": "object",
-        "properties": {
-          "carrierCode": {
-            "minLength": 1,
-            "pattern": "^[A-Z0-9_\\-]{2,64}$",
-            "type": "string"
-          },
-          "redirectSupported": {
-            "type": "boolean"
-          },
-          "redirectDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cancelSupported": {
-            "type": "boolean"
-          },
-          "cancelDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unsupportedReason": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          },
-          "remark": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "CarrierRedirectRuleRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierChannel": {
-            "type": "string"
-          },
-          "redirectSupported": {
-            "type": "boolean"
-          },
-          "redirectDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cancelSupported": {
-            "type": "boolean"
-          },
-          "cancelDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unsupportedReason": {
-            "type": "string"
-          },
-          "remark": {
-            "type": "string"
-          },
-          "registeredByMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WaybillRedirectInput": {
-        "required": [
-          "reason",
-          "recipientCountry",
-          "recipientName"
-        ],
-        "type": "object",
-        "properties": {
-          "recipientName": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "recipientCountry": {
-            "minLength": 1,
-            "pattern": "^[A-Z]{2}$",
-            "type": "string"
-          },
-          "addressLine": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          },
-          "city": {
-            "maxLength": 120,
-            "minLength": 0,
-            "type": "string"
-          },
-          "postalCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderChangeRequestId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "WaybillRedirectRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "redirectNo": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierChannel": {
-            "type": "string"
-          },
-          "issuedAtSnapshot": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "minutesToDeadline": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "recipientName": {
-            "type": "string"
-          },
-          "recipientCountry": {
-            "type": "string"
-          },
-          "addressLine": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "postalCode": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "verdict": {
-            "type": "string",
-            "enum": [
-              "WITHIN_WINDOW",
-              "DEADLINE_PASSED",
-              "CHANNEL_UNSUPPORTED",
-              "RULE_UNREGISTERED"
-            ]
-          },
-          "verdictLabel": {
-            "type": "string"
-          },
-          "canSucceed": {
-            "type": "boolean"
-          },
-          "canSucceedReason": {
-            "type": "string"
-          },
-          "outcome": {
-            "type": "string",
-            "enum": [
-              "NOT_ATTEMPTED",
-              "ACCEPTED",
-              "REJECTED"
-            ]
-          },
-          "outcomeLabel": {
-            "type": "string"
-          },
-          "carrierRef": {
-            "type": "string"
-          },
-          "outcomeReason": {
-            "type": "string"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderChangeRequestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "orderChangeStatus": {
-            "type": "string"
-          },
-          "orderChangeNote": {
-            "type": "string"
-          },
-          "notificationTaskId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notificationNo": {
-            "type": "string"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "nextAction": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillRedirectPrecheckInput": {
-        "required": [
-          "requestIds"
-        ],
-        "type": "object",
-        "properties": {
-          "requestIds": {
-            "maxItems": 200,
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillRedirectPrecheckEntry": {
-        "type": "object",
-        "properties": {
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "waybillIssued": {
-            "type": "boolean"
-          },
-          "waybillStatusNote": {
-            "type": "string"
-          },
-          "verdict": {
-            "type": "string",
-            "enum": [
-              "WITHIN_WINDOW",
-              "DEADLINE_PASSED",
-              "CHANNEL_UNSUPPORTED",
-              "RULE_UNREGISTERED"
-            ]
-          },
-          "verdictLabel": {
-            "type": "string"
-          },
-          "canSucceed": {
-            "type": "boolean"
-          },
-          "canSucceedReason": {
-            "type": "string"
-          },
-          "deadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "minutesToDeadline": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "adapterConnected": {
-            "type": "boolean"
-          },
-          "redirectDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cancelDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "WaybillRedirectPrecheckResult": {
-        "type": "object",
-        "properties": {
-          "selected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "issued": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "notIssued": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "canSucceed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cannotSucceed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillRedirectPrecheckEntry"
-            }
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillCancelRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "cancelNo": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "carrierChannel": {
-            "type": "string"
-          },
-          "issuedAtSnapshot": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "minutesToDeadline": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "verdict": {
-            "type": "string",
-            "enum": [
-              "WITHIN_WINDOW",
-              "DEADLINE_PASSED",
-              "CHANNEL_UNSUPPORTED",
-              "RULE_UNREGISTERED"
-            ]
-          },
-          "verdictLabel": {
-            "type": "string"
-          },
-          "canSucceed": {
-            "type": "boolean"
-          },
-          "canSucceedReason": {
-            "type": "string"
-          },
-          "outcome": {
-            "type": "string",
-            "enum": [
-              "NOT_ATTEMPTED",
-              "ACCEPTED",
-              "REJECTED"
-            ]
-          },
-          "outcomeLabel": {
-            "type": "string"
-          },
-          "carrierRef": {
-            "type": "string"
-          },
-          "outcomeReason": {
-            "type": "string"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderCancellationRequestId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "orderCancellationStatus": {
-            "type": "string"
-          },
-          "orderCancellationNote": {
-            "type": "string"
-          },
-          "notificationTaskId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notificationNo": {
-            "type": "string"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "nextAction": {
-            "type": "string"
-          }
-        }
-      },
-      "CarrierRedirectRulePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CarrierRedirectRuleRow"
-            }
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "WaybillRedirectPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillRedirectRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withinWindow": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "deadlinePassed": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "channelUnsupported": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ruleUnregistered": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "canSucceedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "acceptedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rejectedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notAttemptedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingNotificationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillRedirectCarrierState": {
-        "type": "object",
-        "properties": {
-          "carrierCode": {
-            "type": "string"
-          },
-          "registeredInCarrierMaster": {
-            "type": "boolean"
-          },
-          "redirectSupportedByRule": {
-            "type": "boolean"
-          },
-          "cancelSupportedByRule": {
-            "type": "boolean"
-          },
-          "redirectDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cancelDeadlineHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "redirectAdapterConnected": {
-            "type": "boolean"
-          },
-          "cancelAdapterConnected": {
-            "type": "boolean"
-          },
-          "unavailableReason": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillRedirectDetail": {
-        "type": "object",
-        "properties": {
-          "redirect": {
-            "$ref": "#/components/schemas/WaybillRedirectRow"
-          },
-          "carrierState": {
-            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
-          },
-          "nextActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boundaryNotes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "BuyerNotificationTaskPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BuyerNotificationTaskRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "queued": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingForModule15": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "BuyerNotificationTaskRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notificationNo": {
-            "type": "string"
-          },
-          "redirectId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "cancelId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "waybillNo": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "notificationKind": {
-            "type": "string",
-            "enum": [
-              "REDIRECT_ACCEPTED",
-              "REDIRECT_REJECTED",
-              "REDIRECT_EXPIRED",
-              "REDIRECT_UNSUPPORTED",
-              "CANCEL_ACCEPTED",
-              "CANCEL_REJECTED",
-              "CANCEL_EXPIRED",
-              "CANCEL_UNSUPPORTED"
-            ]
-          },
-          "notificationKindLabel": {
-            "type": "string"
-          },
-          "subjectLine": {
-            "type": "string"
-          },
-          "bodySummary": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RedirectCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "source": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "impact": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillRedirectCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RedirectCapabilityDimension"
-            }
-          },
-          "verdicts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "carrierOutcomes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "notificationKinds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "verdictRule": {
-            "type": "string"
-          },
-          "deadlineRule": {
-            "type": "string"
-          },
-          "boundaryNote": {
-            "type": "string"
-          }
-        }
-      },
-      "WaybillCancelPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WaybillCancelRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "withinWindow": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "deadlinePassed": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "channelUnsupported": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ruleUnregistered": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "canSucceedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "acceptedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rejectedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notAttemptedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingNotificationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "WaybillCancelDetail": {
-        "type": "object",
-        "properties": {
-          "cancel": {
-            "$ref": "#/components/schemas/WaybillCancelRow"
-          },
-          "carrierState": {
-            "$ref": "#/components/schemas/WaybillRedirectCarrierState"
-          },
-          "nextActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boundaryNotes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       }
