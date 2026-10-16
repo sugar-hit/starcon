@@ -26,37 +26,69 @@ import { describe, expect, it } from 'vitest';
 const TRADE_PREFIX = 'trade/';
 
 /**
- * 从 api-proxy.ts 抽出 trade 服务那条白名单正则。
+ * 从 api-proxy.ts 抽出 trade 服务的**全部**白名单正则（同一前缀可能有多条元素）。
+ *
+ * <p><b>为什么必须收全部、而不是只收第一条</b>：`api-proxy.ts` 是并行车道共同的
+ * **累积型**文件，同一个 prefix 出现多条元素是**合法且已经发生**的
+ * （`trade/` 现有 2 条、`channel/` 有 6 条）。运行时 {@code resolve()} 是逐条
+ * fallthrough：前缀不匹配就 {@code continue}，正则不匹配也继续试下一条 ——
+ * 所以**后登记的那条不会因为前面那条先存在而失效**，两者是并集关系。
+ *
+ * <p>只抽第一条会让守卫拿其中一条正则去断言**所有** trade 路径。9.3.1.2 合单合法地
+ * 新增了一条 `prefix: 'trade/'`（`fulfillment/consolidation/...`）并把它插在既有那条
+ * 大元素**之前**（该车道的刻意锚点约定），于是守卫抽到的是合单那条窄正则，
+ * 拿它去判 `processing/orders/.../bom-binding` 之类 ⇒ 假红；而在别的组合下，
+ * 一条窄正则做**反向**判定同样不可信。这不是功能回归，是守卫与运行时语义不同构。
  *
  * <p><b>为什么锚在行首而不是裸子串</b>：`prefix: 'trade/'` 这个字面量同时也出现在
  * 解释「插入锚点固定在 `prefix: 'trade/'` 之前」的那些注释里 —— 那是有意的文档约定，
- * 每条新车道都会写。所以裸 {@code indexOf} 会命中**注释**（第 745 行），切片起点落在
- * 注释上，随后 {@code indexOf('/^')} 找到的是**下一条 channel/ 元素**的正则，
- * 于是拿 channel 的正则去断言 trade 路径 —— 失败，而且失败原因看起来像「白名单缺条目」。
- *
- * <p>真实元素行以缩进的 {@code prefix:} 开头（注释行以 {@code //} 开头），
+ * 每条新车道都会写。真实元素行以缩进的 {@code prefix:} 开头（注释行以 {@code //} 开头），
  * 所以这里按行首匹配元素属性本身。这样再加多少条解释锚点的注释都伤不到守卫。
+ *
+ * <p><b>为什么每条元素单独定界</b>：元素边界 = 下一个元素的 prefix 行（或数组结尾）。
+ * 不定界的话，从本元素 {@code prefix:} 往后找第一个 {@code /^}，找到的是**下一条元素**的
+ * 正则 —— 那正是上面那批假红的确切机制。定界之后「第 N 条元素抽错正则」不再可能。
  */
-function tradePattern(): RegExp {
+function tradePatterns(): RegExp[] {
   const source = readFileSync(join(__dirname, 'api-proxy.ts'), 'utf8');
-  const anchor = source.search(new RegExp(`^\\s*prefix: '${TRADE_PREFIX}'`, 'm'));
-  if (anchor < 0) {
-    throw new Error(`未能从 api-proxy.ts 里定位真实元素 prefix: '${TRADE_PREFIX}'`);
-  }
-  const block = source.slice(anchor);
-  const start = block.indexOf('/^');
-  if (start < 0) throw new Error('未能从 api-proxy.ts 里定位 trade 白名单正则起点');
-  for (let i = start + 1; i < block.length; i++) {
-    const ch = block[i];
-    if (ch === '\\') {
-      i++; // 转义字符：跳过，不当作字面量结束
-      continue;
+  // 所有真实元素的 prefix 行，按出现顺序。注释行以 // 开头，匹配不到这一条。
+  const starts = [...source.matchAll(/^\s*prefix: '([^']+)'/gm)].map((m) => ({
+    prefix: m[1] ?? '',
+    at: m.index ?? 0,
+  }));
+
+  const out: RegExp[] = [];
+  for (const [i, element] of starts.entries()) {
+    if (element.prefix !== TRADE_PREFIX) continue;
+    const end = starts[i + 1]?.at ?? source.lastIndexOf('];');
+    const block = source.slice(element.at, end);
+    // `pattern:` 与正则字面量之间可能夹着 `//` 注释行，所以不能用一条正则去跨行捞 ——
+    // 改为定位首尾：找到 `/^` 起点，再从那里扫描「未转义的 `/`」，直到后跟逗号为止。
+    const start = block.indexOf('/^');
+    if (start < 0) {
+      throw new Error(`未能从 api-proxy.ts 的 ${TRADE_PREFIX} 元素里定位白名单正则起点`);
     }
-    if (ch === '/' && block[i + 1] === ',') {
-      return new RegExp(block.slice(start + 1, i));
+    let literal: string | undefined;
+    for (let j = start + 1; j < block.length; j++) {
+      const ch = block[j];
+      if (ch === '\\') {
+        j++; // 转义字符：跳过，不当作字面量结束
+        continue;
+      }
+      if (ch === '/' && block[j + 1] === ',') {
+        literal = block.slice(start + 1, j);
+        break;
+      }
     }
+    if (literal === undefined) {
+      throw new Error(`未能从 api-proxy.ts 的 ${TRADE_PREFIX} 元素里定位白名单正则终点`);
+    }
+    out.push(new RegExp(literal));
   }
-  throw new Error('未能从 api-proxy.ts 里定位 trade 白名单正则终点');
+  if (out.length === 0) {
+    throw new Error(`未能从 api-proxy.ts 里定位任何真实元素 prefix: '${TRADE_PREFIX}'`);
+  }
+  return out;
 }
 
 /**
@@ -88,13 +120,20 @@ function callSitesIn(file: string): string[] {
   return [...found];
 }
 
-const ALLOWED = tradePattern();
+const ALLOWED = tradePatterns();
 const UUID = '0192f3c4-5d6e-7a8b-9c0d-1e2f3a4b5c6d';
 
-/** 走 resolve() 的真实形状：剥掉 trade/ 前缀后与正则对撞。 */
+/**
+ * 走 resolve() 的真实形状：剥掉 trade/ 前缀后**逐条 fallthrough**，任一条命中即放行。
+ *
+ * <p>这与 api-proxy.ts 的 resolve() 同构（任一元素的 pattern 命中即放行），
+ * 所以反向用例同样有效：返回 false 就意味着**全部** trade 元素都不匹配，
+ * 而不是一个可能来自别的元素的窄正则碰巧没匹配上。
+ */
 function resolveOk(path: string): boolean {
   if (!path.startsWith(TRADE_PREFIX)) return false;
-  return ALLOWED.test(path.slice(TRADE_PREFIX.length));
+  const remainder = path.slice(TRADE_PREFIX.length);
+  return ALLOWED.some((pattern) => pattern.test(remainder));
 }
 
 describe('6.4.1.2 BOM 关联调用点在 api-proxy 白名单里', () => {
