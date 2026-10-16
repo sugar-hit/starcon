@@ -3354,6 +3354,429 @@
         }
       }
     },
+    "/trade/fulfillment/shipment-writeback/tasks": {
+      "get": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "get_trade_fulfillment_shipment_writeback_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verification",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackCreateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}/verify": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks_id_verify",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackVerifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}/submit": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackSubmitInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}/retry": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks_id_retry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackRetryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}/outcome": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks_id_outcome",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackOutcomeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}/corrections": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_tasks_id_corrections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackCorrectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/retry-batch": {
+      "post": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "post_trade_fulfillment_shipment_writeback_retry_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentWritebackBatchRetryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackBatchRetryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/shipment-records/sync": {
       "post": {
         "tags": [
@@ -11198,6 +11621,208 @@
         }
       }
     },
+    "/trade/fulfillment/shipment-writeback/tasks/{id}": {
+      "get": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "get_trade_fulfillment_shipment_writeback_tasks_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/events": {
+      "get": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "get_trade_fulfillment_shipment_writeback_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/capabilities": {
+      "get": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "get_trade_fulfillment_shipment_writeback_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/shipment-writeback/board": {
+      "get": {
+        "tags": [
+          "shipment-writeback-controller"
+        ],
+        "operationId": "get_trade_fulfillment_shipment_writeback_board",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "STATUS"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentWritebackBoard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/shipment-records/records": {
       "get": {
         "tags": [
@@ -18476,6 +19101,568 @@
           "note": {
             "type": "string",
             "description": "未送达时必填：拒收 / 退回 / 丢失是三件不同的事"
+          }
+        }
+      },
+      "ShipmentWritebackCreateInput": {
+        "required": [
+          "platformCode",
+          "recordIds",
+          "shopId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "pattern": "^.{1,32}$",
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "platformOrderRef": {
+            "pattern": "^.{0,128}$",
+            "type": "string"
+          },
+          "recordIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackCreateResult": {
+        "type": "object",
+        "properties": {
+          "createdTasks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reusedTasks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentWritebackVerifyInput": {
+        "required": [
+          "conclusion",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_APPLIED",
+              "CONFIRMED_NOT_APPLIED",
+              "STILL_UNKNOWN"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CHANNEL_VERIFY",
+              "MANUAL_ATTESTATION"
+            ]
+          },
+          "evidence": {
+            "pattern": "^.{0,800}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackAttemptRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "channelOperationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformRequestId": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "SENDING",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "responseRef": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentWritebackEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentWritebackTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/ShipmentWritebackTaskRow"
+          },
+          "payloadJson": {
+            "type": "string"
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackAttemptRow"
+            }
+          },
+          "verifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackVerificationRow"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackEventRow"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentWritebackTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "sourceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRecordNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformOrderRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION",
+              "SKIPPED",
+              "SUPERSEDED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUIRED",
+              "CONFIRMED_APPLIED",
+              "CONFIRMED_NOT_APPLIED",
+              "STILL_UNKNOWN"
+            ]
+          },
+          "verificationLabel": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxAttempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nextAttemptAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "channelOperationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformRequestId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "correctionOf": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelCount": {
+            "type": "number"
+          },
+          "resendAllowed": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentWritebackVerificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_APPLIED",
+              "CONFIRMED_NOT_APPLIED",
+              "STILL_UNKNOWN"
+            ]
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CHANNEL_VERIFY",
+              "MANUAL_ATTESTATION"
+            ]
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "queriedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentWritebackSubmitInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackRetryInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackOutcomeInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION",
+              "SKIPPED",
+              "SUPERSEDED"
+            ]
+          },
+          "platformRequestId": {
+            "pattern": "^.{0,128}$",
+            "type": "string"
+          },
+          "errorMessage": {
+            "pattern": "^.{0,800}$",
+            "type": "string"
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ParcelWaybillInput": {
+        "required": [
+          "parcelNo",
+          "waybillNo"
+        ],
+        "type": "object",
+        "properties": {
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waybillNo": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "ShipmentWritebackCorrectionInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "pattern": "^.{1,64}$",
+            "type": "string",
+            "nullable": true
+          },
+          "masterWaybillNo": {
+            "pattern": "^.{1,64}$",
+            "type": "string",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "platformOrderRef": {
+            "pattern": "^.{0,128}$",
+            "type": "string",
+            "nullable": true
+          },
+          "parcels": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ParcelWaybillInput"
+            }
+          },
+          "reason": {
+            "minLength": 1,
+            "pattern": "^.{4,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackBatchRetryInput": {
+        "required": [
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "pattern": "^.{1,32}$",
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "pattern": "^.{1,64}$",
+            "type": "string",
+            "nullable": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackBatchRetryResult": {
+        "type": "object",
+        "properties": {
+          "submitted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rescheduled": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedUnknown": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedAtCap": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedBackoff": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedTerminal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "retried": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackTaskRow"
+            }
+          },
+          "blocked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "executedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -27871,6 +29058,230 @@
           },
           "handling": {
             "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackSummary": {
+        "type": "object",
+        "properties": {
+          "totalTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supersededTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dueTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unverifiedUnknownTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resendAllowedTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "atCapTasks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalAttempts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ShipmentWritebackTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackTaskRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ShipmentWritebackSummary"
+          }
+        }
+      },
+      "ShipmentWritebackEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ShipmentWritebackCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verifications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "groupByOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "idempotencyKeyBasis": {
+            "type": "string"
+          },
+          "threeStatePolicy": {
+            "type": "string"
+          },
+          "shopIdPolicy": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentWritebackBoard": {
+        "type": "object",
+        "properties": {
+          "groupBy": {
+            "type": "string"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentWritebackGroup"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ShipmentWritebackSummary"
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ShipmentWritebackGroup": {
+        "type": "object",
+        "properties": {
+          "groupKey": {
+            "type": "string"
+          },
+          "groupLabel": {
+            "type": "string"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
