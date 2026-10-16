@@ -6184,6 +6184,434 @@
         }
       }
     },
+    "/catalog/category-mappings/{id}": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryMappingDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "put_catalog_category_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformCategoryMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryMappingRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "delete_catalog_category_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/{id}/enabled": {
+      "put": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "put_catalog_category_mappings_id_enabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/{id}/default": {
+      "put": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "put_catalog_category_mappings_id_default",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/{id}/attributes/{ruleId}": {
+      "put": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "put_catalog_category_mappings_id_attributes_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAttributeMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAttributeMappingRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "delete_catalog_category_mappings_id_attributes_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/{id}/attributes/{ruleId}/enabled": {
+      "put": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "put_catalog_category_mappings_id_attributes_ruleId_enabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/trees/{id}": {
       "put": {
         "tags": [
@@ -15109,6 +15537,247 @@
         }
       }
     },
+    "/catalog/category-mappings": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "internalCategoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "unmappedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "updatedAt,desc"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryMappingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "post_catalog_category_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformCategoryMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/{id}/attributes": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_id_attributes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformAttributeMappingRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "post_catalog_category_mappings_id_attributes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformAttributeMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAttributeMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/trees": {
       "get": {
         "tags": [
@@ -23356,6 +24025,170 @@
         }
       }
     },
+    "/catalog/category-mappings/resolve": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "internalCategoryId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryResolveResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/platform-sites": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_platform_sites",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformSiteOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/overview": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCategoryMappingOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/category-mappings/attribute-options": {
+      "get": {
+        "tags": [
+          "platform-category-mapping-controller"
+        ],
+        "operationId": "get_catalog_category_mappings_attribute_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InternalAttributeOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/overview": {
       "get": {
         "tags": [
@@ -29684,6 +30517,245 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformCategoryMappingInput": {
+        "required": [
+          "internalCategoryId",
+          "platformCategoryId",
+          "platformCode",
+          "siteCode"
+        ],
+        "type": "object",
+        "properties": {
+          "internalCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "siteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformCategoryMappingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "internalCategoryCode": {
+            "type": "string"
+          },
+          "internalCategoryName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCategoryCode": {
+            "type": "string"
+          },
+          "platformCategoryName": {
+            "type": "string"
+          },
+          "platformCategoryPath": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "mappedInternalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attributeRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformAttributeMappingInput": {
+        "required": [
+          "platformAttributeCode",
+          "platformAttributeName",
+          "platformDataType",
+          "requirement"
+        ],
+        "type": "object",
+        "properties": {
+          "platformAttributeCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformAttributeName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "internalAttributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requirement": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "platformDataType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "allowedValues": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "transform": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformAttributeMappingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformAttributeCode": {
+            "type": "string"
+          },
+          "platformAttributeName": {
+            "type": "string"
+          },
+          "internalAttributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "internalAttributeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalAttributeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "platformDataType": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transform": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
           },
           "updatedAt": {
             "type": "string"
@@ -45640,6 +46712,309 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "PlatformCategoryMappingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformCategoryMappingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MappedInternalCategory": {
+        "type": "object",
+        "properties": {
+          "internalCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlatformCategoryMappingDetail": {
+        "type": "object",
+        "properties": {
+          "mapping": {
+            "$ref": "#/components/schemas/PlatformCategoryMappingRow"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAttributeMappingRow"
+            }
+          },
+          "alsoMappedFrom": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappedInternalCategory"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PlatformMappingSummary"
+          }
+        }
+      },
+      "PlatformMappingSummary": {
+        "type": "object",
+        "properties": {
+          "attributeRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformCategoryResolveResult": {
+        "type": "object",
+        "properties": {
+          "mappingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "internalCategoryName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCategoryCode": {
+            "type": "string"
+          },
+          "platformCategoryName": {
+            "type": "string"
+          },
+          "platformCategoryPath": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "requiredAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformRequiredAttribute"
+            }
+          },
+          "unmappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformRequiredAttribute": {
+        "type": "object",
+        "properties": {
+          "platformAttributeCode": {
+            "type": "string"
+          },
+          "platformAttributeName": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "platformDataType": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "allowedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transform": {
+            "type": "string"
+          },
+          "internalAttributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "internalAttributeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalAttributeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mapped": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlatformSiteOption": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mappingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformCategoryMappingOverview": {
+        "type": "object",
+        "properties": {
+          "mappingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledMappingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "defaultMappingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "internalCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mappedInternalCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mappedPlatformCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "siteCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attributeRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformSiteCoverage"
+            }
+          }
+        }
+      },
+      "PlatformSiteCoverage": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "mappingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "internalCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mappedInternalCategoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmappedRequiredCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "InternalAttributeOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
           }
         }
       },
