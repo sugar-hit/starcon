@@ -385,36 +385,45 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     'freight/quotes/not-a-uuid',
   ];
 
-  // --- KNOWN PRE-EXISTING DEFECTS, owned by 10.1.2.1 --------------------------
+  // --- FORMER 10.1.2.1 DEFECT, FIXED BY 10.1.2.2 (commit 3a4a1710) ----------
   //
-  // Both were proven PRE-EXISTING by A/B: the identical probe run against
-  // `git show integration/module-dev:apps/web/src/lib/api-proxy.ts` fails these
-  // two in exactly the same way. They are NOT introduced by this merge, and
-  // they are NOT fixed by it either — the `freight` element is reproduced
-  // verbatim from the integration head.
+  // `freight/quotes/{uuid}` is a DELIVERED route (contract key
+  // /channel/freight/quotes/{id}, GET). Until 10.1.2.2 it was **not** allowed by
+  // the whitelist: the regex read
+  //   ^freight(?:\/(?:capabilities|estimate|quotes|rate-cards|...|UUID))?$
+  // where the UUID was a SIBLING of `quotes`, so `freight/quotes/<uuid>` could
+  // not match. That was a browser-side silent 404 with the endpoint and the
+  // contract both present, while typecheck / lint / vitest / Playwright all
+  // stayed green — the exact failure mode this file exists to catch.
   //
-  // (a) `freight/quotes/{uuid}` is DELIVERED (contract key
-  //     /channel/freight/quotes/{id}, GET) but the regex reads
-  //       ^freight(?:\/(?:capabilities|estimate|quotes|rate-cards|...|UUID))?$
-  //     where the UUID is a SIBLING of `quotes`, not nested under it, so
-  //     `freight/quotes/<uuid>` cannot match. Asserted BLOCKED to record the
-  //     defect in a test rather than only in someone's head.
-  // (b) bare `freight` is claimed NOT routed by the element's own trailing
-  //     comment, but the trailing `?` on the whole group makes it optional,
-  //     so `freight` alone IS routed. Asserted ALLOWED to pin actual
-  //     behaviour; fixing either is 10.1.2.1's call, not this lane's.
-  const CH10_FREIGHT_KNOWN_BROKEN = [`freight/quotes/${UUID}`];
+  // 10.1.2.2 (渠道比价) fixed it while touching the adjacent `channel/` element,
+  // adding the nested `\/quotes\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+  // branch. The path now returns 200.
+  //
+  // So this is asserted as ALLOWED and kept as a REGRESSION GUARD, not deleted:
+  // "it used to be broken" is precisely why "it must stay working" needs to be
+  // pinned. A future edit that drops the nested branch turns this red again.
+  const CH10_FREIGHT_FIXED_IN_10_1_2_2 = [`freight/quotes/${UUID}`];
 
-  it.each(CH10_FREIGHT_KNOWN_BROKEN)(
-    'CH10 KNOWN-BROKEN (10.1.2.1 owns the fix) %s',
+  it.each(CH10_FREIGHT_FIXED_IN_10_1_2_2)(
+    'CH10 REGRESSION (freight/quotes/{uuid} — broken until 10.1.2.2) stays routed %s',
     async (path) => {
       const res = await callProxy(path, 'channel');
-      expect(res.status, `${path} was expected to be blocked (pre-existing 10.1.2.1 defect)`).toBe(
-        404,
-      );
+      expect(
+        res.status,
+        `${path} regressed to 404: the 10.1.2.2 nested quotes/{uuid} branch is gone`,
+      ).not.toBe(404);
     },
   );
 
+  // --- FORMER 10.1.2.1 DEFECT #2, still open ---------------------------------
+  //
+  // bare `freight` is claimed NOT routed by the element's own trailing comment,
+  // but the trailing `?` on the whole group makes it optional, so `freight`
+  // alone IS routed. Asserted ALLOWED to pin actual behaviour rather than the
+  // comment's claim. This one was NOT fixed by 10.1.2.2 — fixing either this or
+  // the regex is 10.1.2.1's call, not this lane's. It is left asserted here so
+  // the behaviour change is noticed when 10.1.2.1 gets to it.
   it('CH10 bare `freight` IS routed (contradicts 10.1.2.1 comment; pinned as-is)', async () => {
     const res = await callProxy('freight', 'channel');
     expect(res.status, 'bare freight routing changed; re-check the 10.1.2.1 regex').not.toBe(404);

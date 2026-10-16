@@ -23,26 +23,76 @@ import { describe, expect, it } from 'vitest';
  */
 const WAREHOUSE_PREFIX = 'warehouse/';
 
-/** 从 api-proxy.ts 抽出 warehouse 服务那条白名单正则。 */
-function warehousePattern(): RegExp {
+/**
+ * 从 api-proxy.ts 抽出 warehouse 服务的**全部**白名单正则（同一前缀可能有多条元素）。
+ *
+ * <p><b>为什么必须收全部、而不是只收第一条</b>：`api-proxy.ts` 是并行车道共同的
+ * **累积型**文件，同一个 prefix 出现多条元素是**合法且已经发生**的
+ * （`channel/` 现有 6 条、`trade/` 现有 2 条）。运行时 {@code resolve()} 逐条
+ * fallthrough：前缀不匹配就 {@code continue}，正则不匹配也继续试下一条，
+ * 所以后登记的那条不会因为前面那条先存在而失效，两者构成并集。
+ * 裸 {@code indexOf} 取第一条更糟：它既可能命中注释，也可能抽到下一条元素的正则 ——
+ * `trade/` 上已经真实发生过后者，导致 11 个用例假红。
+ *
+ * <p><b>为什么锚在行首而不是裸子串</b>：`prefix: 'warehouse/'` 这个字面量同样会出现在
+ * 解释「插入锚点固定在 … 之前」的注释里，那是有意的文档约定。真实元素行以缩进的
+ * {@code prefix:} 开头（注释行以 {@code //} 开头），所以按行首匹配元素属性本身。
+ *
+ * <p><b>为什么每条元素单独定界</b>：元素边界 = 下一个元素的 prefix 行（或数组结尾）。
+ * 不定界的话，从本元素 {@code prefix:} 往后找第一个 {@code /^}，找到的会是**下一条元素**的
+ * 正则。本车道目前只有一条 warehouse 元素，所以这是**尚未触发**的隐患，
+ * 而第二条 warehouse 元素落地的当天就会变成假红。
+ */
+function warehousePatterns(): RegExp[] {
   const source = readFileSync(join(__dirname, 'api-proxy.ts'), 'utf8');
-  const block = source.slice(source.indexOf(`prefix: '${WAREHOUSE_PREFIX}'`));
-  const start = block.indexOf('/^');
-  if (start < 0) throw new Error('未能从 api-proxy.ts 里定位 warehouse 白名单正则起点');
-  for (let i = start + 1; i < block.length; i++) {
-    const ch = block[i];
-    if (ch === '\\') {
-      i++; // 转义字符：跳过，不当作字面量结束
-      continue;
+  // 所有真实元素的 prefix 行，按出现顺序。注释行以 // 开头，匹配不到这一条。
+  const starts = [...source.matchAll(/^\s*prefix: '([^']+)'/gm)].map((m) => ({
+    prefix: m[1] ?? '',
+    at: m.index ?? 0,
+  }));
+
+  const out: RegExp[] = [];
+  for (const [i, element] of starts.entries()) {
+    if (element.prefix !== WAREHOUSE_PREFIX) continue;
+    const end = starts[i + 1]?.at ?? source.lastIndexOf('];');
+    const block = source.slice(element.at, end);
+    const start = block.indexOf('/^');
+    if (start < 0) {
+      throw new Error(`未能从 api-proxy.ts 的 ${WAREHOUSE_PREFIX} 元素里定位白名单正则起点`);
     }
-    if (ch === '/' && block[i + 1] === ',') {
-      return new RegExp(block.slice(start + 1, i));
+    let literal: string | undefined;
+    for (let j = start + 1; j < block.length; j++) {
+      const ch = block[j];
+      if (ch === '\\') {
+        j++; // 转义字符：跳过，不当作字面量结束
+        continue;
+      }
+      if (ch === '/' && block[j + 1] === ',') {
+        literal = block.slice(start + 1, j);
+        break;
+      }
     }
+    if (literal === undefined) {
+      throw new Error(`未能从 api-proxy.ts 的 ${WAREHOUSE_PREFIX} 元素里定位白名单正则终点`);
+    }
+    out.push(new RegExp(literal));
   }
-  throw new Error('未能从 api-proxy.ts 里定位 warehouse 白名单正则终点');
+  if (out.length === 0) {
+    throw new Error(`未能从 api-proxy.ts 里定位任何真实元素 prefix: '${WAREHOUSE_PREFIX}'`);
+  }
+  return out;
 }
 
-const allows = (path: string) => warehousePattern().test(path);
+const ALLOWED = warehousePatterns();
+
+/**
+ * 与 resolve() 同构：逐条 fallthrough，**任一条**命中即放行。
+ *
+ * <p>入参是已经切掉 `warehouse/` 前缀的余段（白名单正则只匹配 prefix 之后的部分）。
+ * 返回 false 意味着**全部** warehouse 元素都不匹配，所以反向用例同样有效 ——
+ * 一条只覆盖别的车道的窄正则不可能把本车道的未知形状放行掉。
+ */
+const allows = (path: string) => ALLOWED.some((pattern) => pattern.test(path));
 
 describe('7.1.1.3 正向：三个真实形状必须放行', () => {
   it.each(['inventory/sellable', 'inventory/sellable/skus', 'inventory/sellable/capabilities'])(
