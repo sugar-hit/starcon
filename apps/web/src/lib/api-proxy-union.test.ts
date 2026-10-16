@@ -99,6 +99,13 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `transit-trackings/${UUID}`,
     `transit-trackings/${UUID}/receipt`,
     'first-mile-shipments',
+    // 8.5.3.1 出库时效。四条全是字面量子路径，逐条列出来是为了钉住
+    // 「这一支在、且只有这四条在」—— 少一条就是该模块在浏览器里静默 404，
+    // 而 typecheck / lint / vitest / Playwright 仍然全绿。
+    'outbound-timeliness/capabilities',
+    'outbound-timeliness/report',
+    'outbound-timeliness/order-times',
+    'outbound-timeliness/thresholds',
   ];
   // --- catalog layer: 4.2.2.2 description-templates appended to the SAME
   //     alternation as the pre-existing catalog routes (descriptions / titles /
@@ -196,7 +203,15 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
   });
 
-  const WH_BLOCK = ['customs-declarationz', `transit-trackings/${UUID}/bogus-shape`];
+  const WH_BLOCK = [
+    'customs-declarationz',
+    `transit-trackings/${UUID}/bogus-shape`,
+    // 8.5.3.1 的反面：本模块只放行那四条，多一段子路径必须仍然 404 ——
+    // 写一个 [0-9a-f-]+ 通配很容易，但这四条都是集合级/字面量形状，通配等于凭空放行。
+    `outbound-timeliness/${UUID}`,
+    'outbound-timeliness/report/extra',
+    'outbound-timeliness/capabilitie',
+  ];
 
   it.each(WH_ALLOW)('WAREHOUSE ALLOWS %s', async (path) => {
     const res = await callProxy(path, 'warehouse');
