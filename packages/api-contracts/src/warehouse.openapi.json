@@ -349,6 +349,47 @@
         }
       }
     },
+    "/warehouse/outbound-timeliness/thresholds": {
+      "put": {
+        "tags": [
+          "outbound-timeliness-controller"
+        ],
+        "operationId": "put_warehouse_outbound_timeliness_thresholds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundThresholdView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/location-trees/{warehouseId}/locations/{id}": {
       "put": {
         "tags": [
@@ -6799,6 +6840,47 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PackingMaterialRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/outbound-timeliness/order-times": {
+      "post": {
+        "tags": [
+          "outbound-timeliness-controller"
+        ],
+        "operationId": "post_warehouse_outbound_timeliness_order_times",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundOrderTimeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundTimelinessRow"
                 }
               }
             }
@@ -19361,6 +19443,124 @@
         }
       }
     },
+    "/warehouse/outbound-timeliness/report": {
+      "get": {
+        "tags": [
+          "outbound-timeliness-controller"
+        ],
+        "operationId": "get_warehouse_outbound_timeliness_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundTimelinessReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/outbound-timeliness/capabilities": {
+      "get": {
+        "tags": [
+          "outbound-timeliness-controller"
+        ],
+        "operationId": "get_warehouse_outbound_timeliness_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundTimelinessCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/lots": {
       "get": {
         "tags": [
@@ -28111,6 +28311,58 @@
           }
         }
       },
+      "OutboundThresholdInput": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "stageCode": {
+            "type": "string"
+          },
+          "thresholdMinutes": {
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundThresholdView": {
+        "type": "object",
+        "properties": {
+          "stageCode": {
+            "type": "string"
+          },
+          "stageLabel": {
+            "type": "string"
+          },
+          "thresholdMinutes": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "LocationUpdateInput": {
         "type": "object",
         "properties": {
@@ -33368,6 +33620,102 @@
         "properties": {
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "OutboundOrderTimeInput": {
+        "type": "object",
+        "properties": {
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "orderPlacedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceModule": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundTimelinessRow": {
+        "type": "object",
+        "properties": {
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "externalOrderRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "orderToOutboundMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "pickingMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "packingMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "handoverMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "overdueStages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "overdueStageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderPlacedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pickCompletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "packCompletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -48107,6 +48455,341 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "OutboundBottleneck": {
+        "type": "object",
+        "properties": {
+          "stageCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "stageLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "avgMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdMinutes": {
+            "type": "number"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "overdueRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sampledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "basis": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDistributionBucket": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "share": {
+            "type": "number"
+          }
+        }
+      },
+      "OutboundOverdueDetail": {
+        "type": "object",
+        "properties": {
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "stageCode": {
+            "type": "string"
+          },
+          "stageLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "actualMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdMinutes": {
+            "type": "number"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "excessMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundOverduePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundOverdueDetail"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OutboundStageDistribution": {
+        "type": "object",
+        "properties": {
+          "stageCode": {
+            "type": "string"
+          },
+          "stageLabel": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "sampledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "coverageRate": {
+            "type": "number"
+          },
+          "avgMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "p50Minutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "p90Minutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdMinutes": {
+            "type": "number"
+          },
+          "thresholdSource": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDistributionBucket"
+            }
+          }
+        }
+      },
+      "OutboundTimelinessReport": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "dayBasis": {
+            "type": "string"
+          },
+          "warehouseFilter": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseFilterLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "shippedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueOrderRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundThresholdView"
+            }
+          },
+          "distribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundStageDistribution"
+            }
+          },
+          "bottleneck": {
+            "$ref": "#/components/schemas/OutboundBottleneck"
+          },
+          "overdue": {
+            "$ref": "#/components/schemas/OutboundOverduePage"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundTimelinessRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingSampleCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "OutboundStageOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "internal": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OutboundTimelinessCapabilities": {
+        "type": "object",
+        "properties": {
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundStageOption"
+            }
+          },
+          "builtinThresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundThresholdView"
+            }
+          },
+          "effectiveThresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundThresholdView"
+            }
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "stageBasisNote": {
+            "type": "string"
+          },
+          "wallClockBasisNote": {
+            "type": "string"
+          },
+          "missingSampleBasisNote": {
+            "type": "string"
+          },
+          "bottleneckBasisNote": {
+            "type": "string"
+          },
+          "overdueBasisNote": {
+            "type": "string"
+          },
+          "orderTimestampSourceNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
           }
         }
       },
