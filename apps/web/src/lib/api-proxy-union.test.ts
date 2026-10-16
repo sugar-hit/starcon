@@ -321,4 +321,82 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     const res = await callProxy(path, 'channel');
     expect(res.status, `channel path ${path} should be blocked`).toBe(404);
   });
+
+  // --- batch-10 channel union: 10.1.2.1 运费计算器 (integration side) and
+  //     10.2.2.2 面单模板 (lane side). Both lanes appended a SEPARATE
+  //     services[] element with the same `channel/` prefix, anchored at the
+  //     same place (immediately before `prefix: 'trade/'`), so git collides
+  //     even though the union is purely additive.
+  //
+  //     `resolve()` returns on the FIRST matching element, and it iterates the
+  //     whole array — so sibling same-prefix elements are independent and a
+  //     dropped element 404s its routes while typecheck/lint stay green. That
+  //     is what these cases catch.
+  //
+  //     Paths below are taken verbatim from the generated contract
+  //     packages/api-contracts/src/channel.openapi.json, keys
+  //     /channel/freight/* and /channel/label-templates/*, with the
+  //     `channel/` service prefix stripped (that is what resolve() does).
+  const CH10_ALLOW = [
+    // 10.1.2.1 运费计算器 — contract keys /channel/freight/*
+    'freight/capabilities',
+    'freight/estimate',
+    'freight/quotes',
+    `freight/quotes/${UUID}`,
+    'freight/rate-cards',
+    'freight/country-rules',
+    // 10.2.2.2 面单模板 — contract keys /channel/label-templates/*
+    'label-templates',
+    'label-templates/capabilities',
+    'label-templates/overview',
+    'label-templates/binding',
+    `label-templates/${UUID}`,
+    `label-templates/${UUID}/status`,
+    `label-templates/${UUID}/preview`,
+    `label-templates/${UUID}/renders`,
+  ];
+
+  const CH10_BLOCK = [
+    // 10.1.2.1 explicitly does not route these (own comment block):
+    //   freight/compare                      — 10.1.2.2 渠道比价未交付
+    //   freight/quotes/{uuid}/settlement      — 结算口径不在本模块
+    'freight/compare',
+    `freight/quotes/${UUID}/settlement`,
+    // bare `freight` is deliberately NOT routed (no bare collection read)
+    'freight',
+    // 10.2.2.2 explicitly does not route these (own comment block):
+    //   label-templates/{uuid}/print   — 8.3.4.2 owns printing
+    //   label-templates/{uuid}/deploy  — same
+    //   label-templates/resolve        — 运单 ↔ 模板自动选版未做
+    `label-templates/${UUID}/print`,
+    `label-templates/${UUID}/deploy`,
+    'label-templates/resolve',
+    // trailing slash: backend has no .../label-templates/ mapping
+    'label-templates/',
+    // literal sub-paths must not be swallowed by the uuid segment, and must
+    // not carry an optional tail
+    'label-templates/capabilities/extra',
+    'label-templates/binding/extra',
+    `label-templates/${UUID}/status/extra`,
+    `label-templates/${UUID}/renders/${UUID}`,
+    // single-typo of an existing segment
+    'label-template',
+    'freightz',
+    'freight/quotes/not-a-uuid',
+  ];
+
+  it('CH10_ALLOW is non-empty and unique (guards against a broken list)', () => {
+    expect(CH10_ALLOW.length).toBe(14);
+    expect(new Set(CH10_ALLOW).size).toBe(CH10_ALLOW.length);
+  });
+
+  it.each(CH10_ALLOW)('CH10 CHANNEL ALLOWS %s', async (path) => {
+    const res = await callProxy(path, 'channel');
+    expect(res.status, `channel path ${path} was blocked (${res.status})`).not.toBe(404);
+  });
+
+  it.each(CH10_BLOCK)('CH10 CHANNEL STILL BLOCKS %s', async (path) => {
+    const res = await callProxy(path, 'channel');
+    expect(res.status, `channel path ${path} should be blocked`).toBe(404);
+  });
 });
