@@ -148,14 +148,28 @@ class LogisticsChannelIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      // 🔴 10.1.1.3 时效与限制（V139）的三张表用复合外键引用 logistics_channel_config，
-      //    truncate 一个被外键引用的表会被 PostgreSQL 拒（必须先把引用方清掉）。
-      //    这三张表是下游模块的数据，本测试用例本就不关心它们，清空即可。
+      // 本表（logistics_channel_config）是**渠道配置的父表**，两组下游模块对它建了
+      //   复合外键，所以 truncate 语句必须显式带 cascade：
+      //   * 10.1.1.3 时效与限制（V139）：logistics_transit_rule / logistics_size_limit /
+      //     logistics_marking_requirement 按「时效与限制归属渠道」引用本表；
+      //   * 10.1.2.1 运费计算器（V140）：freight_rate_card / freight_channel_country /
+      //     freight_quote_line 按「费率与试算单归属渠道」引用本表。
+      // 🔴 cascade 不是顺手加的，是必需的：TRUNCATE 一张被外键引用的表时，PostgreSQL
+      //   要求把**全部**引用表一并处理，否则报 23503「cannot truncate a table referenced
+      //   in a foreign key constraint」—— 症状是本类**每个**用例在 setUp 里就炸，
+      //   与本模块的任何断言无关，根因极难往测试用例上想。
+      // ⚠️ 下游表名**逐个显式列举 + cascade 并存是有意的双保险，不是重复劳动**：
+      //   显式列举锁住「本模块确实关心 / 确实依赖这些表」的可读意图，让后来人一眼看到
+      //   数据边界；cascade 兜住**下一组**引用本表的下游模块，不必回头改这里。
+      //   只留 cascade 会抹掉已并入车道的意图；只留列举则每多一个下游模块就得改一次，
+      //   漏改的表现是「别的模块的测试红了」而不是「这里漏了一条」，更难查。
+      //   下游模块的数据本测试用例不关心，清空即可。
       s.execute("truncate logistics_transit_rule, logistics_size_limit,"
           + " logistics_marking_requirement,"
           + " logistics_channel_scope, logistics_channel_surcharge,"
           + " logistics_channel_restriction, logistics_channel_config,"
-          + " carrier_country_coverage, carrier_business_scope, carrier_logistics_profile");
+          + " carrier_country_coverage, carrier_business_scope, carrier_logistics_profile"
+          + " cascade");
     } catch (java.sql.SQLException e) {
       throw new RuntimeException(e);
     }
