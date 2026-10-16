@@ -3721,6 +3721,349 @@
         }
       }
     },
+    "/channel/ad-type-diffs/profiles": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "PLATFORM"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypeProfilePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "post_channel_ad_type_diffs_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypeProfileRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/profiles/{id}/field-specs": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_profiles_id_field_specs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdTypeFieldSpecRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "post_channel_ad_type_diffs_profiles_id_field_specs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFieldSpecRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypeFieldSpecRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/payloads": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_payloads",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mappingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "INGESTED_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypePayloadPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "post_channel_ad_type_diffs_payloads",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePayloadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveResponseAdTypePayloadRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/warehouse-providers": {
       "get": {
         "tags": [
@@ -5649,6 +5992,224 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CarrierCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/resolve": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformAdType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingResolution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/profiles/{id}": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_profiles_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypeProfileDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/payloads/{id}": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_payloads_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypePayloadDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/fidelity": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_fidelity",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FidelityOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/comparable": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_comparable",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparableView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-type-diffs/capabilities": {
+      "get": {
+        "tags": [
+          "ad-type-diff-controller"
+        ],
+        "operationId": "get_channel_ad_type_diffs_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdTypeDiffCapabilities"
                 }
               }
             }
@@ -9790,6 +10351,655 @@
           }
         }
       },
+      "SaveProfileRequest": {
+        "required": [
+          "auctionModel",
+          "displayName",
+          "internalAdType",
+          "mappingSource",
+          "objective",
+          "platformAdType",
+          "platformId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "档案 id；留空表示新建",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（上游 2.1.1.1）",
+            "format": "uuid"
+          },
+          "platformAdType": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 原始平台类型标记，原样存不折叠"
+          },
+          "internalAdType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 归一后的内部类型；必须是 2.1.2.1 真的能解析出来的那个值，查不到就传 UNMAPPED"
+          },
+          "displayName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "description": "展示名"
+          },
+          "auctionModel": {
+            "minLength": 1,
+            "type": "string",
+            "description": "拍卖方式"
+          },
+          "objective": {
+            "minLength": 1,
+            "type": "string",
+            "description": "投放目标"
+          },
+          "supportsTargeting": {
+            "type": "boolean",
+            "description": "是否支持定向"
+          },
+          "supportsBidSchedule": {
+            "type": "boolean",
+            "description": "是否支持分时竞价"
+          },
+          "supportsNegativeKw": {
+            "type": "boolean",
+            "description": "是否支持否定关键词"
+          },
+          "supportsCreative": {
+            "type": "boolean",
+            "description": "是否支持创意素材"
+          },
+          "supportsAsciiAd": {
+            "type": "boolean",
+            "description": "是否支持 ASCII 广告位"
+          },
+          "mappingSource": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 归一口径来源；DB 会核对它与 2.1.2.1 的实际行是否对得上"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdTypeProfileRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "档案 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（上游 2.1.1.1 平台目录）",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始平台类型标记：平台怎么叫就怎么存"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 归一后的内部类型；UNMAPPED 表示 2.1.2.1 两层都没查到"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "展示名"
+          },
+          "auctionModel": {
+            "type": "string",
+            "description": "拍卖方式（跨平台可比的关键口径）"
+          },
+          "objective": {
+            "type": "string",
+            "description": "投放目标（跨平台可比的关键口径）"
+          },
+          "supportsTargeting": {
+            "type": "boolean",
+            "description": "是否支持定向"
+          },
+          "supportsBidSchedule": {
+            "type": "boolean",
+            "description": "是否支持分时竞价"
+          },
+          "supportsNegativeKw": {
+            "type": "boolean",
+            "description": "是否支持否定关键词"
+          },
+          "supportsCreative": {
+            "type": "boolean",
+            "description": "是否支持创意素材"
+          },
+          "supportsAsciiAd": {
+            "type": "boolean",
+            "description": "是否支持 ASCII 广告位"
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "🔴 归一口径来源：PLATFORM_DEFAULT / TENANT_OVERRIDE / UNMAPPED"
+          },
+          "enumKind": {
+            "type": "string",
+            "description": "上游 2.1.2.1 的枚举族名（本模块固定 AD_TYPE）"
+          },
+          "fieldSpecCount": {
+            "type": "integer",
+            "description": "该档案的特有字段定义条数",
+            "format": "int32"
+          },
+          "payloadCount": {
+            "type": "integer",
+            "description": "该档案已归一的广告条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveFieldSpecRequest": {
+        "required": [
+          "dataType",
+          "fieldKey",
+          "fieldLabel"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "字段定义 id；留空表示新建",
+            "format": "uuid"
+          },
+          "fieldKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 原始字段键"
+          },
+          "fieldLabel": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "description": "界面标签"
+          },
+          "dataType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "数据类型"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "展示单位"
+          },
+          "enumValues": {
+            "type": "string",
+            "description": "ENUM 型的候选值，逗号分隔"
+          },
+          "comparable": {
+            "type": "boolean",
+            "description": "🔴 是否参与跨平台可比；为 true 时必须有内部落点（DB 层 CHECK）"
+          },
+          "internalRepresentation": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 归一后的内部落点；留空表示该字段只能原样留在原始报文里"
+          },
+          "requiredOnInput": {
+            "type": "boolean",
+            "description": "录入是否必填"
+          },
+          "position": {
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer",
+            "description": "展示顺序",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdTypeFieldSpecRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "字段定义 id",
+            "format": "uuid"
+          },
+          "adTypeProfileId": {
+            "type": "string",
+            "description": "所属档案 id",
+            "format": "uuid"
+          },
+          "fieldKey": {
+            "type": "string",
+            "description": "🔴 原始字段键（与原始报文里的顶层键同名字面）"
+          },
+          "fieldLabel": {
+            "type": "string",
+            "description": "界面上的中文标签"
+          },
+          "dataType": {
+            "type": "string",
+            "description": "数据类型"
+          },
+          "unit": {
+            "type": "string",
+            "description": "展示单位（标签，不做单位换算）"
+          },
+          "enumValues": {
+            "type": "string",
+            "description": "ENUM 型的候选值（逗号分隔的数据）"
+          },
+          "comparable": {
+            "type": "boolean",
+            "description": "🔴 是否参与跨平台可比"
+          },
+          "internalRepresentation": {
+            "type": "string",
+            "description": "🔴 归一后的内部落点；为空表示该字段只能原样留在原始报文里"
+          },
+          "requiredOnInput": {
+            "type": "boolean",
+            "description": "录入是否必填"
+          },
+          "position": {
+            "type": "integer",
+            "description": "展示顺序",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "JsonNode": {
+        "type": "object",
+        "description": "🔴 平台 API 返回的差异字段原文，一个字都不改。它是「不能丢信息」的兜底：归一做错了还能回到原文重来"
+      },
+      "SavePayloadRequest": {
+        "required": [
+          "adStatus",
+          "adTypeProfileId",
+          "externalAdId",
+          "normalizedFieldKeys",
+          "rawFetchedAt",
+          "rawPayload",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "广告数据 id；留空表示新建",
+            "format": "uuid"
+          },
+          "adTypeProfileId": {
+            "type": "string",
+            "description": "广告类型档案 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalAdId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台侧广告 id"
+          },
+          "externalCampaignId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台侧广告组 id"
+          },
+          "adName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "广告名称"
+          },
+          "adStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 归一后的状态（不同平台的 ENABLED/RUNNING/ACTIVE 归到一处）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "日预算"
+          },
+          "defaultBid": {
+            "type": "string",
+            "description": "默认出价"
+          },
+          "bidFloor": {
+            "type": "string",
+            "description": "出价下限"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间（ISO-8601 带时区）",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间（ISO-8601 带时区）",
+            "format": "date-time"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "展示量"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击量"
+          },
+          "conversions": {
+            "type": "string",
+            "description": "转化量"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费"
+          },
+          "attributedRevenue": {
+            "type": "string",
+            "description": "归因销售额"
+          },
+          "rawPayload": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "rawFetchedAt": {
+            "type": "string",
+            "description": "原始报文抓取时刻（ISO-8601 带时区）",
+            "format": "date-time"
+          },
+          "normalizedFieldKeys": {
+            "type": "array",
+            "description": "🔴 声明哪些键已归一到内部字段；DB 会核对它们确实存在于原文里，不许虚报覆盖率",
+            "items": {
+              "type": "string",
+              "description": "🔴 声明哪些键已归一到内部字段；DB 会核对它们确实存在于原文里，不许虚报覆盖率"
+            }
+          },
+          "sourceRef": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源凭据（报表 id / 批次号）"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdTypePayloadRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "广告数据 id",
+            "format": "uuid"
+          },
+          "adTypeProfileId": {
+            "type": "string",
+            "description": "档案 id",
+            "format": "uuid"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始平台类型标记"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 归一后的内部类型"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "平台原始类型展示名"
+          },
+          "auctionModel": {
+            "type": "string",
+            "description": "拍卖方式"
+          },
+          "objective": {
+            "type": "string",
+            "description": "投放目标"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalAdId": {
+            "type": "string",
+            "description": "平台侧广告 id"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧广告组 id"
+          },
+          "adName": {
+            "type": "string",
+            "description": "广告名称"
+          },
+          "adStatus": {
+            "type": "string",
+            "description": "归一后的状态（跨平台可比）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "日预算"
+          },
+          "defaultBid": {
+            "type": "string",
+            "description": "默认出价"
+          },
+          "bidFloor": {
+            "type": "string",
+            "description": "出价下限"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间",
+            "format": "date-time"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "展示量"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击量"
+          },
+          "conversions": {
+            "type": "string",
+            "description": "转化量"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费"
+          },
+          "attributedRevenue": {
+            "type": "string",
+            "description": "归因销售额"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 点击率（派生列；分母为 0 时为 null=不可比，与 0 含义相反）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 单次点击成本（派生列）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率（派生列）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS（派生列）"
+          },
+          "normalizedFieldKeys": {
+            "type": "array",
+            "description": "🔴 已归一的键（保真审计的一部分）",
+            "items": {
+              "type": "string",
+              "description": "🔴 已归一的键（保真审计的一部分）"
+            }
+          },
+          "rawOnlyFieldKeys": {
+            "type": "array",
+            "description": "🔴 只留在原始报文里、没有内部落点的键（由 DB 触发器从原始报文派生，服务层传什么都不作数）",
+            "items": {
+              "type": "string",
+              "description": "🔴 只留在原始报文里、没有内部落点的键（由 DB 触发器从原始报文派生，服务层传什么都不作数）"
+            }
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 保真状态"
+          },
+          "rawFetchedAt": {
+            "type": "string",
+            "description": "原始报文抓取时刻",
+            "format": "date-time"
+          },
+          "ingestedAt": {
+            "type": "string",
+            "description": "归一入库时刻",
+            "format": "date-time"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源凭据"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "落库后的实体"
+      },
+      "SaveResponseAdTypePayloadRow": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "$ref": "#/components/schemas/AdTypePayloadRow"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 DB 派生出来的保真结果（服务层声称什么都不作数）"
+          },
+          "rawOnlyFieldKeys": {
+            "type": "array",
+            "description": "🔴 DB 派生出来的「只留在原始报文里的键」；服务层声称什么都不作数，隐瞒在此被改写出来",
+            "items": {
+              "type": "string",
+              "description": "🔴 DB 派生出来的「只留在原始报文里的键」；服务层声称什么都不作数，隐瞒在此被改写出来"
+            }
+          }
+        }
+      },
       "WarehouseProviderView": {
         "type": "object",
         "properties": {
@@ -12652,6 +13862,514 @@
           },
           "impact": {
             "type": "string"
+          }
+        }
+      },
+      "MappingResolution": {
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始类型标记"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 解析出的归一后内部类型；查不到时为 UNMAPPED"
+          },
+          "mapped": {
+            "type": "boolean",
+            "description": "🔴 是否命中了 2.1.2.1 的任一层"
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "🔴 命中哪一层：TENANT_OVERRIDE 优先于 PLATFORM_DEFAULT"
+          },
+          "enumKind": {
+            "type": "string",
+            "description": "枚举族名"
+          },
+          "precedenceNote": {
+            "type": "string",
+            "description": "生效顺序说明"
+          },
+          "unmappedReason": {
+            "type": "string",
+            "description": "为什么是未映射（命中时为空）"
+          }
+        }
+      },
+      "AdTypeProfilePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdTypeProfileRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdTypeProfileDetail": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/AdTypeProfileRow"
+          },
+          "fieldSpecs": {
+            "type": "array",
+            "description": "🔴 特有字段定义（驱动「特有字段补充展示」）",
+            "items": {
+              "$ref": "#/components/schemas/AdTypeFieldSpecRow"
+            }
+          },
+          "undocumentedKeys": {
+            "type": "array",
+            "description": "🔴 原始报文里出现、但没有任何字段定义覆盖的键 —— 它们会被保真审计列成 raw_only_field_keys，界面上必须显式告诉运营「系统没有归一这些字段」",
+            "items": {
+              "type": "string",
+              "description": "🔴 原始报文里出现、但没有任何字段定义覆盖的键 —— 它们会被保真审计列成 raw_only_field_keys，界面上必须显式告诉运营「系统没有归一这些字段」"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdTypePayloadPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdTypePayloadRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "unmappedCount": {
+            "type": "integer",
+            "description": "其中 UNMAPPED_TYPE 的条数：这些不参与任何可比聚合",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "description": "其中 PARTIAL_FIELD_COVERAGE 的条数：有字段只留在原始报文里",
+            "format": "int64"
+          }
+        }
+      },
+      "AdTypePayloadDetail": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/AdTypePayloadRow"
+          },
+          "rawPayload": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "extraFields": {
+            "type": "array",
+            "description": "🔴 特有字段补充展示（服务端已组装，前端只渲染）",
+            "items": {
+              "$ref": "#/components/schemas/ExtraFieldView"
+            }
+          },
+          "undocumentedKeys": {
+            "type": "array",
+            "description": "🔴 原始报文里没有任何字段定义覆盖的键 —— 未定义就是「系统不认识它」，必须原样露出而不是悄悄忽略",
+            "items": {
+              "type": "string",
+              "description": "🔴 原始报文里没有任何字段定义覆盖的键 —— 未定义就是「系统不认识它」，必须原样露出而不是悄悄忽略"
+            }
+          },
+          "fidelityNote": {
+            "type": "string",
+            "description": "保真说明"
+          }
+        }
+      },
+      "ExtraFieldView": {
+        "type": "object",
+        "properties": {
+          "fieldKey": {
+            "type": "string",
+            "description": "原始字段键"
+          },
+          "fieldLabel": {
+            "type": "string",
+            "description": "界面标签"
+          },
+          "dataType": {
+            "type": "string",
+            "description": "数据类型"
+          },
+          "unit": {
+            "type": "string",
+            "description": "展示单位"
+          },
+          "rawValue": {
+            "type": "string",
+            "description": "🔴 原始报文里的原值（平台原样，未加工）"
+          },
+          "normalized": {
+            "type": "boolean",
+            "description": "🔴 该字段是否有内部落点"
+          },
+          "internalRepresentation": {
+            "type": "string",
+            "description": "🔴 内部落点的列名；为空表示系统没有归一这个字段，它只原样存在于原始报文里"
+          },
+          "comparabilityNote": {
+            "type": "string",
+            "description": "解释：这一行为什么可比 / 不可比"
+          }
+        },
+        "description": "🔴 特有字段补充展示（服务端已组装，前端只渲染）"
+      },
+      "FidelityOverview": {
+        "type": "object",
+        "properties": {
+          "totalAds": {
+            "type": "integer",
+            "description": "归一后的广告条数",
+            "format": "int64"
+          },
+          "normalizedAds": {
+            "type": "integer",
+            "description": "🔴 完全归一（NORMALIZED）的条数",
+            "format": "int64"
+          },
+          "partialAds": {
+            "type": "integer",
+            "description": "🔴 部分覆盖（PARTIAL_FIELD_COVERAGE）的条数",
+            "format": "int64"
+          },
+          "unmappedAds": {
+            "type": "integer",
+            "description": "🔴 未映射类型（UNMAPPED_TYPE）的条数",
+            "format": "int64"
+          },
+          "rawOnlyFields": {
+            "type": "array",
+            "description": "🔴 只留在原始报文里、没有内部落点的字段按出现次数排序 —— 这是「系统没有归一这些字段」的明账，运营要能直接看见",
+            "items": {
+              "$ref": "#/components/schemas/RawOnlyFieldCount"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "RawOnlyFieldCount": {
+        "type": "object",
+        "properties": {
+          "fieldKey": {
+            "type": "string",
+            "description": "原始字段键"
+          },
+          "occurrences": {
+            "type": "integer",
+            "description": "出现条数",
+            "format": "int64"
+          }
+        },
+        "description": "🔴 只留在原始报文里、没有内部落点的字段按出现次数排序 —— 这是「系统没有归一这些字段」的明账，运营要能直接看见"
+      },
+      "ComparableTypeSummary": {
+        "type": "object",
+        "properties": {
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 归一后的内部类型"
+          },
+          "adCount": {
+            "type": "integer",
+            "description": "该类型下的广告条数",
+            "format": "int64"
+          },
+          "platformCount": {
+            "type": "integer",
+            "description": "覆盖的平台数（归一后才有的维度）",
+            "format": "int32"
+          },
+          "markers": {
+            "type": "array",
+            "description": "各平台的原始类型标记 —— 归一让它们可比，但标记必须一并留着",
+            "items": {
+              "$ref": "#/components/schemas/PlatformTypeMarker"
+            }
+          },
+          "auctionModels": {
+            "type": "array",
+            "description": "拍卖方式（同一内部类型下应当一致，不一致说明归一口径有问题）",
+            "items": {
+              "type": "string",
+              "description": "拍卖方式（同一内部类型下应当一致，不一致说明归一口径有问题）"
+            }
+          },
+          "objectives": {
+            "type": "array",
+            "description": "投放目标",
+            "items": {
+              "type": "string",
+              "description": "投放目标"
+            }
+          },
+          "impressions": {
+            "type": "string",
+            "description": "展示量合计"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击量合计"
+          },
+          "conversions": {
+            "type": "string",
+            "description": "转化量合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "attributedRevenue": {
+            "type": "string",
+            "description": "归因销售额合计"
+          },
+          "comparabilityNote": {
+            "type": "string",
+            "description": "🔴 汇总口径说明：为什么这些数可以横向比"
+          }
+        },
+        "description": "按归一后内部类型聚合的可比汇总（不含 UNMAPPED）"
+      },
+      "ComparableView": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "type": "array",
+            "description": "按归一后内部类型聚合的可比汇总（不含 UNMAPPED）",
+            "items": {
+              "$ref": "#/components/schemas/ComparableTypeSummary"
+            }
+          },
+          "unmappedTypes": {
+            "type": "array",
+            "description": "🔴 未映射的原始类型清单：这些广告**存在且带完整原始标记**，只是 2.1.2.1 没有归一口径，因此不参与上面的横向比较",
+            "items": {
+              "$ref": "#/components/schemas/UnmappedTypeSummary"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "可比口径总说明"
+          }
+        }
+      },
+      "PlatformTypeMarker": {
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 该平台上的原始类型标记"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "该平台上的展示名"
+          },
+          "adCount": {
+            "type": "integer",
+            "description": "该平台该类型下的广告条数",
+            "format": "int64"
+          }
+        },
+        "description": "各平台的原始类型标记 —— 归一让它们可比，但标记必须一并留着"
+      },
+      "UnmappedTypeSummary": {
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始类型标记"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "展示名"
+          },
+          "adCount": {
+            "type": "integer",
+            "description": "该原始类型下的广告条数",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 为什么没进可比表：上游 2.1.2.1 的 platform_enum_mapping / platform_enum_override 都没有 enum_kind=AD_TYPE、external_value=该标记 的行"
+          }
+        },
+        "description": "🔴 未映射的原始类型清单：这些广告**存在且带完整原始标记**，只是 2.1.2.1 没有归一口径，因此不参与上面的横向比较"
+      },
+      "AdTypeCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdTypeDiffCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdTypeCapabilityDimension"
+            }
+          },
+          "internalAdTypes": {
+            "type": "array",
+            "description": "归一后的内部广告类型全集（UNMAPPED 是显式值，不是兜底）",
+            "items": {
+              "type": "string",
+              "description": "归一后的内部广告类型全集（UNMAPPED 是显式值，不是兜底）"
+            }
+          },
+          "mappingSources": {
+            "type": "array",
+            "description": "归一口径来源：走 2.1.2.1 的哪一层",
+            "items": {
+              "type": "string",
+              "description": "归一口径来源：走 2.1.2.1 的哪一层"
+            }
+          },
+          "auctionModels": {
+            "type": "array",
+            "description": "拍卖方式取值",
+            "items": {
+              "type": "string",
+              "description": "拍卖方式取值"
+            }
+          },
+          "objectives": {
+            "type": "array",
+            "description": "投放目标取值",
+            "items": {
+              "type": "string",
+              "description": "投放目标取值"
+            }
+          },
+          "fieldDataTypes": {
+            "type": "array",
+            "description": "特有字段的数据类型",
+            "items": {
+              "type": "string",
+              "description": "特有字段的数据类型"
+            }
+          },
+          "mappingStatuses": {
+            "type": "array",
+            "description": "保真状态取值",
+            "items": {
+              "type": "string",
+              "description": "保真状态取值"
+            }
+          },
+          "normalizationNote": {
+            "type": "string",
+            "description": "归一与保真的总口径"
+          },
+          "fidelityNote": {
+            "type": "string",
+            "description": "「不能丢信息」的物理落点说明"
+          },
+          "unmappedNote": {
+            "type": "string",
+            "description": "「未映射不兜底」的说明（照抄 2.1.2.1 加粗句）"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
           }
         }
       }
