@@ -169,7 +169,8 @@ class LogisticsTransitIntegrationTest {
       // 🔴 cascade 是必需的：logistics_channel_config 是**渠道配置的父表**，除本模块
       //   10.1.1.3 的三张表外，下游模块也按渠道对它建了复合外键
       //   （10.1.2.1 运费计算器 V140：freight_rate_card / freight_channel_country /
-      //   freight_quote_line）。TRUNCATE 一张被外键引用的表时 PostgreSQL 要求把**全部**
+      //   freight_quote_line；10.2.2.2 面单模板 V141：logistics_label_template）。
+      //   TRUNCATE 一张被外键引用的表时 PostgreSQL 要求把**全部**
       //   引用表一并处理，否则报 23503「cannot truncate a table referenced in a foreign
       //   key constraint」—— 症状是本类**每个**用例在 setUp 里就炸，与断言无关。
       //   显式列举本模块关心的表 + cascade 兜住下游引用，是与

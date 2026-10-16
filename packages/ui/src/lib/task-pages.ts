@@ -558,7 +558,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/channels',
-    implemented: false,
+    implemented: true,
     domain: 'logistics',
     label: '物流渠道',
     description: '维护承运商服务、计费规则与可达范围。',

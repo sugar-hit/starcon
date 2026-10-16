@@ -25,10 +25,25 @@ import { describe, expect, it } from 'vitest';
 
 const TRADE_PREFIX = 'trade/';
 
-/** 从 api-proxy.ts 抽出 trade 服务那条白名单正则。 */
+/**
+ * 从 api-proxy.ts 抽出 trade 服务那条白名单正则。
+ *
+ * <p><b>为什么锚在行首而不是裸子串</b>：`prefix: 'trade/'` 这个字面量同时也出现在
+ * 解释「插入锚点固定在 `prefix: 'trade/'` 之前」的那些注释里 —— 那是有意的文档约定，
+ * 每条新车道都会写。所以裸 {@code indexOf} 会命中**注释**（第 745 行），切片起点落在
+ * 注释上，随后 {@code indexOf('/^')} 找到的是**下一条 channel/ 元素**的正则，
+ * 于是拿 channel 的正则去断言 trade 路径 —— 失败，而且失败原因看起来像「白名单缺条目」。
+ *
+ * <p>真实元素行以缩进的 {@code prefix:} 开头（注释行以 {@code //} 开头），
+ * 所以这里按行首匹配元素属性本身。这样再加多少条解释锚点的注释都伤不到守卫。
+ */
 function tradePattern(): RegExp {
   const source = readFileSync(join(__dirname, 'api-proxy.ts'), 'utf8');
-  const block = source.slice(source.indexOf(`prefix: '${TRADE_PREFIX}'`));
+  const anchor = source.search(new RegExp(`^\\s*prefix: '${TRADE_PREFIX}'`, 'm'));
+  if (anchor < 0) {
+    throw new Error(`未能从 api-proxy.ts 里定位真实元素 prefix: '${TRADE_PREFIX}'`);
+  }
+  const block = source.slice(anchor);
   const start = block.indexOf('/^');
   if (start < 0) throw new Error('未能从 api-proxy.ts 里定位 trade 白名单正则起点');
   for (let i = start + 1; i < block.length; i++) {

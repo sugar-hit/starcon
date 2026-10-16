@@ -154,6 +154,8 @@ class LogisticsChannelIntegrationTest {
       //     logistics_marking_requirement 按「时效与限制归属渠道」引用本表；
       //   * 10.1.2.1 运费计算器（V140）：freight_rate_card / freight_channel_country /
       //     freight_quote_line 按「费率与试算单归属渠道」引用本表。
+      //   * 10.2.2.2 面单模板（V141）：logistics_label_template 按「面单模板归属渠道」
+      //     引用本表（面单的渠道规则强绑定判定就建在这条外键上）。
       // 🔴 cascade 不是顺手加的，是必需的：TRUNCATE 一张被外键引用的表时，PostgreSQL
       //   要求把**全部**引用表一并处理，否则报 23503「cannot truncate a table referenced
       //   in a foreign key constraint」—— 症状是本类**每个**用例在 setUp 里就炸，
