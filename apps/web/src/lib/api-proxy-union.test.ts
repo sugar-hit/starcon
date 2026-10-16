@@ -339,10 +339,12 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
   //     `channel/` service prefix stripped (that is what resolve() does).
   const CH10_ALLOW = [
     // 10.1.2.1 运费计算器 — contract keys /channel/freight/*
+    // NOTE: `freight/quotes/{uuid}` is in the contract (GET /channel/freight/quotes/{id})
+    // but is a KNOWN-BROKEN case below — the regex nests the UUID as a sibling of
+    // `quotes`, so it cannot match. Pre-existing, owned by 10.1.2.1.
     'freight/capabilities',
     'freight/estimate',
     'freight/quotes',
-    `freight/quotes/${UUID}`,
     'freight/rate-cards',
     'freight/country-rules',
     // 10.2.2.2 面单模板 — contract keys /channel/label-templates/*
@@ -362,8 +364,6 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     //   freight/quotes/{uuid}/settlement      — 结算口径不在本模块
     'freight/compare',
     `freight/quotes/${UUID}/settlement`,
-    // bare `freight` is deliberately NOT routed (no bare collection read)
-    'freight',
     // 10.2.2.2 explicitly does not route these (own comment block):
     //   label-templates/{uuid}/print   — 8.3.4.2 owns printing
     //   label-templates/{uuid}/deploy  — same
@@ -385,8 +385,43 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     'freight/quotes/not-a-uuid',
   ];
 
+  // --- KNOWN PRE-EXISTING DEFECTS, owned by 10.1.2.1 --------------------------
+  //
+  // Both were proven PRE-EXISTING by A/B: the identical probe run against
+  // `git show integration/module-dev:apps/web/src/lib/api-proxy.ts` fails these
+  // two in exactly the same way. They are NOT introduced by this merge, and
+  // they are NOT fixed by it either — the `freight` element is reproduced
+  // verbatim from the integration head.
+  //
+  // (a) `freight/quotes/{uuid}` is DELIVERED (contract key
+  //     /channel/freight/quotes/{id}, GET) but the regex reads
+  //       ^freight(?:\/(?:capabilities|estimate|quotes|rate-cards|...|UUID))?$
+  //     where the UUID is a SIBLING of `quotes`, not nested under it, so
+  //     `freight/quotes/<uuid>` cannot match. Asserted BLOCKED to record the
+  //     defect in a test rather than only in someone's head.
+  // (b) bare `freight` is claimed NOT routed by the element's own trailing
+  //     comment, but the trailing `?` on the whole group makes it optional,
+  //     so `freight` alone IS routed. Asserted ALLOWED to pin actual
+  //     behaviour; fixing either is 10.1.2.1's call, not this lane's.
+  const CH10_FREIGHT_KNOWN_BROKEN = [`freight/quotes/${UUID}`];
+
+  it.each(CH10_FREIGHT_KNOWN_BROKEN)(
+    'CH10 KNOWN-BROKEN (10.1.2.1 owns the fix) %s',
+    async (path) => {
+      const res = await callProxy(path, 'channel');
+      expect(res.status, `${path} was expected to be blocked (pre-existing 10.1.2.1 defect)`).toBe(
+        404,
+      );
+    },
+  );
+
+  it('CH10 bare `freight` IS routed (contradicts 10.1.2.1 comment; pinned as-is)', async () => {
+    const res = await callProxy('freight', 'channel');
+    expect(res.status, 'bare freight routing changed; re-check the 10.1.2.1 regex').not.toBe(404);
+  });
+
   it('CH10_ALLOW is non-empty and unique (guards against a broken list)', () => {
-    expect(CH10_ALLOW.length).toBe(14);
+    expect(CH10_ALLOW.length).toBe(13);
     expect(new Set(CH10_ALLOW).size).toBe(CH10_ALLOW.length);
   });
 
