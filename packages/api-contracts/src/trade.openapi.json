@@ -12995,6 +12995,221 @@
         }
       }
     },
+    "/trade/aftersales/reasons/mappings": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mappingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonMappingCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/categories": {
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_categories",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonCategoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonTreeNode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/attributions": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_attributions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonAttributionView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_attributions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonAttributionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonAttributionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/cases": {
       "get": {
         "tags": [
@@ -13458,6 +13673,168 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AftersalesBulkResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/mappings/{id}": {
+      "delete": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "delete_trade_aftersales_reasons_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "patch_trade_aftersales_reasons_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonMappingCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/categories/{id}": {
+      "delete": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "delete_trade_aftersales_reasons_categories_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "patch_trade_aftersales_reasons_categories_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonCategoryUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonTreeNode"
                 }
               }
             }
@@ -20150,6 +20527,123 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/B2BCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/tree": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_tree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rootKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignableOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonTree"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/reports": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_reports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/capabilities": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonCapabilities"
                 }
               }
             }
@@ -35768,6 +36262,426 @@
           }
         }
       },
+      "AftersalesReasonMappingCreate": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "内部原因分类 ID。**新建时必填**（服务端校验）；更新时传 null 表示不改内部分类",
+            "format": "uuid",
+            "nullable": true
+          },
+          "platformSource": {
+            "type": "string",
+            "description": "平台来源"
+          },
+          "platformReasonCode": {
+            "type": "string",
+            "description": "平台原因码"
+          },
+          "platformReasonName": {
+            "type": "string",
+            "description": "平台原因名（平台返回的原文，缺省空）",
+            "nullable": true
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "来源，缺省 TENANT_MAINTAINED",
+            "nullable": true
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用；mappingSource=MODULE_2_ENUM_MAPPING 时**必填**（哪份来源的哪一段）",
+            "nullable": true
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻（**不是**登记时刻），缺省取当前时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "状态，缺省 ACTIVE",
+            "nullable": true
+          }
+        },
+        "description": "新建/更新平台原因码映射（trade 自有表，非跨服务读；更新时 categoryId 可空表示不改）"
+      },
+      "AftersalesReasonMappingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "映射 ID",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "内部原因分类 ID",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "内部原因分类编码"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "内部原因分类名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "platformSource": {
+            "type": "string",
+            "description": "平台来源"
+          },
+          "platformReasonCode": {
+            "type": "string",
+            "description": "平台原因码"
+          },
+          "platformReasonName": {
+            "type": "string",
+            "description": "平台原因名"
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "来源"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻（不是登记时刻）",
+            "format": "date-time"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "状态"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "平台原因码映射（读回）"
+      },
+      "AftersalesReasonCategoryCreate": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "type": "string",
+            "description": "父分类 ID；null 表示建根",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "编码，租户内唯一（大写字母 / 数字 / 点 / 下划线 / 连字符）"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "根口径；建根时**必填**且只能是七类之一，建子节点时必须为 null",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位，缺省 0",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "说明，缺省空",
+            "nullable": true
+          }
+        },
+        "description": "新建原因分类"
+      },
+      "AftersalesReasonTreeNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "分类 ID",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "父分类 ID；根为 null",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "编码（租户内唯一，报表的稳定锚点，改名不改编码）"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "根口径；非根节点为 null",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "根口径中文名",
+            "nullable": true
+          },
+          "categoryStatus": {
+            "type": "string",
+            "description": "状态 ACTIVE / DISABLED"
+          },
+          "categoryStatusLabel": {
+            "type": "string",
+            "description": "状态中文名"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位（同一层内，报表导出按它定序）",
+            "format": "int32"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级，1 是根",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "description": "直接子分类数",
+            "format": "int64"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "引用了这个分类的**全部版本**归因成员数（含历史版本）",
+            "format": "int64"
+          },
+          "assignable": {
+            "type": "boolean",
+            "description": "当前是否可被新归因选中：ACTIVE 且全部祖先 ACTIVE"
+          },
+          "notAssignableReason": {
+            "type": "string",
+            "description": "不可选的原因；可选时为 null",
+            "nullable": true
+          },
+          "codePath": {
+            "type": "string",
+            "description": "从根到本节点的编码路径，如 ROOT.QUALITY_DEFECT/APPEARANCE_DEFECT"
+          },
+          "namePath": {
+            "type": "string",
+            "description": "从根到本节点的名称路径"
+          },
+          "description": {
+            "type": "string",
+            "description": "说明"
+          }
+        },
+        "description": "原因分类树节点"
+      },
+      "AftersalesReasonAttributionCreate": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "description": "售后单 ID",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "补充说明（自由文本，≤1000 字符）。**不能替代**分类选择"
+          },
+          "items": {
+            "type": "array",
+            "description": "原因列表，至少一个、最多 10 个，恰好一个主因",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonAttributionItem"
+            }
+          }
+        },
+        "description": "登记一次归因（替换语义；至少一个原因、恰好一个主因）"
+      },
+      "AftersalesReasonAttributionItem": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "原因分类 ID",
+            "format": "uuid"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "是否为主因；一次归因**恰好一个**为 true"
+          },
+          "weight": {
+            "type": "number",
+            "description": "权重，(0, 1]，小数点后六位。必填，不接受默认值 1"
+          }
+        },
+        "description": "归因里的一个原因分类"
+      },
+      "AftersalesReasonAttributionItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "成员 ID",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "原因分类 ID",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "原因分类编码"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "原因分类名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级",
+            "format": "int32"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "是否主因"
+          },
+          "weight": {
+            "type": "number",
+            "description": "权重"
+          },
+          "codePath": {
+            "type": "string",
+            "description": "编码路径"
+          }
+        },
+        "description": "归因成员（读回）"
+      },
+      "AftersalesReasonAttributionSetRow": {
+        "type": "object",
+        "properties": {
+          "setId": {
+            "type": "string",
+            "description": "归因集合 ID",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "补充说明（自由文本，非空也**不构成**一次归因）"
+          },
+          "items": {
+            "type": "array",
+            "description": "归因成员",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonAttributionItemRow"
+            }
+          },
+          "itemCount": {
+            "type": "integer",
+            "description": "成员数（恒 >= 1，恒 == 1 个主因，由 DB 提交期约束保证）",
+            "format": "int32"
+          },
+          "primaryCount": {
+            "type": "integer",
+            "description": "主因数（恒为 1）",
+            "format": "int32"
+          },
+          "weightSum": {
+            "type": "number",
+            "description": "权重合计（供界面提示是否需要重新分配）"
+          },
+          "attributedBy": {
+            "type": "string",
+            "description": "归因人",
+            "format": "uuid",
+            "nullable": true
+          },
+          "attributedAt": {
+            "type": "string",
+            "description": "归因时刻",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "是否当前生效"
+          },
+          "supersededAt": {
+            "type": "string",
+            "description": "被哪一版取代的时刻；当前版为 null",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "归因集合（一个版本）",
+        "nullable": true
+      },
+      "AftersalesReasonAttributionView": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "description": "售后单 ID",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string",
+            "description": "售后单号（aftersales_case.case_no，只读）",
+            "nullable": true
+          },
+          "attributed": {
+            "type": "boolean",
+            "description": "是否已归因；false 表示从未归因（不是「归因为空」）"
+          },
+          "current": {
+            "$ref": "#/components/schemas/AftersalesReasonAttributionSetRow"
+          },
+          "versionCount": {
+            "type": "integer",
+            "description": "历史版本数（按归因时刻倒序，含当前版）",
+            "format": "int64"
+          },
+          "noteSemantics": {
+            "type": "string",
+            "description": "自由文本的语义说明（前端必须照此渲染，不能把它显示成「原因」）"
+          },
+          "enforcementNote": {
+            "type": "string",
+            "description": "「强制选择分类」的说明"
+          }
+        },
+        "description": "一张售后单的当前归因"
+      },
       "AftersalesCaseCreate": {
         "type": "object",
         "properties": {
@@ -36377,6 +37291,42 @@
             "type": "string"
           }
         }
+      },
+      "AftersalesReasonCategoryUpdate": {
+        "type": "object",
+        "properties": {
+          "categoryName": {
+            "type": "string",
+            "description": "新名称；不传表示不改",
+            "nullable": true
+          },
+          "categoryStatus": {
+            "type": "string",
+            "description": "新状态 ACTIVE / DISABLED；不传表示不改",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "新排序位；不传表示不改",
+            "format": "int32",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "description": "新父分类 ID；不传表示不改，null 不表示移到根（用 moveToRoot）",
+            "format": "uuid",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "新说明；空串表示清空，null 表示不改"
+          },
+          "moveToRoot": {
+            "type": "boolean",
+            "description": "把节点移到根（必须同时不传 parentId）；默认 false"
+          }
+        },
+        "description": "更新原因分类（只改这些列；rootKind / categoryCode 刻意不可改）"
       },
       "SalesOrderPage": {
         "type": "object",
@@ -49596,6 +50546,349 @@
             "type": "string"
           }
         }
+      },
+      "AftersalesReasonTree": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "节点列表（确定性顺序，前端可按 codePath 建树）",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonTreeNode"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "节点总数",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "description": "启用中的节点数",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "description": "停用的节点数",
+            "format": "int64"
+          },
+          "maxDepth": {
+            "type": "integer",
+            "description": "最大层数",
+            "format": "int32"
+          },
+          "baselineVocabularySeeded": {
+            "type": "boolean",
+            "description": "七类根口径是否已作为基线词表落库到当前租户"
+          },
+          "baselineSeededOnThisRead": {
+            "type": "boolean",
+            "description": "本次读取是否刚刚落库了基线词表（true 表示这是该租户第一次打开本模块）"
+          },
+          "orderedBy": {
+            "type": "string",
+            "description": "排序键（原样报出，报表导出的确定性由它保证）"
+          },
+          "treeRules": {
+            "type": "string",
+            "description": "树结构约束说明"
+          },
+          "scope": {
+            "type": "string",
+            "description": "返回的是全树还是某个子树"
+          }
+        },
+        "description": "原因分类树整树"
+      },
+      "AftersalesReasonReport": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "description": "按分类的明细行（确定性顺序）",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonReportRow"
+            }
+          },
+          "rootTotals": {
+            "type": "array",
+            "description": "按七类根口径的汇总行（七类全部出现，零也出现）",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonRootTotal"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "统计基准时刻（整份报表共用一个）",
+            "format": "date-time"
+          },
+          "attributedCaseCount": {
+            "type": "integer",
+            "description": "已归因的售后单数（当前生效集合的去重单数）",
+            "format": "int64"
+          },
+          "unattributedCaseCount": {
+            "type": "integer",
+            "description": "有售后单但从未归因的单数",
+            "format": "int64"
+          },
+          "attributionItemCount": {
+            "type": "integer",
+            "description": "参与统计的原因成员总数",
+            "format": "int64"
+          },
+          "totalWeight": {
+            "type": "number",
+            "description": "权重合计"
+          },
+          "semantics": {
+            "type": "string",
+            "description": "统计口径说明（下游直接取用，不必自己再定一套）"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "下游模块的交付状态"
+          }
+        },
+        "description": "原因分类报表（统一口径）"
+      },
+      "AftersalesReasonReportRow": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "分类 ID",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "分类编码"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "分类名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级；> 1 表示它同时被汇总进所属根口径",
+            "format": "int32"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位",
+            "format": "int32"
+          },
+          "primaryCaseCount": {
+            "type": "integer",
+            "description": "作为主因的归因单数",
+            "format": "int64"
+          },
+          "secondaryCaseCount": {
+            "type": "integer",
+            "description": "作为次因的归因单数",
+            "format": "int64"
+          },
+          "attributionCaseCount": {
+            "type": "integer",
+            "description": "被选中的归因单数（主因 + 次因）",
+            "format": "int64"
+          },
+          "caseSharePercent": {
+            "type": "number",
+            "description": "占比（归因单数 ÷ 生效归因单总数，两位小数四舍五入）"
+          },
+          "weightSum": {
+            "type": "number",
+            "description": "权重合计（主因权重 + 次因权重）"
+          }
+        },
+        "description": "报表行（一个原因分类）"
+      },
+      "AftersalesReasonRootTotal": {
+        "type": "object",
+        "properties": {
+          "rootKind": {
+            "type": "string",
+            "description": "根口径"
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "根口径中文名"
+          },
+          "primaryCaseCount": {
+            "type": "integer",
+            "description": "该口径下作为主因的归因单数",
+            "format": "int64"
+          },
+          "attributionCaseCount": {
+            "type": "integer",
+            "description": "该口径下被选中的归因单数（含次因，已按单去重）",
+            "format": "int64"
+          },
+          "caseSharePercent": {
+            "type": "number",
+            "description": "占比（该口径归因单数 ÷ 生效归因单总数，两位小数四舍五入）"
+          }
+        },
+        "description": "按七类根口径汇总的一行"
+      },
+      "AftersalesReasonMappingList": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "description": "映射行",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonMappingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "命中总数",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "description": "生效映射数",
+            "format": "int64"
+          },
+          "ownershipNote": {
+            "type": "string",
+            "description": "本表归属服务的说明"
+          },
+          "orderedBy": {
+            "type": "string",
+            "description": "排序键（原样报出）"
+          }
+        },
+        "description": "平台原因码映射列表"
+      },
+      "AftersalesReasonCapabilities": {
+        "type": "object",
+        "properties": {
+          "supportedDimensions": {
+            "type": "array",
+            "description": "真实存在的分类字段与口径，逐条给出列名 / 函数名",
+            "items": {
+              "type": "string",
+              "description": "真实存在的分类字段与口径，逐条给出列名 / 函数名"
+            }
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "description": "当前不可得或刻意不提供的维度",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonDimension"
+            }
+          },
+          "rootKinds": {
+            "type": "array",
+            "description": "七类根口径词表（与 DB 的 root_kind CHECK 逐字一致）",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonEnumOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台来源词表",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonEnumOption"
+            }
+          },
+          "baselineVocabularySeeded": {
+            "type": "boolean",
+            "description": "蓝图点名的七类是否已作为基线词表落库到当前租户"
+          },
+          "maxDepth": {
+            "type": "integer",
+            "description": "分类树最大层数（V158 的 depth CHECK）",
+            "format": "int32"
+          },
+          "maxAttributionItems": {
+            "type": "integer",
+            "description": "单次归因可选的原因个数上限（服务层校验）",
+            "format": "int32"
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean",
+            "description": "是否可跨服务读取上游 2.1.2.1 的枚举映射表"
+          },
+          "platformMappingOwnerModule": {
+            "type": "string",
+            "description": "平台原因码映射的归属模块号（跨服务读不可得时的实际归属）"
+          },
+          "qualityAnalysisDelivered": {
+            "type": "boolean",
+            "description": "质量分析是否已交付（11.5.2）"
+          },
+          "supplierClaimDelivered": {
+            "type": "boolean",
+            "description": "供应商索赔是否已交付（6.4.2.2）"
+          },
+          "platformMappingNote": {
+            "type": "string",
+            "description": "平台原因码映射的说明"
+          },
+          "forcedClassificationNote": {
+            "type": "string",
+            "description": "「强制选择分类」的实现方式"
+          },
+          "reportSemantics": {
+            "type": "string",
+            "description": "报表口径说明（下游 11.5.2 直接取用）"
+          }
+        },
+        "description": "11.1.2.1 原因分类的能力声明与上下游可用性"
+      },
+      "AftersalesReasonDimension": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "维度标识"
+          },
+          "label": {
+            "type": "string",
+            "description": "维度中文名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否可得"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块号"
+          },
+          "detail": {
+            "type": "string",
+            "description": "为什么不可得 / 为什么刻意不提供"
+          }
+        },
+        "description": "不可得维度 + 归属模块 + 原因"
+      },
+      "AftersalesReasonEnumOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "枚举值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          }
+        },
+        "description": "枚举下拉项"
       },
       "AftersalesCaseSortOption": {
         "type": "object",
