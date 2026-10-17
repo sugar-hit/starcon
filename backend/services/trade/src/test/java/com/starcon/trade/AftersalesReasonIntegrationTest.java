@@ -1406,6 +1406,63 @@ class AftersalesReasonIntegrationTest {
     http.perform(get("/trade/aftersales/reasons/reports")).andExpect(status().isUnauthorized());
   }
 
+  /**
+   * 回归：<b>「只切启用/停用」的映射更新在 HTTP 边界上必须真的能成。</b>
+   *
+   * <p>⚠️ 这条测试是被一个<b>契约与运行时对不上</b>的缺陷逼出来的：
+   * 契约把 {@code AftersalesReasonMappingCreate.categoryId} 声明成必填 {@code string}，
+   * 而更新端点的语义是「传了才改」（服务层 {@code coalesce(?::uuid, category_id)} 与
+   * {@code if (categoryId() != null)} 都按可空处理）。前端做状态切换时**不传内部分类**，
+   * 被必填的 {@code string} 逼得只能发 {@code ""} —— 靠 Jackson 的空串→null 强制转换
+   * 才能蒙对。
+   *
+   * <p>为什么这值得钉住：{@code ""} 能蒙对是<b>实现细节而不是契约</b> ——
+   * 全局 {@code CoercionConfig} 一改、或者换掉 {@code FAIL_ON_NULL_FOR_PRIMITIVES} 类配置，
+   * 这个按钮就会突然开始 400，而 CI 全绿。契约标 {@code nullable} 之后，
+   * 前端发的是**显式的 null**（「不改内部分类」），不再依赖任何隐式转换。
+   *
+   * <p>所以这里只断 ①：显式 null 的 PATCH 真的 200 且状态翻过来了。
+   * <b>不断言 ②（空串）</b>：那是把「当前 Jackson 版本的强制转换行为」写死成契约，
+   * 反而会阻止将来正确的配置收紧。
+   */
+  @Test
+  void 只切启用停用的映射更新在http边界上能成_内部分类可以显式传null表示不改() throws Exception {
+    UUID caseId = seedCase("SO-MAPPING-TOGGLE");
+    var q = node("ROOT.QUALITY_DEFECT");
+    var row =
+        asWriter(
+            () ->
+                reasons.createMapping(
+                    new AftersalesReasonMappingCreate(
+                        q.id(), "AMAZON", "TOGGLE_PROBE", null, null, null, null, null),
+                    user));
+
+    // ① 前端真实发的那个形状：只给 mappingStatus，内部分类显式传 null。
+    //    ⚠️ 其余字段刻意全部省略，证明「只切状态」不需要回填匹配键。
+    http.perform(patch("/trade/aftersales/reasons/mappings/{id}", row.id().toString())
+            .header("Authorization", "Bearer tenant-a")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"categoryId\":null,\"mappingStatus\":\"DISABLED\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.mappingStatus").value("DISABLED"));
+    assertThat(asWriter(() -> reasons.mappings(null, null, null)).activeCount())
+        .as("停用之后生效映射数应当少一条")
+        .isEqualTo(0);
+
+    // ② 切回来同样只给状态：证明「可空」是双向可用的，
+    //    而不是只有停用这一个方向能走。
+    http.perform(patch("/trade/aftersales/reasons/mappings/{id}", row.id().toString())
+            .header("Authorization", "Bearer tenant-a")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"categoryId\":null,\"mappingStatus\":\"ACTIVE\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.mappingStatus").value("ACTIVE"))
+        // 内部分类没被动过 —— 「传 null 表示不改」必须真的什么都不改。
+        .andExpect(jsonPath("$.categoryId").value(q.id().toString()));
+
+    asWriterVoid(() -> reasons.deleteMapping(row.id()));
+  }
+
   @Test
   void 迁移确实建出了四张表_而且都强制rls_分类表与映射表是活表_归因两表追加式() {
     for (String table :

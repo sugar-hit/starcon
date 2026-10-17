@@ -382,16 +382,29 @@ public final class AftersalesReasonModels {
   // ================================================================ 平台原因码映射
 
   /**
-   * 新建一条平台原因码映射。
+   * 新建 / 更新一条平台原因码映射（<b>同一个 DTO 兼任两种写入口</b>）。
    *
-   * <p>⚠️ 这张表在 **trade 库**，不是 channel 的 {@code platform_enum_mapping}
+   * <p>本表在 **trade 库**，不是 channel 的 {@code platform_enum_mapping}
    * （实查：那张表在 channel 服务独立库 starcon_channel，禁止跨服务 SQL / FK / 视图）。
    * 本表形状与 channel 的枚举映射**语义一致**（内部口径 ⇄ 平台码 + 来源 + 采集时刻），
    * 同步器将来按同一形状写入时**表结构与查询都不用改**。
+   *
+   * <p>⚠️ <b>{@code categoryId} 标成 nullable 是为了让契约说出更新路径的真实语义</b>：
+   * 更新端点是「传了才改」（{@code coalesce(?::uuid, category_id)} 与
+   * {@code if (categoryId() != null)} 都按可空处理），而契约若把它声明成必填
+   * {@code string}，前端做「只切启用/停用」时就只能发 {@code ""}，
+   * 依赖 Jackson 的空串→null 强制转换才能蒙对 ——
+   * 那是<b>实现细节不是契约</b>，全局 {@code CoercionConfig} 一改就会开始 400 而 CI 全绿。
+   * 可空之后前端发的是显式的 null（「不改内部分类」）。
+   * POST 侧仍由 {@code createMapping} 的「必须指定内部原因分类」服务端校验强制。
    */
-  @Schema(description = "新建平台原因码映射（trade 自有表，非跨服务读）")
+  @Schema(description = "新建/更新平台原因码映射（trade 自有表，非跨服务读；更新时 categoryId 可空表示不改）")
   public record AftersalesReasonMappingCreate(
-      @Schema(description = "内部原因分类 ID") UUID categoryId,
+      @Schema(
+              nullable = true,
+              description =
+                  "内部原因分类 ID。**新建时必填**（服务端校验）；更新时传 null 表示不改内部分类")
+          UUID categoryId,
       @Schema(description = "平台来源") String platformSource,
       @Schema(description = "平台原因码") String platformReasonCode,
       @Schema(nullable = true, description = "平台原因名（平台返回的原文，缺省空）")
