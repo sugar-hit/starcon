@@ -1053,6 +1053,56 @@ const services: readonly {
     // 裸路径 orders/risk-validation **刻意不放行**：后端没有对应映射。
   },
   {
+    // 9.3.3.1 履约请求（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**：与另外三条并行车道的插入点
+    // 被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                        能力与上下游可用性（**下游三个全部未接通**，
+    //                                        含 reservesUpstreamStock=false 这类必须显式报出的事实）
+    //   requests/{uuid}                     详情（头 + 步骤 + 预占 + 出库单 + 作业 + 超时 + 事件）
+    //   requests/{uuid}/advance             推进状态（expectedVersion 必填，冲突回 409）
+    //   requests/{uuid}/block               挂起（超时 / 步骤失败 / 回执陈旧）
+    //   requests/{uuid}/retry               重试 / 断点恢复（resumeReason 必填）
+    //   requests/{uuid}/cancel              取消（终态，reason 必填）
+    //   requests/{uuid}/complete            登记跟踪完成（TRACK 步）并收尾
+    //   requests/{uuid}/reservation         发出锁定预占指令（登记 7.2，**不假装已锁**）
+    //   requests/{uuid}/reservation/ack     登记 7.2 的预占回执
+    //   requests/{uuid}/outbound-order      发出库单指令（登记 8.3.1）
+    //   requests/{uuid}/outbound-order/ack  登记 8.3.1 的出库单回执
+    //   requests/{uuid}/work-orders         批量编排作业（只有 POST，没有 GET 集合读）
+    //   requests/{uuid}/work-orders/{uuid2}/status  登记单条作业状态
+    //   requests/resumable                  可恢复清单（断点恢复入口）
+    //   requests/scan-timeouts              扫描已超时的流程并挂起（只有 POST）
+    //   requests/timeouts                   超时 / 失败检出记录列表
+    //
+    // 判别顺序：**字面量子路径（capabilities / resumable / scan-timeouts / timeouts）
+    // 必须排在 {uuid} 分支之前**，否则它们的 id 段会被 uuid 分支吃掉半截，
+    // 正则静默匹配失败，或更糟：拼出一个「id=timeouts 的请求」被凭空放行。
+    // ⚠ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `fulfillment/requests/{uuid}/release` —— 释放预占是 9.3.3.2 的处置入口，未开发
+    //   * `fulfillment/requests/{uuid}/exceptions` —— 异常清单同样判给 9.3.3.2
+    //   * `fulfillment/requests/{uuid}/waybill` —— 运单主权在 9.4.1.1 / 8.3.4.2
+    //   * 任何**本模块不存在的 path**：后端没有对应映射，放行只会拿到 404/405。
+    // ⚠ 关于 DELETE：本白名单是**按 path 判别、不看 HTTP 方法**的，所以
+    //   「刻意不放行 DELETE」这句在本文件里**做不到** —— DELETE 打到上面任一形状
+    //   仍会被转发。真正的拦截点是后端：V152 第 11 节把 UPDATE/DELETE 从 trade_app
+    //   全部收回，Spring 也没有任何 DELETE 映射（trade.openapi.json 里 delete 段为 0），
+    //   所以删除请求只会拿到 405/404，且数据库层也删不掉留痕表。这里如实说明，
+    //   不写一句「白名单挡住了 DELETE」这种看起来更漂亮但不成立的话。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^fulfillment\/requests(?:\/(?:capabilities|resumable|scan-timeouts|timeouts|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:advance|block|retry|cancel|complete|reservation(?:\/ack)?|outbound-order(?:\/ack)?|work-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?))?))?$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

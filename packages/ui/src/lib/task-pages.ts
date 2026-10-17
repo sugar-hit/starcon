@@ -309,7 +309,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/orders/fulfillment',
-    implemented: false,
+    implemented: true,
     domain: 'orders',
     label: '待发货订单',
     description: '按发货时限、仓库与物流渠道安排订单履约。',
