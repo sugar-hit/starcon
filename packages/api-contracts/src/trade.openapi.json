@@ -18919,6 +18919,773 @@
           }
         }
       }
+    },
+    "/trade/fulfillment/quality/alert-rules/{metric}": {
+      "put": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "put_trade_fulfillment_quality_alert_rules_metric",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/exceptions": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exceptionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentExceptionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentExceptionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_alerts_id_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts/evaluate": {
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_alerts_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertEvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertEvaluateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/after-sale-signals": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_after_sale_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signalState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AfterSaleSignalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_after_sale_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AfterSaleSignalInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AfterSaleSignalRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/report": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/events": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/drilldown": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_drilldown",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SHIP_ON_TIME_RATE"
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimensionValue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "OCCURRED_AT_DESC"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityDrilldownPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/dimensions": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_dimensions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "PLATFORM"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityDimensionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/capabilities": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_alerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimensionCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alert-rules": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_alert_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertRuleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -19151,7 +19918,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -19476,49 +20243,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -19543,7 +20310,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -20023,14 +20790,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -22567,7 +23334,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -23448,7 +24215,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -31795,7 +32562,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-08,
+            "minimum": 1e-8,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -31907,12 +32674,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -33717,9 +34484,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -46739,6 +47506,821 @@
           },
           "effect": {
             "type": "string"
+          }
+        }
+      },
+      "AlertRuleInput": {
+        "required": [
+          "comparison",
+          "thresholdValue"
+        ],
+        "type": "object",
+        "properties": {
+          "thresholdValue": {
+            "type": "number",
+            "description": "百分数，0~100，与指标卡同量纲"
+          },
+          "comparison": {
+            "type": "string",
+            "enum": [
+              "GT",
+              "GTE",
+              "LT",
+              "LTE"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "缺省 true"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AlertRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentExceptionInput": {
+        "required": [
+          "exceptionType",
+          "orderId",
+          "reportedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "description": "与 orderLineId 同时给或同时不给",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string",
+            "enum": [
+              "WRONG_ITEM",
+              "MISSING_ITEM"
+            ]
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "错发时为实际发出量，漏发时为少发量；可空"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentExceptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string"
+          },
+          "affectedQty": {
+            "type": "number"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportedSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AlertPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "numerator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionValue": {
+            "type": "string"
+          },
+          "triggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AlertEvaluateInput": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "评估窗口起；缺省取默认窗口",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "description": "评估窗口止；缺省取默认窗口",
+            "format": "date-time"
+          },
+          "perDimension": {
+            "type": "boolean",
+            "description": "逐维度评估；缺省只评估租户整体"
+          }
+        }
+      },
+      "AlertEvaluateResult": {
+        "type": "object",
+        "properties": {
+          "evaluated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "triggered": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedNoBasis": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "perDimension": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AfterSaleSignalInput": {
+        "required": [
+          "occurredAt",
+          "orderId",
+          "signalType"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（不是登记时刻）",
+            "format": "date-time"
+          },
+          "signalType": {
+            "type": "string",
+            "enum": [
+              "DISPUTE",
+              "RETURN"
+            ]
+          },
+          "signalState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "UNDER_REVIEW",
+              "RESOLVED",
+              "REJECTED",
+              "CLOSED"
+            ]
+          },
+          "platformOrderNo": {
+            "type": "string",
+            "description": "平台侧单号；平台同步到位后才有值"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "非 TENANT_MAINTAINED 来源时必填"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AfterSaleSignalRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "signalType": {
+            "type": "string"
+          },
+          "signalState": {
+            "type": "string"
+          },
+          "platformOrderNo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signalSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityMetricCard": {
+        "type": "object",
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "numerator": {
+            "type": "string"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "numeratorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedFromDenominator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unavailable": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "clock": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "sourceDetailRef": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityReport": {
+        "type": "object",
+        "properties": {
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricCard"
+            }
+          },
+          "window": {
+            "$ref": "#/components/schemas/QualityWindow"
+          },
+          "shippedOrdersInWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedOrdersInWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "defaulted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FulfillmentExceptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentExceptionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wrongItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingItemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QualityEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QualityEventRow": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "QualityDrilldownItem": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "assigneeRef": {
+            "type": "string"
+          },
+          "metricRole": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "detailKind": {
+            "type": "string"
+          },
+          "detailRef": {
+            "type": "string"
+          },
+          "detailNo": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDrilldownPage": {
+        "type": "object",
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityDrilldownItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numeratorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDimensionPage": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionDisplayName": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityDimensionRow"
+            }
+          },
+          "dimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDimensionRow": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "ordersInScope": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricCard"
+            }
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityCapabilityDimension"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "supportedDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rateScale": {
+            "type": "string"
+          },
+          "rateNullRule": {
+            "type": "string"
+          },
+          "shopDimensionStatus": {
+            "type": "string"
+          },
+          "downstreamStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "handling": {
+            "type": "string"
+          }
+        }
+      },
+      "AfterSaleSignalPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AfterSaleSignalRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disputeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }
