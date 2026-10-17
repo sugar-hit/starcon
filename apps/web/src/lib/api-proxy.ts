@@ -1017,6 +1017,42 @@ const services: readonly {
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
   },
   {
+    // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**：与 9.3.1.2 合单那条并排，
+    // 两条都被既有条目与其它车道的插入点隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力与上下游可用性（**明说 15 客户 / 16 合规没接通**）
+    //   overview                             全量概览（不受筛选与分页影响）
+    //   rule / rule                           风控规则（GET 读 + PUT upsert，五维权重合计必须 1.0000）
+    //   signals                              信号列表（GET，真分页 + 真搜索）
+    //   signals                              POST 登记一条风险信号（15 客户 / 16 合规未接通期间的唯一数据入口）
+    //   assessments                          评估列表（GET，真分页 + 真搜索 + 汇总）
+    //   assessments                          POST 对一张订单触发一次评估
+    //   {uuid}                                评估详情（头 + 五行组件 + 人工复核留痕）
+    //   {uuid}/review                         POST 人工复核 —— **拒发的唯一合法入口**
+    // 判别顺序：字面量子路径（capabilities / overview / rule / signals / assessments）
+    // 排在 {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `assessments/{uuid}/reject` —— **本模块刻意没有**：蓝图加粗句「风控分数不能单独
+    //     作为拒绝依据」，改最终动作的唯一入口是 /review（要人工身份）；
+    //     若将来下游 9.2.1.3 落拦截表，它也不该走 trade 的这个命名空间
+    //   * `assessments/{uuid}/decision` —— 同上，是上面那个陷阱的另一个常见叫法
+    //   * `signals/{uuid}` —— 信号是时间序列（按 captured_at 追加），没有「改一条」的语义；
+    //     观测值变了就再采一次，同一 (码, 主体, 采集时刻) 走 ON CONFLICT 覆盖
+    //   * `signal-codes` / `rules` —— 本模块只有**一租户一条**规则，没有集合读；规则名说清楚更省事
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^orders\/risk\-validation\/(?:capabilities|overview|rule|signals|assessments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/review)?)?)$/,
+    // 裸路径 orders/risk-validation **刻意不放行**：后端没有对应映射。
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

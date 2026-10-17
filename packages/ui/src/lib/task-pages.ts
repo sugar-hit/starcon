@@ -292,6 +292,22 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['定义条件', '试跑真实订单', '启用并查看命中链'],
   },
   {
+    href: '/orders/risk-validation',
+    implemented: true,
+    domain: 'orders',
+    label: '风控校验',
+    description: '多信号风险打分：买家历史、设备与 IP 关联、下单频次、金额异常、地址集中度。',
+    fields: [
+      '订单号',
+      '风险分',
+      '建议动作',
+      '最终动作',
+      '缺失维度',
+      '复核人',
+    ],
+    workflow: ['登记规则与信号', '触发评估', '人工复核'],
+  },
+  {
     href: '/orders/fulfillment',
     implemented: false,
     domain: 'orders',
