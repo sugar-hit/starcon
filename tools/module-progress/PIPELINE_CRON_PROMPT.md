@@ -218,7 +218,31 @@ node tools/module-progress/lane.mjs gate acquire
 
 （仅在判定 GO 且 `gate status` 显示空闲时）
 
-### 第 3 步：回收已落地的车道
+### 第 3 步：回收已落地的车道（**先过 L2 闸门**）
+
+**派发按 tick 走（消耗额度），L2 按小时走（控制发热）** —— 这两件事必须解耦。
+worker 的 L1 已收窄到本模块（便宜）；L2 的 `mvnw verify` 是唯一发热高峰。
+若每 tick 都跑 L2，24 小时就是 ~24 次全量，那是烧 CPU 不是烧额度。
+
+```bash
+cd /Users/tommy/Project/starcon
+L2LAST=$(cat .dev-agent/last-l2-at 2>/dev/null || echo 0)
+NOW=$(date +%s); echo "距上次 L2 $(( (NOW - L2LAST) / 60 )) 分钟"
+```
+
+满足**任一条**才执行本步与第 5 步（merge + 全量 + push）：
+
+1. 距上次 L2 **>= `L2_EVERY_MIN`**（本地文件当前 50，约每小时）
+2. `lanesRunning == 0` 且有 `ready` 车道（排空闸，防夜间攒着不做）
+3. `ready` 车道数 **>= 4**（积压闸，攒够一批就做）
+
+**都不满足 ⇒ 跳过整个第 3 步与第 5 步**，只做第 4 步派发。
+车道停在 `ready` 等下一格是**预期行为**，不要因为「有 ready 就该立刻合」而破闸。
+
+⚠️ **只在 L2 绿且 push 成功之后**才 `date +%s > .dev-agent/last-l2-at`。
+L2 红绝对不写，否则失败的重试会被推迟一小时，红批次永远卡住。
+
+闸门放行后：
 
 ```bash
 node tools/module-progress/lane.mjs merge-ready
