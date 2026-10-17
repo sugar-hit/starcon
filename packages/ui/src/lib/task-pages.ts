@@ -292,6 +292,33 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['分配仓库', '申请面单', '交接发货'],
   },
   {
+    // 9.3.1.1 拆单。**不占用** /orders/fulfillment 本身（那是 9.3.3.1 履约请求的路由），
+    // 与 9.3.1.2 合单 / 9.3.2.1 分仓 / 9.3.2.2 履约路径并列挂在锚点之下。
+    href: '/orders/fulfillment/split',
+    implemented: true,
+    domain: 'orders',
+    label: '订单拆单',
+    description:
+      '把一个订单拆成多个履约单元：按仓库拆、按承运商拆、按发货时效拆、按平台限制拆。拆单不产生新的销售订单，订单总金额与买家视角不变。',
+    fields: [
+      '拆单号',
+      '订单引用',
+      '拆分维度',
+      '履约单元',
+      '订单总额',
+      '尾差',
+      '预占指令',
+      '发货回传',
+    ],
+    // workflow 固定三步（task-pages.test.ts 钉死这个长度）：
+    // 「能拆」→「拆成什么」→「发出去没有」就是运营脑子里真实的三段。
+    workflow: [
+      '登记发货仓与可用库存分布、配拆单规则',
+      '预览拆单（无副作用）并落拆单',
+      '登记预占回执与逐单元发货回传',
+    ],
+  },
+  {
     href: '/orders/rules',
     implemented: false,
     domain: 'orders',

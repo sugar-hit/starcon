@@ -1010,6 +1010,43 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**（即 9.3.1.2 合单那条之前）：
+    // 两条车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力与上下游可用性（含「审单未接通」「不预占上游库存」）
+    //   rule / rule                      拆单规则（GET 读 + PUT upsert）
+    //   warehouses                       发货仓清单（GET；含 activeOnly 筛选）
+    //   warehouses                       POST 登记 / 更新发货仓
+    //   stock-snapshots                  可用库存分布清单（GET；按仓 / SKU 筛选）
+    //   stock-snapshots                  POST 登记 / 更新可用库存分布
+    //   preview                          拆单预览（POST，**无副作用**，与落库同一段判定逻辑）
+    //   splits                           拆单列表（真分页 + 状态/维度/订单/仓筛选）
+    //   splits                           POST 落一次拆单
+    //   {uuid}                           拆单详情（头 + 单元 + 行级明细 + 候选 + 预占 + 回传 + 事件流）
+    //   {uuid}/status                    推进状态（CONFIRMED / DISPATCHED / CANCELLED）
+    //   reservation-commands             预占指令清单（真分页 + 状态/SKU 筛选）
+    //   writeback-tasks                  发货回传任务清单（真分页）
+    //   {uuid}/units/{unitUuid}/reservation 按履约单元登记**预占回执**（warehouse 侧）
+    //   {uuid}/units/{unitUuid}/writeback     按履约单元登记**发货回传结果**（一单元一条）
+    // 判别顺序：字面量子路径（capabilities / rule / warehouses / stock-snapshots /
+    // preview / reservation-commands / writeback-tasks）排在 {uuid} 分支之前，
+    // 否则会被 [0-9a-f-]+ 分支吃掉半截。
+    // 刻意**没有** DELETE：拆单方案、候选依据与事件流都是履约凭据，
+    // 删掉等于抹掉「这批货当时为什么这么拆」的证据。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^fulfillment\/split\/(?:capabilities|rule|warehouses|stock-snapshots|preview|reservation-commands|writeback-tasks|splits(?:\/[0-9a-f-]+(?:\/(?:status|units\/[0-9a-f-]+\/(?:reservation|writeback)))?)?)$/,
+    // 裸路径 fulfillment/split **刻意不放行**：后端没有对应映射，
+    // 放行它会让界面以为「一条不存在的拆单列表接口」可用。
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
