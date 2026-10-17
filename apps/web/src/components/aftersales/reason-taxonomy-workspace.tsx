@@ -37,6 +37,7 @@ import {
   toAttributionCreate,
   toggleSecondary,
   updateReasonCategory,
+  updateReasonMapping,
   validateAttributionDraft,
   weightSumHint,
 } from './reason-taxonomy-model';
@@ -182,7 +183,7 @@ export function ReasonTaxonomyWorkspace() {
         description: '',
       });
       await loadTree();
-      setAttributionMessage(null);
+      setAttrMessage(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : '保存分类失败');
     } finally {
@@ -311,7 +312,10 @@ export function ReasonTaxonomyWorkspace() {
     setMappingMessage(null);
     try {
       await updateReasonMapping(id, {
-        categoryId: '',
+        // ⚠️ 这里**必须传 null 而不是空串**：本调用只切启用/停用，不动内部分类。
+        // 空串能蒙对全靠 Jackson 的空串→null 强制转换，那是实现细节不是契约；
+        // 契约把 categoryId 标成 nullable 之后，显式 null 才是「不改内部分类」的诚实写法。
+        categoryId: null,
         platformSource: '',
         platformReasonCode: '',
         platformReasonName: null,
