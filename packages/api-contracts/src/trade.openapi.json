@@ -666,6 +666,84 @@
         }
       }
     },
+    "/trade/fulfillment/monitor/thresholds": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_thresholds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorEffectiveThresholds"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "put_trade_fulfillment_monitor_thresholds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorThresholdInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorThresholdRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/consolidation/rule": {
       "get": {
         "tags": [
@@ -7350,6 +7428,414 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ShipmentBatchTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/todos/{todoId}/action": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_todos_todoId_action",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "todoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorTodoActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorTodoRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/scan": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_scan",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorScanResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/verify": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_verify",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorVerifyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorVerifySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/todos": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_todos",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorTodoInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorTodoRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/release/{releaseId}/ack": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_release_releaseId_ack",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "releaseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorReleaseAckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorReleaseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/disposition": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_disposition",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorDispositionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorDispositionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/disposition/{dispositionId}/status": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_disposition_dispositionId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "dispositionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorDispositionStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorDispositionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}/close": {
+      "post": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "post_trade_fulfillment_monitor_cases_id_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentMonitorCloseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorCaseSaved"
                 }
               }
             }
@@ -15593,6 +16079,363 @@
         }
       }
     },
+    "/trade/fulfillment/monitor/todos": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_todos",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorTodoPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/events": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FulfillmentMonitorEventRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stepKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "anomalyKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verifiedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "pendingVerificationOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorCasePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/cases/{id}": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_cases_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/monitor/capabilities": {
+      "get": {
+        "tags": [
+          "fulfillment-monitor-controller"
+        ],
+        "operationId": "get_trade_fulfillment_monitor_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentMonitorCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/dropship/events": {
       "get": {
         "tags": [
@@ -19001,6 +19844,87 @@
           }
         },
         "description": "拆单规则（每租户一条）"
+      },
+      "FulfillmentMonitorThresholdInput": {
+        "required": [
+          "stepKind",
+          "thresholdSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "type": "string",
+            "description": "留空 = 租户默认档"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "thresholdSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorThresholdRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "null = 租户默认档"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "stepKindLabel": {
+            "type": "string"
+          },
+          "thresholdSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "TENANT_OVERRIDE",
+              "TENANT_DEFAULT",
+              "BUILTIN",
+              "SNAPSHOT_FROM_REQUEST"
+            ]
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "ConsolidationRuleInput": {
         "required": [
@@ -27411,6 +28335,757 @@
             "minLength": 1,
             "pattern": "^[A-Za-z0-9\\-_]{3,128}$",
             "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorTodoActionInput": {
+        "required": [
+          "action"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorTodoRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "todoNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "REVIEW_CASE",
+              "CONFIRM_DOWNSTREAM",
+              "ESCALATE",
+              "CONTACT_SUPPLIER",
+              "OTHER"
+            ]
+          },
+          "actionKindLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARNING",
+              "CRITICAL"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_7_2_1_3_RELEASE",
+              "MODULE_1_WORKBENCH_TODO"
+            ]
+          },
+          "sourceKindLabel": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLAIMED",
+              "DONE",
+              "CANCELLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "claimedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "doneAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "doneNote": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorScanInput": {
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "type": "string",
+            "description": "只扫这一个仓；留空扫全租户"
+          },
+          "anomalyKinds": {
+            "type": "array",
+            "description": "按几种异常一起检出（留空=全部四种）",
+            "items": {
+              "type": "string",
+              "description": "按几种异常一起检出（留空=全部四种）"
+            }
+          },
+          "maxCases": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "asOfSecondsAgo": {
+            "type": "integer",
+            "description": "把判定基准前移 N 秒（回放/演练用；留空=用数据库当前时间）",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentMonitorScanEntry": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestCode": {
+            "type": "string"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "anomalyKind": {
+            "type": "string",
+            "enum": [
+              "RESERVATION_FAILED",
+              "INSUFFICIENT_STOCK",
+              "STEP_STUCK",
+              "SHIPMENT_TIMEOUT"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARNING",
+              "CRITICAL"
+            ]
+          },
+          "thresholdSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "thresholdSource": {
+            "type": "string",
+            "enum": [
+              "TENANT_OVERRIDE",
+              "TENANT_DEFAULT",
+              "BUILTIN",
+              "SNAPSHOT_FROM_REQUEST"
+            ]
+          },
+          "overdueSeconds": {
+            "type": "number"
+          },
+          "ruleEvidence": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean",
+            "description": "true=新检出案例；false=已有未结案案例被跳过"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "skipReason": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorScanResult": {
+        "type": "object",
+        "properties": {
+          "scannedRequests": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCases": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorScanEntry"
+            }
+          }
+        }
+      },
+      "FulfillmentMonitorVerifyInput": {
+        "required": [
+          "conclusion",
+          "expectedMonitorVersion",
+          "finding",
+          "idempotencyKey",
+          "verifiedScope"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedMonitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "NOT_CONFIRMED"
+            ]
+          },
+          "verifiedScope": {
+            "type": "string",
+            "enum": [
+              "DOWNSTREAM_ACK",
+              "LOCAL_STATE_ONLY",
+              "WAREHOUSE_STOCK",
+              "CARRIER_TRACE"
+            ]
+          },
+          "evidenceRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "本次查证看到的下游凭据（回执号 / 库存快照号 / 轨迹号）"
+          },
+          "finding": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "description": "查证时刻；留空用数据库当前时间",
+            "format": "date-time"
+          },
+          "idempotencyKey": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorVerifySaved": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "NOT_CONFIRMED"
+            ]
+          },
+          "caseStatus": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "INVESTIGATING",
+              "VERIFIED",
+              "DISPOSED",
+              "DISMISSED"
+            ]
+          },
+          "monitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentMonitorTodoInput": {
+        "required": [
+          "actionKind",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "REVIEW_CASE",
+              "CONFIRM_DOWNSTREAM",
+              "ESCALATE",
+              "CONTACT_SUPPLIER",
+              "OTHER"
+            ]
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "detail": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻；留空用数据库当前时间。刻意与登记时刻分开",
+            "format": "date-time"
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_7_2_1_3_RELEASE",
+              "MODULE_1_WORKBENCH_TODO"
+            ]
+          }
+        }
+      },
+      "FulfillmentMonitorReleaseAckInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "RELEASED",
+              "REJECTED"
+            ]
+          },
+          "releaseRef": {
+            "type": "string"
+          },
+          "releasedQty": {
+            "type": "number"
+          },
+          "rejectReason": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorReleaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "releaseNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_7_2_1_3_RELEASE",
+              "MODULE_1_WORKBENCH_TODO"
+            ]
+          },
+          "sourceKindLabel": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "RELEASED",
+              "REJECTED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "releaseRef": {
+            "type": "string"
+          },
+          "releasedQty": {
+            "type": "number"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorDispositionInput": {
+        "required": [
+          "actionKind",
+          "expectedMonitorVersion",
+          "idempotencyKey",
+          "note"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedMonitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "SWITCH_PATH",
+              "MANUAL_INTERVENTION",
+              "RELEASE_RESERVATION",
+              "DISMISS"
+            ]
+          },
+          "verificationId": {
+            "type": "string",
+            "description": "RETRY 时必填：指向一条 CONFIRMED 的查证记录",
+            "format": "uuid"
+          },
+          "retryGrantSeconds": {
+            "type": "integer",
+            "description": "RETRY 时必填：打算给这次重试多长窗口（秒）",
+            "format": "int32"
+          },
+          "targetRouteRef": {
+            "type": "string",
+            "description": "SWITCH_PATH 时必填：9.3.2.2 的 routing_decision_ref"
+          },
+          "targetWarehouseRef": {
+            "type": "string"
+          },
+          "estimatedCostDelta": {
+            "type": "number",
+            "description": "SWITCH_PATH 可选：切换的成本差估值（必须与币种成对出现）"
+          },
+          "estimatedCostCurrencyCode": {
+            "type": "string"
+          },
+          "note": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorDispositionSaved": {
+        "type": "object",
+        "properties": {
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "SWITCH_PATH",
+              "MANUAL_INTERVENTION",
+              "RELEASE_RESERVATION",
+              "DISMISS"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SENT",
+              "ACKNOWLEDGED",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "monitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releaseId": {
+            "type": "string",
+            "description": "RELEASE_RESERVATION 时带出登记的释放指令 id（缺省 REQUESTED，待 7.2 回执）",
+            "format": "uuid"
+          },
+          "releaseNo": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorDispositionStatusInput": {
+        "required": [
+          "fromStatus",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "fromStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SENT",
+              "ACKNOWLEDGED",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SENT",
+              "ACKNOWLEDGED",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "toStatus=FAILED 时必填"
+          }
+        }
+      },
+      "FulfillmentMonitorDispositionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionKind": {
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "SWITCH_PATH",
+              "MANUAL_INTERVENTION",
+              "RELEASE_RESERVATION",
+              "DISMISS"
+            ]
+          },
+          "actionKindLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SENT",
+              "ACKNOWLEDGED",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "retryGrantSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetRouteRef": {
+            "type": "string"
+          },
+          "targetWarehouseRef": {
+            "type": "string"
+          },
+          "estimatedCostDelta": {
+            "type": "number"
+          },
+          "estimatedCostCurrencyCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorCloseInput": {
+        "required": [
+          "expectedMonitorVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedMonitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorCaseSaved": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "INVESTIGATING",
+              "VERIFIED",
+              "DISPOSED",
+              "DISMISSED"
+            ]
+          },
+          "monitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -38598,6 +40273,451 @@
           },
           "summary": {
             "$ref": "#/components/schemas/PendingShipmentBatchSummary"
+          }
+        }
+      },
+      "FulfillmentMonitorTodoPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorTodoRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentMonitorEffectiveThresholds": {
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "type": "string"
+          },
+          "thresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorThresholdRow"
+            }
+          }
+        }
+      },
+      "FulfillmentMonitorEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string",
+            "enum": [
+              "DETECTED",
+              "INVESTIGATING",
+              "VERIFIED",
+              "NOT_CONFIRMED",
+              "DISPOSITION_CREATED",
+              "DISPOSITION_SENT",
+              "DISPOSITION_ACKNOWLEDGED",
+              "DISPOSITION_COMPLETED",
+              "DISPOSITION_FAILED",
+              "DISPOSITION_CANCELLED",
+              "RELEASE_REGISTERED",
+              "RELEASE_ACK",
+              "TODO_CREATED",
+              "TODO_CLAIMED",
+              "TODO_DONE",
+              "TODO_CANCELLED",
+              "THRESHOLD_CHANGED"
+            ]
+          },
+          "eventKindLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "monitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentMonitorCasePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorCaseRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentMonitorCaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestCode": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "stepKindLabel": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "anomalyKind": {
+            "type": "string",
+            "enum": [
+              "RESERVATION_FAILED",
+              "INSUFFICIENT_STOCK",
+              "STEP_STUCK",
+              "SHIPMENT_TIMEOUT"
+            ]
+          },
+          "anomalyKindLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARNING",
+              "CRITICAL"
+            ]
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "thresholdSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "thresholdSource": {
+            "type": "string",
+            "enum": [
+              "TENANT_OVERRIDE",
+              "TENANT_DEFAULT",
+              "BUILTIN",
+              "SNAPSHOT_FROM_REQUEST"
+            ]
+          },
+          "thresholdSourceLabel": {
+            "type": "string"
+          },
+          "overdueSeconds": {
+            "type": "number"
+          },
+          "ruleEvidence": {
+            "type": "string",
+            "description": "判定算式原文，界面上直接展示这行就能复现判定"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "INVESTIGATING",
+              "VERIFIED",
+              "DISPOSED",
+              "DISMISSED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "monitorVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "investigatingAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolutionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentMonitorCaseDetail": {
+        "type": "object",
+        "properties": {
+          "monitorCase": {
+            "$ref": "#/components/schemas/FulfillmentMonitorCaseRow"
+          },
+          "verifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorVerificationRow"
+            }
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorDispositionRow"
+            }
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorReleaseRow"
+            }
+          },
+          "todos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorTodoRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorEventRow"
+            }
+          },
+          "retryAllowed": {
+            "type": "boolean",
+            "description": "当前是否允许发起重试（查证已坐实且没有未终结的处置）"
+          },
+          "retryBlockedReason": {
+            "type": "string",
+            "description": "不允许重试时写清楚差什么，界面直接显示这句话，不让调用方自己猜"
+          }
+        }
+      },
+      "FulfillmentMonitorVerificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verificationNo": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "NOT_CONFIRMED"
+            ]
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "verifiedScope": {
+            "type": "string",
+            "enum": [
+              "DOWNSTREAM_ACK",
+              "LOCAL_STATE_ONLY",
+              "WAREHOUSE_STOCK",
+              "CARRIER_TRACE"
+            ]
+          },
+          "verifiedScopeLabel": {
+            "type": "string"
+          },
+          "evidenceRef": {
+            "type": "string"
+          },
+          "finding": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verifiedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FulfillmentMonitorCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentMonitorDimension"
+            }
+          },
+          "reservationReleaseDispatched": {
+            "type": "boolean",
+            "description": "是否真的把释放指令发给了 7.2.1.3（恒为 false：只登记，待下游回执）"
+          },
+          "workbenchTodoPushed": {
+            "type": "boolean",
+            "description": "是否真的推到了 1 工作台待办（恒为 false：本服务内待办是权威）"
+          },
+          "processStateMutated": {
+            "type": "boolean",
+            "description": "是否真的把流程推回 RUNNING（恒为 false：本模块不代 9.3.3.1 改状态）"
+          },
+          "retryRequiresVerification": {
+            "type": "boolean",
+            "description": "重试是否被「先查证」硬约束（恒为 true：蓝图加粗句）"
+          },
+          "anomalyKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "RESERVATION_FAILED",
+                "INSUFFICIENT_STOCK",
+                "STEP_STUCK",
+                "SHIPMENT_TIMEOUT"
+              ]
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "CRITICAL"
+              ]
+            }
+          },
+          "actionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "RETRY",
+                "SWITCH_PATH",
+                "MANUAL_INTERVENTION",
+                "RELEASE_RESERVATION",
+                "DISMISS"
+              ]
+            }
+          },
+          "verifiedScopes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DOWNSTREAM_ACK",
+                "LOCAL_STATE_ONLY",
+                "WAREHOUSE_STOCK",
+                "CARRIER_TRACE"
+              ]
+            }
+          },
+          "coreStanceNote": {
+            "type": "string",
+            "description": "「超时不是失败」这条口径怎么落地"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "下游边界为什么是「登记指令」而不是「直接调下游」"
+          },
+          "scopeNote": {
+            "type": "string",
+            "description": "本模块与 9.3.3.1 的分工"
+          }
+        }
+      },
+      "FulfillmentMonitorDimension": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "FULFILLMENT_PROCESS_STATE"
+          },
+          "label": {
+            "type": "string",
+            "example": "履约流程状态（9.3.3.1 已持久化）"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "example": "9.3.3.1 履约请求"
+          },
+          "reason": {
+            "type": "string"
           }
         }
       },

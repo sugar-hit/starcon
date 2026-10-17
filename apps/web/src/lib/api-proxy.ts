@@ -1053,6 +1053,50 @@ const services: readonly {
     // 裸路径 orders/risk-validation **刻意不放行**：后端没有对应映射。
   },
   {
+    // 9.3.3.2 履约流程监控（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 9.3.3.1 `fulfillment/requests` 那条**之前**：与并行车道的插入点
+    // 被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                                    能力与上下游可用性（含 7.2.1.3 / 1 工作台
+    //                                                    两个未交付下游的显式 false）
+    //   cases                                            异常流程清单（真分页 + 真 SQL 筛选）
+    //   cases/{uuid}                                     详情（案例 + 查证 + 处置 + 释放登记
+    //                                                    + 待办 + 事件，带 retryAllowed）
+    //   scan                                             扫描检出（判定用数据库时钟）
+    //   cases/{uuid}/verify                              查证（加粗句的落点）
+    //   cases/{uuid}/disposition                         发起处置（重试 / 切换路径 / 人工介入 /
+    //                                                    释放预占）
+    //   cases/{uuid}/disposition/{uuid}/status           推进处置状态（状态上的 CAS）
+    //   cases/{uuid}/close                               结案（要求至少一条 COMPLETED 处置）
+    //   cases/{uuid}/release/{uuid}/ack                  登记 7.2.1.3 释放回执
+    //   cases/{uuid}/todos                               登记人工介入待办项
+    //   thresholds        GET / PUT                      租户可维护的超时阈值（带解析来源）
+    //   todos                                               人工介入待办清单（真分页）
+    //   todos/{uuid}/action                               待办认领 / 完成 / 取消
+    //   events                                             事件流
+    //
+    // 判别顺序：**字面量子路径（capabilities / cases / scan / thresholds / todos / events）
+    // 必须排在 {uuid} 分支之前**，否则它们的 id 段会被 uuid 分支吃掉半截。
+    // ⚠ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 fulfillment/monitor —— 后端没有对应映射，放行只会拿到 404。
+    //   * 任何**本模块不存在的 path**：放行只会拿到 404/405。
+    //   * `fulfillment/requests/{uuid}/release` 与 `/exceptions` —— 那是 9.3.3.1
+    //     那条正则刻意不放行的形状；本模块的释放登记走 `/cases/{uuid}/release/{uuid}/ack`，
+    //     异常清单走 `/cases`，**不经** `/requests/{uuid}/exceptions`。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^fulfillment\/monitor\/(?:capabilities|scan|thresholds|todos(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/action)?|events|cases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:verify|disposition|close|todos|disposition\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|release\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack))?)?)$/,
+  },
+  {
     // 9.3.3.1 履约请求（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
