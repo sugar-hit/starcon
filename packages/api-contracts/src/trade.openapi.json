@@ -4634,6 +4634,802 @@
         }
       }
     },
+    "/trade/fulfillment/requests": {
+      "get": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "get_trade_fulfillment_requests",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "requestCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "splitUnitRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "consolidationRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocationDecisionRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currentStep",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/work-orders": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_work_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestWorkOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FulfillmentRequestWorkOrderRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/work-orders/{workOrderId}/status": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_work_orders_workOrderId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestWorkOrderStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestWorkOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/retry": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_retry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestRetryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTransitionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/reservation": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_reservation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestReservationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestReservationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/reservation/ack": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_reservation_ack",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestReservationAckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestReservationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/outbound-order": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_outbound_order",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestOutboundInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestOutboundRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/outbound-order/ack": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_outbound_order_ack",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestOutboundAckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestOutboundRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/complete": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestRetryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTransitionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/cancel": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTransitionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/block": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_block",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestBlockInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTransitionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}/advance": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_id_advance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTransitionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/scan-timeouts": {
+      "post": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "post_trade_fulfillment_requests_scan_timeouts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentRequestScanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestScanResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/pending-shipment/units/{id}/sla": {
       "post": {
         "tags": [
@@ -12352,6 +13148,195 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/FulfillmentRoutingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/{id}": {
+      "get": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "get_trade_fulfillment_requests_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/timeouts": {
+      "get": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "get_trade_fulfillment_requests_timeouts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "stepKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestTimeoutPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/resumable": {
+      "get": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "get_trade_fulfillment_requests_resumable",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestResumablePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/requests/capabilities": {
+      "get": {
+        "tags": [
+          "fulfillment-request-controller"
+        ],
+        "operationId": "get_trade_fulfillment_requests_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRequestCapabilities"
                 }
               }
             }
@@ -20818,6 +21803,762 @@
             ]
           },
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestInput": {
+        "required": [
+          "destinationCountryCode",
+          "legalEntityCode",
+          "orderRef",
+          "requestCode",
+          "requestedQty",
+          "skuRef",
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "requestCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "orderRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "orderLineRef": {
+            "type": "string"
+          },
+          "splitUnitRef": {
+            "type": "string",
+            "description": "9.3.1.1 拆单单元引用（该模块尚未交付，未接通）"
+          },
+          "consolidationRef": {
+            "type": "string",
+            "description": "9.3.1.2 合单引用"
+          },
+          "allocationDecisionRef": {
+            "type": "string",
+            "description": "9.3.2.1 分仓决策引用"
+          },
+          "routingDecisionRef": {
+            "type": "string",
+            "description": "9.3.2.2 履约路径决策引用"
+          },
+          "skuRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "destinationRegionCode": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "estimatedHandlingAmount": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键：重复建单只产生一张履约请求"
+          },
+          "reserveTimeoutSeconds": {
+            "type": "integer",
+            "description": "各步超时阈值（秒）；留空用租户缺省值",
+            "format": "int32"
+          },
+          "outboundTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "workTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trackTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestSaved": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RESERVING",
+              "RESERVED",
+              "OUTBOUND_PENDING",
+              "OUTBOUND_CONFIRMED",
+              "WORKING",
+              "COMPLETED",
+              "BLOCKED",
+              "CANCELLED"
+            ]
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "processVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentRequestWorkOrderInput": {
+        "required": [
+          "tasks"
+        ],
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestWorkTask"
+            }
+          }
+        }
+      },
+      "FulfillmentRequestWorkTask": {
+        "required": [
+          "qty",
+          "skuRef",
+          "taskType",
+          "warehouseRef",
+          "workOrderCode"
+        ],
+        "type": "object",
+        "properties": {
+          "workOrderCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "taskType": {
+            "type": "string",
+            "enum": [
+              "PICK",
+              "RECHECK",
+              "PACK",
+              "HANDOVER"
+            ]
+          },
+          "warehouseRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "skuRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "留空则按 requestId+workOrderCode 生成"
+          }
+        }
+      },
+      "FulfillmentRequestWorkOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderCode": {
+            "type": "string"
+          },
+          "taskType": {
+            "type": "string",
+            "enum": [
+              "PICK",
+              "RECHECK",
+              "PACK",
+              "HANDOVER"
+            ]
+          },
+          "taskTypeLabel": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ASSIGNED",
+              "RUNNING",
+              "DONE",
+              "FAILED",
+              "SKIPPED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "assigneeRef": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestWorkOrderStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ASSIGNED",
+              "RUNNING",
+              "DONE",
+              "FAILED",
+              "SKIPPED"
+            ]
+          },
+          "assigneeRef": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestRetryInput": {
+        "required": [
+          "expectedVersion",
+          "resumeReason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resumeReason": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestTransitionResult": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RESERVING",
+              "RESERVED",
+              "OUTBOUND_PENDING",
+              "OUTBOUND_CONFIRMED",
+              "WORKING",
+              "COMPLETED",
+              "BLOCKED",
+              "CANCELLED"
+            ]
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "processVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blockedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blockedReason": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestReservationInput": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "description": "留空则用本次尝试的默认键"
+          }
+        }
+      },
+      "FulfillmentRequestReservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "LOCKED",
+              "REJECTED",
+              "RELEASED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reservationRef": {
+            "type": "string"
+          },
+          "lockedQty": {
+            "type": "number"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestReservationAckInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "LOCKED",
+              "REJECTED",
+              "RELEASED"
+            ]
+          },
+          "reservationRef": {
+            "type": "string",
+            "description": "已锁定时必填：warehouse 回的凭据"
+          },
+          "lockedQty": {
+            "type": "number",
+            "description": "已锁定时必填"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "被拒 / 释放时必填"
+          }
+        }
+      },
+      "FulfillmentRequestOutboundInput": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "description": "留空则用本次尝试的默认键"
+          },
+          "packageRef": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestOutboundRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "outboundQty": {
+            "type": "number"
+          },
+          "outboundRef": {
+            "type": "string"
+          },
+          "packageRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "CONFIRMED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestOutboundAckInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "CONFIRMED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "outboundRef": {
+            "type": "string",
+            "description": "已确认时必填：8.3.1 开的单号"
+          },
+          "packageRef": {
+            "type": "string"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "被拒 / 取消时必填"
+          }
+        }
+      },
+      "FulfillmentRequestCancelInput": {
+        "required": [
+          "expectedVersion",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestBlockInput": {
+        "required": [
+          "detectionKind",
+          "expectedVersion",
+          "reason",
+          "reasonCode",
+          "stepKind"
+        ],
+        "type": "object",
+        "properties": {
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "detectionKind": {
+            "type": "string",
+            "enum": [
+              "TIMEOUT",
+              "STEP_FAILED",
+              "STALE_ACK"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "RESERVE_TIMEOUT",
+              "RESERVE_REJECTED",
+              "OUTBOUND_TIMEOUT",
+              "OUTBOUND_REJECTED",
+              "WORK_TIMEOUT",
+              "TRACK_TIMEOUT",
+              "STALE_ACK",
+              "UPSTREAM_MISMATCH"
+            ]
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "FulfillmentRequestStatusInput": {
+        "required": [
+          "currentStep",
+          "expectedVersion",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RESERVING",
+              "RESERVED",
+              "OUTBOUND_PENDING",
+              "OUTBOUND_CONFIRMED",
+              "WORKING",
+              "COMPLETED",
+              "BLOCKED",
+              "CANCELLED"
+            ]
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "description": "蓝图输入里点名的乐观并发版本",
+            "format": "int64"
+          },
+          "stepTimeoutSeconds": {
+            "type": "integer",
+            "description": "该步的超时阈值（秒）",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestScanInput": {
+        "type": "object",
+        "properties": {
+          "stepKind": {
+            "type": "string",
+            "description": "只扫这一步（留空 = 当前步）",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多处理多少条，防止一次扫描把库锁住",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestBlocked": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestCode": {
+            "type": "string"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "RESERVE_TIMEOUT",
+              "RESERVE_REJECTED",
+              "OUTBOUND_TIMEOUT",
+              "OUTBOUND_REJECTED",
+              "WORK_TIMEOUT",
+              "TRACK_TIMEOUT",
+              "STALE_ACK",
+              "UPSTREAM_MISMATCH"
+            ]
+          },
+          "overdueSeconds": {
+            "type": "number"
+          },
+          "processVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "FulfillmentRequestScanResult": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestBlocked"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestSkipped"
+            }
+          },
+          "scannedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentRequestSkipped": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
             "type": "string"
           }
         }
@@ -30163,6 +31904,592 @@
             "type": "string"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestCode": {
+            "type": "string"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "orderLineRef": {
+            "type": "string"
+          },
+          "splitUnitRef": {
+            "type": "string"
+          },
+          "consolidationRef": {
+            "type": "string"
+          },
+          "allocationDecisionRef": {
+            "type": "string"
+          },
+          "routingDecisionRef": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationRegionCode": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "estimatedHandlingAmount": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "RESERVING",
+              "RESERVED",
+              "OUTBOUND_PENDING",
+              "OUTBOUND_CONFIRMED",
+              "WORKING",
+              "COMPLETED",
+              "BLOCKED",
+              "CANCELLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "currentStepLabel": {
+            "type": "string"
+          },
+          "processVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastStepAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "是否已超过当前步 deadline（按服务器时钟实时算，不落库）"
+          },
+          "blockedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blockedReasonCode": {
+            "type": "string",
+            "enum": [
+              "RESERVE_TIMEOUT",
+              "RESERVE_REJECTED",
+              "OUTBOUND_TIMEOUT",
+              "OUTBOUND_REJECTED",
+              "WORK_TIMEOUT",
+              "TRACK_TIMEOUT",
+              "STALE_ACK",
+              "UPSTREAM_MISMATCH"
+            ]
+          },
+          "blockedReasonCodeLabel": {
+            "type": "string"
+          },
+          "blockedReason": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentRequestDetail": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/FulfillmentRequestRow"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestStepRow"
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestReservationRow"
+            }
+          },
+          "outboundOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestOutboundRow"
+            }
+          },
+          "workOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestWorkOrderRow"
+            }
+          },
+          "timeouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestTimeoutRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestEventRow"
+            }
+          }
+        }
+      },
+      "FulfillmentRequestEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "RESERVATION_REQUESTED",
+              "RESERVATION_LOCKED",
+              "RESERVATION_REJECTED",
+              "OUTBOUND_REQUESTED",
+              "OUTBOUND_CONFIRMED",
+              "OUTBOUND_REJECTED",
+              "WORK_ASSIGNED",
+              "WORK_DONE",
+              "WORK_FAILED",
+              "BLOCKED",
+              "RETRY_REQUESTED",
+              "RESUMED",
+              "COMPLETED",
+              "CANCELLED",
+              "NOTE"
+            ]
+          },
+          "eventKindLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "processVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentRequestStepRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "stepKindLabel": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "COMPLETED",
+              "FAILED",
+              "SKIPPED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "elapsedSeconds": {
+            "type": "number"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "operatedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FulfillmentRequestTimeoutRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "所属履约请求",
+            "format": "uuid"
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": [
+              "RESERVE",
+              "OUTBOUND",
+              "WORK",
+              "TRACK"
+            ]
+          },
+          "stepKindLabel": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detectionKind": {
+            "type": "string",
+            "enum": [
+              "TIMEOUT",
+              "STEP_FAILED",
+              "STALE_ACK"
+            ]
+          },
+          "detectionKindLabel": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdueSeconds": {
+            "type": "number"
+          },
+          "thresholdSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "RESERVE_TIMEOUT",
+              "RESERVE_REJECTED",
+              "OUTBOUND_TIMEOUT",
+              "OUTBOUND_REJECTED",
+              "WORK_TIMEOUT",
+              "TRACK_TIMEOUT",
+              "STALE_ACK",
+              "UPSTREAM_MISMATCH"
+            ]
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "blockedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FulfillmentRequestTimeoutPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestTimeoutRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestResumablePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FulfillmentRequestCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentRequestDimension"
+            }
+          },
+          "reservesUpstreamStock": {
+            "type": "boolean",
+            "description": "本模块是否真的锁了 warehouse 的上游库存（恒为 false：只登记指令）"
+          },
+          "outboundOrderDispatched": {
+            "type": "boolean",
+            "description": "本模块是否真的把出库单派给了 8.3.1（恒为 false：只登记指令）"
+          },
+          "logisticsOrderPlaced": {
+            "type": "boolean",
+            "description": "本模块是否真的下了物流单（恒为 false：运单主权在 9.4.1.1 / 8.3.4.2）"
+          },
+          "processStatePersisted": {
+            "type": "boolean",
+            "description": "流程状态是否持久化在 PostgreSQL（恒为 true：蓝图加粗句）"
+          },
+          "monitoringDelivered": {
+            "type": "boolean",
+            "description": "9.3.3.2 履约流程监控是否交付（跨请求异常看板与人工处置入口）"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "RESERVING",
+                "RESERVED",
+                "OUTBOUND_PENDING",
+                "OUTBOUND_CONFIRMED",
+                "WORKING",
+                "COMPLETED",
+                "BLOCKED",
+                "CANCELLED"
+              ]
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "RESERVE",
+                "OUTBOUND",
+                "WORK",
+                "TRACK"
+              ]
+            }
+          },
+          "blockReasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "RESERVE_TIMEOUT",
+                "RESERVE_REJECTED",
+                "OUTBOUND_TIMEOUT",
+                "OUTBOUND_REJECTED",
+                "WORK_TIMEOUT",
+                "TRACK_TIMEOUT",
+                "STALE_ACK",
+                "UPSTREAM_MISMATCH"
+              ]
+            }
+          },
+          "detectionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TIMEOUT",
+                "STEP_FAILED",
+                "STALE_ACK"
+              ]
+            }
+          },
+          "processNote": {
+            "type": "string",
+            "description": "断点恢复与乐观并发怎么用"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "下游边界为什么是「登记指令」而不是「直接调下游」"
+          },
+          "scopeNote": {
+            "type": "string",
+            "description": "本模块与 9.3.3.2 的分工"
+          }
+        }
+      },
+      "FulfillmentRequestDimension": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "WAREHOUSE_ALLOCATION"
+          },
+          "label": {
+            "type": "string",
+            "example": "分仓结果（发货仓 + 分配数量）"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "example": "9.3.2.1 分仓规则"
+          },
+          "reason": {
             "type": "string"
           }
         }
