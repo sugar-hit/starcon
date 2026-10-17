@@ -323,6 +323,76 @@
         }
       }
     },
+    "/trade/fulfillment/split/rule": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitRule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "put_trade_fulfillment_split_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/consolidation/rule": {
       "get": {
         "tags": [
@@ -3347,6 +3417,516 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderTimelinessDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/warehouses": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_warehouses",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SplitWarehouseRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_warehouses",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitWarehouseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitWarehouseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/stock-snapshots": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_stock_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SplitStockSnapshotRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_stock_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitStockSnapshotInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitStockSnapshotRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/splits": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_splits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "strategy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_splits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/splits/{splitId}/units/{unitId}/writeback": {
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_splits_splitId_units_unitId_writeback",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitWritebackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitWritebackTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/splits/{splitId}/units/{unitId}/reservation": {
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_splits_splitId_units_unitId_reservation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitReservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitReservationCommand"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/splits/{splitId}/status": {
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_splits_splitId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/preview": {
+      "post": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "post_trade_fulfillment_split_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitPreview"
                 }
               }
             }
@@ -11621,6 +12201,246 @@
         }
       }
     },
+    "/trade/fulfillment/split/writeback-tasks": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_writeback_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformOrderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitWritebackPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/splits/{splitId}": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_splits_splitId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/reservation-commands": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_reservation_commands",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "splitId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "unitId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitReservationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/split/capabilities": {
+      "get": {
+        "tags": [
+          "order-split-controller"
+        ],
+        "operationId": "get_trade_fulfillment_split_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderSplitCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/shipment-writeback/tasks/{id}": {
       "get": {
         "tags": [
@@ -15388,6 +16208,136 @@
           }
         }
       },
+      "SplitRuleInput": {
+        "required": [
+          "maxUnitsPerSplit"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "规则是否启用（默认 true）"
+          },
+          "splitByWarehouse": {
+            "type": "boolean",
+            "description": "是否按仓库拆（默认 true）"
+          },
+          "splitByCarrier": {
+            "type": "boolean",
+            "description": "是否按承运商拆（默认 true）"
+          },
+          "splitByTimeliness": {
+            "type": "boolean",
+            "description": "是否按发货时效拆（默认 false）"
+          },
+          "splitByPlatformRestriction": {
+            "type": "boolean",
+            "description": "是否按平台限制拆（默认 true）"
+          },
+          "primaryStrategy": {
+            "type": "string",
+            "description": "主维度；必须是一个被开启的维度",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "maxUnitsPerSplit": {
+            "maximum": 64,
+            "minimum": 1,
+            "type": "integer",
+            "description": "单次拆单最多拆几个履约单元",
+            "format": "int32"
+          },
+          "allowPartialFulfillment": {
+            "type": "boolean",
+            "description": "是否允许部分先发（默认 true）"
+          },
+          "maxShipByHours": {
+            "type": "integer",
+            "description": "时效档位上限（小时）；null = 不限",
+            "format": "int32"
+          },
+          "stockFreshnessHours": {
+            "type": "integer",
+            "description": "库存新鲜度上限（小时）；null = 不限",
+            "format": "int32"
+          }
+        },
+        "description": "保存拆单规则"
+      },
+      "SplitRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "规则是否启用"
+          },
+          "splitByWarehouse": {
+            "type": "boolean",
+            "description": "是否按仓库拆"
+          },
+          "splitByCarrier": {
+            "type": "boolean",
+            "description": "是否按承运商拆"
+          },
+          "splitByTimeliness": {
+            "type": "boolean",
+            "description": "是否按发货时效拆"
+          },
+          "splitByPlatformRestriction": {
+            "type": "boolean",
+            "description": "是否按平台限制拆"
+          },
+          "primaryStrategy": {
+            "type": "string",
+            "description": "主维度（分组时以它为准）",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "maxUnitsPerSplit": {
+            "type": "integer",
+            "description": "单次拆单最多拆几个履约单元",
+            "format": "int32"
+          },
+          "allowPartialFulfillment": {
+            "type": "boolean",
+            "description": "是否允许部分先发（同一行跨单元分批）"
+          },
+          "maxShipByHours": {
+            "type": "integer",
+            "description": "时效档位上限（小时）；null = 不限，不是 0",
+            "format": "int32"
+          },
+          "stockFreshnessHours": {
+            "type": "integer",
+            "description": "库存新鲜度上限（小时）；null = 不限",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        },
+        "description": "拆单规则（每租户一条）"
+      },
       "ConsolidationRuleInput": {
         "required": [
           "maxOrdersPerConsolidation"
@@ -19103,6 +20053,796 @@
             "description": "未送达时必填：拒收 / 退回 / 丢失是三件不同的事"
           }
         }
+      },
+      "SplitWarehouseInput": {
+        "required": [
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "warehouseName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "仓名"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "description": "货权归属（法人）"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "该仓默认承运商；按承运商拆单时用它"
+          },
+          "shipByHours": {
+            "type": "integer",
+            "description": "承诺发货时效（小时）；null = 未知",
+            "format": "int32"
+          },
+          "allowedPlatforms": {
+            "type": "string",
+            "description": "平台限制清单：逗号分隔的平台码大写列表（如 AMAZON,SHOPIFY）；空 = 不限平台"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "是否参与拆单候选（默认 true）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "登记 / 更新发货仓"
+      },
+      "SplitWarehouseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "仓 id",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码（租户内唯一）"
+          },
+          "warehouseName": {
+            "type": "string",
+            "description": "仓名"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "description": "货权归属（法人）"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "该仓默认承运商"
+          },
+          "shipByHours": {
+            "type": "integer",
+            "description": "承诺发货时效（小时）；null = 未知，不是 0",
+            "format": "int32"
+          },
+          "allowedPlatforms": {
+            "type": "string",
+            "description": "平台限制清单（逗号分隔）；空 = 不限平台"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "是否参与拆单候选"
+          },
+          "notes": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "发货仓登记"
+      },
+      "SplitStockSnapshotInput": {
+        "required": [
+          "availableQty",
+          "collectedAt",
+          "skuRef",
+          "warehouseRef"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "SKU 逻辑引用"
+          },
+          "availableQty": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "可用量（numeric(19,6)）"
+          },
+          "collectedAt": {
+            "type": "string",
+            "description": "采集时刻（timestamptz）。由采集方给出，不取服务器当前时间",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "type": "string",
+            "description": "来源：MODULE_7_1_1_3 / TENANT_MAINTAINED（默认后者）"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源单号；stockSource=MODULE_7_1_1_3 时必填"
+          },
+          "notes": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "登记 / 更新可用库存分布"
+      },
+      "SplitStockSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "skuRef": {
+            "type": "string",
+            "description": "SKU 逻辑引用"
+          },
+          "availableQty": {
+            "type": "number",
+            "description": "可用量"
+          },
+          "collectedAt": {
+            "type": "string",
+            "description": "采集时刻（由采集方给出，不由写入时刻冒充）",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "type": "string",
+            "description": "来源：MODULE_7_1_1_3 / TENANT_MAINTAINED"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源单号（来源为 MODULE_7_1_1_3 时必填）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "可用库存分布快照（7.1.1.3 的租户可维护替身）"
+      },
+      "OrderLineInput": {
+        "required": [
+          "amount",
+          "orderLineRef",
+          "qty"
+        ],
+        "type": "object",
+        "properties": {
+          "orderLineRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "订单行引用（UUID 文本或租户自己的行号）"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "SKU 逻辑引用"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "SKU 编码快照"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "SKU 名称快照"
+          },
+          "qty": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "本行总数量"
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "本行总金额（numeric(19,4)，与订单总额口径一致）"
+          }
+        },
+        "description": "订单行快照（拆单请求里随行带来的真实业务数据，不是 mock）"
+      },
+      "SplitInput": {
+        "required": [
+          "orderRef",
+          "orderTotalAmount",
+          "plannedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "订单引用（逻辑引用，不校验存在性：上游 9.2 审单未交付）"
+          },
+          "orderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "我方单号快照"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单内容来源：SALES_ORDER = 按 tenant 从 sales_order 真实联表读取；REQUEST_SNAPSHOT = 用下面的 lines 快照。留空则先试 SALES_ORDER，取不到回落快照"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种（ISO 4217 alpha-3）"
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收货人姓名快照"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收货人电话快照"
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收货人邮箱快照"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "国家码（ISO 3166-1 alpha-2）"
+          },
+          "addressLine": {
+            "type": "string",
+            "description": "可读地址快照"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码快照（决定平台限制维度怎么切）"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺码快照"
+          },
+          "platformOrderRef": {
+            "type": "string",
+            "description": "平台单号快照"
+          },
+          "orderTotalAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "订单总金额（拆单全程不变，蓝图加粗句）"
+          },
+          "lines": {
+            "type": "array",
+            "description": "订单行快照；orderSource=REQUEST_SNAPSHOT 时必填",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineInput"
+            }
+          },
+          "plannedAt": {
+            "type": "string",
+            "description": "拆分时刻（timestamptz）。由调用方显式给出，不取服务器当前时间",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "落一次拆单的入参（蓝图输入「拆单请求」）"
+      },
+      "SplitSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "拆单 id",
+            "format": "uuid"
+          },
+          "splitNo": {
+            "type": "string",
+            "description": "拆单号"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "unitCount": {
+            "type": "integer",
+            "description": "履约单元数",
+            "format": "int32"
+          },
+          "allocatedAmountTotal": {
+            "type": "number",
+            "description": "各单元分摊合计"
+          },
+          "residualAmountTotal": {
+            "type": "number",
+            "description": "尾差合计"
+          },
+          "amountConserved": {
+            "type": "boolean",
+            "description": "🔴 金额守恒是否成立"
+          },
+          "message": {
+            "type": "string",
+            "description": "提示语（说清这一步实际做了什么，而不是「操作成功」）"
+          }
+        },
+        "description": "操作结果"
+      },
+      "SplitWritebackInput": {
+        "required": [
+          "occurredAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "回传状态",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION"
+            ]
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "物流号；status=CONFIRMED 时必填"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "失败原因；status=REJECTED 时给"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（timestamptz）",
+            "format": "date-time"
+          }
+        },
+        "description": "登记发货回传结果（按拆分执行：一单元一条）"
+      },
+      "SplitWritebackTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "description": "单元 id",
+            "format": "uuid"
+          },
+          "splitId": {
+            "type": "string",
+            "description": "拆单 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺码"
+          },
+          "platformOrderRef": {
+            "type": "string",
+            "description": "平台单号"
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "物流号"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "CONFIRMED",
+              "REJECTED",
+              "PENDING_VERIFICATION"
+            ]
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "description": "尝试次数",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "最后一次错误"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          },
+          "settledAt": {
+            "type": "string",
+            "description": "结算时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "发货回传任务（蓝图输出③：按拆分执行，一单元一条）"
+      },
+      "SplitReservationInput": {
+        "required": [
+          "occurredAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "指令状态：ACKNOWLEDGED / REJECTED",
+            "enum": [
+              "REQUESTED",
+              "ACKNOWLEDGED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "externalReservationRef": {
+            "type": "string",
+            "description": "warehouse 侧预占号；status=ACKNOWLEDGED 时必填"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "拒绝原因；status=REJECTED 时必填"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "回执时刻（timestamptz）",
+            "format": "date-time"
+          }
+        },
+        "description": "登记预占指令回执（warehouse 侧回执）"
+      },
+      "SplitReservationCommand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "指令 id",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "description": "单元 id",
+            "format": "uuid"
+          },
+          "skuRef": {
+            "type": "string",
+            "description": "SKU 逻辑引用"
+          },
+          "orderLineRef": {
+            "type": "string",
+            "description": "订单行引用"
+          },
+          "reservedQty": {
+            "type": "number",
+            "description": "请求预占数量"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "targetService": {
+            "type": "string",
+            "description": "目标服务（7 预占归属 warehouse）"
+          },
+          "commandSource": {
+            "type": "string",
+            "description": "指令来源：SPLIT_PLAN / MANUAL"
+          },
+          "commandStatus": {
+            "type": "string",
+            "description": "指令状态",
+            "enum": [
+              "REQUESTED",
+              "ACKNOWLEDGED",
+              "REJECTED",
+              "CANCELLED"
+            ]
+          },
+          "commandStatusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "externalReservationRef": {
+            "type": "string",
+            "description": "warehouse 侧返回的预占号"
+          },
+          "upstreamReserved": {
+            "type": "boolean",
+            "description": "🔴 本模块不预占上游库存（恒 false）"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "拒绝原因"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "description": "回执时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "库存预占指令（蓝图输出②；本服务登记，不预占上游库存）"
+      },
+      "SplitStatusInput": {
+        "required": [
+          "occurredAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "目标状态：CONFIRMED / DISPATCHED / CANCELLED",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "作废原因；status=CANCELLED 时必填"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（timestamptz）；CANCELLED 时也用作废时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "推进拆单状态"
+      },
+      "PreviewCandidate": {
+        "type": "object",
+        "properties": {
+          "orderLineRef": {
+            "type": "string",
+            "description": "订单行引用"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "selected": {
+            "type": "boolean",
+            "description": "是否被选中"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "落选原因码；被选中时为空串"
+          },
+          "rejectReasonLabel": {
+            "type": "string",
+            "description": "落选原因中文；被选中时为空串"
+          },
+          "rejectDetail": {
+            "type": "string",
+            "description": "落选说明"
+          },
+          "availableQty": {
+            "type": "number",
+            "description": "该仓该行可用量"
+          },
+          "demandQty": {
+            "type": "number",
+            "description": "该行需求量"
+          },
+          "rankNo": {
+            "type": "integer",
+            "description": "候选排序键（确定性 tiebreak）",
+            "format": "int32"
+          }
+        },
+        "description": "预览里的一条候选（含落选原因）"
+      },
+      "PreviewUnit": {
+        "type": "object",
+        "properties": {
+          "unitSeq": {
+            "type": "integer",
+            "description": "单元序号（确定性排序：字典序）",
+            "format": "int32"
+          },
+          "unitStrategy": {
+            "type": "string",
+            "description": "本单元用哪个维度切出来",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "shipByHours": {
+            "type": "integer",
+            "description": "发货时效档位（小时）；null = 未知",
+            "format": "int32"
+          },
+          "shipByAt": {
+            "type": "string",
+            "description": "承诺发货时刻；按时效拆时必填",
+            "format": "date-time"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "description": "货权归属"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "行数",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "件数"
+          },
+          "allocatedAmount": {
+            "type": "number",
+            "description": "分摊金额"
+          }
+        },
+        "description": "预览里的一个履约单元"
+      },
+      "SplitPreview": {
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "description": "本次按哪个维度拆",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "units": {
+            "type": "array",
+            "description": "拟拆出的履约单元（尚未落库）",
+            "items": {
+              "$ref": "#/components/schemas/PreviewUnit"
+            }
+          },
+          "candidates": {
+            "type": "array",
+            "description": "逐行逐仓候选与落选原因（尚未落库）",
+            "items": {
+              "$ref": "#/components/schemas/PreviewCandidate"
+            }
+          },
+          "orderTotalAmount": {
+            "type": "number",
+            "description": "订单总金额"
+          },
+          "allocatedTotal": {
+            "type": "number",
+            "description": "各单元分摊合计"
+          },
+          "residualTotal": {
+            "type": "number",
+            "description": "尾差合计（分摊舍入后归到某一行的那几分钱）"
+          },
+          "amountConserved": {
+            "type": "boolean",
+            "description": "🔴 金额守恒是否成立（各单元分摊 + 尾差 == 订单总额）"
+          },
+          "createsSalesOrder": {
+            "type": "boolean",
+            "description": "🔴 是否会产生新的销售订单（恒为 false，蓝图加粗句）"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单内容来源：SALES_ORDER / REQUEST_SNAPSHOT"
+          },
+          "ruleConfigured": {
+            "type": "boolean",
+            "description": "拆单规则是否已配置"
+          },
+          "blockedReason": {
+            "type": "string",
+            "description": "阻断原因；未阻断时为 null"
+          }
+        },
+        "description": "拆单预览的结果：与真正落库用的是**同一段判定逻辑**，差别只是不写 order_split* 那几张表"
       },
       "ShipmentWritebackCreateInput": {
         "required": [
@@ -29060,6 +30800,724 @@
             "type": "string"
           }
         }
+      },
+      "SplitWritebackPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/SplitWritebackTask"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "description": "汇总：待回传数（不受分页影响）",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "汇总：被平台拒数（不受分页影响）",
+            "format": "int64"
+          },
+          "pendingVerificationCount": {
+            "type": "integer",
+            "description": "汇总：结果待查证数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "回传任务分页"
+      },
+      "SplitPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/SplitRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "description": "汇总：已下发拆单数（不受分页影响）",
+            "format": "int64"
+          },
+          "pendingReservationCount": {
+            "type": "integer",
+            "description": "汇总：待认领预占指令数（不受分页影响）",
+            "format": "int64"
+          },
+          "pendingWritebackCount": {
+            "type": "integer",
+            "description": "汇总：待回传任务数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "拆单分页"
+      },
+      "SplitRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "拆单 id",
+            "format": "uuid"
+          },
+          "splitNo": {
+            "type": "string",
+            "description": "拆单号"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "PLANNED",
+              "CONFIRMED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "orderRef": {
+            "type": "string",
+            "description": "订单引用（逻辑引用）"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单内容来源"
+          },
+          "orderOriginPlatform": {
+            "type": "string",
+            "description": "平台码快照"
+          },
+          "orderOriginShop": {
+            "type": "string",
+            "description": "店铺码快照"
+          },
+          "platformOrderRef": {
+            "type": "string",
+            "description": "平台单号快照"
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收货人姓名"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收货人电话"
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收货人邮箱"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "国家码"
+          },
+          "addressLine": {
+            "type": "string",
+            "description": "可读地址"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "orderTotalAmount": {
+            "type": "number",
+            "description": "🔴 订单总金额（拆单全程不变）"
+          },
+          "createsSalesOrder": {
+            "type": "boolean",
+            "description": "🔴 是否产生新的销售订单（恒 false）"
+          },
+          "strategy": {
+            "type": "string",
+            "description": "本次拆分维度",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "unitCount": {
+            "type": "integer",
+            "description": "履约单元数（DB 实算）",
+            "format": "int32"
+          },
+          "distinctWarehouseCount": {
+            "type": "integer",
+            "description": "涉及仓数（DB 实算）",
+            "format": "int32"
+          },
+          "distinctCarrierCount": {
+            "type": "integer",
+            "description": "涉及承运商数（DB 实算）",
+            "format": "int32"
+          },
+          "allocatedAmountTotal": {
+            "type": "number",
+            "description": "各单元分摊合计（DB 实算）"
+          },
+          "residualAmountTotal": {
+            "type": "number",
+            "description": "尾差合计（DB 实算）"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "件数合计（DB 实算）"
+          },
+          "plannedAt": {
+            "type": "string",
+            "description": "拆分时刻",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "description": "确认时刻",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "下发时刻",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "description": "作废时刻",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string",
+            "description": "作废原因"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "拆单一行（汇总数由 DB 从单元行实算回填）"
+      },
+      "CandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "候选 id",
+            "format": "uuid"
+          },
+          "orderLineRef": {
+            "type": "string",
+            "description": "订单行引用"
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "selected": {
+            "type": "boolean",
+            "description": "是否被选中"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "落选原因码；被选中时为空串"
+          },
+          "rejectReasonLabel": {
+            "type": "string",
+            "description": "落选原因中文"
+          },
+          "rejectDetail": {
+            "type": "string",
+            "description": "落选说明"
+          },
+          "availableQty": {
+            "type": "number",
+            "description": "该仓该行可用量"
+          },
+          "demandQty": {
+            "type": "number",
+            "description": "需求量"
+          },
+          "collectedAt": {
+            "type": "string",
+            "description": "库存采集时刻",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "type": "string",
+            "description": "库存来源"
+          },
+          "rankNo": {
+            "type": "integer",
+            "description": "候选排序键",
+            "format": "int32"
+          }
+        },
+        "description": "候选依据（落选候选与被选候选同等重要）"
+      },
+      "SplitDetail": {
+        "type": "object",
+        "properties": {
+          "split": {
+            "$ref": "#/components/schemas/SplitRow"
+          },
+          "units": {
+            "type": "array",
+            "description": "履约单元（9.3.3.1 后续消费的就是这些行）",
+            "items": {
+              "$ref": "#/components/schemas/SplitUnit"
+            }
+          },
+          "unitLines": {
+            "type": "array",
+            "description": "单元行级明细",
+            "items": {
+              "$ref": "#/components/schemas/UnitLine"
+            }
+          },
+          "candidates": {
+            "type": "array",
+            "description": "逐行逐仓候选依据（落选带原因）",
+            "items": {
+              "$ref": "#/components/schemas/CandidateRow"
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "description": "库存预占指令（登记，不是预占事实）",
+            "items": {
+              "$ref": "#/components/schemas/SplitReservationCommand"
+            }
+          },
+          "writebackTasks": {
+            "type": "array",
+            "description": "发货回传任务",
+            "items": {
+              "$ref": "#/components/schemas/SplitWritebackTask"
+            }
+          },
+          "events": {
+            "type": "array",
+            "description": "事件流",
+            "items": {
+              "$ref": "#/components/schemas/SplitEvent"
+            }
+          },
+          "amountConserved": {
+            "type": "boolean",
+            "description": "🔴 金额守恒复算（DB 侧独立复核的结果）"
+          },
+          "createsSalesOrder": {
+            "type": "boolean",
+            "description": "🔴 是否产生新的销售订单（恒 false）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页时必须知道的事"
+          }
+        },
+        "description": "拆单详情：头 + 单元 + 行级明细 + 候选 + 预占指令 + 回传 + 事件流"
+      },
+      "SplitEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "事件 id",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "事件类型"
+          },
+          "fromStatus": {
+            "type": "string",
+            "description": "原状态"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "新状态"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "description": "操作人成员 id",
+            "format": "uuid"
+          },
+          "detail": {
+            "type": "string",
+            "description": "说明"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "拆单事件（append-only）"
+      },
+      "SplitUnit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "单元 id",
+            "format": "uuid"
+          },
+          "unitSeq": {
+            "type": "integer",
+            "description": "单元序号",
+            "format": "int32"
+          },
+          "unitStatus": {
+            "type": "string",
+            "description": "单元状态",
+            "enum": [
+              "PLANNED",
+              "ALLOCATED",
+              "DISPATCHED",
+              "CANCELLED"
+            ]
+          },
+          "unitStatusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "unitStrategy": {
+            "type": "string",
+            "description": "本单元用哪个维度切出来",
+            "enum": [
+              "WAREHOUSE",
+              "CARRIER",
+              "TIMELINESS",
+              "PLATFORM"
+            ]
+          },
+          "warehouseRef": {
+            "type": "string",
+            "description": "仓引用码"
+          },
+          "carrierCode": {
+            "type": "string",
+            "description": "承运商码"
+          },
+          "shipByAt": {
+            "type": "string",
+            "description": "承诺发货时刻；按时效拆时必填",
+            "format": "date-time"
+          },
+          "shipByHours": {
+            "type": "integer",
+            "description": "时效档位（小时）",
+            "format": "int32"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "description": "货权归属"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "行数（DB 实算）",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "件数（DB 实算）"
+          },
+          "allocatedAmount": {
+            "type": "number",
+            "description": "分摊金额（DB 实算）"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "下发时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "履约单元（蓝图输出①「多个履约请求」在本服务的落法）"
+      },
+      "UnitLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "明细 id",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "description": "单元 id",
+            "format": "uuid"
+          },
+          "orderLineRef": {
+            "type": "string",
+            "description": "订单行引用"
+          },
+          "skuRef": {
+            "type": "string",
+            "description": "SKU 逻辑引用"
+          },
+          "skuCode": {
+            "type": "string",
+            "description": "SKU 编码快照"
+          },
+          "skuName": {
+            "type": "string",
+            "description": "SKU 名称快照"
+          },
+          "allocatedQty": {
+            "type": "number",
+            "description": "本单元切走的数量"
+          },
+          "allocatedAmount": {
+            "type": "number",
+            "description": "本单元分摊金额"
+          },
+          "residualAmount": {
+            "type": "number",
+            "description": "🔴 尾差承载额（全拆单至多一行非零）"
+          }
+        },
+        "description": "单元行级明细（金额守恒的最小粒度）"
+      },
+      "SplitReservationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/SplitReservationCommand"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "汇总：待认领数（不受分页影响）",
+            "format": "int64"
+          },
+          "acknowledgedCount": {
+            "type": "integer",
+            "description": "汇总：已预占数（不受分页影响）",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "汇总：被拒数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "预占指令分页"
+      },
+      "OrderSplitCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/SplitDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "拆单状态机取值",
+            "items": {
+              "type": "string",
+              "description": "拆单状态机取值",
+              "enum": [
+                "PLANNED",
+                "CONFIRMED",
+                "DISPATCHED",
+                "CANCELLED"
+              ]
+            }
+          },
+          "strategies": {
+            "type": "array",
+            "description": "拆分维度取值",
+            "items": {
+              "type": "string",
+              "description": "拆分维度取值",
+              "enum": [
+                "WAREHOUSE",
+                "CARRIER",
+                "TIMELINESS",
+                "PLATFORM"
+              ]
+            }
+          },
+          "reservationStatuses": {
+            "type": "array",
+            "description": "预占指令状态取值",
+            "items": {
+              "type": "string",
+              "description": "预占指令状态取值",
+              "enum": [
+                "REQUESTED",
+                "ACKNOWLEDGED",
+                "REJECTED",
+                "CANCELLED"
+              ]
+            }
+          },
+          "writebackStatuses": {
+            "type": "array",
+            "description": "回传状态取值",
+            "items": {
+              "type": "string",
+              "description": "回传状态取值",
+              "enum": [
+                "PENDING",
+                "SUBMITTED",
+                "CONFIRMED",
+                "REJECTED",
+                "PENDING_VERIFICATION"
+              ]
+            }
+          },
+          "rejectReasons": {
+            "type": "array",
+            "description": "候选落选原因词表",
+            "items": {
+              "type": "string",
+              "description": "候选落选原因词表",
+              "enum": [
+                "INSUFFICIENT_STOCK",
+                "PLATFORM_RESTRICTED",
+                "SHIP_BY_TOO_SLOW",
+                "STOCK_TOO_STALE",
+                "WAREHOUSE_INACTIVE",
+                "NO_CARRIER",
+                "BEATEN_BY_TIEBREAK",
+                "MAX_UNITS_EXCEEDED",
+                "PARTIAL_FULFILMENT_DISABLED",
+                "SAME_WAREHOUSE_ALREADY_FULL"
+              ]
+            }
+          },
+          "ruleConfigured": {
+            "type": "boolean",
+            "description": "本租户是否已配置拆单规则（false 时不能落拆单）"
+          },
+          "reservesUpstreamStock": {
+            "type": "boolean",
+            "description": "🔴 本模块不预占上游库存：预占住在 warehouse 独立库，不得跨库读写"
+          },
+          "orderReviewConnected": {
+            "type": "boolean",
+            "description": "🔴 上游 9.2 审单整条线未交付，本模块只存逻辑引用与快照列"
+          },
+          "notes": {
+            "type": "string",
+            "description": "口径与交接说明"
+          },
+          "downstreamGaps": {
+            "type": "string",
+            "description": "下游缺口说明"
+          }
+        },
+        "description": "9.3.1.1 拆单能力与上下游可用性"
+      },
+      "SplitDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "维度码"
+          },
+          "label": {
+            "type": "string",
+            "description": "维度名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否真的可用"
+          },
+          "source": {
+            "type": "string",
+            "description": "上游来源与归属"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "description": "不可用时的原因与交接方式；可用时为 null"
+          }
+        },
+        "description": "能力维度：依赖什么、是否真的可用、不可用时怎么办"
       },
       "ShipmentWritebackSummary": {
         "type": "object",
