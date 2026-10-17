@@ -392,13 +392,21 @@ public class AftersalesCaseService {
         request.receivedAt() == null ? OffsetDateTime.now(ZoneOffset.UTC) : request.receivedAt();
     String caseNo = nextCaseNo();
 
+    // ⚠️ **platform_received_at 必须带 ::timestamptz**：这一列是 timestamptz，
+    //   而 jOOQ 把 OffsetDateTime 按 varchar 绑定。不加 cast 时 PG 报
+    //   「column platform_received_at is of type timestamp with time zone but expression
+    //   is of type character varying」，而且它**只在调用方真的传了平台受理时刻时才炸**
+    //   （上游的测试恰好传的是 null，所以一直没暴露）。
+    //   平台受理时刻是时效倒计时的起点（内部补录的单不能因为晚录入就多算时限），
+    //   所以这个洞会让这一列永远写不进去。
+    //   由 11.1.1.2 详情的集成测试首次传入非空 platformReceivedAt 时发现并修正。
     sql.execute(
         "insert into aftersales_case(id,tenant_id,case_no,order_id,case_type,status,reason_code,"
             + " reason_note,requested_amount,currency,requested_quantity,platform_case_no,"
             + " platform_case_url,platform_received_at,buyer_request,reply_due_at,resolve_due_at,"
             + " received_at,created_at,updated_at)"
-            + " values (?,?,?,?,?,'RECEIVED',?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,"
-            + " ?::timestamptz,now(),now())",
+            + " values (?,?,?,?,?,'RECEIVED',?,?,?,?,?,?,?,?::timestamptz,?,?::timestamptz,"
+            + " ?::timestamptz,?::timestamptz,now(),now())",
         id,
         currentTenant(),
         caseNo,

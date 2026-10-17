@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlarmClock, RefreshCw, TriangleAlert } from 'lucide-react';
 import { Button, EmptyState, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
@@ -600,7 +601,13 @@ function Row({
       <td className="px-2 py-2">
         <input type="checkbox" checked={checked} onChange={onToggle} aria-label={`选择 ${row.caseNo}`} />
       </td>
-      <td className="px-2 py-2 font-mono">{row.caseNo}</td>
+      <td className="px-2 py-2 font-mono">
+        {/* 11.1.1.2 详情交付后，售后号成为通往全景页的入口。
+            此前本列表**刻意**不带任何指向详情的链接 —— 一个点进去 404 的入口比没有更糟。 */}
+        <Link href={`/aftersales/cases/${row.id}`} className="underline underline-offset-2">
+          {row.caseNo}
+        </Link>
+      </td>
       <td className="px-2 py-2 font-mono">{row.orderNo ?? '—'}</td>
       <td className="px-2 py-2">{platformSourceLabel(row.platformSource)}</td>
       <td className="text-muted-foreground px-2 py-2" title={shop.title}>
