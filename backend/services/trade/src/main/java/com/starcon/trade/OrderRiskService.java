@@ -101,7 +101,7 @@ public class OrderRiskService {
     boolean configured = ruleOrNull() != null;
     return new RiskCapabilities(
         List.of(
-            new RiskCapabilities.Dimension(
+            new RiskCapabilityDimension(
                 "BUYER_HISTORY",
                 RiskDimension.BUYER_HISTORY.label(),
                 "15 客户行为画像（退款率 / 纠纷率）",
@@ -112,7 +112,7 @@ public class OrderRiskService {
                     + "本维因此落在租户可维护的 order_risk_signal（REFUND_RATE / DISPUTE_RATE），"
                     + "两码都采集齐才算分，缺一码判 MISSING_SIGNAL 并点名缺哪一码 —— "
                     + "把没量过的纠纷率当成 0 是本模块最不该犯的错。"),
-            new RiskCapabilities.Dimension(
+            new RiskCapabilityDimension(
                 "DEVICE_IP_LINK",
                 RiskDimension.DEVICE_IP_LINK.label(),
                 "16 合规关联风险（设备 / IP）",
@@ -121,14 +121,14 @@ public class OrderRiskService {
                 "卷 16 的 24 个 L4 模块在集成头**全部未交付**，连服务都还没有。"
                     + "本维落在租户可维护的 order_risk_signal（DEVICE_IP_LINK_COUNT / "
                     + "SHARED_DEVICE_COUNT / SHARED_IP_COUNT），三码都采集齐才算分。"),
-            new RiskCapabilities.Dimension(
+            new RiskCapabilityDimension(
                 "ORDER_FREQUENCY",
                 RiskDimension.ORDER_FREQUENCY.label(),
                 "订单聚合特征（本服务 sales_order 簇，真 SQL）",
                 true,
                 "order_risk_rule.weight_order_frequency",
                 null),
-            new RiskCapabilities.Dimension(
+            new RiskCapabilityDimension(
                 "AMOUNT_ANOMALY",
                 RiskDimension.AMOUNT_ANOMALY.label(),
                 "订单聚合特征（本服务 sales_order 簇，真 SQL）",
@@ -138,7 +138,7 @@ public class OrderRiskService {
                     + "拿 USD 与 EUR 比「金额异常」是纯噪声，所以历史均单只在**同币种**内算；"
                     + "同币种历史不足 rule.amount_anomaly_min_orders 笔时判 INSUFFICIENT_HISTORY，"
                     + "不拿别的币种凑。"),
-            new RiskCapabilities.Dimension(
+            new RiskCapabilityDimension(
                 "ADDRESS_CONCENTRATION",
                 RiskDimension.ADDRESS_CONCENTRATION.label(),
                 "订单聚合特征（本服务 order_address_snapshot，真 SQL）",
@@ -147,7 +147,7 @@ public class OrderRiskService {
                 "地址指纹用**收货地址快照**现算 md5（与 9.3.1.2 合单同一口径）："
                     + "V99 已用 guard_sales_order_snapshot_frozen 把 SUBMITTED 后的地址快照冻住，"
                     + "「这几单是不是寄到同一个地方」要判的是下单当时的事实，不是现在的地址。")),
-        new RiskCapabilities.Downstream(
+        new RiskCapabilityDownstream(
             "9.2.1.3",
             "审单拦截",
             false,
@@ -569,7 +569,7 @@ public class OrderRiskService {
    * {@code DEFERRED} 与 {@code ESCALATED} **不改**结论 —— 「升级给合规」不等于「已拒发」。
    */
   @Transactional
-  public ReviewSaved review(UUID assessmentId, ReviewInput input, UUID actorId) {
+  public ReviewSaved review(UUID assessmentId, RiskReviewInput input, UUID actorId) {
     if (input == null) {
       throw bad("请求体不能为空");
     }

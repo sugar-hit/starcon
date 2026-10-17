@@ -185,7 +185,7 @@ public class OrderRiskController {
   public ReviewSaved review(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID assessmentId,
-      @Valid @RequestBody ReviewInput input) {
+      @Valid @RequestBody RiskReviewInput input) {
     return call(auth, "orders.update", a -> risk.review(assessmentId, input, a.membershipId()));
   }
 }

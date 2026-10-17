@@ -280,30 +280,38 @@ public final class OrderRiskModels {
    */
   @Schema(description = "9.2.2.2 风控校验能力与上下游可用性")
   public record RiskCapabilities(
-      @Schema(description = "五个风险维度的可用性") List<Dimension> dimensions,
-      @Schema(description = "下游 9.2.1.3") Downstream downstream,
+      @Schema(description = "五个风险维度的可用性") List<RiskCapabilityDimension> dimensions,
+      @Schema(description = "下游 9.2.1.3") RiskCapabilityDownstream downstream,
       @Schema(description = "本租户是否已登记风控规则") boolean ruleConfigured,
       @Schema(description = "是否已接入 15 客户画像（跨服务读表一律禁止）") boolean crossServiceReadAvailable,
       @Schema(description = "五维权重合计恒为 1.0000，判定顺序见 scoringOrder") String weightCheck,
       @Schema(description = "打分的判定顺序原文") String scoringOrder,
-      @Schema(description = "上游缺口原文") String gaps) {
+      @Schema(description = "上游缺口原文") String gaps) {}
 
-    @Schema(description = "单个维度的可用性")
-    public record Dimension(
-        @Schema(description = "维度码") String code,
-        @Schema(description = "中文名") String label,
-        @Schema(description = "数据来源原文") String source,
-        @Schema(description = "是否真接通（false = 租户维护或未交付）") boolean upstreamDelivered,
-        @Schema(description = "权重来源") String weightSource,
-        @Schema(description = "缺口原文；已接通为 null") String gap) {}
+  /**
+   * 单个风险维度的可用性。
+   *
+   * <p>⚠️ 刻意**不叫 {@code Dimension}**：warehouse 的 capabilities 也有一个
+   * {@code Dimension}（code / label / available / source / unavailableReason），
+   * 而 codegen 把各服务的 schema 合并进同一个桶文件 —— 直接生成会把 warehouse 的
+   * 那份打掉、打红它的 workspace。加模块前缀是既有解法（照抄 15.4.1.1 把
+   * KnowledgeEntry 改名成 CrmKnowledgeEntry 那次）。
+   */
+  @Schema(description = "单个风险维度的可用性")
+  public record RiskCapabilityDimension(
+      @Schema(description = "维度码") String code,
+      @Schema(description = "中文名") String label,
+      @Schema(description = "数据来源原文") String source,
+      @Schema(description = "是否真接通（false = 租户维护或上游未交付）") boolean upstreamDelivered,
+      @Schema(description = "权重取自规则表的哪一列") String weightSource,
+      @Schema(description = "缺口原文；已接通为 null") String gap) {}
 
-    @Schema(description = "下游可用性")
-    public record Downstream(
-        @Schema(description = "模块号") String moduleId,
-        @Schema(description = "名称") String name,
-        @Schema(description = "是否已交付") boolean available,
-        @Schema(description = "交付前本模块做到哪一步") String handoff) {}
-  }
+  @Schema(description = "下游可用性")
+  public record RiskCapabilityDownstream(
+      @Schema(description = "模块号") String moduleId,
+      @Schema(description = "名称") String name,
+      @Schema(description = "是否已交付") boolean available,
+      @Schema(description = "交付前本模块做到哪一步") String handoff) {}
 
   // ------------------------------------------------------------ 规则
 
@@ -485,7 +493,7 @@ public final class OrderRiskModels {
 
   /** 提交人工复核。 */
   @Schema(description = "提交人工复核（拒发的唯一合法入口）")
-  public record ReviewInput(
+  public record RiskReviewInput(
       @NotNull ReviewDecision decision,
       @NotNull ReviewReasonCode reasonCode,
       @Size(max = 2000) String note) {}

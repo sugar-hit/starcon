@@ -401,7 +401,7 @@ class OrderRiskIntegrationTest {
         .isFalse();
     assertThat(caps.ruleConfigured()).as("本用例还没登记规则").isFalse();
 
-    var byCode = new HashMap<String, RiskCapabilities.Dimension>();
+    var byCode = new HashMap<String, RiskCapabilityDimension>();
     caps.dimensions().forEach(d -> byCode.put(d.code(), d));
 
     // 15 客户 / 16 合规这两维必须报未交付，且说清缺口落在哪张表上。
@@ -838,7 +838,7 @@ class OrderRiskIntegrationTest {
         asA(
             () ->
                 service.review(
-                    head.id(), new ReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK,
+                    head.id(), new RiskReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK,
                         "复核确认"),
                     user));
     assertThat(reviewed.assessment().finalAction()).isEqualTo(FinalAction.REJECT);
@@ -861,7 +861,7 @@ class OrderRiskIntegrationTest {
                     () ->
                         service.review(
                             saved.assessment().id(),
-                            new ReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK,
+                            new RiskReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK,
                                 "想直接拒"),
                             user)))
         .hasMessageContaining("不需要人工复核");
@@ -880,7 +880,7 @@ class OrderRiskIntegrationTest {
             () ->
                 service.review(
                     saved.assessment().id(),
-                    new ReviewInput(ReviewDecision.DEFERRED, ReviewReasonCode.PENDING_EVIDENCE,
+                    new RiskReviewInput(ReviewDecision.DEFERRED, ReviewReasonCode.PENDING_EVIDENCE,
                         "等材料"),
                     user));
     assertThat(first.assessment().finalAction()).isNull();
@@ -891,7 +891,7 @@ class OrderRiskIntegrationTest {
                     () ->
                         service.review(
                             saved.assessment().id(),
-                            new ReviewInput(ReviewDecision.SHIP, ReviewReasonCode.FALSE_POSITIVE,
+                            new RiskReviewInput(ReviewDecision.SHIP, ReviewReasonCode.FALSE_POSITIVE,
                                 "复购客户"),
                             user)))
         .as("一份评估只复核一次：风控留痕不可覆写")
@@ -903,7 +903,7 @@ class OrderRiskIntegrationTest {
                     () ->
                         service.review(
                             UUID.randomUUID(),
-                            new ReviewInput(ReviewDecision.REJECT, ReviewReasonCode.FALSE_POSITIVE,
+                            new RiskReviewInput(ReviewDecision.REJECT, ReviewReasonCode.FALSE_POSITIVE,
                                 "矛盾组合"),
                             user)))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
@@ -979,7 +979,7 @@ class OrderRiskIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     json.writeValueAsString(
-                        new ReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK, ""))))
+                        new RiskReviewInput(ReviewDecision.REJECT, ReviewReasonCode.CONFIRMED_RISK, ""))))
         .andExpect(status().isForbidden());
   }
 

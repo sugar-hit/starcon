@@ -237,6 +237,76 @@
         }
       }
     },
+    "/trade/orders/risk-validation/rule": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskRule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "put_trade_orders_risk_validation_rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/customs-elements/{id}": {
       "get": {
         "tags": [
@@ -2253,6 +2323,315 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/FactorySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/orders/risk-validation/signals": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signalCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signalSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TENANT_MAINTAINED",
+                "MODULE_15_CUSTOMER_PROFILE",
+                "MODULE_16_RISK_LINKAGE",
+                "DERIVED_FROM_ORDERS"
+              ]
+            }
+          },
+          {
+            "name": "subjectKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskSignalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "post_trade_orders_risk_validation_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskSignalInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskSignal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/orders/risk-validation/assessments": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_assessments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recommendedAction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "evaluationStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pendingReviewOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "buyerFingerprint",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskAssessmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "post_trade_orders_risk_validation_assessments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/orders/risk-validation/assessments/{assessmentId}/review": {
+      "post": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "post_trade_orders_risk_validation_assessments_assessmentId_review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assessmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskReviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSaved"
                 }
               }
             }
@@ -10153,6 +10532,108 @@
         }
       }
     },
+    "/trade/orders/risk-validation/overview": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/orders/risk-validation/capabilities": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/orders/risk-validation/assessments/{assessmentId}": {
+      "get": {
+        "tags": [
+          "order-risk-controller"
+        ],
+        "operationId": "get_trade_orders_risk_validation_assessments_assessmentId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assessmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/waybills/{id}": {
       "get": {
         "tags": [
@@ -15091,6 +15572,221 @@
           }
         }
       },
+      "RiskRuleInput": {
+        "required": [
+          "amountAnomalyRatio",
+          "holdShipmentThreshold",
+          "manualReviewThreshold",
+          "missingSignalPolicy",
+          "ruleName",
+          "weightAddressConcentration",
+          "weightAmountAnomaly",
+          "weightBuyerHistory",
+          "weightDeviceIpLink",
+          "weightOrderFrequency"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "weightBuyerHistory": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "weightDeviceIpLink": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "weightOrderFrequency": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "weightAmountAnomaly": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "weightAddressConcentration": {
+            "maximum": 1.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "manualReviewThreshold": {
+            "maximum": 100.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "holdShipmentThreshold": {
+            "maximum": 100.0,
+            "exclusiveMaximum": false,
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "frequencyWindowHours": {
+            "maximum": 8760,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "frequencyMaxOrders": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "deviceLinkMaxLinks": {
+            "maximum": 1000000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountAnomalyRatio": {
+            "maximum": 100.0,
+            "exclusiveMaximum": false,
+            "minimum": 1.0001,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "amountAnomalyMinOrders": {
+            "maximum": 100000,
+            "minimum": 2,
+            "type": "integer",
+            "format": "int32"
+          },
+          "addressConcentrationWindowHours": {
+            "maximum": 8760,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "addressConcentrationMaxOrders": {
+            "maximum": 1000000,
+            "minimum": 2,
+            "type": "integer",
+            "format": "int32"
+          },
+          "signalMaxAgeHours": {
+            "maximum": 26280,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingSignalPolicy": {
+            "type": "string",
+            "enum": [
+              "SCORE_KNOWN_ONLY",
+              "BLOCK_EVALUATION"
+            ]
+          }
+        },
+        "description": "登记风控规则（upsert；权重合计必须等于 1.0000）"
+      },
+      "RiskRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "weightBuyerHistory": {
+            "type": "number"
+          },
+          "weightDeviceIpLink": {
+            "type": "number"
+          },
+          "weightOrderFrequency": {
+            "type": "number"
+          },
+          "weightAmountAnomaly": {
+            "type": "number"
+          },
+          "weightAddressConcentration": {
+            "type": "number"
+          },
+          "manualReviewThreshold": {
+            "type": "number"
+          },
+          "holdShipmentThreshold": {
+            "type": "number"
+          },
+          "frequencyWindowHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "frequencyMaxOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deviceLinkMaxLinks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountAnomalyRatio": {
+            "type": "number"
+          },
+          "amountAnomalyMinOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "addressConcentrationWindowHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "addressConcentrationMaxOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signalMaxAgeHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingSignalPolicy": {
+            "type": "string",
+            "enum": [
+              "SCORE_KNOWN_ONLY",
+              "BLOCK_EVALUATION"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "风控规则（每租户一条）"
+      },
       "ElementSetInput": {
         "required": [
           "destinationCountryCode",
@@ -17316,6 +18012,438 @@
             "type": "string"
           }
         }
+      },
+      "RiskSignalInput": {
+        "required": [
+          "capturedAt",
+          "measuredValue",
+          "signalCode",
+          "signalSource",
+          "subjectKey",
+          "subjectKind"
+        ],
+        "type": "object",
+        "properties": {
+          "signalCode": {
+            "type": "string",
+            "enum": [
+              "REFUND_RATE",
+              "DISPUTE_RATE",
+              "DEVICE_IP_LINK_COUNT",
+              "SHARED_DEVICE_COUNT",
+              "SHARED_IP_COUNT"
+            ]
+          },
+          "subjectKind": {
+            "type": "string",
+            "enum": [
+              "CUSTOMER_PARTY",
+              "BUYER_FINGERPRINT"
+            ]
+          },
+          "subjectKey": {
+            "maxLength": 200,
+            "minLength": 0,
+            "pattern": "^[0-9a-fA-F-]{32,36}$",
+            "type": "string"
+          },
+          "measuredValue": {
+            "minimum": 0.0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "signalSource": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_15_CUSTOMER_PROFILE",
+              "MODULE_16_RISK_LINKAGE",
+              "DERIVED_FROM_ORDERS"
+            ]
+          },
+          "sourceReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "登记一条风险信号（采集时刻必填：那是信号被测出来的时刻，不是登记时刻）"
+      },
+      "RiskSignal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "signalCode": {
+            "type": "string",
+            "enum": [
+              "REFUND_RATE",
+              "DISPUTE_RATE",
+              "DEVICE_IP_LINK_COUNT",
+              "SHARED_DEVICE_COUNT",
+              "SHARED_IP_COUNT"
+            ]
+          },
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "BUYER_HISTORY",
+              "DEVICE_IP_LINK",
+              "ORDER_FREQUENCY",
+              "AMOUNT_ANOMALY",
+              "ADDRESS_CONCENTRATION"
+            ]
+          },
+          "measurementUnit": {
+            "type": "string",
+            "enum": [
+              "RATE",
+              "COUNT"
+            ]
+          },
+          "subjectKind": {
+            "type": "string",
+            "enum": [
+              "CUSTOMER_PARTY",
+              "BUYER_FINGERPRINT"
+            ]
+          },
+          "subjectKey": {
+            "type": "string"
+          },
+          "measuredValue": {
+            "type": "number"
+          },
+          "signalSource": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_15_CUSTOMER_PROFILE",
+              "MODULE_16_RISK_LINKAGE",
+              "DERIVED_FROM_ORDERS"
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "风险信号（租户可维护；每行带来源与采集时刻）"
+      },
+      "AssessmentInput": {
+        "required": [
+          "orderId"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "触发一次风控评估"
+      },
+      "AssessmentSaved": {
+        "type": "object",
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskComponent"
+            }
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "description": "评估落库结果（分数与建议动作由 DB 触发器实算后回读）"
+      },
+      "RiskAssessment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "buyerFingerprint": {
+            "type": "string"
+          },
+          "orderCurrency": {
+            "type": "string"
+          },
+          "orderAmount": {
+            "type": "number"
+          },
+          "orderSubmittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedReferenceAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "riskScore": {
+            "type": "number",
+            "description": "总分 0..100（4 位刻度）；信号不足未出分时为 null"
+          },
+          "recommendedAction": {
+            "type": "string",
+            "enum": [
+              "RELEASE",
+              "MANUAL_REVIEW",
+              "HOLD_SHIPMENT"
+            ]
+          },
+          "manualReviewRequired": {
+            "type": "boolean",
+            "description": "是否需要人工复核（建议拒发恒为 true）"
+          },
+          "evaluationStatus": {
+            "type": "string",
+            "enum": [
+              "SCORED",
+              "INSUFFICIENT_SIGNALS"
+            ]
+          },
+          "scoredDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "finalAction": {
+            "type": "string",
+            "description": "最终动作；只能来自人工复核，未复核时为 null",
+            "enum": [
+              "SHIP",
+              "REJECT"
+            ]
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "totalsComputedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "风控评估头"
+      },
+      "RiskComponent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "BUYER_HISTORY",
+              "DEVICE_IP_LINK",
+              "ORDER_FREQUENCY",
+              "AMOUNT_ANOMALY",
+              "ADDRESS_CONCENTRATION"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCORED",
+              "MISSING_SIGNAL",
+              "STALE_SIGNAL",
+              "INSUFFICIENT_HISTORY",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "weight": {
+            "type": "number",
+            "description": "该维权重（恒等于规则里的权重，即使是缺失维）"
+          },
+          "rawValue": {
+            "type": "number",
+            "description": "原始值；不可用时为 null（不是 0）"
+          },
+          "normalizedScore": {
+            "type": "number",
+            "description": "归一化分 0..100；不可用时为 0"
+          },
+          "contribution": {
+            "type": "number",
+            "description": "贡献 = 权重 × 归一化分"
+          },
+          "signalSource": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_15_CUSTOMER_PROFILE",
+              "MODULE_16_RISK_LINKAGE",
+              "DERIVED_FROM_ORDERS"
+            ]
+          },
+          "signalCapturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "为什么是现在这个结论"
+          }
+        },
+        "description": "单维计分明细（恒 5 行；缺失维度也在）"
+      },
+      "RiskReviewInput": {
+        "required": [
+          "decision",
+          "reasonCode"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "SHIP",
+              "REJECT",
+              "DEFERRED",
+              "ESCALATED"
+            ]
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_RISK",
+              "FALSE_POSITIVE",
+              "PENDING_EVIDENCE",
+              "ESCALATED_COMPLIANCE"
+            ]
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": "提交人工复核（拒发的唯一合法入口）"
+      },
+      "ReviewSaved": {
+        "type": "object",
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "review": {
+            "$ref": "#/components/schemas/RiskReview"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "description": "复核落库结果（最终动作由 DB 触发器回填后回读）"
+      },
+      "RiskReview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assessmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "SHIP",
+              "REJECT",
+              "DEFERRED",
+              "ESCALATED"
+            ]
+          },
+          "reviewedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_RISK",
+              "FALSE_POSITIVE",
+              "PENDING_EVIDENCE",
+              "ESCALATED_COMPLIANCE"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "description": "人工复核记录（风控分数唯一的出口）"
       },
       "WaybillFreightInput": {
         "required": [
@@ -27129,6 +28257,210 @@
             "type": "string"
           }
         }
+      },
+      "RiskSignalPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskSignal"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "风险信号分页"
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scoredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "insufficientSignalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releasedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "manualReviewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "holdShipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incompleteCount": {
+            "type": "integer",
+            "description": "缺任一维的评估数",
+            "format": "int64"
+          }
+        },
+        "description": "列表汇总（不受分页影响）"
+      },
+      "RiskCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "五个风险维度的可用性",
+            "items": {
+              "$ref": "#/components/schemas/RiskCapabilityDimension"
+            }
+          },
+          "downstream": {
+            "$ref": "#/components/schemas/RiskCapabilityDownstream"
+          },
+          "ruleConfigured": {
+            "type": "boolean",
+            "description": "本租户是否已登记风控规则"
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean",
+            "description": "是否已接入 15 客户画像（跨服务读表一律禁止）"
+          },
+          "weightCheck": {
+            "type": "string",
+            "description": "五维权重合计恒为 1.0000，判定顺序见 scoringOrder"
+          },
+          "scoringOrder": {
+            "type": "string",
+            "description": "打分的判定顺序原文"
+          },
+          "gaps": {
+            "type": "string",
+            "description": "上游缺口原文"
+          }
+        },
+        "description": "9.2.2.2 风控校验能力与上下游可用性"
+      },
+      "RiskCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "维度码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源原文"
+          },
+          "upstreamDelivered": {
+            "type": "boolean",
+            "description": "是否真接通（false = 租户维护或上游未交付）"
+          },
+          "weightSource": {
+            "type": "string",
+            "description": "权重取自规则表的哪一列"
+          },
+          "gap": {
+            "type": "string",
+            "description": "缺口原文；已接通为 null"
+          }
+        },
+        "description": "单个风险维度的可用性"
+      },
+      "RiskCapabilityDownstream": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string",
+            "description": "模块号"
+          },
+          "name": {
+            "type": "string",
+            "description": "名称"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "handoff": {
+            "type": "string",
+            "description": "交付前本模块做到哪一步"
+          }
+        },
+        "description": "下游可用性"
+      },
+      "RiskAssessmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskAssessment"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/Summary"
+          }
+        },
+        "description": "风控评估分页"
+      },
+      "RiskDetail": {
+        "type": "object",
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskComponent"
+            }
+          },
+          "review": {
+            "$ref": "#/components/schemas/RiskReview"
+          }
+        },
+        "description": "风控评估详情（头 + 五维明细 + 人工复核）"
       },
       "WaybillListDetail": {
         "type": "object",
