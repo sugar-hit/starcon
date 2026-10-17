@@ -283,6 +283,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['识别异常', '人工核对', '放行履约'],
   },
   {
+    href: '/orders/review/rules',
+    implemented: true,
+    domain: 'orders',
+    label: '审单规则',
+    description: '按店铺、金额、买家等级、商品、收货国家配置自动审单；命中黑名单、地址异常、大额、异常折扣的强制转人工。',
+    fields: ['规则编号', '规则名称', '维度', '运算符', '动作', '优先级', '生效期', '命中规则链'],
+    workflow: ['定义条件', '试跑真实订单', '启用并查看命中链'],
+  },
+  {
     href: '/orders/fulfillment',
     implemented: false,
     domain: 'orders',
