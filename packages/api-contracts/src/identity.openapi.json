@@ -2115,6 +2115,147 @@
         }
       }
     },
+    "/identity/my-approvals/{id}/transfer": {
+      "post": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "post_identity_my_approvals_id_transfer",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalTransferInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalInboxItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/my-approvals/{id}/decide": {
+      "post": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "post_identity_my_approvals_id_decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalDecideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalInboxItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/my-approvals/batch": {
+      "post": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "post_identity_my_approvals_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/members": {
       "get": {
         "tags": [
@@ -3370,6 +3511,55 @@
         }
       }
     },
+    "/identity/approval-instances": {
+      "post": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "post_identity_approval_instances",
+        "parameters": [
+          {
+            "name": "X-Internal-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalSubmitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalSubmitResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/approval-flows": {
       "get": {
         "tags": [
@@ -4358,6 +4548,211 @@
                   "items": {
                     "$ref": "#/components/schemas/NumberEntityView"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/my-approvals": {
+      "get": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "get_identity_my_approvals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentTypeCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "minDwellSeconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "submittedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "WAITING"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalInboxPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/my-approvals/{id}": {
+      "get": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "get_identity_my_approvals_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalInboxDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/my-approvals/capabilities": {
+      "get": {
+        "tags": [
+          "approval-inbox-controller"
+        ],
+        "operationId": "get_identity_my_approvals_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalInboxCapabilities"
                 }
               }
             }
@@ -6898,6 +7293,223 @@
           }
         }
       },
+      "ApprovalTransferInput": {
+        "type": "object",
+        "properties": {
+          "toMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalInboxItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "documentTypeName": {
+            "type": "string"
+          },
+          "flowName": {
+            "type": "string"
+          },
+          "subjectTitle": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignedToId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "currentNodeKey": {
+            "type": "string"
+          },
+          "currentNodeName": {
+            "type": "string"
+          },
+          "currentNodeOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentStageIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approverType": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReferenceId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nodeEnteredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalDecideInput": {
+        "required": [
+          "decision"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "pattern": "APPROVE|REJECT",
+            "type": "string"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalBatchInput": {
+        "required": [
+          "action",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "pattern": "APPROVE|REJECT|TRANSFER",
+            "type": "string"
+          },
+          "items": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalBatchItemInput"
+            }
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "toMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ApprovalBatchItemInput": {
+        "required": [
+          "instanceId"
+        ],
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "toMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ApprovalBatchItemResult": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApprovalBatchResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalBatchItemResult"
+            }
+          }
+        }
+      },
       "MemberInput": {
         "required": [
           "assignments",
@@ -7306,6 +7918,76 @@
           },
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "ApprovalSubmitInput": {
+        "required": [
+          "flowId",
+          "sourceReferenceId",
+          "sourceSystem",
+          "subjectTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "flowId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceReferenceId": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subjectTitle": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "ApprovalSubmitResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "flowId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currentNodeKey": {
+            "type": "string"
+          },
+          "currentNodeName": {
+            "type": "string"
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "routedBy": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -8340,6 +9022,140 @@
             "type": "string"
           },
           "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalInboxPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalInboxItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ApprovalInboxSummary"
+          },
+          "unclaimedNodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalUnclaimedNodeView"
+            }
+          }
+        }
+      },
+      "ApprovalInboxSummary": {
+        "type": "object",
+        "properties": {
+          "pendingTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "longestDwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalUnclaimedNodeView": {
+        "type": "object",
+        "properties": {
+          "nodeKey": {
+            "type": "string"
+          },
+          "nodeName": {
+            "type": "string"
+          },
+          "flowName": {
+            "type": "string"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalInboxDetail": {
+        "type": "object",
+        "properties": {
+          "instance": {
+            "$ref": "#/components/schemas/ApprovalInboxItem"
+          },
+          "assignedToName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApprovalInboxCapabilities": {
+        "type": "object",
+        "properties": {
+          "intakeContract": {
+            "type": "string"
+          },
+          "approvedBy": {
+            "type": "string"
+          },
+          "sourceSystems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalSourceIntegration"
+            }
+          },
+          "observed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalSourceCount"
+            }
+          }
+        }
+      },
+      "ApprovalSourceCount": {
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "instanceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalSourceIntegration": {
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "owningSystem": {
+            "type": "string"
+          },
+          "owningModule": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "note": {
             "type": "string"
           }
         }

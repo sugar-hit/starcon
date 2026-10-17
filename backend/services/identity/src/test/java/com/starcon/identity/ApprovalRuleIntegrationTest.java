@@ -45,9 +45,12 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
       // 本模块的用例要为每个单据类型准备一条「生效」流程，而 approval_flow 上有
       // UNIQUE(tenant_id, document_type_code) WHERE status='ACTIVE' —— 不清就会撞唯一索引。
       // 规则表必须与流程表同批清空（approval_trigger_rule.target_flow_id 外键指向 approval_flow）。
+      // approval_instance / approval_instance_action（17.4.2.1 待我审批）同样引用 approval_flow，
+      // 所以也在这批里 —— 否则本类与 ApprovalFlowIntegrationTest 的 TRUNCATE 都会被外键拒绝。
       s.execute(
           "truncate approval_flow_escalation, approval_flow_amount_branch,"
-              + " approval_flow_node, approval_trigger_rule, approval_rule_set, approval_flow");
+              + " approval_flow_node, approval_trigger_rule, approval_rule_set,"
+              + " approval_instance_action, approval_instance, approval_flow");
     }
   }
 
