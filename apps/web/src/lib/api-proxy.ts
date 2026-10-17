@@ -1043,6 +1043,45 @@ const services: readonly {
       /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,
   },
   {
+    // 9.2.1.3 异常拦截（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**：与 9.2.2.2 / 9.3.3.1 / 9.3.1.2
+    // 那些条目各自并排，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力与上下游可用性（**明说 9.2.2.1 / 16 合规 / 5 定价没接通**）
+    //   overview                          全量概览（不受筛选与分页影响）
+    //   rule 不对 —— 本模块是 policy：capabilities / overview / policy(GET+PUT)
+    //   restrictions                     限制清单（GET 真分页 + 真搜索 / POST 登记一条）
+    //   sku-costs                         成本基线（GET 真分页 + 真搜索 / POST 登记一条）
+    //   checks                            拦截清单（GET，真分页 + 真搜索 + 汇总）
+    //   checks                            POST 对一张订单触发一次检查
+    //   {uuid}                            检查详情（头 + 八行命中明细 + 人工处置留痕）
+    //   {uuid}/disposition                POST 人工处置 —— **取消的唯一合法入口**
+    // 判别顺序：字面量子路径（capabilities / overview / policy / restrictions / sku-costs / checks）
+    // 排在 {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    // ⚠️ 本白名单是**按 path 判别、不看 HTTP 方法**的，所以「刻意不放行 DELETE」在这里做不到；
+    //   真正的拦截点在后端：V153 对留痕表做了 REVOKE UPDATE/DELETE，
+    //   Spring 也没有任何 DELETE 映射，删除请求只会拿到 405/404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `checks/{uuid}/auto-cancel` / `checks/{uuid}/confirm-cancel` —— **本模块刻意没有**：
+    //     蓝图加粗句「拦截不自动取消，默认转人工」，改最终处置的唯一入口是 /disposition
+    //   * `checks/{uuid}/batch-disposition` / `checks/batch-release` —— 批量处置
+    //     正是加粗句点名要避免的那种动作
+    //   * `checks/{uuid}/decision` —— 同「auto-cancel」，是上面那个陷阱的另一个常见叫法
+    //   * `address-validations` —— 9.2.2.1 未交付，本模块**不假装**有地址校验接口；
+    //     capabilities 里的 addressValidationAvailable = false 已经说明这件事
+    //   * 裸路径 `order-intercept` —— 后端没有对应映射
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-intercept\/(?:capabilities|overview|policy|restrictions|sku\-costs|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disposition)?)?)$/,
+  },
+  {
     // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
