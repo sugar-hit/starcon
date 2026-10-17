@@ -6,25 +6,32 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 178 |
+| 已交付 | 180 |
 | 进行中 | 0 |
-| **未开发** | **287** |
-| 完成率 | 38.3% |
+| **未开发** | **285** |
+| 完成率 | 38.7% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
-| **D4** | 36 | 0 | 24 | 60 |
+| **D4** | 38 | 0 | 22 | 60 |
 | **D5** | 14 | 0 | 38 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -33,9 +40,9 @@
 | 06 | 采购与供应系统 | D6 | 4 | 26 |
 | 07 | 库存核算系统 | D3 | 26 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 21 | 27 |
+| 09 | 订单履约系统 | D4 / D5 | 22 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 18 | 27 |
-| 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
+| 11 | 售后与退货系统 | D4 / D7 | 2 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -341,7 +358,7 @@
 | 10.7.1.1 | 退货接收与处置决策 | — | D5 | 未开发 | — |
 | 10.7.1.2 | 退运回国 | — | D5 | 未开发 | — |
 | 10.7.1.3 | 弃置与销毁 | — | D5 | 未开发 | — |
-| 11.1.1.1 | 售后单列表 | — | D4 | 已交付 | 迁移 V156__trade_aftersales_case_list.sql（**零 ALTER 既有表、零外键**，跨车道 DDL 回归面 = 0）：aftersales_case（五种类型 RETURN_REFUND/REFUND_ONLY/EXCHANGE/REISSUE/REPAIR 七态；金额 numeric(19,4)、数量 numeric(19,6)、reply_due_at/resolve_due_at 两个真列 + **effective_due_at 由 BEFORE 触发器维护**并建索引；CHECK 钉死「终态 ⇔ resolved_at」与「两个时限至少给一个」）/ aftersales_owner_assignment（**租户可维护的责任人登记**：强制 owner_source 枚举 TENANT_MAINTAINED / MODULE_15_SERVICE_STAFF 与 captured_at **采集时刻**，append-only，不伪造 L4 模块号）/ aftersales_case_note（批量备注，强制带 batch_id 可追回哪一次批量）/ aftersales_authorization（**授权类型与售后类型一一对应**由触发器 guard_aftersales_authorization_kind 钉死；授权额 ≤ 申请额；换货/补发/维修**不许带金额**）/ aftersales_service_ticket（转工单，UNIQUE(tenant_id,case_id) 一单只转一次，owner_module='11.4.2.1' 显式标注归属）。五表 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + GRANT；四张留痕表 REVOKE UPDATE/DELETE（append-only）；aftersales_case 的 UPDATE 做成**列级白名单**（只授 status/resolved_at/updated_at）。**蓝图加粗句「平台时效倒计时必须显眼」四层落点**：(1) reply/resolve 两个时限是**真列**、effective_due_at 是触发器维护的**可索引真列**；(2) 时效状态由 **IMMUTABLE 函数** aftersales_timeliness_state(due_at,done_at,at) 现算（OVERDUE/DUE_SOON≤24h/ON_TRACK/RESOLVED/NO_DEADLINE），能进 WHERE 与 ORDER BY，**筛选与排序全在 DB 层**；(3) **参考时刻整页共用一个**（at 在 list() 开头取一次，WHERE/行/汇总三处复用），否则会「筛了临期、第一条不临期」；(4) 判定真身**只有 DB 函数一处**，Java 与前端都刻意不重算 —— 两处实现必然漂移，而超时直接关系账号绩效与资金冻结。端点 6 个 /trade/aftersales：capabilities、filters、cases(GET 列表)、cases(POST 登记)、cases/bulk(POST 批量)；**刻意不提供 cases/{uuid}**（11.1.1.2 详情未交付，列表行不带任何指向它的链接）。**批量三件全部可用**（授权 / 备注 / 转工单），各自落在本服务内的真实表，**不假装已对接 11.1.1.3 / 11.4.2.1**；单次上限 100；**逐条结果回报**（与请求 caseIds **同序同长**，含成败、结果码、人话原因、产物引用）；逐条失败来自**写库前的真实预校验**（DB 里的状态/类型/金额/已有工单号/请求内重复项），不是 catch 到什么都标 failed —— 写阶段意外异常整批回滚返回 5xx，不伪装成部分成功；结果按**请求下标**返回而非按 caseId 归并（重复 ID 时归并会让第 1 条的成功顶到第 2 个位置）。**金额区间是闭区间**（两端都取），口径由响应 amountRangeSemantics 原样报出。**上游实查结论（与调度口径一致，已复核集成头 a052a025）**：sales_order（V99）**无 shop_code 列**、order_source 的 CHECK 已含五个平台来源；卷 15 的 24 个 L4 里**只交付 1 个**（15.4.1.1，在 backend/services/crm 独立库 starcon_crm）、卷 2 平台消息在 channel 服务**无任何相关表**；二者都是别的服务独立库，禁止跨服务 SQL ⇒ **责任人**落成租户可维护的登记表（正式接口到位后同步器按同一形状写入，**表结构与查询都不用改**），**平台消息无落表方案**（是对话流不是可维护信号）如实报 crossServiceReadAvailable=false；店铺维度当前**只到平台级**（order_source），platformShopCode 恒为 null 并报 available=false，**刻意不建恒为空的 shop 列**（空列会被读成「这家店没有售后单」）。下游 11.1.1.2 / 11.1.1.3 / 11.2 / 11.3 / 11.4.2.1 **全部未交付**，capabilities 逐条报 *Delivered=false 与归属模块；登记入口 POST /cases 显式标注是 11.1.1.3 未交付期间的入口（只做单据落库 + 平台时限登记，**不含**受理判定四件事），intakeDelivered=false。前端 /aftersales：**替换掉既有的 DomainPlaceholder 占位页**为真实工作区 page.tsx + components/aftersales/{model,workspace}.tsx（能力与缺口 / 多维筛选 / 时效四档视觉徽标 + 倒计时人话 / 批量三件 + 逐条结果面板 / 列表 / 分页，加载·空·错误三态齐全；超时的**整行染色**且超时数是顶部第一张卡；未知时效状态回落「无平台时限」而**不回落「正常」**——后者会掩盖一次超时）。api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）。测试 34 条（AfterSalesCaseIntegrationTest 29 + AfterSalesCaseTenancyIntegrationTest 5，Testcontainers 真实 PG16、连接池压到 1）含：五种类型逐个登记与列出、**+08:00 非 UTC 偏移夹具写入后断言写回的是同一绝对时刻**（API 与直查库各断言一次）、effective_due_at 取更紧的那个、时效五态分得开且**恰好到期判 DUE_SOON**（判 OVERDUE 用严格小于）、边界处 ±1000 纳秒（24h 闭区间 / 早 1 微秒即超时）、**已结案行 remainingSeconds 必须是 null 而不是 0**、**闭区间 min==max==某张单的金额时它自己必须在结果里**、多维筛选叠加、真分页三页不重不漏、汇总与分页无关、金额按币种分开、SELF 范围真生效、批量 4 条混合断言逐条成败与原因、重复 ID 按请求顺序逐条回报、超额授权 / 非金额类型带金额 / 拒绝带金额 / 已结案 / 重复转工单（附已有工单号）逐条失败、空备注是**请求级 400**（整批共用字段，报 N 条相同失败原因无价值）、批量上限 100 → 400、**绕过服务层直写时 DB 触发器仍挡住类型不匹配的授权**（并用对照组证明该插入语句本身没写坏）、终态必须带 resolved_at、effective_due_at 运行角色**真的改不动**（列级白名单收紧后 has_column_privilege=false）、四张留痕表 UPDATE/DELETE 皆 false、时效函数 provolatile='i'。**三断言实跑在真实业务表上**（两租户互不可见含按主键直查与买家诉求原文、伪造 X-Tenant-Id 无效且行仍落在会话租户名下、伪造头批量改别人的单逐条 NOT_FOUND、连接池固定 1 条时 5 轮交替不串租户且金额汇总各自独立），外加事务外读零行。前端 25 条（model 22 + allowlist 双向断言 3：模型源码反向抽取真实调用点逐条断言放行、POST 真转发到 8085、**刻意不放行的 cases/{uuid} 等形状仍 404**）。**过程中被测试逼出来的三个真实缺陷（已修）**：(1) **列级 REVOKE 在表级 GRANT 之后是空操作** —— PG 里表级 UPDATE 蕴含每列 UPDATE，`REVOKE UPDATE(effective_due_at)` 后 has_column_privilege 仍为 true，必须先收回表级 UPDATE 再逐列授回（V150 合计列疑似同样没收紧，未在本车道改）；(2) 序列必须单独 `GRANT USAGE`，漏了会以 BadSqlGrammarException→409 挂掉而文案说的是「数据冲突」，与根因无关；(3) `Timestamp.valueOf` 的静默 −28800s 偏移必须靠 +08:00 夹具断言写回时刻才测得出来。 |
+| 11.1.1.1 | 售后单列表 | — | D4 | 已交付 | 迁移 V156__trade_aftersales_case_list.sql（**零 ALTER 既有表、零外键**，跨车道 DDL 回归面 = 0）：aftersales_case（五种类型 RETURN_REFUND/REFUND_ONLY/EXCHANGE/REISSUE/REPAIR 七态；金额 numeric(19,4)、数量 numeric(19,6)、reply_due_at/resolve_due_at 两个真列 + **effective_due_at 由 BEFORE 触发器维护**并建索引；CHECK 钉死「终态 ⇔ resolved_at」与「两个时限至少给一个」）/ aftersales_owner_assignment（**租户可维护的责任人登记**：强制 owner_source 枚举 TENANT_MAINTAINED / MODULE_15_SERVICE_STAFF 与 captured_at **采集时刻**，append-only，不伪造 L4 模块号）/ aftersales_case_note（批量备注，强制带 batch_id 可追回哪一次批量）/ aftersales_authorization（**授权类型与售后类型一一对应**由触发器 guard_aftersales_authorization_kind 钉死；授权额 ≤ 申请额；换货/补发/维修**不许带金额**）/ aftersales_service_ticket（转工单，UNIQUE(tenant_id,case_id) 一单只转一次，owner_module='11.4.2.1' 显式标注归属）。五表 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + GRANT；四张留痕表 REVOKE UPDATE/DELETE（append-only）；aftersales_case 的 UPDATE 做成**列级白名单**（只授 status/resolved_at/updated_at）。**蓝图加粗句「平台时效倒计时必须显眼」四层落点**：(1) reply/resolve 两个时限是**真列**、effective_due_at 是触发器维护的**可索引真列**；(2) 时效状态由 **IMMUTABLE 函数** aftersales_timeliness_state(due_at,done_at,at) 现算（OVERDUE/DUE_SOON≤24h/ON_TRACK/RESOLVED/NO_DEADLINE），能进 WHERE 与 ORDER BY，**筛选与排序全在 DB 层**；(3) **参考时刻整页共用一个**（at 在 list() 开头取一次，WHERE/行/汇总三处复用），否则会「筛了临期、第一条不临期」；(4) 判定真身**只有 DB 函数一处**，Java 与前端都刻意不重算 —— 两处实现必然漂移，而超时直接关系账号绩效与资金冻结。端点 6 个 /trade/aftersales：capabilities、filters、cases(GET 列表)、cases(POST 登记)、cases/bulk(POST 批量)；**刻意不提供 cases/{uuid}**（11.1.1.2 详情未交付，列表行不带任何指向它的链接）。**批量三件全部可用**（授权 / 备注 / 转工单），各自落在本服务内的真实表，**不假装已对接 11.1.1.3 / 11.4.2.1**；单次上限 100；**逐条结果回报**（与请求 caseIds **同序同长**，含成败、结果码、人话原因、产物引用）；逐条失败来自**写库前的真实预校验**（DB 里的状态/类型/金额/已有工单号/请求内重复项），不是 catch 到什么都标 failed —— 写阶段意外异常整批回滚返回 5xx，不伪装成部分成功；结果按**请求下标**返回而非按 caseId 归并（重复 ID 时归并会让第 1 条的成功顶到第 2 个位置）。**金额区间是闭区间**（两端都取），口径由响应 amountRangeSemantics 原样报出。**上游实查结论（与调度口径一致，已复核集成头 a052a025）**：sales_order（V99）**无 shop_code 列**、order_source 的 CHECK 已含五个平台来源；卷 15 的 24 个 L4 里**只交付 1 个**（15.4.1.1，在 backend/services/crm 独立库 starcon_crm）、卷 2 平台消息在 channel 服务**无任何相关表**；二者都是别的服务独立库，禁止跨服务 SQL ⇒ **责任人**落成租户可维护的登记表（正式接口到位后同步器按同一形状写入，**表结构与查询都不用改**），**平台消息无落表方案**（是对话流不是可维护信号）如实报 crossServiceReadAvailable=false；店铺维度当前**只到平台级**（order_source），platformShopCode 恒为 null 并报 available=false，**刻意不建恒为空的 shop 列**（空列会被读成「这家店没有售后单」）。下游 11.1.1.2 / 11.1.1.3 / 11.2 / 11.3 / 11.4.2.1 **全部未交付**，capabilities 逐条报 *Delivered=false 与归属模块；登记入口 POST /cases 显式标注是 11.1.1.3 未交付期间的入口（只做单据落库 + 平台时限登记，**不含**受理判定四件事），intakeDelivered=false。前端 /aftersales：**替换掉既有的 DomainPlaceholder 占位页**为真实工作区 page.tsx + components/aftersales/{model,workspace}.tsx（能力与缺口 / 多维筛选 / 时效四档视觉徽标 + 倒计时人话 / 批量三件 + 逐条结果面板 / 列表 / 分页，加载·空·错误三态齐全；超时的**整行染色**且超时数是顶部第一张卡；未知时效状态回落「无平台时限」而**不回落「正常」**——后者会掩盖一次超时）。api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）。测试 34 条（AfterSalesCaseIntegrationTest 29 + AfterSalesCaseTenancyIntegrationTest 5，Testcontainers 真实 PG16、连接池压到 1）含：五种类型逐个登记与列出、**+08:00 非 UTC 偏移夹具写入后断言写回的是同一绝对时刻**（API 与直查库各断言一次）、effective_due_at 取更紧的那个、时效五态分得开且**恰好到期判 DUE_SOON**（判 OVERDUE 用严格小于）、边界处 ±1000 纳秒（24h 闭区间 / 早 1 微秒即超时）、**已结案行 remainingSeconds 必须是 null 而不是 0**、**闭区间 min==max==某张单的金额时它自己必须在结果里**、多维筛选叠加、真分页三页不重不漏、汇总与分页无关、金额按币种分开、SELF 范围真生效、批量 4 条混合断言逐条成败与原因、重复 ID 按请求顺序逐条回报、超额授权 / 非金额类型带金额 / 拒绝带金额 / 已结案 / 重复转工单（附已有工单号）逐条失败、空备注是**请求级 400**（整批共用字段，报 N 条相同失败原因无价值）、批量上限 100 → 400、**绕过服务层直写时 DB 触发器仍挡住类型不匹配的授权**（并用对照组证明该插入语句本身没写坏）、终态必须带 resolved_at、effective_due_at 运行角色**真的改不动**（列级白名单收紧后 has_column_privilege=false）、四张留痕表 UPDATE/DELETE 皆 false、时效函数 provolatile='i'。**三断言实跑在真实业务表上**（两租户互不可见含按主键直查与买家诉求原文、伪造 X-Tenant-Id 无效且行仍落在会话租户名下、伪造头批量改别人的单逐条 NOT_FOUND、连接池固定 1 条时 5 轮交替不串租户且金额汇总各自独立），外加事务外读零行。前端 25 条（model 22 + allowlist 双向断言 3：模型源码反向抽取真实调用点逐条断言放行、POST 真转发到 8085、**刻意不放行的 cases/{uuid} 等形状仍 404**）。**过程中被测试逼出来的三个真实缺陷（已修）**：(1) **列级 REVOKE 在表级 GRANT 之后是空操作** —— PG 里表级 UPDATE 蕴含每列 UPDATE，`REVOKE UPDATE(effective_due_at)` 后 has_column_privilege 仍为 true，必须先收回表级 UPDATE 再逐列授回（V150 合计列疑似同样没收紧，未在本车道改）；(2) 序列必须单独 `GRANT USAGE`，漏了会以 BadSqlGrammarException→409 挂掉而文案说的是「数据冲突」，与根因无关；(3) `Timestamp.valueOf` 的静默 −28800s 偏移必须靠 +08:00 夹具断言写回时刻才测得出来。 **【恢复车道 2026-10-17 15:19-15:30 复核并入】**：并入 integration/module-dev（4225d99b 之后共 8 个提交）时 api-proxy.ts 冲突已解 —— git 的对齐启发式把 11.1.1.1 与 9.2.1.3 的元素吸成了**同一个** `{...}` 槽（注释与正则被配成一对），只删冲突标记会得到「语法合法但只活下来一半白名单」的文件（漏登记路径在浏览器静默 404 而 CI 全绿）；按三方拼接重建为**两个并列 services[] 元素**，前缀互不相交（aftersales 与 order-intercept），两侧前缀都在 resolve() 里活着（两条 allowlist 真跑 proxy 断言 HTTP 状态码，7 例全绿）；esbuild 以 TypeScript 解析通过且全文花括号深度归零。契约按合并后代码重新生成（trade 用实跑 OpenApiContractTest 导出的 spec，其余五服务本次合并未改动）：merge-union 的行级兜底并集内容一条没少也没重（632 条声明 = Aftersales* 16 + Intercept* 20），但不符合 render_types 的 sorted() 规范序（Intercept* 整块被顶到 IssueInput 之后），重生成后 diff 为纯重排（排序后逐行集合相同；openapi 的 paths / schema 名集合 / schema 结构 / servers 全等）。**L0**：backend ./mvnw -q compile exit 0；TURBO_FORCE=true pnpm typecheck 3 successful 且 **Cached: 0 cached, 3 total**（三个包均 cache bypass，绿不是别的 worktree 的缓存）。**L1**：`./mvnw -pl services/trade -am test` 共 **869 tests / 0 failures / 0 errors / 0 skipped**（34 个测试类；本车道 AftersalesCaseIntegrationTest 29 + AftersalesCaseTenancyIntegrationTest 5，9.2.1.3 侧 OrderIntercept 38 + 5；Flyway 实跑 30 条迁移到 v156，V153 与 V156 共存）；前端 25 例（model 22 + allowlist 双向断言 3）全绿。多租户三条断言实跑在真实业务表上（断言1 两租户互不可见 / 断言2 伪造租户上下文无效 / 断言3 连接池归还后不串租户，另加五表 RLS 与运行角色读写、无租户上下文零行）。 |
 | 11.1.1.2 | 售后单详情 | — | D4 | 未开发 | — |
 | 11.1.1.3 | 售后受理 | — | D4 | 未开发 | — |
 | 11.1.2.1 | 原因分类 | — | D4 | 未开发 | — |
@@ -540,8 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 179 |
-| **未开发** | **286** |
-| 完成率 | 38.5% |
-| **D4** | 37 | 0 | 23 | 60 |
-| 09 | 订单履约系统 | D4 / D5 | 22 | 27 |
