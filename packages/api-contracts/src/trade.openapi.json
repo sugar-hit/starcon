@@ -18202,7 +18202,8 @@
             "type": "string"
           },
           "buyerFingerprint": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "orderCurrency": {
             "type": "string"
@@ -18231,7 +18232,8 @@
           },
           "riskScore": {
             "type": "number",
-            "description": "总分 0..100（4 位刻度）；信号不足未出分时为 null"
+            "description": "总分 0..100（4 位刻度）；信号不足未出分时为 null",
+            "nullable": true
           },
           "recommendedAction": {
             "type": "string",
@@ -18263,6 +18265,7 @@
           "finalAction": {
             "type": "string",
             "description": "最终动作；只能来自人工复核，未复核时为 null",
+            "nullable": true,
             "enum": [
               "SHIP",
               "REJECT"
@@ -18270,19 +18273,23 @@
           },
           "reviewedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "reviewedBy": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           },
           "totalsComputedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "createdBy": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -18324,7 +18331,8 @@
           },
           "rawValue": {
             "type": "number",
-            "description": "原始值；不可用时为 null（不是 0）"
+            "description": "原始值；不可用时为 null（不是 0）",
+            "nullable": true
           },
           "normalizedScore": {
             "type": "number",
@@ -18345,7 +18353,8 @@
           },
           "signalCapturedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "explanation": {
             "type": "string",

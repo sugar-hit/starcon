@@ -412,11 +412,11 @@ public final class OrderRiskModels {
       RiskComponentStatus status,
       @Schema(description = "该维权重（恒等于规则里的权重，即使是缺失维）")
           BigDecimal weight,
-      @Schema(description = "原始值；不可用时为 null（不是 0）") BigDecimal rawValue,
+      @Schema(nullable = true, description = "原始值；不可用时为 null（不是 0）") BigDecimal rawValue,
       @Schema(description = "归一化分 0..100；不可用时为 0") BigDecimal normalizedScore,
       @Schema(description = "贡献 = 权重 × 归一化分") BigDecimal contribution,
       SignalSource signalSource,
-      OffsetDateTime signalCapturedAt,
+      @Schema(nullable = true) OffsetDateTime signalCapturedAt,
       @Schema(description = "为什么是现在这个结论") String explanation) {}
 
   /** 评估头。 */
@@ -425,7 +425,7 @@ public final class OrderRiskModels {
       UUID id,
       UUID orderId,
       String orderNo,
-      String buyerFingerprint,
+      @Schema(nullable = true) String buyerFingerprint,
       String orderCurrency,
       BigDecimal orderAmount,
       OffsetDateTime orderSubmittedAt,
@@ -433,23 +433,27 @@ public final class OrderRiskModels {
       String ruleName,
       long ruleVersion,
       OffsetDateTime evaluatedReferenceAt,
-      @Schema(description = "总分 0..100（4 位刻度）；信号不足未出分时为 null") BigDecimal riskScore,
+      @Schema(nullable = true, description = "总分 0..100（4 位刻度）；信号不足未出分时为 null")
+          BigDecimal riskScore,
       RecommendedAction recommendedAction,
       @Schema(description = "是否需要人工复核（建议拒发恒为 true）") boolean manualReviewRequired,
       EvaluationStatus evaluationStatus,
       int scoredDimensionCount,
       int missingDimensionCount,
-      @Schema(description = "最终动作；只能来自人工复核，未复核时为 null") FinalAction finalAction,
-      OffsetDateTime reviewedAt,
-      UUID reviewedBy,
-      OffsetDateTime totalsComputedAt,
-      UUID createdBy,
+      @Schema(nullable = true, description = "最终动作；只能来自人工复核，未复核时为 null")
+          FinalAction finalAction,
+      @Schema(nullable = true) OffsetDateTime reviewedAt,
+      @Schema(nullable = true) UUID reviewedBy,
+      @Schema(nullable = true) OffsetDateTime totalsComputedAt,
+      @Schema(nullable = true) UUID createdBy,
       OffsetDateTime createdAt) {}
 
   /** 评估详情：头 + 五行组件 + 人工复核留痕。 */
   @Schema(description = "风控评估详情（头 + 五维明细 + 人工复核）")
   public record RiskDetail(
-      RiskAssessment assessment, List<RiskComponent> components, RiskReview review) {}
+      RiskAssessment assessment,
+      List<RiskComponent> components,
+      @Schema(nullable = true, description = "人工复核留痕；尚未复核时为 null") RiskReview review) {}
 
   /** 评估列表分页（真分页 + 真搜索）。 */
   @Schema(description = "风控评估分页")
