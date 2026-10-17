@@ -11685,6 +11685,276 @@
         }
       }
     },
+    "/trade/aftersales/cases": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timelinessState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorizationState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "receivedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "receivedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "ownerRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCasePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "post_trade_aftersales_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesCaseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCaseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/cases/bulk": {
+      "post": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "post_trade_aftersales_cases_bulk",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesBulkResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/list": {
       "get": {
         "tags": [
@@ -17492,6 +17762,68 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/B2BCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/filters": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/capabilities": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCaseCapabilities"
                 }
               }
             }
@@ -31089,6 +31421,317 @@
           }
         }
       },
+      "AftersalesCaseCreate": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "buyerRequest": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerCapturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesCaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "platformSource": {
+            "type": "string"
+          },
+          "platformShopCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "caseTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "timelinessState": {
+            "type": "string"
+          },
+          "timelinessLabel": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "remainingSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerUpstreamDelivered": {
+            "type": "boolean"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizationState": {
+            "type": "string"
+          },
+          "ticketNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "noteCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkRequest": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string"
+          },
+          "caseIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "decision": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkItemResult": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkResult": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string"
+          },
+          "operationLabel": {
+            "type": "string"
+          },
+          "requested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesBulkItemResult"
+            }
+          },
+          "batchId": {
+            "type": "string"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "SalesOrderPage": {
         "type": "object",
         "properties": {
@@ -43205,6 +43848,350 @@
             "type": "string"
           },
           "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesCaseSortOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesEnumOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesFilterOptions": {
+        "type": "object",
+        "properties": {
+          "caseTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesEnumOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesEnumOption"
+            }
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesEnumOption"
+            }
+          },
+          "timelinessStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesEnumOption"
+            }
+          },
+          "platformSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorizationStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesCaseSortOption"
+            }
+          },
+          "bulkMaxSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AftersalesAmountBucket": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AftersalesCasePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesCaseRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AftersalesCaseSummary"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amountRangeSemantics": {
+            "type": "string"
+          },
+          "timelinessThresholdNote": {
+            "type": "string"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesCaseSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dueSoonCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTrackCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noDeadlineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ticketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amountsByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesAmountBucket"
+            }
+          },
+          "countsByType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesTypeBucket"
+            }
+          },
+          "amountsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesTypeBucket": {
+        "type": "object",
+        "properties": {
+          "caseType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AftersalesBulkOperationSpec": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "maxBatchSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "landsIn": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "outcomeCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AftersalesCaseCapabilities": {
+        "type": "object",
+        "properties": {
+          "availableDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesCaseDimension"
+            }
+          },
+          "bulkOperations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesBulkOperationSpec"
+            }
+          },
+          "availableSorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesCaseSortOption"
+            }
+          },
+          "filterableNote": {
+            "type": "string"
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean"
+          },
+          "crossServiceNote": {
+            "type": "string"
+          },
+          "downstream": {
+            "$ref": "#/components/schemas/AftersalesDownstream"
+          },
+          "shopGranularityNote": {
+            "type": "string"
+          },
+          "timelinessNote": {
+            "type": "string"
+          },
+          "intakeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesCaseDimension": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesDownstream": {
+        "type": "object",
+        "properties": {
+          "detailDelivered": {
+            "type": "boolean"
+          },
+          "intakeDelivered": {
+            "type": "boolean"
+          },
+          "returnsDelivered": {
+            "type": "boolean"
+          },
+          "refundsDelivered": {
+            "type": "boolean"
+          },
+          "ticketDelivered": {
+            "type": "boolean"
+          },
+          "detailOwner": {
+            "type": "string"
+          },
+          "intakeOwner": {
+            "type": "string"
+          },
+          "returnsOwner": {
+            "type": "string"
+          },
+          "refundsOwner": {
+            "type": "string"
+          },
+          "ticketOwner": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }
