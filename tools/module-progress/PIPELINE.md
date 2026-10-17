@@ -538,10 +538,17 @@ node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
    cd <WORKTREE> && pnpm typecheck
 
    # L1 模块闸：只跑【你自己新增的测试类】，不要跑整个服务
-   #   -DfailIfNoSpecifiedTests=false 是必需的：-am 会连带构建依赖模块，
-   #   那些模块没有匹配 -Dtest 的用例，不加这个开关会直接构建失败。
+   #   ⚠️ **两个属性名都要带**：-am 会连带构建依赖模块（tenancy / identity 等），
+   #   那些模块没有匹配 -Dtest 的用例，不加开关会直接构建失败。
+   #   本仓 surefire 3.5.4 只认 **-Dsurefire.failIfNoSpecifiedTests**；
+   #   只写旧的 -DfailIfNoSpecifiedTests 在配合 -am 时仍会失败，
+   #   报错原文：「No tests matching pattern "..." were executed!
+   #   (Set -Dsurefire.failIfNoSpecifiedTests=false to ignore this error.)」
+   #   （2026-10-17 20:00 tick 实测：只带旧属性名 → 失败在 `tenancy` 模块，
+   #     看起来像测试红了，实际是构建阶段就挂了 —— 别误判成业务缺陷。）
    cd <WORKTREE>/backend && ./mvnw -pl services/<你的服务> -am test \
-       -Dtest='<你的测试类前缀>*' -DfailIfNoSpecifiedTests=false
+       -Dtest='<你的测试类前缀>*' \
+       -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
    # 例：11.1.1.1 新增 AftersalesCaseIntegrationTest + AftersalesCaseTenancyIntegrationTest
    #     → -Dtest='AftersalesCase*'
 
