@@ -292,6 +292,25 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['定义条件', '试跑真实订单', '启用并查看命中链'],
   },
   {
+    href: '/orders/review/intercept',
+    implemented: true,
+    domain: 'orders',
+    label: '异常拦截',
+    description:
+      '识别并拦截异常订单：地址不可达/信息不全、黑名单买家、重复下单、异常折扣（低于成本）、疑似欺诈、超出收货国家限制、平台合规风险。',
+    fields: [
+      '订单号',
+      '命中项',
+      '拦截原因',
+      '建议处置',
+      '最终处置',
+      '命中明细',
+      '处置人',
+      '处置时刻',
+    ],
+    workflow: ['登记限制与成本基线', '运行八项检查', '人工处置留痕（不自动取消）'],
+  },
+  {
     href: '/orders/risk-validation',
     implemented: true,
     domain: 'orders',
