@@ -26,9 +26,9 @@ describe('9.3.1.1 拆单前端模型', () => {
     it('分摊 + 尾差 == 订单总额时判为守恒', () => {
       expect(
         conserved({
-          orderTotalAmount: '100.0000',
-          allocatedAmountTotal: '99.9999',
-          residualAmountTotal: '0.0001',
+          orderTotalAmount: 100,
+          allocatedAmountTotal: 99.9999,
+          residualAmountTotal: 0.0001,
         }),
       ).toBe(true);
     });
@@ -36,9 +36,9 @@ describe('9.3.1.1 拆单前端模型', () => {
     it('差一分钱也判为不守恒（4 位刻度，不四舍五入放过）', () => {
       expect(
         conserved({
-          orderTotalAmount: '100.0000',
-          allocatedAmountTotal: '99.9998',
-          residualAmountTotal: '0.0001',
+          orderTotalAmount: 100,
+          allocatedAmountTotal: 99.9998,
+          residualAmountTotal: 0.0001,
         }),
       ).toBe(false);
     });
@@ -47,9 +47,9 @@ describe('9.3.1.1 拆单前端模型', () => {
       // 分摊合计 100 但总额是 100.0001 —— 差额没有承载列，这就是「差了几分钱不见了」。
       expect(
         conserved({
-          orderTotalAmount: '100.0001',
-          allocatedAmountTotal: '100.0000',
-          residualAmountTotal: '0.0000',
+          orderTotalAmount: 100.0001,
+          allocatedAmountTotal: 100,
+          residualAmountTotal: 0,
         }),
       ).toBe(false);
     });
