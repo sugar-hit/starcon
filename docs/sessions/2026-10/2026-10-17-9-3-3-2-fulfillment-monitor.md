@@ -116,6 +116,35 @@ capabilities 里 `reservationReleaseDispatched=false` / `workbenchTodoPushed=fal
 - 前端：`pnpm vitest run`（本模块两个测试文件 + 9.3.3.1 白名单测试）→ **37 passed**
 - Lint：`pnpm exec eslint`（六个改动文件）→ 无输出；`prettier --check`（自有五个文件）→ 全通过
 
+## 恢复车道复核（合入集成头后，2026-10-17 第二次）
+
+原 worker 在前端与契约阶段被 Token 配额切断，上面的验证数字（818 例 / 37 passed）
+是**中断前、基于旧基线**跑的。恢复车道把 `integration/module-dev` 合进来后重跑了全部闸门：
+
+- L0：`cd backend && ./mvnw -q compile` → exit 0（仅 JVM warning）
+- L0：`TURBO_FORCE=true pnpm typecheck` → `Tasks: 3 successful`，
+  且 **`Cached: 0 cached, 3 total`** —— 缓存确已绕过（turbo 提示 `using shared worktree cache`，
+  不加 `TURBO_FORCE` 会命中别的 worktree 的产物，绿的就不是这份代码）
+- L1：`./mvnw -pl services/trade -am test` → **Tests run: 861, Failures: 0, Errors: 0, Skipped: 0**
+  （trade 全量，比中断前的 818 多了集成头带进来的 9.2.1.3 等用例；本模块 26 例仍全绿）
+- Lint：`pnpm lint` → 绿
+- 前端：`pnpm vitest run`（本模块两个测试文件）→ **31 passed / 31**
+
+### 合入新基线时修掉的一处真实缺陷
+
+**冲突没有发生**：两侧在 `services[]` 里的插入锚点被既有条目隔开，git 自动求并成功，
+`order-intercept/`（9.2.1.3）与 `fulfillment/monitor/`（9.3.3.2）两个元素都在；
+`node --check` 过、`{}`/`[]` 配平。**但自动求并出来的契约文件是坏的**：
+
+那条 wip 抢救提交里的 `trade.ts` **丢掉了 9.2.1.3 全部 20 个 `Intercept*` 类型**
+（中断前生成时用的是与集成头并行的旧快照）。git 求并把两侧类型都保住了，
+但产出的是**未按生成器字典序排序、且丢了首行 `DO NOT EDIT` 头注释**的文件 ——
+会被 CI 的 `contracts:generate` + `git diff --exit-code` 无漂移闸门判红。
+
+按 codegen 重新生成修正（未手改任何生成物）：排序与头注释回到生成器状态，
+trade 289 条 path 前后一致、**零丢失**，9.2.1.3 的 20 个 `Intercept*` DTO 与
+`/trade/order-intercept/*` 端点全部仍在，其余五个服务的契约**逐字节不变**。
+
 ## 后续待办
 
 1. **9.3.3.1 的 step 失败路径还没法写 `INSUFFICIENT_STOCK`**：该失败码在 V152 的 CHECK 词表里
