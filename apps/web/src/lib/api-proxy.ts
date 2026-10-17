@@ -1017,6 +1017,45 @@ const services: readonly {
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
   },
   {
+    // 11.3.1.2 退款状态（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.1.1.2 售后单详情那条**之前**：本条与 11.1.1.2 的前缀形状
+    // （`aftersales/…` vs `refunds/…`）互不相交，谁先被匹配都互不吃。
+    //
+    // ⚠️ **这条是「页面能真的通」的必要条件**：后端 11 个端点已经交付、页面也已经存在，
+    //    但 allowlist 不放行时浏览器这一侧一律 404 —— 界面会永远停在错误态，
+    //   而后端日志里一次请求都没有（放行与不通的区别只在浏览器这一侧，极难定位）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   refunds                                    列表（GET）+ 登记待发起（POST，幂等键）
+    //   refunds/capabilities                       能力声明 + 状态机逐条转换规则
+    //   refunds/filters                            筛选项词表（来自真实数据 DISTINCT）
+    //   refunds/discrepancies                      差异清单（GET，默认只列未裁定）
+    //   refunds/{uuid}                             详情聚合（GET）
+    //   refunds/{uuid}/dispatch                    派发 / 查证后重试（POST）
+    //   refunds/{uuid}/verifications               登记「先查证交易」（POST）
+    //   refunds/{uuid}/reports                     登记外部执行结果回报（POST）
+    //   refunds/{uuid}/platform-sync               平台侧同步结果回报（POST）
+    //   refunds/{uuid}/discrepancies               登记一条对账差异（POST）
+    //   refunds/{uuid}/discrepancies/{uuid}/resolve 人工裁定差异（POST）
+    //
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `refunds/{uuid}` 的 PUT / DELETE —— 退款执行与其派发/查证/回报/差异都是留痕，
+    //     改写或删除等于毁掉「这笔钱到底退没退、查过没有」的证据链
+    //   * `refunds/{uuid}/refund-request` —— 11.3.1.1 退款申请（可退余额校验 + 审批）**未交付**，
+    //     capabilities 里 refundRequestDelivered=false 如实报出
+    //   * `refunds/{uuid}/returns` —— 11.2 退回旧货未交付
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^refunds(?:\/(?:capabilities|filters|discrepancies)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:dispatch|verifications|reports|platform-sync|discrepancies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve)?)?)?)?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

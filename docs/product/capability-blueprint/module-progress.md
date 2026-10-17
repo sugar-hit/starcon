@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **282** |
 | 完成率 | 39.4% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 14 | 0 | 38 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -371,7 +354,7 @@
 | 11.2.3.2 | 转可售/残次/报废 | — | D4 | 未开发 | — |
 | 11.2.3.3 | 供应商索赔 | — | D4 | 未开发 | — |
 | 11.3.1.1 | 退款申请 | — | D4 | 未开发 | — |
-| 11.3.1.2 | 退款状态 | — | D4 | 未开发 | — |
+| 11.3.1.2 | 退款状态 | — | D4 | 已交付 | 迁移 V159__trade_refund_status.sql（**零 ALTER 既有表、零外键**）：refund_execution（退款执行主记录，currency/refund_amount numeric、platform_sync_state 与 execution_state 两条**正交**的状态轴、六态含 UNKNOWN，CHECK 钉死「终态 ⇒ settled_at」与「UNKNOWN 只能从已发起进入」）/ refund_attempt（派发与查证后重试，idempotency_key + 触发器 guard_refund_attempt_retry）/ refund_verification（「先查证交易」三结论 CONFIRMED_NOT_SETTLED / CONFIRMED_SETTLED / INCONCLUSIVE）/ refund_execution_report（外部回报，TIMEOUT 与 UNKNOWN **只推进到 UNKNOWN、绝不进 FAILED**）/ refund_discrepancy（对账差异，四类 + 人工裁定）/ refund_status_event（状态事件留痕，append-only）。六表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS + GRANT；留痕表 REVOKE UPDATE/DELETE；refund_discrepancy 的 UPDATE 做成**列级白名单**（只授回 resolution_* 四列，检测事实改不动）。**蓝图加粗句「外部退款超时不等于失败，重复发起退款会造成实质资损」五层落点**：(1) TIMEOUT/UNKNOWN 在**状态机层**只能进 UNKNOWN；(2) UNKNOWN 的 dispatch **必须**带 verificationId 且结论须为 CONFIRMED_NOT_SETTLED，CONFIRMED_SETTLED 返回 409 并指出正确动作是推进到 SUCCEEDED、INCONCLUSIVE 同样 409；(3) DB 触发器 guard_refund_attempt_retry 兜住绕过服务层的直写；(4) 前端把 UNKNOWN 渲染成**独立的第四种语气**（不复用 FAILED 的 danger 也不复用 SUCCEEDED 的 success）并**排在待处置第一位**；(5) 存在 UNKNOWN 时固定打出「直接重试就是对同一笔退款发起第二次支付」的风险提示。端点 11 个 /trade/refunds（capabilities / filters / GET 列表 / GET 详情 / GET 差异清单 / POST 登记 / dispatch / verifications / reports / platform-sync / discrepancies / discrepancies/{id}/resolve）；默认排序 ATTENTION_FIRST（未知 → 明确失败 → 差异 → 其余），「待处置」沉不到第 30 页；total **必须**带同一个 attention 过滤（否则「第一页 1 条却说有 2 条」）。登记入口显式标注是 **11.3.1.1 未交付**期间的入口（不含可退余额校验与审批），capabilities 报 refundRequestDelivered=false；reportSource=FINANCE_MODULE_12 返回 503 并说明改用 PLATFORM_SYNC / MANUAL_OPERATOR。汇总**按币种分开绝不跨币种相加**。前端 /aftersales/refunds：**新建真实工作区页面**（task-pages 里该入口原本 implemented:false、点进去是空壳；标签从「退款与补发」收窄为「退款状态」—— 补发是 11.1.1.1 的售后单类型不是本模块），api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）。测试 **52 条**（RefundStatusIntegrationTest 42 + RefundStatusTenancyIntegrationTest 10，Testcontainers 真实 PG16、连接池压到 1）+ 前端 **53 条**（model 48 + allowlist 双向 5）。**过程中修掉的真实缺陷**：(1) **typecheck 两处红** —— Button 的 variant 令牌是 cva 联合类型，模型自造的 primary/caution/danger/disabled 透传不过，改为模型出语义、workspace 经 buttonVariant() 映射到真实令牌（caution→outline，描边与品牌填充对比度最大，最防误点重复退款）；(2) **契约静默缺口** —— `Map<String,BigDecimal>` 之类的裸 Map 经 springdoc 只生成空的 `{ }`，前端拿到 unknown 而非 number（金额按币种分开这条汇总直接 typecheck 挂住），改为 list 桶（RefundAmountBucket / RefundStateCountBucket / RefundKindCountBucket / RefundKindAmountBucket），**与 11.1.1.1 的 AftersalesAmountBucket 同一决定**，Map→list 后契约从 `{ }` 变成 `Array<RefundAmountBucket>`；(3) **api-proxy 白名单整条缺失** —— 上一任 worker 没碰白名单，后端 11 个端点与页面都在，浏览器侧却一条都放行不了（页面永远停在错误态而后端日志一次请求都没有），补一条 services[] 元素并用双向断言钉住。**三断言实跑在真实业务表上**：断言1 `断言1_两租户互不可见`（列表 + 按主键直查 + 用对方 id 调详情 404 + 外部交易号与失败原因不可跨租户读）、断言2 `断言2_伪造租户头无效且行仍落在会话租户名下` + **本车道补写的 `断言2_合法B家会话加伪造头改不动A家已有的退款单`**（B 家合法会话 + body 指向 A 家 id + 伪造 X-Tenant-Id/内部键 ⇒ 404，且 A 家行的归属、失败原因、状态与回报条数逐项未变；前者证「租户只从成员关系解析」，后者证**改别人已有数据必须靠 FORCE RLS 挡住**，两个攻击面不同），断言3 `断言3_连接池归还后不串租户且金额汇总各自独立`（池固定 1 条、5 轮交替读写、A 30 / B 70 各自独立），另加六表 FORCE RLS 与运行角色真能读写、差异清单与幂等键按租户隔离、事务外读零行、401/403。 |
 | 11.3.2.1 | 换货授权 | — | D4 | 未开发 | — |
 | 11.3.2.2 | 换货新单 | — | D4 | 未开发 | — |
 | 11.4.1.1 | 纠纷列表 | — | D7 | 未开发 | — |
