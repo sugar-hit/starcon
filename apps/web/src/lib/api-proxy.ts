@@ -981,6 +981,42 @@ const services: readonly {
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
   },
   {
+    // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**：各车道的插入点被既有条目隔开，
+    // git 能干净求并（与 9.3.1.2 合单 / 10.1.1.2 等条目同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力与上下游可用性（含 shop_code / 买家等级的缺口）
+    //   rules                            规则列表（GET 真分页 + POST 新建）
+    //   rules/{uuid}                     规则详情（GET 头+条件 / PUT 更新）
+    //   rules/{uuid}/status              切换规则状态（DRAFT / ACTIVE / DISABLED）
+    //   buyer-profiles                   买家画像列表（GET）+ 登记更新（PUT upsert）
+    //   orders/{uuid}/review             对真实订单跑一次审单判定（POST，落规则生效记录）
+    //   orders/{uuid}/trial              拿真实订单试跑规则（POST，标 DRY_RUN 不冒充结论）
+    //   evaluations                      判定记录列表（GET 真分页）
+    //   evaluations/{uuid}               判定详情（结论 + 完整命中链 + 订单事实）
+    // 判别顺序：字面量子路径（capabilities / rules / buyer-profiles / evaluations）
+    // **排在** {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    // ⚠️ orders/{uuid}/review|trial 两段都排在规则子资源之后 —— orders 这一层先由字面量
+    //    `orders` 认领，再进 uuid 与动作段，不会与 rules 的分支互相干扰。
+    // ⚠️ 刻意**没有** DELETE：规则一旦参与过判定，它就是「这单为什么被拦」的凭据；
+    //    删掉只会停用（status=DISABLED），不会让历史命中链断掉。
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `order-review/orders`（裸路径）—— 后端没有「列出全部订单」的映射，
+    //     本模块只对调用方给定的 order_id 判定
+    //   * `order-review/rules/{uuid}/delete` —— 见上，规则不提供删除
+    //   * `order-review/evaluations/{uuid}/events` —— 判定是 append-only 留痕，没有事件流
+    //   * `order-review/bulk-review` —— 批量判定属 9.2.1.1 待审队列（未交付）
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

@@ -237,6 +237,209 @@
         }
       }
     },
+    "/trade/order-review/rules/{ruleId}": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "put_trade_order_review_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/buyer-profiles": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_buyer_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buyerLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "blacklistedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerProfilePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "put_trade_order_review_buyer_profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyerProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/customs-elements/{id}": {
       "get": {
         "tags": [
@@ -2253,6 +2456,296 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/FactorySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/rules": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "forcedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "post_trade_order_review_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/rules/{ruleId}/status": {
+      "post": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "post_trade_order_review_rules_ruleId_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRuleStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/orders/{orderId}/trial": {
+      "post": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "post_trade_order_review_orders_orderId_trial",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/orders/{orderId}/review": {
+      "post": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "post_trade_order_review_orders_orderId_review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetail"
                 }
               }
             }
@@ -10153,6 +10646,170 @@
         }
       }
     },
+    "/trade/order-review/evaluations": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_evaluations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "forcedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/evaluations/{evaluationId}": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_evaluations_evaluationId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "evaluationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-review/capabilities": {
+      "get": {
+        "tags": [
+          "order-review-rule-controller"
+        ],
+        "operationId": "get_trade_order_review_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderReviewRuleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/logistics/waybills/{id}": {
       "get": {
         "tags": [
@@ -15091,6 +15748,332 @@
           }
         }
       },
+      "ReviewRuleConditionInput": {
+        "required": [
+          "dimension",
+          "operator",
+          "seqNo"
+        ],
+        "type": "object",
+        "properties": {
+          "seqNo": {
+            "minimum": 1,
+            "type": "integer",
+            "description": "条件序号（从 1 开始）",
+            "format": "int32"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度",
+            "enum": [
+              "SHOP",
+              "AMOUNT",
+              "BUYER_LEVEL",
+              "ITEM",
+              "SHIPPING_COUNTRY",
+              "BUYER_BLACKLIST",
+              "ADDRESS_ANOMALY",
+              "DISCOUNT_RATIO"
+            ]
+          },
+          "operator": {
+            "type": "string",
+            "description": "运算符",
+            "enum": [
+              "IN",
+              "NOT_IN",
+              "GTE",
+              "GT",
+              "LTE",
+              "LT",
+              "EQ",
+              "IS_TRUE",
+              "IS_FALSE"
+            ]
+          },
+          "valueSet": {
+            "type": "array",
+            "description": "集合取值；IN / NOT_IN 必填且至少一个",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "集合取值；IN / NOT_IN 必填且至少一个",
+              "nullable": true
+            }
+          },
+          "valueNumeric": {
+            "type": "number",
+            "description": "数值阈值；GTE/GT/LTE/LT/EQ 必填",
+            "nullable": true
+          },
+          "description": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "description": "条件说明"
+          }
+        },
+        "description": "保存规则时提交的条件"
+      },
+      "ReviewRuleInput": {
+        "required": [
+          "action",
+          "conditions",
+          "effectiveFrom",
+          "priority",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "type": "string",
+            "description": "规则编号；租户内唯一，只允许字母数字与 . _ -"
+          },
+          "ruleName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则名称"
+          },
+          "description": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则说明",
+            "nullable": true
+          },
+          "priority": {
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer",
+            "description": "优先级：数字大的先判定",
+            "format": "int32"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作：AUTO_APPROVE / MANUAL_REVIEW",
+            "enum": [
+              "AUTO_APPROVE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "forcedManual": {
+            "type": "boolean",
+            "description": "是否强制转人工；命中即压过任何自动通过规则",
+            "nullable": true
+          },
+          "matchMode": {
+            "type": "string",
+            "description": "条件组合方式，默认 ALL",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起（timestamptz），必填",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止（timestamptz）；留空 = 长期有效",
+            "format": "date-time",
+            "nullable": true
+          },
+          "capabilityNote": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "description": "能力自述",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "conditions": {
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array",
+            "description": "条件（1~20 条）。ACTIVE 规则不允许零条件",
+            "items": {
+              "$ref": "#/components/schemas/ReviewRuleConditionInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本；更新时必填，创建时忽略",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "description": "保存审单规则"
+      },
+      "ReviewRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编号"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "conditionCount": {
+            "type": "integer",
+            "description": "条件条数",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "description": "提示语（说清这一步实际做了什么，而不是「操作成功」）"
+          }
+        },
+        "description": "操作结果"
+      },
+      "BuyerProfileInput": {
+        "required": [
+          "buyerKey",
+          "buyerLevel"
+        ],
+        "type": "object",
+        "properties": {
+          "buyerKey": {
+            "minLength": 1,
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string",
+            "description": "买家身份键 md5；与 V144 合单的地址分支同一算法"
+          },
+          "buyerName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "收件人姓名",
+            "nullable": true
+          },
+          "buyerPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "收件人电话",
+            "nullable": true
+          },
+          "buyerEmail": {
+            "type": "string",
+            "description": "收件人邮箱",
+            "nullable": true
+          },
+          "buyerLevel": {
+            "type": "string",
+            "description": "买家等级：STANDARD / KEY / STRATEGIC / VIP / RISK"
+          },
+          "blacklisted": {
+            "type": "boolean",
+            "description": "是否拉黑"
+          },
+          "blacklistReason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "description": "拉黑理由；拉黑时必填",
+            "nullable": true
+          },
+          "blacklistedAt": {
+            "type": "string",
+            "description": "拉黑时刻；不填则取当前时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "description": "保存买家画像（按身份键 upsert）"
+      },
+      "BuyerProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "画像 id",
+            "format": "uuid"
+          },
+          "buyerKey": {
+            "type": "string",
+            "description": "买家身份键：收货地址快照三件套的 md5"
+          },
+          "buyerName": {
+            "type": "string",
+            "description": "收件人姓名"
+          },
+          "buyerPhone": {
+            "type": "string",
+            "description": "收件人电话"
+          },
+          "buyerEmail": {
+            "type": "string",
+            "description": "收件人邮箱（判定时先按身份键、再按邮箱反查）"
+          },
+          "buyerLevel": {
+            "type": "string",
+            "description": "买家等级；没有这一行 = 等级未知，不是 STANDARD"
+          },
+          "blacklisted": {
+            "type": "boolean",
+            "description": "是否在黑名单里"
+          },
+          "blacklistReason": {
+            "type": "string",
+            "description": "拉黑理由（拉黑时必填，否则客服无法解释）"
+          },
+          "blacklistedAt": {
+            "type": "string",
+            "description": "拉黑时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        },
+        "description": "买家画像（等级 + 黑名单，租户自维护）"
+      },
       "ElementSetInput": {
         "required": [
           "destinationCountryCode",
@@ -17316,6 +18299,457 @@
             "type": "string"
           }
         }
+      },
+      "ReviewRuleStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "目标状态：DRAFT / ACTIVE / DISABLED",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "启用时顺带改生效起；不给则保持原值",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "启用时顺带改生效止；不给则保持原值，传 null 表示长期有效时需用清空语义",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注；停用时必填",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "description": "切换规则状态"
+      },
+      "ReviewRunInput": {
+        "required": [
+          "evaluatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "evaluatedAt": {
+            "type": "string",
+            "description": "判定时刻（timestamptz）。由调用方显式给出，不取服务器当前时间",
+            "format": "date-time"
+          },
+          "ruleIds": {
+            "type": "array",
+            "description": "试跑指定的规则 id；不给 = 只跑此刻生效中的规则",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "description": "试跑指定的规则 id；不给 = 只跑此刻生效中的规则",
+              "format": "uuid",
+              "nullable": true
+            }
+          }
+        },
+        "description": "发起审单判定"
+      },
+      "HitCondition": {
+        "type": "object",
+        "properties": {
+          "seqNo": {
+            "type": "integer",
+            "description": "条件序号",
+            "format": "int32"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度",
+            "enum": [
+              "SHOP",
+              "AMOUNT",
+              "BUYER_LEVEL",
+              "ITEM",
+              "SHIPPING_COUNTRY",
+              "BUYER_BLACKLIST",
+              "ADDRESS_ANOMALY",
+              "DISCOUNT_RATIO"
+            ]
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "维度中文"
+          },
+          "operator": {
+            "type": "string",
+            "description": "运算符",
+            "enum": [
+              "IN",
+              "NOT_IN",
+              "GTE",
+              "GT",
+              "LTE",
+              "LT",
+              "EQ",
+              "IS_TRUE",
+              "IS_FALSE"
+            ]
+          },
+          "expected": {
+            "type": "string",
+            "description": "规则侧期望值（当时的条件快照）"
+          },
+          "actualField": {
+            "type": "string",
+            "description": "订单侧被比对的列；取不到时为空串"
+          },
+          "actualValue": {
+            "type": "string",
+            "description": "订单侧实际值；**取不到时是空串而不是默认值**"
+          },
+          "satisfied": {
+            "type": "boolean",
+            "description": "该条件是否满足"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "人话解释"
+          }
+        },
+        "description": "逐条件命中明细"
+      },
+      "OrderFactsSummary": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "外部/平台单号",
+            "nullable": true
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源（SHOP 维度比的就是它）"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "orderTotal": {
+            "type": "number",
+            "description": "订单总额（AMOUNT 维度比的就是它）"
+          },
+          "discountAmount": {
+            "type": "number",
+            "description": "订单折扣额"
+          },
+          "subtotalAmount": {
+            "type": "number",
+            "description": "小计"
+          },
+          "discountRatePercent": {
+            "type": "number",
+            "description": "折扣比例百分数；小计为 0 时是 null（不是 0）",
+            "nullable": true
+          },
+          "shippingCountry": {
+            "type": "string",
+            "description": "收货国家（SHIPPING_COUNTRY 维度比的就是它）",
+            "nullable": true
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人姓名",
+            "nullable": true
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收件人电话",
+            "nullable": true
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收件人邮箱",
+            "nullable": true
+          },
+          "buyerKey": {
+            "type": "string",
+            "description": "买家身份键"
+          },
+          "buyerLevel": {
+            "type": "string",
+            "description": "买家等级；null = 未登记档案（等级未知，不是 STANDARD）",
+            "nullable": true
+          },
+          "blacklisted": {
+            "type": "boolean",
+            "description": "是否命中黑名单；null = 未登记档案",
+            "nullable": true
+          },
+          "addressAnomalyCodes": {
+            "type": "array",
+            "description": "命中的地址异常码",
+            "items": {
+              "type": "string",
+              "description": "命中的地址异常码"
+            }
+          },
+          "skuCodes": {
+            "type": "array",
+            "description": "订单内的 SKU 编码（ITEM 维度比的就是它）",
+            "items": {
+              "type": "string",
+              "description": "订单内的 SKU 编码（ITEM 维度比的就是它）"
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "订单行数",
+            "format": "int32"
+          },
+          "totalQty": {
+            "type": "number",
+            "description": "订单件数"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "判定时用到的订单事实快照"
+      },
+      "ReviewDecision": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "判定 id",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号快照"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源快照"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种快照"
+          },
+          "orderTotal": {
+            "type": "number",
+            "description": "订单金额快照"
+          },
+          "discountRatePercent": {
+            "type": "number",
+            "description": "折扣比例百分数快照；null = 小计为 0，比例不可计算",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "description": "模式：DRY_RUN 试跑 / RECORDED 生效判定",
+            "enum": [
+              "DRY_RUN",
+              "RECORDED"
+            ]
+          },
+          "modeLabel": {
+            "type": "string",
+            "description": "模式中文"
+          },
+          "evaluatedScope": {
+            "type": "string",
+            "description": "取值范围：EFFECTIVE 生效中 / SELECTED 点名"
+          },
+          "decision": {
+            "type": "string",
+            "description": "结论",
+            "enum": [
+              "AUTO_APPROVE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "decisionLabel": {
+            "type": "string",
+            "description": "结论中文"
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "一句话结论（客服第一眼要看的就是它）"
+          },
+          "winningRuleId": {
+            "type": "string",
+            "description": "决定结论的规则 id；无规则命中时为 null",
+            "format": "uuid",
+            "nullable": true
+          },
+          "winningRuleCode": {
+            "type": "string",
+            "description": "决定结论的规则编号快照"
+          },
+          "winningRuleName": {
+            "type": "string",
+            "description": "决定结论的规则名称快照"
+          },
+          "consideredRuleCount": {
+            "type": "integer",
+            "description": "参与判定的规则数",
+            "format": "int32"
+          },
+          "matchedRuleCount": {
+            "type": "integer",
+            "description": "命中的规则数",
+            "format": "int32"
+          },
+          "forcedRuleCount": {
+            "type": "integer",
+            "description": "强制命中的规则数",
+            "format": "int32"
+          },
+          "addressAnomalyCodes": {
+            "type": "array",
+            "description": "命中的地址异常码",
+            "items": {
+              "type": "string",
+              "description": "命中的地址异常码"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "判定时刻（timestamptz）",
+            "format": "date-time"
+          },
+          "evaluatedByMembershipId": {
+            "type": "string",
+            "description": "判定人；自动判定时为 null",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "落库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "审单判定结论（规则生效记录）"
+      },
+      "ReviewDetail": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/ReviewDecision"
+          },
+          "hits": {
+            "type": "array",
+            "description": "命中链：被考虑到的每一条规则（按 evalRank 升序）",
+            "items": {
+              "$ref": "#/components/schemas/RuleHit"
+            }
+          },
+          "orderFacts": {
+            "$ref": "#/components/schemas/OrderFactsSummary"
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "审单判定详情：结论 + 命中链 + 订单事实"
+      },
+      "RuleHit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "命中行 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编号快照"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称快照"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "优先级快照",
+            "format": "int32"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作快照",
+            "enum": [
+              "AUTO_APPROVE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "动作中文"
+          },
+          "forcedManual": {
+            "type": "boolean",
+            "description": "是否强制转人工"
+          },
+          "evalRank": {
+            "type": "integer",
+            "description": "判定次序：priority DESC, rule_code ASC 之后的名次",
+            "format": "int32"
+          },
+          "matched": {
+            "type": "boolean",
+            "description": "是否命中"
+          },
+          "reason": {
+            "type": "string",
+            "description": "命中或未命中的理由"
+          },
+          "conditions": {
+            "type": "array",
+            "description": "逐条件明细（按 seqNo 升序）",
+            "items": {
+              "$ref": "#/components/schemas/HitCondition"
+            }
+          }
+        },
+        "description": "命中链一行（未命中的规则也在内）"
       },
       "WaybillFreightInput": {
         "required": [
@@ -27129,6 +28563,468 @@
             "type": "string"
           }
         }
+      },
+      "ReviewRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ReviewRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "activeCount": {
+            "type": "integer",
+            "description": "汇总：生效中的规则数（不受分页影响）",
+            "format": "int64"
+          },
+          "forcedCount": {
+            "type": "integer",
+            "description": "汇总：强制转人工的规则数（不受分页影响）",
+            "format": "int64"
+          },
+          "effectiveNowCount": {
+            "type": "integer",
+            "description": "汇总：此刻落在生效期内的规则数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "规则分页"
+      },
+      "ReviewRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编号（租户内唯一，同时是排序的确定性来源）"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "规则说明"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "优先级：数字大的先判定",
+            "format": "int32"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作",
+            "enum": [
+              "AUTO_APPROVE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "动作中文"
+          },
+          "forcedManual": {
+            "type": "boolean",
+            "description": "是否强制转人工（命中即压过任何自动通过规则）"
+          },
+          "matchMode": {
+            "type": "string",
+            "description": "条件组合方式：ALL / ANY"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "状态中文"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止；null = 长期有效",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveNow": {
+            "type": "boolean",
+            "description": "此刻是否落在生效期内（按查询时刻实算）"
+          },
+          "conditionCount": {
+            "type": "integer",
+            "description": "条件条数",
+            "format": "int32"
+          },
+          "dimensionSummary": {
+            "type": "string",
+            "description": "条件维度摘要（逗号分隔，供列表快速扫读）"
+          },
+          "capabilityNote": {
+            "type": "string",
+            "description": "能力自述：条件引用字段此刻取不到值时的说明",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        },
+        "description": "审单规则一行"
+      },
+      "ReviewRuleCondition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "条件 id",
+            "format": "uuid"
+          },
+          "seqNo": {
+            "type": "integer",
+            "description": "条件序号（命中明细按它排序）",
+            "format": "int32"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度",
+            "enum": [
+              "SHOP",
+              "AMOUNT",
+              "BUYER_LEVEL",
+              "ITEM",
+              "SHIPPING_COUNTRY",
+              "BUYER_BLACKLIST",
+              "ADDRESS_ANOMALY",
+              "DISCOUNT_RATIO"
+            ]
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "维度中文"
+          },
+          "operator": {
+            "type": "string",
+            "description": "运算符",
+            "enum": [
+              "IN",
+              "NOT_IN",
+              "GTE",
+              "GT",
+              "LTE",
+              "LT",
+              "EQ",
+              "IS_TRUE",
+              "IS_FALSE"
+            ]
+          },
+          "operatorLabel": {
+            "type": "string",
+            "description": "运算符中文"
+          },
+          "valueSet": {
+            "type": "array",
+            "description": "集合取值（IN / NOT_IN 用）",
+            "items": {
+              "type": "string",
+              "description": "集合取值（IN / NOT_IN 用）"
+            }
+          },
+          "valueNumeric": {
+            "type": "number",
+            "description": "数值阈值（GTE/GT/LTE/LT/EQ 用；折扣比例口径是百分数，85 = 85%）",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "条件说明"
+          }
+        },
+        "description": "规则条件"
+      },
+      "ReviewRuleDetail": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/ReviewRuleRow"
+          },
+          "conditions": {
+            "type": "array",
+            "description": "条件（按 seqNo 升序）",
+            "items": {
+              "$ref": "#/components/schemas/ReviewRuleCondition"
+            }
+          },
+          "lastDecision": {
+            "$ref": "#/components/schemas/ReviewDecision"
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "审单规则详情"
+      },
+      "EvaluationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ReviewDecision"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "autoApproveCount": {
+            "type": "integer",
+            "description": "汇总：自动通过条数（不受分页影响）",
+            "format": "int64"
+          },
+          "manualReviewCount": {
+            "type": "integer",
+            "description": "汇总：转人工条数（不受分页影响）",
+            "format": "int64"
+          },
+          "forcedCount": {
+            "type": "integer",
+            "description": "汇总：强制转人工触发条数（不受分页影响）",
+            "format": "int64"
+          },
+          "noRuleMatchedCount": {
+            "type": "integer",
+            "description": "汇总：结论为「无规则命中默认转人工」的条数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "判定记录分页"
+      },
+      "OrderReviewDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "维度码"
+          },
+          "label": {
+            "type": "string",
+            "description": "维度名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否真的可用"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源与归属"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "description": "不可用时的原因与交接方式；可用时为 null"
+          }
+        },
+        "description": "能力维度：依赖什么、是否真的可用、不可用时怎么办"
+      },
+      "OrderReviewRuleCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "能力维度清单",
+            "items": {
+              "$ref": "#/components/schemas/OrderReviewDimension"
+            }
+          },
+          "conditionDimensions": {
+            "type": "array",
+            "description": "可配置的条件维度",
+            "items": {
+              "type": "string",
+              "description": "可配置的条件维度",
+              "enum": [
+                "SHOP",
+                "AMOUNT",
+                "BUYER_LEVEL",
+                "ITEM",
+                "SHIPPING_COUNTRY",
+                "BUYER_BLACKLIST",
+                "ADDRESS_ANOMALY",
+                "DISCOUNT_RATIO"
+              ]
+            }
+          },
+          "operators": {
+            "type": "array",
+            "description": "条件运算符",
+            "items": {
+              "type": "string",
+              "description": "条件运算符",
+              "enum": [
+                "IN",
+                "NOT_IN",
+                "GTE",
+                "GT",
+                "LTE",
+                "LT",
+                "EQ",
+                "IS_TRUE",
+                "IS_FALSE"
+              ]
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "规则动作取值",
+            "items": {
+              "type": "string",
+              "description": "规则动作取值",
+              "enum": [
+                "AUTO_APPROVE",
+                "MANUAL_REVIEW"
+              ]
+            }
+          },
+          "ruleStatuses": {
+            "type": "array",
+            "description": "规则状态取值",
+            "items": {
+              "type": "string",
+              "description": "规则状态取值",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "DISABLED"
+              ]
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "description": "判定结论取值",
+            "items": {
+              "type": "string",
+              "description": "判定结论取值",
+              "enum": [
+                "AUTO_APPROVE",
+                "MANUAL_REVIEW"
+              ]
+            }
+          },
+          "ruleCount": {
+            "type": "integer",
+            "description": "本租户规则条数",
+            "format": "int64"
+          },
+          "activeRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的规则条数",
+            "format": "int64"
+          },
+          "buyerProfileCount": {
+            "type": "integer",
+            "description": "本租户已登记的买家画像条数",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "string",
+            "description": "口径与判读说明"
+          },
+          "downstreamGaps": {
+            "type": "string",
+            "description": "下游缺口说明"
+          }
+        },
+        "description": "9.2.1.2 审单规则能力与上下游可用性"
+      },
+      "BuyerProfilePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/BuyerProfile"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "blacklistedCount": {
+            "type": "integer",
+            "description": "汇总：黑名单条数（不受分页影响）",
+            "format": "int64"
+          }
+        },
+        "description": "买家画像分页"
       },
       "WaybillListDetail": {
         "type": "object",
