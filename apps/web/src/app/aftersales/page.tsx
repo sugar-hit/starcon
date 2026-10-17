@@ -16,9 +16,9 @@ import { AftersalesCaseWorkspace } from '@/components/aftersales/aftersales-case
  * 知识库管的是「内容」，这里管的是「单据」，挂成父子会让「话术依赖工单」这个
  * 错误印象成立。
  *
- * <p>刻意**不占用** {@code /aftersales/cases} 与 {@code /aftersales/detail}：
- * 前者留给 11.1.1.2 售后单详情（未交付），本模块的行上**不带**任何指向它的链接 ——
- * 一个点进去 404 的入口比没有这个入口更危险。
+ * <p>11.1.1.2 详情交付后，列表行的售后号已是指向 {@code /aftersales/cases/{id}} 的入口。
+ * 本模块此前**刻意不占用**那条路由、也不在行上带任何指向它的链接 ——
+ * 一个点进去 404 的入口比没有这个入口更危险；那个前提在详情交付后已经不成立。
  */
 export default function AftersalesPage() {
   return <AftersalesCaseWorkspace />;

@@ -306,6 +306,63 @@ load 不随车道数线性涨，而随**同时处于构建高峰的车道数**�
 若 load 持续超阈值或有车道报 `RESOURCE_BLOCKED`，说明当前档位偏高，
 **报给用户由用户决定是否继续减负。**
 
+## 🔕 静默窗口闸：20:30 → 次日 08:00 不得发起（用户明确要求，最高优先级）
+
+**20:30 到次日 08:00 之间，一个新任务都不许发起。** 这条优先于节流闸、
+优先于容量闸、优先于「本轮该干活」的任何判断。
+
+### 为什么不能只靠 cron
+
+当前 cron 是 `0 8-20`，最后一格 20:00，**结构上**确实不会在窗口内触发。
+但下面两种情况仍会让任务在 20:30 之后被发起：
+
+1. **cron 漂移 / 上一格未收工** —— 19:00 或 20:00 那一格如果耗时超预期，
+   可能在 20:30 之后才继续往下走并派发。
+2. **未来有人把 cron 改成 24 小时或 `*/30`**（烧额度那次就是这么改的）——
+   `*/30` 会在 20:30、21:00… 持续触发。
+
+⇒ **cron 是第一道闸，本闸是最后一道闸。** 即使 cron 被改错，本闸仍会兜住。
+
+### 判定（每个 tick 的第一件事，先于一切动作）
+
+```bash
+cd /Users/tommy/Project/starcon
+H=$(date +%H)
+if [ "$H" -ge 20 ] || [ "$H" -lt 8 ]; then
+  echo "静默窗口：当前 $(date '+%H:%M') 在 20:30-08:00 内"
+fi
+```
+
+⚠️ **`H >= 20` 是粗判**（覆盖 20:00–20:29）。要精确到 20:30：
+
+```bash
+NOW_H=$(date +%H); NOW_M=$(date +%M)
+MINUTES=$(( NOW_H * 60 + NOW_M ))
+if [ "$MINUTES" -ge 1230 ] || [ "$MINUTES" -lt 480 ]; then   # 1230=20:30, 480=08:00
+  echo "静默窗口命中：$(date '+%H:%M')"
+fi
+```
+
+### 命中后的行为（硬规定）
+
+| 允许 | 禁止 |
+| --- | --- |
+| 只读检查（`sync.mjs`、`lane.mjs status`、台账 grep） | ❌ 派发任何新车道 / `task` |
+| 读在途车道状态、必要时记一条只读汇报 | ❌ 取调度闸 `gate acquire` |
+| | ❌ 跑 `plan`（它有副作用，会凭空造车道） |
+| | ❌ 跑 L2 / `mvnw verify`（那是发热高峰） |
+| | ❌ `merge-ready`（并入会触发后续动作，且逼近静默边界） |
+
+**已在跑的车道（`state=running`）一律不杀** —— 用户明确「未结束的能忍受」。
+让它们自己跑完，下一次窗口开启（08:00）再回收 `ready`。
+
+### 窗口边界上的两条纪律
+
+- **不要为了「赶在 20:30 前做完」而加速** —— 提前收工不比踩线好。
+  20:30 命中就停，不硬撑。
+- **窗口内的 tick 不要写 `last-batch-at` / `last-l2-at`** —— 空转轮次刷新时间戳
+  会把节奏无限后推，且让窗口看起来「有活动」。
+
 ## 第 1 步：同步台账
 
 ```bash
@@ -481,10 +538,17 @@ node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
    cd <WORKTREE> && pnpm typecheck
 
    # L1 模块闸：只跑【你自己新增的测试类】，不要跑整个服务
-   #   -DfailIfNoSpecifiedTests=false 是必需的：-am 会连带构建依赖模块，
-   #   那些模块没有匹配 -Dtest 的用例，不加这个开关会直接构建失败。
+   #   ⚠️ **两个属性名都要带**：-am 会连带构建依赖模块（tenancy / identity 等），
+   #   那些模块没有匹配 -Dtest 的用例，不加开关会直接构建失败。
+   #   本仓 surefire 3.5.4 只认 **-Dsurefire.failIfNoSpecifiedTests**；
+   #   只写旧的 -DfailIfNoSpecifiedTests 在配合 -am 时仍会失败，
+   #   报错原文：「No tests matching pattern "..." were executed!
+   #   (Set -Dsurefire.failIfNoSpecifiedTests=false to ignore this error.)」
+   #   （2026-10-17 20:00 tick 实测：只带旧属性名 → 失败在 `tenancy` 模块，
+   #     看起来像测试红了，实际是构建阶段就挂了 —— 别误判成业务缺陷。）
    cd <WORKTREE>/backend && ./mvnw -pl services/<你的服务> -am test \
-       -Dtest='<你的测试类前缀>*' -DfailIfNoSpecifiedTests=false
+       -Dtest='<你的测试类前缀>*' \
+       -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
    # 例：11.1.1.1 新增 AftersalesCaseIntegrationTest + AftersalesCaseTenancyIntegrationTest
    #     → -Dtest='AftersalesCase*'
 

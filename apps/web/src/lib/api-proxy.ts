@@ -1024,6 +1024,43 @@ const services: readonly {
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
   },
   {
+    // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'` **之前**（此处即紧邻 11.1.1.1 那条之前），
+    // 与其他车道的新增元素被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，本条先于 11.1.1.1 那条被匹配，
+    // 但两者前缀形状互不相交：11.1.1.1 管的是 `cases` / `cases/bulk`（裸路径），
+    // 本条管的是 `cases/{uuid}` 与它下面的子路径，各自互不吃。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   case-detail/capabilities        详情页能力声明（**九个区块逐块报可用性 + 归属模块**）
+    //   cases/{uuid}                    详情聚合（GET，一次返回九个区块 + 操作入口 + 时间线）
+    //   cases/{uuid}/timeline           时间线单独分页读（GET，真分页）
+    //   cases/{uuid}/notes              追加单条备注（POST，note_source=TENANT_SINGLE）
+    //   cases/{uuid}/messages           登记沟通记录（POST）
+    //   cases/{uuid}/attachments        登记附件与凭证（POST）
+    //   cases/{uuid}/lines              登记商品行（POST）
+    //
+    // 判别顺序：字面量子路径（case-detail/capabilities）**排在** uuid 段之前。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ uuid 尾巴只挂在 `cases` 后面，`cases/bulk` 仍归 11.1.1.1 那条 ——
+    //    本模块刻意不提供批量端点，批量授权 / 备注 / 转工单是 11.1.1.1 的三件。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `cases/{uuid}` 的 PUT / DELETE —— 留痕与单据在本服务内**不可改写**
+    //     （四张留痕表在数据库层连 UPDATE/DELETE 权限都没有），改掉或删掉一行等于毁掉纠纷证据
+    //   * `cases/{uuid}/refunds` / `/returns` / `/disputes` —— 11.2 / 11.3 / 11.4 **均未交付**，
+    //     capabilities 里逐条报 delivered=false 与归属模块，页面据此显示「该能力未交付」
+    //   * `cases/{uuid}/attribution` —— 11.1.2.2 商品问题归因未交付
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^aftersales\/(?:case-detail\/capabilities|cases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:timeline|lines|messages|attachments|notes))?)$/,
+  },
+  {
     // 11.1.1.1 售后单列表（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

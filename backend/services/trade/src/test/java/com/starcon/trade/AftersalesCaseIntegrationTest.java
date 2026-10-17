@@ -922,10 +922,19 @@ class AftersalesCaseIntegrationTest {
                         .get(0, String.class)))
         .as("工单必须显式记着归属 11.4.2.1（未交付），不能冒充本模块自造的影子表")
         .isEqualTo("11.4.2.1");
-    // 单条详情路由刻意不存在（那是 11.1.1.2）
+    // 单条详情路由：**11.1.1.2 售后单详情已交付**（V157 / GET /trade/aftersales/cases/{id}）。
+    //
+    // ⚠️ 这里原本断言 404 —— 那条断言的前提是「11.1.1.2 未交付」，本模块的台账当时也写着
+    //   「刻意不提供 cases/{uuid}」。前提已经不成立，继续断言 404 只会把一条**真的存在**的
+    //   路由钉成「不存在」，让任何人删掉它时测试照绿。11.1.1.2 交付后改为断言它真的通。
+    //   未交付的**子**资源仍然 404（详情模块刻意不提供单条删除与改写）。
     http.perform(get("/trade/aftersales/cases/" + row.get("id").asText())
             .header("Authorization", "Bearer tenant-a"))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk());
+    http.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+            .delete("/trade/aftersales/cases/" + row.get("id").asText())
+        .header("Authorization", "Bearer tenant-a"))
+        .andExpect(status().isMethodNotAllowed());
   }
 
   @Test
