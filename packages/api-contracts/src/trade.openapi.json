@@ -736,6 +736,55 @@
         }
       }
     },
+    "/trade/fulfillment/quality/alert-rules/{metric}": {
+      "put": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "put_trade_fulfillment_quality_alert_rules_metric",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/monitor/thresholds": {
       "get": {
         "tags": [
@@ -7436,6 +7485,305 @@
         }
       }
     },
+    "/trade/fulfillment/quality/exceptions": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exceptionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentExceptionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FulfillmentExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentExceptionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_alerts_id_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts/evaluate": {
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_alerts_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertEvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertEvaluateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/after-sale-signals": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_after_sale_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "signalType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signalState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AfterSaleSignalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "post_trade_fulfillment_quality_after_sale_signals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AfterSaleSignalInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AfterSaleSignalRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/pending-shipment/units/{id}/sla": {
       "post": {
         "tags": [
@@ -12647,6 +12995,653 @@
         }
       }
     },
+    "/trade/aftersales/reasons/mappings": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mappingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonMappingCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/categories": {
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_categories",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonCategoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonTreeNode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/attributions": {
+      "get": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "get_trade_aftersales_reasons_attributions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonAttributionView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "post_trade_aftersales_reasons_attributions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonAttributionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonAttributionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/cases": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timelinessState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorizationState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "receivedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "receivedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "ownerRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCasePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "post_trade_aftersales_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesCaseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCaseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/cases/bulk": {
+      "post": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "post_trade_aftersales_cases_bulk",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesBulkResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/mappings/{id}": {
+      "delete": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "delete_trade_aftersales_reasons_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "patch_trade_aftersales_reasons_mappings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonMappingCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/reasons/categories/{id}": {
+      "delete": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "delete_trade_aftersales_reasons_categories_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "aftersales-reason-controller"
+        ],
+        "operationId": "patch_trade_aftersales_reasons_categories_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReasonCategoryUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReasonTreeNode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/list": {
       "get": {
         "tags": [
@@ -16366,6 +17361,425 @@
         }
       }
     },
+    "/trade/fulfillment/quality/report": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/events": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/drilldown": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_drilldown",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SHIP_ON_TIME_RATE"
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimensionValue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "OCCURRED_AT_DESC"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityDrilldownPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/dimensions": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_dimensions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimensionBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "PLATFORM"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityDimensionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/capabilities": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alerts": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_alerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimensionCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/quality/alert-rules": {
+      "get": {
+        "tags": [
+          "fulfillment-quality-controller"
+        ],
+        "operationId": "get_trade_fulfillment_quality_alert_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertRuleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/pending-shipment/units": {
       "get": {
         "tags": [
@@ -18920,61 +20334,12 @@
         }
       }
     },
-    "/trade/fulfillment/quality/alert-rules/{metric}": {
-      "put": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "put_trade_fulfillment_quality_alert_rules_metric",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "metric",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AlertRuleInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AlertRuleRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/exceptions": {
+    "/trade/aftersales/reasons/tree": {
       "get": {
         "tags": [
-          "fulfillment-quality-controller"
+          "aftersales-reason-controller"
         ],
-        "operationId": "get_trade_fulfillment_quality_exceptions",
+        "operationId": "get_trade_aftersales_reasons_tree",
         "parameters": [
           {
             "name": "Authorization",
@@ -18986,7 +20351,7 @@
             }
           },
           {
-            "name": "exceptionType",
+            "name": "categoryStatus",
             "in": "query",
             "required": false,
             "schema": {
@@ -18994,7 +20359,7 @@
             }
           },
           {
-            "name": "keyword",
+            "name": "rootKind",
             "in": "query",
             "required": false,
             "schema": {
@@ -19002,23 +20367,11 @@
             }
           },
           {
-            "name": "page",
+            "name": "assignableOnly",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
+              "type": "boolean"
             }
           }
         ],
@@ -19028,46 +20381,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/FulfillmentExceptionPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "post_trade_fulfillment_quality_exceptions",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FulfillmentExceptionInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FulfillmentExceptionRow"
+                  "$ref": "#/components/schemas/AftersalesReasonTree"
                 }
               }
             }
@@ -19075,164 +20389,12 @@
         }
       }
     },
-    "/trade/fulfillment/quality/alerts/{id}/acknowledge": {
-      "post": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "post_trade_fulfillment_quality_alerts_id_acknowledge",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AlertPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/alerts/evaluate": {
-      "post": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "post_trade_fulfillment_quality_alerts_evaluate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AlertEvaluateInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AlertEvaluateResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/after-sale-signals": {
+    "/trade/aftersales/reasons/reports": {
       "get": {
         "tags": [
-          "fulfillment-quality-controller"
+          "aftersales-reason-controller"
         ],
-        "operationId": "get_trade_fulfillment_quality_after_sale_signals",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "signalType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "signalState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AfterSaleSignalPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "post_trade_fulfillment_quality_after_sale_signals",
+        "operationId": "get_trade_aftersales_reasons_reports",
         "parameters": [
           {
             "name": "Authorization",
@@ -19244,23 +20406,13 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AfterSaleSignalInput"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AfterSaleSignalRow"
+                  "$ref": "#/components/schemas/AftersalesReasonReport"
                 }
               }
             }
@@ -19268,299 +20420,12 @@
         }
       }
     },
-    "/trade/fulfillment/quality/report": {
+    "/trade/aftersales/reasons/capabilities": {
       "get": {
         "tags": [
-          "fulfillment-quality-controller"
+          "aftersales-reason-controller"
         ],
-        "operationId": "get_trade_fulfillment_quality_report",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/QualityReport"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/events": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_events",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/QualityEventPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/drilldown": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_drilldown",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "metric",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "SHIP_ON_TIME_RATE"
-            }
-          },
-          {
-            "name": "dimensionBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dimensionValue",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "OCCURRED_AT_DESC"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/QualityDrilldownPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/dimensions": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_dimensions",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "dimensionBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "PLATFORM"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/QualityDimensionPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/capabilities": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_capabilities",
+        "operationId": "get_trade_aftersales_reasons_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19578,378 +20443,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/QualityCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/alerts": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_alerts",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "metric",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dimensionCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AlertPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/fulfillment/quality/alert-rules": {
-      "get": {
-        "tags": [
-          "fulfillment-quality-controller"
-        ],
-        "operationId": "get_trade_fulfillment_quality_alert_rules",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AlertRuleRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/cases": {
-      "get": {
-        "tags": [
-          "aftersales-case-controller"
-        ],
-        "operationId": "get_trade_aftersales_cases",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "reasonCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformSource",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "timelinessState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "currency",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "authorizationState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "orderNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "caseNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "minAmount",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxAmount",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "receivedFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "receivedTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "ownerRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesCasePage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "aftersales-case-controller"
-        ],
-        "operationId": "post_trade_aftersales_cases",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesCaseCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesCaseRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/cases/bulk": {
-      "post": {
-        "tags": [
-          "aftersales-case-controller"
-        ],
-        "operationId": "post_trade_aftersales_cases_bulk",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesBulkRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesBulkResult"
+                  "$ref": "#/components/schemas/AftersalesReasonCapabilities"
                 }
               }
             }
@@ -20250,7 +20744,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -20575,49 +21069,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -20642,7 +21136,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -21122,14 +21616,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -21620,6 +22114,77 @@
           }
         },
         "description": "拆单规则（每租户一条）"
+      },
+      "AlertRuleInput": {
+        "required": [
+          "comparison",
+          "thresholdValue"
+        ],
+        "type": "object",
+        "properties": {
+          "thresholdValue": {
+            "type": "number",
+            "description": "百分数，0~100，与指标卡同量纲"
+          },
+          "comparison": {
+            "type": "string",
+            "enum": [
+              "GT",
+              "GTE",
+              "LT",
+              "LTE"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "缺省 true"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AlertRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "FulfillmentMonitorThresholdInput": {
         "required": [
@@ -23666,7 +24231,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -24547,7 +25112,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -30089,6 +30654,317 @@
           }
         }
       },
+      "FulfillmentExceptionInput": {
+        "required": [
+          "exceptionType",
+          "orderId",
+          "reportedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "description": "与 orderLineId 同时给或同时不给",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string",
+            "enum": [
+              "WRONG_ITEM",
+              "MISSING_ITEM"
+            ]
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "错发时为实际发出量，漏发时为少发量；可空"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FulfillmentExceptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string"
+          },
+          "affectedQty": {
+            "type": "number"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportedSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AlertPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number"
+          },
+          "thresholdValue": {
+            "type": "number"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "numerator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionValue": {
+            "type": "string"
+          },
+          "triggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AlertEvaluateInput": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "评估窗口起；缺省取默认窗口",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "description": "评估窗口止；缺省取默认窗口",
+            "format": "date-time"
+          },
+          "perDimension": {
+            "type": "boolean",
+            "description": "逐维度评估；缺省只评估租户整体"
+          }
+        }
+      },
+      "AlertEvaluateResult": {
+        "type": "object",
+        "properties": {
+          "evaluated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "triggered": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedNoBasis": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowFrom": {
+            "type": "string"
+          },
+          "windowTo": {
+            "type": "string"
+          },
+          "perDimension": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AfterSaleSignalInput": {
+        "required": [
+          "occurredAt",
+          "orderId",
+          "signalType"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻（不是登记时刻）",
+            "format": "date-time"
+          },
+          "signalType": {
+            "type": "string",
+            "enum": [
+              "DISPUTE",
+              "RETURN"
+            ]
+          },
+          "signalState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "UNDER_REVIEW",
+              "RESOLVED",
+              "REJECTED",
+              "CLOSED"
+            ]
+          },
+          "platformOrderNo": {
+            "type": "string",
+            "description": "平台侧单号；平台同步到位后才有值"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "非 TENANT_MAINTAINED 来源时必填"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AfterSaleSignalRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "signalType": {
+            "type": "string"
+          },
+          "signalState": {
+            "type": "string"
+          },
+          "platformOrderNo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signalSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "ShipmentSlaInput": {
         "required": [
           "deadlineAt",
@@ -32894,7 +33770,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -33006,12 +33882,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -34816,9 +35692,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -35054,6 +35930,772 @@
             }
           }
         }
+      },
+      "AftersalesReasonMappingCreate": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "内部原因分类 ID",
+            "format": "uuid"
+          },
+          "platformSource": {
+            "type": "string",
+            "description": "平台来源"
+          },
+          "platformReasonCode": {
+            "type": "string",
+            "description": "平台原因码"
+          },
+          "platformReasonName": {
+            "type": "string",
+            "description": "平台原因名（平台返回的原文，缺省空）",
+            "nullable": true
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "来源，缺省 TENANT_MAINTAINED",
+            "nullable": true
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用；mappingSource=MODULE_2_ENUM_MAPPING 时**必填**（哪份来源的哪一段）",
+            "nullable": true
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻（**不是**登记时刻），缺省取当前时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "状态，缺省 ACTIVE",
+            "nullable": true
+          }
+        },
+        "description": "新建平台原因码映射（trade 自有表，非跨服务读）"
+      },
+      "AftersalesReasonMappingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "映射 ID",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "内部原因分类 ID",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "内部原因分类编码"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "内部原因分类名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "platformSource": {
+            "type": "string",
+            "description": "平台来源"
+          },
+          "platformReasonCode": {
+            "type": "string",
+            "description": "平台原因码"
+          },
+          "platformReasonName": {
+            "type": "string",
+            "description": "平台原因名"
+          },
+          "mappingSource": {
+            "type": "string",
+            "description": "来源"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻（不是登记时刻）",
+            "format": "date-time"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "状态"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "平台原因码映射（读回）"
+      },
+      "AftersalesReasonCategoryCreate": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "type": "string",
+            "description": "父分类 ID；null 表示建根",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "编码，租户内唯一（大写字母 / 数字 / 点 / 下划线 / 连字符）"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "根口径；建根时**必填**且只能是七类之一，建子节点时必须为 null",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位，缺省 0",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "说明，缺省空",
+            "nullable": true
+          }
+        },
+        "description": "新建原因分类"
+      },
+      "AftersalesReasonTreeNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "分类 ID",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "父分类 ID；根为 null",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "编码（租户内唯一，报表的稳定锚点，改名不改编码）"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "根口径；非根节点为 null",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "根口径中文名",
+            "nullable": true
+          },
+          "categoryStatus": {
+            "type": "string",
+            "description": "状态 ACTIVE / DISABLED"
+          },
+          "categoryStatusLabel": {
+            "type": "string",
+            "description": "状态中文名"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位（同一层内，报表导出按它定序）",
+            "format": "int32"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级，1 是根",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "description": "直接子分类数",
+            "format": "int64"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "引用了这个分类的**全部版本**归因成员数（含历史版本）",
+            "format": "int64"
+          },
+          "assignable": {
+            "type": "boolean",
+            "description": "当前是否可被新归因选中：ACTIVE 且全部祖先 ACTIVE"
+          },
+          "notAssignableReason": {
+            "type": "string",
+            "description": "不可选的原因；可选时为 null",
+            "nullable": true
+          },
+          "codePath": {
+            "type": "string",
+            "description": "从根到本节点的编码路径，如 ROOT.QUALITY_DEFECT/APPEARANCE_DEFECT"
+          },
+          "namePath": {
+            "type": "string",
+            "description": "从根到本节点的名称路径"
+          },
+          "description": {
+            "type": "string",
+            "description": "说明"
+          }
+        },
+        "description": "原因分类树节点"
+      },
+      "AftersalesReasonAttributionCreate": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "description": "售后单 ID",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "补充说明（自由文本，≤1000 字符）。**不能替代**分类选择"
+          },
+          "items": {
+            "type": "array",
+            "description": "原因列表，至少一个、最多 10 个，恰好一个主因",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonAttributionItem"
+            }
+          }
+        },
+        "description": "登记一次归因（替换语义；至少一个原因、恰好一个主因）"
+      },
+      "AftersalesReasonAttributionItem": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "原因分类 ID",
+            "format": "uuid"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "是否为主因；一次归因**恰好一个**为 true"
+          },
+          "weight": {
+            "type": "number",
+            "description": "权重，(0, 1]，小数点后六位。必填，不接受默认值 1"
+          }
+        },
+        "description": "归因里的一个原因分类"
+      },
+      "AftersalesReasonAttributionItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "成员 ID",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "原因分类 ID",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "原因分类编码"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "原因分类名称"
+          },
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级",
+            "format": "int32"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "是否主因"
+          },
+          "weight": {
+            "type": "number",
+            "description": "权重"
+          },
+          "codePath": {
+            "type": "string",
+            "description": "编码路径"
+          }
+        },
+        "description": "归因成员（读回）"
+      },
+      "AftersalesReasonAttributionSetRow": {
+        "type": "object",
+        "properties": {
+          "setId": {
+            "type": "string",
+            "description": "归因集合 ID",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "补充说明（自由文本，非空也**不构成**一次归因）"
+          },
+          "items": {
+            "type": "array",
+            "description": "归因成员",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonAttributionItemRow"
+            }
+          },
+          "itemCount": {
+            "type": "integer",
+            "description": "成员数（恒 >= 1，恒 == 1 个主因，由 DB 提交期约束保证）",
+            "format": "int32"
+          },
+          "primaryCount": {
+            "type": "integer",
+            "description": "主因数（恒为 1）",
+            "format": "int32"
+          },
+          "weightSum": {
+            "type": "number",
+            "description": "权重合计（供界面提示是否需要重新分配）"
+          },
+          "attributedBy": {
+            "type": "string",
+            "description": "归因人",
+            "format": "uuid",
+            "nullable": true
+          },
+          "attributedAt": {
+            "type": "string",
+            "description": "归因时刻",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "是否当前生效"
+          },
+          "supersededAt": {
+            "type": "string",
+            "description": "被哪一版取代的时刻；当前版为 null",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "归因集合（一个版本）",
+        "nullable": true
+      },
+      "AftersalesReasonAttributionView": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "description": "售后单 ID",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string",
+            "description": "售后单号（aftersales_case.case_no，只读）",
+            "nullable": true
+          },
+          "attributed": {
+            "type": "boolean",
+            "description": "是否已归因；false 表示从未归因（不是「归因为空」）"
+          },
+          "current": {
+            "$ref": "#/components/schemas/AftersalesReasonAttributionSetRow"
+          },
+          "versionCount": {
+            "type": "integer",
+            "description": "历史版本数（按归因时刻倒序，含当前版）",
+            "format": "int64"
+          },
+          "noteSemantics": {
+            "type": "string",
+            "description": "自由文本的语义说明（前端必须照此渲染，不能把它显示成「原因」）"
+          },
+          "enforcementNote": {
+            "type": "string",
+            "description": "「强制选择分类」的说明"
+          }
+        },
+        "description": "一张售后单的当前归因"
+      },
+      "AftersalesCaseCreate": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "buyerRequest": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerCapturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesCaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "platformSource": {
+            "type": "string"
+          },
+          "platformShopCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "caseTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "timelinessState": {
+            "type": "string"
+          },
+          "timelinessLabel": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "remainingSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerUpstreamDelivered": {
+            "type": "boolean"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizationState": {
+            "type": "string"
+          },
+          "ticketNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "noteCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkRequest": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string"
+          },
+          "caseIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "decision": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkItemResult": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesBulkResult": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string"
+          },
+          "operationLabel": {
+            "type": "string"
+          },
+          "requested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesBulkItemResult"
+            }
+          },
+          "batchId": {
+            "type": "string"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesReasonCategoryUpdate": {
+        "type": "object",
+        "properties": {
+          "categoryName": {
+            "type": "string",
+            "description": "新名称；不传表示不改",
+            "nullable": true
+          },
+          "categoryStatus": {
+            "type": "string",
+            "description": "新状态 ACTIVE / DISABLED；不传表示不改",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "新排序位；不传表示不改",
+            "format": "int32",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "description": "新父分类 ID；不传表示不改，null 不表示移到根（用 moveToRoot）",
+            "format": "uuid",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "新说明；空串表示清空，null 表示不改"
+          },
+          "moveToRoot": {
+            "type": "boolean",
+            "description": "把节点移到根（必须同时不传 parentId）；默认 false"
+          }
+        },
+        "description": "更新原因分类（只改这些列；rootKind / categoryCode 刻意不可改）"
       },
       "SalesOrderPage": {
         "type": "object",
@@ -42376,6 +44018,439 @@
           }
         }
       },
+      "QualityMetricCard": {
+        "type": "object",
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "numerator": {
+            "type": "string"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "numeratorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "excludedFromDenominator": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unavailable": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "clock": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          },
+          "sourceDetailRef": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityReport": {
+        "type": "object",
+        "properties": {
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricCard"
+            }
+          },
+          "window": {
+            "$ref": "#/components/schemas/QualityWindow"
+          },
+          "shippedOrdersInWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedOrdersInWindow": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "defaulted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FulfillmentExceptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FulfillmentExceptionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wrongItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingItemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QualityEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QualityEventRow": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "QualityDrilldownItem": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "shopRef": {
+            "type": "string"
+          },
+          "assigneeRef": {
+            "type": "string"
+          },
+          "metricRole": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "classificationLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "detailKind": {
+            "type": "string"
+          },
+          "detailRef": {
+            "type": "string"
+          },
+          "detailNo": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDrilldownPage": {
+        "type": "object",
+        "properties": {
+          "metricCode": {
+            "type": "string"
+          },
+          "metricDisplayName": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityDrilldownItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numeratorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDimensionPage": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionDisplayName": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityDimensionRow"
+            }
+          },
+          "dimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityDimensionRow": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "ordersInScope": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricCard"
+            }
+          },
+          "caveat": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityCapabilityDimension"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "supportedDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rateScale": {
+            "type": "string"
+          },
+          "rateNullRule": {
+            "type": "string"
+          },
+          "shopDimensionStatus": {
+            "type": "string"
+          },
+          "downstreamStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "handling": {
+            "type": "string"
+          }
+        }
+      },
+      "AfterSaleSignalPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AfterSaleSignalRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "disputeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "PendingShipmentSummary": {
         "type": "object",
         "properties": {
@@ -47841,1131 +49916,348 @@
           }
         }
       },
-      "AlertRuleInput": {
-        "required": [
-          "comparison",
-          "thresholdValue"
-        ],
+      "AftersalesReasonTree": {
         "type": "object",
         "properties": {
-          "thresholdValue": {
-            "type": "number",
-            "description": "百分数，0~100，与指标卡同量纲"
-          },
-          "comparison": {
-            "type": "string",
-            "enum": [
-              "GT",
-              "GTE",
-              "LT",
-              "LTE"
-            ]
-          },
-          "severity": {
-            "type": "string",
-            "enum": [
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "缺省 true"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AlertRuleRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "metricCode": {
-            "type": "string"
-          },
-          "metricDisplayName": {
-            "type": "string"
-          },
-          "thresholdValue": {
-            "type": "number"
-          },
-          "comparison": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "FulfillmentExceptionInput": {
-        "required": [
-          "exceptionType",
-          "orderId",
-          "reportedAt"
-        ],
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lineNo": {
-            "type": "integer",
-            "description": "与 orderLineId 同时给或同时不给",
-            "format": "int32"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "exceptionType": {
-            "type": "string",
-            "enum": [
-              "WRONG_ITEM",
-              "MISSING_ITEM"
-            ]
-          },
-          "affectedQty": {
-            "type": "number",
-            "description": "错发时为实际发出量，漏发时为少发量；可空"
-          },
-          "reportedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "sourceReference": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "FulfillmentExceptionRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "orderSource": {
-            "type": "string"
-          },
-          "orderLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "exceptionType": {
-            "type": "string"
-          },
-          "affectedQty": {
-            "type": "number"
-          },
-          "reportedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "reportedSource": {
-            "type": "string"
-          },
-          "sourceReference": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AlertPage": {
-        "type": "object",
-        "properties": {
-          "items": {
+          "nodes": {
             "type": "array",
+            "description": "节点列表（确定性顺序，前端可按 codePath 建树）",
             "items": {
-              "$ref": "#/components/schemas/AlertRow"
+              "$ref": "#/components/schemas/AftersalesReasonTreeNode"
             }
           },
-          "page": {
+          "totalCount": {
             "type": "integer",
+            "description": "节点总数",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "description": "启用中的节点数",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "description": "停用的节点数",
+            "format": "int64"
+          },
+          "maxDepth": {
+            "type": "integer",
+            "description": "最大层数",
             "format": "int32"
           },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "openCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "AlertRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "metricCode": {
-            "type": "string"
-          },
-          "metricDisplayName": {
-            "type": "string"
-          },
-          "observedValue": {
-            "type": "number"
-          },
-          "thresholdValue": {
-            "type": "number"
-          },
-          "comparison": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "numerator": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "denominator": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "windowFrom": {
-            "type": "string"
-          },
-          "windowTo": {
-            "type": "string"
-          },
-          "dimensionCode": {
-            "type": "string"
-          },
-          "dimensionValue": {
-            "type": "string"
-          },
-          "triggeredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "acknowledged": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AlertEvaluateInput": {
-        "type": "object",
-        "properties": {
-          "from": {
-            "type": "string",
-            "description": "评估窗口起；缺省取默认窗口",
-            "format": "date-time"
-          },
-          "to": {
-            "type": "string",
-            "description": "评估窗口止；缺省取默认窗口",
-            "format": "date-time"
-          },
-          "perDimension": {
+          "baselineVocabularySeeded": {
             "type": "boolean",
-            "description": "逐维度评估；缺省只评估租户整体"
-          }
-        }
-      },
-      "AlertEvaluateResult": {
-        "type": "object",
-        "properties": {
-          "evaluated": {
-            "type": "integer",
-            "format": "int32"
+            "description": "七类根口径是否已作为基线词表落库到当前租户"
           },
-          "triggered": {
-            "type": "integer",
-            "format": "int32"
+          "baselineSeededOnThisRead": {
+            "type": "boolean",
+            "description": "本次读取是否刚刚落库了基线词表（true 表示这是该租户第一次打开本模块）"
           },
-          "skippedNoBasis": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "windowFrom": {
-            "type": "string"
-          },
-          "windowTo": {
-            "type": "string"
-          },
-          "perDimension": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AfterSaleSignalInput": {
-        "required": [
-          "occurredAt",
-          "orderId",
-          "signalType"
-        ],
-        "type": "object",
-        "properties": {
-          "orderId": {
+          "orderedBy": {
             "type": "string",
-            "format": "uuid"
+            "description": "排序键（原样报出，报表导出的确定性由它保证）"
           },
-          "occurredAt": {
+          "treeRules": {
             "type": "string",
-            "description": "发生时刻（不是登记时刻）",
-            "format": "date-time"
-          },
-          "signalType": {
-            "type": "string",
-            "enum": [
-              "DISPUTE",
-              "RETURN"
-            ]
-          },
-          "signalState": {
-            "type": "string",
-            "enum": [
-              "OPEN",
-              "UNDER_REVIEW",
-              "RESOLVED",
-              "REJECTED",
-              "CLOSED"
-            ]
-          },
-          "platformOrderNo": {
-            "type": "string",
-            "description": "平台侧单号；平台同步到位后才有值"
-          },
-          "sourceReference": {
-            "type": "string",
-            "description": "非 TENANT_MAINTAINED 来源时必填"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AfterSaleSignalRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "signalType": {
-            "type": "string"
-          },
-          "signalState": {
-            "type": "string"
-          },
-          "platformOrderNo": {
-            "type": "string"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "signalSource": {
-            "type": "string"
-          },
-          "sourceReference": {
-            "type": "string"
-          },
-          "capturedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityMetricCard": {
-        "type": "object",
-        "properties": {
-          "metricCode": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "numerator": {
-            "type": "string"
-          },
-          "denominator": {
-            "type": "string"
-          },
-          "rate": {
-            "type": "number"
-          },
-          "numeratorCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "denominatorCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "excludedFromDenominator": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unavailable": {
-            "type": "boolean"
-          },
-          "unavailableReason": {
-            "type": "string"
-          },
-          "direction": {
-            "type": "string"
-          },
-          "clock": {
-            "type": "string"
-          },
-          "definition": {
-            "type": "string"
-          },
-          "caveat": {
-            "type": "string"
-          },
-          "sourceDetailRef": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityReport": {
-        "type": "object",
-        "properties": {
-          "metrics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityMetricCard"
-            }
-          },
-          "window": {
-            "$ref": "#/components/schemas/QualityWindow"
-          },
-          "shippedOrdersInWindow": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "submittedOrdersInWindow": {
-            "type": "integer",
-            "format": "int64"
+            "description": "树结构约束说明"
           },
           "scope": {
-            "type": "string"
-          },
-          "caveat": {
-            "type": "string"
+            "type": "string",
+            "description": "返回的是全树还是某个子树"
           }
-        }
+        },
+        "description": "原因分类树整树"
       },
-      "QualityWindow": {
+      "AftersalesReasonReport": {
         "type": "object",
         "properties": {
-          "from": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "defaulted": {
-            "type": "boolean"
-          }
-        }
-      },
-      "FulfillmentExceptionPage": {
-        "type": "object",
-        "properties": {
-          "items": {
+          "rows": {
             "type": "array",
+            "description": "按分类的明细行（确定性顺序）",
             "items": {
-              "$ref": "#/components/schemas/FulfillmentExceptionRow"
+              "$ref": "#/components/schemas/AftersalesReasonReportRow"
             }
           },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "wrongItemCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "missingItemCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "QualityEventPage": {
-        "type": "object",
-        "properties": {
-          "items": {
+          "rootTotals": {
             "type": "array",
+            "description": "按七类根口径的汇总行（七类全部出现，零也出现）",
             "items": {
-              "$ref": "#/components/schemas/QualityEventRow"
+              "$ref": "#/components/schemas/AftersalesReasonRootTotal"
             }
           },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "QualityEventRow": {
-        "type": "object",
-        "properties": {
-          "seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "kind": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "orderId": {
+          "evaluatedAt": {
             "type": "string",
-            "format": "uuid"
-          },
-          "alertId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "QualityDrilldownItem": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "orderSource": {
-            "type": "string"
-          },
-          "shopRef": {
-            "type": "string"
-          },
-          "assigneeRef": {
-            "type": "string"
-          },
-          "metricRole": {
-            "type": "string"
-          },
-          "classification": {
-            "type": "string"
-          },
-          "classificationLabel": {
-            "type": "string"
-          },
-          "occurredAt": {
-            "type": "string",
+            "description": "统计基准时刻（整份报表共用一个）",
             "format": "date-time"
           },
-          "quantity": {
-            "type": "number"
+          "attributedCaseCount": {
+            "type": "integer",
+            "description": "已归因的售后单数（当前生效集合的去重单数）",
+            "format": "int64"
           },
-          "requiredQuantity": {
-            "type": "number"
+          "unattributedCaseCount": {
+            "type": "integer",
+            "description": "有售后单但从未归因的单数",
+            "format": "int64"
           },
-          "detailKind": {
-            "type": "string"
+          "attributionItemCount": {
+            "type": "integer",
+            "description": "参与统计的原因成员总数",
+            "format": "int64"
           },
-          "detailRef": {
-            "type": "string"
+          "totalWeight": {
+            "type": "number",
+            "description": "权重合计"
           },
-          "detailNo": {
-            "type": "string"
+          "semantics": {
+            "type": "string",
+            "description": "统计口径说明（下游直接取用，不必自己再定一套）"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "下游模块的交付状态"
           }
-        }
+        },
+        "description": "原因分类报表（统一口径）"
       },
-      "QualityDrilldownPage": {
+      "AftersalesReasonReportRow": {
         "type": "object",
         "properties": {
-          "metricCode": {
-            "type": "string"
+          "categoryId": {
+            "type": "string",
+            "description": "分类 ID",
+            "format": "uuid"
           },
-          "metricDisplayName": {
-            "type": "string"
+          "categoryCode": {
+            "type": "string",
+            "description": "分类编码"
           },
-          "definition": {
-            "type": "string"
+          "categoryName": {
+            "type": "string",
+            "description": "分类名称"
           },
-          "items": {
+          "rootKind": {
+            "type": "string",
+            "description": "所属根口径",
+            "nullable": true
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "所属根口径中文名",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "description": "层级；> 1 表示它同时被汇总进所属根口径",
+            "format": "int32"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "description": "排序位",
+            "format": "int32"
+          },
+          "primaryCaseCount": {
+            "type": "integer",
+            "description": "作为主因的归因单数",
+            "format": "int64"
+          },
+          "secondaryCaseCount": {
+            "type": "integer",
+            "description": "作为次因的归因单数",
+            "format": "int64"
+          },
+          "attributionCaseCount": {
+            "type": "integer",
+            "description": "被选中的归因单数（主因 + 次因）",
+            "format": "int64"
+          },
+          "caseSharePercent": {
+            "type": "number",
+            "description": "占比（归因单数 ÷ 生效归因单总数，两位小数四舍五入）"
+          },
+          "weightSum": {
+            "type": "number",
+            "description": "权重合计（主因权重 + 次因权重）"
+          }
+        },
+        "description": "报表行（一个原因分类）"
+      },
+      "AftersalesReasonRootTotal": {
+        "type": "object",
+        "properties": {
+          "rootKind": {
+            "type": "string",
+            "description": "根口径"
+          },
+          "rootKindLabel": {
+            "type": "string",
+            "description": "根口径中文名"
+          },
+          "primaryCaseCount": {
+            "type": "integer",
+            "description": "该口径下作为主因的归因单数",
+            "format": "int64"
+          },
+          "attributionCaseCount": {
+            "type": "integer",
+            "description": "该口径下被选中的归因单数（含次因，已按单去重）",
+            "format": "int64"
+          },
+          "caseSharePercent": {
+            "type": "number",
+            "description": "占比（该口径归因单数 ÷ 生效归因单总数，两位小数四舍五入）"
+          }
+        },
+        "description": "按七类根口径汇总的一行"
+      },
+      "AftersalesReasonMappingList": {
+        "type": "object",
+        "properties": {
+          "rows": {
             "type": "array",
+            "description": "映射行",
             "items": {
-              "$ref": "#/components/schemas/QualityDrilldownItem"
+              "$ref": "#/components/schemas/AftersalesReasonMappingRow"
             }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
           },
           "total": {
             "type": "integer",
+            "description": "命中总数",
             "format": "int64"
           },
-          "totalPages": {
+          "activeCount": {
             "type": "integer",
-            "format": "int32"
-          },
-          "numeratorCount": {
-            "type": "integer",
+            "description": "生效映射数",
             "format": "int64"
           },
-          "denominatorCount": {
-            "type": "integer",
-            "format": "int64"
+          "ownershipNote": {
+            "type": "string",
+            "description": "本表归属服务的说明"
           },
-          "rate": {
-            "type": "number"
-          },
-          "caveat": {
-            "type": "string"
+          "orderedBy": {
+            "type": "string",
+            "description": "排序键（原样报出）"
           }
-        }
+        },
+        "description": "平台原因码映射列表"
       },
-      "QualityDimensionPage": {
+      "AftersalesReasonCapabilities": {
         "type": "object",
         "properties": {
-          "dimensionCode": {
-            "type": "string"
-          },
-          "dimensionDisplayName": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityDimensionRow"
-            }
-          },
-          "dimensionCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "caveat": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityDimensionRow": {
-        "type": "object",
-        "properties": {
-          "dimensionCode": {
-            "type": "string"
-          },
-          "dimensionKey": {
-            "type": "string"
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "ordersInScope": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "metrics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityMetricCard"
-            }
-          },
-          "caveat": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityCapabilityDimension"
-            }
-          },
-          "metrics": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "metricDefinitions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "supportedDimensions": {
             "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "rateScale": {
-            "type": "string"
-          },
-          "rateNullRule": {
-            "type": "string"
-          },
-          "shopDimensionStatus": {
-            "type": "string"
-          },
-          "downstreamStatus": {
-            "type": "string"
-          }
-        }
-      },
-      "QualityCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "unavailableReason": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "handling": {
-            "type": "string"
-          }
-        }
-      },
-      "AfterSaleSignalPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AfterSaleSignalRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "disputeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "returnCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "AftersalesCaseCreate": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseType": {
-            "type": "string"
-          },
-          "reasonCode": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "requestedQuantity": {
-            "type": "number"
-          },
-          "platformCaseNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformCaseUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformReceivedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "buyerRequest": {
-            "type": "string",
-            "nullable": true
-          },
-          "replyDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "resolveDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "ownerRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSourceReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerCapturedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesCaseRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "platformSource": {
-            "type": "string"
-          },
-          "platformShopCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "caseType": {
-            "type": "string"
-          },
-          "caseTypeLabel": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "reasonCode": {
-            "type": "string"
-          },
-          "reasonLabel": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "requestedQuantity": {
-            "type": "number"
-          },
-          "timelinessState": {
-            "type": "string"
-          },
-          "timelinessLabel": {
-            "type": "string"
-          },
-          "replyDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "resolveDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "effectiveDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "remainingSeconds": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "ownerRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerUpstreamDelivered": {
-            "type": "boolean"
-          },
-          "platformCaseNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "authorizationState": {
-            "type": "string"
-          },
-          "ticketNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "noteCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resolvedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesBulkRequest": {
-        "type": "object",
-        "properties": {
-          "operation": {
-            "type": "string"
-          },
-          "caseIds": {
-            "type": "array",
+            "description": "真实存在的分类字段与口径，逐条给出列名 / 函数名",
             "items": {
               "type": "string",
-              "format": "uuid"
+              "description": "真实存在的分类字段与口径，逐条给出列名 / 函数名"
             }
           },
-          "note": {
-            "type": "string",
-            "nullable": true
+          "unavailableDimensions": {
+            "type": "array",
+            "description": "当前不可得或刻意不提供的维度",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonDimension"
+            }
           },
-          "decision": {
-            "type": "string",
-            "nullable": true
+          "rootKinds": {
+            "type": "array",
+            "description": "七类根口径词表（与 DB 的 root_kind CHECK 逐字一致）",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonEnumOption"
+            }
           },
-          "authorizedAmount": {
-            "type": "number",
-            "nullable": true
+          "platforms": {
+            "type": "array",
+            "description": "平台来源词表",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesReasonEnumOption"
+            }
           },
-          "reasonNote": {
-            "type": "string",
-            "nullable": true
+          "baselineVocabularySeeded": {
+            "type": "boolean",
+            "description": "蓝图点名的七类是否已作为基线词表落库到当前租户"
           },
-          "priority": {
+          "maxDepth": {
+            "type": "integer",
+            "description": "分类树最大层数（V158 的 depth CHECK）",
+            "format": "int32"
+          },
+          "maxAttributionItems": {
+            "type": "integer",
+            "description": "单次归因可选的原因个数上限（服务层校验）",
+            "format": "int32"
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean",
+            "description": "是否可跨服务读取上游 2.1.2.1 的枚举映射表"
+          },
+          "platformMappingOwnerModule": {
             "type": "string",
-            "nullable": true
+            "description": "平台原因码映射的归属模块号（跨服务读不可得时的实际归属）"
+          },
+          "qualityAnalysisDelivered": {
+            "type": "boolean",
+            "description": "质量分析是否已交付（11.5.2）"
+          },
+          "supplierClaimDelivered": {
+            "type": "boolean",
+            "description": "供应商索赔是否已交付（6.4.2.2）"
+          },
+          "platformMappingNote": {
+            "type": "string",
+            "description": "平台原因码映射的说明"
+          },
+          "forcedClassificationNote": {
+            "type": "string",
+            "description": "「强制选择分类」的实现方式"
+          },
+          "reportSemantics": {
+            "type": "string",
+            "description": "报表口径说明（下游 11.5.2 直接取用）"
           }
-        }
+        },
+        "description": "11.1.2.1 原因分类的能力声明与上下游可用性"
       },
-      "AftersalesBulkItemResult": {
+      "AftersalesReasonDimension": {
         "type": "object",
         "properties": {
-          "caseId": {
+          "name": {
             "type": "string",
-            "format": "uuid",
-            "nullable": true
+            "description": "维度标识"
           },
-          "caseNo": {
+          "label": {
             "type": "string",
-            "nullable": true
+            "description": "维度中文名"
           },
-          "success": {
-            "type": "boolean"
+          "available": {
+            "type": "boolean",
+            "description": "是否可得"
           },
-          "outcome": {
-            "type": "string"
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块号"
           },
           "detail": {
-            "type": "string"
-          },
-          "reference": {
             "type": "string",
-            "nullable": true
+            "description": "为什么不可得 / 为什么刻意不提供"
           }
-        }
+        },
+        "description": "不可得维度 + 归属模块 + 原因"
       },
-      "AftersalesBulkResult": {
+      "AftersalesReasonEnumOption": {
         "type": "object",
         "properties": {
-          "operation": {
-            "type": "string"
+          "value": {
+            "type": "string",
+            "description": "枚举值"
           },
-          "operationLabel": {
-            "type": "string"
-          },
-          "requested": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "succeeded": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AftersalesBulkItemResult"
-            }
-          },
-          "batchId": {
-            "type": "string"
-          },
-          "dataScope": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
+          "label": {
+            "type": "string",
+            "description": "中文名"
           }
-        }
+        },
+        "description": "枚举下拉项"
       },
       "AftersalesCaseSortOption": {
         "type": "object",

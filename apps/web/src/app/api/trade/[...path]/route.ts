@@ -3,6 +3,15 @@ export const dynamic = 'force-dynamic';
 export const GET = proxy;
 export const POST = proxy;
 export const PUT = proxy;
+/**
+ * PATCH 是 11.1.2.1 售后原因分类引入的（分类改名 / 排序 / 停用 / 换父分类，
+ * 以及平台原因码映射改内部分类与状态）。
+ *
+ * <p>⚠️ 这一行是**新增**，不是改动既有方法：此前本路由没有导出 PATCH，
+ * 于是所有 PATCH 请求在 Next 路由层就 405 了 —— 代理的白名单再对也没用，
+ * 因为请求根本到不了 `routeProxy`。补上它对既有 GET/POST/PUT/DELETE 行为零影响。
+ */
+export const PATCH = proxy;
 export const DELETE = proxy;
 
 /**

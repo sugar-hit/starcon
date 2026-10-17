@@ -1043,6 +1043,47 @@ const services: readonly {
       /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,
   },
   {
+    // 11.1.2.1 售后原因分类（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.1.1.1 那条**之后**、既有 `prefix: 'trade/'` 之前：
+    // 与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的相邻两条前缀互不相交，
+    // 谁先谁后都不误吃：`aftersales/(capabilities|filters|cases)` 与
+    // `aftersales/reasons/…` 在正则上是**互斥**的（后者都带 `reasons/` 这一段）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                 能力与上下游可用性（**明说 channel 跨服务读不可得、**
+    //                                11.5.2 质量分析与 6 采购索赔未交付**）
+    //   tree                         分类树（GET，真递归 CTE 算路径/深度/可归因性）
+    //   categories                   POST 新建分类（建根必给 rootKind，建子节点必不给）
+    //   categories/{uuid}            PATCH 改名称/状态/排序/说明/父分类（**只读只写白名单**）
+    //   categories/{uuid}            DELETE 删叶子且从未被引用的分类
+    //   attributions                 GET  按 caseId 读当前归因
+    //   attributions                 POST 登记一次归因（**至少一个原因、恰好一个主因**）
+    //   mappings                     GET  平台原因码映射列表（trade 自有表）
+    //   mappings                     POST 新建映射
+    //   mappings/{uuid}              PATCH 改内部分类/平台原因名/状态（匹配键不可改）
+    //   mappings/{uuid}              DELETE 删映射（**同步器写的行只许停用不许删**）
+    //   reports                      GET  报表（七类零也出现，主因与次因分开计数）
+    // 判别顺序：字面量子路径（capabilities / tree / categories / attributions /
+    // mappings / reports）排在 {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `reasons/categories/{uuid}/move` —— 提升为根要一个 rootKind，而 rootKind 是
+    //     **不可改列**（改了会把全部历史归因重新归到另一个口径）。刻意不提供这个端点。
+    //   * `reasons/export` —— 导出的可用性取决于能导出哪些维度；当前报表的口径由
+    //     /reports 原样报出就够了，真要导出必须连排序键一起稳定，不给半成品出口。
+    //   * `reasons/attributions/bulk` —— 批量归因：逐单判定 + 逐单回报的成本远高于
+    //     「打开这张单、选主因、次因、给权重」本身，批量入口只会诱导乱归因。
+    //   * 裸路径 `reasons` —— 后端没有对应映射。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^aftersales\/reasons\/(?:capabilities|tree|categories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|attributions|mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|reports)$/,
+  },
+  {
     // 9.2.1.3 异常拦截（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
