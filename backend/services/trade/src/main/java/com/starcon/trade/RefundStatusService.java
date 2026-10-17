@@ -892,20 +892,22 @@ public class RefundStatusService {
     long failed = count("select count(*)" + from + where + attention + " and e.execution_state = 'FAILED'", args);
     long discrepancy = count("select count(*)" + from + where + attention + " and e.execution_state = 'DISCREPANCY'", args);
 
-    Map<String, Long> byState = new LinkedHashMap<>();
+    List<RefundStateCountBucket> byState = new ArrayList<>();
     sql.fetch(
             "select e.execution_state, count(*) c" + from + where + attention
                 + " group by e.execution_state order by e.execution_state",
             args.toArray())
-        .forEach(r -> byState.put(r.get("execution_state", String.class), r.get("c", Long.class)));
+        .forEach(r -> byState.add(new RefundStateCountBucket(
+            r.get("execution_state", String.class), r.get("c", Long.class))));
 
     // 金额按币种分开：**跨币种相加是财务事故的标准起点**，绝不合并成一个总数。
-    Map<String, BigDecimal> byCurrency = new LinkedHashMap<>();
+    List<RefundAmountBucket> byCurrency = new ArrayList<>();
     sql.fetch(
             "select e.currency, sum(e.refund_amount) s" + from + where + attention
                 + " group by e.currency order by e.currency",
             args.toArray())
-        .forEach(r -> byCurrency.put(r.get("currency", String.class), r.get("s", BigDecimal.class)));
+        .forEach(r -> byCurrency.add(new RefundAmountBucket(
+            r.get("currency", String.class), r.get("s", BigDecimal.class))));
 
     return new RefundExecutionPage(
         rows,
@@ -1037,17 +1039,18 @@ public class RefundStatusService {
                 concat(args, s, p * s))
             .map(this::discrepancyRow);
 
-    Map<String, Long> byKind = new LinkedHashMap<>();
+    List<RefundKindCountBucket> byKind = new ArrayList<>();
     sql.fetch(
             "select discrepancy_kind, count(*) c from refund_discrepancy d " + w
                 + " group by discrepancy_kind order by discrepancy_kind",
             args.toArray())
-        .forEach(r -> byKind.put(r.get("discrepancy_kind", String.class), r.get("c", Long.class)));
+        .forEach(r -> byKind.add(new RefundKindCountBucket(
+            r.get("discrepancy_kind", String.class), r.get("c", Long.class))));
 
     // 两边金额分别汇总：差异清单的价值就在「系统一共多了/少了多少、平台一共多了/少了多少」，
     // 合成一个净额会把方向抹掉（-100 与 +100 抵成 0，而真实情况是差了 200）。
-    Map<String, BigDecimal> systemByKind = new LinkedHashMap<>();
-    Map<String, BigDecimal> platformByKind = new LinkedHashMap<>();
+    List<RefundKindAmountBucket> systemByKind = new ArrayList<>();
+    List<RefundKindAmountBucket> platformByKind = new ArrayList<>();
     sql.fetch(
             "select discrepancy_kind,"
                 + " sum(coalesce(system_amount,0)) sa, sum(coalesce(platform_amount,0)) pa"
@@ -1056,8 +1059,8 @@ public class RefundStatusService {
         .forEach(
             r -> {
               String k = r.get("discrepancy_kind", String.class);
-              systemByKind.put(k, r.get("sa", BigDecimal.class));
-              platformByKind.put(k, r.get("pa", BigDecimal.class));
+              systemByKind.add(new RefundKindAmountBucket(k, r.get("sa", BigDecimal.class)));
+              platformByKind.add(new RefundKindAmountBucket(k, r.get("pa", BigDecimal.class)));
             });
 
     return new RefundDiscrepancyPage(

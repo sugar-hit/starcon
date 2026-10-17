@@ -218,6 +218,33 @@ export function actionButton(action: string | null | undefined): {
 }
 
 /**
+ * 把模型的语义变体翻译成 `@starcon/ui` Button **真实存在**的 variant token。
+ *
+ * <p>模型的 `primary | caution | ghost | danger | disabled` 是**语义**，不是设计令牌；
+ * 直接透传给 `<Button variant>` 会因 cva 的联合类型不匹配而编译不过（上一任 worker 留下的
+ * 两个 typecheck 错误之一）。语义与令牌分层，模型才不必跟着设计系统改。
+ *
+ * <p>`caution` → `outline`（描边）而不是 `secondary`（填充）：蓝图要求「先查证交易」与
+ * 「重试退款」在视觉上必须分开，描边与品牌填充的最大对比度最能防一次误点造成重复退款。
+ */
+export function buttonVariant(
+  variant: ReturnType<typeof actionButton>['variant'],
+): 'brand' | 'outline' | 'ghost' | 'destructive' {
+  switch (variant) {
+    case 'primary':
+      return 'brand';
+    case 'caution':
+      return 'outline';
+    case 'danger':
+      return 'destructive';
+    case 'ghost':
+    case 'disabled':
+    default:
+      return 'ghost';
+  }
+}
+
+/**
  * 「为什么现在不能直接重试」的说明。
  *
  * <p>后端在 UNKNOWN / IN_FLIGHT / SUCCEEDED 上都给了 {@code actionBlocking}，

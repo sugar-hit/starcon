@@ -648,9 +648,15 @@ public final class RefundStatusModels {
       long openCount,
       long acknowledgedCount,
       long resolvedCount,
-      Map<String, Long> byKind,
-      Map<String, BigDecimal> systemAmountByKind,
-      Map<String, BigDecimal> platformAmountByKind) {}
+      List<RefundKindCountBucket> byKind,
+      List<RefundKindAmountBucket> systemAmountByKind,
+      List<RefundKindAmountBucket> platformAmountByKind) {}
+
+  /** 差异类型计数桶。与其他汇总桶同理：list 而非 Map 才有可用的契约类型（见 RefundAmountBucket）。 */
+  public record RefundKindCountBucket(String kind, long count) {}
+
+  /** 差异类型金额桶（系统侧 / 平台侧各一份，**方向不合成净额**）。 */
+  public record RefundKindAmountBucket(String kind, BigDecimal amount) {}
 
   /** 列表分页页。汇总按币种分开（跨币种相加是财务事故的标准起点）。 */
   public record RefundExecutionPage(
@@ -663,10 +669,25 @@ public final class RefundStatusModels {
       long inFlightCount,
       long failedCount,
       long discrepancyCount,
-      Map<String, Long> countByState,
-      Map<String, BigDecimal> amountByCurrency,
+      List<RefundStateCountBucket> countByState,
+      List<RefundAmountBucket> amountByCurrency,
       String amountRangeSemantics,
       String sortApplied) {}
+
+  /**
+   * 按币种的金额桶。
+   *
+   * <p>⚠️ **刻意用 list 而不是 {@code Map<String, BigDecimal>}**：jOOQ/springdoc 无法为裸 Map
+   * 推断值类型，OpenAPI 里只会生成一个空的 {@code { }} —— 前端拿到的 {@code amountByCurrency}
+   * 是 {@code unknown} 而不是 {@code number}，类型检查直接挂，且这条契约缺口对所有下游静默生效。
+   * 11.1.1.1 的 {@code AftersalesAmountBucket} 是同一个决定的先例。
+   *
+   * <p>顺序由 SQL 的 {@code order by e.currency} 决定（币种字典序），调用方不依赖它做正确性判断。
+   */
+  public record RefundAmountBucket(String currency, BigDecimal amount) {}
+
+  /** 按执行状态的分桶。与 {@link RefundAmountBucket} 同理，list 而非 Map 才有可用的契约类型。 */
+  public record RefundStateCountBucket(String executionState, long count) {}
 
   /** 筛选项下拉（**来自真实数据的词表**，不是硬编码常量列表）。 */
   public record RefundFilterOptions(

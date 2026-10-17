@@ -139,6 +139,36 @@ class RefundStatusIntegrationTest {
     return access.run(actor(), "trade.refunds.write", work);
   }
 
+  /** 取出某个币种的汇总金额。桶是 list（不是 Map，Map 在 OpenAPI 里只会生成空的 {@code { }}）。 */
+  static java.math.BigDecimal amountOf(
+      List<RefundStatusModels.RefundAmountBucket> buckets, String currency) {
+    return buckets.stream()
+        .filter(b -> b.currency().equals(currency))
+        .findFirst()
+        .map(RefundStatusModels.RefundAmountBucket::amount)
+        .orElseThrow(() -> new AssertionError("汇总里没有币种 " + currency));
+  }
+
+  /** 取出某个执行状态的分桶计数。 */
+  static long stateCountOf(
+      List<RefundStatusModels.RefundStateCountBucket> buckets, String state) {
+    return buckets.stream()
+        .filter(b -> b.executionState().equals(state))
+        .findFirst()
+        .map(RefundStatusModels.RefundStateCountBucket::count)
+        .orElseThrow(() -> new AssertionError("汇总里没有状态 " + state));
+  }
+
+  /** 取出某个差异类型的汇总金额（系统侧 / 平台侧各一份）。 */
+  static java.math.BigDecimal kindAmountOf(
+      List<RefundStatusModels.RefundKindAmountBucket> buckets, String kind) {
+    return buckets.stream()
+        .filter(b -> b.kind().equals(kind))
+        .findFirst()
+        .map(RefundStatusModels.RefundKindAmountBucket::amount)
+        .orElseThrow(() -> new AssertionError("汇总里没有差异类型 " + kind));
+  }
+
   /** 建一张真实订单（走 V99 的表，夹具必须满足它的延迟约束触发器）。 */
   UUID seedOrder(String orderNo) {
     UUID orderId = UUID.randomUUID();
@@ -701,8 +731,8 @@ class RefundStatusIntegrationTest {
     assertThat(row.platformAmount()).as("平台侧原值必须留着：只报「不一致」运营无法判断该改哪边")
         .isEqualByComparingTo("90.0000");
     assertThat(row.resolutionState()).as("检出后仍是待裁定，系统不自动抹平").isEqualTo("OPEN");
-    assertThat(page.systemAmountByKind().get("AMOUNT")).isEqualByComparingTo("100.0000");
-    assertThat(page.platformAmountByKind().get("AMOUNT")).isEqualByComparingTo("90.0000");
+    assertThat(kindAmountOf(page.systemAmountByKind(), "AMOUNT")).isEqualByComparingTo("100.0000");
+    assertThat(kindAmountOf(page.platformAmountByKind(), "AMOUNT")).isEqualByComparingTo("90.0000");
 
     // 检出差异后执行进入 DISCREPANCY。
     assertThat(as(() -> refunds.detail(id)).header().executionState()).isEqualTo("DISCREPANCY");
@@ -815,11 +845,17 @@ class RefundStatusIntegrationTest {
 
     var page = as(() -> refunds.list(query(0, 50)));
     assertThat(page.total()).isEqualTo(2);
-    assertThat(page.amountByCurrency().get("USD")).isEqualByComparingTo("100.0000");
-    assertThat(page.amountByCurrency().get("EUR")).isEqualByComparingTo("250.0000");
+    // 汇总桶是 list（不是 Map）：契约里才有可用的值类型。USD/EUR 两桶各一个，**跨币种绝不相加**。
+    assertThat(amountOf(page.amountByCurrency(), "USD")).isEqualByComparingTo("100.0000");
+    assertThat(amountOf(page.amountByCurrency(), "EUR")).isEqualByComparingTo("250.0000");
     assertThat(page.amountByCurrency()).as("跨币种绝不相加").hasSize(2);
+    // 币种字典序（SQL order by e.currency），列表顺序是确定的。
+    assertThat(page.amountByCurrency())
+        .extracting(RefundStatusModels.RefundAmountBucket::currency)
+        .containsExactly("EUR", "USD");
     assertThat(page.inFlightCount()).isEqualTo(1);
-    assertThat(page.countByState()).containsEntry("NOT_INITIATED", 1L).containsEntry("IN_FLIGHT", 1L);
+    assertThat(stateCountOf(page.countByState(), "NOT_INITIATED")).isEqualTo(1L);
+    assertThat(stateCountOf(page.countByState(), "IN_FLIGHT")).isEqualTo(1L);
 
     // 按币种筛。
     var eur = as(() -> refunds.list(new RefundStatusModels.RefundExecutionQuery(

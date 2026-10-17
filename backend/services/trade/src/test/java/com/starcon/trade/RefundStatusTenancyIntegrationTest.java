@@ -311,6 +311,75 @@ class RefundStatusTenancyIntegrationTest {
     assertThat(id).isNotNull();
   }
 
+  /**
+   * 断言 2 的**写侧**那一半：不是「伪造头改不了归属」，而是
+   * **拿着自己合法的 B 家会话 + 伪造头，也改不动 A 家已存在的退款单**。
+   *
+   * <p>为什么必须单独测：前一个用例证的是「伪造头不会被当成租户来源」（写不进**自己**的库）。
+   * 这一条证的是**改别人的已有数据** —— 攻击者有完全合法的 B 家身份，只是把 body 里的
+   * {@code id} 换成 A 家的退款单 UUID（外加伪造 {@code X-Tenant-Id: A} 声称自己是 A 家）。
+   * 两者是不同的攻击面：前者靠「租户只从成员关系解析」挡住，后者必须靠 **FORCE RLS** 挡住。
+   */
+  @Test
+  void 断言2_合法B家会话加伪造头改不动A家已有的退款单() throws Exception {
+    UUID idA = seedRefund(a, "MO-WRITE", "500.0000", "w-a-1");
+    // 对照组：A 家自己改得动（先派发到 IN_FLIGHT 才能报失败），否则本测试可能只是「接口本来就坏了」。
+    asA(() ->
+        refunds.dispatch(
+            idA,
+            new RefundStatusModels.RefundDispatchRequest("w-a-d", null, T1, "FINANCE", ""),
+            userA));
+    asA(() ->
+        refunds.report(
+            idA,
+            new RefundStatusModels.RefundReportRequest(
+                RefundStatusModels.ReportSource.MANUAL_OPERATOR,
+                RefundStatusModels.ReportOutcome.FAILED,
+                RefundStatusModels.FailureClass.DEFINITIVE,
+                "BIZ-OK", null, null, "BANK_REJECTED", "A 家自己登记的失败", T2),
+            userA));
+
+    // B 家合法会话，body 里带 **A 家的 id**，并伪造声称自己是 A 家的租户头与内部键。
+    String body =
+        ("{\"reportSource\":\"MANUAL_OPERATOR\",\"reportOutcome\":\"FAILED\","
+                + "\"failureClass\":\"DEFINITIVE\",\"externalTransactionRef\":\"FORGED-TXN\","
+                + "\"failureCode\":\"BANK_REJECTED\",\"failureReason\":\"B 家伪造写入\","
+                + "\"reportedAt\":\"%s\"}")
+            .formatted(T2);
+
+    http.perform(post("/trade/refunds/" + idA + "/reports")
+            .header("Authorization", "Bearer tenant-b")
+            .header("X-Tenant-Id", a.toString())
+            .header("X-Internal-Key", "forged")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        // B 家会话看不到 A 家的单：404 而不是「静默改成功」。
+        .andExpect(status().isNotFound());
+
+    // 行的归属与内容都还在 A 家名下，且**没有被 B 家那次伪造写入覆盖**。
+    // 断言打在 failure_reason 上：明确失败会把失败原因写进 refund_execution，
+    // 是这批字段里最能证明「B 的那次调用确实什么都没写」的证据
+    // （外部交易号只在成功分支落到这一层，失败时它留在 refund_execution_report 上）。
+    var row =
+        asA(
+            () ->
+                sql.fetchOne(
+                    "select tenant_id, failure_reason, execution_state from refund_execution where id = ?",
+                    idA));
+    assertThat(row).isNotNull();
+    assertThat(row.get(0, UUID.class)).as("伪造写入不得改掉归属").isEqualTo(a);
+    assertThat(row.get(1, String.class))
+        .as("A 家自己登记的失败原因没被 B 家的伪造值覆盖")
+        .isEqualTo("A 家自己登记的失败");
+    assertThat(row.get(2, String.class)).as("对照组：A 家自己那次是推进到 FAILED 的").isEqualTo("FAILED");
+
+    // 伪造那次连一条回报记录都没留下（B 家会话看不到 A 的单，写入点在查得到之后）。
+    var reports = asA(() -> sql.fetch("select id from refund_execution_report where execution_id = ?", idA));
+    assertThat(reports.size())
+        .as("B 家伪造的回报必须一行都没写进去（对照组那次成功写入的回报仍然在）")
+        .isEqualTo(1);
+  }
+
   UUID seedOrderId(UUID tenant, String orderNo) {
     UUID orderId = UUID.randomUUID();
     as(
@@ -368,10 +437,10 @@ class RefundStatusTenancyIntegrationTest {
 
       // **金额汇总各自独立**：退款是金额类数据，A 家汇总里混进 B 家的钱
       // 比「看到 B 家的单号」更隐蔽也更致命，必须单独断言。
-      assertThat(asA(() -> refunds.list(query(0, 50)).amountByCurrency().get("USD")))
+      assertThat(usdOf(asA(() -> refunds.list(query(0, 50)).amountByCurrency())))
           .as("第 " + i + " 轮：A 家汇总 10 + 20 = 30")
           .isEqualByComparingTo("30.0000");
-      assertThat(asB(() -> refunds.list(query(0, 50)).amountByCurrency().get("USD")))
+      assertThat(usdOf(asB(() -> refunds.list(query(0, 50)).amountByCurrency())))
           .as("第 " + i + " 轮：B 家汇总 30 + 40 = 70")
           .isEqualByComparingTo("70.0000");
     }
@@ -417,10 +486,22 @@ class RefundStatusTenancyIntegrationTest {
     assertThat(ba).isNotNull();
     assertThat(asA(() -> refunds.list(query(0, 50)).total())).isEqualTo(1);
     assertThat(asB(() -> refunds.list(query(0, 50)).total())).isEqualTo(1);
-    assertThat(asA(() -> refunds.list(query(0, 50)).amountByCurrency().get("USD")))
+    assertThat(usdOf(asA(() -> refunds.list(query(0, 50)).amountByCurrency())))
         .isEqualByComparingTo("66.0000");
-    assertThat(asB(() -> refunds.list(query(0, 50)).amountByCurrency().get("USD")))
+    assertThat(usdOf(asB(() -> refunds.list(query(0, 50)).amountByCurrency())))
         .isEqualByComparingTo("55.0000");
+  }
+
+  /**
+   * 取出 USD 桶的金额。汇总桶是 list 而不是 {@code Map}：jOOQ/springdoc 无法为裸 Map 推断值类型，
+   * OpenAPI 里只会生成空的 {@code { }}，前端拿到的值类型是 {@code unknown}。见 RefundAmountBucket。
+   */
+  static BigDecimal usdOf(List<RefundStatusModels.RefundAmountBucket> buckets) {
+    return buckets.stream()
+        .filter(b -> "USD".equals(b.currency()))
+        .findFirst()
+        .map(RefundStatusModels.RefundAmountBucket::amount)
+        .orElseThrow(() -> new AssertionError("汇总里没有 USD 桶"));
   }
 
   @Test
@@ -452,13 +533,14 @@ class RefundStatusTenancyIntegrationTest {
     http.perform(get("/trade/refunds").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
-        .andExpect(jsonPath("$.amountByCurrency.USD").value(10.0))
+        // 汇总桶是 list：JSONPath 按币种筛桶，不是 map 取键。
+        .andExpect(jsonPath("$.amountByCurrency[?(@.currency=='USD')].amount").value(10.0))
         .andExpect(jsonPath("$.rows[0].refundAmount").value(10.0));
 
     http.perform(get("/trade/refunds").header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
-        .andExpect(jsonPath("$.amountByCurrency.USD").value(20.0))
+        .andExpect(jsonPath("$.amountByCurrency[?(@.currency=='USD')].amount").value(20.0))
         .andExpect(jsonPath("$.rows[0].refundAmount").value(20.0));
   }
 }

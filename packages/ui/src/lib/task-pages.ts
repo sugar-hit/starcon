@@ -391,12 +391,14 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/aftersales/refunds',
-    implemented: false,
+    implemented: true,
     domain: 'aftersales',
-    label: '退款与补发',
-    description: '核对退款币种、金额与补发履约进度。',
-    fields: ['申请号', '订单号', '退款金额', '币种', '审批状态', '补发单号'],
-    workflow: ['审批申请', '执行退款或补发', '对账'],
+    label: '退款状态',
+    // 原标签是「退款与补发」。**补发（REISSUE）是 11.1.1.1 的售后单类型，不是本模块**，
+    // 11.3.1.2 只交付退款执行状态与对账差异；沿用旧标签会让导航声称覆盖了一个不存在的能力。
+    description: '跟踪退款执行与平台同步状态，查证后重试，裁定对账差异。',
+    fields: ['退款单号', '订单号', '退款金额', '币种', '执行状态', '平台同步状态', '建议动作'],
+    workflow: ['登记待发起', '派发或先查证交易', '裁定对账差异'],
   },
   {
     href: '/crm',

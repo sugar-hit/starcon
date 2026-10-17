@@ -15,6 +15,7 @@ import {
   actionButton,
   attemptKindLabels,
   blockingText,
+  buttonVariant,
   discrepancyKindLabels,
   discrepancyPair,
   failureText,
@@ -270,12 +271,10 @@ export function RefundStatusWorkspace() {
           <span className="text-muted-foreground">
             金额区间口径：{page?.amountRangeSemantics ?? '闭区间'}
           </span>
-          {page && Object.keys(page.amountByCurrency).length > 0 && (
+          {page && page.amountByCurrency.length > 0 && (
             <span className="text-muted-foreground">
               金额按币种分开：
-              {Object.entries(page.amountByCurrency)
-                .map(([c, v]) => formatAmount(v, c))
-                .join(' · ')}
+              {page.amountByCurrency.map((b) => formatAmount(b.amount, b.currency)).join(' · ')}
             </span>
           )}
         </div>
@@ -362,7 +361,7 @@ export function RefundStatusWorkspace() {
                       <td className="p-2 text-xs">{formatTime(r.lastVerifiedAt)}</td>
                       <td className="p-2 text-right">
                         <Button
-                          variant={btn.variant === 'disabled' ? 'ghost' : btn.variant}
+                          variant={buttonVariant(btn.variant)}
                           size="sm"
                           disabled={btn.variant === 'disabled' || !btn.show}
                           onClick={() => void openDetail(r.id)}
