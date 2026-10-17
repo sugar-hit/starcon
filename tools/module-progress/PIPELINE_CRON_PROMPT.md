@@ -147,7 +147,8 @@ pmset -g therm
   `CPU_Shutdown_SpeedLimit` 且值 **< 100** ⇒ 系统已因过热降频 ⇒ **STOP，零派发**。
   报 unknown oid ⇒ **跳过温度闸**，不要因此判 STOP。
   （2026-10-08 22:21 实测输出 `Note: No thermal warning level has been recorded` = 正常。）
-- `status` 里 running 条数 **>= 4**
+- `status` 里 running 条数 **>= 7**（即超过 `RUNNING_QUOTA=6`；
+  配额值以 `.dev-agent/PIPELINE.local.md` 为准，改 lanes 时两处必须同步）
 - load 1min **> 核数**（10 核机即 > 10）
 - Testcontainers PG 容器数 **>= 6**（排除常驻的 `starcon-mig-v2`，它 Up 数天不是 Testcontainers）
 - `plan` 返回的 `newlyPlanned` 为空数组
@@ -287,7 +288,7 @@ node tools/module-progress/sync.mjs --check
 **L2 红了的处置**：
 
 1. **不 push**，不在集成头上继续改
-2. `git bisect` 在本批 merge commit 上二分定位（4 条车道最多 2 次全量验证）
+2. `git bisect` 在本批 merge commit 上二分定位（无论本批几条车道，最多 2 次全量验证）
 3. 二分找不到 = 跨车道互相破坏，按 5.1 静态排查
 4. 定位后派一个**修复任务**（只修这一个模块）
 5. 修复后**重跑 L2**，绿了再 push
