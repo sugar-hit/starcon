@@ -1520,6 +1520,56 @@
         }
       }
     },
+    "/trade/aftersales/intake/owner-roster/{id}": {
+      "put": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "put_trade_aftersales_intake_owner_roster_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesOwnerRosterUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders": {
       "get": {
         "tags": [
@@ -14127,6 +14177,772 @@
         }
       }
     },
+    "/trade/aftersales/intake/reply-sla": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_reply_sla",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AftersalesReplySlaView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_reply_sla",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReplySlaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReplySlaView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/reply-sla/{id}/retire": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_reply_sla_id_retire",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReplySlaRetire"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReplySlaView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/owner-roster": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_owner_roster",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_owner_roster",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesOwnerRosterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/cases": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/cases/{caseId}/rejudge": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_cases_caseId_rejudge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchanges": {
+      "get": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchanges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchanges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeAuthorizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchanges/{id}/cancel": {
+      "post": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchanges_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "authorizationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/sync": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/submit": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/cases": {
       "get": {
         "tags": [
@@ -21806,826 +22622,6 @@
         }
       }
     },
-    "/trade/aftersales/filters": {
-      "get": {
-        "tags": [
-          "aftersales-case-controller"
-        ],
-        "operationId": "get_trade_aftersales_filters",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/cases/{id}": {
-      "get": {
-        "tags": [
-          "aftersales-case-detail-controller"
-        ],
-        "operationId": "get_trade_aftersales_cases_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesCaseDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/cases/{id}/timeline": {
-      "get": {
-        "tags": [
-          "aftersales-case-detail-controller"
-        ],
-        "operationId": "get_trade_aftersales_cases_id_timeline",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesTimelinePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/case-detail/capabilities": {
-      "get": {
-        "tags": [
-          "aftersales-case-detail-controller"
-        ],
-        "operationId": "get_trade_aftersales_case_detail_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesDetailCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/capabilities": {
-      "get": {
-        "tags": [
-          "aftersales-case-controller"
-        ],
-        "operationId": "get_trade_aftersales_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesCaseCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchanges": {
-      "get": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchanges",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "orderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "decision",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangePage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchanges",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeAuthorizeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchanges/{id}/cancel": {
-      "post": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchanges_id_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeCancelRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchanges/{id}": {
-      "get": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchanges_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchanges/filters": {
-      "get": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchanges_filters",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchanges/capabilities": {
-      "get": {
-        "tags": [
-          "exchange-authorization-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchanges_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/owner-roster/{id}": {
-      "put": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "put_trade_aftersales_intake_owner_roster_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesOwnerRosterUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/reply-sla": {
-      "get": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "get_trade_aftersales_intake_reply_sla",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AftersalesReplySlaView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "post_trade_aftersales_intake_reply_sla",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesReplySlaCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesReplySlaView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/reply-sla/{id}/retire": {
-      "post": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "post_trade_aftersales_intake_reply_sla_id_retire",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesReplySlaRetire"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesReplySlaView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/owner-roster": {
-      "get": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "get_trade_aftersales_intake_owner_roster",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AftersalesOwnerRosterView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "post_trade_aftersales_intake_owner_roster",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesOwnerRosterCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/cases": {
-      "post": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "post_trade_aftersales_intake_cases",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AftersalesIntakeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesIntakeResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/intake/cases/{caseId}/rejudge": {
-      "post": {
-        "tags": [
-          "aftersales-intake-controller"
-        ],
-        "operationId": "post_trade_aftersales_intake_cases_caseId_rejudge",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/trade/aftersales/intake/verdicts": {
       "get": {
         "tags": [
@@ -22814,6 +22810,403 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AftersalesIntakeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/filters": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchanges/{id}": {
+      "get": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchanges_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchanges/filters": {
+      "get": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchanges_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchanges/capabilities": {
+      "get": {
+        "tags": [
+          "exchange-authorization-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchanges_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/filters": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/capabilities": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/cases/{id}": {
+      "get": {
+        "tags": [
+          "aftersales-case-detail-controller"
+        ],
+        "operationId": "get_trade_aftersales_cases_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/cases/{id}/timeline": {
+      "get": {
+        "tags": [
+          "aftersales-case-detail-controller"
+        ],
+        "operationId": "get_trade_aftersales_cases_id_timeline",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesTimelinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/case-detail/capabilities": {
+      "get": {
+        "tags": [
+          "aftersales-case-detail-controller"
+        ],
+        "operationId": "get_trade_aftersales_case_detail_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/capabilities": {
+      "get": {
+        "tags": [
+          "aftersales-case-controller"
+        ],
+        "operationId": "get_trade_aftersales_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesCaseCapabilities"
                 }
               }
             }
@@ -23052,7 +23445,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -23851,49 +24244,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -23918,7 +24311,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -24398,14 +24791,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -25700,6 +26093,63 @@
             "format": "int64"
           },
           "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AftersalesOwnerRosterUpdate": {
+        "type": "object",
+        "properties": {
+          "acceptingNewCases": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesOwnerRosterView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerDisplayName": {
+            "type": "string"
+          },
+          "ownerRoleLabel": {
+            "type": "string"
+          },
+          "ownerSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "acceptingNewCases": {
+            "type": "boolean"
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -27671,7 +28121,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -28552,7 +29002,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -37210,7 +37660,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -37322,12 +37772,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39132,9 +39582,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39791,7 +40241,103 @@
         },
         "description": "一张售后单的当前归因"
       },
-      "AftersalesCaseCreate": {
+      "AftersalesReplySlaCreate": {
+        "type": "object",
+        "properties": {
+          "platformScope": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AftersalesReplySlaView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformScope": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AftersalesReplySlaRetire": {
+        "type": "object",
+        "properties": {
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesOwnerRosterCreate": {
+        "type": "object",
+        "properties": {
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesIntakeRequest": {
         "type": "object",
         "properties": {
           "orderId": {
@@ -39817,12 +40363,19 @@
           "requestedQuantity": {
             "type": "number"
           },
-          "platformCaseNo": {
+          "intakeSource": {
+            "type": "string"
+          },
+          "intakeReference": {
             "type": "string",
             "nullable": true
           },
-          "platformCaseUrl": {
+          "intakeChannel": {
             "type": "string",
+            "nullable": true
+          },
+          "platformMustRefund": {
+            "type": "boolean",
             "nullable": true
           },
           "platformReceivedAt": {
@@ -39849,6 +40402,10 @@
             "format": "date-time",
             "nullable": true
           },
+          "handlingPlan": {
+            "type": "string",
+            "nullable": true
+          },
           "ownerRef": {
             "type": "string",
             "nullable": true
@@ -39859,19 +40416,6 @@
           },
           "ownerRoleLabel": {
             "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSourceReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerCapturedAt": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         }
@@ -39996,6 +40540,854 @@
             "format": "date-time"
           },
           "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesIntakeResult": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+          },
+          "caseRow": {
+            "$ref": "#/components/schemas/AftersalesCaseRow"
+          },
+          "ownerAssignment": {
+            "$ref": "#/components/schemas/AftersalesOwnerAssignmentView"
+          },
+          "policyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeVerdictView": {
+        "type": "object",
+        "properties": {
+          "verdictId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "intakeSource": {
+            "type": "string"
+          },
+          "intakeReference": {
+            "type": "string"
+          },
+          "intakeChannel": {
+            "type": "string"
+          },
+          "requestReceivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "judgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderAnchorKind": {
+            "type": "string"
+          },
+          "orderAnchorAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "policyReturnWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnWindowDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inReturnWindow": {
+            "type": "boolean"
+          },
+          "windowMarginHours": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "policyMustRefundReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mustRefund": {
+            "type": "boolean"
+          },
+          "mustRefundBasis": {
+            "type": "string"
+          },
+          "mustRefundSituation": {
+            "type": "string"
+          },
+          "eligibility": {
+            "type": "string"
+          },
+          "handlingPlan": {
+            "type": "string"
+          },
+          "handlingPlanSource": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replyDueBasis": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ownerAssignmentMode": {
+            "type": "string"
+          },
+          "policySourceScope": {
+            "type": "string"
+          },
+          "policyParameterCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "policyReadAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AftersalesOwnerAssignmentView": {
+        "type": "object",
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeAuthorizeRequest": {
+        "required": [
+          "caseId",
+          "legalEntityId",
+          "lines",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lines": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeLineRequest"
+            }
+          },
+          "allowPartial": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reasonNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeLineRequest": {
+        "required": [
+          "caseLineId",
+          "replacementSkuId"
+        ],
+        "type": "object",
+        "properties": {
+          "caseLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "replacementSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "replacementReason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeDetail": {
+        "type": "object",
+        "properties": {
+          "authorization": {
+            "$ref": "#/components/schemas/ExchangeRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeLineView"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExchangeLineView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "originalSkuName": {
+            "type": "string"
+          },
+          "originalQuantity": {
+            "type": "string"
+          },
+          "replacementSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "replacementSkuCode": {
+            "type": "string"
+          },
+          "replacementSkuName": {
+            "type": "string"
+          },
+          "replacementReason": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedQuantity": {
+            "type": "string"
+          },
+          "authorizedQuantity": {
+            "type": "string"
+          },
+          "reservedQuantity": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "reservationStatus": {
+            "type": "string"
+          },
+          "outboundDemandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundDemandNo": {
+            "type": "string"
+          },
+          "outboundDemandStatus": {
+            "type": "string"
+          },
+          "returnRequirementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "returnRequirementStatus": {
+            "type": "string"
+          },
+          "waitingReturnQuantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "string"
+          },
+          "authorizedQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeReservationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "releasedReservationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingOutboundDemandCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "waitingReturnCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "authorizedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExchangeCancelRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderCreateRequest": {
+        "required": [
+          "authorizationId"
+        ],
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderDetail": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/ExchangeOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderLineView"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderEventView"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExchangeOrderEventView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "fromClosureStatus": {
+            "type": "string"
+          },
+          "toClosureStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExchangeOrderLineView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "linkNo": {
+            "type": "string"
+          },
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "newOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderNo": {
+            "type": "string"
+          },
+          "newOrderStatus": {
+            "type": "string"
+          },
+          "newOrderStatusLabel": {
+            "type": "string"
+          },
+          "closureStatus": {
+            "type": "string"
+          },
+          "closureStatusLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newOrderAmount": {
+            "type": "string"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstShippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipmentRecordNo": {
+            "type": "string"
+          },
+          "lastTrackingStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatusLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExchangeOrderSyncRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderSubmitRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderCancelRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesCaseCreate": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "buyerRequest": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerCapturedAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -54965,6 +56357,164 @@
         },
         "description": "枚举下拉项"
       },
+      "AftersalesIntakePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AftersalesIntakeSummary"
+          },
+          "sortSemantics": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mustRefundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyOverdueMustRefundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfWindowPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supersededCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AftersalesHandlingPlanOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeCapabilities": {
+        "type": "object",
+        "properties": {
+          "judgmentResponsibilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "policySource": {
+            "type": "string"
+          },
+          "policySourceNote": {
+            "type": "string"
+          },
+          "returnWindowParameter": {
+            "type": "string"
+          },
+          "mustRefundParameter": {
+            "type": "string"
+          },
+          "effectiveReturnWindowDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveMustRefundReasons": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "policyScopeType": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDeadlineSource": {
+            "type": "string"
+          },
+          "replyDeadlineNote": {
+            "type": "string"
+          },
+          "replySlaConfigured": {
+            "type": "boolean"
+          },
+          "rosterSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assignableRosterSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ownerSourceNote": {
+            "type": "string"
+          },
+          "mustRefundEnforcementNote": {
+            "type": "string"
+          },
+          "platformMessageNote": {
+            "type": "string"
+          },
+          "intakeSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "handlingPlans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesHandlingPlanOption"
+            }
+          },
+          "crossServiceNote": {
+            "type": "string"
+          }
+        }
+      },
       "AftersalesCaseSortOption": {
         "type": "object",
         "properties": {
@@ -55041,6 +56591,471 @@
           "bulkMaxSize": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ExchangePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExchangeSummary"
+          }
+        }
+      },
+      "ExchangeSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partiallyApprovedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRequestedQuantity": {
+            "type": "string"
+          },
+          "totalAuthorizedQuantity": {
+            "type": "string"
+          },
+          "totalPendingOutboundQuantity": {
+            "type": "string"
+          },
+          "totalWaitingReturnQuantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeCaseLineOption": {
+        "type": "object",
+        "properties": {
+          "caseLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeCaseOption": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeCaseLineOption"
+            }
+          }
+        }
+      },
+      "ExchangeFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisionLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exchangeCases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeCaseOption"
+            }
+          },
+          "exchangeCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeCapabilities": {
+        "type": "object",
+        "properties": {
+          "caseDelivered": {
+            "type": "boolean"
+          },
+          "reservationApiDelivered": {
+            "type": "boolean"
+          },
+          "skuCatalogDelivered": {
+            "type": "boolean"
+          },
+          "sellableApiDelivered": {
+            "type": "boolean"
+          },
+          "outboundHandoffDelivered": {
+            "type": "boolean"
+          },
+          "outboundHandoffOwnerModule": {
+            "type": "string"
+          },
+          "oldGoodsReturnDelivered": {
+            "type": "boolean"
+          },
+          "oldGoodsReturnOwnerModule": {
+            "type": "string"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisionLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowedNextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "hardRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExchangeOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExchangeOrderSummary"
+          }
+        }
+      },
+      "ExchangeOrderSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "pendingDispatchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationLineOption": {
+        "type": "object",
+        "properties": {
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationOption": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "authorizedQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasShippingSnapshot": {
+            "type": "boolean"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationLineOption"
+            }
+          }
+        }
+      },
+      "ExchangeOrderFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationOption"
+            }
+          },
+          "authorizationCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderCapabilities": {
+        "type": "object",
+        "properties": {
+          "exchangeAuthorizationDelivered": {
+            "type": "boolean"
+          },
+          "realNewSalesOrder": {
+            "type": "boolean"
+          },
+          "shipmentProjectionReadable": {
+            "type": "boolean"
+          },
+          "shipmentProjectionOwnerModule": {
+            "type": "string"
+          },
+          "outboundHandoffDelivered": {
+            "type": "boolean"
+          },
+          "outboundHandoffOwnerModule": {
+            "type": "string"
+          },
+          "oldGoodsReturnReceivedDelivered": {
+            "type": "boolean"
+          },
+          "oldGoodsReturnOwnerModule": {
+            "type": "string"
+          },
+          "closureStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowedNextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "hardRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -56098,1092 +58113,6 @@
             "type": "string"
           },
           "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeAuthorizeRequest": {
-        "required": [
-          "caseId",
-          "legalEntityId",
-          "lines",
-          "warehouseId"
-        ],
-        "type": "object",
-        "properties": {
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lines": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeLineRequest"
-            }
-          },
-          "allowPartial": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "reasonNote": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeLineRequest": {
-        "required": [
-          "caseLineId",
-          "replacementSkuId"
-        ],
-        "type": "object",
-        "properties": {
-          "caseLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "replacementSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "replacementReason": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeDetail": {
-        "type": "object",
-        "properties": {
-          "authorization": {
-            "$ref": "#/components/schemas/ExchangeRow"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeLineView"
-            }
-          },
-          "allowedActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ExchangeLineView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalSkuCode": {
-            "type": "string"
-          },
-          "originalSkuName": {
-            "type": "string"
-          },
-          "originalQuantity": {
-            "type": "string"
-          },
-          "replacementSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "replacementSkuCode": {
-            "type": "string"
-          },
-          "replacementSkuName": {
-            "type": "string"
-          },
-          "replacementReason": {
-            "type": "string"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestedQuantity": {
-            "type": "string"
-          },
-          "authorizedQuantity": {
-            "type": "string"
-          },
-          "reservedQuantity": {
-            "type": "string"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationNo": {
-            "type": "string"
-          },
-          "reservationStatus": {
-            "type": "string"
-          },
-          "outboundDemandId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "outboundDemandNo": {
-            "type": "string"
-          },
-          "outboundDemandStatus": {
-            "type": "string"
-          },
-          "returnRequirementId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "returnRequirementStatus": {
-            "type": "string"
-          },
-          "waitingReturnQuantity": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorizationNo": {
-            "type": "string"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "decision": {
-            "type": "string"
-          },
-          "decisionLabel": {
-            "type": "string"
-          },
-          "requestedQuantity": {
-            "type": "string"
-          },
-          "authorizedQuantity": {
-            "type": "string"
-          },
-          "replacementSkuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "activeReservationCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "releasedReservationCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pendingOutboundDemandCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "waitingReturnCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reasonNote": {
-            "type": "string"
-          },
-          "authorizedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorizedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "cancelledBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "cancelledAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "cancelReason": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ExchangeCancelRequest": {
-        "required": [
-          "expectedVersion"
-        ],
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/ExchangeSummary"
-          }
-        }
-      },
-      "ExchangeSummary": {
-        "type": "object",
-        "properties": {
-          "totalCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "cancelledCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "approvedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "partiallyApprovedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalRequestedQuantity": {
-            "type": "string"
-          },
-          "totalAuthorizedQuantity": {
-            "type": "string"
-          },
-          "totalPendingOutboundQuantity": {
-            "type": "string"
-          },
-          "totalWaitingReturnQuantity": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeCaseLineOption": {
-        "type": "object",
-        "properties": {
-          "caseLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeCaseOption": {
-        "type": "object",
-        "properties": {
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "reasonCode": {
-            "type": "string"
-          },
-          "requestedQuantity": {
-            "type": "string"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeCaseLineOption"
-            }
-          }
-        }
-      },
-      "ExchangeFilterOptions": {
-        "type": "object",
-        "properties": {
-          "statuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statusLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "decisions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "decisionLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "exchangeCases": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeCaseOption"
-            }
-          },
-          "exchangeCaseCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ExchangeCapabilities": {
-        "type": "object",
-        "properties": {
-          "caseDelivered": {
-            "type": "boolean"
-          },
-          "reservationApiDelivered": {
-            "type": "boolean"
-          },
-          "skuCatalogDelivered": {
-            "type": "boolean"
-          },
-          "sellableApiDelivered": {
-            "type": "boolean"
-          },
-          "outboundHandoffDelivered": {
-            "type": "boolean"
-          },
-          "outboundHandoffOwnerModule": {
-            "type": "string"
-          },
-          "oldGoodsReturnDelivered": {
-            "type": "boolean"
-          },
-          "oldGoodsReturnOwnerModule": {
-            "type": "string"
-          },
-          "statuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statusLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "decisions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "decisionLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "allowedNextActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "note": {
-            "type": "string"
-          },
-          "hardRules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "AftersalesOwnerRosterUpdate": {
-        "type": "object",
-        "properties": {
-          "acceptingNewCases": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "weight": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesOwnerRosterView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerRef": {
-            "type": "string"
-          },
-          "ownerDisplayName": {
-            "type": "string"
-          },
-          "ownerRoleLabel": {
-            "type": "string"
-          },
-          "ownerSource": {
-            "type": "string"
-          },
-          "sourceReference": {
-            "type": "string"
-          },
-          "acceptingNewCases": {
-            "type": "boolean"
-          },
-          "weight": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AftersalesReplySlaCreate": {
-        "type": "object",
-        "properties": {
-          "platformScope": {
-            "type": "string"
-          },
-          "replySlaHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "resolveSlaHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AftersalesReplySlaView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "platformScope": {
-            "type": "string"
-          },
-          "replySlaHours": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "resolveSlaHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "effectiveNow": {
-            "type": "boolean"
-          },
-          "created": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AftersalesReplySlaRetire": {
-        "type": "object",
-        "properties": {
-          "effectiveTo": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesOwnerRosterCreate": {
-        "type": "object",
-        "properties": {
-          "ownerRef": {
-            "type": "string"
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSourceReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "weight": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesIntakeRequest": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseType": {
-            "type": "string"
-          },
-          "reasonCode": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "requestedQuantity": {
-            "type": "number"
-          },
-          "intakeSource": {
-            "type": "string"
-          },
-          "intakeReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "intakeChannel": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformMustRefund": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "platformReceivedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "buyerRequest": {
-            "type": "string",
-            "nullable": true
-          },
-          "replyDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "resolveDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "handlingPlan": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AftersalesIntakeResult": {
-        "type": "object",
-        "properties": {
-          "verdict": {
-            "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
-          },
-          "caseRow": {
-            "$ref": "#/components/schemas/AftersalesCaseRow"
-          },
-          "ownerAssignment": {
-            "$ref": "#/components/schemas/AftersalesOwnerAssignmentView"
-          },
-          "policyNote": {
-            "type": "string"
-          }
-        }
-      },
-      "AftersalesIntakeVerdictView": {
-        "type": "object",
-        "properties": {
-          "verdictId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "intakeSource": {
-            "type": "string"
-          },
-          "intakeReference": {
-            "type": "string"
-          },
-          "intakeChannel": {
-            "type": "string"
-          },
-          "requestReceivedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "judgedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "orderAnchorKind": {
-            "type": "string"
-          },
-          "orderAnchorAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "policyReturnWindowDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "returnWindowDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "inReturnWindow": {
-            "type": "boolean"
-          },
-          "windowMarginHours": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "policyMustRefundReasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "mustRefund": {
-            "type": "boolean"
-          },
-          "mustRefundBasis": {
-            "type": "string"
-          },
-          "mustRefundSituation": {
-            "type": "string"
-          },
-          "eligibility": {
-            "type": "string"
-          },
-          "handlingPlan": {
-            "type": "string"
-          },
-          "handlingPlanSource": {
-            "type": "string"
-          },
-          "replyDueAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "replyDueBasis": {
-            "type": "string"
-          },
-          "replySlaHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "resolveDueAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "resolveSlaHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "ownerAssignmentMode": {
-            "type": "string"
-          },
-          "policySourceScope": {
-            "type": "string"
-          },
-          "policyParameterCodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "policyReadAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AftersalesOwnerAssignmentView": {
-        "type": "object",
-        "properties": {
-          "assignmentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "ownerRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerDisplayName": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerRoleLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "mode": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AftersalesIntakePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "evaluatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/AftersalesIntakeSummary"
-          },
-          "sortSemantics": {
-            "type": "string"
-          }
-        }
-      },
-      "AftersalesIntakeSummary": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "mustRefundCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "replyOverdueMustRefundCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "outOfWindowPendingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unassignedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "supersededCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "AftersalesHandlingPlanOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "AftersalesIntakeCapabilities": {
-        "type": "object",
-        "properties": {
-          "judgmentResponsibilities": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "policySource": {
-            "type": "string"
-          },
-          "policySourceNote": {
-            "type": "string"
-          },
-          "returnWindowParameter": {
-            "type": "string"
-          },
-          "mustRefundParameter": {
-            "type": "string"
-          },
-          "effectiveReturnWindowDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "effectiveMustRefundReasons": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          "policyScopeType": {
-            "type": "string",
-            "nullable": true
-          },
-          "replyDeadlineSource": {
-            "type": "string"
-          },
-          "replyDeadlineNote": {
-            "type": "string"
-          },
-          "replySlaConfigured": {
-            "type": "boolean"
-          },
-          "rosterSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "assignableRosterSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ownerSourceNote": {
-            "type": "string"
-          },
-          "mustRefundEnforcementNote": {
-            "type": "string"
-          },
-          "platformMessageNote": {
-            "type": "string"
-          },
-          "intakeSources": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "handlingPlans": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AftersalesHandlingPlanOption"
-            }
-          },
-          "crossServiceNote": {
             "type": "string"
           }
         }
