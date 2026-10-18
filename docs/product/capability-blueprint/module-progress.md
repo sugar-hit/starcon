@@ -6,25 +6,32 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 186 |
+| 已交付 | 190 |
 | 进行中 | 0 |
-| **未开发** | **279** |
-| 完成率 | 40.0% |
+| **未开发** | **275** |
+| 完成率 | 40.9% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
-| **D4** | 44 | 0 | 16 | 60 |
+| **D4** | 48 | 0 | 12 | 60 |
 | **D5** | 14 | 0 | 38 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -35,30 +42,38 @@
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 24 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 18 | 27 |
-| 11 | 售后与退货系统 | D4 / D7 | 5 | 22 |
+| 11 | 售后与退货系统 | D4 / D7 | 8 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
 | 15 | 客户与客服系统 | D7 | 1 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 24 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -346,7 +363,7 @@
 | 11.1.1.3 | 售后受理 | — | D4 | 已交付 | 迁移 `backend/services/trade/src/main/resources/db/migration/V164__trade_aftersales_intake.sql`（aftersales_intake_verdict 受理判定凭据 append-only / aftersales_reply_sla 回复时限策略分档生效 / aftersales_owner_roster 责任人名册，三表 tenant_id NOT NULL + ENABLE+FORCE RLS isolation + GRANT trade_app，零 ALTER 既有表、跨车道 DDL 回归面 = 0）· 端点 10 个挂在 `/trade/aftersales/intake`：GET capabilities（**返回当前生效值**）/ GET verdicts（真分页 + 与分页无关汇总）/ POST cases 受理 / POST `cases/{id}/rejudge` 重新判定 / GET+POST reply-sla / GET `reply-sla/effective` / POST `reply-sla/{id}/retire` / GET+POST owner-roster / PUT `owner-roster/{id}` （`AftersalesIntakeController.java` + `AftersalesIntakeService.java` + `AftersalesIntakeModels.java` + `AftersalesPolicyQueryPort.java`）· 页面 `/aftersales/intake`（`apps/web/src/app/aftersales/intake/page.tsx` + `components/aftersales/aftersales-intake-workspace.tsx` + `aftersales-intake-model.ts`）、api-proxy 放行 11 条形状 · 测试 `AftersalesIntakeIntegrationTest.java` 28 例 + `AftersalesIntakeTenancyIntegrationTest.java` 4 例实跑 Testcontainers PostgreSQL 16（连接池压到 1） · **四项判定各读一张真实存在的表，没有一处硬编码常量**：① 售后期锚点读 `sales_order.submitted_at`（DRAFT 单回退 `created_at` 并由 `order_anchor_kind` 如实标出）、期限天数读 17.5.1.1 业务参数 `AFTERSALE_RETURN_WINDOW_DAYS`；② 必退情形读同模块 `AFTERSALE_MUST_REFUND_REASONS`（MULTI_ENUM，出厂默认 DAMAGED_ON_ARRIVAL/MISSING_ITEM/WRONG_ITEM），判定优先级固定为 **平台声明 > 原因分类映射 > 不命中**，七类原因分类到六种必退情形的映射显式写成表（MUST_REFUND_SITUATION）：QUALITY_DEFECT→QUALITY_DEFECT、DESCRIPTION_MISMATCH→NOT_AS_DESCRIBED、LOGISTICS_DAMAGE→DAMAGED_ON_ARRIVAL，而 SIZE_MISMATCH/BUYER_REASON/MISTAKE_BUY/**FRAUD_RETURN 刻意不映射**（欺诈恰恰是不能自动同意退款的一类）；③ 责任人按名册**加权最少在办单**轮转派单（load=在办单数÷权重，同负载按 owner_ref 定胜负以保证可复现），真正写进 11.1.1.1 的 `aftersales_owner_assignment` 追加式留痕表；④ 回复时限 = 平台给的时限优先，否则按租户 `aftersales_reply_sla` 推算 · **必退自动判定的数据来源与「政策配置未交付」的处理**：本车道开工前实测集成头 f760ba37，**17.5.1.1 业务参数实际已交付**（identity V48 + BusinessParameterController，台账 526 行「已交付」），此前批次结论「未开发」已过时；AFTERSALE 类恰好两条出厂参数（期限天数、必退情形）正是本模块所需。它在 identity 独立库 ⇒ 由 `AftersalesPolicyQueryPort` 经 `/identity/business-parameters/effective` 授权只读端点读、**透传调用方自己的 Authorization**（租户仍由身份服务按已认证成员关系解析，隔离两道），**不落影子副本**；两条参数**一次请求同时取回**（分两次读会出现「旧期限+新词表」这种不存在的组合）；身份服务不可达时 503 并说清「唯一真身在 17.5.1.1」，**绝不返回编造的默认值**。⚠️ 但 **17.5.1.1 里没有售后回复时限参数**（实测 8 条出厂默认值里 AFTERSALE 类只有上面两条），所以回复时限刻意**不假装是政策参数**，落在本服务自己的 `aftersales_reply_sla`（分档生效、内容写定不可改由 guard_aftersales_reply_sla_immutable 钉死、同槽位区间重叠由 guard_aftersales_reply_sla_interval 挡住并报出冲突档 id），平台给 + 租户 SLA **两档都取不到时受理直接失败**并指向配置入口，而不是替租户编一个默认小时数 · **加粗句「人工不能为了业绩拖着不退导致平台判责」的三层钉死**：① `guard_aftersales_verdict_must_refund` 触发器 —— 被顶替的判定若是 PLATFORM_DECLARED 必退，新判定**不许降级为非必退**（绕过服务层直接写 SQL 也被拒，测试实跑）；② 判定凭据**列级**只授 `UPDATE(superseded_at)`，判定内容不可改写（照 V156 对 aftersales_case 同一套列级白名单写法），`guard_aftersales_verdict_supersede_once` 让顶替时刻只能单向写一次；③ **人工无法自封必退** —— 平台强制必退只接受平台消息声明，内部录入勾选直接 400，且受理入参里刻意**没有**「我要不要必退」这个开关 · **判定凭据整份冻结**：期限天数、必退词表全量（非只记命中项）、政策档位、读取时刻一起入库，照 identity `business_parameter_freeze` 的同一理由「改参数不改历史单据已冻结的行为」；重新判定=追加一版 + 标记 superseded，旧版本值原样留着（测试断言改参数后旧判定里仍是 30 天），且**回复时限沿用首判**（重新判定的是「符不符合条件」，换新时限等于给已超时的必退单续命）；平台重投同一申请号由部分唯一索引判重 · **多租户三断言实跑**：两租户互不可见（按主键直查对方返回零行，且用同样写法正对照查得到自己那行）、伪造 `X-Tenant-Id` 头**仍然 200**（写入落在会话租户名下，对方租户逐字节未变 —— 断言比的是两侧数据库快照，不是状态码）、单连接下交替读写 5 轮不串租户；另断言无租户上下文时一张也读不到 · 逐表断言 relforcerowsecurity/relrowsecurity 为真、判定凭据表级 UPDATE/DELETE 权限为假 · 其余用例覆盖：验收时刻的窗口内外判定与余量小时数（正数=余量、负数=欠账）、时间字段用 +08:00 夹具**断言写回的绝对时刻**（RECEIVED_IN + 36h SLA = 2026-02-12T21:30:00+08:00，零漂移）、平台精确 SLA 档优先于全平台兜底档、换版必须收口旧档且区间不重叠、名册为空时如实报 UNASSIGNED、停接新单的人不再参与轮转但留痕还在、列表两页 caseId 不重叠且汇总统计的是全部命中行 · 前端 `aftersales-intake-model.test.ts` 19 例钉住展示口径（**必退超时 rank 0 且与必退是两个不同 tone**、认不出的结论回落到「超窗待裁定」而不是「符合条件」、余量 null 不编 0、mustRefund=false 不能被当成「没筛选」丢掉）、`aftersales-intake-allowlist.test.ts` 4 例双向钉住白名单（放行 + 拒绝 + 不误伤同目录另外三条）；因改动共享的 api-proxy，已跑全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api/trade` **33 文件 182 例全过** · **跨服务边界**：对 identity 只做授权只读调用（业务参数），不读对方库；对 channel（卷 2 平台消息）与 crm（卷 15 客服，集成头只交付 15.4.1.1）**不做任何跨服务调用**，两个缺口照 V156 的既有纪律如实标注并在 capabilities 里点名（名册为租户可维护登记 + 来源枚举，刻意不伪造 L4 模块号）；`aftersales_case` 的写入所有者仍是 11.1.1.1，本模块**委托** `AftersalesCaseService.create()` 建单而不自写 INSERT（照 11.1.1.1 注释「11.1.1.3 交付后应当接管本方法」的交接），本模块只写自己的判定凭据表 · ⚠️ 共享的 `ApiErrorHandler` 会把 `IllegalArgumentException` 的 detail 压成通用语（Servlet 栈下 `ResponseStatusException` 走 sendError、body 为空），所以端点级错误断言只断**状态码与副作用**，不断言响应文案 —— 断文案等于把断言绑在别的模块的措辞上 |
 | 11.1.2.1 | 原因分类 | — | D4 | 已交付 | 迁移 `V158__aftersales_reason_taxonomy.sql`（**零 ALTER 既有表、零外键**，对 V156 的 `aftersales_case` 簇**只读**，跨车道 DDL 回归面 = 0）：`aftersales_reason_category`（分类树，`parent_id`/`depth`/`category_code`/`category_status`/`sort_order` 全是真列，**depth 由触发器维护不可写成假值**，层级 1..3）/ `aftersales_reason_attribution_set`（归因集合，**部分唯一索引 UNIQUE(tenant_id,case_id) WHERE superseded_at IS NULL** 保证一单只有一版生效）/ `aftersales_reason_attribution_item`（归因成员，`is_primary` + **权重必填 numeric 落在 (0,1]**）/ `aftersales_reason_platform_mapping`（平台原因码映射，**trade 自有表**）。四张表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT。**加粗句「原因口径不统一会让退货率分析失真 —— 必须强制选择分类而不是留自由文本」落成三层防线**：① 服务层拒绝零个原因 / 多个或零个主因 / 重复分类 / 权重缺失或越界 / 分类或**上级分支**已停用；② **DB 层 DEFERRABLE INITIALLY DEFERRED 约束触发器在提交瞬间判定「至少一个成员 + 恰好一个主因」**，绕过后端直接开 psql 写 SQL 也存不进去；③ 自由文本只挂在**集合**上而零成员的集合提交不了 ⇒「只写了一段话没选分类」在类型与物理两层都不可能成立。**七类根口径按租户幂等落库**（`ON CONFLICT (tenant_id,category_code) DO NOTHING`，落库后就是普通租户行：能改名/排序/停用/加子节点/加树外新根，Java 枚举只用来保证「根必须归入七类之一」与 DB CHECK 一致，不是硬编码数据源）。**「报表用统一口径」的四个定死**：只统计**当前生效**的归因集合（`superseded_at IS NULL`，改过一次的单只算一次）/ 主因与次因**分开计数**（合成一个会让既是主因又在别的分类里当次因的单被重复计入）/ 占比 = 归因单数 ÷ 生效归因单总数两位小数、分母 0 时全 0.00 / 排序键 `(depth, sort_order, category_code, id)` **唯一确定**（`sort_order` 允许重复，单靠它排两次导出会逐行不同）。**子分类按 `effective_root_kind` 汇总进七类**（用递归 CTE 自根向下标出所属口径；按本行 `root_kind` 分组会让勾了子分类的单整个消失，而七类正是下游 11.5.2 与 6 采购唯一对齐的锚点）。**七类零也出现**（少列一个界面就显示成空白，而空白会被读成「没有数据」而不是「真的是 0」）。**分类编码与 root_kind 刻意不可改**（V158 的列级白名单根本没授这两列，11.5.2 与 6 采购的历史数据按编码对齐；改 rootKind 会让全部历史归因被重新归到另一个口径）——「换口径请新建分类再迁归因」。**被引用过的分类删不掉**（子分类 / 归因引用 / 映射引用三条都挡），停用才是口径变更动作：不再可被新归因选中而历史归因仍指向它。**平台原因码映射刻意不 join channel**：`platform_enum_mapping` 在 channel 服务独立库 starcon_channel，按 AGENTS.md 禁止跨服务 SQL/FK/视图 ⇒ 在 **trade 库**建同形状的表（内部口径 ⇄ 平台码 + 来源 + 采集时刻），2.1.2.1 同步器按同一形状写入时结构与查询都不用改；`mapping_source` 区分 TENANT_MAINTAINED / MODULE_2_ENUM_MAPPING（后者必须带 `sourceReference`，否则「这行是同步器写的」只是口头声明）、**同步器写的行不许删只许停用**（删了下次同步写回来就变成「明明停用了却又生效」）。`capturedAt` 是**采集时刻**不是登记时刻。端点 8 个 /trade/aftersales/reasons：capabilities（哪些维度真有依据、上游通没通、下游交付没交付、映射归谁，**逐条如实报出**——平台级粒度是因为店铺在 channel 独立库读不到）、tree（递归 CTE 算路径/层级/可归因性；`assignableOnly` 的语义是「自己 ACTIVE **且全部祖先 ACTIVE**」，祖先停用时整支灰掉）、categories（POST 建 / PATCH 改 / DELETE 删）、attributions（GET 读 / POST 登记，**替换语义**：新写一版旧的标记失效并留痕）、mappings（GET / POST / PATCH / DELETE）、reports。**刻意不占用的路径**：`/trade/aftersales/cases/{id}` 属 11.1.1.2 —— 本模块只用 caseId 做归因，不给它造详情端点，**一个点进去 404 的入口比没有这个入口更危险**。**权限码与 11.1.1.1 分开**：读 `trade.aftersales.reason.read`、写 `trade.aftersales.reason.write`（给一份只读权限就等于让谁都能改所有人的退货原因）。租户**不来自任何请求头**：先向 identity 确认已认证成员关系与权限，再在事务里绑定 `app.current_tenant`，FORCE RLS 在库层强制。**下游 11.5.2.1 质量分析与 6.4.2.2 供应商索赔均未交付**，capabilities 逐条报 delivered=false 与归属模块，本模块**不假装已对接**，只把口径定义清楚并可通过 HTTP 取用。前端 `/aftersales/reasons`：**新增**页面 + `components/aftersales/{model,workspace}.tsx`（分类树维护 / 多选归因（主因单选、次因复选、权重必填）/ 平台原因码映射 / 统一口径报表，加载·空·错误三态齐全，无占位数据）。api-proxy **新增一条独立 services[] 元素**（不是往既有 trade 分支的 alternation 里并分支 —— 那一支是超长单行正则，多车道同时并进去 git 必然判冲突），形状与 11.1.1.1（`capabilities |
 | 11.1.2.2 | 商品问题归因 | — | D4 | 未开发 | — |
-| 11.2.1.1 | 退货授权单 | /aftersales/returns | D4 | 已交付 | 迁移 trade V161__trade_rma_authorization.sql（三张新表 tenant_id NOT NULL + FORCE RLS isolation + GRANT trade_app 与序列 rma_no_seq，**零 ALTER 既有表、零外键**，跨车道 DDL 回归面 = 0，对 V156 aftersales_case 簇 / V157 aftersales_case_line / V99 sales_order_line / V119 order_fulfillment_line_progress 全部只读，跨表一致性由触发器在写入时刻真查一次钉死）：rma_authorization 退货授权单头（**一个状态列到底**：DRAFT / AUTHORIZED / PARTIALLY_AUTHORIZED / REJECTED / EXPIRED / CANCELLED，decision 由状态派生不存第二份真相；退货地址带来源枚举 PLATFORM_RMA / MODULE_3_6_3_ADDRESS_BOOK / TENANT_MAINTAINED 并强制 source_reference；买家回寄物流三件套承运商·运单号·寄出时刻同进同出且必须留登记人；寄回时限 return_by_at 与 expired_at；乐观锁 version）+ rma_authorization_line 授权行（**只存 case_line_id**，SKU 与单价实时读订单行；四个闸门基数快照 requested / ordered / shipped / prior_authorized 记的是「审批当时凭什么批了这个数」供事后审计）+ rma_decision_event 审批留痕（追加式，**由 DB 触发器按状态变更自动追加**，只有真变了才写；运行角色 UPDATE/DELETE 已收回）；**可退量约束钉三层**：表级 CHECK（授权量 ≤ min(订购, 已发) − 其他在途授权累计）+ 触发器 guard_rma_authorization_line 真查一次（没发出去的货不能退、没有履约投影按已发 0 处理、别的在途单已占用的量不能再批）+ 服务层审批时重算；**DB CHECK 钉死部分授权与拒绝必须说明理由**、授权/部分授权必须有寄回时限（没有时限的授权永远不会超时关闭）；索引 4 条对应真实查询形状（按 case 反查 / 在途且带时限的部分索引供超时扫描 / 按 case_line 反查 / 留痕按发生时刻回放） · 端点 10 个挂在 /trade/rma-authorizations：GET /capabilities（职责句五块逐块报可用性 + 下游逐个 Delivered=false 与归属模块 + **刻意不做的事**清单 + 「授权不等于已收到」口径）、GET /returnable-quantities（可退量校验，三个来源服务端实时查）、GET 列表（真分页 + 全量汇总 + 筛选状态/决定/处理方式/售后单/仅超时/关键字 + 排序白名单 4 键）、GET /{id} 详情（头 + 行 + 审批留痕 + 当前可执行动作 + 上下游可用性）、POST 建单（**草稿，授权量恒 0 —— 建单不是审批**）、PUT /{id} 改草稿要素（**只有 DRAFT 可改**：授权后地址就是对买家的承诺，改地址等于让货寄丢）、POST /{id}/decide 审批、POST /{id}/return-logistics 登记回寄物流、POST /{id}/cancel 撤销（可退量立刻还给订单行）、POST /expire-overdue 超时未寄自动关闭（蓝图加粗句的直接落点；**已登记回寄物流的单也照常关闭** —— 登记只说明买家报了个运单号，货到没到库是 11.2.2.1 的事） · 页面 /aftersales/returns（app/aftersales/returns/page.tsx + components/aftersales/rma-authorization-workspace.tsx + rma-authorization-model.ts）第一屏就是**在途 / 已超时**统计卡（不是「一共多少张」——在途的才是要天天盯的）、筛选、列表、详情（授权行含四个基数快照 + 指示性金额并标注「不是可退余额校验结果」+ 审批留痕 + 三个写入口）、可退数量校验对话框（**「不可退」与「额度已占满」分成两种读法** —— 合成一个「可退 0」会让「货根本没发出去」被误当成「额度用完了」）、加载 / 空 / 错误三态、底部能力边界区（未交付下游 + 刻意不做的事） · 测试 RmaAuthorizationIntegrationTest 39 例 + RmaAuthorizationTenancyIntegrationTest 4 例 = 43 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖**可退上限真的被约束**（已发 0 / 无履约投影 / 上限 3 批 4 件三种都批不出去，且**绕过服务层直连 SQL 也批不出去**）、在途占用与撤销后归还、拒绝与超时单不占用可退量、漏报某一行被拒、部分授权与拒绝无理由被拒、缺寄回时限被拒、版本不符与缺失版本都拒绝、已审批单不能二次审批、**超时未寄自动关闭且关闭后可退量立刻归还订单行**、已登记回寄物流的单到时限仍照常关闭、未到时限与已撤销单都不被关闭、**留痕表对运行角色是追加式的**（并带正对照：该留的 INSERT 权限还在、单头与授权行的 UPDATE 还在）、三张表逐张断言 relforce**r**owsecurity、timestamptz 带 +08:00 写入后断言读回零漂移、真分页两页不重叠且汇总不受分页、排序白名单拒绝任意表达式、真实模糊检索命中授权单号/售后单号/订单号、**租户隔离三断言**（含伪造 X-Tenant-Id 的正确预期：**仍然按会话正常执行并 200、写入落在会话租户名下**，断言比对两侧数据库而不是状态码；每轮读写都**新建实体**，「按主键直查对方返回零行」都配同样写法的正对照防假绿）、HTTP 契约 400/401 · **上游依赖实查结论**：售后单与商品行（V156/V157，11.1.1.1 / 11.1.1.2 已交付）可用；**已发数量落点 = order_fulfillment_line_progress.shipped_qty（V119，9.1.2.2）**，**订购数量 = sales_order_line.quantity（V99）**；**已退数量当前没有列**（写入所有者是 11.2.2.2 实收分配，**未交付**）⇒ 可退量里的 receivedQty **恒为 null 并标注归属模块**，**不填 0 冒充「没退过」**（填 0 会让运营以为这行从来没退过，在重复退货面前失去唯一提醒），当前按「其他在途授权累计」扣减，11.2.2.2 交付后在同一处叠加 · **边界**：本模块刻意**没有** RECEIVED 状态（登记实收属 11.2.2.1 未交付，而退回商品默认进待检，编一个「已收到」会让下游以为货已到手并开始做质检与入库分录，把残次品当新品卖出去）；target_disposition 是**意图**不是处置结论（处置属 11.2.3.2 未交付，且必须等实收到货）；**刻意不碰 aftersales_authorization（V156）** —— 它是 11.1.1.1 批量授权的写入所有者，本模块的退货授权单是另一份单据，塞进去会把「同意退 3 件中的 2 件」压成一个金额，谁都答不出退的是哪几件；**刻意不改写 aftersales_case.status**（属 11.1.1.3 未交付，且该表是 11.1.1.1 的写入所有权）；3.6.3.1 地址与联系人虽已交付但在 **catalog 服务**独立库（V31），按模块边界纪律**禁止跨服务 SQL**，本服务读不到 ⇒ 照抄 V150 / V156 / V157 的既有解法落成租户可维护列 + 来源枚举，正式接口到位后按**同一形状**接入，表结构与查询都不用改 · **契约**：python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi 重生成 trade.ts（23 个 Rma* 类型，无同名冲突） · api-proxy **新增一条 services[] 元素**（锚在 11.3.1.2 之后、11.1.1.2 之前，与其他车道插入点被既有条目隔开），形状为 rma-authorizations/{capabilities|returnable-quantities|expire-overdue|uuid(|/(decide|return-logistics|cancel))} 与裸路径；刻意**不放行** `{uuid}/receive`（11.2.2.1 未交付，放行会让界面显示成货已到手）与 `{uuid}/instruction`（11.2.1.2 未交付）；allowlist 测试 rma-authorization-allowlist.test.ts 双向断言（从模型源码反向抽取真实调用点逐条断言放行 + 刻意不放行的形状仍 404 + 不误伤相邻车道形状），全量 trade allowlist 回归 33 文件 / 182 例全过 |
+| 11.2.1.1 | 退货授权单 | — | D4 | 已交付 | 迁移 trade V161__trade_rma_authorization.sql（三张新表 tenant_id NOT NULL + FORCE RLS isolation + GRANT trade_app 与序列 rma_no_seq，**零 ALTER 既有表、零外键**，跨车道 DDL 回归面 = 0，对 V156 aftersales_case 簇 / V157 aftersales_case_line / V99 sales_order_line / V119 order_fulfillment_line_progress 全部只读，跨表一致性由触发器在写入时刻真查一次钉死）：rma_authorization 退货授权单头（**一个状态列到底**：DRAFT / AUTHORIZED / PARTIALLY_AUTHORIZED / REJECTED / EXPIRED / CANCELLED，decision 由状态派生不存第二份真相；退货地址带来源枚举 PLATFORM_RMA / MODULE_3_6_3_ADDRESS_BOOK / TENANT_MAINTAINED 并强制 source_reference；买家回寄物流三件套承运商·运单号·寄出时刻同进同出且必须留登记人；寄回时限 return_by_at 与 expired_at；乐观锁 version）+ rma_authorization_line 授权行（**只存 case_line_id**，SKU 与单价实时读订单行；四个闸门基数快照 requested / ordered / shipped / prior_authorized 记的是「审批当时凭什么批了这个数」供事后审计）+ rma_decision_event 审批留痕（追加式，**由 DB 触发器按状态变更自动追加**，只有真变了才写；运行角色 UPDATE/DELETE 已收回）；**可退量约束钉三层**：表级 CHECK（授权量 ≤ min(订购, 已发) − 其他在途授权累计）+ 触发器 guard_rma_authorization_line 真查一次（没发出去的货不能退、没有履约投影按已发 0 处理、别的在途单已占用的量不能再批）+ 服务层审批时重算；**DB CHECK 钉死部分授权与拒绝必须说明理由**、授权/部分授权必须有寄回时限（没有时限的授权永远不会超时关闭）；索引 4 条对应真实查询形状（按 case 反查 / 在途且带时限的部分索引供超时扫描 / 按 case_line 反查 / 留痕按发生时刻回放） · 端点 10 个挂在 /trade/rma-authorizations：GET /capabilities（职责句五块逐块报可用性 + 下游逐个 Delivered=false 与归属模块 + **刻意不做的事**清单 + 「授权不等于已收到」口径）、GET /returnable-quantities（可退量校验，三个来源服务端实时查）、GET 列表（真分页 + 全量汇总 + 筛选状态/决定/处理方式/售后单/仅超时/关键字 + 排序白名单 4 键）、GET /{id} 详情（头 + 行 + 审批留痕 + 当前可执行动作 + 上下游可用性）、POST 建单（**草稿，授权量恒 0 —— 建单不是审批**）、PUT /{id} 改草稿要素（**只有 DRAFT 可改**：授权后地址就是对买家的承诺，改地址等于让货寄丢）、POST /{id}/decide 审批、POST /{id}/return-logistics 登记回寄物流、POST /{id}/cancel 撤销（可退量立刻还给订单行）、POST /expire-overdue 超时未寄自动关闭（蓝图加粗句的直接落点；**已登记回寄物流的单也照常关闭** —— 登记只说明买家报了个运单号，货到没到库是 11.2.2.1 的事） · 页面 /aftersales/returns（app/aftersales/returns/page.tsx + components/aftersales/rma-authorization-workspace.tsx + rma-authorization-model.ts）第一屏就是**在途 / 已超时**统计卡（不是「一共多少张」——在途的才是要天天盯的）、筛选、列表、详情（授权行含四个基数快照 + 指示性金额并标注「不是可退余额校验结果」+ 审批留痕 + 三个写入口）、可退数量校验对话框（**「不可退」与「额度已占满」分成两种读法** —— 合成一个「可退 0」会让「货根本没发出去」被误当成「额度用完了」）、加载 / 空 / 错误三态、底部能力边界区（未交付下游 + 刻意不做的事） · 测试 RmaAuthorizationIntegrationTest 39 例 + RmaAuthorizationTenancyIntegrationTest 4 例 = 43 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖**可退上限真的被约束**（已发 0 / 无履约投影 / 上限 3 批 4 件三种都批不出去，且**绕过服务层直连 SQL 也批不出去**）、在途占用与撤销后归还、拒绝与超时单不占用可退量、漏报某一行被拒、部分授权与拒绝无理由被拒、缺寄回时限被拒、版本不符与缺失版本都拒绝、已审批单不能二次审批、**超时未寄自动关闭且关闭后可退量立刻归还订单行**、已登记回寄物流的单到时限仍照常关闭、未到时限与已撤销单都不被关闭、**留痕表对运行角色是追加式的**（并带正对照：该留的 INSERT 权限还在、单头与授权行的 UPDATE 还在）、三张表逐张断言 relforce**r**owsecurity、timestamptz 带 +08:00 写入后断言读回零漂移、真分页两页不重叠且汇总不受分页、排序白名单拒绝任意表达式、真实模糊检索命中授权单号/售后单号/订单号、**租户隔离三断言**（含伪造 X-Tenant-Id 的正确预期：**仍然按会话正常执行并 200、写入落在会话租户名下**，断言比对两侧数据库而不是状态码；每轮读写都**新建实体**，「按主键直查对方返回零行」都配同样写法的正对照防假绿）、HTTP 契约 400/401 · **上游依赖实查结论**：售后单与商品行（V156/V157，11.1.1.1 / 11.1.1.2 已交付）可用；**已发数量落点 = order_fulfillment_line_progress.shipped_qty（V119，9.1.2.2）**，**订购数量 = sales_order_line.quantity（V99）**；**已退数量当前没有列**（写入所有者是 11.2.2.2 实收分配，**未交付**）⇒ 可退量里的 receivedQty **恒为 null 并标注归属模块**，**不填 0 冒充「没退过」**（填 0 会让运营以为这行从来没退过，在重复退货面前失去唯一提醒），当前按「其他在途授权累计」扣减，11.2.2.2 交付后在同一处叠加 · **边界**：本模块刻意**没有** RECEIVED 状态（登记实收属 11.2.2.1 未交付，而退回商品默认进待检，编一个「已收到」会让下游以为货已到手并开始做质检与入库分录，把残次品当新品卖出去）；target_disposition 是**意图**不是处置结论（处置属 11.2.3.2 未交付，且必须等实收到货）；**刻意不碰 aftersales_authorization（V156）** —— 它是 11.1.1.1 批量授权的写入所有者，本模块的退货授权单是另一份单据，塞进去会把「同意退 3 件中的 2 件」压成一个金额，谁都答不出退的是哪几件；**刻意不改写 aftersales_case.status**（属 11.1.1.3 未交付，且该表是 11.1.1.1 的写入所有权）；3.6.3.1 地址与联系人虽已交付但在 **catalog 服务**独立库（V31），按模块边界纪律**禁止跨服务 SQL**，本服务读不到 ⇒ 照抄 V150 / V156 / V157 的既有解法落成租户可维护列 + 来源枚举，正式接口到位后按**同一形状**接入，表结构与查询都不用改 · **契约**：python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi 重生成 trade.ts（23 个 Rma* 类型，无同名冲突） · api-proxy **新增一条 services[] 元素**（锚在 11.3.1.2 之后、11.1.1.2 之前，与其他车道插入点被既有条目隔开），形状为 rma-authorizations/{capabilities |
 | 11.2.1.2 | 退货指令下发 | — | D4 | 未开发 | — |
 | 11.2.2.1 | 退货入库 | — | D4 | 未开发 | — |
 | 11.2.2.2 | 实收分配 | — | D4 | 未开发 | — |
