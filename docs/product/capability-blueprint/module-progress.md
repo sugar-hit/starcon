@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **279** |
 | 完成率 | 40.0% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 14 | 0 | 38 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 24 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -372,7 +355,7 @@
 | 11.2.3.3 | 供应商索赔 | — | D4 | 未开发 | — |
 | 11.3.1.1 | 退款申请 | — | D4 | 未开发 | — |
 | 11.3.1.2 | 退款状态 | — | D4 | 已交付 | 迁移 V159__trade_refund_status.sql（**零 ALTER 既有表、零外键**）：refund_execution（退款执行主记录，currency/refund_amount numeric、platform_sync_state 与 execution_state 两条**正交**的状态轴、六态含 UNKNOWN，CHECK 钉死「终态 ⇒ settled_at」与「UNKNOWN 只能从已发起进入」）/ refund_attempt（派发与查证后重试，idempotency_key + 触发器 guard_refund_attempt_retry）/ refund_verification（「先查证交易」三结论 CONFIRMED_NOT_SETTLED / CONFIRMED_SETTLED / INCONCLUSIVE）/ refund_execution_report（外部回报，TIMEOUT 与 UNKNOWN **只推进到 UNKNOWN、绝不进 FAILED**）/ refund_discrepancy（对账差异，四类 + 人工裁定）/ refund_status_event（状态事件留痕，append-only）。六表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS + GRANT；留痕表 REVOKE UPDATE/DELETE；refund_discrepancy 的 UPDATE 做成**列级白名单**（只授回 resolution_* 四列，检测事实改不动）。**蓝图加粗句「外部退款超时不等于失败，重复发起退款会造成实质资损」五层落点**：(1) TIMEOUT/UNKNOWN 在**状态机层**只能进 UNKNOWN；(2) UNKNOWN 的 dispatch **必须**带 verificationId 且结论须为 CONFIRMED_NOT_SETTLED，CONFIRMED_SETTLED 返回 409 并指出正确动作是推进到 SUCCEEDED、INCONCLUSIVE 同样 409；(3) DB 触发器 guard_refund_attempt_retry 兜住绕过服务层的直写；(4) 前端把 UNKNOWN 渲染成**独立的第四种语气**（不复用 FAILED 的 danger 也不复用 SUCCEEDED 的 success）并**排在待处置第一位**；(5) 存在 UNKNOWN 时固定打出「直接重试就是对同一笔退款发起第二次支付」的风险提示。端点 11 个 /trade/refunds（capabilities / filters / GET 列表 / GET 详情 / GET 差异清单 / POST 登记 / dispatch / verifications / reports / platform-sync / discrepancies / discrepancies/{id}/resolve）；默认排序 ATTENTION_FIRST（未知 → 明确失败 → 差异 → 其余），「待处置」沉不到第 30 页；total **必须**带同一个 attention 过滤（否则「第一页 1 条却说有 2 条」）。登记入口显式标注是 **11.3.1.1 未交付**期间的入口（不含可退余额校验与审批），capabilities 报 refundRequestDelivered=false；reportSource=FINANCE_MODULE_12 返回 503 并说明改用 PLATFORM_SYNC / MANUAL_OPERATOR。汇总**按币种分开绝不跨币种相加**。前端 /aftersales/refunds：**新建真实工作区页面**（task-pages 里该入口原本 implemented:false、点进去是空壳；标签从「退款与补发」收窄为「退款状态」—— 补发是 11.1.1.1 的售后单类型不是本模块），api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）。测试 **52 条**（RefundStatusIntegrationTest 42 + RefundStatusTenancyIntegrationTest 10，Testcontainers 真实 PG16、连接池压到 1）+ 前端 **53 条**（model 48 + allowlist 双向 5）。**过程中修掉的真实缺陷**：(1) **typecheck 两处红** —— Button 的 variant 令牌是 cva 联合类型，模型自造的 primary/caution/danger/disabled 透传不过，改为模型出语义、workspace 经 buttonVariant() 映射到真实令牌（caution→outline，描边与品牌填充对比度最大，最防误点重复退款）；(2) **契约静默缺口** —— `Map<String,BigDecimal>` 之类的裸 Map 经 springdoc 只生成空的 `{ }`，前端拿到 unknown 而非 number（金额按币种分开这条汇总直接 typecheck 挂住），改为 list 桶（RefundAmountBucket / RefundStateCountBucket / RefundKindCountBucket / RefundKindAmountBucket），**与 11.1.1.1 的 AftersalesAmountBucket 同一决定**，Map→list 后契约从 `{ }` 变成 `Array<RefundAmountBucket>`；(3) **api-proxy 白名单整条缺失** —— 上一任 worker 没碰白名单，后端 11 个端点与页面都在，浏览器侧却一条都放行不了（页面永远停在错误态而后端日志一次请求都没有），补一条 services[] 元素并用双向断言钉住。**三断言实跑在真实业务表上**：断言1 `断言1_两租户互不可见`（列表 + 按主键直查 + 用对方 id 调详情 404 + 外部交易号与失败原因不可跨租户读）、断言2 `断言2_伪造租户头无效且行仍落在会话租户名下` + **本车道补写的 `断言2_合法B家会话加伪造头改不动A家已有的退款单`**（B 家合法会话 + body 指向 A 家 id + 伪造 X-Tenant-Id/内部键 ⇒ 404，且 A 家行的归属、失败原因、状态与回报条数逐项未变；前者证「租户只从成员关系解析」，后者证**改别人已有数据必须靠 FORCE RLS 挡住**，两个攻击面不同），断言3 `断言3_连接池归还后不串租户且金额汇总各自独立`（池固定 1 条、5 轮交替读写、A 30 / B 70 各自独立），另加六表 FORCE RLS 与运行角色真能读写、差异清单与幂等键按租户隔离、事务外读零行、401/403。 |
-| 11.3.2.1 | 换货授权 | — | D4 | 未开发 | — |
+| 11.3.2.1 | 换货授权 | — | D4 | 已交付 | 迁移 V162__trade_exchange_authorization.sql（五张表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS + GRANT，零 ALTER 既有表、零外键：exchange_authorization 换货授权单（ACTIVE/CANCELLED 两态 × APPROVED/PARTIALLY_APPROVED 两结论，**刻意不落 REJECTED** —— 库存不足而授权不了就是没有授权可立，落一行 REJECTED 只会让人对着永远不会被处理的单反复查看；version 是蓝图输入句点名的 expected_version 载体）/ exchange_authorization_line 逐行（原 SKU 快照 → 替换 SKU → 数量三级链 requested ≥ authorized ≥ reserved）/ exchange_reservation **替换货预占记录**（reservation_id NOT NULL 且无默认值 —— 写不出「没有真实预占」的记录，于是「只读检查 + 一个标志位」在这种 schema 里不可表达）/ exchange_outbound_demand 新发货需求 / exchange_return_requirement 等待旧货回寄；列级 REVOKE：授权数量 / 明细行 / 预占 id 运行角色一律改不了）· **预占是本模块的核心，边界必须说清**：实查集成头，**预占事实的写入所有者是 warehouse**（7.2.1.1 inventory_reservation V102，物理圈货由 7.2.1.2 reservation_allocation V107 落 bucket），AGENTS.md 禁止跨服务 SQL / 外键 / 共享视图 ⇒ trade 侧只经 **ExchangeReservationPort** 调 warehouse 的授权写端点 POST /warehouse/inventory/reservations 登记、POST .../{id}/release 释放（7.2.1.3 V112 已交付），**绝不自己往对方表插一行，也绝不凭空造一个 reservation_id**；替换商品事实走 ExchangeSkuQueryPort 读 catalog（只有 catalog 里**在售**的 SKU 能当替换品），可售量按 warehouse 的 **含安全缓冲可售量**判（按 available 判会在安全库存被击穿时把替换货发出去）· **蓝图加粗句「换货必须同时预占替换货并等待旧货回寄，否则会出现只发不收的损失」三层落点**：(1) 服务层每行同时建三样（预占记录 + 新发货需求 + 回寄要求）；(2) **两个 DEFERRABLE INITIALLY DEFERRED 约束触发器在提交时复核**（trg_exchange_line_reserved：恰好一笔预占 + 恰好一条回寄要求 + 预占量 == 授权量 == reserved；trg_exchange_authorization_complete：各行数量之和 == 头上数量 + 替换 SKU 数一致），于是「有授权行没预占」「预占了没等回寄」「数量对不上」这三种只发不收的入口**绕过服务层直连 SQL 也一样被数据库拒**；(3) 前端把「未预占」渲染成**红色危险**而不是空白（空白会被读成「还没显示」），旧货回寄单列一列 · **并发为什么必须先锁单再打远程**：warehouse 的 7.2.1.1 在 (source_system, source_ref_id) 上**没有**唯一约束（V102 只 UNIQUE(tenant_id, reservation_no)，单号还是 warehouse 自己发的），同一张售后单并发提交两次会各拿到一个 reservation_no、预占两次成立 ⇒ 唯一防线落在 trade 侧：**先 SELECT ... FOR UPDATE 锁 aftersales_case、再让 UNIQUE(tenant_id, case_id) 判第二次**，那个顺序是 load-bearing 的；测试实跑断言 warehouse 端点**只被调用一次**。顺带一个真实发现：aftersales_case_line 在 V157 里是 append-only（UPDATE/DELETE 已 REVOKE），而 PG 的 SELECT ... FOR UPDATE 需要 UPDATE 权限 ⇒ 对它加行锁既拿不到也没意义，行锁只加在售后单头上 · 端点 5 个挂 /trade/aftersales/exchanges：GET /capabilities（含两条硬规则原文 + 下游未交付归属）、GET /filters（**可授权的换货售后单下拉，随单下发商品行** —— 授权对话框必须显示「退的是哪一行、原来是什么 SKU、退几件」，少一次往返就少一次「列表已加载但明细还在飞」的中间态）、GET 列表（真分页 + 汇总 + 筛选 + 排序白名单 3 键 + 真实模糊检索）、GET /{id} 详情（头 + 逐行「退什么→换成什么→换几件→预占在哪一笔→旧货等不等」+ 可执行动作）、POST 批准换货、POST /{id}/cancel 撤销 · **跨服务失败是真补偿不是改标志位**：多行授权时第 3 行预占失败会把前两行逐笔 release，拿不到释放应答就整笔回滚并如实报错 —— 「本地事务回滚了、仓库还占着货」的幽灵占用里，本地表已回滚、事后根本查不到那一行 · 页面 /aftersales/exchanges **新建真实工作区**（exchange-authorization-model / -workspace / -model.test）汇总卡、筛选、真分页、详情弹窗、批准换货对话框（固定显示后端下发的硬规则原文）、撤销对话框（写明会释放预占），加载 / 空 / 错误三态；api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）· 测试 **60 条**（后端 31 = ExchangeAuthorizationIntegrationTest 25 + ExchangeAuthorizationTenancyIntegrationTest 6，Testcontainers 真实 PG16、连接池压到 1；前端 29 = exchange-authorization-model.test 25 + exchange-authorization-allowlist.test 4 双向钉住白名单，另跑全量 allowlist 回归 178 例确认未误吃他人路由）覆盖**预占是真远程写**（授权成功时 warehouse 端点被调用一次且返回的 reservation_id 原样落库）、**预占恰好一次**（并发两次授权同一售后单：一成一 409，warehouse 登记调用数 == 1）、**绕过服务层直连 SQL 也被 DB 迟到触发器打回**（有行无预占 / 有预占无回寄，各自断言到 PG 的中文报错）、库存不足在**预占之前**就拒（断言 warehouse 登记调用数为 0 —— 先占住货再发现不够是更贵的错）、允许部分授权按可售量少批且落库数量与真实预占一致、可售为 0 整笔拒绝、撤销真调 release 且版本不符时**一次都不释放**、替换品与原品相同 / 停售品 / 重复售后行各自被拒、仓库与商品服务不可达时**不留任何已授权的行**、timestamptz 带 +08:00 写入后断言**写回值**零漂移、真分页两页不重叠且汇总不受分页、排序白名单拒绝任意表达式、逐张表断言 relforcerowsecurity 与运行角色真能读写 / 授权数量与预占 id 列级不可写 · **租户隔离三断言实跑在真实业务表上**：断言1 两租户互不可见（列表 + 按主键直查 + 用对方 id 调详情 404 + 仓库预占单号不可跨租户读，每处都配**正对照**）、断言2 伪造 tenant header **仍然 200 且行落在会话租户名下**（比对两侧数据库而非状态码）+ 合法 B 家会话加伪造头**改不动 A 家已有的换货授权单**（归属/状态/撤销原因/版本/预占状态逐项未变）、断言3 连接池固定 1 条、5 轮交替读写且**每轮新建实体**（否则测的是幂等不是隔离），汇总按累计条数断言 · **过程中修掉的真实缺陷**：(1) **jOOQ 没有 fetchOne(String, Class, Object...) 重载** —— 那个调用退化成 varargs，`Object.class` 被当成**绑参**塞进 SQL，报「Type class java.lang.Class is not supported in dialect POSTGRES」，而 SQL 里的 ?::uuid 全都对、单看语句根本看不出问题（fetch 同理）；(2) **查询「没授权过」时不能按必有行的标量去 .get(0,...)**，第一次授权直接 NPE；(3) **明细行 append-only ⇒ 「先插 0 再回填预占量」这种写法在本服务里根本不可执行**，改成「先预占、后建行，建行即预占足额」，正好是那条迟到约束触发器要复核的形态；(4) cancel 的 SELECT 误写了 authorization_id 列（头表没有这一列）；(5) 契约静默缺口：授权对话框拿不到商品行，**filters 少下发 lines**（首版把 caseId 当 caseLineId 传，后端会以「商品行不属于这张售后单」拒掉）⇒ filters 随单下发 ExchangeCaseLineOption；另 statusLabels/decisionLabels 一并下发，界面按下标取标签，**不在前端另写一份词表**（前端硬编码就等于有两个真相）· **边界**：本模块只**立**新发货需求与「等旧货回寄」的要求，**刻意不建 outbound_order_ref 之类的下游回填列** —— 9.3.3.1 新出库与 11.2 退回旧货（11.2.2.2）**未交付**，建一列永远为空的引用字段只会在页面上显示成「已下发」而实际没有任何出库单；capabilities 的 outboundHandoffDelivered / oldGoodsReturnDelivered 如实报 false 并给出归属模块 · 11.3.2.2 换货新单是下游，本模块**不实现**；换货新单**不修改原出库事实**，原单保持完整可追溯 |
 | 11.3.2.2 | 换货新单 | — | D4 | 未开发 | — |
 | 11.4.1.1 | 纠纷列表 | — | D7 | 未开发 | — |
 | 11.4.1.2 | 证据与申诉 | — | D4 | 未开发 | — |
