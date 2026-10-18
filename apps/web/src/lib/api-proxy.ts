@@ -1151,6 +1151,59 @@ const services: readonly {
       /^rma-authorizations\/(?:capabilities|returnable-quantities|expire-overdue|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:decide|return-logistics|cancel))?)$|^rma-authorizations$/,
   },
   {
+    // 11.2.1.2 退货指令下发（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.2.1.1（rma-authorizations）那条**之后**、11.1.1.2 那条**之前**：
+    // 与相邻两条的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，本条与相邻两条的前缀形状互不相交
+    // （本条一律以 `rma-instructions/` 开头），谁先谁后都不误吃。
+    //
+    // 命名空间**独立于 `/trade/rma-authorizations`**：本模块是 11.2.1.1 的**下游**
+    // （指引 / 标签 / 轨迹），不是退货授权单的另一个视图。塞进
+    // `rma-authorizations/{uuid}/instructions` 会让两个模块共用一个前缀，
+    // 而它们各自的写入所有权与状态机是分开的。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                能力与上下游可用性（**明说 10 物流 / 15 客服 /
+    //                                11.2.2.1 / 11.2.3.x 全部未交付，「已下发 ≠ 已寄回」**）
+    //   （裸）                      列表（GET，真分页 + 多维筛选 + 按承运商/运单号反查 + 排序白名单）
+    //   （裸）                      登记退货指引草稿（POST，挂在已授权的授权单下）
+    //   {uuid}                      详情聚合（GET，头 + 行 + 留痕 + 轨迹 + 当前标签 + 动作）
+    //   {uuid}                      改草稿要素（PUT，**只有 DRAFT 可改**：下发即冻结）
+    //   {uuid}/issue                下发指引（POST，内容在这一刻冻结）
+    //   {uuid}/acknowledge          登记买家已确认收到（POST，**主动回执**，不是我们推测）
+    //   {uuid}/cancel               人工撤销（POST）
+    //   expire-overdue              寄回时限到期自动失效（POST，**只判时限，不判货有没有回来**）
+    //   {uuid}/label                生成退货标签（POST，真字节 + SHA-256 校验和）
+    //   {uuid}/label                取标签文件内容（GET，服务端重算校验和比对）
+    //   {uuid}/label/deliver        交付标签（POST，**生成 ≠ 交付**）
+    //   {uuid}/label/void           作废标签（POST，理由必填，作废后可重出）
+    //   {uuid}/tracking             回寄轨迹时间线（GET，追加式事件 + 按运单号分组的当前状态）
+    //   {uuid}/tracking             登记一条轨迹（POST，追加式；承运商重复推送去重）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / expire-overdue）**排在** uuid 段之前 ——
+    //   否则 `capabilities` 会被当成 uuid 段匹配掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ `label` 后面**只接** `deliver` 与 `void` 两个字面量段：多一层仍然 404 ——
+    //   放行一个后端不存在的形状只会让界面以为已交付。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}` 的 DELETE —— 指引是发给买家的一份文件，删掉一行等于抹掉纠纷证据
+    //   * `{uuid}/receive` —— 登记退货实收属 **11.2.2.1，未交付**。
+    //     蓝图加粗句「本系统只负责指引与跟踪，**不控制实物**」：放行「标记已收到」
+    //     会让界面显示成货已到手并开始做入库分录，而退回商品**默认进待检**，
+    //     直接当已收货处理会把残次品当新品卖出去。
+    //   * `{uuid}/waybill` —— 退货运单属 **10 物流，未交付**。本模块出的模板标签
+    //     **不含承运商运单号**，带了就等于声称已对接面单接口。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^rma-instructions\/(?:capabilities|expire-overdue|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:issue|acknowledge|cancel|tracking|label(?:\/(?:deliver|void))?))?)$|^rma-instructions$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
