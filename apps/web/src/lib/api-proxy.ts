@@ -1063,6 +1063,52 @@ const services: readonly {
       /^refunds(?:\/(?:capabilities|filters|discrepancies)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:dispatch|verifications|reports|platform-sync|discrepancies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve)?)?)?)?$/,
   },
   {
+    // 11.2.1.1 退货授权单（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.3.1.2（refunds）那条**之后**、11.1.1.2 那条**之前**：
+    // 与其他车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，本条与相邻两条的前缀形状互不相交
+    // （本条一律以 `rma-authorizations/` 开头），谁先谁后都不误吃。
+    //
+    // 命名空间**独立于 `/trade/aftersales`**：退货授权单是另一张单据（行级授权数量 +
+    // 退货地址 + 回寄物流 + 寄回时限），不是售后单的另一个视图。塞进
+    // `aftersales/cases/{uuid}/returns` 会让人以为它是 11.1.1.2 详情的一个子资源，
+    // 而本模块的下游是 11.2.1.2 退货指令，不是售后详情页。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                 能力与上下游可用性（**明说 11.2.1.2 / 11.2.2.x /
+    //                               11.2.3.x 全部未交付，「授权 ≠ 已收到」**）
+    //   returnable-quantities        原订单行可退量校验（GET，三个来源服务端实时查）
+    //   （裸）                       列表（GET，真分页 + 多维筛选 + 排序白名单）
+    //   （裸）                       登记退货授权单（POST，建草稿，**不是审批**）
+    //   {uuid}                       详情聚合（GET，头 + 行 + 审批留痕 + 可执行动作）
+    //   {uuid}                       改草稿要素（PUT，**只有 DRAFT 可改**）
+    //   {uuid}/decide                审批：授权 / 部分授权 / 拒绝（POST）
+    //   {uuid}/return-logistics      登记买家回寄物流（POST，三件套同进同出）
+    //   {uuid}/cancel                人工撤销（POST，可退量立刻还给订单行）
+    //   expire-overdue               超时未寄自动关闭（POST）
+    //
+    // ⚠️ 判别顺序：两个**字面量子路径**（capabilities / returnable-quantities /
+    //   expire-overdue）**排在** uuid 段之前 —— 否则 `returnable-quantities`
+    //   会被当成 uuid 段匹配掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}` 的 DELETE —— 退货授权是审批单据，删掉一行等于抹掉纠纷证据
+    //   * `{uuid}/receive` —— 登记退货实收属 **11.2.2.1，未交付**。
+    //     蓝图加粗句「授权不等于已收到」：货可能还在路上，也可能根本没寄回；
+    //     放行一个「标记已收到」会让界面显示成货已到手并开始做入库分录，
+    //     而退回商品**默认进待检**，直接当已收货处理会把残次品当新品卖出去。
+    //   * `{uuid}/instruction` —— 退货指引与标签属 **11.2.1.2，未交付**
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^rma-authorizations\/(?:capabilities|returnable-quantities|expire-overdue|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:decide|return-logistics|cancel))?)$|^rma-authorizations$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
