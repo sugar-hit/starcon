@@ -9,6 +9,7 @@ import { MemberOnboardingWorkspace } from './member-onboarding-workspace';
 import { ApprovalFlowWorkspace } from './approval-flow-workspace';
 import { ApprovalRuleWorkspace } from './approval-rule-workspace';
 import { MyApprovalWorkspace } from './my-approval-workspace';
+import { ApprovalRecordWorkspace } from './approval-record-workspace';
 import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
@@ -58,6 +59,11 @@ const destinations = [
     '查看停在你名下节点的待办（单据类型、金额、申请人、停留时长、当前节点），支持批量审批与转交',
   ],
   [
+    'approval-records',
+    '审批记录',
+    '检索全租户审批全链路：发起、流转节点、各节点意见与时间、转交、驳回与最终结果，含统计报表与审计导出',
+  ],
+  [
     'operation-log',
     '操作日志',
     '按用户、时间与请求 ID 检索登录、API 调用、任务执行与错误堆栈，用于运维排障',
@@ -68,7 +74,12 @@ const destinations = [
 // 不是 AdministrationPanel 的一种 kind，所以不进这个联合类型；
 // 它只需要在 visible() 里能被判出来（visible 的 key 是 string）。
 type WorkspaceKind =
-  AdministrationKind | 'onboarding' | 'approval-flows' | 'approval-rules' | 'my-approvals';
+  | AdministrationKind
+  | 'onboarding'
+  | 'approval-flows'
+  | 'approval-rules'
+  | 'my-approvals'
+  | 'approval-records';
 
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
@@ -109,6 +120,10 @@ function visible(session: Access, key: string) {
   // 「拿到待办」与「配流程」是两种风险：能配流程的人不该因此自动拿到审批权。
   // 页面权限只决定能不能用这个页面，具体哪些单子归他由节点审批人判定（服务端按成员关系过滤）。
   if (key === 'my-approvals') return hasPermission(session, 'identity.approval_inbox.read');
+  // 审批记录（17.4.2.2）是独立页面权限码，且刻意**不复用** approval_inbox.* ——
+  // 「能看全部审批记录」与「能批单」是两种风险：审计岗要看得见所有人批了什么，
+  // 但绝不该因此拿到审批权。同理也不复用 approval_flow.*（那是配流程的权）。
+  if (key === 'approval-records') return hasPermission(session, 'identity.approval_record.read');
   // 17.6.1.1 账簿与本位币是独立页面权限码（路由在 /settings/books），
   // 不走 canManage 的页面映射 —— AdministrationKind 里没有 'books'，
   // 少了这条会落到 canManage 兜底并恒为 false，于是有权限的人也看不到入口。
@@ -153,6 +168,8 @@ export function IdentityWorkspace({
         <ApprovalRuleWorkspace />
       ) : kind === 'my-approvals' ? (
         <MyApprovalWorkspace />
+      ) : kind === 'approval-records' ? (
+        <ApprovalRecordWorkspace />
       ) : kind ? (
         <AdministrationPanel
           key={`${session.tenantId}:${kind}`}
