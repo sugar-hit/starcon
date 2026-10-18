@@ -23549,6 +23549,399 @@
           }
         }
       }
+    },
+    "/trade/aftersales/exchange-orders": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "authorizationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/sync": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/submit": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/filters": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/capabilities": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -23781,7 +24174,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -25238,49 +25631,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -25305,7 +25698,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -25785,14 +26178,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -29354,7 +29747,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -30235,7 +30628,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -38893,7 +39286,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-08,
+            "minimum": 1e-8,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39005,12 +39398,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -40815,9 +41208,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -59189,6 +59582,542 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderCreateRequest": {
+        "required": [
+          "authorizationId"
+        ],
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderDetail": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/ExchangeOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderLineView"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderEventView"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExchangeOrderEventView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "fromClosureStatus": {
+            "type": "string"
+          },
+          "toClosureStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExchangeOrderLineView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "linkNo": {
+            "type": "string"
+          },
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "newOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderNo": {
+            "type": "string"
+          },
+          "newOrderStatus": {
+            "type": "string"
+          },
+          "newOrderStatusLabel": {
+            "type": "string"
+          },
+          "closureStatus": {
+            "type": "string"
+          },
+          "closureStatusLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newOrderAmount": {
+            "type": "string"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstShippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipmentRecordNo": {
+            "type": "string"
+          },
+          "lastTrackingStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatusLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExchangeOrderSyncRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderSubmitRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderCancelRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExchangeOrderSummary"
+          }
+        }
+      },
+      "ExchangeOrderSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "pendingDispatchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationLineOption": {
+        "type": "object",
+        "properties": {
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationOption": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "authorizedQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasShippingSnapshot": {
+            "type": "boolean"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationLineOption"
+            }
+          }
+        }
+      },
+      "ExchangeOrderFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationOption"
+            }
+          },
+          "authorizationCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderCapabilities": {
+        "type": "object",
+        "properties": {
+          "exchangeAuthorizationDelivered": {
+            "type": "boolean"
+          },
+          "realNewSalesOrder": {
+            "type": "boolean"
+          },
+          "shipmentProjectionReadable": {
+            "type": "boolean"
+          },
+          "shipmentProjectionOwnerModule": {
+            "type": "string"
+          },
+          "outboundHandoffDelivered": {
+            "type": "boolean"
+          },
+          "outboundHandoffOwnerModule": {
+            "type": "string"
+          },
+          "oldGoodsReturnReceivedDelivered": {
+            "type": "boolean"
+          },
+          "oldGoodsReturnOwnerModule": {
+            "type": "string"
+          },
+          "closureStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowedNextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "hardRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
