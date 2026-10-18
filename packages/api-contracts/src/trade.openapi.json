@@ -1432,6 +1432,56 @@
         }
       }
     },
+    "/trade/aftersales/intake/owner-roster/{id}": {
+      "put": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "put_trade_aftersales_intake_owner_roster_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesOwnerRosterUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders": {
       "get": {
         "tags": [
@@ -2267,6 +2317,509 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderChangeCancelCancellationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds": {
+      "get": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "get_trade_refunds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "executionState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformSyncState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformRefundMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refundNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "failureCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyNeedsAttention",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundExecutionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/verifications": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_verifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundVerificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundVerificationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/reports": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_reports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/platform-sync": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_platform_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPlatformSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/dispatch": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/discrepancies": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_discrepancies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDiscrepancyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDiscrepancyRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}/discrepancies/{discrepancyId}/resolve": {
+      "post": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "post_trade_refunds_id_discrepancies_discrepancyId_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "discrepancyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDiscrepancyResolutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDiscrepancyRow"
                 }
               }
             }
@@ -13210,6 +13763,282 @@
         }
       }
     },
+    "/trade/aftersales/intake/reply-sla": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_reply_sla",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AftersalesReplySlaView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_reply_sla",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReplySlaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReplySlaView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/reply-sla/{id}/retire": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_reply_sla_id_retire",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesReplySlaRetire"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReplySlaView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/owner-roster": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_owner_roster",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_owner_roster",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesOwnerRosterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesOwnerRosterView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/cases": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AftersalesIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/cases/{caseId}/rejudge": {
+      "post": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "post_trade_aftersales_intake_cases_caseId_rejudge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/cases": {
       "get": {
         "tags": [
@@ -14437,6 +15266,173 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SalesOrderCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/{id}": {
+      "get": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "get_trade_refunds_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundExecutionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/filters": {
+      "get": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "get_trade_refunds_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/discrepancies": {
+      "get": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "get_trade_refunds_discrepancies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "resolutionState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDiscrepancyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refunds/capabilities": {
+      "get": {
+        "tags": [
+          "refund-status-controller"
+        ],
+        "operationId": "get_trade_refunds_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundStatusCapabilities"
                 }
               }
             }
@@ -20651,6 +21647,201 @@
         }
       }
     },
+    "/trade/aftersales/intake/verdicts": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_verdicts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eligibility",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mustRefund",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "intakeSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerAssignmentMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currentOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/reply-sla/effective": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_reply_sla_effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesReplySlaView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/intake/capabilities": {
+      "get": {
+        "tags": [
+          "aftersales-intake-controller"
+        ],
+        "operationId": "get_trade_aftersales_intake_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AftersalesIntakeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/filters": {
       "get": {
         "tags": [
@@ -20837,676 +22028,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AftersalesCaseCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds": {
-      "get": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "get_trade_refunds",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "executionState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformSyncState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformRefundMethod",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "currency",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "orderNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "refundNo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "failureCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "minAmount",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "maxAmount",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "onlyNeedsAttention",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundExecutionCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/verifications": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_verifications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundVerificationRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundVerificationRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/reports": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_reports",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundReportRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/platform-sync": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_platform_sync",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundPlatformSyncRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/dispatch": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_dispatch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundDispatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/discrepancies": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_discrepancies",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundDiscrepancyCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDiscrepancyRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}/discrepancies/{discrepancyId}/resolve": {
-      "post": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "post_trade_refunds_id_discrepancies_discrepancyId_resolve",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "discrepancyId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundDiscrepancyResolutionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDiscrepancyRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/{id}": {
-      "get": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "get_trade_refunds_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundExecutionDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/filters": {
-      "get": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "get_trade_refunds_filters",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/discrepancies": {
-      "get": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "get_trade_refunds_discrepancies",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "resolutionState",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDiscrepancyPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refunds/capabilities": {
-      "get": {
-        "tags": [
-          "refund-status-controller"
-        ],
-        "operationId": "get_trade_refunds_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundStatusCapabilities"
                 }
               }
             }
@@ -21745,7 +22266,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -22070,49 +22591,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -22137,7 +22658,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -22617,14 +23138,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -23924,6 +24445,63 @@
           }
         }
       },
+      "AftersalesOwnerRosterUpdate": {
+        "type": "object",
+        "properties": {
+          "acceptingNewCases": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesOwnerRosterView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerDisplayName": {
+            "type": "string"
+          },
+          "ownerRoleLabel": {
+            "type": "string"
+          },
+          "ownerSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "acceptingNewCases": {
+            "type": "boolean"
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SalesOrderCreateInput": {
         "required": [
           "currency",
@@ -24639,6 +25217,451 @@
           }
         }
       },
+      "RefundExecutionCreate": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "platformRefundMethod": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL",
+              "PLATFORM",
+              "BALANCE"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundExecutionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "refundNo": {
+            "type": "string"
+          },
+          "executionState": {
+            "type": "string"
+          },
+          "executionStateLabel": {
+            "type": "string"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "platformSource": {
+            "type": "string"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformRefundMethod": {
+            "type": "string"
+          },
+          "platformSyncState": {
+            "type": "string"
+          },
+          "platformRefundNo": {
+            "type": "string"
+          },
+          "externalTransactionRef": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "actionBlocking": {
+            "type": "string"
+          },
+          "actionReason": {
+            "type": "string"
+          },
+          "requiredVerdict": {
+            "type": "string"
+          },
+          "needsAttention": {
+            "type": "boolean"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "openDiscrepancyCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "initiatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastVerifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundVerificationRequest": {
+        "type": "object",
+        "properties": {
+          "verifySource": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_QUERY",
+              "FINANCE_QUERY",
+              "MANUAL"
+            ]
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_SETTLED",
+              "CONFIRMED_NOT_SETTLED",
+              "INCONCLUSIVE"
+            ]
+          },
+          "transactionRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundVerificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verifySource": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "transactionRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundReportRequest": {
+        "type": "object",
+        "properties": {
+          "reportSource": {
+            "type": "string",
+            "enum": [
+              "FINANCE_MODULE_12",
+              "PLATFORM_SYNC",
+              "MANUAL_OPERATOR"
+            ]
+          },
+          "reportOutcome": {
+            "type": "string",
+            "enum": [
+              "SUCCEEDED",
+              "FAILED",
+              "TIMEOUT",
+              "UNKNOWN"
+            ]
+          },
+          "failureClass": {
+            "type": "string",
+            "enum": [
+              "DEFINITIVE",
+              "INDETERMINATE"
+            ]
+          },
+          "externalTransactionRef": {
+            "type": "string"
+          },
+          "reportedAmount": {
+            "type": "number"
+          },
+          "reportedCurrency": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundPlatformSyncRequest": {
+        "type": "object",
+        "properties": {
+          "platformSyncState": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUESTED",
+              "PENDING",
+              "SYNCED",
+              "DISCREPANCY"
+            ]
+          },
+          "platformRefundNo": {
+            "type": "string"
+          },
+          "platformAmount": {
+            "type": "number"
+          },
+          "platformCurrency": {
+            "type": "string"
+          },
+          "platformRefundedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundDispatchRequest": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dispatchChannel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundDiscrepancyCreate": {
+        "type": "object",
+        "properties": {
+          "discrepancyKind": {
+            "type": "string",
+            "enum": [
+              "AMOUNT",
+              "CURRENCY",
+              "TIMING",
+              "EXISTENCE"
+            ]
+          },
+          "systemAmount": {
+            "type": "number"
+          },
+          "systemCurrency": {
+            "type": "string"
+          },
+          "systemState": {
+            "type": "string",
+            "enum": [
+              "NOT_INITIATED",
+              "IN_FLIGHT",
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED",
+              "DISCREPANCY"
+            ]
+          },
+          "systemRefundedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "platformAmount": {
+            "type": "number"
+          },
+          "platformCurrency": {
+            "type": "string"
+          },
+          "platformState": {
+            "type": "string",
+            "enum": [
+              "NOT_INITIATED",
+              "IN_FLIGHT",
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED",
+              "DISCREPANCY"
+            ]
+          },
+          "platformRefundedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundDiscrepancyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "refundNo": {
+            "type": "string"
+          },
+          "discrepancyKind": {
+            "type": "string"
+          },
+          "discrepancyKindLabel": {
+            "type": "string"
+          },
+          "systemAmount": {
+            "type": "number"
+          },
+          "systemCurrency": {
+            "type": "string"
+          },
+          "systemState": {
+            "type": "string"
+          },
+          "systemRefundedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "platformAmount": {
+            "type": "number"
+          },
+          "platformCurrency": {
+            "type": "string"
+          },
+          "platformState": {
+            "type": "string"
+          },
+          "platformRefundedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "resolutionState": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundDiscrepancyResolutionRequest": {
+        "type": "object",
+        "properties": {
+          "resolutionState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "RequirementPreviewInput": {
         "required": [
           "bomVersionId",
@@ -25232,7 +26255,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -26113,7 +27136,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -34771,7 +35794,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -34883,12 +35906,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -36693,9 +37716,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -37352,7 +38375,103 @@
         },
         "description": "一张售后单的当前归因"
       },
-      "AftersalesCaseCreate": {
+      "AftersalesReplySlaCreate": {
+        "type": "object",
+        "properties": {
+          "platformScope": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AftersalesReplySlaView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformScope": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveNow": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AftersalesReplySlaRetire": {
+        "type": "object",
+        "properties": {
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesOwnerRosterCreate": {
+        "type": "object",
+        "properties": {
+          "ownerRef": {
+            "type": "string"
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesIntakeRequest": {
         "type": "object",
         "properties": {
           "orderId": {
@@ -37378,12 +38497,19 @@
           "requestedQuantity": {
             "type": "number"
           },
-          "platformCaseNo": {
+          "intakeSource": {
+            "type": "string"
+          },
+          "intakeReference": {
             "type": "string",
             "nullable": true
           },
-          "platformCaseUrl": {
+          "intakeChannel": {
             "type": "string",
+            "nullable": true
+          },
+          "platformMustRefund": {
+            "type": "boolean",
             "nullable": true
           },
           "platformReceivedAt": {
@@ -37410,6 +38536,10 @@
             "format": "date-time",
             "nullable": true
           },
+          "handlingPlan": {
+            "type": "string",
+            "nullable": true
+          },
           "ownerRef": {
             "type": "string",
             "nullable": true
@@ -37420,19 +38550,6 @@
           },
           "ownerRoleLabel": {
             "type": "string",
-            "nullable": true
-          },
-          "ownerSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerSourceReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerCapturedAt": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         }
@@ -37557,6 +38674,258 @@
             "format": "date-time"
           },
           "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AftersalesIntakeResult": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+          },
+          "caseRow": {
+            "$ref": "#/components/schemas/AftersalesCaseRow"
+          },
+          "ownerAssignment": {
+            "$ref": "#/components/schemas/AftersalesOwnerAssignmentView"
+          },
+          "policyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeVerdictView": {
+        "type": "object",
+        "properties": {
+          "verdictId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "intakeSource": {
+            "type": "string"
+          },
+          "intakeReference": {
+            "type": "string"
+          },
+          "intakeChannel": {
+            "type": "string"
+          },
+          "requestReceivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "judgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderAnchorKind": {
+            "type": "string"
+          },
+          "orderAnchorAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "policyReturnWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnWindowDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inReturnWindow": {
+            "type": "boolean"
+          },
+          "windowMarginHours": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "policyMustRefundReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mustRefund": {
+            "type": "boolean"
+          },
+          "mustRefundBasis": {
+            "type": "string"
+          },
+          "mustRefundSituation": {
+            "type": "string"
+          },
+          "eligibility": {
+            "type": "string"
+          },
+          "handlingPlan": {
+            "type": "string"
+          },
+          "handlingPlanSource": {
+            "type": "string"
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replyDueBasis": {
+            "type": "string"
+          },
+          "replySlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveSlaHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ownerAssignmentMode": {
+            "type": "string"
+          },
+          "policySourceScope": {
+            "type": "string"
+          },
+          "policyParameterCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "policyReadAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AftersalesOwnerAssignmentView": {
+        "type": "object",
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesCaseCreate": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "platformCaseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "buyerRequest": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolveDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownerRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRoleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerSourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerCapturedAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -39747,6 +41116,579 @@
             "type": "string"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundAmountBucket": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "RefundExecutionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundExecutionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "needsAttentionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inFlightCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countByState": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundStateCountBucket"
+            }
+          },
+          "amountByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundAmountBucket"
+            }
+          },
+          "amountRangeSemantics": {
+            "type": "string"
+          },
+          "sortApplied": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundStateCountBucket": {
+        "type": "object",
+        "properties": {
+          "executionState": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundAttemptRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attemptNo": {
+            "type": "string"
+          },
+          "attemptKind": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stateAtDispatch": {
+            "type": "string"
+          },
+          "dispatchChannel": {
+            "type": "string"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundExecutionDetail": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/RefundExecutionRow"
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundAttemptRow"
+            }
+          },
+          "verifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundVerificationRow"
+            }
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundReportRow"
+            }
+          },
+          "discrepancies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundDiscrepancyRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundStatusEventRow"
+            }
+          },
+          "allowedNextStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "advice": {
+            "$ref": "#/components/schemas/RefundRetryAdvice"
+          },
+          "platformNote": {
+            "type": "string"
+          },
+          "idempotencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundReportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportSource": {
+            "type": "string"
+          },
+          "reportOutcome": {
+            "type": "string"
+          },
+          "failureClass": {
+            "type": "string"
+          },
+          "externalTransactionRef": {
+            "type": "string"
+          },
+          "reportedAmount": {
+            "type": "number"
+          },
+          "reportedCurrency": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundRetryAdvice": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "DISPATCH",
+              "AWAIT",
+              "VERIFY",
+              "RETRY",
+              "MANUAL",
+              "NONE"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "requiredVerdict": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_SETTLED",
+              "CONFIRMED_NOT_SETTLED",
+              "INCONCLUSIVE"
+            ]
+          },
+          "blocking": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundStatusEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromState": {
+            "type": "string"
+          },
+          "toState": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "verificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundFilterOptions": {
+        "type": "object",
+        "properties": {
+          "executionStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformSyncStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformRefundMethods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failureCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "orderSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundDiscrepancyPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundDiscrepancyRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acknowledgedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundKindCountBucket"
+            }
+          },
+          "systemAmountByKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundKindAmountBucket"
+            }
+          },
+          "platformAmountByKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundKindAmountBucket"
+            }
+          }
+        }
+      },
+      "RefundKindAmountBucket": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "RefundKindCountBucket": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundActionSpec": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "guard": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundDownstream": {
+        "type": "object",
+        "properties": {
+          "customerNotifyDelivered": {
+            "type": "boolean"
+          },
+          "customerNotifyOwner": {
+            "type": "string"
+          },
+          "customerNotifyNote": {
+            "type": "string"
+          },
+          "orderStatusWritebackDelivered": {
+            "type": "boolean"
+          },
+          "orderStatusWritebackOwner": {
+            "type": "string"
+          },
+          "orderStatusWritebackNote": {
+            "type": "string"
+          },
+          "platformSyncDelivered": {
+            "type": "boolean"
+          },
+          "platformSyncOwner": {
+            "type": "string"
+          },
+          "platformSyncNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundStateTransitionSpec": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "fromLabel": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "toLabel": {
+            "type": "string"
+          },
+          "requiresVerification": {
+            "type": "boolean"
+          },
+          "allowedVerdict": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundStatusCapabilities": {
+        "type": "object",
+        "properties": {
+          "stateMachine": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundStateTransitionSpec"
+            }
+          },
+          "failureClasses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verificationVerdicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "discrepancyKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformSyncStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstream": {
+            "$ref": "#/components/schemas/RefundUpstream"
+          },
+          "downstream": {
+            "$ref": "#/components/schemas/RefundDownstream"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundActionSpec"
+            }
+          },
+          "idempotencyGuarantees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unknownStateNote": {
+            "type": "string"
+          },
+          "retryGuardNote": {
+            "type": "string"
+          },
+          "discrepancyNote": {
+            "type": "string"
+          },
+          "shopGranularityNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundUpstream": {
+        "type": "object",
+        "properties": {
+          "financeDelivered": {
+            "type": "boolean"
+          },
+          "financeOwner": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "refundRequestDelivered": {
+            "type": "boolean"
+          },
+          "refundRequestOwner": {
+            "type": "string"
+          },
+          "refundRequestNote": {
+            "type": "string"
+          },
+          "reportLandingNote": {
             "type": "string"
           }
         }
@@ -51560,6 +53502,164 @@
         },
         "description": "枚举下拉项"
       },
+      "AftersalesIntakePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesIntakeVerdictView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AftersalesIntakeSummary"
+          },
+          "sortSemantics": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mustRefundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "replyOverdueMustRefundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfWindowPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supersededCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AftersalesHandlingPlanOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "AftersalesIntakeCapabilities": {
+        "type": "object",
+        "properties": {
+          "judgmentResponsibilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "policySource": {
+            "type": "string"
+          },
+          "policySourceNote": {
+            "type": "string"
+          },
+          "returnWindowParameter": {
+            "type": "string"
+          },
+          "mustRefundParameter": {
+            "type": "string"
+          },
+          "effectiveReturnWindowDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "effectiveMustRefundReasons": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "policyScopeType": {
+            "type": "string",
+            "nullable": true
+          },
+          "replyDeadlineSource": {
+            "type": "string"
+          },
+          "replyDeadlineNote": {
+            "type": "string"
+          },
+          "replySlaConfigured": {
+            "type": "boolean"
+          },
+          "rosterSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assignableRosterSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ownerSourceNote": {
+            "type": "string"
+          },
+          "mustRefundEnforcementNote": {
+            "type": "string"
+          },
+          "platformMessageNote": {
+            "type": "string"
+          },
+          "intakeSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "handlingPlans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AftersalesHandlingPlanOption"
+            }
+          },
+          "crossServiceNote": {
+            "type": "string"
+          }
+        }
+      },
       "AftersalesCaseSortOption": {
         "type": "object",
         "properties": {
@@ -52693,1024 +54793,6 @@
             "type": "string"
           },
           "note": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundExecutionCreate": {
-        "type": "object",
-        "properties": {
-          "idempotencyKey": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "refundAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "platformRefundMethod": {
-            "type": "string",
-            "enum": [
-              "ORIGINAL",
-              "PLATFORM",
-              "BALANCE"
-            ]
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundExecutionRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "refundNo": {
-            "type": "string"
-          },
-          "executionState": {
-            "type": "string"
-          },
-          "executionStateLabel": {
-            "type": "string"
-          },
-          "failureClass": {
-            "type": "string"
-          },
-          "failureCode": {
-            "type": "string"
-          },
-          "failureReason": {
-            "type": "string"
-          },
-          "refundAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "platformSource": {
-            "type": "string"
-          },
-          "orderNo": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "platformRefundMethod": {
-            "type": "string"
-          },
-          "platformSyncState": {
-            "type": "string"
-          },
-          "platformRefundNo": {
-            "type": "string"
-          },
-          "externalTransactionRef": {
-            "type": "string"
-          },
-          "action": {
-            "type": "string"
-          },
-          "actionLabel": {
-            "type": "string"
-          },
-          "actionBlocking": {
-            "type": "string"
-          },
-          "actionReason": {
-            "type": "string"
-          },
-          "requiredVerdict": {
-            "type": "string"
-          },
-          "needsAttention": {
-            "type": "boolean"
-          },
-          "attemptCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "openDiscrepancyCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "initiatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastVerifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resolvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundVerificationRequest": {
-        "type": "object",
-        "properties": {
-          "verifySource": {
-            "type": "string",
-            "enum": [
-              "PLATFORM_QUERY",
-              "FINANCE_QUERY",
-              "MANUAL"
-            ]
-          },
-          "verdict": {
-            "type": "string",
-            "enum": [
-              "CONFIRMED_SETTLED",
-              "CONFIRMED_NOT_SETTLED",
-              "INCONCLUSIVE"
-            ]
-          },
-          "transactionRef": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "verifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundVerificationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "verifySource": {
-            "type": "string"
-          },
-          "verdict": {
-            "type": "string"
-          },
-          "verdictLabel": {
-            "type": "string"
-          },
-          "transactionRef": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "verifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundReportRequest": {
-        "type": "object",
-        "properties": {
-          "reportSource": {
-            "type": "string",
-            "enum": [
-              "FINANCE_MODULE_12",
-              "PLATFORM_SYNC",
-              "MANUAL_OPERATOR"
-            ]
-          },
-          "reportOutcome": {
-            "type": "string",
-            "enum": [
-              "SUCCEEDED",
-              "FAILED",
-              "TIMEOUT",
-              "UNKNOWN"
-            ]
-          },
-          "failureClass": {
-            "type": "string",
-            "enum": [
-              "DEFINITIVE",
-              "INDETERMINATE"
-            ]
-          },
-          "externalTransactionRef": {
-            "type": "string"
-          },
-          "reportedAmount": {
-            "type": "number"
-          },
-          "reportedCurrency": {
-            "type": "string"
-          },
-          "failureCode": {
-            "type": "string"
-          },
-          "failureReason": {
-            "type": "string"
-          },
-          "reportedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundPlatformSyncRequest": {
-        "type": "object",
-        "properties": {
-          "platformSyncState": {
-            "type": "string",
-            "enum": [
-              "NOT_REQUESTED",
-              "PENDING",
-              "SYNCED",
-              "DISCREPANCY"
-            ]
-          },
-          "platformRefundNo": {
-            "type": "string"
-          },
-          "platformAmount": {
-            "type": "number"
-          },
-          "platformCurrency": {
-            "type": "string"
-          },
-          "platformRefundedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundDispatchRequest": {
-        "type": "object",
-        "properties": {
-          "idempotencyKey": {
-            "type": "string"
-          },
-          "verificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dispatchChannel": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundDiscrepancyCreate": {
-        "type": "object",
-        "properties": {
-          "discrepancyKind": {
-            "type": "string",
-            "enum": [
-              "AMOUNT",
-              "CURRENCY",
-              "TIMING",
-              "EXISTENCE"
-            ]
-          },
-          "systemAmount": {
-            "type": "number"
-          },
-          "systemCurrency": {
-            "type": "string"
-          },
-          "systemState": {
-            "type": "string",
-            "enum": [
-              "NOT_INITIATED",
-              "IN_FLIGHT",
-              "UNKNOWN",
-              "SUCCEEDED",
-              "FAILED",
-              "DISCREPANCY"
-            ]
-          },
-          "systemRefundedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "platformAmount": {
-            "type": "number"
-          },
-          "platformCurrency": {
-            "type": "string"
-          },
-          "platformState": {
-            "type": "string",
-            "enum": [
-              "NOT_INITIATED",
-              "IN_FLIGHT",
-              "UNKNOWN",
-              "SUCCEEDED",
-              "FAILED",
-              "DISCREPANCY"
-            ]
-          },
-          "platformRefundedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "detectedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundDiscrepancyRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "executionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "refundNo": {
-            "type": "string"
-          },
-          "discrepancyKind": {
-            "type": "string"
-          },
-          "discrepancyKindLabel": {
-            "type": "string"
-          },
-          "systemAmount": {
-            "type": "number"
-          },
-          "systemCurrency": {
-            "type": "string"
-          },
-          "systemState": {
-            "type": "string"
-          },
-          "systemRefundedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "platformAmount": {
-            "type": "number"
-          },
-          "platformCurrency": {
-            "type": "string"
-          },
-          "platformState": {
-            "type": "string"
-          },
-          "platformRefundedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "resolutionState": {
-            "type": "string"
-          },
-          "resolutionNote": {
-            "type": "string"
-          },
-          "resolvedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resolvedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "detectedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundDiscrepancyResolutionRequest": {
-        "type": "object",
-        "properties": {
-          "resolutionState": {
-            "type": "string",
-            "enum": [
-              "OPEN",
-              "ACKNOWLEDGED",
-              "RESOLVED"
-            ]
-          },
-          "resolutionNote": {
-            "type": "string"
-          },
-          "resolvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundAmountBucket": {
-        "type": "object",
-        "properties": {
-          "currency": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number"
-          }
-        }
-      },
-      "RefundExecutionPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundExecutionRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "needsAttentionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unknownCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inFlightCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "failedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "discrepancyCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "countByState": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundStateCountBucket"
-            }
-          },
-          "amountByCurrency": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundAmountBucket"
-            }
-          },
-          "amountRangeSemantics": {
-            "type": "string"
-          },
-          "sortApplied": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundStateCountBucket": {
-        "type": "object",
-        "properties": {
-          "executionState": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundAttemptRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "attemptNo": {
-            "type": "string"
-          },
-          "attemptKind": {
-            "type": "string"
-          },
-          "idempotencyKey": {
-            "type": "string"
-          },
-          "verificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "stateAtDispatch": {
-            "type": "string"
-          },
-          "dispatchChannel": {
-            "type": "string"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundExecutionDetail": {
-        "type": "object",
-        "properties": {
-          "header": {
-            "$ref": "#/components/schemas/RefundExecutionRow"
-          },
-          "attempts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundAttemptRow"
-            }
-          },
-          "verifications": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundVerificationRow"
-            }
-          },
-          "reports": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundReportRow"
-            }
-          },
-          "discrepancies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundDiscrepancyRow"
-            }
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundStatusEventRow"
-            }
-          },
-          "allowedNextStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "advice": {
-            "$ref": "#/components/schemas/RefundRetryAdvice"
-          },
-          "platformNote": {
-            "type": "string"
-          },
-          "idempotencyNote": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundReportRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reportSource": {
-            "type": "string"
-          },
-          "reportOutcome": {
-            "type": "string"
-          },
-          "failureClass": {
-            "type": "string"
-          },
-          "externalTransactionRef": {
-            "type": "string"
-          },
-          "reportedAmount": {
-            "type": "number"
-          },
-          "reportedCurrency": {
-            "type": "string"
-          },
-          "failureCode": {
-            "type": "string"
-          },
-          "failureReason": {
-            "type": "string"
-          },
-          "reportedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundRetryAdvice": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string",
-            "enum": [
-              "DISPATCH",
-              "AWAIT",
-              "VERIFY",
-              "RETRY",
-              "MANUAL",
-              "NONE"
-            ]
-          },
-          "label": {
-            "type": "string"
-          },
-          "requiredVerdict": {
-            "type": "string",
-            "enum": [
-              "CONFIRMED_SETTLED",
-              "CONFIRMED_NOT_SETTLED",
-              "INCONCLUSIVE"
-            ]
-          },
-          "blocking": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundStatusEventRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "eventType": {
-            "type": "string"
-          },
-          "fromState": {
-            "type": "string"
-          },
-          "toState": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "verificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reportId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "discrepancyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundFilterOptions": {
-        "type": "object",
-        "properties": {
-          "executionStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "platformSyncStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "platformRefundMethods": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "currencies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "failureCodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "orderSources": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundDiscrepancyPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundDiscrepancyRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "openCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "acknowledgedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "resolvedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byKind": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundKindCountBucket"
-            }
-          },
-          "systemAmountByKind": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundKindAmountBucket"
-            }
-          },
-          "platformAmountByKind": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundKindAmountBucket"
-            }
-          }
-        }
-      },
-      "RefundKindAmountBucket": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number"
-          }
-        }
-      },
-      "RefundKindCountBucket": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundActionSpec": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "guard": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundDownstream": {
-        "type": "object",
-        "properties": {
-          "customerNotifyDelivered": {
-            "type": "boolean"
-          },
-          "customerNotifyOwner": {
-            "type": "string"
-          },
-          "customerNotifyNote": {
-            "type": "string"
-          },
-          "orderStatusWritebackDelivered": {
-            "type": "boolean"
-          },
-          "orderStatusWritebackOwner": {
-            "type": "string"
-          },
-          "orderStatusWritebackNote": {
-            "type": "string"
-          },
-          "platformSyncDelivered": {
-            "type": "boolean"
-          },
-          "platformSyncOwner": {
-            "type": "string"
-          },
-          "platformSyncNote": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundStateTransitionSpec": {
-        "type": "object",
-        "properties": {
-          "from": {
-            "type": "string"
-          },
-          "fromLabel": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "toLabel": {
-            "type": "string"
-          },
-          "requiresVerification": {
-            "type": "boolean"
-          },
-          "allowedVerdict": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundStatusCapabilities": {
-        "type": "object",
-        "properties": {
-          "stateMachine": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundStateTransitionSpec"
-            }
-          },
-          "failureClasses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "verificationVerdicts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "discrepancyKinds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "platformSyncStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "upstream": {
-            "$ref": "#/components/schemas/RefundUpstream"
-          },
-          "downstream": {
-            "$ref": "#/components/schemas/RefundDownstream"
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundActionSpec"
-            }
-          },
-          "idempotencyGuarantees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "unknownStateNote": {
-            "type": "string"
-          },
-          "retryGuardNote": {
-            "type": "string"
-          },
-          "discrepancyNote": {
-            "type": "string"
-          },
-          "shopGranularityNote": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundUpstream": {
-        "type": "object",
-        "properties": {
-          "financeDelivered": {
-            "type": "boolean"
-          },
-          "financeOwner": {
-            "type": "string"
-          },
-          "financeNote": {
-            "type": "string"
-          },
-          "refundRequestDelivered": {
-            "type": "boolean"
-          },
-          "refundRequestOwner": {
-            "type": "string"
-          },
-          "refundRequestNote": {
-            "type": "string"
-          },
-          "reportLandingNote": {
             "type": "string"
           }
         }
