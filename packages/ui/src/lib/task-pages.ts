@@ -381,13 +381,29 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['受理', '核实', '处理结案'],
   },
   {
+    // 11.2.1.1 退货授权单。/aftersales/returns 是蓝图 11.2「退货管理」的 L3 锚点，
+    // 而本路由上部署的是 11.2.1.1（审批退货申请），**不是** 11.2.2.1 退货入库。
+    // 原登记的 label/description/fields/workflow 全在描述下游的 11.2.2.x（收件、质检、
+    // 可售库存恢复），页面真存在之后只翻 implemented 布尔值，菜单就会声称一个本页
+    // 根本没有的能力——比守卫报红更糟（守卫只校验 implemented，抓不到文案错配）。
+    // 因此按 /aftersales/refunds 的同一惯例：L3 锚点 href 按实际部署在那里的 L4 命名。
+    // 11.2.2.1 退货入库将来另立子路由（参照 /orders/fulfillment/split 与
+    // /warehouse/location-allocations 的处理），不占用本条。
     href: '/aftersales/returns',
-    implemented: false,
+    implemented: true,
     domain: 'aftersales',
-    label: '退货入库',
-    description: '追踪退件收货、检测与可售库存恢复。',
-    fields: ['退件号', '原订单', '收货仓', '实收数量', '质检结果', '处理方式'],
-    workflow: ['接收退件', '检测', '入库或报损'],
+    label: '退货授权单',
+    description: '审批退货申请：校验可退数量、登记退货地址与买家回寄物流，超时未寄自动关闭。',
+    fields: [
+      '授权单号',
+      '原订单行',
+      '可退数量',
+      '退货地址',
+      '买家回寄物流',
+      '目标处理方式',
+      '状态',
+    ],
+    workflow: ['受理退货申请', '校验可退量并审批', '登记回寄与超时关闭'],
   },
   {
     href: '/aftersales/refunds',
