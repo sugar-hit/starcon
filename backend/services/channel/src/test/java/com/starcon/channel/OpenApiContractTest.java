@@ -19,7 +19,9 @@ import org.springframework.transaction.PlatformTransactionManager;
     properties = {
       "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jooq.JooqAutoConfiguration,org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration",
       "INTERNAL_KEY=contract-test",
-      "IDENTITY_URL=http://localhost:8081"
+      "IDENTITY_URL=http://localhost:8081",
+      // 02.6.1.1 回调验签的主密钥：契约导出不需要真密钥，但 bean 必须能装配起来
+      "CHANNEL_WEBHOOK_SIGNING_KEY=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
     })
 @AutoConfigureMockMvc
 class OpenApiContractTest {

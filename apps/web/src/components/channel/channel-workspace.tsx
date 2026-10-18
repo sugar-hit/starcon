@@ -14,6 +14,7 @@ import {
   Search,
   Send,
   Store,
+  Webhook,
 } from 'lucide-react';
 import type {
   ConnectionView,
@@ -31,13 +32,16 @@ import type {
   SyncFailureSummary,
   SyncFailureView,
   SyncRunView,
+  WebhookEndpointView,
+  WebhookReceiptSummary,
+  WebhookReceiptView,
 } from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError } from '@/lib/api';
 import { EnumMappingPanel } from './enum-mapping-panel';
 import { OAuthWizard } from './oauth-wizard';
 import { useIdentity } from '../iam/identity-shell';
 
-type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations';
+type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations' | 'webhooks';
 
 const sections: readonly { id: Section; label: string; permission: string; icon: typeof Globe2 }[] =
   [
@@ -45,6 +49,8 @@ const sections: readonly { id: Section; label: string; permission: string; icon:
     { id: 'connections', label: '授权连接', permission: 'channel.connection.read', icon: Link2 },
     { id: 'sync', label: '同步运行', permission: 'channel.sync.read', icon: RefreshCw },
     { id: 'operations', label: '平台回写', permission: 'channel.operation.read', icon: Send },
+    // 02.6.1.1 接收记录：与同步同属平台对接面，复用 channel.sync.* 权限码
+    { id: 'webhooks', label: '平台消息', permission: 'channel.sync.read', icon: Webhook },
     { id: 'platforms', label: '平台目录', permission: 'channel.registry.read', icon: Globe2 },
   ];
 
@@ -66,6 +72,16 @@ const statusTone: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> =
   FAILED: 'danger',
   RUNNING: 'warning',
   UNKNOWN: 'danger',
+  // 02.6.1.1 平台消息：验签失败与重复推送都要一眼看见
+  RECEIVED: 'success',
+  DUPLICATE: 'warning',
+  SIGNATURE_FAILED: 'danger',
+  PROCESSING: 'warning',
+  PROCESSED: 'success',
+  VERIFIED: 'success',
+  MISSING: 'danger',
+  UNCONFIGURED: 'warning',
+  DISABLED: 'neutral',
   CONFIRMED_APPLIED: 'success',
   STILL_UNKNOWN: 'danger',
   REVOKED: 'neutral',
@@ -97,6 +113,16 @@ const statusLabel: Record<string, string> = {
   CONFIRMED_APPLIED: '已确认执行',
   CONFIRMED_NOT_APPLIED: '已确认未执行',
   STILL_UNKNOWN: '仍不确定',
+  // 02.6.1.1 平台消息接收
+  RECEIVED: '已入库',
+  DUPLICATE: '重复推送',
+  SIGNATURE_FAILED: '验签失败',
+  PROCESSING: '处理中',
+  PROCESSED: '已处理',
+  VERIFIED: '验签通过',
+  MISSING: '缺少签名',
+  UNCONFIGURED: '未登记密钥',
+  DISABLED: '已停用',
   REVOKED: '已撤销',
   SUSPENDED: '已停用',
   ARCHIVED: '已归档',
@@ -123,6 +149,11 @@ export function ChannelWorkspace() {
   const [failureSummary, setFailureSummary] = useState<SyncFailureSummary[]>([]);
   const [runs, setRuns] = useState<SyncRunView[]>([]);
   const [operations, setOperations] = useState<PlatformOperationView[]>([]);
+  // 02.6.1.1 平台消息接入
+  const [webhookEndpoints, setWebhookEndpoints] = useState<WebhookEndpointView[]>([]);
+  const [webhookReceipts, setWebhookReceipts] = useState<WebhookReceiptView[]>([]);
+  const [webhookSummary, setWebhookSummary] = useState<WebhookReceiptSummary[]>([]);
+  const [receiptFilter, setReceiptFilter] = useState('');
   const [runCursorId, setRunCursorId] = useState<string | null>(null);
   // 店铺要绑连接与法人、负责人要选成员与部门：这些字典在 identity 服务，权限不足时保持空数组，
   // 对应控件会明说"没有权限"，而不是渲染一个看起来能选、其实选不了的下拉。
@@ -166,6 +197,16 @@ export function ChannelWorkspace() {
       }
       if (can('channel.operation.read'))
         setOperations(await api<PlatformOperationView[]>('channel/platform-operations?limit=50'));
+      // 02.6.1.1 平台消息接入：接收记录与状态分布
+      if (can('channel.sync.read')) {
+        setWebhookEndpoints(await api<WebhookEndpointView[]>('channel/webhook-endpoints'));
+        setWebhookSummary(await api<WebhookReceiptSummary[]>('channel/webhook-receipts/summary'));
+        setWebhookReceipts(
+          await api<WebhookReceiptView[]>(
+            `channel/webhook-receipts?limit=50${receiptFilter ? `&status=${receiptFilter}` : ''}`,
+          ),
+        );
+      }
     } catch (e) {
       handleError(e);
     } finally {
@@ -182,7 +223,7 @@ export function ChannelWorkspace() {
     } catch (e) {
       setDictionaryError(e instanceof Error ? e.message : '关联数据加载失败');
     }
-  }, [can, handleError, runCursorId]);
+  }, [can, handleError, runCursorId, receiptFilter]);
 
   useEffect(() => {
     void load();
@@ -307,6 +348,22 @@ export function ChannelWorkspace() {
       {section === 'operations' && (
         <OperationQueue
           operations={operations}
+          can={can}
+          busy={busy}
+          setBusy={setBusy}
+          onDone={load}
+          onError={handleError}
+          onNotice={setNotice}
+        />
+      )}
+      {section === 'webhooks' && (
+        <WebhookInbox
+          endpoints={webhookEndpoints}
+          receipts={webhookReceipts}
+          summary={webhookSummary}
+          connections={connections}
+          statusFilter={receiptFilter}
+          onFilterChange={setReceiptFilter}
           can={can}
           busy={busy}
           setBusy={setBusy}
@@ -2117,4 +2174,438 @@ function formatTime(value: string | null) {
   if (!value) return '—';
   const at = new Date(value);
   return Number.isNaN(at.getTime()) ? value : at.toLocaleString('zh-CN');
+}
+
+/**
+ * 02.6.1.1 平台消息接入：接收记录与回调入口。
+ *
+ * <p>页面上刻意把三件事摆在最前面，因为它们是接入出问题时的第一现场：
+ * 验签失败（有人在伪造推送）、重复推送（平台在超时重推）、待处理积压（异步消费跟不上）。
+ */
+function WebhookInbox({
+  endpoints,
+  receipts,
+  summary,
+  connections,
+  statusFilter,
+  onFilterChange,
+  can,
+  busy,
+  setBusy,
+  onDone,
+  onError,
+  onNotice,
+}: {
+  endpoints: WebhookEndpointView[];
+  receipts: WebhookReceiptView[];
+  summary: WebhookReceiptSummary[];
+  connections: ConnectionView[];
+  statusFilter: string;
+  onFilterChange: (value: string) => void;
+  can: (p: string) => boolean;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+  onDone: () => Promise<void>;
+  onError: (e: unknown) => void;
+  onNotice: (v: string) => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
+
+  async function run(work: () => Promise<unknown>, message: string): Promise<void> {
+    setBusy(true);
+    try {
+      await work();
+      onNotice(message);
+      await onDone();
+    } catch (e) {
+      onError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const countOf = (status: string) => summary.find((s) => s.status === status)?.total ?? 0;
+  const failed = countOf('SIGNATURE_FAILED');
+  const duplicates = countOf('DUPLICATE');
+  const pending = countOf('RECEIVED') + countOf('PROCESSING');
+  const badSignature = receipts.filter(
+    (r) => r.signatureStatus !== 'VERIFIED' && r.status === 'SIGNATURE_FAILED',
+  );
+
+  const active = endpoints.filter((e) => e.status === 'ACTIVE');
+
+  return (
+    <div className="space-y-4">
+      {(failed > 0 || duplicates > 0 || pending > 0) && (
+        <div className="border-warning/40 bg-warning/5 rounded-md border p-4">
+          <p className="text-copy-14 flex items-center gap-2 font-medium">
+            <AlertTriangle className="text-warning h-4 w-4" />
+            平台消息待处理
+          </p>
+          <ul className="text-copy-13 text-muted-foreground mt-2 space-y-1">
+            {failed > 0 && (
+              <li>
+                {failed} 条验签失败——这些推送没有可信来源，不会进入业务处理。
+                持续增长通常意味着有人在伪造回调，或密钥已轮换但平台侧还没更新。
+              </li>
+            )}
+            {duplicates > 0 && (
+              <li>
+                {duplicates} 条重复推送——平台在重推同一条事件。
+                每条事件只会被处理一次，重推说明上一次处理没能及时完成。
+              </li>
+            )}
+            {pending > 0 && <li>{pending} 条已入库待处理或处理中。</li>}
+          </ul>
+        </div>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {(
+          [
+            ['RECEIVED', '已入库'],
+            ['PROCESSING', '处理中'],
+            ['SIGNATURE_FAILED', '验签失败'],
+            ['DUPLICATE', '重复推送'],
+            ['PROCESSED', '已处理'],
+            ['FAILED', '处理失败'],
+          ] as const
+        ).map(([status, label]) => (
+          <button
+            key={status}
+            type="button"
+            aria-pressed={statusFilter === status}
+            onClick={() => onFilterChange(statusFilter === status ? '' : status)}
+            className={
+              statusFilter === status
+                ? 'border-ring bg-card rounded-md border p-3 text-left'
+                : 'border-border bg-card hover:bg-muted rounded-md border p-3 text-left'
+            }
+          >
+            <p className="text-muted-foreground text-copy-12">{label}</p>
+            <p className="text-copy-14 mt-1 font-medium">{countOf(status)}</p>
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-card rounded-md border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-copy-14 font-medium">回调入口</p>
+            <p className="text-copy-12 text-muted-foreground mt-1">
+              把回调地址与签名密钥填到平台后台。密钥只存密文，写入后无法再读回——换密钥需重新登记。
+            </p>
+          </div>
+          {can('channel.sync.create') &&
+            (showForm ? (
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}>
+                取消
+              </Button>
+            ) : (
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(true)}>
+                <Plus className="h-4 w-4" />
+                登记入口
+              </Button>
+            ))}
+        </div>
+
+        {showForm && (
+          <WebhookEndpointForm
+            connections={connections}
+            busy={busy}
+            onCancel={() => setShowForm(false)}
+            onSubmit={async (input) => {
+              await run(
+                () =>
+                  api('channel/webhook-endpoints', 'POST', {
+                    connectionId: input.connectionId,
+                    signatureHeader: input.signatureHeader,
+                    signatureEncoding: input.signatureEncoding,
+                    signingSecret: input.signingSecret,
+                  }),
+                '回调入口已登记，密钥已加密保存',
+              );
+              setShowForm(false);
+            }}
+          />
+        )}
+
+        {endpoints.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">
+            还没有登记回调入口。没有入口，平台推送不会被接收。
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {endpoints.map((e) => (
+              <li key={e.id} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      {e.platformCode} · {e.authorizedAccount}
+                      <Badge tone={statusTone[e.status] ?? 'neutral'}>
+                        {statusLabel[e.status] ?? e.status}
+                      </Badge>
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                      回调地址 {e.callbackUrl} · 签名头 {e.signatureHeader} · {e.signatureAlgorithm}{' '}
+                      ({e.signatureEncoding})
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1">
+                      最近接收 {formatTime(e.lastReceivedAt)}
+                    </p>
+                  </div>
+                  {e.status === 'ACTIVE' && can('channel.sync.update') && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() =>
+                        void run(
+                          () => api(`channel/webhook-endpoints/${e.id}/disable`, 'POST'),
+                          '入口已停用，平台再推送也不会受理；接收记录仍可查',
+                        )
+                      }
+                    >
+                      停用
+                    </Button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="bg-card rounded-md border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-copy-14 font-medium">接收记录</p>
+            <p className="text-copy-12 text-muted-foreground mt-1">
+              先持久化再处理：接收成功即落库返回，业务处理异步完成，避免平台超时重推造成压力。
+            </p>
+          </div>
+          {statusFilter && (
+            <Button size="sm" variant="ghost" onClick={() => onFilterChange('')}>
+              清除筛选
+            </Button>
+          )}
+        </div>
+
+        {receipts.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">
+            {statusFilter
+              ? `没有状态为「${statusLabel[statusFilter] ?? statusFilter}」的接收记录`
+              : '还没有平台推送记录。平台配置好回调地址后，推送会实时出现在这里。'}
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {receipts.map((r) => (
+              <li key={r.id} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      {r.eventType || r.topic || '未标注类型'}
+                      <Badge tone={statusTone[r.status] ?? 'neutral'}>
+                        {statusLabel[r.status] ?? r.status}
+                      </Badge>
+                      <Badge tone={statusTone[r.signatureStatus] ?? 'neutral'}>
+                        {statusLabel[r.signatureStatus] ?? r.signatureStatus}
+                      </Badge>
+                      {r.duplicateOf && <Badge tone="warning">第 {r.deliveryAttempt} 次推送</Badge>}
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                      事件 {r.externalEventId || '（平台未带事件 ID）'} · {r.platformCode} ·{' '}
+                      {r.shopName ?? '未标注店铺'} · 接收于 {formatTime(r.receivedAt)}
+                    </p>
+                    {r.duplicateOf && (
+                      <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                        首次接收 {r.duplicateOf}，本条不会再次进入业务处理
+                      </p>
+                    )}
+                    {r.lastError && (
+                      <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                        {r.lastError}
+                      </p>
+                    )}
+                  </div>
+                  {r.status === 'RECEIVED' && can('channel.sync.update') && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() =>
+                        void run(
+                          () => api(`channel/webhook-receipts/${r.id}/claim`, 'POST', {}),
+                          '已认领，状态转为处理中',
+                        )
+                      }
+                    >
+                      认领处理
+                    </Button>
+                  )}
+                  {r.status === 'PROCESSING' && can('channel.sync.update') && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() =>
+                          void run(
+                            () =>
+                              api(`channel/webhook-receipts/${r.id}/complete`, 'POST', {
+                                status: 'PROCESSED',
+                                lastError: '',
+                              }),
+                            '已标记处理完成',
+                          )
+                        }
+                      >
+                        处理完成
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() =>
+                          void run(
+                            () =>
+                              api(`channel/webhook-receipts/${r.id}/complete`, 'POST', {
+                                status: 'FAILED',
+                                lastError: '人工标记处理失败',
+                              }),
+                            '已标记处理失败，可重新认领',
+                          )
+                        }
+                      >
+                        处理失败
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {badSignature.length > 0 && (
+          <div className="border-destructive/30 bg-destructive/5 mt-4 rounded-md border p-3">
+            <p className="text-copy-13 text-destructive font-medium">
+              {badSignature.length} 条推送未通过验签
+            </p>
+            <p className="text-copy-12 text-muted-foreground mt-1">
+              这些报文已留证但不会进入业务处理。若确认是密钥轮换导致的，先重新登记入口密钥；
+              若无法解释，按安全事件处理——回调地址是公开的，只有签名能区分真假。
+            </p>
+          </div>
+        )}
+      </div>
+
+      {active.length === 0 && endpoints.length > 0 && (
+        <p className="text-copy-13 text-muted-foreground">
+          所有回调入口都已停用，平台推送不会被受理。
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** 02.6.1.1 登记回调入口：签名密钥明文只在这一刻存在。 */
+function WebhookEndpointForm({
+  connections,
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  connections: ConnectionView[];
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (input: {
+    connectionId: string;
+    signatureHeader: string;
+    signatureEncoding: 'HEX' | 'BASE64';
+    signingSecret: string;
+  }) => Promise<void>;
+}) {
+  const usable = connections.filter((c) => c.status === 'ACTIVE');
+  const [connectionId, setConnectionId] = useState(usable[0]?.id ?? '');
+  const [signatureHeader, setSignatureHeader] = useState('X-Starcon-Signature');
+  const [signatureEncoding, setSignatureEncoding] = useState<'HEX' | 'BASE64'>('HEX');
+  const [signingSecret, setSigningSecret] = useState('');
+
+  if (usable.length === 0)
+    return (
+      <p className="text-copy-13 text-muted-foreground mt-3">
+        没有可用连接。先在「授权连接」完成授权，才能为它登记回调入口。
+      </p>
+    );
+
+  return (
+    <div className="border-border mt-3 space-y-2 rounded-md border p-3">
+      <label className="block">
+        <span className="text-copy-13">连接</span>
+        <select
+          value={connectionId}
+          onChange={(e) => setConnectionId(e.target.value)}
+          className="border-border bg-card text-copy-13 mt-1 h-8 w-full rounded-md border px-2"
+        >
+          {usable.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.platformCode} · {c.authorizedAccount}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block">
+        <span className="text-copy-13">签名请求头</span>
+        <input
+          value={signatureHeader}
+          onChange={(e) => setSignatureHeader(e.target.value)}
+          className="border-border bg-card text-copy-13 mt-1 h-8 w-full rounded-md border px-2"
+        />
+      </label>
+      <label className="block">
+        <span className="text-copy-13">签名编码</span>
+        <select
+          value={signatureEncoding}
+          onChange={(e) => setSignatureEncoding(e.target.value as 'HEX' | 'BASE64')}
+          className="border-border bg-card text-copy-13 mt-1 h-8 w-full rounded-md border px-2"
+        >
+          <option value="HEX">HEX</option>
+          <option value="BASE64">BASE64</option>
+        </select>
+      </label>
+      <label className="block">
+        <span className="text-copy-13">平台签名密钥</span>
+        <input
+          type="password"
+          value={signingSecret}
+          onChange={(e) => setSigningSecret(e.target.value)}
+          placeholder="平台后台配置的 webhook 密钥"
+          className="border-border bg-card text-copy-13 mt-1 h-8 w-full rounded-md border px-2"
+        />
+      </label>
+      <p className="text-copy-12 text-muted-foreground">
+        密钥加密后落库且无法再读回。丢失后只能重新登记。
+      </p>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          disabled={busy || !connectionId || !signingSecret.trim()}
+          onClick={() =>
+            void onSubmit({
+              connectionId,
+              signatureHeader: signatureHeader.trim() || 'X-Starcon-Signature',
+              signatureEncoding,
+              signingSecret: signingSecret.trim(),
+            })
+          }
+        >
+          登记
+        </Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </div>
+  );
 }
