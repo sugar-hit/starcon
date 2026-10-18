@@ -181,3 +181,32 @@
 - **warehouse `inventory_reservation` 缺 `(source_system, source_ref_id)` 唯一约束** ——
   跨服务预占类模块的共性风险，建议单独立项
 - 下批重排：2.4.2.3 映射缺失队列、2.5.2.1 常用回写操作
+
+---
+
+## 附：09:00 tick 补齐的前端 L2 复验
+
+本文档落库时（`2b8c0f54`）批次状态是「L2 后端全绿，**前端待复验**」。
+09:00 tick 在同一内容快照 `db04bb36` 上补跑前端那一半，结果全绿：
+
+| L2 环节            | 结果                                                    |
+| ------------------ | ------------------------------------------------------- |
+| `mvnw verify`（后端）| 229 个测试类 / **4700 例** / failures 0 / errors 0 / skipped 0，6 个服务全覆盖，反应堆跑完到 `crm`（08:58:56） |
+| `pnpm typecheck`   | exit 0                                                  |
+| `pnpm lint`        | exit 0                                                  |
+| `pnpm test`        | **222 个测试文件 / 3910 例** 全通过                     |
+| Next production build | exit 0（Next.js 15.5.27，编译成功）                  |
+| `sync.mjs --check` | ✓ 台账与蓝图一致                                        |
+
+**快照一致性取证**（为什么不重跑后端全量）：后端 `mvnw verify` 跑在 `06beab27`，
+此后集成分支新增 3 个提交，差异只有 3 个文件 ——
+
+- `docs/product/capability-blueprint/module-progress.md`（台账）
+- `docs/sessions/.../2026-10-18-batch-20-....md`（本文档）
+- `packages/ui/src/lib/task-pages.ts`（11.2.1.1 锚点文案修正）
+
+**零 `backend/` 文件改动** ⇒ Java 与迁移在两个快照间逐字节相同，
+上表后端那一行对 `db04bb36` 仍然成立；前端那次改动已由本次 L2 的
+typecheck / lint / vitest / Next build 全量覆盖。
+
+产物落在 `db04bb36`，与远端 `upstream/integration/module-dev` 逐字相同（ahead 0 / behind 0）。
