@@ -1,6 +1,7 @@
 # 两个既有集成测试在全量并发下 flake（L2 误报来源）
 
 **发现时间**：2026-10-13 20:00 tick，L2 批次闸
+**最近一次复现**：2026-10-18 23:42 tick（批次 22），第三个 flake，见下方 §四
 **严重度**：中（不阻塞交付，但会让每批 L2 假红，浪费一次全量验证 + 一次二分）
 **状态**：未修 · 本轮已确认两者都与本批代码无关
 
@@ -80,3 +81,43 @@ surefire 判定 hang 并强杀 ⇒ reactor 报 FAILURE，但 `surefire-reports/*
 1. `git diff --name-only <上批HEAD> <本批HEAD> | grep -E "<失败的模块>"` — **为空就不是本批的锅**
 2. 单独重跑失败类：`-Dtest=XxxTest -Dsurefire.failIfNoSpecifiedTests=false` — 绿 ⇒ flake
 3. 查 `.dumpstream` 有没有 `kill self fork JVM` — 有 ⇒ 那是退出超时，不是断言失败
+
+> 第 2 步要跑**不止一次**。2026-10-18 那次连跑三次得到 FAIL(1F+1E) / FAIL(1F+2E) / PASS ——
+> 失败数本身在变，这比「绿了」更能证明是 flake。单跑一次绿不足以结案。
+
+---
+
+## 四、第三个 flake：`OrderChangeCancelIntegrationTest`（2026-10-18 批次 22）
+
+**现象**：后端 trade `Tests run: 1232, Failures: 3, Errors: 3`，全部集中在
+`OrderChangeCancelIntegrationTest`，报
+`400「平台 AMAZON / 店铺 SHOP-1 没有登记「减少数量」的可变更规则」`。
+
+**取证（本次判据全流程走了一遍，结论：与本批无关）**：
+
+| 步骤 | 结果 |
+| --- | --- |
+| `git diff --name-only <上批HEAD> <本批HEAD>` 里有无 `OrderChange*` | **无** —— `11.3.1.1` 未碰任何该前缀文件 |
+| V166 是否碰 `order_platform_change_rule` | **无**（零 ALTER 既有表、零外键） |
+| 在**上批**集成头 `d4919c4a` 单独跑 | **同样失败，错误信息一字不差** |
+| 同代码连跑三次 | FAIL(1F+1E) / FAIL(1F+2E) / **PASS** |
+| 批次 21 的全量跑 | **绿的**（trade SUCCESS 1210 例零失败） |
+
+**根因（判断，未 100% 钉死）**：查询条件 `effective_from <= now()` 中，
+`effective_from` 由**宿主 JVM** 的 `OffsetDateTime.now()` 写入（夹具 `rule()` 辅助方法），
+而 `now()` 是**数据库**的事务开始时间 —— 典型的跨时钟边界竞态：
+两者挨得够近时，刚插入的行"刚好不可见"。
+
+**已排除**：时钟漂移。宿主与 Testcontainers PG 容器是同一瞬间
+（`docker exec date` 显示差 8 小时，那是**时区显示**，非 drift）。
+
+**建议修法**（与上面两条同类）：
+
+1. 夹具侧：`rule()` 辅助方法写 `effective_from` 时不要用 JVM `now()`，
+   改用**数据库的** `now()`（`?::timestamptz` 绑 `select now()` 的结果），
+   或直接写一个明确更早的固定时刻。
+2. 查询侧：`evaluateRule` 的 `effective_from <= now()` 对"刚生效的规则"天然敏感，
+   可考虑放宽为 `effective_from <= now() + 间隔`，或由夹具保证有裕量。
+
+⚠️ 批次 22 的 push **建立在这个 flake 的补跑之上，不是首次全量绿**。
+已在 `docs/sessions/2026-10/2026-10-18-batch-22-*.md` 如实记录，未做「一次就绿」的表述。
