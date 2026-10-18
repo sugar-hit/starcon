@@ -995,6 +995,47 @@ const services: readonly {
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
   },
   {
+    // 4.1.1.1 Listing 列表（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在本文件里**最后一条 `channel/` 元素**（10.2.2.2 `label-templates`）
+    // **之后**、`prefix: 'trade/'` **之前**：与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listings                    分页列表（GET，七个筛选维度 + 真分页）/ 登记平台商品（POST）
+    //   listings/capabilities       能力声明（价格 / 销量 / 内部可售量 available=false + ownerModule）
+    //   listings/filter-options     筛选面板词表（不硬编码在前端）
+    //   listings/{uuid}             单条读取（列表行点进去的最小载荷；全景详情归 4.1.1.2）
+    //   listings/batch              批量操作（POST：分配负责人 / 下架；改价改库存显式拒绝并留痕）
+    //   listings/batch-tasks        批量操作任务列表（GET，被拒绝的改价同样可回溯）
+    //
+    // ⚠️ 判别顺序：`batch-tasks` 必须排在 `batch` **之前**。写反的话 `batch` 先吃掉前缀，
+    //    `batch-tasks` 永远匹配不到（症状是「批量任务列表 404」，很容易被误判成正则写错）。
+    // ⚠️ 那个 `\/` 必须写在**字面量子路径与 uuid 段共用的那一层**上
+    //    （`(?:\/(?:batch|capabilities|…|[0-9a-f]{8}…))`）。写成
+    //    `(?:\/batch|[0-9a-f]{8}…)` 会让斜杠只属于第一个分支 —— 字面量路径照样放行，
+    //    而 `listings/{id}` 静默 404，症状是「点进详情就 404，但列表和批量都正常」。
+    // ⚠️ 裸路径 `listings` **放行**：本模块的列表就是 `GET /channel/listings?...`，
+    //    query string 不参与这里的比对（proxy() 拿的是 params.path，不含 search），
+    //    不放行裸路径等于列表页在浏览器里直接 404。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listings/{uuid}/mapping`    —— 映射的建立 / 版本化 / 批量匹配归 4.1.2.1 / 4.1.2.2
+    //   * `listings/{uuid}/lifecycle`  —— 七态状态机与平台回写归 4.1.1.3
+    //   * `listings/{uuid}/diff`       —— 差异对照是 4.1.1.2 的核心价值，不在本模块
+    //   * `listings/{uuid}/publish`    —— 发布流程归 4.3.1，本模块只登记不上线
+    //   * `listings/{uuid}/history`    —— 状态历史随列表行返回，不单独开一条
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
