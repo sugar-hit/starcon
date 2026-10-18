@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 190 |
+| 已交付 | 191 |
 | 进行中 | 0 |
-| **未开发** | **275** |
-| 完成率 | 40.9% |
+| **未开发** | **274** |
+| 完成率 | 41.1% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -24,7 +24,7 @@
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
 | **D4** | 48 | 0 | 12 | 60 |
-| **D5** | 14 | 0 | 38 | 52 |
+| **D5** | 15 | 0 | 37 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
 
@@ -33,7 +33,7 @@
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
-| 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
+| 02 | 渠道与店铺系统 | D1–D2 / D5 | 21 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 2 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
@@ -136,7 +136,7 @@
 | 2.4.2.3 | 映射缺失队列 | — | D5 | 未开发 | — |
 | 2.5.1.1 | 回写任务列表 | /channels/operations | D1–D2 | 已交付 | platform_operation UNIQUE(tenant,idempotency_key) + GET /platform-operations |
 | 2.5.1.2 | 未知结果核验 | /channels/operations | D1–D2 | 已交付 | POST /platform-operations/{id}/verify 未知结果核验（CONFIRMED_* 三选一） |
-| 2.5.2.1 | 常用回写操作 | — | D5 | 未开发 | — |
+| 2.5.2.1 | 常用回写操作 | — | D5 | 已交付 | 迁移 channel `V169__common_writeback_operations.sql`（**零 ALTER 既有表**：不改 `platform_operation` 的任何列/CHECK/索引 —— 它的 operation 取值域是 2.5.1.1 的对外契约，扩它等于替别的车道改契约；跨车道 DDL 回归面 = 0，2.5.1.1 的插入路径一行未动）。三张表 tenant_id NOT NULL + ENABLE/**FORCE** RLS isolation + GRANT channel_app：`writeback_target`（**可回写目标登记簿**，本服务自持的投影 —— 蓝图输入句是「用户勾选的记录范围」+「按店铺与筛选条件批量执行」，而真正的对象（刊登/商品/物流单）分属 04/07/09/10 各自的库，AGENTS.md 禁止跨服务 SQL/FK/视图，所以本服务查不到也不该猜；跨服务的 uuid 由调用方带入，本服务不编造，表里只存平台侧业务键）· `writeback_batch`（一次批量动作的头，WB-yyyyMMdd-发号器，`UNIQUE(tenant_id,idempotency_key)`）· `writeback_batch_item`（**逐条结果**，一行 = 批次里的一条）。**「批量 ≠ 事务」逐条钉死**：① 每条被选中的目标**独立**生成一条 `platform_operation`(PENDING)，一条被拦下不影响其余，代码里没有任何一处把 N 条包进同一个 try；② **生成前**被拦下的那条（目标不存在/已封禁/参数不合法/币种不符/发货目标不是 SHIPMENT）**不生成**平台任务 —— 没发出去的东西不该在「发往平台的写操作」清单里冒充失败，但它**照样**出现在批次结果里并带真实原因（漏报比失败更糟）；③ **批次状态不落库**，每次读都从 `platform_operation` 的真实状态聚合 —— 落一个 status 字段就等于多一个会与真实任务撒谎的地方。**未知结果 UNKNOWN 单列成一类而不是并进失败**：结果未知时平台可能已执行，并进「成功」会报出一句谎，并进「失败」会诱导运营重试造成重复扣减（2.5.1.2 整节讲的就是这件事），所以只要还有 UNKNOWN 没核验，批次就停在 IN_PROGRESS。**幂等键两层**：批次键调用方自拟（不给则服务端按「kind+店铺+筛选+参数」算摘要，同样请求提交两次只生成一批）；**每条任务的键由「批次键+目标+参数摘要」导出、不接受调用方自拟** —— 调用方自拟就能两次「不同键、同一个目标」，恰好绕开幂等。**批量下架用 `operation='PUBLISH'` + payload.delist=true，而不是给 CHECK 塞第四个值**：下架在平台侧就是改刊登的在线状态，与上架同一条通道只是 active 取反，合成一个可分辨方向的 payload 既不碰别人的契约又让派发方能分辨。四种动作（UPDATE_STOCK/UPDATE_PRICE/DELIST/SHIP_UPDATE）齐全，回传物流支持**逐目标覆盖**（每票货运单号本就不同，只给公共值等于逼着运营分 N 次批量、N 次之间还可能漏勾）。金额与数量一律 BigDecimal + `NUMERIC(14,3)`/`NUMERIC(18,4)`，禁浮点；`shipped_at` timestamptz 用 `?::timestamptz` + OffsetDateTime 绑定并**断言写回值**（`Timestamp.valueOf(LocalDateTime)` 会静默偏 −28800s）。端点挂在 `/channel`（7 个）：GET+POST `/writeback-targets`、POST `/writeback-targets/{id}/status`、GET+POST `/writeback-batches`、POST `/writeback-batches/preview`（试算：同一套筛选与校验、不落任何一行）、GET `/writeback-batches/{id}`；权限复用 2.5.1.1 的 `channel.operation.read/create/update`，**不新增**权限码（新增要动 identity 的权限真相源，是别的车道的事），租户只来自已认证成员关系（伪造 X-Tenant-Id 头改不动）。**范围必须显式**：既没勾选也没给任何筛选条件时直接 400 —— 放行等于「把整个租户的目标批量改一遍」，一个调用方的漏传就是真实事故，且事后无法分辨是失误还是本意；单批上限 500。契约由 codegen 重生成（channel.ts / channel.openapi.json **纯新增** 15 个 type，零删除）：过程中发现并修掉两处**契约说谎** —— `currency`/`reason`/`listingRef`/`skuCode`/`sourceRef` 缺 `@Schema(nullable=true)` 被生成成必填（前端只能发 `""`，而 `""` 过不了 `@Pattern("^[A-Z]{3}$")` ⇒ DELIST/SHIP_UPDATE 一律 400），以及 `perTarget` 用 `Map` 被 springdoc 推成空对象 `{}`（正是 9.6.1.3 踩过并改为具名 record 的那颗雷，改成自带 `targetId` 的 record 列表）；六个 spec 全部在本车道 worktree 内重新生成，**未借用主工作区可能带其它车道漂移的 spec**；codegen 顺带改动的 `trade.ts`/`trade.openapi.json` 经核实是**纯行序 churn**（排序后 diff 为空、JSON 语义相等），已 `git checkout` 复原，只提交 channel 那一份，以免给 trade 车道制造合并冲突。前端：页面 `/channels/writeback`（apps/web/src/app/channels/writeback/page.tsx + components/channel/writeback-batch-workspace.tsx + writeback-batch-model.ts），真实工作区，加载/空/错误三态齐全；「批量 ≠ 事务」在界面上落成三处**具体措辞**而不是横幅口号：PARTIAL 用提醒色与 SUCCEEDED 分开（最该看的批次不能混在历史里）、`REJECTED` 说「**没发出去**」且用中性色而非失败色（说成「失败」会让人去平台侧查一条压根不存在的失败记录）、UNKNOWN 提醒色 + 固定提示「先走 2.5.1.2 核验，**不要直接重试**」；页面**刻意没有**「一键重试整批」（对含 UNKNOWN 的批次整批重发是本模块最贵的资损动作）；执行前先试算，范围（勾选 or 筛选）永远写在脸上。api-proxy 白名单**新增一条独立 `services[]` 元素**（既有 channel 分支一字未动、不并入任何 alternation），并钉死 `writeback-batches/{uuid}/retry`、`writeback-targets/{uuid}`、`writeback-targets/sync` 等**刻意不放行**的形状。测试 WritebackBatchIntegrationTest **20 例**（实跑 Testcontainers PostgreSQL 16，连接池压到 1）：批量改库存生成 N 条独立任务并各自带业务幂等键、幂等键命中复用批次不给幂等键按内容去重、一条被封禁不影响其余且被拒那条不生成平台任务、平台侧部分成功后读作 PARTIAL、列表按 outcome 过滤与详情一致（SQL 判定与 Java 判定不跑偏）、UNKNOWN 不计失败、币种不一致逐条拒、下架走 PUBLISH+delist、回传物流逐目标运单号覆盖公共值且**发货时刻断言到具体瞬间**、SHIPMENT 目标类型互斥、勾选里混进不存在的目标照样回报 REJECTED、按店铺+关键词真谓词、真分页不重叠、封禁必须写原因、空筛选报错、**多租户三断言**（两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）＋ 前端 writeback-batch-model.test.ts 22 例 + writeback-batch-allowlist.test.ts 5 例（含反向形状 404、兄弟分支未被挤掉、伪造租户头不被转发、跨源写 403）。验证：L0 `./mvnw -q compile` 与 `pnpm typecheck` / `pnpm lint` 全绿；L1 `./mvnw -pl services/channel -am test` **20 例 0 失败**；前端 `pnpm vitest run`（本车道两个文件）**27 例 0 失败**，全量 allowlist 回归 33 例 / api 路由 401 例全绿。**下游缺口**：2.5.1.2 未知结果核验未交付（本模块只如实呈现 UNKNOWN 并提示先核验，不提供核验入口）；上游 04 刊登 / 07 库存 / 09 订单 / 10 物流未交付，登记簿现阶段由本服务自持 + 页面手工登记，上游交付后改事件驱动登记、表结构不必变；本模块**不调用**任何平台接口，派发属 vendor adapter 侧 |
 | 2.6.1.1 | 接收记录 | — | D5 | 未开发 | — |
 | 2.6.1.2 | 去重视图 | — | D5 | 未开发 | — |
 | 2.6.2.1 | 增量补拉 | — | D5 | 未开发 | — |
