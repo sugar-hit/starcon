@@ -5535,6 +5535,529 @@
         }
       }
     },
+    "/identity/approval-records": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "instanceNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentTypeCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "nodeKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "submittedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decidedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decidedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "NEWEST"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/approval-records/{id}": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalRecordDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/approval-records/statistics": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records_statistics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentTypeCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalRecordStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/approval-records/export": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "instanceNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentTypeCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "nodeKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "submittedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "submittedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decidedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decidedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/approval-records/capabilities": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalRecordCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/approval-records/by-actor/{actorId}": {
+      "get": {
+        "tags": [
+          "approval-record-controller"
+        ],
+        "operationId": "get_identity_approval_records_by_actor_actorId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalRecordTrace"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/approval-flows/{id}/validation": {
       "get": {
         "tags": [
@@ -10609,6 +11132,480 @@
           },
           "highRiskProduct": {
             "type": "string"
+          }
+        }
+      },
+      "ApprovalRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ApprovalRecordSummary"
+          }
+        }
+      },
+      "ApprovalRecordSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "longestDwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalRecordView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "documentTypeName": {
+            "type": "string"
+          },
+          "flowName": {
+            "type": "string"
+          },
+          "subjectTitle": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentNodeKey": {
+            "type": "string"
+          },
+          "currentNodeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReferenceId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "actionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalInstanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "originalInstanceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "resubmittedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalRecordDetail": {
+        "type": "object",
+        "properties": {
+          "instance": {
+            "$ref": "#/components/schemas/ApprovalRecordView"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordNode"
+            }
+          },
+          "resubmissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalResubmission"
+            }
+          }
+        }
+      },
+      "ApprovalRecordNode": {
+        "type": "object",
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "nodeKey": {
+            "type": "string"
+          },
+          "nodeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "nodeOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string"
+          },
+          "toMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "toName": {
+            "type": "string",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalResubmission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ApprovalActionCount": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalActorStat": {
+        "type": "object",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "actionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "approveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgHandleSeconds": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalRecordBreakdown": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "instanceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgDwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalRecordStatistics": {
+        "type": "object",
+        "properties": {
+          "periodFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "periodTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "instanceTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "finishedTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withdrawnTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "approveRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "avgCycleSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgActionSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "longestDwellSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordBreakdown"
+            }
+          },
+          "byDocumentType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordBreakdown"
+            }
+          },
+          "byNode": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordBreakdown"
+            }
+          },
+          "bySourceSystem": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordBreakdown"
+            }
+          },
+          "byAction": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalActionCount"
+            }
+          },
+          "byActor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalActorStat"
+            }
+          }
+        }
+      },
+      "ApprovalRecordCapabilities": {
+        "type": "object",
+        "properties": {
+          "readsFactsFrom": {
+            "type": "string"
+          },
+          "readsOnly": {
+            "type": "boolean"
+          },
+          "withdrawal": {
+            "$ref": "#/components/schemas/ApprovalWithdrawCapability"
+          },
+          "observed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordSourceCount"
+            }
+          }
+        }
+      },
+      "ApprovalRecordSourceCount": {
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "instanceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApprovalWithdrawCapability": {
+        "type": "object",
+        "properties": {
+          "owningModule": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalRecordTrace": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instanceNo": {
+            "type": "string"
+          },
+          "subjectTitle": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentTypeCode": {
+            "type": "string"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalRecordNode"
+            }
           }
         }
       },
