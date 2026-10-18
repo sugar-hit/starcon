@@ -1213,6 +1213,38 @@ const services: readonly {
     pattern: /^aftersales\/(?:capabilities|filters|cases(?:\/bulk)?)$/,
   },
   {
+    // 11.1.1.3 售后受理（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.1.1.1 那条**之后**、11.1.2.1 那条**之前**：
+    // 与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // 当前实际顺序：11.1.1.2 → 11.1.1.1 → **本条** → 11.1.2.1。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                        能力声明 + **当前生效**的期限天数与必退词表
+    //   cases                    POST        受理一张售后请求（判四项 + 建单 + 派责任人）
+    //   cases/{uuid}/rejudge     POST        重新判定（追加一版，旧判定留档）
+    //   verdicts                             判定凭据列表（真分页 + 与分页无关的汇总）
+    //   reply-sla                  GET/POST  回复时限策略：当前生效档 / 全部档 / 新开一档
+    //   reply-sla/effective        GET       按平台档解析当前生效档（**可以返回 null = 没配**）
+    //   reply-sla/{uuid}/retire    POST      收口一档（内容不可改，只能换版）
+    //   owner-roster               GET/POST  责任人名册：列表 / 登记
+    //   owner-roster/{uuid}        PUT       调整名册行（是否接新单 / 权重）
+    //
+    // 与 11.1.1.1 / 11.1.1.2 / 11.1.2.1 三条**形状互斥**：它们分别是
+    // `aftersales/(capabilities|filters|cases…)`、`aftersales/cases/{uuid}/…`、
+    // `aftersales/reasons/…`，本条全部带 `intake/` 这一段，谁先被匹配都互不吃。
+    //
+    // 刻意**不放行**的形状：
+    //   * `cases/{uuid}/refunds|returns|disputes` —— 11.2 / 11.3 / 11.4 均未交付
+    //   * `verdicts/{uuid}` 的 PUT / DELETE —— 判定凭据 append-only，改写等于毁掉纠纷证据
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^aftersales\/intake\/(?:capabilities|verdicts|reply-sla(?:\/effective|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/retire)?|owner-roster(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|cases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/rejudge)?)$/,
+  },
+  {
     // 11.1.2.1 售后原因分类（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
