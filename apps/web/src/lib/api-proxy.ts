@@ -1178,6 +1178,57 @@ const services: readonly {
       /^refunds(?:\/(?:capabilities|filters|discrepancies)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:dispatch|verifications|reports|platform-sync|discrepancies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve)?)?)?)?$/,
   },
   {
+    // 11.3.1.1 退款申请（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.2.1.1 退货授权单那条**之后**（本条紧贴同为 11.3.1 锚点的
+    // 11.3.1.2 那条下方），与其他车道的新增元素被既有条目隔开，git 能干净求并。
+    //
+    // 命名空间**独立于 `refunds/`**：那是 11.3.1.2 退款状态的命名空间（执行 / 查证 /
+    // 派发 / 对账差异），本模块是**申请与审批**的那一半。两者的写入所有者不同 ——
+    // 退款申请单归本模块，退款执行记录归 11.3.1.2 —— 混在一个命名空间里迟早有人
+    // 代写对方那张表，而「这笔钱退没退」会出现两个来源各说各话。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，本条一律以
+    // `refund-applications/` 开头，与 `refunds/` 的形状互不相交（`refunds` 后面必须
+    // 是 `/` 或结尾，`refund-applications` 的第 8 个字符是 `-`），谁先被匹配都不误吃。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                    能力与上下游可用性（**明说 12 财务未交付**、
+    //                                  可退余额五桶口径、fail-closed 审批规则）
+    //   refundable-balance?caseId=      可退余额校验（GET，五个占用桶服务端实时查）
+    //   approval-policy?currency=       审批规则读取 / 维护（GET + PUT）
+    //   filters                         筛选项词表（来自真实数据 DISTINCT）
+    //   （裸）                          列表（GET，真分页 + 多维筛选 + 排序白名单）
+    //   （裸）                          发起退款申请（POST，**建草稿不是提交**）
+    //   {uuid}                          详情聚合（GET，头 + 余额 + 规则 + 执行状态 + 留痕 + 动作）
+    //   {uuid}                          改草稿要素（PUT，**只有 DRAFT 可改**）
+    //   {uuid}/submit                   提交审批（POST，**这一刻重新校验可退余额**）
+    //   {uuid}/decide                   审批：同意 / 驳回（POST，**落单签还是双签由规则决定**）
+    //   {uuid}/dispatch                 交财务执行（POST，必须挂一条已存在的执行记录）
+    //   {uuid}/execution-outcome        登记执行结果（POST，成功 / 失败）
+    //   {uuid}/cancel                   人工撤销（POST，钱还没出去时）
+    //
+    // ⚠️ 判别顺序：三个**字面量子路径**（capabilities / refundable-balance /
+    //   approval-policy / filters）**排在** uuid 段之前 —— 否则 `filters`
+    //   会被当成 uuid 段匹配掉（uuid 段只认完整 UUID 形状，`filters` 不是，
+    //   但仍然把字面量写在前面才不必依赖这一层推理）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //   后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}` 的 DELETE —— 退款审批是资金凭据，删掉一行等于抹掉「这笔钱为什么退、
+    //     谁批的」这段证据。
+    //   * `{uuid}/verify` —— 「先查证交易再重试」属 **11.3.1.2**。放行它会让界面显示成
+    //     本模块能查证，而真相是执行记录定论与否由 11.3.1.2 说了算，
+    //     查证不了却显示按钮 = 点了必然失败。
+    //   * `{uuid}/pay` —— 真实付款执行属 **12.2.2.2，未交付**。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^refund-applications(?:\/(?:capabilities|refundable-balance|approval-policy|filters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|decide|dispatch|execution-outcome|cancel))?)?$/,
+  },
+  {
     // 11.2.1.1 退货授权单（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
