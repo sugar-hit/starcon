@@ -1024,6 +1024,41 @@ const services: readonly {
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
   },
   {
+    // 11.3.2.1 换货授权（trade 服务）。本条目同样是**新增一条 services[] 元素**，
+    // 不往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.3.1.2 `refunds` 那条**之前**：前缀形状互不相交
+    // （`aftersales/exchanges/…` vs `refunds/…`），谁先被匹配都互不吃。
+    //
+    // ⚠️ **这条是「页面能真的通」的必要条件**：allowlist 不放行时浏览器侧一律 404，
+    //    界面永远停在错误态而后端日志一次请求都没有 —— 放行与不通的区别只在浏览器侧。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   aftersales/exchanges                      列表（GET）+ 批准换货（POST）
+    //   aftersales/exchanges/capabilities         能力声明 + 两条硬规则原文
+    //   aftersales/exchanges/filters              可授权的换货售后单下拉
+    //   aftersales/exchanges/{uuid}               详情（头 + 逐行 + 可执行动作）
+    //   aftersales/exchanges/{uuid}/cancel        撤销换货（POST，释放真实预占）
+    //
+    // ⚠️ `capabilities` / `filters` 必须写在 id 形状**之前**：否则 `{uuid}` 那一支
+    //   会把它们当 id 放行 —— 而 id 段是完整 UUID 形状，本来匹配不上，
+    //   真正会出事的是顺序颠倒后字面量段被当成 id 段的一部分。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `aftersales/exchanges/{uuid}` 的 PUT / DELETE —— 换货授权行在 V162 里是
+    //     append-only 的（运行角色的 UPDATE/DELETE 已被 REVOKE），改写等于毁掉
+    //     「这笔换货当初预占了多少、约了谁、什么时候撤的」这条追溯链；
+    //   * `aftersales/exchanges/{uuid}/outbound` —— 9.3.3.1 新出库接手未交付，
+    //     capabilities 里 outboundHandoffDelivered=false 如实报出；
+    //   * `aftersales/exchanges/{uuid}/return` —— 11.2 退回旧货未交付，
+    //     capabilities 里 oldGoodsReturnDelivered=false 如实报出。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^aftersales\/exchanges(?:\/(?:capabilities|filters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/cancel)?)?$/,
+  },
+  {
     // 11.3.1.2 退款状态（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
