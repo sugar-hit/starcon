@@ -137,7 +137,7 @@
 | 2.5.1.1 | 回写任务列表 | /channels/operations | D1–D2 | 已交付 | platform_operation UNIQUE(tenant,idempotency_key) + GET /platform-operations |
 | 2.5.1.2 | 未知结果核验 | /channels/operations | D1–D2 | 已交付 | POST /platform-operations/{id}/verify 未知结果核验（CONFIRMED_* 三选一） |
 | 2.5.2.1 | 常用回写操作 | — | D5 | 未开发 | — |
-| 2.6.1.1 | 接收记录 | — | D5 | 未开发 | — |
+| 2.6.1.1 | 接收记录 | — | D5 | 已交付 | channel V170 webhook_endpoint + webhook_receipt（强制 RLS + 部分唯一索引「只处理一次」）＋ 真实 HMAC-SHA256 验签（常数时间比对；密钥 AES-GCM 密文落库，明文不可回读）＋ POST /webhooks/{endpointKey} 先落库返回 200 ＋ GET /webhook-receipts(+/summary)、认领/收尾端点 ＋ /channels「平台消息」段（登记入口·状态分布·接收记录）＋ WebhookReceiptIntegrationTest 27 例（真实密钥对构造合法/非法签名；租户隔离三断言实跑 Testcontainers PG16） |
 | 2.6.1.2 | 去重视图 | — | D5 | 未开发 | — |
 | 2.6.2.1 | 增量补拉 | — | D5 | 未开发 | — |
 | 3.1.1.1 | SPU 列表 | /products/spu | D1–D2 | 已交付 | spu 表 + GET /catalog/products + /products 商品工作区 |

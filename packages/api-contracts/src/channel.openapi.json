@@ -291,6 +291,257 @@
         }
       }
     },
+    "/channel/webhooks/{endpointKey}": {
+      "post": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "post_channel_webhooks_endpointKey",
+        "parameters": [
+          {
+            "name": "endpointKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Starcon-Signature",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Shopify-Hmac-Sha256",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "byte"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-receipts/{id}/complete": {
+      "post": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "post_channel_webhook_receipts_id_complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptCompleteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/webhook-receipts/{id}/claim": {
+      "post": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "post_channel_webhook_receipts_id_claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptClaimInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/webhook-endpoints": {
+      "get": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "get_channel_webhook_endpoints",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookEndpointView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "post_channel_webhook_endpoints",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEndpointInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-endpoints/{id}/disable": {
+      "post": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "post_channel_webhook_endpoints_id_disable",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/channel/warehouse-providers/connections": {
       "get": {
         "tags": [
@@ -4064,6 +4315,101 @@
         }
       }
     },
+    "/channel/webhook-receipts": {
+      "get": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "get_channel_webhook_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookReceiptView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-receipts/summary": {
+      "get": {
+        "tags": [
+          "webhook-controller"
+        ],
+        "operationId": "get_channel_webhook_receipts_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookReceiptSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/warehouse-providers": {
       "get": {
         "tags": [
@@ -6536,6 +6882,77 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ReceiptCompleteInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "DUPLICATE",
+              "SIGNATURE_FAILED",
+              "PROCESSING",
+              "PROCESSED",
+              "FAILED"
+            ]
+          },
+          "lastError": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ReceiptClaimInput": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookEndpointInput": {
+        "required": [
+          "connectionId",
+          "signatureEncoding",
+          "signatureHeader",
+          "signingSecret"
+        ],
+        "type": "object",
+        "properties": {
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endpointKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signatureHeader": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signatureEncoding": {
+            "type": "string",
+            "enum": [
+              "HEX",
+              "BASE64"
+            ]
+          },
+          "signingSecret": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string"
           }
         }
       },
@@ -10997,6 +11414,145 @@
               "type": "string",
               "description": "🔴 DB 派生出来的「只留在原始报文里的键」；服务层声称什么都不作数，隐瞒在此被改写出来"
             }
+          }
+        }
+      },
+      "WebhookReceiptView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endpointId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizedAccount": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopName": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalEventId": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "signatureStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "duplicateOf": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "deliveryAttempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "payloadDigest": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processingStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookReceiptSummary": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oldest": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookEndpointView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizedAccount": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "callbackUrl": {
+            "type": "string"
+          },
+          "endpointKey": {
+            "type": "string"
+          },
+          "signatureAlgorithm": {
+            "type": "string"
+          },
+          "signatureHeader": {
+            "type": "string"
+          },
+          "signatureEncoding": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
