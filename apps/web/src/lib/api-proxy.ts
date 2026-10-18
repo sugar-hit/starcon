@@ -995,6 +995,40 @@ const services: readonly {
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
   },
   {
+    // 2.5.2.1 常用回写操作（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有的 `label-templates`（10.2.2.2）、`ad-type-diffs`（14.1.2.2）、`rate-comparison`
+    // （10.1.2.2）、`logistics-channels`（10.1.1.2）等**一字未动、也不重排** —— 本文件是
+    // 多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里并分支
+    // 会让 git 必然判冲突且 retry 永远不会自愈。
+    // 插入锚点固定在 `label-templates` 那条**之后**、`prefix: 'trade/'` **之前**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   writeback-targets                    候选池集合读（GET，真分页 + 筛选）/ POST 登记目标
+    //   writeback-targets/{uuid}/status      封禁 / 解封目标（POST）
+    //   writeback-batches                    批次集合读（GET，真分页 + 结局筛选）/ POST 执行批量
+    //   writeback-batches/preview            🔴 执行前试算（POST，只读无副作用，不落任何一行）
+    //   writeback-batches/{uuid}             批次详情（GET，逐条结果）
+    //
+    // 判别顺序：字面量子路径 `preview` 排在 uuid 分支之前（与既有两组同款次序）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    // 后者会把 `p`（preview 的首字母）当 id 吃掉，`writeback-batches/p` 会被凭空放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `writeback-batches/{uuid}/items` —— 逐条结果随详情一起返回，不单独开一条
+    //   * `writeback-targets/{uuid}` —— 目标没有独立详情端点，候选池集合读已带全部字段
+    //   * `writeback-batches/{uuid}/retry` —— 批量不等于事务，整批重发是有资损风险的动作，
+    //     重试按 2.5.1.1 的任务清单逐条判断（2.5.1.2 未知结果核验），本模块刻意不提供整批重发入口
+    //   * `writeback-targets/sync` —— 本模块不经任何跨服务同步：上游（04/07/09/10）推事件或
+    //     运营在工作区登记，没有需要本服务投影的对象
+    // ⚠️ 末尾**刻意不带 `?`**：两个裸路径（writeback-targets / writeback-batches）都是真实的
+    // 集合读写入口，必须放行。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^writeback\-(?:targets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?|batches(?:\/preview|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
