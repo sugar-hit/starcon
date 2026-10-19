@@ -17900,6 +17900,644 @@
           }
         }
       }
+    },
+    "/channel/listing-hijackers/watches/{watchId}": {
+      "put": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "put_channel_listing_hijackers_watches_watchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveHijackerWatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerWatchRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "delete_channel_listing_hijackers_watches_watchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerWatchDeleteResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/alerts/{alertId}/acknowledge": {
+      "put": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "put_channel_listing_hijackers_alerts_alertId_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcknowledgeHijackerAlertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/watches": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_watches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerWatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "post_channel_listing_hijackers_watches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveHijackerWatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerWatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/records": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sellerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hijackerKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerRecordPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "post_channel_listing_hijackers_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestHijackerRecordsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerIngestResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/filter-options": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/comparison": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_comparison",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerComparisonPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/capabilities": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-hijackers/alerts": {
+      "get": {
+        "tags": [
+          "listing-hijacker-controller"
+        ],
+        "operationId": "get_channel_listing_hijackers_alerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "alertType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingHijackerAlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -43340,6 +43978,1055 @@
           "openCount": {
             "type": "integer",
             "description": "本筛选范围内未确认的预警条数",
+            "format": "int64"
+          }
+        }
+      },
+      "SaveHijackerWatchRequest": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "被监控的商品 id（与 shopCode+externalItemId 二选一）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "自家店铺编码（与 externalItemId 配对定位商品）"
+          },
+          "externalItemId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台商品 ID 原文（与 shopCode 配对定位商品）"
+          },
+          "referencePrice": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 自家参考售价（人工维护，非平台权威价；05 定价未交付）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（ISO 4217 三字母）"
+          },
+          "priceCutThreshold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 恶意压价阈值：跟卖价 ≤ 该值即判为恶意压价（不给 = 不判定）"
+          },
+          "priceGapRatioThreshold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 异常跟卖的价格差比例阈值 ∈ [0,1)（不给 = 不判定）"
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED（不给 = ACTIVE）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ListingHijackerWatchRow": {
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "被监控的商品 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "自家店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "🔴 自家参考售价（人工维护，非平台权威价）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "priceCutThreshold": {
+            "type": "number",
+            "description": "🔴 恶意压价阈值（不给 = 不判定这一条）"
+          },
+          "priceGapRatioThreshold": {
+            "type": "number",
+            "description": "🔴 异常跟卖的价格差比例阈值（配置项；不给 = 不判定这一条）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "recordCount": {
+            "type": "integer",
+            "description": "跟卖记录条数",
+            "format": "int64"
+          },
+          "openAlertCount": {
+            "type": "integer",
+            "description": "未处理预警条数",
+            "format": "int64"
+          },
+          "lastObservedAt": {
+            "type": "string",
+            "description": "最近一次发现跟卖的时刻；从未发现过为 null",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AcknowledgeHijackerAlertRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          }
+        }
+      },
+      "ListingHijackerAlertRow": {
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "type": "string",
+            "description": "预警 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "recordId": {
+            "type": "string",
+            "description": "触发预警的跟卖记录 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "被跟卖的商品 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "alertType": {
+            "type": "string",
+            "description": "预警类型：MALICIOUS_PRICE_CUT 恶意压价 / ANOMALOUS_HIJACK 异常跟卖"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度：HIGH / MEDIUM"
+          },
+          "hijackerSellerId": {
+            "type": "string",
+            "description": "🔴 跟卖者（卖家标识）"
+          },
+          "hijackerShopName": {
+            "type": "string",
+            "description": "跟卖者店铺名"
+          },
+          "hijackerKind": {
+            "type": "string",
+            "description": "🔴 跟卖者性质：OWN_SHOP / EXTERNAL"
+          },
+          "observedPrice": {
+            "type": "number",
+            "description": "🔴 触发时刻的跟卖价快照"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "🔴 判定时刻的自家参考售价快照（**不是当前值**；05 定价未交付，人工维护）"
+          },
+          "priceGapRatio": {
+            "type": "number",
+            "description": "🔴 价格差比例（**现算**；分母为 0 时为 null）"
+          },
+          "status": {
+            "type": "string",
+            "description": "🔴 状态：OPEN 未处理 / ACKNOWLEDGED 已阅（**内部状态，非平台侧处置**）"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 命中了哪条规则（写明依据）"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "发现时间",
+            "format": "date-time"
+          },
+          "detectedAt": {
+            "type": "string",
+            "description": "预警生成时刻",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "description": "已阅时刻；未已阅为 null",
+            "format": "date-time"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "HijackerRecordInput": {
+        "required": [
+          "hijackerPrice",
+          "hijackerSellerId",
+          "hijackerShopIdentifier"
+        ],
+        "type": "object",
+        "properties": {
+          "hijackerSellerId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "跟卖者（卖家标识，平台侧原文）"
+          },
+          "hijackerShopIdentifier": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 跟卖者店铺的平台侧标识（如 Amazon Seller ID）—— 判定「是不是我们自己人」的依据"
+          },
+          "hijackerShopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "跟卖者店铺名（平台侧原文，仅供展示）"
+          },
+          "hijackerPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 跟卖价格（平台侧观测值）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（不给 = 监控对象的币种）"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "平台给的原文结构（原样存）"
+            },
+            "description": "平台给的原文结构（原样存）"
+          }
+        },
+        "description": "🔴 本批的跟卖信息"
+      },
+      "IngestHijackerRecordsRequest": {
+        "required": [
+          "idempotencyKey",
+          "observedAt",
+          "records",
+          "watchId"
+        ],
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "🔴 这一批的发现时间（抓取时刻；timestamptz）",
+            "format": "date-time"
+          },
+          "source": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源：PLATFORM / SCRAPE / API（不给 = PLATFORM）"
+          },
+          "ingestChannel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API（不给 = API）"
+          },
+          "idempotencyKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 幂等键（租户内唯一；重复投递整批不再落库）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          },
+          "records": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "description": "🔴 本批的跟卖信息",
+            "items": {
+              "$ref": "#/components/schemas/HijackerRecordInput"
+            }
+          }
+        }
+      },
+      "ListingHijackerIngestResult": {
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "🔴 发现时间",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "同步状态：RECEIVED / APPLIED / PARTIAL / REPLAYED"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "description": "本批收到的跟卖信息条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "实际落库的条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "被跳过的条数",
+            "format": "int32"
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "🔴 是否为重复投递（本次未落库）"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "skipped": {
+            "type": "array",
+            "description": "🔴 逐条跳过原因（不静默丢弃）",
+            "items": {
+              "type": "string",
+              "description": "🔴 逐条跳过原因（不静默丢弃）"
+            }
+          },
+          "alerts": {
+            "type": "array",
+            "description": "🔴 本批产生的预警（一条跟卖记录最多一条预警）",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerAlertRow"
+            }
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "ListingHijackerWatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerWatchRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "ListingHijackerRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerRecordRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "alertCount": {
+            "type": "integer",
+            "description": "🔴 本筛选范围内的预警条数",
+            "format": "int64"
+          },
+          "watchCount": {
+            "type": "integer",
+            "description": "🔴 本筛选范围内的监控对象数（0 = 还没配监控对象）",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "ListingHijackerRecordRow": {
+        "type": "object",
+        "properties": {
+          "recordId": {
+            "type": "string",
+            "description": "跟卖记录 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "被跟卖的商品 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "自家店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 所在平台编码（由 listing → shop → platform 派生）"
+          },
+          "hijackerSellerId": {
+            "type": "string",
+            "description": "跟卖者（卖家标识）"
+          },
+          "hijackerShopName": {
+            "type": "string",
+            "description": "跟卖者店铺名（平台侧原文）"
+          },
+          "hijackerShopIdentifier": {
+            "type": "string",
+            "description": "跟卖者店铺的平台侧标识"
+          },
+          "hijackerKind": {
+            "type": "string",
+            "description": "🔴 跟卖者性质：OWN_SHOP 己方其他店铺 / EXTERNAL 外部跟卖者"
+          },
+          "hijackerPrice": {
+            "type": "number",
+            "description": "🔴 跟卖价格（平台侧观测值）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "🔴 自家参考售价（人工维护，非平台权威价）"
+          },
+          "priceGap": {
+            "type": "number",
+            "description": "🔴 价格差 = 自家参考价 − 跟卖价（**现算**，不落表）"
+          },
+          "priceGapRatio": {
+            "type": "number",
+            "description": "🔴 价格差比例 = 价格差 ÷ 自家参考价（**现算**；分母为 0 时为 null）"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "🔴 发现时间",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：PLATFORM / SCRAPE / API"
+          },
+          "ingestChannel": {
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API"
+          },
+          "batchIdempotencyKey": {
+            "type": "string",
+            "description": "批次幂等键"
+          },
+          "receivedAt": {
+            "type": "string",
+            "description": "入库时刻",
+            "format": "date-time"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（PLATFORM_SCRAPED = 平台抓取观测值）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingHijackerFilterOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台词表（全局只读码表）",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerPlatformOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "本租户的店铺词表",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerShopOption"
+            }
+          },
+          "alertTypes": {
+            "type": "array",
+            "description": "预警类型取值域",
+            "items": {
+              "type": "string",
+              "description": "预警类型取值域"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "预警严重度取值域",
+            "items": {
+              "type": "string",
+              "description": "预警严重度取值域"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "watchStatuses": {
+            "type": "array",
+            "description": "监控对象状态取值域",
+            "items": {
+              "type": "string",
+              "description": "监控对象状态取值域"
+            }
+          },
+          "hijackerKinds": {
+            "type": "array",
+            "description": "跟卖者性质取值域",
+            "items": {
+              "type": "string",
+              "description": "跟卖者性质取值域"
+            }
+          },
+          "alertStatuses": {
+            "type": "array",
+            "description": "预警记录状态取值域",
+            "items": {
+              "type": "string",
+              "description": "预警记录状态取值域"
+            }
+          }
+        }
+      },
+      "ListingHijackerPlatformOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台词表（全局只读码表）"
+      },
+      "ListingHijackerShopOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "店铺 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          }
+        },
+        "description": "本租户的店铺词表"
+      },
+      "ListingHijackerComparisonPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerComparisonRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的跟卖者总数",
+            "format": "int64"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "被监控的商品 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "🔴 自家参考售价（人工维护，非平台权威价）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "hijackerCount": {
+            "type": "integer",
+            "description": "区间内跟卖者数量",
+            "format": "int64"
+          },
+          "observationCount": {
+            "type": "integer",
+            "description": "区间内观察总次数",
+            "format": "int64"
+          },
+          "lowestHijackerPrice": {
+            "type": "number",
+            "description": "区间内最低跟卖价"
+          },
+          "averageHijackerPrice": {
+            "type": "number",
+            "description": "区间内平均跟卖价"
+          },
+          "maxPriceGapRatio": {
+            "type": "number",
+            "description": "🔴 跟卖最狠的那一个的价格差比例（区间内**最大**的那个；分母为 0 时为 null）"
+          },
+          "openAlertCount": {
+            "type": "integer",
+            "description": "区间内未处理预警条数",
+            "format": "int64"
+          },
+          "from": {
+            "type": "string",
+            "description": "区间起（含，UTC 自然日）"
+          },
+          "to": {
+            "type": "string",
+            "description": "区间止（含，UTC 自然日）"
+          },
+          "hasData": {
+            "type": "boolean",
+            "description": "区间内是否有跟卖数据"
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "空态原因（没有数据时写明）"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "ListingHijackerComparisonRow": {
+        "type": "object",
+        "properties": {
+          "hijackerSellerId": {
+            "type": "string",
+            "description": "跟卖者（卖家标识）"
+          },
+          "hijackerShopName": {
+            "type": "string",
+            "description": "跟卖者店铺名"
+          },
+          "hijackerShopIdentifier": {
+            "type": "string",
+            "description": "跟卖者店铺的平台侧标识"
+          },
+          "hijackerKind": {
+            "type": "string",
+            "description": "🔴 跟卖者性质：OWN_SHOP / EXTERNAL"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 所在平台编码（派生）"
+          },
+          "observationCount": {
+            "type": "integer",
+            "description": "观察次数（区间内）",
+            "format": "int64"
+          },
+          "latestPrice": {
+            "type": "number",
+            "description": "🔴 最近一次观察到的价格"
+          },
+          "minPrice": {
+            "type": "number",
+            "description": "区间内最低价"
+          },
+          "maxPrice": {
+            "type": "number",
+            "description": "区间内最高价"
+          },
+          "avgPrice": {
+            "type": "number",
+            "description": "区间内平均价"
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "🔴 自家参考售价（人工维护，非平台权威价）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "priceGap": {
+            "type": "number",
+            "description": "🔴 价格差 = 自家参考价 − 最近跟卖价（**现算**）"
+          },
+          "priceGapRatio": {
+            "type": "number",
+            "description": "🔴 价格差比例 = 价格差 ÷ 自家参考价（**现算**；分母为 0 时为 null）"
+          },
+          "lastObservedAt": {
+            "type": "string",
+            "description": "最近一次发现时间",
+            "format": "date-time"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingHijackerCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerCapabilityDimension"
+            }
+          },
+          "alertTypes": {
+            "type": "array",
+            "description": "预警类型取值域",
+            "items": {
+              "type": "string",
+              "description": "预警类型取值域"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "预警严重度取值域",
+            "items": {
+              "type": "string",
+              "description": "预警严重度取值域"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "ingestChannels": {
+            "type": "array",
+            "description": "进来的通道",
+            "items": {
+              "type": "string",
+              "description": "进来的通道"
+            }
+          },
+          "watchStatuses": {
+            "type": "array",
+            "description": "监控对象状态取值域",
+            "items": {
+              "type": "string",
+              "description": "监控对象状态取值域"
+            }
+          },
+          "hijackerKinds": {
+            "type": "array",
+            "description": "跟卖者性质取值域",
+            "items": {
+              "type": "string",
+              "description": "跟卖者性质取值域"
+            }
+          },
+          "alertStatuses": {
+            "type": "array",
+            "description": "预警记录状态取值域",
+            "items": {
+              "type": "string",
+              "description": "预警记录状态取值域"
+            }
+          },
+          "ruleDefinitions": {
+            "type": "string",
+            "description": "🔴 判定规则的口径（服务端算，前端原样显示）"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（PLATFORM_SCRAPED = 平台抓取观测值）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          },
+          "actionsNote": {
+            "type": "string",
+            "description": "🔴 处置动作声明（投诉/举报在平台侧完成）"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "ListingHijackerCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ListingHijackerAlertPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingHijackerAlertRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "description": "🔴 本筛选范围内的未处理预警条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成处置结论）"
+          }
+        }
+      },
+      "ListingHijackerWatchDeleteResult": {
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "被删除的监控对象 id",
+            "format": "uuid"
+          },
+          "deletedRecords": {
+            "type": "integer",
+            "description": "🔴 一并删除的跟卖记录条数",
+            "format": "int64"
+          },
+          "deletedAlerts": {
+            "type": "integer",
+            "description": "🔴 一并删除的预警条数",
             "format": "int64"
           }
         }

@@ -1589,6 +1589,56 @@ const services: readonly {
       /^listing\-compliance\-precheck(?:\/capabilities|\/filter\-options|\/risks\/decisions|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/publish\-gate)?|\/scans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/words(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?)$/,
   },
   {
+    // 4.5.2.1 跟卖监控（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.2.3.2 `listing-compliance-precheck` 那条**之后**、
+    // 4.4.2.1 `listing-claims` 那条**之前** —— 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-hijackers` 这个独立前缀：
+    //   * 跟卖在跨境电商语境里英文是 **hijacker**（抢listing的人），所以前缀是 `listing-hijackers`。
+    //   * 它**不是** `listing-claims`（4.4.2.1 商品认领，跨店搬家的 listing 草稿）——
+    //     那是"把 listing 搬走"，本模块是"盯着别人抢我的 listing"，两码事。
+    //   * 它**不是** `listing-compliance-precheck`（4.2.3.2 发布前的违禁词/侵权扫描）——
+    //     那是"扫内容"，本模块是"看价格"。
+    //   * 它**不是** `listing-keyword-rankings`（4.5.1.2 关键词排名，未交付）——
+    //     那是"看排名"，与跟卖价无关。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-hijackers/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   listing-hijackers/filter-options           筛选项词表
+    //   listing-hijackers/watches                   监控对象列表（GET）/ 新建监控对象（POST）
+    //   listing-hijackers/watches/{uuid}           改监控对象（PUT）/ 删除监控对象（DELETE）
+    //   listing-hijackers/records                   跟卖记录列表（GET）/ 接收跟卖信息（POST）
+    //   listing-hijackers/alerts                    预警记录列表（GET）
+    //   listing-hijackers/alerts/{uuid}/acknowledge 标记预警已阅（PUT）
+    //   listing-hijackers/comparison               价格对比视图（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / watches / records / alerts /
+    //    comparison）**排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    //    `alerts/{uuid}/acknowledge` 这一支排在裸 `alerts` 段之后 —— 首段是字面量 `alerts`，
+    //    与 uuid 段不会互相吃掉，但顺序保持「字面量在前」这一条文件的统一口径。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-hijackers/{uuid}/complaint`       —— 🔴 投诉/举报/申诉在**平台侧**完成，
+    //     本模块只负责发现与提醒，**没有**这些动作端点
+    //   * `listing-hijackers/{uuid}/report`          —— 同上
+    //   * `listing-hijackers/{uuid}/appeal`          —— 同上
+    //   * `listing-hijackers/notifications`          —— 🔴 1 工作台预警未交付（available=false）
+    //   * `listing-hijackers/brand-protection`        —— 🔴 16 合规品牌保护未交付（available=false）
+    //   * `listing-hijackers/crawlers`                —— 🔴 02 抓取调度器未交付（available=false）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-hijackers(?:\/capabilities|\/filter\-options|\/comparison|\/watches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/records|\/alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?)$/,
+  },
+  {
     // 4.4.2.1 商品认领（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
