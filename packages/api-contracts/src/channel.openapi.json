@@ -8572,6 +8572,376 @@
           }
         }
       }
+    },
+    "/channel/listing-details/{id}/publish-records": {
+      "post": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "post_channel_listing_details_id_publish_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePublishRecordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavePublishRecordResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}/content-snapshots": {
+      "post": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "post_channel_listing_details_id_content_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveContentSnapshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveContentSnapshotResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}/publish-history": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_id_publish_history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingPublishRecordView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}/platform-operations": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_id_platform_operations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingPlatformOperationView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}/diff": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_id_diff",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDiffReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/{id}/content": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_id_content",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingContentComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-details/capabilities": {
+      "get": {
+        "tags": [
+          "listing-detail-controller"
+        ],
+        "operationId": "get_channel_listing_details_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -19454,6 +19824,888 @@
           "onlineBaselineAvailable": {
             "type": "boolean",
             "description": "🔴 该维度的**线上**基线是否可读（false 时 before 只能来自已有草稿）"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "SavePublishRecordRequest": {
+        "required": [
+          "outcome"
+        ],
+        "type": "object",
+        "properties": {
+          "snapshotId": {
+            "type": "string",
+            "description": "本次发布所用的平台内容快照 id；人工在平台后台改的可以为空",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "PUBLISH / CONTENT_WRITEBACK；为空按 PUBLISH"
+          },
+          "outcome": {
+            "minLength": 1,
+            "type": "string",
+            "description": "SUCCEEDED / FAILED / REJECTED"
+          },
+          "platformRequestId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台返回的请求 ID"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "失败 / 被拒原因；FAILED / REJECTED 时必填"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "动作发生时刻；为空按 now",
+            "format": "date-time"
+          }
+        }
+      },
+      "SavePublishRecordResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "发布记录 id",
+            "format": "uuid"
+          },
+          "snapshotId": {
+            "type": "string",
+            "description": "本次引用的内容快照 id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "结果"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          },
+          "occurredAtEcho": {
+            "type": "string",
+            "description": "🔴 写回值逐字回显（AGENTS.md：timestamptz 必须断言写回的值）"
+          }
+        }
+      },
+      "SaveContentSnapshotRequest": {
+        "required": [
+          "language"
+        ],
+        "type": "object",
+        "properties": {
+          "language": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "语言，如 en-US / zh-CN；同一 listing 的一种语言只有一份当前快照"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台标题原文"
+          },
+          "bulletPoints": {
+            "type": "string",
+            "description": "平台侧要点数组（json 数组字符串，如 [\"轻便\",\"耐用\"]）"
+          },
+          "description": {
+            "type": "string",
+            "description": "平台侧描述原文"
+          },
+          "images": {
+            "type": "string",
+            "description": "平台侧图片数组（json 数组字符串，元素为图片 url）"
+          },
+          "videoUrl": {
+            "type": "string",
+            "description": "平台侧视频 url"
+          },
+          "aPlusModules": {
+            "type": "string",
+            "description": "平台侧 A+ 模块数组（json 数组字符串）"
+          },
+          "categoryAttributes": {
+            "type": "string",
+            "description": "平台侧类目属性（json 对象字符串）"
+          },
+          "complianceStatements": {
+            "type": "string",
+            "description": "平台侧合规声明（json 对象字符串）"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：SYNC / COLLECTION / MANUAL；为空按 SYNC"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "平台侧内容采集时刻；为空按 now",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "是否登记为该语言下的当前快照；为空按 true"
+          }
+        }
+      },
+      "SaveContentSnapshotResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "language": {
+            "type": "string",
+            "description": "语言"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "是否当前快照"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "采集时刻",
+            "format": "date-time"
+          },
+          "capturedAtEcho": {
+            "type": "string",
+            "description": "🔴 采集时刻写回值逐字回显"
+          },
+          "historyCount": {
+            "type": "integer",
+            "description": "该 listing 该语言的历史快照总数",
+            "format": "int64"
+          }
+        }
+      },
+      "ListingContentField": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "字段键（title / bullet_points / description / images …）"
+          },
+          "label": {
+            "type": "string",
+            "description": "字段中文名"
+          },
+          "platformLabel": {
+            "type": "string",
+            "description": "🔴 左列标题：恒为「平台当前内容」"
+          },
+          "platformValue": {
+            "type": "string",
+            "description": "平台侧取值原文；平台没给该字段时为 null"
+          },
+          "platformKnown": {
+            "type": "boolean",
+            "description": "🔴 平台侧是否有值（false ≠ 空字符串：平台写了空标题和没写过标题是两件事）"
+          },
+          "internalLabel": {
+            "type": "string",
+            "description": "🔴 右列标题：恒为「内部草稿内容」"
+          },
+          "internalValue": {
+            "type": "string",
+            "description": "🔴 内部草稿取值；4.2.1.1 未交付 ⇒ 恒为 null"
+          },
+          "internalKnown": {
+            "type": "boolean",
+            "description": "🔴 内部侧是否有值；4.2.1.1 未交付 ⇒ 恒为 false"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 该字段能否比对（恒 false，归属 4.2.1.1）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "职责句：内容对照（平台当前内容 vs 内部草稿内容）"
+      },
+      "ListingContentSnapshotView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "language": {
+            "type": "string",
+            "description": "语言"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：SYNC / COLLECTION / MANUAL"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "是否当前快照"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "平台侧内容采集时刻",
+            "format": "date-time"
+          },
+          "historyCount": {
+            "type": "integer",
+            "description": "🔴 该 listing 共有多少份历史快照（追加写，不是就地覆盖）",
+            "format": "int64"
+          }
+        },
+        "description": "当前平台内容快照的元信息；从未登记过快照时为 null"
+      },
+      "ListingDetail": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ListingPlatformProfile"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 内部映射状态：UNMAPPED / PARTIAL / MAPPED（列表级聚合）"
+          },
+          "variantCount": {
+            "type": "integer",
+            "description": "平台变体条数",
+            "format": "int32"
+          },
+          "mappedVariantCount": {
+            "type": "integer",
+            "description": "已映射到内部 SKU 的变体条数",
+            "format": "int32"
+          },
+          "variants": {
+            "type": "array",
+            "description": "职责句：内部映射",
+            "items": {
+              "$ref": "#/components/schemas/ListingVariantMapping"
+            }
+          },
+          "contentComparison": {
+            "type": "array",
+            "description": "职责句：内容对照（平台当前内容 vs 内部草稿内容）",
+            "items": {
+              "$ref": "#/components/schemas/ListingContentField"
+            }
+          },
+          "contentSnapshot": {
+            "$ref": "#/components/schemas/ListingContentSnapshotView"
+          },
+          "diff": {
+            "$ref": "#/components/schemas/ListingDiffReport"
+          },
+          "publishHistory": {
+            "type": "array",
+            "description": "职责句：发布历史（新 → 旧）",
+            "items": {
+              "$ref": "#/components/schemas/ListingPublishRecordView"
+            }
+          },
+          "platformOperations": {
+            "type": "array",
+            "description": "职责句：平台操作记录（新 → 旧）",
+            "items": {
+              "$ref": "#/components/schemas/ListingPlatformOperationView"
+            }
+          },
+          "statusChanges": {
+            "type": "array",
+            "description": "状态变更轨迹（与发布历史是两回事）",
+            "items": {
+              "$ref": "#/components/schemas/ListingStatusChange"
+            }
+          },
+          "writebackRegistry": {
+            "$ref": "#/components/schemas/ListingWritebackRegistryView"
+          },
+          "differentCount": {
+            "type": "integer",
+            "description": "🔴 差异高亮计数（便于列表页角标复用）",
+            "format": "int32"
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "description": "🔴 未接入维度清单",
+            "items": {
+              "type": "string",
+              "description": "🔴 未接入维度清单"
+            }
+          }
+        }
+      },
+      "ListingDiffReport": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "array",
+            "description": "全部差异行（含未接入的行 —— 隐藏未接入的行等于隐藏缺口）",
+            "items": {
+              "$ref": "#/components/schemas/ListingDiffRow"
+            }
+          },
+          "differentCount": {
+            "type": "integer",
+            "description": "可比对且不同的条数（差异高亮计数）",
+            "format": "int32"
+          },
+          "sameCount": {
+            "type": "integer",
+            "description": "可比对且相同的条数",
+            "format": "int32"
+          },
+          "unavailableCount": {
+            "type": "integer",
+            "description": "🔴 因一侧未接入而不可比对的条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 差异口径总说明"
+          }
+        },
+        "description": "职责句：差异对照（本模块的核心价值）"
+      },
+      "ListingDiffRow": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "type": "string",
+            "description": "分组：CONTENT / PRICE_STOCK / PLATFORM_SIDE / REGISTRY / MAPPING"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "label": {
+            "type": "string",
+            "description": "维度中文名"
+          },
+          "platformLabel": {
+            "type": "string",
+            "description": "🔴 左列标题（平台侧 / 系统登记簿侧）"
+          },
+          "platformValue": {
+            "type": "string",
+            "description": "左列取值原文；无值时为 null"
+          },
+          "platformKnown": {
+            "type": "boolean",
+            "description": "🔴 左列是否有值"
+          },
+          "internalLabel": {
+            "type": "string",
+            "description": "🔴 右列标题（内部侧）"
+          },
+          "internalValue": {
+            "type": "string",
+            "description": "右列取值原文；无值时为 null"
+          },
+          "internalKnown": {
+            "type": "boolean",
+            "description": "🔴 右列是否有值"
+          },
+          "status": {
+            "type": "string",
+            "description": "DIFFERENT 不同 / SAME 相同 / PLATFORM_ONLY 只有左侧有 / INTERNAL_ONLY 只有右侧有 / UNAVAILABLE 有一侧未接入 / UNKNOWN 两侧都没值"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 该维度能否比对（false 时 status 恒为 UNAVAILABLE）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块；available=true 时为空"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响；available=true 时为空"
+          },
+          "note": {
+            "type": "string",
+            "description": "该行的口径说明（前端 tooltip / 小字，原样展示）"
+          }
+        },
+        "description": "全部差异行（含未接入的行 —— 隐藏未接入的行等于隐藏缺口）"
+      },
+      "ListingPlatformOperationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "platform_operation id",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string",
+            "description": "PUBLISH / UPDATE_PRICE / UPDATE_STOCK / SHIP_UPDATE / CANCEL_ORDER"
+          },
+          "status": {
+            "type": "string",
+            "description": "PENDING / SENDING / SUCCEEDED / FAILED / UNKNOWN。UNKNOWN 是「不知道平台上到底成没成」"
+          },
+          "verification": {
+            "type": "string",
+            "description": "未知结果核验结论（2.5.1.2：先查证再决定重发）"
+          },
+          "attempts": {
+            "type": "integer",
+            "description": "已重试次数",
+            "format": "int32"
+          },
+          "platformRequestId": {
+            "type": "string",
+            "description": "平台返回的请求 ID"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "最后一次错误"
+          },
+          "payload": {
+            "type": "string",
+            "description": "payload 原文（json 字符串）"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "动作发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "职责句：平台操作记录（新 → 旧）"
+      },
+      "ListingPlatformProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "上游 02 店铺 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "description": "上游 02 站点 id；为空表示未归站点",
+            "format": "uuid"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "description": "站点编码；为空表示未归站点"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN / item_id），不折叠大小写"
+          },
+          "title": {
+            "type": "string",
+            "description": "平台标题原文"
+          },
+          "categoryPath": {
+            "type": "string",
+            "description": "平台类目路径原文"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id"
+          },
+          "status": {
+            "type": "string",
+            "description": "平台商品状态"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "description": "审核状态"
+          },
+          "reviewMessage": {
+            "type": "string",
+            "description": "平台驳回原因 / 审核备注"
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "负责人 id（登记时的归属快照）",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分；平台未给则为 null"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评论数"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种；仅作展示标签，本模块不据此做任何换算"
+          },
+          "platformStockState": {
+            "type": "string",
+            "description": "🔴 缺货标记（平台侧事实）：IN_STOCK / OUT_OF_STOCK / UNKNOWN。**与 07 的内部可售量不是一回事**"
+          },
+          "platformStockQty": {
+            "type": "number",
+            "description": "平台侧可售量（02 同步 / 4.3.2.2 回流回报）；UNKNOWN 时为 null"
+          },
+          "launchedAt": {
+            "type": "string",
+            "description": "上架时刻",
+            "format": "date-time"
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "description": "最近一次平台同步时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "职责句：平台原始信息"
+      },
+      "ListingPublishRecordView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "发布记录 id",
+            "format": "uuid"
+          },
+          "snapshotId": {
+            "type": "string",
+            "description": "本次发布所用的平台内容快照 id；无对应快照时为 null",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "PUBLISH 4.3.1.1 发布 / CONTENT_WRITEBACK 4.3.2.1 内容回写"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "SUCCEEDED 成功 / FAILED 平台失败 / REJECTED 生成前被拒"
+          },
+          "platformRequestId": {
+            "type": "string",
+            "description": "平台返回的请求 ID"
+          },
+          "reason": {
+            "type": "string",
+            "description": "失败 / 被拒原因；成功时为空"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作者 id",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "动作发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "职责句：发布历史（新 → 旧）"
+      },
+      "ListingVariantMapping": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "变体 id",
+            "format": "uuid"
+          },
+          "externalVariantId": {
+            "type": "string",
+            "description": "平台变体 ID 原文"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 映射状态：UNMAPPED / MAPPED / BUNDLE"
+          },
+          "internalSkuId": {
+            "type": "string",
+            "description": "🔴 内部 SKU 逻辑 id（03 catalog 拥有）；未映射时为 null",
+            "format": "uuid"
+          },
+          "componentQuantity": {
+            "type": "number",
+            "description": "组件数量（仅 BUNDLE 有意义）"
+          },
+          "attributes": {
+            "type": "string",
+            "description": "平台侧变体属性原文（json 对象字符串）"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "职责句：内部映射"
+      },
+      "ListingWritebackRegistryView": {
+        "type": "object",
+        "properties": {
+          "registered": {
+            "type": "boolean",
+            "description": "🔴 该 listing 是否已登记为可回写目标（false ⇒ 下面两列都是 null，不回 0）"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "writeback_target id；未登记时为 null",
+            "format": "uuid"
+          },
+          "currentStock": {
+            "type": "number",
+            "description": "登记簿里的当前库存快照；未登记或未填时为 null"
+          },
+          "currentPrice": {
+            "type": "number",
+            "description": "🔴 登记簿里的当前价快照；未登记或未填时为 null（**这不是售价**）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种；仅作展示标签"
+          },
+          "status": {
+            "type": "string",
+            "description": "ACTIVE / BLOCKED（BLOCKED = 已被封禁，不允许发起回写）"
+          },
+          "blockedReason": {
+            "type": "string",
+            "description": "封禁原因"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "登记时刻",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "description": "🔴 该快照的来源（前端原样展示）"
+          },
+          "limitation": {
+            "type": "string",
+            "description": "🔴 该快照的局限说明（前端原样展示）"
+          }
+        },
+        "description": "🔴 回写登记簿状态（只读，2.5.2.1 已交付）"
+      },
+      "ListingContentComparison": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/ListingContentSnapshotView"
+          },
+          "fields": {
+            "type": "array",
+            "description": "🔴 逐字段左右对照（右列恒为未接入，归属 4.2.1.1）",
+            "items": {
+              "$ref": "#/components/schemas/ListingContentField"
+            }
+          },
+          "internalDraftAvailable": {
+            "type": "boolean",
+            "description": "🔴 内部草稿是否已接入（4.2.1.1，恒 false）"
+          },
+          "internalDraftOwnerModule": {
+            "type": "string",
+            "description": "内部草稿的归属模块"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 内容对照口径说明（前端原样展示）"
+          }
+        }
+      },
+      "ListingDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingDetailCapabilityDimension"
+            }
+          },
+          "priceAvailable": {
+            "type": "boolean",
+            "description": "🔴 售价是否已接入：卷 05 定价与价目系统整卷未交付，恒为 false，前端据此显示「价格能力未接入」"
+          },
+          "priceOwnerModule": {
+            "type": "string",
+            "description": "🔴 售价维度的归属模块"
+          },
+          "priceNote": {
+            "type": "string",
+            "description": "🔴 未接入售价时的界面措辞（前端原样展示，不要自己编）"
+          },
+          "internalStockAvailable": {
+            "type": "boolean",
+            "description": "🔴 内部可售量是否已接入：归 07 库存，恒为 false"
+          },
+          "internalStockOwnerModule": {
+            "type": "string",
+            "description": "🔴 内部可售量的归属模块"
+          },
+          "internalStockNote": {
+            "type": "string",
+            "description": "🔴 未接入内部可售量时的界面措辞（前端原样展示）"
+          },
+          "contentDraftAvailable": {
+            "type": "boolean",
+            "description": "🔴 内容草稿是否已接入：归 4.2.1.1 刊登编辑器，恒为 false"
+          },
+          "contentDraftOwnerModule": {
+            "type": "string",
+            "description": "🔴 内容草稿的归属模块"
+          },
+          "contentDraftNote": {
+            "type": "string",
+            "description": "🔴 未接入内容草稿时的界面措辞（前端原样展示）"
+          },
+          "salesAvailable": {
+            "type": "boolean",
+            "description": "🔴 销量是否已接入：归 09 订单，恒为 false"
+          },
+          "salesOwnerModule": {
+            "type": "string",
+            "description": "🔴 销量的归属模块"
+          },
+          "salesNote": {
+            "type": "string",
+            "description": "🔴 未接入销量时的界面措辞（前端原样展示）"
+          },
+          "contentFields": {
+            "type": "array",
+            "description": "内容对照字段清单（左右两列的字段顺序）",
+            "items": {
+              "type": "string",
+              "description": "内容对照字段清单（左右两列的字段顺序）"
+            }
+          },
+          "diffGroups": {
+            "type": "array",
+            "description": "差异分组：CONTENT / PRICE_STOCK / PLATFORM_SIDE / REGISTRY / MAPPING",
+            "items": {
+              "type": "string",
+              "description": "差异分组：CONTENT / PRICE_STOCK / PLATFORM_SIDE / REGISTRY / MAPPING"
+            }
+          },
+          "editSupported": {
+            "type": "boolean",
+            "description": "编辑入口能否执行（本批次恒 false）"
+          },
+          "editOwnerModule": {
+            "type": "string",
+            "description": "编辑入口归属模块"
+          },
+          "editReason": {
+            "type": "string",
+            "description": "编辑入口不可用的原因（前端原样展示）"
+          },
+          "writebackSupported": {
+            "type": "boolean",
+            "description": "内容回写按钮能否执行（本批次恒 false）"
+          },
+          "writebackOwnerModule": {
+            "type": "string",
+            "description": "内容回写归属模块"
+          },
+          "writebackReason": {
+            "type": "string",
+            "description": "内容回写不可用的原因（前端原样展示）"
+          },
+          "platformOperationNote": {
+            "type": "string",
+            "description": "🔴 平台操作记录的完整性说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          }
+        }
+      },
+      "ListingDetailCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
           },
           "source": {
             "type": "string",
