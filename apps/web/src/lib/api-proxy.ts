@@ -1741,6 +1741,48 @@ const services: readonly {
       /^one\-click\-publish(?:\/capabilities|\/target\-options|\/content\-sources|\/jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:targets|steps|dispatch))?)?|\/targets\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:report|retry))?)$/,
   },
   {
+    // 4.3.1.3 发布任务（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.3.1.1 `one-click-publish` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-claims` / `listing-status-events` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-publish-tasks` 这个独立前缀：
+    //   4.3.1.1 一键刊登占了 `/channel/one-click-publish`（一个 SKU → N 个目标，各自成败），
+    //   4.3.1.2 批量发布占了 `/channel/listing-publish`（一个批次 → 一条队列，按平台配额排队），
+    //   本模块是**单次发布任务的进度视图**（步骤时间线 + 错误明细 + 重试操作）。
+    //   三者是三套独立的状态机，共用前缀会让「一个平台失败」被误写成「整批失败」。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-publish-tasks/capabilities               能力声明（阶段→步骤键映射 + 未交付段）
+    //   listing-publish-tasks/tasks                      任务列表（GET，真分页 + 来源/阶段/平台/店铺筛选）
+    //   listing-publish-tasks/tasks/{uuid}               任务详情（步骤时间线 + 错误明细 + 重试尝试）
+    //   listing-publish-tasks/tasks/{uuid}/steps         步骤时间线（单独一条，便于只刷新时间线）
+    //   listing-publish-tasks/tasks/{uuid}/retry         任务级重试（整条任务重来）
+    //   listing-publish-tasks/tasks/{uuid}/steps/{key}/retry  步骤级重试
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / tasks）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ steps 段下的 stepKey 只放行 4.3.1.1 落的八个步骤键（PRICE / STOCK 是作业级步骤，
+    //    也在同一段里 —— 它们出现在**作业级**时间线上，不是目标级）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸 `listing-publish-tasks`        —— 后端没有「列出全部」的映射在裸路径上
+    //   * `listing-publish-tasks/jobs`      —— 作业归 4.3.1.1（one-click-publish）
+    //   * `listing-publish-tasks/batches`   —— 批次归 4.3.1.2（listing-publish）
+    //   * `listing-publish-tasks/tasks/{uuid}/cancel` —— 撤销未实现
+    //   * `listing-publish-tasks/tasks/{uuid}/report` —— 平台回执归 4.3.1.1 / 4.3.2.2
+    //   * `listing-publish-tasks/tasks/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-publish\-tasks(?:\/capabilities|\/tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:steps(?:\/(?:TEMPLATE|CONTENT|MAPPING|MEDIA|PRICE|STOCK|SUBMIT|RESULT)\/retry)?|retry))?)?)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
