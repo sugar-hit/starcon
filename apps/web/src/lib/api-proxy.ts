@@ -1070,6 +1070,50 @@ const services: readonly {
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 4.1.1.2 Listing 详情（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往 4.1.1.1 的 `listings` 分支里并子路径 —— 那条分支是已交付车道的成果，
+    // 多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.1.1.1 的 `listings` 元素**之后**、`prefix: 'trade/'` **之前**：
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-details` 这个独立前缀而不是 `listings/{id}/...`：
+    // 4.1.1.1 交付时把 `/channel/listings/{id}/diff` 显式登记成「不放行」（那是本模块的形状），
+    // 也把 `/channel/listings/{id}` 定义成「列表行点进去的最小载荷」。在同一棵路径树上开子资源，
+    // 要同时改它的白名单与它的拒绝清单 —— 而那份清单是别人的成果。
+    // 「列表」与「详情全景」本来也是两种资源：列表行是筛选结果的一行，
+    // 详情是聚合了四份上游事实的全景视图，两者连字段集合都不一样。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-details/capabilities            能力声明（售价 / 内部可售量 / 内容草稿 / 销量 available=false + ownerModule）
+    //   listing-details/{uuid}                  全景（七块一次给全 + 差异高亮计数）
+    //   listing-details/{uuid}/diff             差异对照（本模块的核心价值）
+    //   listing-details/{uuid}/content          内容对照（平台当前内容 vs 内部草稿内容）
+    //   listing-details/{uuid}/publish-history  发布历史（GET 真分页）
+    //   listing-details/{uuid}/platform-operations 平台操作记录（GET 真分页）
+    //   listing-details/{uuid}/content-snapshots 登记平台当前内容快照（POST）
+    //   listing-details/{uuid}/publish-records  登记发布动作结果（POST）
+    //
+    // ⚠️ 判别顺序：`capabilities` 必须排在 `{uuid}` **之前**，否则会被 uuid 分支吃掉半截
+    //    （症状是「能力声明 404，但详情页正常」）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    短前缀会被放行到一条根本不存在的路由上。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-details/{uuid}/lifecycle`  —— 七态状态机与平台回写归 4.1.1.3
+    //   * `listing-details/{uuid}/reprice`     —— 改价归 05 定价，本服务不建影子价格表
+    //   * `listing-details/{uuid}/restock`     —— 改库存归 07 库存
+    //   * `listing-details/{uuid}/draft`       —— 内容草稿归 4.2.1.1，尚未交付
+    //   * `listing-details/{uuid}/writeback`   —— 内容回写归 4.3.2.1，尚未交付
+    //   * `listing-details/{uuid}/publish`     —— 发布流程归 4.3.1，本模块只留痕不发起
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-details(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:content|diff|publish\-history|platform\-operations|content\-snapshots|publish\-records))?))?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
