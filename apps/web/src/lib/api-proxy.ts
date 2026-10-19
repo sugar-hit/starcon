@@ -1590,6 +1590,55 @@ const services: readonly {
       /^listing\-migrations(?:\/capabilities|\/filter\-options|\/preview|\/duplicate\-risks|\/migrated|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
   },
   {
+    // 4.3.1.1 一键刊登（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-migrations`（4.4.2.2 批量搬迁）那一条**之后** ——
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `one-click-publish` 这个独立前缀：
+    //   4.3.1.2 批量发布已经占了 `/channel/listing-publish`（batches / rate-limits /
+    //   dispatch / pause / resume / cancel / reorder / retry）。两条通道的语义完全不同 ——
+    //   一键刊登是「一个 SKU → N 个目标，每个目标各自成败、各自重试」，
+    //   批量发布是「一个批次 → 一条队列，按平台 API 配额排队」。
+    //   共用前缀会让「一个平台失败」被误写成「整批失败」，正是蓝图那句加粗要防的事。
+    //   也不用 `listing-publish-jobs`：既有正则锚定 `^listing\-publish(...)?$`，
+    //   虽不匹配，但极易被后来人误写成 `listing\-publish\-jobs` 而互相吃掉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   one-click-publish/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   one-click-publish/target-options          目标店铺 / 站点候选（只列已启用站点）
+    //   one-click-publish/content-sources         内容来源候选（编辑器入队记录 + 刊登模板）
+    //   one-click-publish/jobs                    作业列表（GET）+ 建作业（POST，幂等）
+    //   one-click-publish/jobs/{uuid}             单个作业详情（GET）
+    //   one-click-publish/jobs/{uuid}/targets     该作业的发布任务（每个目标一个）
+    //   one-click-publish/jobs/{uuid}/steps       该作业的步骤时间线
+    //   one-click-publish/jobs/{uuid}/dispatch    派发（逐目标独立，一个失败不影响其他）
+    //   one-click-publish/targets/{uuid}          单个发布任务（GET）
+    //   one-click-publish/targets/{uuid}/report   平台回执（成功 / 驳回 / 失败）
+    //   one-click-publish/targets/{uuid}/retry    独立重试（只重试失败的那一个）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / target-options / content-sources）
+    //    **排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸 `one-click-publish`            —— 后端没有「列出全部」的映射在裸路径上
+    //   * `one-click-publish/jobs/{uuid}/cancel` —— 撤销未实现
+    //   * `one-click-publish/jobs/{uuid}/timeline` —— 单次发布任务的时间线页归 4.3.1.3（未交付）
+    //   * `one-click-publish/jobs/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `one-click-publish/{uuid}`        —— 没有「按 id 直接取作业」的裸形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^one\-click\-publish(?:\/capabilities|\/target\-options|\/content\-sources|\/jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:targets|steps|dispatch))?)?|\/targets\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:report|retry))?)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
