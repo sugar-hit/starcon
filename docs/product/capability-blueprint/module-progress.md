@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **266** |
 | 完成率 | 42.8% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 19 | 0 | 33 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 9 | 0 | 146 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 24 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -187,7 +170,7 @@
 | 4.1.2.2 | 映射版本 | — | D5 | 未开发 | — |
 | 4.1.2.3 | 套装组件映射 | — | D5 | 未开发 | — |
 | 4.2.1.1 | 刊登编辑器 | /listings/editor | D5 | 未开发 | — |
-| 4.2.1.2 | 批量编辑 | /listings/editor | D5 | 未开发 | — |
+| 4.2.1.2 | 批量编辑 | /listings/editor | D5 | 已交付 | 迁移 channel `V177__listing_bulk_edit.sql`（四张新表，**纯新建、零 ALTER 任何既有表的内容列**）。**🔴 核心不变量「批量编辑只改草稿不直接改线上，必须走发布流程——这是"误改全店标题"事故的唯一防线」的三层物理落法**（三层缺一都不算交付）：① **API 形状** —— 全模块唯一的持久化写路径是 confirm()，它的产出是草稿，**没有任何一个改线上的端点**（前端拿不到可直接调用的"保存到线上"入口）；② **事务标记** —— confirm 的整个写事务用 `set_config('app.draft_only','true',true)`（第三个参数 true＝事务局部，连接归还池子后不带标记），配合 V177 的 `guard_listing_live_content` BEFORE UPDATE 触发器，该事务期间对线上 listing.title / category_path / platform_category_id 的**任何**改动由 DB 直接拒（23514）—— 于是将来有人在批量编辑路径里手滑加一句 `update listing set title=…`，会在测试期就炸而不是等到全店标题被改完（4.3.1.2 的发布流程不打开该标记，它本来就要写线上，所以"批量编辑写不了线上"与"发布能写线上"同时成立）；③ **物理分表** —— 草稿态在新建的 `listing_content_draft`，与线上 `listing` 是两张表，跨表写入只可能出现在发布流程那条被 review 的路径上，同表两列意味着"发布"是一次可被任何漏写 WHERE 的语句打穿的 UPDATE。四表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + 店铺维度 data_scope RESTRICTIVE（草稿/操作/变更三张随 listing 的目标收敛，模板是租户级资产不挂店铺维度故只有 isolation）+ GRANT（`starcon_app` 零权限）：`listing_bulk_template`（**平台差异化模板**：标题长度 / 图片数 / 卖点数上限**按平台配**而不是服务层写死，写死成 500 会让发到短标题平台的商品直到被平台驳回才发现超长）；`listing_content_draft`（🔴 草稿态：`touched_fields` 之外的列为 NULL 表示"本次没拟改"——把没碰过的字段也复制成快照会在发布时把线上新值覆盖回去，那是一次用户根本没要求的线上改动；CHECK 把 `touched_fields` 与哪些列有值钉成一一对应；**"一条 listing 同时只有一份待发布草稿"用部分唯一索引 `listing_content_draft_one_active(tenant_id,listing_id) WHERE state='DRAFT'` 表达而不是整表 UNIQUE**，否则上一份草稿发布/废弃后第二次批量编辑会被 ON CONFLICT 静默吞掉；另带 base_version 与 stale 标记回答"草稿从哪个线上版本派生、线上之后有没有被改过"）；`listing_bulk_operation`（预览即落库为 PREVIEWED——"当时系统告诉我们会怎么改"是追责凭据）；`listing_bulk_change`（🔴 逐条改前/改后，**预览与执行共用同一批行**：preview 落 PREVIEWED，confirm 只把同一批行推进并写进草稿，"预览一套、执行另一套"在结构上不可能，集成测试逐条比对；CHECK 钉住 `outcome='APPLIED'` 与 `changed` 互为充要）。**六种操作全部真实现**（职责句逐词）：TITLE_APPEND / TITLE_REPLACE（字面量替换，用 String.replace 而非正则，"c++"就按字面量处理）/ TITLE_REGEX_REPLACE（支持分组引用）/ REPLACE_IMAGES（整组替换）/ BULLET_APPEND / REPLACE_CATEGORY（类目路径与平台类目 id 一起改，两者本是同一次决定）。**逐条结果四值把"为什么这条没被改"说清**：APPLIED / NO_CHANGE / SKIPPED_LIMIT（**超平台上限显式跳过并写明，`after` 仍是完整长串而不是被偷截短的版本**，截断会让运营以为标题没超长）/ SKIPPED_NO_BASELINE。**正则 ReDoS 防线是三层的**：① `SafeRegex` 静态结构分析（逐字符扫描识别嵌套无界量词 / 反向引用 / 相邻无界量词 / 括号不配对，并正确跳过字符类与转义序列——用正则去判断量词会在这两种输入上误判且误判方向是放行）② **对抗语料实测计时**（真的跑一遍对输入不利的语料，超时即拒）③ DB 层 `guard_bulk_change_not_oversized` 触发器给 before/after 长度封顶。**🔴 诚实边界**：V171 的 `listing` 只有 title / category_path / platform_category_id 三个内容列，**没有卖点与图片**——那是 4.2.1.1 刊登编辑器的内容域而它尚未交付，因此本模块对 BULLETS / IMAGES 显式声明 `onlineBaselineAvailable=false` + ownerModule + 影响：标题与类目的 before 真的取自线上，卖点的 before 取自已有草稿，**没有可比基线时统一加卖点显式跳过**（照做会产出一份只含新卖点的草稿，发布时清空 listing 原有卖点——那是一次没人要求的线上改动）；换图是整组替换语义所以照做，但改前值如实显示为空集而不是编一个线上原图。**跨租户批量选中自动切分**：可见的照常进草稿，不可见的 id 在 `outOfScopeIds` 里逐个回显（跨租户与不存在对调用方没有区别，能区分二者本身就是信息泄露），全部不可见才整体拒绝。**本模块无任何金额列**：职责句六件事里没有改价（归 05 定价，与 4.1.1.1 显式拒绝批量改价同一纪律），有金额字段就得填值而填 0 会被读成"批量把全店商品改成 0 元"。端点 `/channel/listing-bulk-edit`（capabilities / templates GET·POST / preview / confirm / regex-check / operations 列表·`{id}` / drafts 列表·`{listingId}`·`{listingId}/discard` / scope-check），权限码复用 identity 既有 `channel.operation.*`（identity 零改动）。集成测试 `ListingBulkEditIntegrationTest` 17 例（Testcontainers 真实 PG16 实跑 Flyway V177）覆盖：只改草稿不直接改线上 + 触发器级防线、预览==执行、六种操作、超限与无基线显式跳过、ReDoS 拒绝、平台切分、草稿生命周期与 stale、多租户三断言 + 跨租户自动切分、端点往返 |
 | 4.2.2.1 | 刊登模板 | /listings/templates | D5 | 未开发 | — |
 | 4.2.2.2 | 描述模板 | /listings/templates | D5 | 已交付 | V96（description_template / description_template_section / description_image_slot / description_render*，RLS + CHECK + 触发器；变量与多语言复用 V21 content_template*）；GET /catalog/description-templates/{overview,options,templates,renders} + POST/PUT/DELETE；页面 /listings/templates |
 | 4.2.3.1 | 平台类目映射 | — | D5 | 已交付 | V145__platform_category_mapping.sql（**纯新建两张表、零 ALTER 任何既有表**，零跨车道 DDL 回归面；platform_category_mapping 内部分类↔平台类目映射 + platform_category_attribute_mapping 平台属性↔内部属性规则；均 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY（只 ENABLE 的话表 owner 能绕过策略，隔离测试就成了自欺欺人）+ POLICY isolation USING/WITH CHECK tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid + GRANT SELECT,INSERT,UPDATE,DELETE TO catalog_app/starcon_app）；**蓝图加粗句「同一个内部类目在不同平台映射到不同平台类目，映射必须带平台与站点维度」落地为独立事实表而不是 product_category 上加两列** —— 加列的话 N 个平台就要 N 列，且永远表达不了「两个内部分类映射到同一个平台类目」这一侧；**平台与站点是两条独立列**（platform_code + site_code，各带 `^[A-Z0-9][A-Z0-9_-]{0,31}$` CHECK），不合成「amazon/us」一个字符串 —— 合成的话「Amazon US 与 Amazon DE 共用一条平台树」这种最常见的情况只能靠前缀解析还原两个维度，解析一旦写错映射会静默串到别的站点，症状是刊登到 DE 站却填了 US 站的类目、平台审核才报错；多对多的两端都有 UNIQUE(tenant_id,internal_category_id,platform_code,site_code,platform_category_id) 兜重复；**「至多一个默认」用 partial unique index（… WHERE is_default）而不是服务层自查** —— 自查挡不住并发，两个请求同时把两条设为默认都会通过检查，刊登侧拿到两条默认后「用哪个」变成数据库物理顺序、不可复现；**不建平台类目表**：V14 结尾已写死「叶子到平台 category_id 的映射属于 04 刊登」，所以本迁移直接用 product_category_tree.tree_kind='INTERNAL'/'PLATFORM' 的节点当内部分类与平台类目，**平台类目改名仍归 3.3.1.1 写入所有权**（每张事实表只有一个写入所有者），两边都用复合外键 (tenant_id,id) 钉在 V14 的 UNIQUE(tenant_id,id) 上；guard_platform_category_mapping_scope 触发器钉死「左必须 INTERNAL 树、右必须 PLATFORM 树、且树声明的 platform_code 必须等于本行 platform_code」—— CHECK 只能看本行列、看不到节点挂在哪棵树上，只在服务层校验的话运维 psql / 未来 ETL / 另一个服务的迁移脚本都能造出「内部类目映射到另一个内部类目」的行，而那行在界面上完全看不出异常、只有刊登提交时才暴露；**属性规则是独立一张表不是映射表上的字符串列** —— 要能列必填清单、要能按内部属性反查「在哪些平台被用」、要能统计「哪些必填还没绑内部属性」，塞成字符串列这三个问题一个都答不了；挂**映射**上而非平台类目上（同一平台类目在内部分类 A 上要求材质、在 B 上可能完全不要求）；**internal_attribute_id 可空是刻意取舍**：平台要求填 material 而租户字典里还没有对应属性，这个事实必须能记下来，否则运营配不出这条规则、只能等刊登被驳回才知道自己缺一个属性，可空 + `requirement='REQUIRED' AND internal_attribute_id IS NULL` 就是「已知缺口」的确定口径（partial index platform_category_attribute_mapping_unmapped_required 为 4.2.3.2 预检的阻断项清单而建）；ENUM 无候选值用 CHECK 挡住，而「候选值里不许有空白项」必须用**触发器**（PostgreSQL 明令 CHECK 里不能用子查询，实测 0A000，与 V14 防环、V37 认证守卫同一手法）；internal_attribute_id 的外键是 ON DELETE **RESTRICT** 不级联 —— 删内部属性会让已配好的平台规则静默失效而正在刊登的批次突然少一个必填项；**与 channel 的边界写死在迁移末尾**：platform/marketplace 码表在 channel V1（2.1.1.1/2.1.1.2/2.1.1.3）且不带 tenant_id，故**不建跨服务 FK**（AGENTS.md 禁止跨库 FK/视图）、只按 code 形态校验，代价（能填一个 channel 里不存在的平台码）由「候选值取自租户已建的 PLATFORM 树与真实历史映射」缓解；无金额/数量列（映射与规则都是配置）；端点 GET /catalog/category-mappings（台账，真分页：筛选/排序/LIMIT-OFFSET 全在 SQL，where 片段与参数列表一起构造以免 count 与 items 条件漂移）、/overview（覆盖率按「已映射内部分类数÷内部分类总数」而不是映射条数）、/platform-sites、/attribute-options、/{id}（映射行+属性规则+**多对多另一侧 alsoMappedFrom**）、/{id}/attributes、/resolve（按「内部分类×平台×站点」解析刊登目标与必填清单，供 4.2.1.1；多条启用映射且无默认时**明确报需要指定**、不静默挑第一条，否则同一商品两次刊登落到不同平台类目而两边看起来都成功）、POST /catalog/category-mappings、PUT/DELETE /{id}、PUT /{id}/default、PUT /{id}/enabled、POST/PUT/DELETE /{id}/attributes[/{ruleId}]、PUT /{id}/attributes/{ruleId}/enabled；写路径 version 乐观锁；权限读 catalog.spu.read 写 catalog.spu.update（刊登映射是 SPU 主数据的下游配置，不新造权限词表）；页面 /listings/category-mappings（platform-mapping-workspace.tsx：概览四卡含覆盖率与「必填未绑内部属性」数、台账真分页且每行带 mappedInternalCount 把多对多另一侧显式摆出来、平台与站点**分两栏**筛选与录入、按内部类目×平台×站点的必填属性清单解析面板、属性规则增删改启停；加载态/筛选无结果/租户还没有映射三种空态分开渲染、写操作按 catalog.spu.update 收敛只读角色看得见动不了）；契约 packages/api-contracts 由 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi 重新生成（先跑 catalog 的 OpenApiContractTest 刷新 target/openapi 快照再生成，不用旧快照），重跑一次 md5 不变 = 与上一次生成结果一致，+11 条 category-mappings 路径；api-proxy 的 catalog 白名单在 categories 之后**插入**一条 category-mappings 分支（git diff 已逐字符核验：把插入片段去掉后与集成头逐字节相同，既有条目一字未动也未重排）；测试 PlatformCategoryMappingRulesTest 5 例（编码规范化/词表/候选值去重/属性规则逐项校验，与前端 platform-mapping-model.test.ts 同批用例） + PlatformCategoryMappingIntegrationTest 14 例（Testcontainers 真实 PostgreSQL 16，含**多对多 + 平台/站点两维度**、重复元组被拒而同平台异站点允许、两侧树种类校验、编码规范化、每组合唯一默认、必填可无内部绑定、ENUM/字典泄漏/跨映射写拒绝、resolve 取默认且歧义时拒绝、概览与候选来自真实数据、真分页 total 与 items 同源、停用保留规则且删除级联、**timestamptz 往返断言写回值**（断言 created_at 落在测试时刻 ±5 分钟内并逐字比对 DTO 的 UTC ISO 串，而不是只断言没抛异常）、**租户隔离三断言**：两租户互不可见（台账/详情/概览缺口统计三路，跨租户详情给 404 而非空对象；用增量而非绝对值断言，同容器里别的测试也在造数据）、伪造 X-Tenant-Id 头无效（读与写两侧都验）、连接池归还后不串租户（单连接反复交替 5 轮，含 resolve 与属性规则两条不同查询形状））、HTTP 端点与权限）；验证 `./mvnw -q compile` exit 0、`./mvnw -pl services/catalog -am test` **1502 例 0 失败 0 错误 BUILD SUCCESS**（其中本模块 14+5=19 例，与上一轮 worker 的自述一致并已独立复现）、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过（警告均在既有其它文件）、`pnpm vitest run` 本模块 model 15 例 + api-proxy 两文件 270 例全绿 |
@@ -557,3 +540,10 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 196 |
+| **未开发** | **269** |
+| 完成率 | 42.2% |
+| **D4** | 51 | 0 | 9 | 60 |
+| **D5** | 17 | 0 | 35 | 52 |
+| 02 | 渠道与店铺系统 | D1–D2 / D5 | 22 | 25 |
+| 11 | 售后与退货系统 | D4 / D7 | 11 | 22 |
