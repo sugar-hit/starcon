@@ -11780,6 +11780,453 @@
           }
         }
       }
+    },
+    "/channel/mapping-gaps/{id}/map": {
+      "post": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "post_channel_mapping_gaps_id_map",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingGapMapRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/{id}/ignore": {
+      "post": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "post_channel_mapping_gaps_id_ignore",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingGapIgnoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/{id}/create-sku": {
+      "post": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "post_channel_mapping_gaps_id_create_sku",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingGapCreateSkuRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapSkuRequestResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/orders": {
+      "post": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "post_channel_mapping_gaps_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingGapOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapOrderAccepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps": {
+      "get": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "get_channel_mapping_gaps",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gapReason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/{id}": {
+      "get": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "get_channel_mapping_gaps_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/summary": {
+      "get": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "get_channel_mapping_gaps_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/filter-options": {
+      "get": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "get_channel_mapping_gaps_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-gaps/capabilities": {
+      "get": {
+        "tags": [
+          "listing-mapping-gap-controller"
+        ],
+        "operationId": "get_channel_mapping_gaps_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingGapCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15215,7 +15662,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -16010,7 +16457,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -16353,9 +16800,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -26881,6 +27328,674 @@
             "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
+      },
+      "MappingGapMapRequest": {
+        "required": [
+          "changeReason",
+          "internalSkuId",
+          "relationType"
+        ],
+        "type": "object",
+        "properties": {
+          "internalSkuId": {
+            "type": "string",
+            "description": "🔴 内部 SKU 逻辑 id（03 拥有）；必须由人明确给出",
+            "format": "uuid"
+          },
+          "relationType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "映射基数：ONE_TO_ONE / ONE_TO_MANY / MANY_TO_ONE"
+          },
+          "componentQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "套装组件数量；仅 ONE_TO_MANY 有值，NUMERIC(19,6) 口径"
+          },
+          "changeReason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 变更原因（必填）：映射版本历史靠它回溯「当时为什么这么建」"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "🔴 生效时间点起点；不传 = 此刻。传了就必须逐字往返（timestamptz）",
+            "format": "date-time"
+          }
+        }
+      },
+      "MappingGapActionResult": {
+        "type": "object",
+        "properties": {
+          "gap": {
+            "$ref": "#/components/schemas/MappingGapRow"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 本次动作的如实说明"
+          }
+        }
+      },
+      "MappingGapRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "缺口 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "上游 4.1.1.1 listing id",
+            "format": "uuid"
+          },
+          "listingVariantId": {
+            "type": "string",
+            "description": "平台变体 id（4.1.1.1 listing_variant）",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：LISTING_SYNC 平台商品同步 / ORDER 订单缺映射（待接线）"
+          },
+          "gapReason": {
+            "type": "string",
+            "description": "入队原因：VARIANT_UNMAPPED / MAPPING_RELEASED / ORDER_UNMAPPED"
+          },
+          "status": {
+            "type": "string",
+            "description": "队列状态：PENDING 在队 / MAPPED 已建映射 / IGNORED 已忽略"
+          },
+          "decision": {
+            "type": "string",
+            "description": "人工决策：NONE / MAPPED / CREATE_SKU / IGNORED"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "titleSnapshot": {
+            "type": "string",
+            "description": "🔴 平台标题快照（入队那一刻冻结）"
+          },
+          "externalVariantId": {
+            "type": "string",
+            "description": "平台变体 ID 原文"
+          },
+          "attributesSnapshot": {
+            "type": "string",
+            "description": "🔴 平台变体属性快照（jsonb 原文）"
+          },
+          "price": {
+            "type": "number",
+            "description": "🔴 平台侧售价快照；NUMERIC(19,4)，本批次平台商品来源恒为 null"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种；与 price 同生共死"
+          },
+          "internalSkuId": {
+            "type": "string",
+            "description": "🔴 内部 SKU 逻辑 id（03 拥有，跨服务不建 FK）",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "建立映射后回填到的映射 id",
+            "format": "uuid"
+          },
+          "mappingVersionId": {
+            "type": "string",
+            "description": "🔴 回填到的那一版（历史事实，不可改写）",
+            "format": "uuid"
+          },
+          "mappedEffectiveFrom": {
+            "type": "string",
+            "description": "🔴 解决这个缺口的那一版的生效时间点（timestamptz 往返逐字相等）",
+            "format": "date-time"
+          },
+          "decidedBy": {
+            "type": "string",
+            "description": "决策人 id",
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "决策时刻",
+            "format": "date-time"
+          },
+          "decisionNote": {
+            "type": "string",
+            "description": "决策备注"
+          },
+          "ignoreReason": {
+            "type": "string",
+            "description": "忽略原因（status=IGNORED 时有值）"
+          },
+          "backfilledAt": {
+            "type": "string",
+            "description": "🔴 回填时刻；映射建立时由 DB 触发器盖上",
+            "format": "date-time"
+          },
+          "orderRef": {
+            "type": "string",
+            "description": "订单来源的外部单号（本地来源为空串）"
+          },
+          "waitingDays": {
+            "type": "integer",
+            "description": "在队天数（入队至今）",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "入队时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "缺口（操作后的状态）"
+      },
+      "MappingGapIgnoreRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 忽略原因（必填）：不写原因就没人知道为什么这条不用映射"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "MappingGapCreateSkuRequest": {
+        "type": "object",
+        "properties": {
+          "requestedCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "期望的 SKU 编码（登记到 03 建档请求里）"
+          },
+          "requestedName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "期望的 SKU 名称"
+          },
+          "requestedBarcode": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "期望的条码"
+          },
+          "requestedBaseUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "期望的基本单位"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "MappingGapSkuRequestResult": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/MappingGapSkuRequestView"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 派发状态说明（当前 03 侧未接线 ⇒ PENDING）"
+          }
+        }
+      },
+      "MappingGapSkuRequestView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "请求 id",
+            "format": "uuid"
+          },
+          "requestedCode": {
+            "type": "string",
+            "description": "期望的 SKU 编码"
+          },
+          "requestedName": {
+            "type": "string",
+            "description": "期望的 SKU 名称"
+          },
+          "requestedBarcode": {
+            "type": "string",
+            "description": "期望的条码"
+          },
+          "requestedBaseUnit": {
+            "type": "string",
+            "description": "期望的基本单位"
+          },
+          "status": {
+            "type": "string",
+            "description": "PENDING 已登记待派发 / DISPATCHED 已派发 / FAILED 失败 / CANCELLED 已撤单"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "派发时刻",
+            "format": "date-time"
+          },
+          "createdSkuId": {
+            "type": "string",
+            "description": "🔴 03 建出来的 SKU 逻辑 id（未派发时为 null）",
+            "format": "uuid"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "失败原因"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "登记时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "建档请求"
+      },
+      "MappingGapOrderRequest": {
+        "required": [
+          "listingVariantId",
+          "orderRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 订单外部单号（trade 侧的原单号）"
+          },
+          "listingVariantId": {
+            "type": "string",
+            "description": "平台变体 id（4.1.1.1 listing_variant）",
+            "format": "uuid"
+          },
+          "price": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 平台侧售价（事件载荷携带的平台价，可为空）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（与 price 同生共死）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "MappingGapOrderAccepted": {
+        "type": "object",
+        "properties": {
+          "gapId": {
+            "type": "string",
+            "description": "缺口 id",
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 受理说明（含「当前 trade 侧未推这条事件」的如实声明）"
+          }
+        }
+      },
+      "MappingGapPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "pendingInPage": {
+            "type": "integer",
+            "description": "🔴 本页在队条数",
+            "format": "int32"
+          },
+          "priceSnapshotInPage": {
+            "type": "integer",
+            "description": "🔴 本页带平台价快照的条数（其余价格位显示「未接入」）",
+            "format": "int32"
+          }
+        }
+      },
+      "MappingGapDetail": {
+        "type": "object",
+        "properties": {
+          "gap": {
+            "$ref": "#/components/schemas/MappingGapRow"
+          },
+          "skuRequests": {
+            "type": "array",
+            "description": "🔴 「新建 SKU」的建档请求（当前 03 侧未接线，只有登记没有派发）",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapSkuRequestView"
+            }
+          },
+          "orderBackfillNote": {
+            "type": "string",
+            "description": "🔴 09 订单回填的如实说明（本批次未接线，不编造受影响订单数）"
+          }
+        }
+      },
+      "MappingGapCount": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "分组键"
+          },
+          "total": {
+            "type": "integer",
+            "description": "条数",
+            "format": "int64"
+          }
+        },
+        "description": "按入队原因分布"
+      },
+      "MappingGapShopCount": {
+        "type": "object",
+        "properties": {
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "total": {
+            "type": "integer",
+            "description": "在队条数",
+            "format": "int64"
+          }
+        },
+        "description": "按店铺分布（只列在队的）"
+      },
+      "MappingGapSummary": {
+        "type": "object",
+        "properties": {
+          "byStatus": {
+            "type": "array",
+            "description": "按状态分布",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapCount"
+            }
+          },
+          "byReason": {
+            "type": "array",
+            "description": "按入队原因分布",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapCount"
+            }
+          },
+          "byShop": {
+            "type": "array",
+            "description": "按店铺分布（只列在队的）",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapShopCount"
+            }
+          },
+          "pendingTotal": {
+            "type": "integer",
+            "description": "🔴 在队总条数",
+            "format": "int64"
+          },
+          "oldestPendingAt": {
+            "type": "string",
+            "description": "🔴 最老的一条在队时刻",
+            "format": "date-time"
+          },
+          "priceSnapshotCount": {
+            "type": "integer",
+            "description": "🔴 带平台价快照的条数（其余价格位未接入）",
+            "format": "int64"
+          },
+          "orderSourceWired": {
+            "type": "boolean",
+            "description": "🔴 09 订单来源是否已接线"
+          }
+        }
+      },
+      "MappingGapFilterOptions": {
+        "type": "object",
+        "properties": {
+          "shops": {
+            "type": "array",
+            "description": "店铺编码（仅本租户可见的）",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapShopOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码",
+            "items": {
+              "type": "string",
+              "description": "平台编码"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "队列状态",
+            "items": {
+              "type": "string",
+              "description": "队列状态"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "description": "人工决策",
+            "items": {
+              "type": "string",
+              "description": "人工决策"
+            }
+          },
+          "gapReasons": {
+            "type": "array",
+            "description": "入队原因",
+            "items": {
+              "type": "string",
+              "description": "入队原因"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源",
+            "items": {
+              "type": "string",
+              "description": "来源"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序取值：RECENT 最近入队 / OLDEST 最久未处理 / PRICE 高价优先 / SHOP 按店铺",
+            "items": {
+              "type": "string",
+              "description": "排序取值：RECENT 最近入队 / OLDEST 最久未处理 / PRICE 高价优先 / SHOP 按店铺"
+            }
+          }
+        }
+      },
+      "MappingGapShopOption": {
+        "type": "object",
+        "properties": {
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          }
+        },
+        "description": "店铺编码（仅本租户可见的）"
+      },
+      "MappingGapCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/MappingGapCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "队列状态取值：PENDING / MAPPED / IGNORED",
+            "items": {
+              "type": "string",
+              "description": "队列状态取值：PENDING / MAPPED / IGNORED"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "description": "人工决策取值：NONE / MAPPED / CREATE_SKU / IGNORED",
+            "items": {
+              "type": "string",
+              "description": "人工决策取值：NONE / MAPPED / CREATE_SKU / IGNORED"
+            }
+          },
+          "gapReasons": {
+            "type": "array",
+            "description": "入队原因取值",
+            "items": {
+              "type": "string",
+              "description": "入队原因取值"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值：LISTING_SYNC / ORDER",
+            "items": {
+              "type": "string",
+              "description": "来源取值：LISTING_SYNC / ORDER"
+            }
+          },
+          "priceAvailable": {
+            "type": "boolean",
+            "description": "🔴 平台侧售价是否可用（false = 归 05 定价，本模块不画假价格）"
+          },
+          "priceNote": {
+            "type": "string",
+            "description": "🔴 价格未接入时的措辞"
+          },
+          "priceOwnerModule": {
+            "type": "string",
+            "description": "🔴 价格未接入的责任模块"
+          },
+          "orderSourceWired": {
+            "type": "boolean",
+            "description": "🔴 09 订单来源是否已接线（false = trade 侧尚未推事件）"
+          },
+          "gapNote": {
+            "type": "string",
+            "description": "🔴 未交付段说明（前端原样展示，不要自己编）"
+          },
+          "dependencyNote": {
+            "type": "string",
+            "description": "上游 / 下游依赖说明"
+          }
+        }
+      },
+      "MappingGapCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
