@@ -13170,6 +13170,528 @@
           }
         }
       }
+    },
+    "/channel/listing-templates/{id}/status": {
+      "put": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "put_channel_listing_templates_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryPath",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "post_channel_listing_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveListingTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/apply": {
+      "post": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "post_channel_listing_templates_apply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyListingTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateApplyResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/{id}": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "delete_channel_listing_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/{id}/matches": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_id_matches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateMatchPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/filter-options": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/capabilities": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/applies": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_applies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateApplyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-templates/applies/{applyId}": {
+      "get": {
+        "tags": [
+          "listing-template-controller"
+        ],
+        "operationId": "get_channel_listing_templates_applies_applyId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "applyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingTemplateApplyResult"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -30863,6 +31385,915 @@
           }
         },
         "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ListingTemplateAssetGroupRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "组 id",
+            "format": "uuid"
+          },
+          "groupCode": {
+            "type": "string",
+            "description": "组编码"
+          },
+          "groupKind": {
+            "type": "string",
+            "description": "取组方式：ASSET_LIST / TAG"
+          },
+          "tagCode": {
+            "type": "string",
+            "description": "媒体库标签编码"
+          },
+          "assetIds": {
+            "type": "array",
+            "description": "素材逻辑 id 列表",
+            "items": {
+              "type": "string",
+              "description": "素材逻辑 id 列表",
+              "format": "uuid"
+            }
+          },
+          "maxCount": {
+            "type": "integer",
+            "description": "最多取几张",
+            "format": "int32"
+          },
+          "slotNo": {
+            "type": "integer",
+            "description": "显示顺序",
+            "format": "int32"
+          }
+        },
+        "description": "图片组"
+      },
+      "ListingTemplateDetail": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/ListingTemplateRow"
+          },
+          "fields": {
+            "type": "array",
+            "description": "字段填充规则",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateFieldRow"
+            }
+          },
+          "assetGroups": {
+            "type": "array",
+            "description": "图片组",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateAssetGroupRow"
+            }
+          }
+        }
+      },
+      "ListingTemplateFieldRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "field": {
+            "type": "string",
+            "description": "字段键"
+          },
+          "sourceKind": {
+            "type": "string",
+            "description": "取值来源"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源引用"
+          },
+          "valueExpression": {
+            "type": "string",
+            "description": "取值表达式"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "是否必填"
+          },
+          "slotNo": {
+            "type": "integer",
+            "description": "显示顺序",
+            "format": "int32"
+          }
+        },
+        "description": "字段填充规则"
+      },
+      "ListingTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "模板编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "模板名"
+          },
+          "description": {
+            "type": "string",
+            "description": "说明"
+          },
+          "scope": {
+            "type": "string",
+            "description": "适用范围：CATEGORY / SHOP"
+          },
+          "scopeTarget": {
+            "type": "string",
+            "description": "🔴 适用范围的落点（CATEGORY 是类目路径，SHOP 是店铺编码）"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "description": "站点 id；为空表示该平台全站点",
+            "format": "uuid"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "description": "站点编码；为空表示该平台全站点"
+          },
+          "language": {
+            "type": "string",
+            "description": "语言"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：DRAFT / ACTIVE / DISABLED"
+          },
+          "fieldCount": {
+            "type": "integer",
+            "description": "字段规则条数",
+            "format": "int32"
+          },
+          "groupCount": {
+            "type": "integer",
+            "description": "图片组个数",
+            "format": "int32"
+          },
+          "requiredFieldCount": {
+            "type": "integer",
+            "description": "必填字段数",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本号",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          }
+        },
+        "description": "模板"
+      },
+      "ListingTemplateAssetGroupInput": {
+        "required": [
+          "groupCode",
+          "groupKind"
+        ],
+        "type": "object",
+        "properties": {
+          "groupCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "组编码（模板内唯一）"
+          },
+          "groupKind": {
+            "minLength": 1,
+            "type": "string",
+            "description": "取组方式：ASSET_LIST / TAG"
+          },
+          "tagCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "媒体库标签编码（TAG 时必填）"
+          },
+          "assetIds": {
+            "type": "array",
+            "description": "素材逻辑 id 列表（ASSET_LIST 时必填）",
+            "items": {
+              "type": "string",
+              "description": "素材逻辑 id 列表（ASSET_LIST 时必填）",
+              "format": "uuid"
+            }
+          },
+          "maxCount": {
+            "type": "integer",
+            "description": "该组最多取几张（1~20）",
+            "format": "int32"
+          },
+          "slotNo": {
+            "type": "integer",
+            "description": "显示顺序",
+            "format": "int32"
+          }
+        },
+        "description": "图片组"
+      },
+      "ListingTemplateFieldInput": {
+        "required": [
+          "field",
+          "sourceKind"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "minLength": 1,
+            "type": "string",
+            "description": "字段键：TITLE / BULLETS / IMAGES / CATEGORY_PATH / PLATFORM_CATEGORY_ID"
+          },
+          "sourceKind": {
+            "minLength": 1,
+            "type": "string",
+            "description": "取值来源：LISTING_FIELD / PRODUCT_ATTRIBUTE / CONTENT_TEMPLATE / IMAGE_GROUP / LITERAL"
+          },
+          "sourceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源引用：属性码 / 内容模板编码 / 图片组编码 / listing 字段名（LITERAL 时留空）"
+          },
+          "valueExpression": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string",
+            "description": "取值表达式：常量前后缀 + {{占位符}}；LITERAL 时就是常量本身"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "是否必填（套用时真的算出来）"
+          },
+          "slotNo": {
+            "type": "integer",
+            "description": "显示顺序",
+            "format": "int32"
+          }
+        },
+        "description": "字段填充规则"
+      },
+      "SaveListingTemplateRequest": {
+        "required": [
+          "code",
+          "name",
+          "platformId",
+          "scope"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "模板 id；留空即新建"
+          },
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板编码（租户内唯一）"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板名"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "说明"
+          },
+          "scope": {
+            "minLength": 1,
+            "type": "string",
+            "description": "适用范围：CATEGORY / SHOP"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（内容按平台 + 站点隔离）",
+            "format": "uuid"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "description": "站点 id；留空表示该平台全站点"
+          },
+          "categoryPath": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "类目路径（CATEGORY 作用域必填，SHOP 作用域必须留空）"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "店铺 id（SHOP 作用域必填，CATEGORY 作用域必须留空）"
+          },
+          "language": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "语言（内容按语言分）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：DRAFT / ACTIVE / DISABLED"
+          },
+          "fields": {
+            "type": "array",
+            "description": "字段填充规则",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateFieldInput"
+            }
+          },
+          "assetGroups": {
+            "type": "array",
+            "description": "图片组",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateAssetGroupInput"
+            }
+          }
+        }
+      },
+      "ApplyListingTemplateRequest": {
+        "required": [
+          "listingId",
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "套用目标 listing id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "幂等键（可选）：同一个键重复套用返回第一次的结果"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ListingTemplateApplyFieldRow": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "字段键"
+          },
+          "sourceKind": {
+            "type": "string",
+            "description": "取值来源"
+          },
+          "ruleRef": {
+            "type": "string",
+            "description": "🔴 规则引用（形如 PRODUCT_ATTRIBUTE:price）"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源引用"
+          },
+          "status": {
+            "type": "string",
+            "description": "求值状态"
+          },
+          "value": {
+            "type": "string",
+            "description": "本次求值出的值（数组字段是 JSON 数组文本）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "🔴 不知道时的归属模块"
+          },
+          "reason": {
+            "type": "string",
+            "description": "原因（人能读的理由，不是异常类名）"
+          },
+          "violation": {
+            "type": "boolean",
+            "description": "🔴 是否构成必填违规"
+          },
+          "violationCode": {
+            "type": "string",
+            "description": "🔴 违规码"
+          }
+        },
+        "description": "🔴 必填违规清单（指到字段与规则）"
+      },
+      "ListingTemplateApplyResult": {
+        "type": "object",
+        "properties": {
+          "applyId": {
+            "type": "string",
+            "description": "套用记录 id",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string",
+            "description": "模板编码"
+          },
+          "templateName": {
+            "type": "string",
+            "description": "模板名"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "套用目标 listing id",
+            "format": "uuid"
+          },
+          "listingExternalItemId": {
+            "type": "string",
+            "description": "目标平台商品 ID 原文"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "目标店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "目标平台编码"
+          },
+          "targetDraftId": {
+            "type": "string",
+            "description": "🔴 产出的草稿 id",
+            "format": "uuid"
+          },
+          "draftState": {
+            "type": "string",
+            "description": "🔴 产出的草稿状态（恒为 DRAFT）"
+          },
+          "validationStatus": {
+            "type": "string",
+            "description": "🔴 必填校验结论：PASS / FAIL"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "成功求值的字段数",
+            "format": "int32"
+          },
+          "unknownCount": {
+            "type": "integer",
+            "description": "🔴 处于「不知道」状态的字段数",
+            "format": "int32"
+          },
+          "violationCount": {
+            "type": "integer",
+            "description": "🔴 必填违规条数",
+            "format": "int32"
+          },
+          "fields": {
+            "type": "array",
+            "description": "🔴 逐字段求值明细",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateApplyFieldRow"
+            }
+          },
+          "violations": {
+            "type": "array",
+            "description": "🔴 必填违规清单（指到字段与规则）",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateApplyFieldRow"
+            }
+          },
+          "idempotentReplay": {
+            "type": "boolean",
+            "description": "🔴 本次是不是幂等重放（返回了第一次的结果，没有重新求值）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "套用时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListingTemplatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的模板",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingTemplateMatchPage": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "scopeNote": {
+            "type": "string",
+            "description": "适用范围说明"
+          },
+          "items": {
+            "type": "array",
+            "description": "命中的 listing",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateMatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingTemplateMatchRow": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "categoryPath": {
+            "type": "string",
+            "description": "类目路径"
+          },
+          "hasDraft": {
+            "type": "boolean",
+            "description": "是否已有待发布草稿"
+          }
+        },
+        "description": "命中的 listing"
+      },
+      "ListingTemplateFilterOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台列表",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺列表",
+            "items": {
+              "$ref": "#/components/schemas/ShopOption"
+            }
+          },
+          "marketplaces": {
+            "type": "array",
+            "description": "站点列表",
+            "items": {
+              "$ref": "#/components/schemas/MarketplaceOption"
+            }
+          }
+        }
+      },
+      "MarketplaceOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "站点 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "站点编码"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "所属平台 id",
+            "format": "uuid"
+          }
+        },
+        "description": "站点列表"
+      },
+      "PlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名"
+          }
+        },
+        "description": "平台列表"
+      },
+      "ShopOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "店铺 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "店铺名"
+          }
+        },
+        "description": "店铺列表"
+      },
+      "ListingTemplateCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateCapabilityDimension"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "可填的字段集合",
+            "items": {
+              "type": "string",
+              "description": "可填的字段集合"
+            }
+          },
+          "sourceKinds": {
+            "type": "array",
+            "description": "取值来源取值域",
+            "items": {
+              "type": "string",
+              "description": "取值来源取值域"
+            }
+          },
+          "evaluationStatuses": {
+            "type": "array",
+            "description": "求值状态取值域",
+            "items": {
+              "type": "string",
+              "description": "求值状态取值域"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "description": "适用范围取值域",
+            "items": {
+              "type": "string",
+              "description": "适用范围取值域"
+            }
+          },
+          "rulesOnly": {
+            "type": "boolean",
+            "description": "🔴 模板是否只存规则不存值"
+          },
+          "rulesOnlyNote": {
+            "type": "string",
+            "description": "🔴 「模板只存规则」说明（前端原样展示）"
+          },
+          "draftOnly": {
+            "type": "boolean",
+            "description": "🔴 套用是否只产出草稿"
+          },
+          "draftNote": {
+            "type": "string",
+            "description": "🔴 草稿态说明（前端原样展示）"
+          },
+          "idempotencyNote": {
+            "type": "string",
+            "description": "🔴 重复套用的语义"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          }
+        }
+      },
+      "ListingTemplateCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ListingTemplateApplyPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的套用记录",
+            "items": {
+              "$ref": "#/components/schemas/ListingTemplateApplyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingTemplateApplyRow": {
+        "type": "object",
+        "properties": {
+          "applyId": {
+            "type": "string",
+            "description": "套用记录 id",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string",
+            "description": "模板编码"
+          },
+          "templateName": {
+            "type": "string",
+            "description": "模板名"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "目标 listing id",
+            "format": "uuid"
+          },
+          "listingExternalItemId": {
+            "type": "string",
+            "description": "目标平台商品 ID 原文"
+          },
+          "targetDraftId": {
+            "type": "string",
+            "description": "🔴 产出的草稿 id",
+            "format": "uuid"
+          },
+          "validationStatus": {
+            "type": "string",
+            "description": "🔴 必填校验结论"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "成功求值字段数",
+            "format": "int32"
+          },
+          "unknownCount": {
+            "type": "integer",
+            "description": "🔴 「不知道」字段数",
+            "format": "int32"
+          },
+          "violationCount": {
+            "type": "integer",
+            "description": "🔴 必填违规条数",
+            "format": "int32"
+          },
+          "fieldCount": {
+            "type": "integer",
+            "description": "逐字段明细条数",
+            "format": "int32"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "套用时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页的套用记录"
       }
     }
   }
