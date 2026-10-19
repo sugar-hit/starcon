@@ -1236,6 +1236,48 @@ const services: readonly {
       /^listing\-details(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:content|diff|publish\-history|platform\-operations|content\-snapshots|publish\-records))?))?$/,
   },
   {
+    // 4.1.2.2 映射版本（channel 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade / channel 分支的 alternation 里并分支 —— 那些分支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.1.1.2 `listing-details` 元素**之后**、`prefix: 'trade/'`（9.2.1.2）**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并（与 4.2.1.2 / 4.1.1.2 同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，`mapping-versions` 这个前缀
+    // 与 `listings` / `listing-mappings` / `listing-details` / `listing-bulk-edit` 都不同首段，互不吃。
+    //
+    // 🔴 为什么用 `mapping-versions` 这个独立前缀而不是 `listing-mappings/{uuid}/versions`：
+    // 4.1.2.1 交付时把 `/channel/listing-mappings/{uuid}/affected-orders` 显式登记成「不放行」
+    // 并在它自己的白名单测试里断言 404（理由：归 4.1.2.2）。往那条分支里加子路径会
+    // 让两个车道改同一行正则，合并必冲突。版本是**跨映射**的查询面（列表按 SKU / 店铺 /
+    // 生效区间筛，不是挂在某条映射下面），独立前缀也更贴它的实际形状。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   mapping-versions                          版本列表（GET 真分页 + 生效区间重叠筛选）
+    //   mapping-versions/capabilities             能力声明（受影响订单 / 订单→版本 available=false + ownerModule）
+    //   mapping-versions/filter-options           筛选词表（不硬编码在前端）
+    //   mapping-versions/{uuid}                   单版详情（与上一版的真比对 + 商品范围）
+    //   mapping-versions/{uuid}/product-scope     按版本回溯商品范围（冻结快照 + 平台当前值对照）
+    //   mapping-versions/{uuid}/affected-orders   受影响订单范围（返回 available=false，无 items 字段）
+    // ⚠️ 判别顺序：`capabilities` / `filter-options` 必须排在 `{uuid}` **之前**，否则会被
+    //    uuid 分支吃掉半截（症状是「能力声明 404，但详情页正常」）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余分支的同一写法），不是 `[0-9a-f-]+`：
+    //    短前缀会被放行到一条根本不存在的路由上。
+    // ⚠️ 本模块**全是 GET**：映射变更生成新版本是 4.1.2.1 的写路径
+    //    （`POST /channel/listing-mappings`），这里刻意**不放行任何写方法** ——
+    //    放行一个能改写历史版本的形状，比 404 更糟。
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `mapping-versions/{uuid}/versions`      版本历史随详情一起返回，不单独开一条
+    //   * `mapping-versions/{uuid}/orders`        「查看某订单用的是哪个版本」是**订单 → 版本**
+    //                                              反查，归 09 订单（trade 冻结 order_line_component），
+    //                                              本服务查不到订单，放行它只会让人反复试一个不存在的路
+    //   * `mapping-versions/{uuid}/components`    套装组件明细归 4.1.2.3
+    //   * `mapping-versions/{uuid}/revert`        版本不可回滚：改映射只会生成新版本
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^mapping\-versions(?:\/(?:capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:product\-scope|affected\-orders))?))?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
