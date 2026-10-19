@@ -134,6 +134,50 @@ L3 锚点互不相同（4.4.1 / 4.5.1 / 4.5.2 / 9.1.2），`serviceBlocked` 为�
 并复核续做时对上一轮三个文件做了什么处理（保留 / 局部修改 / 推翻并说明理由）。
 若它再崩，**先查 504 是否复现**（网关侧），不要当成业务缺陷去二分。
 
+## ✅ 车道 4.5.1.2 已落地（05:39），调度者独立复核通过
+
+`state=ready`，commit `3042d119`（分支 `feat/4-5-1-2`，未 push），`land` 返回
+`{"ok":true,"lane":"4.5.1.2","head":"3042d11"}`。
+
+### 复核结论（不是转述 worker 的自报，是调度者独立取证）
+
+| 复核项 | 方法 | 结果 |
+| --- | --- | --- |
+| api-proxy 白名单 | `git diff --numstat` | **+49 / -0，纯新增**，既有元素一行未改 ✓ |
+| 契约有没有误删别人的东西 | 解 JSON 比对 paths / schemas 集合 | **移除 0 个 path、0 个 schema**；新增 10 path + 19 schema，全部 `ListingKeywordRanking*` ✓ |
+| 契约大 diff 是真改还是重排 | 与 batch-31 三条车道同款对比 | 4.4.1.1 是 7216/6627、4.1.1.3 是 9360/8159、4.5.1.1 是 3423/2397 ⇒ **本仓 codegen 的既有重排特征**，那三条都并入过且 L2 绿 ✓ |
+| 其他 5 个服务的契约 | 逐文件 sha256 | catalog / identity / trade / warehouse / crm **逐字节不变** ✓ |
+| `packages/sdk` | 是否需要重生成 | `packages/sdk/src` **当前为空**（未覆盖 channel 端点）⇒ 本车道不动它是对的 ✓ |
+| 集成头是否被污染 | `git status` | 干净，HEAD 仍是 `b042f648` ✓ |
+| PG 容器 | `docker ps -a` | 测试结束已被 ryuk 全部回收，**无孤儿** ✓ |
+
+L1 自报结果：后端 **29 例 0 失败 0 错误**（`ListingKeywordRankingIntegrationTest` 25 + `TenancyIntegrationTest` 4），
+前端 **28 例全绿**（model 24 + allowlist 4），**全量 allowlist 回归 553 例全绿**，
+`pnpm typecheck` 3/3、`pnpm lint` 零告警。
+
+### 三处值得后续车道避开的坑（worker 自己踩出来并修好的）
+
+1. **Java 可变参数不展开尾部 `Object[]`** —— `sql.fetch(sql, a, b, c, d, arr)` 里 `arr` 被当成
+   **一个**绑定（jOOQ 渲染成 `cast(? as any[])`），PG 报「参数 N 没有值」。
+   ⇒ 全部绑定进同一个 `List` 再 `toArray()`。
+2. **SQL 的 WHERE 必须在所有 JOIN 之后** —— 筛选条件拼在 `join...on...` 之后、`left join` 之前
+   会 `syntax error at or near "left"`。
+3. **PG 不允许 DISTINCT 的 ORDER BY 表达式不在 select list**（42P10）⇒ 改用 `exists`。
+
+### 一处范围边界裁决（调度者已裁决，不是遗留缺口）
+
+蓝图 4.5.1.2 的输入写「关键词集合（**按商品维护**）」。车道交付了租户内**逐条**增删改查 +
+每条关键词绑定商品/平台/站点 + 抓取结果入库、排名历史、变化预警、关键词维度报表，
+但**没有**做「从商品库批量挑核心词建关键词」的批量入口。
+
+⇒ **裁决：接受当前范围，不算缺口。** 理由：蓝图的「按商品维护」由「关键词记录绑定商品 + 逐条维护」
+满足；「从商品库批量挑词」是效率增强，蓝图四问未点名，且若要补应走**同一个**集合入口
+（`POST /channel/listing-keyword-rankings`），不另开通道。已记在此处，
+**后续 tick 不要再把它当缺口重开**。
+
+⚠️ 另记：真实平台排名抓取调度器归 **02 通道**，本模块只做抓取结果入库
+⇒ 能力声明里 `available=false` + `ownerModule` + `impact` 显式标注，**不发假数据**（诚实边界）。
+
 ## 静态预检
 
 本批迁移文件**尚未产生**（4 条车道刚开工），`ADD COLUMN` 无 DEFAULT / `SET NOT NULL` /
