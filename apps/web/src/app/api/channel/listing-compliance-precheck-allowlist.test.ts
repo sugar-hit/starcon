@@ -23,8 +23,14 @@ import { proxy } from '../../../lib/api-proxy';
  *
  * <p>🔴 本车道在白名单里用的是 {@code listing-compliance-precheck} 前缀，
  * **不是** {@code compliance-precheck} —— 那是同批并行那条车道（16.2.2.1 合规体检报告，
- * 合规域 D7）的前缀。两边名字几乎一样但**不共表、不共端点、不共页面**，
- * 所以「{@code compliance-precheck/...} 仍然 404」也是本测试的一条断言。
+ * 合规域 D7）的前缀。两边名字几乎一样但**不共表、不共端点、不共页面**。
+ *
+ * <p>⚠️ **两条车道同批并入集成头之后，两个前缀都真实存在** ⇒
+ * {@code compliance-precheck/...} 不再是「不存在的东西」，它由 16.2.2.1
+ * **自己那条**白名单元素放行（转发 ⇒ 上游响应 / 上游不可达时 503）。
+ * 所以这里的负向断言只能用 16.2.2.1 **没有登记**的形状
+ * （{@code precheck} / {@code score}），
+ * 而「16.2.2.1 已登记的形状被放行」另立一条**独立**断言来钉（见下方两个 🔴 用例）。
  *
  * <p><b>不误伤其他车道已登记的分支</b>：白名单是多车道共用的**累积型**文件。
  * 本车道只**新增一条** {@code listing-compliance-precheck/} 元素，其余分支一字未动 ——
@@ -165,20 +171,50 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
   }
 });
 
-it('🔴 同批并行那条车道的前缀（compliance-precheck）不属于本模块，仍然被拒', async () => {
+it('🔴 同批另一条车道（16.2.2.1）：已登记的形状由它自己的白名单元素放行，没登记的形状仍然被拒（404）', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   for (const path of [
-    // 16.2.2.1 合规预检（体检报告，合规域 D7）：同批并行、此刻尚不存在
-    'channel/compliance-precheck/capabilities',
+    // 16.2.2.1 合规预检（体检报告，合规域 D7）的白名单只登记了
+    // `capabilities` / `drafts` / `drafts/{uuid}/(check|precheck)` / `reports` / `reports/{uuid}`。
+    // 下面两条是它**没有登记**的形状 —— 合并之后依然必须是 404。
     'channel/compliance-precheck/precheck',
     'channel/compliance-precheck/score',
   ]) {
     const response = await callProxy(path, {
       headers: { cookie: 'starcon_session=private-session' },
     });
-    expect(response.status, `${path} 被放行了 —— 那是同批另一条车道的端点`).toBe(404);
+    expect(response.status, `${path} 被放行了 —— 16.2.2.1 并未登记这个形状`).toBe(404);
   }
+  expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
+});
+
+it('🔴 合并没有把同批另一条车道的白名单条目弄丢 —— 它的形状现在被放行并转发到 channel 上游', async () => {
+  // ⚠️ 必须**独立成块**：上一块的判据是「被拒 ⇒ fetch 一次都不许被调用」。
+  // `compliance-precheck/capabilities` 是 16.2.2.1 的**真实端点**，合并后由它自己那条
+  // 白名单元素放行 ⇒ 代理**会**转发 ⇒ 单元测试里上游 channel 服务没在跑 ⇒ 503
+  //（「服务暂时不可连接」）。503 恰恰证明「白名单命中并转发」这个行为是对的，
+  // 所以它**不能**再留在负向清单里，只能在这里被正向断言。
+  //
+  // 🔴 为什么会有这个坑：两条车道**同批并行**并入集成头后，两个前缀都真实存在了。
+  // 各自车道的负向断言在**自己 worktree 里单跑是绿的**（那时另一条车道的前缀还不存在，
+  // 代理返回 404），**合并后才红** —— 这正是 L2 批量闸存在的意义：
+  // 它抓到的是「每条车道单跑都看不见、只在集成头才成立」的那类缺陷。
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+
+  const response = await callProxy('channel/compliance-precheck/capabilities', {
+    headers: { cookie: 'starcon_session=private-session' },
+  });
+  expect(
+    response.status,
+    'channel/compliance-precheck/capabilities 被 404 了 —— 合并没有把 16.2.2.1 的白名单条目弄丢',
+  ).not.toBe(404);
+  // 钉住「放行 = 真的转发到 channel 上游」，而不只是「没被拦」。
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(':8083/channel/compliance-precheck/capabilities'),
+    expect.anything(),
+  );
 });
 
 it('🔴 不误伤其他车道已登记的分支 —— 白名单是多车道共用的累积型文件', async () => {

@@ -763,9 +763,34 @@ class ListingCompliancePrecheckIntegrationTest {
   }
 
   @Test
+  @DisplayName("4.2.3.2 本模块的错误处理器不误伤别的模块：非合规的 DB 冲突仍是 409，不是 500")
+  void nonComplianceDatabaseErrorStillReturns409() throws Exception {
+    // 🔴 ListingComplianceErrorHandler 的优先级高于 channel 通用处理器，所以
+    // DataAccessException 一律先到本类。若本类把非合规的异常**再抛出去**，
+    // Spring 会把它交给默认的 500 处理 —— 别的模块（唯一约束冲突等）的 409 就变成了 500。
+    // 这里用「重复录入同一个词」触发一次真实的唯一约束冲突，钉住 409 不变。
+    addWord("重复词", "PROHIBITED", "BLOCKING", "HIGH", "规则", "替换");
+
+    http.perform(
+            post("/channel/listing-compliance-precheck/words")
+                .header("Authorization", bearer)
+                .contentType("application/json")
+                .content(
+                    JSON.writeValueAsString(
+                        Map.of(
+                            "word", "重复词",
+                            "category", "PROHIBITED",
+                            "severity", "BLOCKING",
+                            "riskLevel", "HIGH",
+                            "ruleSource", "规则",
+                            "suggestion", "替换"))))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("店铺编码重复")));
+  }
+
+  @Test
   @DisplayName("4.2.3.2 DB 层强制：风险行缺四要素之一 ⇒ 直接拒写")
-  void databaseRejectsIncompleteRiskRow() {
-    UUID draftId = saveDraft("一个没有风险词的标题", null, null, "");
+  void databaseRejectsIncompleteRiskRow() {    UUID draftId = saveDraft("一个没有风险词的标题", null, null, "");
     var result = as("channel.operation.read", () -> service.scan(draftId, "MANUAL", bearer));
     UUID scanId = result.scanId();
 
