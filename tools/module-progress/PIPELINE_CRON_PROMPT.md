@@ -427,6 +427,11 @@ node tools/module-progress/lane.mjs plan --lanes "$LANES"
 派发时每条车道一个 `task`（`agent_name: worker`，`run_in_background: true`），
 任务书用 `PIPELINE.md` 的「子任务模板」章节。
 
+⚠️ **发出去之前逐字检查任务书里没有残留 `<...>` 占位符**（`<WORKTREE>` / `<BRANCH>` /
+`<INTEGRATION_ROOT>` / `<模块ID>` / `<MIGRATION_VERSION>` / `<BLUEPRINT>` …）。
+worker 的 shell 里**没有** `$PROJECT_ROOT`，占位符没替换会让它把心跳写进
+**自己 worktree 的** `.dev-agent/lanes.json`，调度者永远看不到落地标记，车道会被误判崩掉重派。
+
 ### 第 5 步：批量验证 + 写详细说明 + push
 
 #### 5.1 静态预检（先于 L2，几秒）
