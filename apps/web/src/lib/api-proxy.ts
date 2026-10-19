@@ -1369,6 +1369,39 @@ const services: readonly {
       /^rma-instructions\/(?:capabilities|expire-overdue|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:issue|acknowledge|cancel|tracking|label(?:\/(?:deliver|void))?))?)$|^rma-instructions$/,
   },
   {
+    // 11.2.2.1 退货入库（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
+    // 同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.2.1.2 `rma-instructions` 那条**之后**、11.1.1.2 那条**之前**：
+    // 三条的前缀形状互不相交（`return-receipts/` vs `rma-instructions/` vs `aftersales/cases/`），
+    // 谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `return-receipts`                            集合读（GET，真分页 + 多维筛选 + 排序白名单）
+    //                                               / 登记实收草稿（POST）
+    //   `return-receipts/capabilities`               能力与上游可用性声明（GET）
+    //   `return-receipts/receivable`                 剩余可收量（GET，扫码前先看还能收几件）
+    //   `return-receipts/{uuid}`                     详情（GET） / 改草稿（PUT，仅 DRAFT）
+    //   `return-receipts/{uuid}/post`                入库（POST）—— **生成待检分录，不是可售**
+    //   `return-receipts/{uuid}/cancel`              撤销（POST，仅 DRAFT，已入库不可撤销）
+    //   `return-receipts/{uuid}/photos`              追加拍照留证（POST，仅 DRAFT）
+    //
+    //   * **刻意不放行** `{uuid}/resell` / `{uuid}/inspect`：处置与质检属
+    //     11.2.3.2 / 11.2.3.1，**未交付**。放行它们会让界面显示成「这批货可以直接转可售」，
+    //     而蓝图加粗句「退回商品**默认进待检状态**，直接进可售会把残次品当新品卖出去」正是
+    //     这条规则要防的事。
+    //   * **刻意不放行** `{uuid}/receive`：11.2.1.2 的指引下发 ≠ 货已到手，
+    //     登记实收只能走本模块的草稿 → 入库两段式。
+    //   * **刻意没有** `{uuid}` 上的 DELETE：行与照片是纠纷证据（运行角色 UPDATE/DELETE
+    //     已在 DB 层收回），放行删除形状等于让「这批货收了几件、判定成什么样」不可追责。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^return-receipts(?:\/(?:capabilities|receivable|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|cancel|photos))?))?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
