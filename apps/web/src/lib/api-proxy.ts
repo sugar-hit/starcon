@@ -1278,6 +1278,52 @@ const services: readonly {
       /^mapping\-versions(?:\/(?:capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:product\-scope|affected\-orders))?))?$/,
   },
   {
+    // 4.3.1.2 批量发布（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往 4.1.1.1 的 `listings` 分支里并子路径 —— 那条分支是已交付车道的成果，
+    // 多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.1.1.2 `listing-details` 条目**之后**、既有 `prefix: 'trade/'` 元素**之前**：
+    // 与兄弟模块相邻但仍是独立元素，各车道插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-publish` 这个独立前缀而不是 `listings/{id}/publish`：
+    // 4.1.1.1 与 4.1.1.2 都把 `listings/{uuid}/publish` 显式登记成「不放行」（那是单条发布，
+    // 归 4.3.1.1 / 4.3.1.3）。批量发布是**队列**（批次 + 限流 + 顺序 + 重试），
+    // 与「列表行」不是同一种资源 —— 强行开在同一棵路径树上要同时改别人的白名单与拒绝清单。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-publish/capabilities            能力声明（SPU 状态筛选 / 平台实际调用 available=false + ownerModule）
+    //   listing-publish/rate-limits             🔴 平台限流配置（GET 查 / POST 配，可配置可查的数据）
+    //   listing-publish/batches                 建批次（POST，按筛选规则）+ 批次列表（GET）
+    //   listing-publish/batches/{uuid}          批次详情（总体进度五计数 + 百分比）
+    //   listing-publish/batches/{uuid}/tasks    批次任务列表（GET，可按状态筛；失败明细用 state=FAILED）
+    //   listing-publish/batches/{uuid}/dispatch 🔴 一轮派发：按各平台自己的配额排队
+    //   listing-publish/batches/{uuid}/pause    暂停（停止派发新任务；在途不受影响）
+    //   listing-publish/batches/{uuid}/resume   恢复
+    //   listing-publish/batches/{uuid}/cancel   人工中止
+    //   listing-publish/batches/{uuid}/reorder  调整顺序（按给的新次序重排待派发任务）
+    //   listing-publish/batches/{uuid}/retry    批量重试（只重试 FAILED，不重跑已成功的）
+    //   listing-publish/tasks/{uuid}/report     在途任务的成功/失败回执（4.3.1.3 回报）
+    //
+    // ⚠️ 判别顺序：`capabilities` 与 `rate-limits` 必须排在 `{uuid}` **之前**，
+    //    否则会被 uuid 分支吃掉半截（症状是「能力声明 404，但列表页正常」）。
+    // ⚠️ 四个批次动作（dispatch / pause / resume / cancel / reorder / retry）挂在
+    //    **uuid 段之后**且各自成支：写成 `/batches/dispatch` 会放行一个不存在的
+    //    「按批次编码派发」的形状。
+    // ⚠️ 裸路径 `listing-publish` **刻意不放行**（最外层分组不带 `?`）：本模块没有裸路径资源。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-publish/batches/{uuid}/retry-all` —— 没有「连成功的一起重跑」的入口，
+    //     那是本模块最危险的假实现（重复发布 / 重复建 listing）
+    //   * `listing-publish/tasks/{uuid}`            —— 单条任务详情随批次任务列表返回，不单开一条
+    //   * `listing-publish/rate-limits/{uuid}`      —— 限流配置按 (平台, 店铺) upsert，没有单条删除
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-publish(?:\/(?:capabilities|rate\-limits)|\/batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|pause|resume|cancel|reorder|retry))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/report)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
