@@ -36,6 +36,12 @@ public class ListingComplianceErrorHandler {
    *
    * <p>只匹配 SQLSTATE 23514（check_violation）**且**消息里有本模块的标记 ——
    * 别的模块的 CHECK 约束失败照旧走通用分支，不会被这里误伤。
+   *
+   * <p>🔴 <b>非本模块的错误必须逐字保持 channel 通用处理器的行为</b>：
+   * 本 advice 的优先级高于 {@code ApiErrorHandler}，所以 DataAccessException 一律先到本类。
+   * 若这里把非合规的异常**再抛出去**，Spring 会记一笔 "Failure in @ExceptionHandler"
+   * 然后把它交给默认的 500 处理 —— 也就是说**别的模块的唯一约束冲突会从 409 变成 500**。
+   * 所以这里不抛，而是返回与 {@code ApiErrorHandler} 通用分支**逐字一致**的 409。
    */
   @ExceptionHandler({
     org.jooq.exception.DataAccessException.class,
@@ -43,7 +49,12 @@ public class ListingComplianceErrorHandler {
   })
   ResponseEntity<ProblemDetail> complianceBlocked(Exception e) {
     if (!isComplianceRejection(e)) {
-      throw e instanceof RuntimeException runtime ? runtime : new RuntimeException(e);
+      // 与 ApiErrorHandler.database(...) 的通用分支逐字一致（刻意保持一致，见上）。
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              ProblemDetail.forStatusAndDetail(
+                  HttpStatus.CONFLICT,
+                  "店铺编码重复、平台账号已被绑定，或该店铺仍被单据引用。"));
     }
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(

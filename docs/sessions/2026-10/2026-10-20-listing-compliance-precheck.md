@@ -109,7 +109,7 @@
 后端测试
 
 - `backend/services/channel/src/test/java/com/starcon/channel/ListingComplianceRulesTest.java`（新，10 例）
-- `backend/services/channel/src/test/java/com/starcon/channel/ListingCompliancePrecheckIntegrationTest.java`（新，17 例）
+- `backend/services/channel/src/test/java/com/starcon/channel/ListingCompliancePrecheckIntegrationTest.java`（新，18 例）
 - `backend/services/channel/src/test/java/com/starcon/channel/ListingCompliancePrecheckTenancyIntegrationTest.java`（新，3 例，租户三断言）
 - `backend/services/channel/src/test/java/com/starcon/channel/StubComplianceCatalogServer.java`（新，本地真 HTTP catalog 服务）
 
@@ -136,8 +136,8 @@
 
 - L0 编译闸：`cd backend && ./mvnw -q compile` → exit 0；`pnpm typecheck` → 3/3 通过。
 - L1 模块闸：`./mvnw -pl services/channel -am test -Dtest='ListingCompliance*'
-  -Dsurefire.failIfNoSpecifiedTests=false` → **30 例 0 失败 0 错误 BUILD SUCCESS**
-  （其中集成 17 例 + 租户 3 例 + 纯规则 10 例 —— 两个 Testcontainers 真实 PostgreSQL 16 容器，
+  -Dsurefire.failIfNoSpecifiedTests=false` → **31 例 0 失败 0 错误 BUILD SUCCESS**
+  （其中集成 18 例 + 租户 3 例 + 纯规则 10 例 —— 两个 Testcontainers 真实 PostgreSQL 16 容器，
   本车道 verify 期间同时存活 2 个 PG 容器，测试结束后被 ryuk 回收）。
 - api-proxy 全量 allowlist 回归（改了共享白名单必跑）：
   `pnpm vitest run apps/web/src/app/api/trade apps/web/src/app/api/channel apps/web/src/lib`
