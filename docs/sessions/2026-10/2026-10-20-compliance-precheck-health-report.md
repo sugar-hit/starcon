@@ -106,3 +106,59 @@
 5. **卷 16 的导航入口**：本页路由 `/compliance/precheck` 已在 Next 路由树里，
    但**没有**在 `packages/ui/src/lib/nav-config.ts` 里加"合规"域入口 ——
    那个文件是多车道共用的，且卷 16 的整组模块都在 D7 阶段，留给该批次统一处理。
+
+---
+
+## 补记（2026-10-20 03:05）：L2 批量验证红在本模块的**负向断言**上 —— 夹具前提在合并后不成立
+
+### 根因
+
+- 本车道（16.2.2.1）在 `apps/web/src/lib/api-proxy.ts` 新增一条 `services[]` 元素（前缀 `compliance-precheck`），
+  同批并行的 4.2.3.2 车道新增**另一条**元素（前缀 `listing-compliance-precheck`）——
+  两条元素互不相干，各自的插入锚点也互不重叠。
+- 两条车道**各自**在自己的 worktree 里写了一条**负向断言**，用来证明
+  「同批另一条车道的前缀不属于本模块，仍然被拒（404）」。
+  **在各自 worktree 里这两条断言都是对的** —— 那时对方的前缀还不存在，代理返回 404。
+- **四条车道并入集成头之后，两条前缀都真实存在了** ⇒ 代理按白名单转发到上游，
+  而单元测试里上游 channel 服务没在跑 ⇒ 返回 **503**（`服务暂时无法连接`），不是 404。
+  ⇒ L2 批量验证红在这两条对称的断言上（2 failed / 4509 passed）。
+- ⇒ **生产代码是对的**：503 恰恰证明「白名单命中并转发」这个行为正确。
+  **错的是测试夹具** —— 它建立在一个「同批另一条车道此刻不存在」的假设上，
+  这个假设在合并后不成立。
+
+### 改法（本车道只改一个测试文件）
+
+- `apps/web/src/app/api/channel/compliance-precheck-allowlist.test.ts`
+  1. **负向清单**里把 `'channel/listing-compliance-precheck/capabilities'` 换成
+     `'channel/listing-compliance-precheck/score'` ——
+     `capabilities` 是 4.2.3.2 **已登记**的形状（合并后由它自己的白名单元素放行 ⇒ 503 是正确行为），
+     `/score` 是它**未登记**的形状 ⇒ 仍然必须是 404。
+     注释同步改成如实描述「合并前后前提不同」。
+  2. **新增一条独立的正向断言**（自带 `vi.stubGlobal('fetch', ...)`）：
+     `'channel/listing-compliance-precheck/capabilities'` 现在**不是** 404 ——
+     上游有响应时是透传状态码、上游不在线时是 503；
+     并钉住「确实转发了、目标就是 channel 出口（:8083）」。
+     用来证明**合并没有把另一条车道的白名单条目弄丢**（丢了会退回 404，
+     而 404 在浏览器里是静默的 —— 界面只会以为「这功能没交付」）。
+  3. ⚠️ 原 `expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled()`
+     **仍然成立** —— 会转发的形状**没有**被塞进那个块里，放行验证另起一块。
+
+### 验证结果
+
+| 命令 | 结果 |
+| --- | --- |
+| `pnpm vitest run apps/web/src/app/api/channel/compliance-precheck-allowlist.test.ts` | **1 文件 / 7 例全绿** |
+| `pnpm vitest run apps/web/src/app/api/trade` | **42 文件 / 224 例全绿** |
+| `pnpm vitest run apps/web/src/app/api/channel` | 25 文件 / 119 例 ⇒ **1 failed**：`listing-compliance-precheck-allowlist.test.ts` 里**4.2.3.2 车道的对称断言**（`expected 503 to be 404`）—— 那是**另一条车道**的文件，本车道无权修改，需由 4.2.3.2 车道同法修 |
+| `pnpm typecheck` | 3 包全绿（`3 successful`） |
+| `pnpm --filter @starcon/web lint` | exit 0（只有既有文件的既有告警） |
+| `./mvnw -pl services/channel -am test -Dtest='CompliancePrecheck*' ...` | **19 例全绿** · BUILD SUCCESS |
+
+### 教训
+
+- **同批并行车道的测试夹具不能假设对方的产物「此刻不存在」** ——
+  那类假设在单跑时绿、在合并后红，只有 L2 批量闸能抓到。
+  跨车道共享 `services[]` 白名单时，负向断言必须挑一个
+  **对方也未登记**的形状，而不是「对方登记过、只是还没合并进来」的形状。
+- 代理的状态码分界要记住：**白名单拒绝 ⇒ 404；放行了但上游连不上 ⇒ 503**。
+  跨车道断言里看到 503，先怀疑**夹具前提**，别急着改生产代码。
