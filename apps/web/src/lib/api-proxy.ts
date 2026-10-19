@@ -1545,6 +1545,59 @@ const services: readonly {
       /^listing\-claims(?:\/capabilities|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/claims|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.3.2.2 平台状态回流（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-claims` 那一条**之后**（4.4.2.1 商品认领已交付），
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-status-events` 这个独立前缀而不是 `listings/{id}/status-events`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「平台状态回流」与「内容回写」是**两条独立通道**（一个把内部变更推出去、
+    //   一个把平台状态收回来），状态机、限流与重试互不干涉 —— 挂在 listing 上会让
+    //   "这个商品的状态"多出第九种含义。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-status-events                            ✗ 刻意**不放行**：本模块没有裸路径资源
+    //   listing-status-events/capabilities               能力声明（未交付段 available=false + ownerModule）
+    //   listing-status-events/events                     状态变更记录（GET 真分页）/ 接收一条平台事件（POST）
+    //   listing-status-events/events/{uuid}              单条状态变更记录（GET）
+    //   listing-status-events/queue                      需处理队列（GET 真分页 + 按驳回原因筛选）
+    //   listing-status-events/queue/{uuid}               单条队列项（GET）
+    //   listing-status-events/queue/{uuid}/acknowledge   人工确认（POST）
+    //   listing-status-events/queue/{uuid}/resolve       人工处理完成（POST）
+    //   listing-status-events/conflicts                  冲突与告警（GET 真分页）
+    //   listing-status-events/actions/republish          一键处理：按驳回原因批量修正重发（POST）
+    //   listing-status-events/listings/{uuid}/history     某个商品的状态变更记录（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / events / queue / conflicts / actions/republish）
+    //    **排在** uuid 段之前，否则会被 uuid 段吃掉半截；`listings/{uuid}/history` 这一支的
+    //    首段是字面量 `listings`，与 uuid 段不会互相吃掉，但顺序保持"字面量在前"这一条文件的统一口径。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-status-events`                      —— 裸路径：本模块没有裸资源
+    //   * `listing-status-events/{uuid}`                —— 单条事件在 `events/{uuid}` 下，不在裸 uuid 下
+    //   * `listing-status-events/events/{uuid}/dispatch` —— 🔴 派发归 4.3.1.2 批量发布与 02 限流队列
+    //   * `listing-status-events/events/{uuid}/report`  —— 4.3.2.1 的任务回执形状在**它自己的**前缀下
+    //   * `listing-status-events/events/{uuid}/republish` —— 动作统一在 `actions/republish`，不按事件寻址
+    //   * `listing-status-events/queue/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-status-events/actions/publish`       —— 4.3.1.2 批量发布
+    //   * `listing-status-events/actions/preview`       —— 本模块没有"确认前先看看"这个状态
+    //   * `listing-status-events/lifecycle`             —— 4.1.1.3 生命周期与下架（未交付）
+    //   * `listing-status-events/publish-tasks`         —— 4.3.1.3 发布任务（未交付）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-status\-events(?:\/capabilities|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/conflicts|\/actions\/republish|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/history)$/,
+  },
+  {
     // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
