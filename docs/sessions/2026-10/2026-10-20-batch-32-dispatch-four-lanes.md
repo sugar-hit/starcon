@@ -103,6 +103,37 @@ L3 锚点互不相同（4.4.1 / 4.5.1 / 4.5.2 / 9.1.2），`serviceBlocked` 为�
 - **必须跑 api-proxy 全量 allowlist 回归**（`pnpm vitest run apps/web/src/app/api/trade`）：
   取错一侧会静默删掉别人已交付的路由，而 typecheck / lint / vitest / Playwright **全绿**。
 
+## 🚨 车道 9.1.2.1 遭遇 504 中断 + 接管续做（05:29）
+
+**发生了什么**：9.1.2.1 的 worker 在完成全部调研与依赖自检、**正在写代码**时，
+被**模型网关的 504 Gateway Time-out**（ALB 层，基础设施故障）打断。
+**不是业务缺陷，也不是测试红** —— 它死在写 `PlatformEnumMappingClient` 的中途。
+
+**留下了什么**（3 个未 commit 的文件，全在它自己的 worktree 里，一行没丢）：
+
+| 文件 | 行数 | 内容 |
+| --- | --- | --- |
+| `V207__platform_order_sync.sql` | 560 | 6 张表 + 14 个索引 + 3 个触发器 + RLS ENABLE/FORCE + GRANT + 完整跨服务边界注释 |
+| `PlatformOrderSyncModels.java` | 591 | 10 个 enum + 10 个 record |
+| `PlatformEnumMappingClient.java` | 103 | 2.1.2.1 跨服务**授权读取端口**（照抄 `ShipmentWritebackPort` 的逐字纪律） |
+
+迁移里已钉好**幂等双闸**：事件级 `UNIQUE(tenant_id, event_key)` +
+订单级 `UNIQUE(tenant_id, source_scope, external_order_no)` / `UNIQUE(tenant_id, idempotency_key)`。
+
+**处置**（**没有** abandon、**没有** gc 掉 worktree、**没有**让下一轮重排）：
+
+1. 查 `lane.mjs` 的孤儿判据：`laneIsUnclaimed` = `sessionId 为空 && 心跳超 60 分钟`，
+   `laneIsStale` = 心跳超 90 分钟。⇒ 崩掉的车道**最早也要 60 分钟后**才会被下一轮 `plan` 判成孤儿。
+2. 但不必等：**立即用同一 worktree / 同一分支 / 同一个 `V207` 重新派发**，
+   并把「上一轮已定稿的设计 + 三个遗留文件 + 明确要续做的部分」写进新的任务书。
+3. 🔴 **双写风险已排除**：`sessionId` 仍为 null，所以「未认领」判据只看**心跳新鲜度**；
+   续做 worker 每 25 分钟续心跳 ⇒ 心跳年龄恒 < 60 分钟 ⇒ 下一轮 `plan` **不会**把它当孤儿再派一次。
+4. 续做 worker 已在 05:31 续上心跳，确认「接管续做：已读完上一轮遗留的 V207 迁移 / Models / EnumMappingClient」。
+
+⚠️ **给下一轮的提醒**：9.1.2.1 是**第二次尝试**，交付说明里要写明「经历一次 504 中断 + 接管续做」，
+并复核续做时对上一轮三个文件做了什么处理（保留 / 局部修改 / 推翻并说明理由）。
+若它再崩，**先查 504 是否复现**（网关侧），不要当成业务缺陷去二分。
+
 ## 静态预检
 
 本批迁移文件**尚未产生**（4 条车道刚开工），`ADD COLUMN` 无 DEFAULT / `SET NOT NULL` /
