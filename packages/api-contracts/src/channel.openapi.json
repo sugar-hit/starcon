@@ -14186,6 +14186,282 @@
           }
         }
       }
+    },
+    "/channel/compliance-precheck/drafts/{id}/precheck": {
+      "post": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "post_channel_compliance_precheck_drafts_id_precheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/compliance-precheck/drafts/{id}/check": {
+      "post": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "post_channel_compliance_precheck_drafts_id_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/compliance-precheck/reports": {
+      "get": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "get_channel_compliance_precheck_reports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "triggerKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckReportPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/compliance-precheck/reports/{id}": {
+      "get": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "get_channel_compliance_precheck_reports_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/compliance-precheck/drafts": {
+      "get": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "get_channel_compliance_precheck_drafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckDraftPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/compliance-precheck/capabilities": {
+      "get": {
+        "tags": [
+          "compliance-precheck-controller"
+        ],
+        "operationId": "get_channel_compliance_precheck_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePrecheckCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -16761,7 +17037,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -18710,7 +18986,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -20342,7 +20618,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -20685,9 +20961,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -33701,6 +33977,421 @@
           "note": {
             "type": "string",
             "description": "🔴 说明：删到一条不剩时整套不可售"
+          }
+        }
+      },
+      "CompliancePrecheckDimensionScore": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scoreText": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "checkItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "passedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknownItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckFinding": {
+        "type": "object",
+        "properties": {
+          "findingId": {
+            "type": "string"
+          },
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "checkCode": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "CompliancePrecheckRemediation": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckReport": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/CompliancePrecheckReportHeader"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckDimensionScore"
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckFinding"
+            }
+          },
+          "remediation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckRemediation"
+            }
+          }
+        }
+      },
+      "CompliancePrecheckReportHeader": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string"
+          },
+          "draftId": {
+            "type": "string"
+          },
+          "triggerKind": {
+            "type": "string"
+          },
+          "triggerLabel": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "overallScore": {
+            "type": "number"
+          },
+          "overallState": {
+            "type": "string"
+          },
+          "overallScoreText": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "hasUnknownDimensions": {
+            "type": "boolean"
+          },
+          "totalDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scoredDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknownDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "checkItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknownItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckReportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckReportSummary"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CompliancePrecheckReportSummary": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string"
+          },
+          "draftId": {
+            "type": "string"
+          },
+          "draftTitle": {
+            "type": "string"
+          },
+          "triggerKind": {
+            "type": "string"
+          },
+          "triggerLabel": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "overallScore": {
+            "type": "number"
+          },
+          "overallScoreText": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "failedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknownItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckDraft": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "sourceSkuId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckDraftPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckDraft"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CompliancePrecheckCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompliancePrecheckCapabilityDimension"
+            }
+          },
+          "dimensionOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checkStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "triggerKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scoreSemantics": {
+            "type": "string"
+          },
+          "verdictSemantics": {
+            "type": "string"
+          },
+          "unknownSemantics": {
+            "type": "string"
+          },
+          "reportNote": {
+            "type": "string"
+          },
+          "enforcementNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "CompliancePrecheckCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       }
