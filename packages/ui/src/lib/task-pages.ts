@@ -129,7 +129,11 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/listings/publish',
-    implemented: false,
+    // 4.3.1.2 批量发布已交付：apps/web/src/app/listings/publish/page.tsx 已存在。
+    // domain 'listings' 与 devSystem 的「刊登中心」(/listings) 匹配，
+    // nav-config 的 children 是按 domain 从 IMPLEMENTED_TASK_PAGES 派生的，
+    // 所以这里翻成 true 就会自动获得菜单入口，不需要另改 nav-config。
+    implemented: true,
     domain: 'listings',
     label: '发布任务',
     description: '追踪批量刊登、平台反馈和失败重试。',
