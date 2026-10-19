@@ -1647,6 +1647,48 @@ const services: readonly {
       /^listing\-status\-events(?:\/capabilities|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/conflicts|\/actions\/republish|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/history)$/,
   },
   {
+    // 4.5.1.1 Listing 表现（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.3.2.2 `listing-status-events` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-claims` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-performance` 这个独立前缀而不是 `listings/{id}/performance`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段路径登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「平台表现」与「平台状态回流」本来就是**两条独立通道**（一个把状态收回来、
+    //   一个把表现收回来），口径、限流与重试互不干涉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-performance                    表现快照列表（GET 真分页 + 商品/店铺/平台/时间范围筛选）
+    //                                          / 接收平台表现数据同步结果（POST，批次级幂等）
+    //   listing-performance/capabilities       能力声明（卷 13 / 卷 14 未交付 ⇒ available=false + ownerModule）
+    //   listing-performance/{uuid}             单个 listing 的表现明细（GET）+ 时间范围对比
+    //   listing-performance/{uuid}/trend       趋势序列（GET，日/周/月）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-performance/syncs`         —— 同步结果是入库回执，不单开一条查询形状
+    //   * `listing-performance/{uuid}/orders`  —— 🔴 内部订单是 09 的事实，本模块不跨服务读它
+    //   * `listing-performance/{uuid}/ads`     —— 🔴 14 广告关联投放（整卷未交付）
+    //   * `listing-performance/{uuid}/product` —— 🔴 13 产品表现下钻（整卷未交付）
+    //   * `listing-performance/{uuid}/sync`    —— 同步走 POST 集合入口，不按商品寻址
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-performance(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/trend)?)?$/,
+  },
+  {
     // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
