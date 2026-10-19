@@ -1504,6 +1504,55 @@ const services: readonly {
       /^listing\-editor(?:\/capabilities|\/form\-schema|\/validate|\/submissions|\/source\-product|\/media\-assets|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)?$/,
   },
   {
+    // 4.2.3.2 合规预检（违禁词/侵权）（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.2.1.1 `listing-editor` 元素**之后**、4.4.2.1 `listing-claims` 元素**之前**。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-compliance-precheck` 这个独立前缀：
+    //   * 它**不是** `compliance-precheck` —— 那是同批并行那条车道（16.2.2.1 合规体检报告，
+    //     合规域 D7）的前缀。两边名字几乎一样但**不共表、不共端点、不共页面**，
+    //     用错前缀会打到别人的端点上去。
+    //   * 它也**不是** `listings/{id}/compliance` —— `/channel/listings/{uuid}/...` 那一段
+    //     由 4.1.1.1 登记成「不放行」，在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，
+    //     而那份清单是别人的成果。而且「合规预检」不是 listing 的一种状态，
+    //     它是**发布前对一份草稿的一次扫描**（按 平台 + 站点 + 语言 分别存的那一份内容）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-compliance-precheck/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   listing-compliance-precheck/filter-options           筛选项词表
+    //   listing-compliance-precheck/drafts                   可扫描的编辑器草稿（GET）
+    //   listing-compliance-precheck/drafts/{uuid}/publish-gate  🔴 服务端发布闸门（GET）
+    //   listing-compliance-precheck/scans                    触发扫描（POST）/ 扫描历史（GET）
+    //   listing-compliance-precheck/scans/{uuid}             单次扫描详情（GET）
+    //   listing-compliance-precheck/risks/decisions          风险批量处置（POST）
+    //   listing-compliance-precheck/words                    词库（GET）/ 新增词（POST）
+    //   listing-compliance-precheck/words/{uuid}             改词（PUT）/ 删词（DELETE）
+    //   listing-compliance-precheck/words/{uuid}/enabled     启停词（PUT）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / drafts / scans / risks / words）
+    //    **排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    //    `drafts/{uuid}/publish-gate` 这一支排在裸 `drafts/{uuid}` 段之前（首段是字面量 `drafts`，
+    //    与 uuid 段不会互相吃掉，但顺序保持「字面量在前」这一条文件的统一口径）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-compliance-precheck/drafts/{uuid}/publish`  —— 🔴 发布归 4.3.1.1，本模块只出闸门结论
+    //   * `listing-compliance-precheck/drafts/{uuid}/dispatch` —— 同上
+    //   * `listing-compliance-precheck/scans/{uuid}/publish`   —— 同上
+    //   * `listing-compliance-precheck/compliance-precheck`   —— 🔴 那是 16.2.2.1 的前缀，不属于本模块
+    //   * `listing-compliance-precheck/words/{uuid}/scan`     —— 扫描是针对草稿的，不是针对词的
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-compliance\-precheck(?:\/capabilities|\/filter\-options|\/risks\/decisions|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/publish\-gate)?|\/scans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/words(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?)$/,
+  },
+  {
     // 4.4.2.1 商品认领（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
