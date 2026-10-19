@@ -2495,6 +2495,38 @@ const services: readonly {
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // listing-templates 是 4.2.2.1 刊登模板的**独立前缀**（channel 服务，端口 8083）。
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 长正则的 alternation 里并 ——
+    // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
+    //
+    // 形状逐条列出：
+    //   listing-templates                      集合读（真分页 + 真筛选：作用域/平台/店铺/类目/状态/关键字）
+    //   listing-templates/capabilities         能力声明（编辑器侧套用入口 available=false + ownerModule=4.2.1.1）
+    //   listing-templates/filter-options       筛选项词表（平台 / 店铺 / 站点，不硬编码在前端）
+    //   listing-templates/apply                一键套用（POST，产出的是**草稿**，不写线上）
+    //   listing-templates/applies              套用记录列表（GET 真分页）
+    //   listing-templates/applies/{uuid}       单次套用详情（逐字段求值明细 + 必填违规清单）
+    //   listing-templates/{uuid}               模板详情（GET）/ 新建与更新（POST）/ 删除（DELETE）
+    //   listing-templates/{uuid}/status        启停模板（PUT）
+    //   listing-templates/{uuid}/matches      适用范围命中的 listing（GET 真分页 —— 判定有真实数据支撑）
+    //
+    // 字面量子路径（capabilities / filter-options / apply / applies）一律排在 {uuid} 段**之前**判别，
+    // 否则 apply / applies 会被 UUID 分支吃掉。id 段用**完整 UUID 形状**
+    // [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）——
+    // 宽松的字符集会把 `listing-templates/apply` 之外的任意串也当成 id 放行。
+    //
+    // **刻意不放行**：
+    //   * 裸的 `listing-templates/{uuid}/{任意动作}` —— {uuid} 之后只认 status 与 matches 两个
+    //     已实现的子资源；多放一段会让一个还不存在的路径看起来像已交付。
+    //   * 任何「直接上线 / 发布」形状 —— 刊登模板只产出草稿，发布归 4.3.1.2；
+    //     放行一个发布形状只会让界面以为有直接上线入口。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing-templates(?:\/(?:capabilities|filter-options|apply|applies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|matches))?))?$/,
+  },
+  {
     // crm 是 15 客户与客服的服务（端口 8086，数据库 starcon_crm），15.4.2.1 知识库
     // 是它的第一条业务端点。本条目是**新增一条 services[] 元素**，
     // 不是往既有分支的 alternation 里并 —— 所以前六个分支逐字未动
