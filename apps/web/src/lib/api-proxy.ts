@@ -1278,6 +1278,42 @@ const services: readonly {
       /^mapping\-versions(?:\/(?:capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:product\-scope|affected\-orders))?))?$/,
   },
   {
+    // 4.1.2.3 套装组件映射（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往 4.1.2.1 的 `listing-mappings` 或 4.1.2.2 的 `mapping-versions` 分支里并子路径
+    // —— 那两条是已交付车道的成果，多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 `mapping-versions` 条目**之后**、既有 `listing-publish` 条目**之前**：
+    // 与同 L3 的两个兄弟相邻但仍是独立元素，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   bundle-components/capabilities                    能力声明（未交付段 available=false）
+    //   bundle-components/filter-options                   筛选词表（不硬编码在前端）
+    //   bundle-components/bindings                         套装版本绑定列表（GET）+ 新建绑定（POST）
+    //   bundle-components/bindings/{uuid}                  单个绑定详情：版本选择 + 逐组件明细
+    //   bundle-components/bindings/{uuid}/sellable-check  🔴 可售性校验结果（缺任一组件 ⇒ 整套不可售）
+    //   bundle-components/components                       组件映射记录列表（GET）+ 新增组件（POST）
+    //   bundle-components/components/{uuid}                改组件（PUT）/ 删除组件登记（DELETE）
+    //
+    // ⚠️ 判别顺序：`capabilities` / `filter-options` 必须排在 `{uuid}` **之前**，否则会被
+    //    uuid 分支吃掉半截（症状是「能力声明 404，但详情页正常」）。
+    // ⚠️ 两个字面量段 `bindings` / `components` 也必须在 uuid 分支之前，理由同上。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余分支的同一写法），不是 `[0-9a-f-]+`：
+    //    短前缀会被放行到一条根本不存在的路由上。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `bundle-components/bindings/{uuid}/components`  组件明细随详情一起返回，不单独开一条
+    //   * `bundle-components/bindings/{uuid}/orders`       「按组件预占库存」是 07 库存自己的写路径
+    //                                                     （warehouse 执行），本服务不发起预占
+    //   * `bundle-components/components/{uuid}/sellable-check`  可售性校验按**绑定**判定，
+    //                                                     因为整套的可售性是所有组件的合取
+    //   * `bundle-components/bindings/{uuid}/revert`       换版不靠 revert：生成新绑定并退役旧的，
+    //                                                     已退役绑定的组件是历史，不可复活
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^bundle\-components(?:\/(?:capabilities|filter\-options|bindings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/sellable\-check)?)?|components(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?$/,
+  },
+  {
     // 4.3.1.2 批量发布（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往 4.1.1.1 的 `listings` 分支里并子路径 —— 那条分支是已交付车道的成果，
     // 多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
