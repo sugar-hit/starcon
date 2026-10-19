@@ -16579,6 +16579,301 @@
           }
         }
       }
+    },
+    "/channel/listing-performance": {
+      "get": {
+        "tags": [
+          "listing-performance-controller"
+        ],
+        "operationId": "get_channel_listing_performance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPerformanceSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-performance-controller"
+        ],
+        "operationId": "post_channel_listing_performance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestPerformanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPerformanceIngestResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-performance/{listingId}": {
+      "get": {
+        "tags": [
+          "listing-performance-controller"
+        ],
+        "operationId": "get_channel_listing_performance_listingId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "compareFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "compareTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPerformanceDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-performance/{listingId}/trend": {
+      "get": {
+        "tags": [
+          "listing-performance-controller"
+        ],
+        "operationId": "get_channel_listing_performance_listingId_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPerformanceTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-performance/capabilities": {
+      "get": {
+        "tags": [
+          "listing-performance-controller"
+        ],
+        "operationId": "get_channel_listing_performance_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPerformanceCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -39688,6 +39983,737 @@
           }
         },
         "description": "平台白名单（当前允许抓取的来源）"
+      },
+      "IngestPerformanceRequest": {
+        "required": [
+          "idempotencyKey",
+          "periodEnd",
+          "periodStart",
+          "snapshots",
+          "statFrom",
+          "statTo"
+        ],
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id（给 listingId 或 externalItemId+shopCode 其一）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码（与 externalItemId 配对定位商品）"
+          },
+          "externalItemId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台商品 ID 原文（与 shopCode 配对定位商品）"
+          },
+          "source": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源：PLATFORM / API（不给 = PLATFORM）"
+          },
+          "ingestChannel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API（不给 = API）"
+          },
+          "periodStart": {
+            "type": "string",
+            "description": "🔴 平台给的口径区间起点",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "description": "🔴 平台给的口径区间终点",
+            "format": "date-time"
+          },
+          "statFrom": {
+            "type": "string",
+            "description": "🔴 覆盖的统计日起（含）",
+            "format": "date"
+          },
+          "statTo": {
+            "type": "string",
+            "description": "🔴 覆盖的统计日止（含）",
+            "format": "date"
+          },
+          "idempotencyKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 幂等键（租户内唯一；重复投递整批不再落库）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "平台给的原文结构（原样存）"
+            },
+            "description": "平台给的原文结构（原样存）"
+          },
+          "snapshots": {
+            "maxItems": 400,
+            "minItems": 0,
+            "type": "array",
+            "description": "🔴 本批的平台表现快照（按统计日）",
+            "items": {
+              "$ref": "#/components/schemas/PerformanceSnapshotInput"
+            }
+          }
+        }
+      },
+      "PerformanceSnapshotInput": {
+        "required": [
+          "statDate"
+        ],
+        "type": "object",
+        "properties": {
+          "statDate": {
+            "type": "string",
+            "description": "🔴 平台统计日（平台自然日口径，不是内部下单日）",
+            "format": "date"
+          },
+          "impressions": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "曝光（平台口径）"
+          },
+          "clicks": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "点击（平台口径）"
+          },
+          "sessions": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "Session（平台口径）"
+          },
+          "unitsOrdered": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 销量（**平台口径，非内部订单**）"
+          },
+          "salesAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 销售额（**平台口径，非内部订单**）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（ISO 4217 三字母）"
+          },
+          "returnsCount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "退货件数（平台口径）"
+          },
+          "returnAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "退货金额（平台口径）"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分（当天快照值）"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评价数（当天快照值）"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "平台给的原文结构（原样存，不解释不加工）"
+            },
+            "description": "平台给的原文结构（原样存，不解释不加工）"
+          }
+        },
+        "description": "🔴 本批的平台表现快照（按统计日）"
+      },
+      "ListingPerformanceIngestResult": {
+        "type": "object",
+        "properties": {
+          "syncId": {
+            "type": "string",
+            "description": "同步批次 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "同步状态：RECEIVED / APPLIED / PARTIAL"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "description": "本批收到的快照条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "实际落库的条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "被跳过的条数（落在声明区间外）",
+            "format": "int32"
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "🔴 是否为重复投递（本次未落库）"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "skipped": {
+            "type": "array",
+            "description": "🔴 逐条跳过原因（不静默丢弃）",
+            "items": {
+              "type": "string",
+              "description": "🔴 逐条跳过原因（不静默丢弃）"
+            }
+          },
+          "receivedAt": {
+            "type": "string",
+            "description": "入库时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListingPerformanceSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingPerformanceSnapshotRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "syncCount": {
+            "type": "integer",
+            "description": "🔴 本筛选范围内的同步结果条数",
+            "format": "int64"
+          }
+        }
+      },
+      "ListingPerformanceSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "snapshotId": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "statDate": {
+            "type": "string",
+            "description": "🔴 平台统计日"
+          },
+          "impressions": {
+            "type": "number",
+            "description": "曝光（平台口径）"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "点击（平台口径）"
+          },
+          "ctr": {
+            "type": "number",
+            "description": "点击率 = 点击 ÷ 曝光"
+          },
+          "sessions": {
+            "type": "number",
+            "description": "Session（平台口径）"
+          },
+          "unitsOrdered": {
+            "type": "number",
+            "description": "🔴 销量（**平台口径，非内部订单**）"
+          },
+          "salesAmount": {
+            "type": "number",
+            "description": "🔴 销售额（**平台口径，非内部订单**）"
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "转化率 = 销量 ÷ Session"
+          },
+          "returnsCount": {
+            "type": "number",
+            "description": "退货件数（平台口径）"
+          },
+          "returnAmount": {
+            "type": "number",
+            "description": "退货金额（平台口径）"
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "退货率 = 退货件数 ÷ 销量"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评价数"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：PLATFORM / API"
+          },
+          "ingestChannel": {
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "revision": {
+            "type": "integer",
+            "description": "🔴 覆盖次数（平台修正同一天报表时递增）",
+            "format": "int32"
+          },
+          "receivedAt": {
+            "type": "string",
+            "description": "入库时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "最近更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingPerformanceComparison": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "description": "逐指标对比",
+            "items": {
+              "$ref": "#/components/schemas/ListingPerformanceComparisonEntry"
+            }
+          }
+        },
+        "description": "🔴 本期 vs 上期逐指标对比"
+      },
+      "ListingPerformanceComparisonEntry": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "指标键"
+          },
+          "current": {
+            "type": "number",
+            "description": "本期值"
+          },
+          "previous": {
+            "type": "number",
+            "description": "上期值"
+          },
+          "change": {
+            "type": "number",
+            "description": "变化量 = 本期 − 上期"
+          },
+          "changeRate": {
+            "type": "number",
+            "description": "🔴 变化率 = 变化量 ÷ |上期|（上期为 0 时为 null）"
+          },
+          "unit": {
+            "type": "string",
+            "description": "单位：COUNT 数量 / AMOUNT 金额 / RATE 比率 / SCORE 评分"
+          }
+        },
+        "description": "逐指标对比"
+      },
+      "ListingPerformanceDetail": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（PLATFORM_REPORTED = 平台口径）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（展示层必须显示）"
+          },
+          "periodFrom": {
+            "type": "string",
+            "description": "本期统计日起（含）"
+          },
+          "periodTo": {
+            "type": "string",
+            "description": "本期统计日止（含）"
+          },
+          "comparePeriodFrom": {
+            "type": "string",
+            "description": "上期统计日起（含）"
+          },
+          "comparePeriodTo": {
+            "type": "string",
+            "description": "上期统计日止（含）"
+          },
+          "current": {
+            "$ref": "#/components/schemas/ListingPerformanceMetrics"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/ListingPerformanceMetrics"
+          },
+          "comparison": {
+            "$ref": "#/components/schemas/ListingPerformanceComparison"
+          },
+          "hasData": {
+            "type": "boolean",
+            "description": "区间内是否有平台表现数据"
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "空态原因（没有数据时写明）"
+          },
+          "syncCount": {
+            "type": "integer",
+            "description": "该商品的同步结果条数",
+            "format": "int64"
+          },
+          "lastSyncAt": {
+            "type": "string",
+            "description": "最近一次同步时刻；从未同步过为 null",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListingPerformanceMetrics": {
+        "type": "object",
+        "properties": {
+          "impressions": {
+            "type": "number",
+            "description": "曝光（平台口径）"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "点击（平台口径）"
+          },
+          "ctr": {
+            "type": "number",
+            "description": "🔴 点击率 = 点击 ÷ 曝光（分母为 0 时为 null）"
+          },
+          "sessions": {
+            "type": "number",
+            "description": "Session（平台口径）"
+          },
+          "unitsOrdered": {
+            "type": "number",
+            "description": "🔴 销量（**平台口径，非内部订单**）"
+          },
+          "salesAmount": {
+            "type": "number",
+            "description": "🔴 销售额（**平台口径，非内部订单**）"
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "🔴 转化率 = 销量 ÷ Session（分母为 0 时为 null）"
+          },
+          "returnsCount": {
+            "type": "number",
+            "description": "退货件数（平台口径）"
+          },
+          "returnAmount": {
+            "type": "number",
+            "description": "退货金额（平台口径）"
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "🔴 退货率 = 退货件数 ÷ 销量（分母为 0 时为 null）"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分（期末值）"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评价数（期末值）"
+          },
+          "ratingChange": {
+            "type": "number",
+            "description": "🔴 评分变化 = 期末评分 − 期初评分（区间内）"
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "description": "参与聚合的快照条数",
+            "format": "int32"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          }
+        },
+        "description": "🔴 上期指标（平台口径）"
+      },
+      "ListingPerformanceTrend": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "粒度：DAY / WEEK / MONTH"
+          },
+          "from": {
+            "type": "string",
+            "description": "统计日起（含）"
+          },
+          "to": {
+            "type": "string",
+            "description": "统计日止（含）"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（PLATFORM_REPORTED = 平台口径）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          },
+          "points": {
+            "type": "array",
+            "description": "🔴 趋势点（**没有数据时是空数组，不是假数据**）",
+            "items": {
+              "$ref": "#/components/schemas/ListingPerformanceTrendPoint"
+            }
+          },
+          "hasData": {
+            "type": "boolean",
+            "description": "区间内是否有平台表现数据"
+          }
+        }
+      },
+      "ListingPerformanceTrendPoint": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "description": "时间桶（DAY=2026-10-01 / WEEK=2026-10-05 / MONTH=2026-10-01）"
+          },
+          "impressions": {
+            "type": "number",
+            "description": "曝光（平台口径）"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "点击（平台口径）"
+          },
+          "ctr": {
+            "type": "number",
+            "description": "点击率 = 点击 ÷ 曝光"
+          },
+          "sessions": {
+            "type": "number",
+            "description": "Session（平台口径）"
+          },
+          "unitsOrdered": {
+            "type": "number",
+            "description": "🔴 销量（**平台口径，非内部订单**）"
+          },
+          "salesAmount": {
+            "type": "number",
+            "description": "🔴 销售额（**平台口径，非内部订单**）"
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "转化率 = 销量 ÷ Session"
+          },
+          "returnsCount": {
+            "type": "number",
+            "description": "退货件数（平台口径）"
+          },
+          "returnAmount": {
+            "type": "number",
+            "description": "退货金额（平台口径）"
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "退货率 = 退货件数 ÷ 销量"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分（该桶期末值）"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评价数（该桶期末值）"
+          }
+        },
+        "description": "🔴 趋势点（**没有数据时是空数组，不是假数据**）"
+      },
+      "ListingPerformanceCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingPerformanceCapabilityDimension"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "ingestChannels": {
+            "type": "array",
+            "description": "进来的通道",
+            "items": {
+              "type": "string",
+              "description": "进来的通道"
+            }
+          },
+          "granularities": {
+            "type": "array",
+            "description": "趋势粒度",
+            "items": {
+              "type": "string",
+              "description": "趋势粒度"
+            }
+          },
+          "metricDefinitions": {
+            "type": "string",
+            "description": "🔴 每个指标与比率的分子/分母口径（服务端算，前端原样显示）"
+          },
+          "dataSourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（平台口径 vs 内部订单）"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "ListingPerformanceCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
