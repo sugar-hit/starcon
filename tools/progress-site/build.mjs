@@ -8,7 +8,15 @@
  *   docs/product/capability-blueprint/README.md            → 18 个系统的定位与主责服务
  *   backend/ apps/                                          → 工程现状（迁移/测试/页面）计数
  *
- * 用法：node tools/progress-site/build.mjs
+ * 用法：
+ *   node tools/progress-site/build.mjs                 从当前工作树构建
+ *   node tools/progress-site/build.mjs --docs-ref origin/main
+ *                                                        从某个 git ref 构建
+ *
+ * --docs-ref 的意义：每日刷新时用 `git show <ref>:<path>` 直接读远端已提交的
+ * 台账与蓝图，**完全不碰本地工作树**。这样刷新不依赖本地 git 状态 ——
+ * 本地有未推送的提交、rebase 冲突、切分支，都不会让站点停止更新。
+ *
  * 产物：tools/progress-site/dist/{index.html,styles.css,app.js,data.json}
  */
 
@@ -23,12 +31,27 @@ import {
 } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
-const BP = join(ROOT, 'docs', 'product', 'capability-blueprint');
+const BP_REL = 'docs/product/capability-blueprint';
+const BP = join(ROOT, BP_REL);
 const SRC = join(__dirname, 'src');
 const DIST = join(__dirname, 'dist');
+
+/* --docs-ref <git ref>：从 ref 读文档，而不是从工作树 */
+const REF = (() => {
+  const i = process.argv.indexOf('--docs-ref');
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+
+const git = (args) =>
+  execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
+
+/** 读一个仓库相对路径的文档：ref 模式走 git show，否则读工作树 */
+const readDoc = (relPath) =>
+  REF ? git(['show', `${REF}:${relPath}`]) : readFileSync(join(ROOT, relPath), 'utf8');
 
 const read = (p) => readFileSync(p, 'utf8');
 
@@ -62,7 +85,7 @@ const stripMd = (s = '') =>
 /* ── 1. 解析交付状态台账 ───────────────────────────────── */
 
 function parseLedger() {
-  const text = read(join(BP, 'module-progress.md'));
+  const text = readDoc(`${BP_REL}/module-progress.md`);
   const rows = new Map();
 
   for (const line of text.split('\n')) {
@@ -88,7 +111,7 @@ function parseLedger() {
 /* ── 2. 解析系统地图（README §4） ───────────────────────── */
 
 function parseSystemMap() {
-  const text = read(join(BP, 'README.md'));
+  const text = readDoc(`${BP_REL}/README.md`);
   const map = new Map();
   const start = text.indexOf('## 4. 系统地图');
   if (start === -1) return map;
@@ -112,7 +135,7 @@ function parseSystemMap() {
       tier: stripMd(tier),
       duty: stripMd(duty),
       service: stripMd(service),
-      volumeFile: vol ? join(BP, vol) : null,
+      volumePath: vol ? `${BP_REL}/${vol}` : null,
     });
   }
   return map;
@@ -121,7 +144,7 @@ function parseSystemMap() {
 /* ── 3. 解析各卷蓝图：定位 / 边界 / L2 职责 / 功能树 / L4 详情 ── */
 
 function parseVolume(volumePath) {
-  const text = read(volumePath);
+  const text = readDoc(volumePath);
   const out = { positioning: null, ownership: null, entry: null, does: null, notDoes: null };
 
   const grab = (re) => (text.match(re) || [])[1] || null;
@@ -203,7 +226,11 @@ function parseVolume(volumePath) {
 /* ── 4. 工程现状计数 ──────────────────────────────────── */
 
 function engineeringStats() {
-  const files = walk(ROOT);
+  // 计数全部基于**文件名**，所以 ref 模式只要一份文件清单就够，不必读文件内容
+  const relPaths = REF
+    ? git(['ls-tree', '-r', '--name-only', REF]).split('\n').filter(Boolean)
+    : walk(ROOT).map((f) => f.slice(ROOT.length + 1));
+
   const stats = {
     migrations: {},
     backendTestClasses: {},
@@ -214,8 +241,7 @@ function engineeringStats() {
     totalBackendTests: 0,
   };
 
-  for (const f of files) {
-    const rel = f.slice(ROOT.length + 1);
+  for (const rel of relPaths) {
     const svcMatch = rel.match(
       /^backend\/services\/([^/]+)\/src\/main\/resources\/db\/migration\/V\d+.*\.sql$/,
     );
@@ -253,8 +279,8 @@ const systemMap = parseSystemMap();
 
 const systems = [];
 for (const [sid, meta] of [...systemMap.entries()].sort((a, b) => Number(a[0]) - Number(b[0]))) {
-  const volume = meta.volumeFile
-    ? parseVolume(meta.volumeFile)
+  const volume = meta.volumePath
+    ? parseVolume(meta.volumePath)
     : { features: [], modules: new Map(), l2: new Map(), l3: new Map() };
   const modules = [];
 
@@ -331,7 +357,7 @@ for (const m of allModules) {
 const phases = [...phaseMap.values()].sort((a, b) => phaseOrder(a.phase) - phaseOrder(b.phase));
 
 // 阶段说明（来自台账「跨期说明」）
-const ledgerText = read(join(BP, 'module-progress.md'));
+const ledgerText = readDoc(`${BP_REL}/module-progress.md`);
 const phaseNotes = [];
 const noteStart = ledgerText.indexOf('## 跨期说明');
 if (noteStart > 0) {
@@ -344,6 +370,7 @@ if (noteStart > 0) {
 
 const data = {
   generatedAt: new Date().toISOString(),
+  sourceRef: REF || 'working-tree',
   project: {
     name: 'starcon',
     tagline: '让跨境生意，有序抵达全球。',
@@ -370,5 +397,5 @@ cpSync(SRC, DIST, { recursive: true });
 writeFileSync(join(DIST, 'data.json'), JSON.stringify(data, null, 2));
 
 console.log(
-  `[progress-site] 模块 ${data.summary.total} · 已交付 ${delivered} · 进行中 ${inProgress} · 未开发 ${notStarted} · 完成率 ${data.summary.rate}% · 系统 ${systems.length} 个 → ${join(DIST, 'data.json')}`,
+  `[progress-site] 模块 ${data.summary.total} · 已交付 ${delivered} · 进行中 ${inProgress} · 未开发 ${notStarted} · 完成率 ${data.summary.rate}% · 系统 ${systems.length} 个 · 来源 ${data.sourceRef} → ${join(DIST, 'data.json')}`,
 );
