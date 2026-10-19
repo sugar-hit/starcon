@@ -4425,6 +4425,406 @@
         }
       }
     },
+    "/channel/listing-content-writeback/writebacks": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_writebacks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentWritebackRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "post_channel_listing_content_writeback_writebacks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContentWritebackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/writebacks/{writebackId}/retry": {
+      "post": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_retry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "writebackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryContentWritebackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/writebacks/{writebackId}/dispatch": {
+      "post": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "writebackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackDispatchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/writebacks/{writebackId}/cancel": {
+      "post": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "writebackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentWritebackStateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/tasks/{taskId}/report": {
+      "post": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "post_channel_listing_content_writeback_tasks_taskId_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "failureReason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-claims": {
+      "get": {
+        "tags": [
+          "listing-claim-controller"
+        ],
+        "operationId": "get_channel_listing_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetShopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingClaimRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-claim-controller"
+        ],
+        "operationId": "post_channel_listing_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-bulk-edit/templates": {
       "get": {
         "tags": [
@@ -9310,6 +9710,342 @@
         }
       }
     },
+    "/channel/listing-content-writeback/writebacks/{writebackId}": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_writebacks_writebackId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "writebackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/writebacks/{writebackId}/tasks": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_writebacks_writebackId_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "writebackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentWritebackTaskRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/tasks/{taskId}/changes": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_tasks_taskId_changes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentWritebackChangeRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/listings/{listingId}/content-history": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_listings_listingId_content_history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingContentHistoryEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-content-writeback/capabilities": {
+      "get": {
+        "tags": [
+          "content-writeback-controller"
+        ],
+        "operationId": "get_channel_listing_content_writeback_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentWritebackCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-claims/{id}": {
+      "get": {
+        "tags": [
+          "listing-claim-controller"
+        ],
+        "operationId": "get_channel_listing_claims_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-claims/listings/{listingId}/claims": {
+      "get": {
+        "tags": [
+          "listing-claim-controller"
+        ],
+        "operationId": "get_channel_listing_claims_listings_listingId_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingClaimRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-claims/capabilities": {
+      "get": {
+        "tags": [
+          "listing-claim-controller"
+        ],
+        "operationId": "get_channel_listing_claims_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingClaimCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-bulk-edit/scope-check": {
       "get": {
         "tags": [
@@ -11041,521 +11777,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_writebacks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ContentWritebackRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "post_channel_listing_content_writeback_writebacks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentWritebackRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks/{writebackId}/retry": {
-      "post": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_retry",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "writebackId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RetryContentWritebackRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks/{writebackId}/dispatch": {
-      "post": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_dispatch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "writebackId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackDispatchResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks/{writebackId}/cancel": {
-      "post": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "post_channel_listing_content_writeback_writebacks_writebackId_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "writebackId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContentWritebackStateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/tasks/{taskId}/report": {
-      "post": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "post_channel_listing_content_writeback_tasks_taskId_report",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "taskId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "success",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "failureReason",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackTaskRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks/{writebackId}": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_writebacks_writebackId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "writebackId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/writebacks/{writebackId}/tasks": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_writebacks_writebackId_tasks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "writebackId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ContentWritebackTaskRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/tasks/{taskId}/changes": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_tasks_taskId_changes",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "taskId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ContentWritebackChangeRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/listings/{listingId}/content-history": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_listings_listingId_content_history",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "listingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ListingContentHistoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-content-writeback/capabilities": {
-      "get": {
-        "tags": [
-          "content-writeback-controller"
-        ],
-        "operationId": "get_channel_listing_content_writeback_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentWritebackCapabilities"
-                }
-              }
-            }
           }
         }
       }
@@ -14994,7 +15215,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -15789,7 +16010,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -16132,9 +16353,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -16451,6 +16672,673 @@
             "type": "integer",
             "description": "该 listing 该语言的历史快照总数",
             "format": "int64"
+          }
+        }
+      },
+      "CreateContentWritebackRequest": {
+        "required": [
+          "changeTypes"
+        ],
+        "type": "object",
+        "properties": {
+          "changeTypes": {
+            "minItems": 1,
+            "type": "array",
+            "description": "🔴 本次回写要改的字段；取值 TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS。**不含 PRICE / STOCK**（那是 05 定价 / 07 库存的事）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本次回写要改的字段；取值 TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS。**不含 PRICE / STOCK**（那是 05 定价 / 07 库存的事）"
+            }
+          },
+          "listingIds": {
+            "type": "array",
+            "description": "目标 listing 集合（不给 = 按下面的筛选条件挑）",
+            "items": {
+              "type": "string",
+              "description": "目标 listing 集合（不给 = 按下面的筛选条件挑）",
+              "format": "uuid"
+            }
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码筛选（不给 listingIds 时按它筛）"
+          },
+          "status": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "listing 状态筛选（不给 listingIds 时按它筛）"
+          },
+          "overrides": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "🔴 显式覆盖值：给 DESCRIPTION / A_PLUS 用的新值。内部没有对应草稿字段时（4.2.1.1 未交付），这是唯一真实来源；既无草稿又无覆盖值的那条任务判 SKIPPED_NO_SOURCE，**不编一个假值**"
+            },
+            "description": "🔴 显式覆盖值：给 DESCRIPTION / A_PLUS 用的新值。内部没有对应草稿字段时（4.2.1.1 未交付），这是唯一真实来源；既无草稿又无覆盖值的那条任务判 SKIPPED_NO_SOURCE，**不编一个假值**"
+          },
+          "language": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台内容语言（listing + language 是平台侧内容的维度）；不给 = 取该 listing 的当前快照语言，连快照都没有时那条任务判 SKIPPED_NO_SOURCE"
+          },
+          "limit": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 数量上限（1~500）：一次触发最多纳入多少条 listing",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "触发来源备注（进留痕）"
+          }
+        }
+      },
+      "ContentWritebackRow": {
+        "type": "object",
+        "properties": {
+          "writebackId": {
+            "type": "string",
+            "description": "回写触发 id",
+            "format": "uuid"
+          },
+          "triggerKind": {
+            "type": "string",
+            "description": "SINGLE 按变更类型单条触发 / BULK_EVENT 批量触发"
+          },
+          "changeTypes": {
+            "type": "array",
+            "description": "🔴 本次的变更类型集合（**不含价格与库存**）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本次的变更类型集合（**不含价格与库存**）"
+            }
+          },
+          "listingIds": {
+            "type": "array",
+            "description": "🔴 目标集合快照（提交那一刻选了哪些）",
+            "items": {
+              "type": "string",
+              "description": "🔴 目标集合快照（提交那一刻选了哪些）",
+              "format": "uuid"
+            }
+          },
+          "overrides": {
+            "type": "string",
+            "description": "🔴 提交那一刻的显式覆盖值原文"
+          },
+          "language": {
+            "type": "string",
+            "description": "解析出的平台内容语言；空串 = 未能解析（相关任务判 SKIPPED_NO_SOURCE）"
+          },
+          "state": {
+            "type": "string",
+            "description": "RUNNING 可派发 / COMPLETED 全部终态 / CANCELLED 已中止"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "目标总数",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "description": "待派发",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "🔴 跳过（内容与线上逐字相同，未派发）",
+            "format": "int32"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "description": "🔴 在途（已进 02 队列未回报）",
+            "format": "int32"
+          },
+          "succeededCount": {
+            "type": "integer",
+            "description": "🔴 已成功",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "description": "🔴 失败（可批量重试）",
+            "format": "int32"
+          },
+          "progressPercent": {
+            "type": "integer",
+            "description": "🔴 进度百分比（0~100，按已终态 / 总数；总数为 0 时为 0）",
+            "format": "int32"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "触发人",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "触发时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "最近更新时刻",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "全部终态的时刻；仅 COMPLETED 非空",
+            "format": "date-time"
+          }
+        }
+      },
+      "RetryContentWritebackRequest": {
+        "type": "object",
+        "properties": {
+          "taskIds": {
+            "type": "array",
+            "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本次全部失败项）",
+            "items": {
+              "type": "string",
+              "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本次全部失败项）",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "原因 / 备注"
+          }
+        }
+      },
+      "ContentWritebackActionResult": {
+        "type": "object",
+        "properties": {
+          "writebackId": {
+            "type": "string",
+            "description": "回写触发 id",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "触发状态"
+          },
+          "changedTaskIds": {
+            "type": "array",
+            "description": "🔴 本次实际被改动的任务 id（逐条）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本次实际被改动的任务 id（逐条）",
+              "format": "uuid"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "description": "🔴 被拒绝的任务 id + 原因（如：已成功不可重试 / 不属于本次触发）",
+            "items": {
+              "type": "string",
+              "description": "🔴 被拒绝的任务 id + 原因（如：已成功不可重试 / 不属于本次触发）"
+            }
+          },
+          "writeback": {
+            "$ref": "#/components/schemas/ContentWritebackRow"
+          }
+        }
+      },
+      "ContentWritebackDispatchResponse": {
+        "type": "object",
+        "properties": {
+          "writebackId": {
+            "type": "string",
+            "description": "回写触发 id",
+            "format": "uuid"
+          },
+          "triggerState": {
+            "type": "string",
+            "description": "触发状态；非 RUNNING 时本轮一律不派发"
+          },
+          "totalDispatched": {
+            "type": "integer",
+            "description": "🔴 本轮一共派发了多少条",
+            "format": "int32"
+          },
+          "totalSkippedByRateLimit": {
+            "type": "integer",
+            "description": "🔴 本轮一共因限流跳过多少条",
+            "format": "int32"
+          },
+          "queuedOperationIds": {
+            "type": "array",
+            "description": "🔴 本轮写进 02 队列的 platform_operation id 列表",
+            "items": {
+              "type": "string",
+              "description": "🔴 本轮写进 02 队列的 platform_operation id 列表",
+              "format": "uuid"
+            }
+          },
+          "lanes": {
+            "type": "array",
+            "description": "🔴 逐限流行的派发情况",
+            "items": {
+              "$ref": "#/components/schemas/ContentWritebackLaneReport"
+            }
+          },
+          "writeback": {
+            "$ref": "#/components/schemas/ContentWritebackRow"
+          }
+        }
+      },
+      "ContentWritebackLaneReport": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码；平台级配额为 null"
+          },
+          "rateLimitId": {
+            "type": "string",
+            "description": "生效的限流配置 id；null = 未配置",
+            "format": "uuid"
+          },
+          "maxInFlight": {
+            "type": "integer",
+            "description": "在途上限",
+            "format": "int32"
+          },
+          "inFlightBefore": {
+            "type": "integer",
+            "description": "🔴 本轮派发前该限流行在途数",
+            "format": "int64"
+          },
+          "requestsPerWindow": {
+            "type": "integer",
+            "description": "🔴 窗口上限（滑动窗口内最多派发多少条）",
+            "format": "int32"
+          },
+          "windowSeconds": {
+            "type": "integer",
+            "description": "窗口长度（秒）",
+            "format": "int32"
+          },
+          "windowCountBefore": {
+            "type": "integer",
+            "description": "🔴 本轮派发前窗口内已派发次数",
+            "format": "int64"
+          },
+          "dispatched": {
+            "type": "integer",
+            "description": "🔴 本轮实际派发条数",
+            "format": "int32"
+          },
+          "skippedByRateLimit": {
+            "type": "integer",
+            "description": "🔴 本轮因限流未派发的条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 为什么没派；为空串表示按配额正常派发"
+          }
+        },
+        "description": "🔴 逐限流行的派发情况"
+      },
+      "ContentWritebackStateRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "原因 / 备注，落进留痕"
+          }
+        }
+      },
+      "ContentWritebackTaskRow": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "writebackId": {
+            "type": "string",
+            "description": "回写触发 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "线上标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 平台编码；这条任务按**这个平台**的配额排队"
+          },
+          "language": {
+            "type": "string",
+            "description": "平台内容语言"
+          },
+          "changeTypes": {
+            "type": "array",
+            "description": "🔴 本次要改的字段",
+            "items": {
+              "type": "string",
+              "description": "🔴 本次要改的字段"
+            }
+          },
+          "draftId": {
+            "type": "string",
+            "description": "改后内容取自的内部草稿 id（null = 无草稿，用显式覆盖值或判无来源）",
+            "format": "uuid"
+          },
+          "snapshotId": {
+            "type": "string",
+            "description": "改前基线取自的平台侧当前快照 id（null = 该 listing 无当前快照）",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "PENDING / SKIPPED_NO_CHANGE / DISPATCHED / SUCCEEDED / FAILED"
+          },
+          "attempts": {
+            "type": "integer",
+            "description": "已派发次数（重试会累加）",
+            "format": "int32"
+          },
+          "operationId": {
+            "type": "string",
+            "description": "🔴 02 队列任务 id（V2 platform_operation）；PENDING / SKIPPED 时为 null",
+            "format": "uuid"
+          },
+          "failureReason": {
+            "type": "string",
+            "description": "跳过或失败的原因；成功时为空串"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "派发时刻；仅 DISPATCHED / 终态非空",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "终态时刻；仅 SUCCEEDED / FAILED 非空",
+            "format": "date-time"
+          }
+        }
+      },
+      "ClaimListingRequest": {
+        "required": [
+          "fieldDecisions",
+          "sourceListingId",
+          "targetMarketplaceId",
+          "targetShopId"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceListingId": {
+            "type": "string",
+            "description": "🔴 源 listing id（只读引用；本模块不会修改它）",
+            "format": "uuid"
+          },
+          "targetShopId": {
+            "type": "string",
+            "description": "目标店铺 id（必须与源店铺不同）",
+            "format": "uuid"
+          },
+          "targetMarketplaceId": {
+            "type": "string",
+            "description": "目标站点 id（必须已被目标店铺启用）",
+            "format": "uuid"
+          },
+          "language": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "复用哪一份源内容快照的语言；不给则用源当前快照的语言"
+          },
+          "fieldDecisions": {
+            "minItems": 1,
+            "type": "array",
+            "description": "逐字段的保留 / 重写决策",
+            "items": {
+              "$ref": "#/components/schemas/ListingClaimFieldDecision"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ListingClaimFieldDecision": {
+        "required": [
+          "field",
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "minLength": 1,
+            "type": "string",
+            "description": "字段键：TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS / VIDEO_URL / CATEGORY_PATH / PLATFORM_CATEGORY_ID / CATEGORY_ATTRIBUTES / COMPLIANCE_STATEMENTS"
+          },
+          "mode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "决策：KEEP 复用源值 / REWRITE 重写 / SKIP 不写入目标草稿"
+          },
+          "value": {
+            "type": "string",
+            "description": "重写值（仅 REWRITE 使用；JSON 字段填 JSON 原文）"
+          }
+        },
+        "description": "逐字段的保留 / 重写决策"
+      },
+      "ListingClaimFieldRow": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "字段键"
+          },
+          "decision": {
+            "type": "string",
+            "description": "决策：KEEP / REWRITE / SKIP"
+          },
+          "sourceOrigin": {
+            "type": "string",
+            "description": "源值来源：PLATFORM_SNAPSHOT / LISTING / NOT_PRESENT"
+          },
+          "sourceValue": {
+            "type": "string",
+            "description": "源值原文"
+          },
+          "targetValue": {
+            "type": "string",
+            "description": "目标值原文（SKIP 时为 null）"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明（例如为什么跳过）"
+          }
+        },
+        "description": "逐字段决策"
+      },
+      "ListingClaimRow": {
+        "type": "object",
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "description": "认领记录 id",
+            "format": "uuid"
+          },
+          "sourceListingId": {
+            "type": "string",
+            "description": "源 listing id",
+            "format": "uuid"
+          },
+          "sourceExternalItemId": {
+            "type": "string",
+            "description": "源 listing 的平台商品 ID 原文"
+          },
+          "sourceTitle": {
+            "type": "string",
+            "description": "源 listing 标题"
+          },
+          "sourceShopCode": {
+            "type": "string",
+            "description": "源 listing 所属店铺编码"
+          },
+          "sourceShopName": {
+            "type": "string",
+            "description": "源 listing 所属店铺名"
+          },
+          "sourceMarketplaceCode": {
+            "type": "string",
+            "description": "🔴 源 listing 所属站点编码（可能为空）"
+          },
+          "sourceStatus": {
+            "type": "string",
+            "description": "🔴 认领时记录的源 listing 状态（认领前后应逐字相同）"
+          },
+          "sourceCurrentStatus": {
+            "type": "string",
+            "description": "🔴 源 listing 当前状态（与认领时记录的比对结果）"
+          },
+          "sourceReviewStatus": {
+            "type": "string",
+            "description": "🔴 认领时记录的源 listing 审核状态"
+          },
+          "sourceCurrentReviewStatus": {
+            "type": "string",
+            "description": "🔴 源 listing 当前审核状态（与认领时记录的比对结果）"
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "description": "🔴 认领时记录的源 listing 版本号",
+            "format": "int64"
+          },
+          "sourceCurrentVersion": {
+            "type": "integer",
+            "description": "🔴 源 listing 当前版本号（与认领时记录的比对结果）",
+            "format": "int64"
+          },
+          "targetListingId": {
+            "type": "string",
+            "description": "目标 listing id（本模块新建的草稿）",
+            "format": "uuid"
+          },
+          "targetExternalItemId": {
+            "type": "string",
+            "description": "🔴 目标 listing 的平台商品 ID 保留位（草稿未发布，平台尚未分配）"
+          },
+          "targetStatus": {
+            "type": "string",
+            "description": "🔴 目标 listing 状态，恒为 DRAFT（尚未过平台审核）"
+          },
+          "targetReviewStatus": {
+            "type": "string",
+            "description": "🔴 目标 listing 审核状态，恒为 NOT_SUBMITTED（尚未提交平台审核）"
+          },
+          "targetPlatformStockState": {
+            "type": "string",
+            "description": "🔴 目标 listing 的平台可售状态，恒为 UNKNOWN（平台上还不存在）"
+          },
+          "targetTitle": {
+            "type": "string",
+            "description": "目标 listing 标题"
+          },
+          "targetShopCode": {
+            "type": "string",
+            "description": "目标店铺编码"
+          },
+          "targetShopName": {
+            "type": "string",
+            "description": "目标店铺名"
+          },
+          "targetMarketplaceCode": {
+            "type": "string",
+            "description": "目标站点编码"
+          },
+          "state": {
+            "type": "string",
+            "description": "🔴 认领状态：DRAFT 目标草稿待发布 / PUBLISHED 目标已离开草稿态（不代表平台已批准）"
+          },
+          "variantCount": {
+            "type": "integer",
+            "description": "复制的变体条数",
+            "format": "int32"
+          },
+          "mappedVariantCount": {
+            "type": "integer",
+            "description": "其中已映射到内部 SKU 的条数",
+            "format": "int32"
+          },
+          "publishBatchId": {
+            "type": "string",
+            "description": "待发布批次 id（复用 4.3.1.2 的 V183 批次）",
+            "format": "uuid"
+          },
+          "publishTaskId": {
+            "type": "string",
+            "description": "待发布任务 id（复用 4.3.1.2 的 V183 任务）",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作人",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间",
+            "format": "date-time"
+          },
+          "fields": {
+            "type": "array",
+            "description": "逐字段决策",
+            "items": {
+              "$ref": "#/components/schemas/ListingClaimFieldRow"
+            }
           }
         }
       },
@@ -23238,6 +24126,314 @@
         },
         "description": "逐维度能力声明；未交付段 available=false"
       },
+      "ContentWritebackChangeRow": {
+        "type": "object",
+        "properties": {
+          "changeId": {
+            "type": "string",
+            "description": "变更 id",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "field": {
+            "type": "string",
+            "description": "🔴 字段：TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS"
+          },
+          "beforeValue": {
+            "type": "string",
+            "description": "改前值（平台侧当前内容；无基线时为空串）"
+          },
+          "afterValue": {
+            "type": "string",
+            "description": "改后值（内部草稿或显式覆盖值）"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "改前是否与改后逐字不同"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "APPLIED 有改 / NO_CHANGE 与线上逐字相同 / SKIPPED_NO_SOURCE 内部没有该字段的待推送内容"
+          },
+          "beforeSource": {
+            "type": "string",
+            "description": "改前值来源：PLATFORM_SNAPSHOT / MISSING"
+          },
+          "afterSource": {
+            "type": "string",
+            "description": "改后值来源：INTERNAL_DRAFT / OVERRIDE / MISSING"
+          },
+          "reason": {
+            "type": "string",
+            "description": "原因说明"
+          }
+        }
+      },
+      "ListingContentHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "writebackId": {
+            "type": "string",
+            "description": "回写触发 id",
+            "format": "uuid"
+          },
+          "triggerState": {
+            "type": "string",
+            "description": "触发状态"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "🔴 触发时刻",
+            "format": "date-time"
+          },
+          "taskState": {
+            "type": "string",
+            "description": "🔴 该次触发在本商品上的任务状态"
+          },
+          "operationId": {
+            "type": "string",
+            "description": "02 队列任务 id；未派发为 null",
+            "format": "uuid"
+          },
+          "changes": {
+            "type": "array",
+            "description": "🔴 逐字段改前 / 改后",
+            "items": {
+              "$ref": "#/components/schemas/ContentWritebackChangeRow"
+            }
+          }
+        }
+      },
+      "ContentWritebackCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ContentWritebackCapabilityDimension"
+            }
+          },
+          "changeTypes": {
+            "type": "array",
+            "description": "变更类型取值域（🔴 不含 PRICE / STOCK）",
+            "items": {
+              "type": "string",
+              "description": "变更类型取值域（🔴 不含 PRICE / STOCK）"
+            }
+          },
+          "rejectedChangeTypes": {
+            "type": "array",
+            "description": "🔴 本请求会被 422 拒绝的变更类型（价格 / 库存等，归属 05/07）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本请求会被 422 拒绝的变更类型（价格 / 库存等，归属 05/07）"
+            }
+          },
+          "channels": {
+            "type": "array",
+            "description": "三条回写通道的归属与独立失败独立重试口径",
+            "items": {
+              "$ref": "#/components/schemas/ContentWritebackChannel"
+            }
+          },
+          "triggerStates": {
+            "type": "array",
+            "description": "触发状态取值",
+            "items": {
+              "type": "string",
+              "description": "触发状态取值"
+            }
+          },
+          "taskStates": {
+            "type": "array",
+            "description": "任务状态取值",
+            "items": {
+              "type": "string",
+              "description": "任务状态取值"
+            }
+          },
+          "snapshotNote": {
+            "type": "string",
+            "description": "回写前后快照口径说明；前端原样展示，不要自己编"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "ContentWritebackCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ContentWritebackChannel": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "通道键"
+          },
+          "label": {
+            "type": "string",
+            "description": "通道名"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块"
+          },
+          "handledHere": {
+            "type": "boolean",
+            "description": "🔴 本模块是否处理它"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        },
+        "description": "三条回写通道的归属与独立失败独立重试口径"
+      },
+      "ListingClaimCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingClaimCapabilityDimension"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "可参与保留 / 重写的字段集",
+            "items": {
+              "type": "string",
+              "description": "可参与保留 / 重写的字段集"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "description": "字段决策取值域",
+            "items": {
+              "type": "string",
+              "description": "字段决策取值域"
+            }
+          },
+          "claimStates": {
+            "type": "array",
+            "description": "认领状态取值域",
+            "items": {
+              "type": "string",
+              "description": "认领状态取值域"
+            }
+          },
+          "sourceUntouched": {
+            "type": "boolean",
+            "description": "🔴 是否保证源 listing 不受影响"
+          },
+          "sourceUntouchedNote": {
+            "type": "string",
+            "description": "🔴 源 listing 不受影响的说明（前端原样展示）"
+          },
+          "draftOnly": {
+            "type": "boolean",
+            "description": "🔴 目标是否恒为草稿态（尚未过平台审核）"
+          },
+          "draftNote": {
+            "type": "string",
+            "description": "🔴 草稿态的说明（前端原样展示）"
+          },
+          "pendingPublishTask": {
+            "type": "boolean",
+            "description": "待发布任务是否复用 4.3.1.2 的既有队列"
+          },
+          "publishTaskNote": {
+            "type": "string",
+            "description": "待发布任务的说明"
+          },
+          "priceAvailable": {
+            "type": "boolean",
+            "description": "🔴 售价是否已接入（恒为 false）"
+          },
+          "priceOwnerModule": {
+            "type": "string",
+            "description": "🔴 售价的归属模块"
+          },
+          "priceNote": {
+            "type": "string",
+            "description": "🔴 未接入售价时的界面措辞"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          }
+        }
+      },
+      "ListingClaimCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
       "BulkEditCapabilities": {
         "type": "object",
         "properties": {
@@ -25685,627 +26881,6 @@
             "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
-      },
-      "CreateContentWritebackRequest": {
-        "required": [
-          "changeTypes"
-        ],
-        "type": "object",
-        "properties": {
-          "changeTypes": {
-            "minItems": 1,
-            "type": "array",
-            "description": "🔴 本次回写要改的字段；取值 TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS。**不含 PRICE / STOCK**（那是 05 定价 / 07 库存的事）",
-            "items": {
-              "type": "string",
-              "description": "🔴 本次回写要改的字段；取值 TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS。**不含 PRICE / STOCK**（那是 05 定价 / 07 库存的事）"
-            }
-          },
-          "listingIds": {
-            "type": "array",
-            "description": "目标 listing 集合（不给 = 按下面的筛选条件挑）",
-            "items": {
-              "type": "string",
-              "description": "目标 listing 集合（不给 = 按下面的筛选条件挑）",
-              "format": "uuid"
-            }
-          },
-          "shopCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "description": "店铺编码筛选（不给 listingIds 时按它筛）"
-          },
-          "status": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "description": "listing 状态筛选（不给 listingIds 时按它筛）"
-          },
-          "overrides": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "description": "🔴 显式覆盖值：给 DESCRIPTION / A_PLUS 用的新值。内部没有对应草稿字段时（4.2.1.1 未交付），这是唯一真实来源；既无草稿又无覆盖值的那条任务判 SKIPPED_NO_SOURCE，**不编一个假值**"
-            },
-            "description": "🔴 显式覆盖值：给 DESCRIPTION / A_PLUS 用的新值。内部没有对应草稿字段时（4.2.1.1 未交付），这是唯一真实来源；既无草稿又无覆盖值的那条任务判 SKIPPED_NO_SOURCE，**不编一个假值**"
-          },
-          "language": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台内容语言（listing + language 是平台侧内容的维度）；不给 = 取该 listing 的当前快照语言，连快照都没有时那条任务判 SKIPPED_NO_SOURCE"
-          },
-          "limit": {
-            "maximum": 500,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 数量上限（1~500）：一次触发最多纳入多少条 listing",
-            "format": "int32"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "触发来源备注（进留痕）"
-          }
-        }
-      },
-      "ContentWritebackRow": {
-        "type": "object",
-        "properties": {
-          "writebackId": {
-            "type": "string",
-            "description": "回写触发 id",
-            "format": "uuid"
-          },
-          "triggerKind": {
-            "type": "string",
-            "description": "SINGLE 按变更类型单条触发 / BULK_EVENT 批量触发"
-          },
-          "changeTypes": {
-            "type": "array",
-            "description": "🔴 本次的变更类型集合（**不含价格与库存**）",
-            "items": {
-              "type": "string",
-              "description": "🔴 本次的变更类型集合（**不含价格与库存**）"
-            }
-          },
-          "listingIds": {
-            "type": "array",
-            "description": "🔴 目标集合快照（提交那一刻选了哪些）",
-            "items": {
-              "type": "string",
-              "description": "🔴 目标集合快照（提交那一刻选了哪些）",
-              "format": "uuid"
-            }
-          },
-          "overrides": {
-            "type": "string",
-            "description": "🔴 提交那一刻的显式覆盖值原文"
-          },
-          "language": {
-            "type": "string",
-            "description": "解析出的平台内容语言；空串 = 未能解析（相关任务判 SKIPPED_NO_SOURCE）"
-          },
-          "state": {
-            "type": "string",
-            "description": "RUNNING 可派发 / COMPLETED 全部终态 / CANCELLED 已中止"
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "目标总数",
-            "format": "int32"
-          },
-          "pendingCount": {
-            "type": "integer",
-            "description": "待派发",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "description": "🔴 跳过（内容与线上逐字相同，未派发）",
-            "format": "int32"
-          },
-          "dispatchedCount": {
-            "type": "integer",
-            "description": "🔴 在途（已进 02 队列未回报）",
-            "format": "int32"
-          },
-          "succeededCount": {
-            "type": "integer",
-            "description": "🔴 已成功",
-            "format": "int32"
-          },
-          "failedCount": {
-            "type": "integer",
-            "description": "🔴 失败（可批量重试）",
-            "format": "int32"
-          },
-          "progressPercent": {
-            "type": "integer",
-            "description": "🔴 进度百分比（0~100，按已终态 / 总数；总数为 0 时为 0）",
-            "format": "int32"
-          },
-          "actorId": {
-            "type": "string",
-            "description": "触发人",
-            "format": "uuid"
-          },
-          "note": {
-            "type": "string",
-            "description": "备注"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "触发时刻",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "最近更新时刻",
-            "format": "date-time"
-          },
-          "completedAt": {
-            "type": "string",
-            "description": "全部终态的时刻；仅 COMPLETED 非空",
-            "format": "date-time"
-          }
-        }
-      },
-      "RetryContentWritebackRequest": {
-        "type": "object",
-        "properties": {
-          "taskIds": {
-            "type": "array",
-            "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本次全部失败项）",
-            "items": {
-              "type": "string",
-              "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本次全部失败项）",
-              "format": "uuid"
-            }
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "原因 / 备注"
-          }
-        }
-      },
-      "ContentWritebackActionResult": {
-        "type": "object",
-        "properties": {
-          "writebackId": {
-            "type": "string",
-            "description": "回写触发 id",
-            "format": "uuid"
-          },
-          "state": {
-            "type": "string",
-            "description": "触发状态"
-          },
-          "changedTaskIds": {
-            "type": "array",
-            "description": "🔴 本次实际被改动的任务 id（逐条）",
-            "items": {
-              "type": "string",
-              "description": "🔴 本次实际被改动的任务 id（逐条）",
-              "format": "uuid"
-            }
-          },
-          "rejected": {
-            "type": "array",
-            "description": "🔴 被拒绝的任务 id + 原因（如：已成功不可重试 / 不属于本次触发）",
-            "items": {
-              "type": "string",
-              "description": "🔴 被拒绝的任务 id + 原因（如：已成功不可重试 / 不属于本次触发）"
-            }
-          },
-          "writeback": {
-            "$ref": "#/components/schemas/ContentWritebackRow"
-          }
-        }
-      },
-      "ContentWritebackDispatchResponse": {
-        "type": "object",
-        "properties": {
-          "writebackId": {
-            "type": "string",
-            "description": "回写触发 id",
-            "format": "uuid"
-          },
-          "triggerState": {
-            "type": "string",
-            "description": "触发状态；非 RUNNING 时本轮一律不派发"
-          },
-          "totalDispatched": {
-            "type": "integer",
-            "description": "🔴 本轮一共派发了多少条",
-            "format": "int32"
-          },
-          "totalSkippedByRateLimit": {
-            "type": "integer",
-            "description": "🔴 本轮一共因限流跳过多少条",
-            "format": "int32"
-          },
-          "queuedOperationIds": {
-            "type": "array",
-            "description": "🔴 本轮写进 02 队列的 platform_operation id 列表",
-            "items": {
-              "type": "string",
-              "description": "🔴 本轮写进 02 队列的 platform_operation id 列表",
-              "format": "uuid"
-            }
-          },
-          "lanes": {
-            "type": "array",
-            "description": "🔴 逐限流行的派发情况",
-            "items": {
-              "$ref": "#/components/schemas/ContentWritebackLaneReport"
-            }
-          },
-          "writeback": {
-            "$ref": "#/components/schemas/ContentWritebackRow"
-          }
-        }
-      },
-      "ContentWritebackLaneReport": {
-        "type": "object",
-        "properties": {
-          "platformCode": {
-            "type": "string",
-            "description": "平台编码"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码；平台级配额为 null"
-          },
-          "rateLimitId": {
-            "type": "string",
-            "description": "生效的限流配置 id；null = 未配置",
-            "format": "uuid"
-          },
-          "maxInFlight": {
-            "type": "integer",
-            "description": "在途上限",
-            "format": "int32"
-          },
-          "inFlightBefore": {
-            "type": "integer",
-            "description": "🔴 本轮派发前该限流行在途数",
-            "format": "int64"
-          },
-          "requestsPerWindow": {
-            "type": "integer",
-            "description": "🔴 窗口上限（滑动窗口内最多派发多少条）",
-            "format": "int32"
-          },
-          "windowSeconds": {
-            "type": "integer",
-            "description": "窗口长度（秒）",
-            "format": "int32"
-          },
-          "windowCountBefore": {
-            "type": "integer",
-            "description": "🔴 本轮派发前窗口内已派发次数",
-            "format": "int64"
-          },
-          "dispatched": {
-            "type": "integer",
-            "description": "🔴 本轮实际派发条数",
-            "format": "int32"
-          },
-          "skippedByRateLimit": {
-            "type": "integer",
-            "description": "🔴 本轮因限流未派发的条数",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string",
-            "description": "🔴 为什么没派；为空串表示按配额正常派发"
-          }
-        },
-        "description": "🔴 逐限流行的派发情况"
-      },
-      "ContentWritebackStateRequest": {
-        "type": "object",
-        "properties": {
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "原因 / 备注，落进留痕"
-          }
-        }
-      },
-      "ContentWritebackTaskRow": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "type": "string",
-            "description": "任务 id",
-            "format": "uuid"
-          },
-          "writebackId": {
-            "type": "string",
-            "description": "回写触发 id",
-            "format": "uuid"
-          },
-          "listingId": {
-            "type": "string",
-            "description": "listing id",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "平台商品 ID 原文"
-          },
-          "title": {
-            "type": "string",
-            "description": "线上标题"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "🔴 平台编码；这条任务按**这个平台**的配额排队"
-          },
-          "language": {
-            "type": "string",
-            "description": "平台内容语言"
-          },
-          "changeTypes": {
-            "type": "array",
-            "description": "🔴 本次要改的字段",
-            "items": {
-              "type": "string",
-              "description": "🔴 本次要改的字段"
-            }
-          },
-          "draftId": {
-            "type": "string",
-            "description": "改后内容取自的内部草稿 id（null = 无草稿，用显式覆盖值或判无来源）",
-            "format": "uuid"
-          },
-          "snapshotId": {
-            "type": "string",
-            "description": "改前基线取自的平台侧当前快照 id（null = 该 listing 无当前快照）",
-            "format": "uuid"
-          },
-          "state": {
-            "type": "string",
-            "description": "PENDING / SKIPPED_NO_CHANGE / DISPATCHED / SUCCEEDED / FAILED"
-          },
-          "attempts": {
-            "type": "integer",
-            "description": "已派发次数（重试会累加）",
-            "format": "int32"
-          },
-          "operationId": {
-            "type": "string",
-            "description": "🔴 02 队列任务 id（V2 platform_operation）；PENDING / SKIPPED 时为 null",
-            "format": "uuid"
-          },
-          "failureReason": {
-            "type": "string",
-            "description": "跳过或失败的原因；成功时为空串"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "description": "派发时刻；仅 DISPATCHED / 终态非空",
-            "format": "date-time"
-          },
-          "completedAt": {
-            "type": "string",
-            "description": "终态时刻；仅 SUCCEEDED / FAILED 非空",
-            "format": "date-time"
-          }
-        }
-      },
-      "ContentWritebackChangeRow": {
-        "type": "object",
-        "properties": {
-          "changeId": {
-            "type": "string",
-            "description": "变更 id",
-            "format": "uuid"
-          },
-          "taskId": {
-            "type": "string",
-            "description": "任务 id",
-            "format": "uuid"
-          },
-          "listingId": {
-            "type": "string",
-            "description": "listing id",
-            "format": "uuid"
-          },
-          "field": {
-            "type": "string",
-            "description": "🔴 字段：TITLE / BULLETS / IMAGES / DESCRIPTION / A_PLUS"
-          },
-          "beforeValue": {
-            "type": "string",
-            "description": "改前值（平台侧当前内容；无基线时为空串）"
-          },
-          "afterValue": {
-            "type": "string",
-            "description": "改后值（内部草稿或显式覆盖值）"
-          },
-          "changed": {
-            "type": "boolean",
-            "description": "改前是否与改后逐字不同"
-          },
-          "outcome": {
-            "type": "string",
-            "description": "APPLIED 有改 / NO_CHANGE 与线上逐字相同 / SKIPPED_NO_SOURCE 内部没有该字段的待推送内容"
-          },
-          "beforeSource": {
-            "type": "string",
-            "description": "改前值来源：PLATFORM_SNAPSHOT / MISSING"
-          },
-          "afterSource": {
-            "type": "string",
-            "description": "改后值来源：INTERNAL_DRAFT / OVERRIDE / MISSING"
-          },
-          "reason": {
-            "type": "string",
-            "description": "原因说明"
-          }
-        }
-      },
-      "ListingContentHistoryEntry": {
-        "type": "object",
-        "properties": {
-          "writebackId": {
-            "type": "string",
-            "description": "回写触发 id",
-            "format": "uuid"
-          },
-          "triggerState": {
-            "type": "string",
-            "description": "触发状态"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "🔴 触发时刻",
-            "format": "date-time"
-          },
-          "taskState": {
-            "type": "string",
-            "description": "🔴 该次触发在本商品上的任务状态"
-          },
-          "operationId": {
-            "type": "string",
-            "description": "02 队列任务 id；未派发为 null",
-            "format": "uuid"
-          },
-          "changes": {
-            "type": "array",
-            "description": "🔴 逐字段改前 / 改后",
-            "items": {
-              "$ref": "#/components/schemas/ContentWritebackChangeRow"
-            }
-          }
-        }
-      },
-      "ContentWritebackCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "description": "逐维度能力声明；未交付段 available=false",
-            "items": {
-              "$ref": "#/components/schemas/ContentWritebackCapabilityDimension"
-            }
-          },
-          "changeTypes": {
-            "type": "array",
-            "description": "变更类型取值域（🔴 不含 PRICE / STOCK）",
-            "items": {
-              "type": "string",
-              "description": "变更类型取值域（🔴 不含 PRICE / STOCK）"
-            }
-          },
-          "rejectedChangeTypes": {
-            "type": "array",
-            "description": "🔴 本请求会被 422 拒绝的变更类型（价格 / 库存等，归属 05/07）",
-            "items": {
-              "type": "string",
-              "description": "🔴 本请求会被 422 拒绝的变更类型（价格 / 库存等，归属 05/07）"
-            }
-          },
-          "channels": {
-            "type": "array",
-            "description": "三条回写通道的归属与独立失败独立重试口径",
-            "items": {
-              "$ref": "#/components/schemas/ContentWritebackChannel"
-            }
-          },
-          "triggerStates": {
-            "type": "array",
-            "description": "触发状态取值",
-            "items": {
-              "type": "string",
-              "description": "触发状态取值"
-            }
-          },
-          "taskStates": {
-            "type": "array",
-            "description": "任务状态取值",
-            "items": {
-              "type": "string",
-              "description": "任务状态取值"
-            }
-          },
-          "snapshotNote": {
-            "type": "string",
-            "description": "回写前后快照口径说明；前端原样展示，不要自己编"
-          },
-          "relationNote": {
-            "type": "string",
-            "description": "上游 / 下游说明"
-          }
-        }
-      },
-      "ContentWritebackCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string",
-            "description": "维度键"
-          },
-          "description": {
-            "type": "string",
-            "description": "维度说明"
-          },
-          "available": {
-            "type": "boolean",
-            "description": "本模块是否已交付"
-          },
-          "source": {
-            "type": "string",
-            "description": "数据来源（表 / 上游模块）"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "未交付段的责任模块"
-          },
-          "impact": {
-            "type": "string",
-            "description": "不交付的影响"
-          }
-        },
-        "description": "逐维度能力声明；未交付段 available=false"
-      },
-      "ContentWritebackChannel": {
-        "type": "object",
-        "properties": {
-          "channel": {
-            "type": "string",
-            "description": "通道键"
-          },
-          "label": {
-            "type": "string",
-            "description": "通道名"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "归属模块"
-          },
-          "handledHere": {
-            "type": "boolean",
-            "description": "🔴 本模块是否处理它"
-          },
-          "note": {
-            "type": "string",
-            "description": "说明"
-          }
-        },
-        "description": "三条回写通道的归属与独立失败独立重试口径"
       }
     }
   }

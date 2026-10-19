@@ -1417,6 +1417,47 @@ const services: readonly {
       /^listing\-content\-writeback(?:\/capabilities|\/writebacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|retry|cancel))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:changes|report)|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/content\-history)$/,
   },
   {
+    // 4.4.2.1 商品认领（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 `listing-content-writeback` 那条**之后**、既有 `prefix: 'trade/'`
+    // 元素**之前** —— 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-claims` 这个独立前缀而不是 `listings/{id}/claim`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「认领」本来就不是 listing 的一种状态 —— 它是**一次跨店搬家的操作**，
+    //   挂在 listing 上会让"这个商品的状态"多出第七种含义。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-claims                        认领历史（GET 真分页 + 状态/目标店铺筛选）/ 发起认领（POST）
+    //   listing-claims/capabilities           能力声明（未交付段 available=false + ownerModule）
+    //   listing-claims/{uuid}                 单次认领详情（GET）
+    //   listing-claims/listings/{uuid}/claims 某个商品的认领历史（作为源或作为目标）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities）**排在** uuid 段之前，
+    //    `listings/{uuid}/claims` 这一支也排在裸 uuid 段之前（首段是字面量 `listings`，
+    //    与 uuid 段不会互相吃掉，但顺序保持"字面量在前"这一条文件的统一口径）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-claims/{uuid}/publish`   —— 🔴 派发归 4.3.1.2 批量发布，本模块只入队
+    //   * `listing-claims/{uuid}/dispatch`  —— 同上，平台限流与派发都在 4.3.1.2 那条通道
+    //   * `listing-claims/{uuid}/abandon`   —— 认领记录是只追加的事实，没有"作废"这个动作
+    //   * `listing-claims/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-claims/{uuid}/fields`     —— 逐字段决策随详情一起返回，不单开一条
+    //   * 裸 `listing-claims/{uuid}/listings` —— 没有"某次认领的商品列表"这个形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-claims(?:\/capabilities|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/claims|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
