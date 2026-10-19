@@ -89,8 +89,10 @@
 - 页面 `/listings/compliance` vs `/compliance/precheck`
 - 控制器 `ListingCompliancePrecheckController` vs `CompliancePrecheckController`
 
-**互不依赖、互不引用。** api-proxy 的 allowlist 测试里有一条专门的断言：
-`channel/compliance-precheck/*` 必须仍然 404。
+**互不依赖、互不引用。** api-proxy 的 allowlist 测试里对这条边界有专门的断言 ——
+但**断言用的形状必须随集成头变化**（见文末「修复补记」）：
+`channel/compliance-precheck/*` 里 **16.2.2.1 没有登记**的形状必须仍然 404；
+它**登记了**的形状由它自己那条白名单元素放行（转发 ⇒ 上游不可达时 503）。
 
 ## 文件清单
 
@@ -155,3 +157,52 @@
 - **16.2.2.1 合规预检（体检报告）**落地后，两边仍不共表：一个是「能不能发」，一个是「做得好不好」。
 - 平台图片规格（白底 / 水印 / 目标尺寸）目前靠租户在 catalog 侧登记图片处理配方；
   若平台侧规格另有来源，图片维度的「量不到」范围会随之变化。
+
+## 修复补记（2026-10-20 03:0x）：L2 批量验证暴露的**跨车道**负向断言缺陷
+
+### 根因
+
+本车道与 16.2.2.1 **同批并行**，各自在 `apps/web/src/lib/api-proxy.ts` 的 `services[]` 里
+新增了一条元素（`listing-compliance-precheck` vs `compliance-precheck`），
+并各自在自己的 worktree 里写了一条**负向断言**：
+「同批另一条车道的前缀不属于本模块，仍然被拒（404）」。
+
+**在各自 worktree 里这两条断言都是对的** —— 那时另一条车道的前缀还不存在，代理返回 404。
+**但四条车道并入集成头之后，两条前缀都真实存在了** ⇒ 代理按白名单转发到上游，
+而单元测试里上游 channel 服务没在跑 ⇒ 返回 **503**（服务暂时不可连接），不是 404。
+
+⇒ L2 批量验证红在这两条断言上（2 failed / 4509 passed）。
+
+**生产代码是对的**：503 恰恰证明「白名单命中并转发」这个行为正确。
+**错的是测试夹具**：它建立在一个「同批另一条车道此刻不存在」的假设上，
+这个假设在合并后不成立。
+
+**这正是 L2 批量闸存在的意义** —— 它抓到的是「每条车道单跑都看不见、只在集成头才成立」的那类缺陷。
+
+### 改法（只改 `apps/web/src/app/api/channel/listing-compliance-precheck-allowlist.test.ts`）
+
+- **负向断言**：从负向清单里删掉 `channel/compliance-precheck/capabilities` ——
+  它**是** 16.2.2.1 真实存在的端点（`GET /channel/compliance-precheck/capabilities`），
+  合并后被 16.2.2.1 自己那条白名单元素正确放行（转发 ⇒ 503/上游响应）。
+  **保留** `channel/compliance-precheck/precheck` 与 `channel/compliance-precheck/score` ——
+  这两个形状**真的**没有被 16.2.2.1 登记（它的白名单只认
+  `capabilities` / `drafts` / `drafts/{uuid}/(check|precheck)` / `reports` / `reports/{uuid}`），
+  所以它们仍然必须是 404。
+  并补上 `expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled()` ——
+  证明这个 404 是**代理拦下来的**，不是上游回的 404。
+- **新增一条独立正向断言**：`channel/compliance-precheck/capabilities` 现在**不是** 404，
+  且 `fetch` 被调用到 `:8083/channel/compliance-precheck/capabilities`
+  ⇒ 钉住「合并没有把 16.2.2.1 的白名单条目弄丢」。
+  **必须独立成块**：它会触发上游调用，不能落进「断言 fetch 未被调用」的那个块里。
+- `api-proxy.ts` **一个字未动**（白名单元素是对的），Java 代码零改动。
+
+### 验证结果
+
+- `pnpm vitest run apps/web/src/app/api/channel/listing-compliance-precheck-allowlist.test.ts`
+  → **1 文件 6 例全绿**。
+- `pnpm vitest run apps/web/src/app/api/trade` → **42 文件 224 例全绿**。
+- `pnpm vitest run apps/web/src/app/api/channel` → 25 文件 **118 passed / 1 failed**；
+  唯一失败在 **16.2.2.1 自己的文件**（对称的那条断言，`expected 503 to be 404`）—— **不属本车道范围**。
+- `pnpm typecheck` → **3/3 通过**；`pnpm --filter @starcon/web lint` → **exit 0**（仅既有文件的历史告警）。
+- `cd backend && ./mvnw -pl services/channel -am test -Dtest='ListingCompliance*' …`
+  → **31 例 0 失败 0 错误 BUILD SUCCESS**（`dcbe16ea` 改的 `ListingComplianceErrorHandler` 仍绿）。
