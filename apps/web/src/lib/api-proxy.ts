@@ -1073,6 +1073,49 @@ const services: readonly {
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 4.1.2.1 映射管理（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往 4.1.1.1 的 `listings` 分支里并子路径 —— 那条分支是已交付车道的成果，
+    // 多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.1.1.1 的 `listings` 元素**之后**、`prefix: 'trade/'` **之前**：
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-mappings` 这个独立前缀而不是 `listings/{id}/mapping`：
+    // 4.1.1.1 交付时把 `/channel/listings/{uuid}/mapping` 显式登记成「不放行」
+    // （那是本模块的形状），在同一棵路径树上开子资源要同时改它的白名单与它的拒绝清单，
+    // 而那份清单是别人的成果。映射本身也是独立资源：它挂在**平台变体**上，
+    // 不挂在 listing 上（一个 listing 有多个变体，映射是逐变体成立的）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-mappings                       列表（GET 真分页 + 筛选）/ 建立映射（POST）
+    //   listing-mappings/capabilities          能力声明（未交付段 available=false + ownerModule）
+    //   listing-mappings/filter-options        筛选词表（不硬编码在前端）
+    //   listing-mappings/{uuid}                详情（当前映射 + 完整版本历史）/ 解除映射（DELETE）
+    //   listing-mappings/batch-candidates      批量候选（POST，只写候选表）
+    //   listing-mappings/candidates            候选列表（GET 真分页）
+    //   listing-mappings/candidates/{uuid}/decide 候选裁决（POST 确认 / 否决）
+    //   listing-mappings/unmapped              未映射清单（GET 真分页）
+    //   listing-mappings/resolve               订单行解析入口（POST）
+    //   listing-mappings/by-sku/{uuid}         多对一反查（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / batch-candidates /
+    //    candidates / unmapped / resolve / by-sku）必须排在 `{uuid}` **之前**，
+    //    否则会被 uuid 分支吃掉半截（症状是「能力声明 404，但列表页正常」）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    短前缀会被放行到一条根本不存在的路由上。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-mappings/{uuid}/versions`   —— 版本历史随详情一起返回，不单独开一条
+    //   * `listing-mappings/{uuid}/affected-orders` —— 「按版本回溯受影响订单」归 4.1.2.2，未交付
+    //   * `listing-mappings/{uuid}/components` —— 套装组件明细归 4.1.2.3，未交付
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-mappings(?:\/(?:capabilities|filter\-options|batch\-candidates|candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decide)?|unmapped|resolve|by\-sku\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
     // 2.6.2.1 增量补拉（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
     // 既有的 `listings`（4.1.1.1）、`writeback-batches`（2.5.2.1）、`label-templates`
     // （10.2.2.2）、`ad-type-diffs`（14.1.2.2）等**一字未动、也不重排** —— 本文件是
