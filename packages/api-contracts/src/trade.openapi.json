@@ -25101,6 +25101,381 @@
           }
         }
       }
+    },
+    "/trade/receipt-allocations": {
+      "get": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "get_trade_receipt_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "rmaId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "varianceOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "post_trade_receipt_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAllocationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/receipt-allocations/{id}/reverse": {
+      "post": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "post_trade_receipt_allocations_id_reverse",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAllocationReverse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/receipt-allocations/{id}/reconcile": {
+      "post": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "post_trade_receipt_allocations_id_reconcile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAllocationReconcile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/receipt-allocations/{id}": {
+      "get": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "get_trade_receipt_allocations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/receipt-allocations/order-returns": {
+      "get": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "get_trade_receipt_allocations_order_returns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderReturnedQtyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/receipt-allocations/capabilities": {
+      "get": {
+        "tags": [
+          "return-receipt-allocation-controller"
+        ],
+        "operationId": "get_trade_receipt_allocations_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAllocationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -63173,6 +63548,880 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationCreate": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationLineDraft"
+            }
+          }
+        }
+      },
+      "ReturnAllocationLineDraft": {
+        "type": "object",
+        "properties": {
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetRmaLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "allocatedQty": {
+            "type": "number"
+          }
+        }
+      },
+      "OrderLineReturnedQty": {
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "orderedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "returnedQty": {
+            "type": "number"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "unreconciledQty": {
+            "type": "number"
+          },
+          "overOrderedQty": {
+            "type": "number"
+          },
+          "exceedsOrderedQty": {
+            "type": "boolean"
+          },
+          "lastAllocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lastAllocatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAllocationAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string",
+            "nullable": true
+          },
+          "blockingReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnAllocationDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnAllocationHead"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationLine"
+            }
+          },
+          "variances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationVariance"
+            }
+          },
+          "orderLineReturns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineReturnedQty"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationEvent"
+            }
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "overReceivedQty": {
+            "type": "number"
+          },
+          "shortReceivedQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "overdueReturned": {
+            "type": "boolean"
+          },
+          "daysOverdue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hardRuleNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationAction"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationRelatedModule"
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "occurredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReturnAllocationHead": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationNo": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rmaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rmaNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "returnByAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overdueReturned": {
+            "type": "boolean"
+          },
+          "daysOverdue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocationStatus": {
+            "type": "string"
+          },
+          "allocationStatusLabel": {
+            "type": "string"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "overReceivedQty": {
+            "type": "number"
+          },
+          "shortReceivedQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "varianceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reconciledBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reconciledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reversedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reversedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reverseReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "reconcileNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAllocationLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRmaLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetRmaLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "targetAuthorizedQty": {
+            "type": "number"
+          },
+          "targetTakenQty": {
+            "type": "number"
+          },
+          "remainingBeforeAlloc": {
+            "type": "number"
+          },
+          "overReceivedQty": {
+            "type": "number"
+          },
+          "shortReceivedQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "overdueReturned": {
+            "type": "boolean"
+          },
+          "varianceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocatedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReturnAllocationRelatedModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnAllocationVariance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "varianceType": {
+            "type": "string"
+          },
+          "varianceTypeLabel": {
+            "type": "string"
+          },
+          "varianceQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "resolutionLabel": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReturnAllocationReverse": {
+        "type": "object",
+        "properties": {
+          "reverseReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAllocationReconcile": {
+        "type": "object",
+        "properties": {
+          "acceptOverReceived": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "overReceivedNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptUnderReceived": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "underReceivedNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptOverdue": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "overdueNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "reconcileNote": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAllocationPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReturnAllocationSummary"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "hardRuleNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationNo": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "rmaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rmaNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "returnByAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overdueReturned": {
+            "type": "boolean"
+          },
+          "daysOverdue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocationStatus": {
+            "type": "string"
+          },
+          "allocationStatusLabel": {
+            "type": "string"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "overReceivedQty": {
+            "type": "number"
+          },
+          "shortReceivedQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "varianceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAllocationSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reconciled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reversed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withOverReceived": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withUnderReceived": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "overReceivedQty": {
+            "type": "number"
+          },
+          "shortReceivedQty": {
+            "type": "number"
+          },
+          "varianceAmount": {
+            "type": "number"
+          },
+          "unreconciledQty": {
+            "type": "number"
+          }
+        }
+      },
+      "OrderReturnedQtyPage": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineReturnedQty"
+            }
+          },
+          "orderedQty": {
+            "type": "number"
+          },
+          "returnedQty": {
+            "type": "number"
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "overOrderedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationSectionCapability"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAllocationBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "dedupRule": {
+            "type": "string"
+          },
+          "overReceiveRule": {
+            "type": "string"
+          },
+          "overdueRule": {
+            "type": "string"
+          },
+          "returnedQtyRule": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAllocationSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "landsIn": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
