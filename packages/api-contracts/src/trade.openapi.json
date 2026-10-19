@@ -325,6 +325,180 @@
         }
       }
     },
+    "/trade/refund-applications/{id}": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "put_trade_refund_applications_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/approval-policy": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications_approval_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundPolicyView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "put_trade_refund_applications_approval_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundPolicyUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundPolicyView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/processing/factories/{factoryId}": {
       "get": {
         "tags": [
@@ -3932,6 +4106,401 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/RefundDiscrepancyRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pendingReviewOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/{id}/submit": {
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/{id}/execution-outcome": {
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications_id_execution_outcome",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundExecutionOutcome"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/{id}/dispatch": {
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications_id_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDispatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/{id}/decide": {
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications_id_decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/{id}/cancel": {
+      "post": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "post_trade_refund_applications_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundCancel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundDetail"
                 }
               }
             }
@@ -15350,6 +15919,297 @@
         }
       }
     },
+    "/trade/aftersales/exchange-orders": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "authorizationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/sync": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/submit": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "post_trade_aftersales_exchange_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeOrderCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/cases": {
       "get": {
         "tags": [
@@ -16846,6 +17706,108 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/RefundStatusCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/refundable-balance": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications_refundable_balance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundBalance"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/filters": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundApplicationFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/refund-applications/capabilities": {
+      "get": {
+        "tags": [
+          "refund-application-controller"
+        ],
+        "operationId": "get_trade_refund_applications_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundCapabilities"
                 }
               }
             }
@@ -23388,6 +24350,108 @@
         }
       }
     },
+    "/trade/aftersales/exchange-orders/{id}": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/filters": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/aftersales/exchange-orders/capabilities": {
+      "get": {
+        "tags": [
+          "exchange-order-link-controller"
+        ],
+        "operationId": "get_trade_aftersales_exchange_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeOrderCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/aftersales/cases/{id}": {
       "get": {
         "tags": [
@@ -23543,1070 +24607,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AftersalesCaseCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders": {
-      "get": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchange_orders",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "authorizationId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "orderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchange_orders",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeOrderCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/{id}/sync": {
-      "post": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchange_orders_id_sync",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeOrderSyncRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/{id}/submit": {
-      "post": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchange_orders_id_submit",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeOrderSubmitRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/{id}/cancel": {
-      "post": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "post_trade_aftersales_exchange_orders_id_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExchangeOrderCancelRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/{id}": {
-      "get": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchange_orders_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/filters": {
-      "get": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchange_orders_filters",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/aftersales/exchange-orders/capabilities": {
-      "get": {
-        "tags": [
-          "exchange-order-link-controller"
-        ],
-        "operationId": "get_trade_aftersales_exchange_orders_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExchangeOrderCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "put_trade_refund_applications_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/approval-policy": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications_approval_policy",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "currency",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "amount",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundPolicyView"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "put_trade_refund_applications_approval_policy",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundPolicyUpsert"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundPolicyView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "method",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "reason",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "pendingReviewOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}/submit": {
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications_id_submit",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundSubmit"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}/execution-outcome": {
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications_id_execution_outcome",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundExecutionOutcome"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}/dispatch": {
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications_id_dispatch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundDispatch"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}/decide": {
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications_id_decide",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundDecision"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/{id}/cancel": {
-      "post": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "post_trade_refund_applications_id_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefundCancel"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/refundable-balance": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications_refundable_balance",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundBalance"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/filters": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications_filters",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundApplicationFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/refund-applications/capabilities": {
-      "get": {
-        "tags": [
-          "refund-application-controller"
-        ],
-        "operationId": "get_trade_refund_applications_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RefundCapabilities"
                 }
               }
             }
@@ -24845,7 +24845,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -26208,6 +26208,477 @@
           }
         }
       },
+      "RefundUpdate": {
+        "type": "object",
+        "properties": {
+          "refundMethod": {
+            "type": "string"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "refundReason": {
+            "type": "string"
+          },
+          "refundReasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "originalPaymentRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformRefundRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundActionEntry": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiresReason": {
+            "type": "boolean"
+          },
+          "blockingReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RefundBalance": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "caseType": {
+            "type": "string"
+          },
+          "caseStatus": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "baseAmount": {
+            "type": "number"
+          },
+          "settledAmount": {
+            "type": "number"
+          },
+          "dispatchedAmount": {
+            "type": "number"
+          },
+          "registeredAmount": {
+            "type": "number"
+          },
+          "pendingAmount": {
+            "type": "number"
+          },
+          "disputedAmount": {
+            "type": "number"
+          },
+          "occupiedAmount": {
+            "type": "number"
+          },
+          "availableAmount": {
+            "type": "number"
+          },
+          "refundable": {
+            "type": "boolean"
+          },
+          "blockingReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "balanceSource": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/RefundHead"
+          },
+          "balance": {
+            "$ref": "#/components/schemas/RefundBalance"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/RefundPolicyView"
+          },
+          "executionState": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalTransactionRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "executionStateNote": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundEvent"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundActionEntry"
+            }
+          },
+          "refundableCheck": {
+            "$ref": "#/components/schemas/RefundSectionCapability"
+          },
+          "financeExecution": {
+            "$ref": "#/components/schemas/RefundSectionCapability"
+          }
+        }
+      },
+      "RefundEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "amountSnapshot": {
+            "type": "number"
+          },
+          "currencySnapshot": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundHead": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "rmaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rmaNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "applicationStatus": {
+            "type": "string"
+          },
+          "applicationStatusLabel": {
+            "type": "string"
+          },
+          "refundMethod": {
+            "type": "string"
+          },
+          "refundMethodLabel": {
+            "type": "string"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "refundReason": {
+            "type": "string"
+          },
+          "refundReasonLabel": {
+            "type": "string"
+          },
+          "refundReasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "originalPaymentRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformRefundRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstApprovedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "firstApprovedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "secondApprovedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "secondApprovedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "approvalNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispatchedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "executionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "executionNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "outcomeSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "outcomeRecordedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outcomeRecordedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundPolicyView": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "policyStatus": {
+            "type": "string"
+          },
+          "dualApprovalThreshold": {
+            "type": "number"
+          },
+          "requiresDualApproval": {
+            "type": "boolean"
+          },
+          "policySource": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "RefundSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "landsIn": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RefundPolicyUpsert": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "dualApprovalThreshold": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "FactoryInput": {
         "required": [
           "factoryKind",
@@ -26302,49 +26773,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -26369,7 +26840,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -26849,14 +27320,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -29825,6 +30296,117 @@
           }
         }
       },
+      "RefundCreate": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rmaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "refundMethod": {
+            "type": "string"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "refundReason": {
+            "type": "string"
+          },
+          "refundReasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "originalPaymentRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformRefundRef": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RefundSubmit": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundExecutionOutcome": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "externalTransactionRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundDispatch": {
+        "type": "object",
+        "properties": {
+          "executionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundDecision": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundCancel": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "RequirementPreviewInput": {
         "required": [
           "bomVersionId",
@@ -30418,7 +31000,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -31299,7 +31881,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39957,7 +40539,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -40069,12 +40651,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -41879,9 +42461,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -43285,6 +43867,310 @@
         }
       },
       "ExchangeCancelRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderCreateRequest": {
+        "required": [
+          "authorizationId"
+        ],
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderDetail": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/ExchangeOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderLineView"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderEventView"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExchangeOrderEventView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "eventLabel": {
+            "type": "string"
+          },
+          "fromClosureStatus": {
+            "type": "string"
+          },
+          "toClosureStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExchangeOrderLineView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "linkNo": {
+            "type": "string"
+          },
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "newOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newOrderNo": {
+            "type": "string"
+          },
+          "newOrderStatus": {
+            "type": "string"
+          },
+          "newOrderStatusLabel": {
+            "type": "string"
+          },
+          "closureStatus": {
+            "type": "string"
+          },
+          "closureStatusLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newOrderAmount": {
+            "type": "string"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstShippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipmentRecordNo": {
+            "type": "string"
+          },
+          "lastTrackingStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatus": {
+            "type": "string"
+          },
+          "oldGoodsReturnStatusLabel": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExchangeOrderSyncRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderSubmitRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExchangeOrderCancelRequest": {
         "required": [
           "expectedVersion"
         ],
@@ -46916,6 +47802,248 @@
           },
           "reportLandingNote": {
             "type": "string"
+          }
+        }
+      },
+      "RefundPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RefundSummary"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "pendingNote": {
+            "type": "string"
+          },
+          "balanceNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundRow": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/RefundHead"
+          },
+          "timelinessState": {
+            "type": "string"
+          },
+          "remainingSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "refundableAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "RefundSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingApproval": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "secondApprovalPending": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "approved": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "executing": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingAmount": {
+            "type": "number"
+          },
+          "executingAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "FilterOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundApplicationFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterOption"
+            }
+          },
+          "distinctCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RefundBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundCapabilities": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundSectionCapability"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundRelatedModule"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "balanceRule": {
+            "type": "string"
+          },
+          "approvalRule": {
+            "type": "string"
+          },
+          "executionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundRelatedModule": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -59198,6 +60326,238 @@
           }
         }
       },
+      "ExchangeOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExchangeOrderSummary"
+          }
+        }
+      },
+      "ExchangeOrderSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "pendingDispatchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationLineOption": {
+        "type": "object",
+        "properties": {
+          "authorizationLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "originalSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ExchangeOrderAuthorizationOption": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizationNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "originalOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalOrderNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "authorizedQuantity": {
+            "type": "string"
+          },
+          "replacementSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasShippingSnapshot": {
+            "type": "boolean"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationLineOption"
+            }
+          }
+        }
+      },
+      "ExchangeOrderFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExchangeOrderAuthorizationOption"
+            }
+          },
+          "authorizationCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExchangeOrderCapabilities": {
+        "type": "object",
+        "properties": {
+          "exchangeAuthorizationDelivered": {
+            "type": "boolean"
+          },
+          "realNewSalesOrder": {
+            "type": "boolean"
+          },
+          "shipmentProjectionReadable": {
+            "type": "boolean"
+          },
+          "shipmentProjectionOwnerModule": {
+            "type": "string"
+          },
+          "outboundHandoffDelivered": {
+            "type": "boolean"
+          },
+          "outboundHandoffOwnerModule": {
+            "type": "string"
+          },
+          "oldGoodsReturnReceivedDelivered": {
+            "type": "boolean"
+          },
+          "oldGoodsReturnOwnerModule": {
+            "type": "string"
+          },
+          "closureStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "closureStatusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowedNextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "hardRules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AftersalesAmountBucket": {
         "type": "object",
         "properties": {
@@ -60253,1366 +61613,6 @@
           },
           "note": {
             "type": "string"
-          }
-        }
-      },
-      "ExchangeOrderCreateRequest": {
-        "required": [
-          "authorizationId"
-        ],
-        "type": "object",
-        "properties": {
-          "authorizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reasonNote": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeOrderDetail": {
-        "type": "object",
-        "properties": {
-          "link": {
-            "$ref": "#/components/schemas/ExchangeOrderRow"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeOrderLineView"
-            }
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeOrderEventView"
-            }
-          },
-          "allowedActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "closureBlockers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ExchangeOrderEventView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "eventKind": {
-            "type": "string"
-          },
-          "eventLabel": {
-            "type": "string"
-          },
-          "fromClosureStatus": {
-            "type": "string"
-          },
-          "toClosureStatus": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "actorMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ExchangeOrderLineView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorizationLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "newOrderLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "newOrderLineNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "originalSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalSkuCode": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeOrderRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "linkNo": {
-            "type": "string"
-          },
-          "authorizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorizationNo": {
-            "type": "string"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "originalOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalOrderNo": {
-            "type": "string"
-          },
-          "newOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "newOrderNo": {
-            "type": "string"
-          },
-          "newOrderStatus": {
-            "type": "string"
-          },
-          "newOrderStatusLabel": {
-            "type": "string"
-          },
-          "closureStatus": {
-            "type": "string"
-          },
-          "closureStatusLabel": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "totalQuantity": {
-            "type": "string"
-          },
-          "replacementSkuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "newOrderAmount": {
-            "type": "string"
-          },
-          "shipmentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstShippedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "shipmentRecordNo": {
-            "type": "string"
-          },
-          "lastTrackingStatus": {
-            "type": "string"
-          },
-          "oldGoodsReturnStatus": {
-            "type": "string"
-          },
-          "oldGoodsReturnStatusLabel": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string"
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "submittedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "cancelledBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "cancelledAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "cancelReason": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ExchangeOrderSyncRequest": {
-        "required": [
-          "expectedVersion"
-        ],
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeOrderSubmitRequest": {
-        "required": [
-          "expectedVersion"
-        ],
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeOrderCancelRequest": {
-        "required": [
-          "expectedVersion"
-        ],
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExchangeOrderPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeOrderRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/ExchangeOrderSummary"
-          }
-        }
-      },
-      "ExchangeOrderSummary": {
-        "type": "object",
-        "properties": {
-          "totalCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dispatchedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "closedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "cancelledCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalQuantity": {
-            "type": "string"
-          },
-          "pendingDispatchCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ExchangeOrderAuthorizationLineOption": {
-        "type": "object",
-        "properties": {
-          "authorizationLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "originalSkuCode": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "string"
-          }
-        }
-      },
-      "ExchangeOrderAuthorizationOption": {
-        "type": "object",
-        "properties": {
-          "authorizationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "authorizationNo": {
-            "type": "string"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "originalOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalOrderNo": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "decision": {
-            "type": "string"
-          },
-          "decisionLabel": {
-            "type": "string"
-          },
-          "authorizedQuantity": {
-            "type": "string"
-          },
-          "replacementSkuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "hasShippingSnapshot": {
-            "type": "boolean"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeOrderAuthorizationLineOption"
-            }
-          }
-        }
-      },
-      "ExchangeOrderFilterOptions": {
-        "type": "object",
-        "properties": {
-          "statuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statusLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sorts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sortLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "authorizations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExchangeOrderAuthorizationOption"
-            }
-          },
-          "authorizationCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ExchangeOrderCapabilities": {
-        "type": "object",
-        "properties": {
-          "exchangeAuthorizationDelivered": {
-            "type": "boolean"
-          },
-          "realNewSalesOrder": {
-            "type": "boolean"
-          },
-          "shipmentProjectionReadable": {
-            "type": "boolean"
-          },
-          "shipmentProjectionOwnerModule": {
-            "type": "string"
-          },
-          "outboundHandoffDelivered": {
-            "type": "boolean"
-          },
-          "outboundHandoffOwnerModule": {
-            "type": "string"
-          },
-          "oldGoodsReturnReceivedDelivered": {
-            "type": "boolean"
-          },
-          "oldGoodsReturnOwnerModule": {
-            "type": "string"
-          },
-          "closureStatuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "closureStatusLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "allowedNextActions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "note": {
-            "type": "string"
-          },
-          "hardRules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "RefundUpdate": {
-        "type": "object",
-        "properties": {
-          "refundMethod": {
-            "type": "string"
-          },
-          "refundAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "refundReason": {
-            "type": "string"
-          },
-          "refundReasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "originalPaymentRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformRefundRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundActionEntry": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "allowed": {
-            "type": "boolean"
-          },
-          "method": {
-            "type": "string",
-            "nullable": true
-          },
-          "path": {
-            "type": "string",
-            "nullable": true
-          },
-          "requiresReason": {
-            "type": "boolean"
-          },
-          "blockingReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "unavailableReason": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "RefundBalance": {
-        "type": "object",
-        "properties": {
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string"
-          },
-          "caseType": {
-            "type": "string"
-          },
-          "caseStatus": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string"
-          },
-          "baseAmount": {
-            "type": "number"
-          },
-          "settledAmount": {
-            "type": "number"
-          },
-          "dispatchedAmount": {
-            "type": "number"
-          },
-          "registeredAmount": {
-            "type": "number"
-          },
-          "pendingAmount": {
-            "type": "number"
-          },
-          "disputedAmount": {
-            "type": "number"
-          },
-          "occupiedAmount": {
-            "type": "number"
-          },
-          "availableAmount": {
-            "type": "number"
-          },
-          "refundable": {
-            "type": "boolean"
-          },
-          "blockingReasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "balanceSource": {
-            "type": "string"
-          },
-          "evaluatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundDetail": {
-        "type": "object",
-        "properties": {
-          "head": {
-            "$ref": "#/components/schemas/RefundHead"
-          },
-          "balance": {
-            "$ref": "#/components/schemas/RefundBalance"
-          },
-          "policy": {
-            "$ref": "#/components/schemas/RefundPolicyView"
-          },
-          "executionState": {
-            "type": "string",
-            "nullable": true
-          },
-          "externalTransactionRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "executionStateNote": {
-            "type": "string"
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundEvent"
-            }
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundActionEntry"
-            }
-          },
-          "refundableCheck": {
-            "$ref": "#/components/schemas/RefundSectionCapability"
-          },
-          "financeExecution": {
-            "$ref": "#/components/schemas/RefundSectionCapability"
-          }
-        }
-      },
-      "RefundEvent": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "eventType": {
-            "type": "string"
-          },
-          "eventTypeLabel": {
-            "type": "string"
-          },
-          "fromStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatus": {
-            "type": "string"
-          },
-          "amountSnapshot": {
-            "type": "number"
-          },
-          "currencySnapshot": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "occurredBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RefundHead": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "applicationNo": {
-            "type": "string"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "rmaId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "rmaNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "applicationStatus": {
-            "type": "string"
-          },
-          "applicationStatusLabel": {
-            "type": "string"
-          },
-          "refundMethod": {
-            "type": "string"
-          },
-          "refundMethodLabel": {
-            "type": "string"
-          },
-          "refundAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "refundReason": {
-            "type": "string"
-          },
-          "refundReasonLabel": {
-            "type": "string"
-          },
-          "refundReasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "originalPaymentRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformRefundRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "submittedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "submittedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "firstApprovedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "firstApprovedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "secondApprovedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "secondApprovedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "approvalNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "dispatchedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "executionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "executionNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "outcomeSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "outcomeRecordedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "outcomeRecordedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "failureReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundPolicyView": {
-        "type": "object",
-        "properties": {
-          "currency": {
-            "type": "string"
-          },
-          "policyStatus": {
-            "type": "string"
-          },
-          "dualApprovalThreshold": {
-            "type": "number"
-          },
-          "requiresDualApproval": {
-            "type": "boolean"
-          },
-          "policySource": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "RefundSectionCapability": {
-        "type": "object",
-        "properties": {
-          "section": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "landsIn": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "RefundPolicyUpsert": {
-        "type": "object",
-        "properties": {
-          "currency": {
-            "type": "string"
-          },
-          "dualApprovalThreshold": {
-            "type": "number"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "RefundCreate": {
-        "type": "object",
-        "properties": {
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rmaId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "refundMethod": {
-            "type": "string"
-          },
-          "refundAmount": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "refundReason": {
-            "type": "string"
-          },
-          "refundReasonNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "originalPaymentRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformRefundRef": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "RefundSubmit": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundExecutionOutcome": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "externalTransactionRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "failureReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundDispatch": {
-        "type": "object",
-        "properties": {
-          "executionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundDecision": {
-        "type": "object",
-        "properties": {
-          "approve": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundCancel": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
-          },
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/RefundSummary"
-          },
-          "evaluatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "paginationNote": {
-            "type": "string"
-          },
-          "pendingNote": {
-            "type": "string"
-          },
-          "balanceNote": {
-            "type": "string"
-          },
-          "sortNote": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundRow": {
-        "type": "object",
-        "properties": {
-          "head": {
-            "$ref": "#/components/schemas/RefundHead"
-          },
-          "timelinessState": {
-            "type": "string"
-          },
-          "remainingSeconds": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "refundableAmount": {
-            "type": "number"
-          }
-        }
-      },
-      "RefundSummary": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "draft": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingApproval": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "secondApprovalPending": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "approved": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "executing": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "succeeded": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rejected": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "cancelled": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingAmount": {
-            "type": "number"
-          },
-          "executingAmount": {
-            "type": "number"
-          }
-        }
-      },
-      "FilterOption": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string",
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundApplicationFilterOptions": {
-        "type": "object",
-        "properties": {
-          "statuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "methods": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "reasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "currencies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterOption"
-            }
-          },
-          "distinctCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "RefundBoundary": {
-        "type": "object",
-        "properties": {
-          "boundary": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundCapabilities": {
-        "type": "object",
-        "properties": {
-          "inputs": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundSectionCapability"
-            }
-          },
-          "relatedModules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundRelatedModule"
-            }
-          },
-          "boundaries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RefundBoundary"
-            }
-          },
-          "stateMachine": {
-            "type": "string"
-          },
-          "balanceRule": {
-            "type": "string"
-          },
-          "approvalRule": {
-            "type": "string"
-          },
-          "executionNote": {
-            "type": "string"
-          }
-        }
-      },
-      "RefundRelatedModule": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "delivered": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
           }
         }
       }

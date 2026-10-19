@@ -291,6 +291,329 @@
         }
       }
     },
+    "/channel/writeback-targets": {
+      "get": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "get_channel_writeback_targets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackTargetPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "post_channel_writeback_targets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WritebackTargetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/writeback-targets/{id}/status": {
+      "post": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "post_channel_writeback_targets_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WritebackTargetStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/writeback-batches": {
+      "get": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "get_channel_writeback_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackBatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "post_channel_writeback_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WritebackBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackBatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/writeback-batches/preview": {
+      "post": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "post_channel_writeback_batches_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WritebackBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackBatchPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/webhooks/{endpointKey}": {
       "post": {
         "tags": [
@@ -2876,6 +3199,451 @@
         }
       }
     },
+    "/channel/listings": {
+      "get": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "get_channel_listings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "marketplaceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mappingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outOfStock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "RECENT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "post_channel_listings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listings/batch": {
+      "post": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "post_channel_listings_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/templates": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BulkTemplateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "post_channel_listing_bulk_edit_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/regex-check": {
+      "post": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "post_channel_listing_bulk_edit_regex_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "pattern",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegexSafetyVerdict"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/preview": {
+      "post": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "post_channel_listing_bulk_edit_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkEditRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkEditPreviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/drafts/{listingId}/discard": {
+      "post": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "post_channel_listing_bulk_edit_drafts_listingId_discard",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingContentDraftRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/confirm": {
+      "post": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "post_channel_listing_bulk_edit_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkEditConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBulkEditOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/label-templates": {
       "get": {
         "tags": [
@@ -4315,6 +5083,46 @@
         }
       }
     },
+    "/channel/writeback-batches/{id}": {
+      "get": {
+        "tags": [
+          "writeback-batch-controller"
+        ],
+        "operationId": "get_channel_writeback_batches_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WritebackBatchView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/webhook-receipts": {
       "get": {
         "tags": [
@@ -5545,6 +6353,433 @@
         }
       }
     },
+    "/channel/listings/{id}": {
+      "get": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "get_channel_listings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listings/filter-options": {
+      "get": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "get_channel_listings_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listings/capabilities": {
+      "get": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "get_channel_listings_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listings/batch-tasks": {
+      "get": {
+        "tags": [
+          "listing-controller"
+        ],
+        "operationId": "get_channel_listings_batch_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingBatchResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/scope-check": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_scope_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingIds",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/operations": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_operations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingBulkEditOperation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/operations/{id}": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_operations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBulkEditOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/drafts": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_drafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListingContentDraftRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/drafts/{listingId}": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_drafts_listingId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingContentDraftRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-bulk-edit/capabilities": {
+      "get": {
+        "tags": [
+          "listing-bulk-edit-controller"
+        ],
+        "operationId": "get_channel_listing_bulk_edit_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkEditCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/label-templates/{id}": {
       "get": {
         "tags": [
@@ -6645,728 +7880,6 @@
           }
         }
       }
-    },
-    "/channel/writeback-targets": {
-      "get": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "get_channel_writeback_targets",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shopId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "targetType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WritebackTargetPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "post_channel_writeback_targets",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WritebackTargetInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/writeback-targets/{id}/status": {
-      "post": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "post_channel_writeback_targets_id_status",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WritebackTargetStatusInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/channel/writeback-batches": {
-      "get": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "get_channel_writeback_batches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shopId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "outcome",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WritebackBatchPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "post_channel_writeback_batches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WritebackBatchInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WritebackBatchView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/writeback-batches/preview": {
-      "post": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "post_channel_writeback_batches_preview",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WritebackBatchInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WritebackBatchPreview"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/writeback-batches/{id}": {
-      "get": {
-        "tags": [
-          "writeback-batch-controller"
-        ],
-        "operationId": "get_channel_writeback_batches_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WritebackBatchView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings": {
-      "get": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "get_channel_listings",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shopCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "marketplaceCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ownerId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "category",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "mappingStatus",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "outOfStock",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "RECENT"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "post_channel_listings",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveListingRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings/batch": {
-      "post": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "post_channel_listings_batch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListingBatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingBatchResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings/{id}": {
-      "get": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "get_channel_listings_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings/filter-options": {
-      "get": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "get_channel_listings_filter_options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings/capabilities": {
-      "get": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "get_channel_listings_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listings/batch-tasks": {
-      "get": {
-        "tags": [
-          "listing-controller"
-        ],
-        "operationId": "get_channel_listings_batch_tasks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ListingBatchResult"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -7604,6 +8117,526 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "WritebackTargetInput": {
+        "required": [
+          "externalRef",
+          "shopId",
+          "targetType"
+        ],
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "LISTING",
+              "SHIPMENT"
+            ]
+          },
+          "externalRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "listingRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "currentStock": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "currentPrice": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WritebackTargetStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "BLOCKED"
+            ]
+          },
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BatchParameters": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "price": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "nullable": true
+          },
+          "trackingNumber": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "perTarget": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PerTargetParameters"
+            }
+          }
+        }
+      },
+      "PerTargetParameters": {
+        "required": [
+          "targetId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "maxLength": 36,
+            "minLength": 0,
+            "type": "string"
+          },
+          "stock": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "price": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "trackingNumber": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "TargetFilter": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetType": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "LISTING",
+              "SHIPMENT"
+            ]
+          },
+          "keyword": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ACTIVE",
+              "BLOCKED"
+            ]
+          }
+        },
+        "nullable": true
+      },
+      "WritebackBatchInput": {
+        "required": [
+          "kind",
+          "parameters"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "UPDATE_STOCK",
+              "UPDATE_PRICE",
+              "DELIST",
+              "SHIP_UPDATE"
+            ]
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "filter": {
+            "$ref": "#/components/schemas/TargetFilter"
+          },
+          "targetIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/BatchParameters"
+          },
+          "idempotencyKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WritebackBatchSummary": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "queued": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknown": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pending": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WritebackBatchView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "UPDATE_STOCK",
+              "UPDATE_PRICE",
+              "DELIST",
+              "SHIP_UPDATE"
+            ]
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "selectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "filterSnapshot": {
+            "type": "string"
+          },
+          "paramSnapshot": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/WritebackBatchSummary"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WritebackItemView"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WritebackItemView": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "listingRef": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemResult": {
+            "type": "string"
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "operationStatus": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stock": {
+            "type": "number",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "trackingNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WritebackBatchParameters": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "type": "number",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "trackingNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "perTargetCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WritebackBatchPreview": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "UPDATE_STOCK",
+              "UPDATE_PRICE",
+              "DELIST",
+              "SHIP_UPDATE"
+            ]
+          },
+          "matched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "applicable": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingParameters": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WritebackPreviewIssue"
+            }
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/WritebackBatchParameters"
+          }
+        }
+      },
+      "WritebackPreviewIssue": {
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -10033,6 +11066,990 @@
           }
         }
       },
+      "SaveListingRequest": {
+        "required": [
+          "externalItemId",
+          "shopId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "为空表示新建；非空表示改这条（乐观锁）",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "上游 02 店铺 id",
+            "format": "uuid"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "description": "上游 02 站点 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台标题原文"
+          },
+          "categoryPath": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台类目路径原文"
+          },
+          "platformCategoryId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台类目 id"
+          },
+          "status": {
+            "type": "string",
+            "description": "平台商品状态；为空按 DRAFT 建"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "description": "审核状态；为空按 NOT_SUBMITTED 建"
+          },
+          "reviewMessage": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台驳回原因 / 审核备注"
+          },
+          "platformStockState": {
+            "type": "string",
+            "description": "🔴 平台侧可售状态；缺货标记的来源"
+          },
+          "platformStockQty": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "平台侧可售量"
+          },
+          "rating": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "平台评分"
+          },
+          "ratingCount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "平台评论数"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string",
+            "description": "币种；仅作展示标签"
+          },
+          "launchedAt": {
+            "type": "string",
+            "description": "上架时刻",
+            "format": "date-time"
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "description": "最近一次平台同步时刻",
+            "format": "date-time"
+          },
+          "variants": {
+            "type": "array",
+            "description": "变体集合；同一请求内按 externalVariantId 幂等",
+            "items": {
+              "$ref": "#/components/schemas/SaveVariantRequest"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          }
+        }
+      },
+      "SaveVariantRequest": {
+        "required": [
+          "externalVariantId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "为空表示新建；非空表示改这条",
+            "format": "uuid"
+          },
+          "externalVariantId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台变体 ID 原文"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 映射状态：UNMAPPED / MAPPED / BUNDLE；为空按 UNMAPPED 建"
+          },
+          "internalSkuId": {
+            "type": "string",
+            "description": "🔴 内部 SKU 逻辑 id（03 catalog 拥有，不跨库建 FK）；未映射时为 null",
+            "format": "uuid"
+          },
+          "componentQuantity": {
+            "minimum": 1e-06,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
+          },
+          "attributes": {
+            "type": "string",
+            "description": "平台侧变体属性原文（json 对象字符串）"
+          }
+        },
+        "description": "变体集合；同一请求内按 externalVariantId 幂等"
+      },
+      "ListingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "上游 02 店铺 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "description": "上游 02 站点 id；为空表示未归站点",
+            "format": "uuid"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "description": "站点编码；为空表示未归站点"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN / item_id），不折叠大小写"
+          },
+          "title": {
+            "type": "string",
+            "description": "平台标题原文"
+          },
+          "categoryPath": {
+            "type": "string",
+            "description": "平台类目路径原文"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id"
+          },
+          "status": {
+            "type": "string",
+            "description": "平台商品状态"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "description": "审核状态"
+          },
+          "reviewMessage": {
+            "type": "string",
+            "description": "平台驳回原因 / 审核备注"
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "负责人 id（创建时的归属快照）",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "number",
+            "description": "平台评分；平台未给则为 null"
+          },
+          "ratingCount": {
+            "type": "number",
+            "description": "平台评论数"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种；仅作展示标签，本模块不据此做任何换算"
+          },
+          "platformStockState": {
+            "type": "string",
+            "description": "🔴 缺货标记（平台侧事实）：IN_STOCK / OUT_OF_STOCK / UNKNOWN"
+          },
+          "platformStockQty": {
+            "type": "number",
+            "description": "平台侧可售量；UNKNOWN 时为 null"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "🔴 内部 SKU 映射状态：UNMAPPED / PARTIAL / MAPPED"
+          },
+          "variantCount": {
+            "type": "integer",
+            "description": "平台变体条数",
+            "format": "int32"
+          },
+          "mappedVariantCount": {
+            "type": "integer",
+            "description": "已映射到内部 SKU 的变体条数",
+            "format": "int32"
+          },
+          "internalSkuIds": {
+            "type": "array",
+            "description": "变体上的内部 SKU 逻辑 id（跨服务，03 拥有）；未映射时为 null",
+            "items": {
+              "type": "string",
+              "description": "变体上的内部 SKU 逻辑 id（跨服务，03 拥有）；未映射时为 null",
+              "format": "uuid"
+            }
+          },
+          "statusChangeCount7d": {
+            "type": "integer",
+            "description": "🔴 近 7 日状态变化次数",
+            "format": "int32"
+          },
+          "recentStatusChanges": {
+            "type": "array",
+            "description": "🔴 近 7 日状态变化明细（新 → 旧）",
+            "items": {
+              "$ref": "#/components/schemas/ListingStatusChange"
+            }
+          },
+          "launchedAt": {
+            "type": "string",
+            "description": "上架时刻",
+            "format": "date-time"
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "description": "最近一次平台同步时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListingStatusChange": {
+        "type": "object",
+        "properties": {
+          "fromStatus": {
+            "type": "string",
+            "description": "原状态；首次登记为 null"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "新状态"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：MANUAL 人工 / PLATFORM 平台回流（4.3.2.2）"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 近 7 日状态变化明细（新 → 旧）"
+      },
+      "ListingBatchRequest": {
+        "required": [
+          "action",
+          "listingIds"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "type": "string",
+            "description": "ASSIGN_OWNER 批量分配负责人 / DELIST 批量下架 / REPRICE 批量改价 / RESTOCK 批量改库存"
+          },
+          "listingIds": {
+            "minItems": 1,
+            "type": "array",
+            "description": "目标 listing 集合（UUID）",
+            "items": {
+              "type": "string",
+              "description": "目标 listing 集合（UUID）",
+              "format": "uuid"
+            }
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "ASSIGN_OWNER 的目标负责人 id",
+            "format": "uuid"
+          },
+          "price": {
+            "type": "number",
+            "description": "REPRICE 的目标价；本模块显式拒绝（归 05 定价）"
+          },
+          "stockQuantity": {
+            "type": "number",
+            "description": "RESTOCK 的目标库存；本模块显式拒绝（归 07 库存）"
+          }
+        }
+      },
+      "ListingBatchResult": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "批量操作任务 id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "SUCCEEDED 已执行 / REJECTED 显式拒绝（归 05 / 07）"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求条数",
+            "format": "int32"
+          },
+          "affectedCount": {
+            "type": "integer",
+            "description": "实际影响条数",
+            "format": "int32"
+          },
+          "skipCount": {
+            "type": "integer",
+            "description": "被跳过的条数（不在数据范围内）",
+            "format": "int32"
+          },
+          "skippedIds": {
+            "type": "array",
+            "description": "被跳过的 listing id",
+            "items": {
+              "type": "string",
+              "description": "被跳过的 listing id",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 拒绝 / 说明理由；前端原样展示"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块；REJECTED 时非空"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "任务创建时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "BulkEditParams": {
+        "type": "object",
+        "properties": {
+          "titleSuffix": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "TITLE_APPEND 追加到标题末尾的文本"
+          },
+          "find": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "TITLE_REPLACE 要被替换的**字面量**片段（不做正则解释）"
+          },
+          "replace": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "TITLE_REPLACE / TITLE_REGEX_REPLACE 的替换文本"
+          },
+          "pattern": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 TITLE_REGEX_REPLACE 的正则；带嵌套量词 / 反向引用的模式会被直接拒（ReDoS）"
+          },
+          "replacement": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 TITLE_REGEX_REPLACE 的替换串；允许 $1 这样的分组引用"
+          },
+          "images": {
+            "type": "array",
+            "description": "REPLACE_IMAGES 的图片 URL / 存储键，整组替换",
+            "items": {
+              "maxLength": 1024,
+              "minLength": 0,
+              "type": "string",
+              "description": "REPLACE_IMAGES 的图片 URL / 存储键，整组替换"
+            }
+          },
+          "bullets": {
+            "type": "array",
+            "description": "BULLET_APPEND 要追加的卖点",
+            "items": {
+              "maxLength": 500,
+              "minLength": 0,
+              "type": "string",
+              "description": "BULLET_APPEND 要追加的卖点"
+            }
+          },
+          "categoryPath": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "REPLACE_CATEGORY 的平台类目路径原文"
+          },
+          "platformCategoryId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "REPLACE_CATEGORY 的平台类目 id"
+          }
+        },
+        "description": "操作参数"
+      },
+      "BulkTemplateRequest": {
+        "required": [
+          "code",
+          "name",
+          "operationType",
+          "platformId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（channel V1 全局码表）",
+            "format": "uuid"
+          },
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板编码；同平台内唯一"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "模板名"
+          },
+          "operationType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "六种批量操作之一"
+          },
+          "params": {
+            "$ref": "#/components/schemas/BulkEditParams"
+          },
+          "titleMaxLength": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 该平台标题长度上限（按平台配，不写死在服务层）",
+            "format": "int32"
+          },
+          "imageMaxCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "该平台图片条数上限",
+            "format": "int32"
+          },
+          "bulletMaxCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "该平台卖点数上限",
+            "format": "int32"
+          }
+        }
+      },
+      "BulkTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "模板 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "code": {
+            "type": "string",
+            "description": "模板编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "模板名"
+          },
+          "operationType": {
+            "type": "string",
+            "description": "批量操作类型"
+          },
+          "params": {
+            "$ref": "#/components/schemas/BulkEditParams"
+          },
+          "titleMaxLength": {
+            "type": "integer",
+            "description": "标题长度上限",
+            "format": "int32"
+          },
+          "imageMaxCount": {
+            "type": "integer",
+            "description": "图片条数上限",
+            "format": "int32"
+          },
+          "bulletMaxCount": {
+            "type": "integer",
+            "description": "卖点数上限",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "RegexSafetyVerdict": {
+        "type": "object",
+        "properties": {
+          "safe": {
+            "type": "boolean",
+            "description": "模式是否通过 ReDoS 检查"
+          },
+          "reason": {
+            "type": "string",
+            "description": "未通过的原因；通过时为空串"
+          }
+        }
+      },
+      "BulkEditRequest": {
+        "required": [
+          "listingIds"
+        ],
+        "type": "object",
+        "properties": {
+          "listingIds": {
+            "minItems": 1,
+            "type": "array",
+            "description": "目标 listing 集合（UUID）；跨租户 / 不在数据范围内的会被自动切分并逐条列出",
+            "items": {
+              "type": "string",
+              "description": "目标 listing 集合（UUID）；跨租户 / 不在数据范围内的会被自动切分并逐条列出",
+              "format": "uuid"
+            }
+          },
+          "templateId": {
+            "type": "string",
+            "description": "平台差异化模板 id；给了就以模板的 operationType / params / 上限为准",
+            "format": "uuid"
+          },
+          "operationType": {
+            "type": "string",
+            "description": "TITLE_APPEND / TITLE_REPLACE / TITLE_REGEX_REPLACE / REPLACE_IMAGES / BULLET_APPEND / REPLACE_CATEGORY；与 templateId 同时给时以模板为准"
+          },
+          "params": {
+            "$ref": "#/components/schemas/BulkEditParams"
+          },
+          "titleMaxLength": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 标题长度上限；不给时取模板值，再不给时取平台列上限 500。**超限是显式跳过，不是静默截断**",
+            "format": "int32"
+          },
+          "imageMaxCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "图片条数上限；不给时取模板值，再不给时取 9",
+            "format": "int32"
+          },
+          "bulletMaxCount": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "卖点条数上限；不给时取模板值，再不给时取 10",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注，落进修改记录便于回溯「当时为什么这么批量改」"
+          }
+        }
+      },
+      "BulkEditPlatformSplit": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "本段用的模板 id；未套模板为 null",
+            "format": "uuid"
+          },
+          "listingCount": {
+            "type": "integer",
+            "description": "本段的目标 listing",
+            "format": "int32"
+          },
+          "titleMaxLength": {
+            "type": "integer",
+            "description": "本段采用的标题长度上限",
+            "format": "int32"
+          },
+          "excluded": {
+            "type": "boolean",
+            "description": "本段是否被排除；被排除时 reason 非空"
+          },
+          "reason": {
+            "type": "string",
+            "description": "排除理由；未排除时为空串"
+          }
+        },
+        "description": "🔴 按平台差异化模板的切分"
+      },
+      "BulkEditPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "description": "本次预览的操作 id（确认时凭它推进）",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "PREVIEWED（仅预览，未改任何东西）/ APPLIED / DISCARDED"
+          },
+          "operationType": {
+            "type": "string",
+            "description": "本次使用的操作类型"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求条数",
+            "format": "int32"
+          },
+          "outOfScopeIds": {
+            "type": "array",
+            "description": "🔴 请求里**不在当前租户数据范围内**的 listing（跨租户与不存在都落这里）",
+            "items": {
+              "type": "string",
+              "description": "🔴 请求里**不在当前租户数据范围内**的 listing（跨租户与不存在都落这里）",
+              "format": "uuid"
+            }
+          },
+          "platformSplits": {
+            "type": "array",
+            "description": "🔴 按平台差异化模板的切分",
+            "items": {
+              "$ref": "#/components/schemas/BulkEditPlatformSplit"
+            }
+          },
+          "changes": {
+            "type": "array",
+            "description": "🔴 逐条改前/改后；确认时写入草稿的就是这批值",
+            "items": {
+              "$ref": "#/components/schemas/ListingBulkChangeRow"
+            }
+          },
+          "draftIsolationNote": {
+            "type": "string",
+            "description": "🔴 确认前线上**不会被改**；确认后改的也只是草稿"
+          }
+        }
+      },
+      "ListingBulkChangeRow": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文；预览要让人认得出是哪一条"
+          },
+          "field": {
+            "type": "string",
+            "description": "被改字段：TITLE / BULLETS / IMAGES / CATEGORY_PATH / PLATFORM_CATEGORY_ID"
+          },
+          "beforeValue": {
+            "type": "string",
+            "description": "🔴 改前值（标题 / 类目取自线上 listing；卖点与图片取自已有草稿）"
+          },
+          "afterValue": {
+            "type": "string",
+            "description": "🔴 改后值（草稿里将被写入的提议值）"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "改后是否与改前逐字不同"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "APPLIED / NO_CHANGE / SKIPPED_LIMIT / SKIPPED_NO_BASELINE"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 这条为什么是这个结果；前端原样展示"
+          }
+        },
+        "description": "🔴 逐条改前/改后；确认时写入草稿的就是这批值"
+      },
+      "ListingContentDraftRow": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "description": "草稿 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "title": {
+            "type": "string",
+            "description": "拟改标题；null 表示本次没拟改标题"
+          },
+          "bullets": {
+            "type": "array",
+            "description": "拟改卖点；null 表示本次没拟改卖点",
+            "items": {
+              "type": "string",
+              "description": "拟改卖点；null 表示本次没拟改卖点"
+            }
+          },
+          "images": {
+            "type": "array",
+            "description": "拟改图片；null 表示本次没拟改图片",
+            "items": {
+              "type": "string",
+              "description": "拟改图片；null 表示本次没拟改图片"
+            }
+          },
+          "categoryPath": {
+            "type": "string",
+            "description": "拟改类目路径；null 表示本次没拟改类目"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "拟改平台类目 id；null 表示本次没拟改类目 id"
+          },
+          "touchedFields": {
+            "type": "array",
+            "description": "🔴 本草稿拟改过的字段；不在这里面的字段发布时保持线上一致，绝不被覆盖",
+            "items": {
+              "type": "string",
+              "description": "🔴 本草稿拟改过的字段；不在这里面的字段发布时保持线上一致，绝不被覆盖"
+            }
+          },
+          "liveTitle": {
+            "type": "string",
+            "description": "线上标题原值（草稿要能和线上并排看）"
+          },
+          "liveCategoryPath": {
+            "type": "string",
+            "description": "线上类目路径原值"
+          },
+          "state": {
+            "type": "string",
+            "description": "DRAFT 待发布 / PUBLISHED 已发布 / DISCARDED 已废弃"
+          },
+          "baseVersion": {
+            "type": "integer",
+            "description": "草稿派生的线上版本",
+            "format": "int64"
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "🔴 线上是否在草稿生成后被改过（true 时发布前必须先复核）"
+          },
+          "lastOperationId": {
+            "type": "string",
+            "description": "最后改这份草稿的批量操作 id",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "草稿生成时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "草稿最近更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "BulkEditConfirmRequest": {
+        "required": [
+          "operationId"
+        ],
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "description": "要确认的预览操作 id",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ListingBulkEditOperation": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "description": "操作 id",
+            "format": "uuid"
+          },
+          "operationType": {
+            "type": "string",
+            "description": "操作类型"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "所用平台差异化模板；未套模板为 null",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "PREVIEWED 仅预览 / APPLIED 已写入草稿 / DISCARDED 已放弃"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "实际写入草稿的条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "逐条被跳过的条数",
+            "format": "int32"
+          },
+          "listingIds": {
+            "type": "array",
+            "description": "目标集合快照",
+            "items": {
+              "type": "string",
+              "description": "目标集合快照",
+              "format": "uuid"
+            }
+          },
+          "platformSplits": {
+            "type": "array",
+            "description": "🔴 按平台差异化模板的切分",
+            "items": {
+              "$ref": "#/components/schemas/BulkEditPlatformSplit"
+            }
+          },
+          "changes": {
+            "type": "array",
+            "description": "🔴 逐条改前/改后（预览看到的与落库的是同一批）",
+            "items": {
+              "$ref": "#/components/schemas/ListingBulkChangeRow"
+            }
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作人",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "description": "确认落草稿的时刻；仅 APPLIED 非空",
+            "format": "date-time"
+          }
+        }
+      },
       "LabelBatteryMark": {
         "type": "object",
         "properties": {
@@ -12139,6 +14156,152 @@
           }
         }
       },
+      "WritebackTargetPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WritebackTargetView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/WritebackTargetSummary"
+          }
+        }
+      },
+      "WritebackTargetSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shops": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WritebackTargetView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "listingRef": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "currentStock": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "blockedReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WritebackBatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WritebackBatchView"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/WritebackBatchSummary"
+          }
+        }
+      },
       "WebhookReceiptView": {
         "type": "object",
         "properties": {
@@ -13807,6 +15970,294 @@
             "type": "string"
           }
         }
+      },
+      "ListingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "rejectedFilters": {
+            "type": "array",
+            "description": "🔴 未接入的维度名；筛选条件命中它们会被显式拒绝而不是静默忽略",
+            "items": {
+              "type": "string",
+              "description": "🔴 未接入的维度名；筛选条件命中它们会被显式拒绝而不是静默忽略"
+            }
+          }
+        }
+      },
+      "ListingFilterOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "description": "平台商品状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台商品状态取值"
+            }
+          },
+          "platformStockStates": {
+            "type": "array",
+            "description": "平台侧可售状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台侧可售状态取值"
+            }
+          },
+          "reviewStatuses": {
+            "type": "array",
+            "description": "审核状态取值",
+            "items": {
+              "type": "string",
+              "description": "审核状态取值"
+            }
+          },
+          "mappingStatuses": {
+            "type": "array",
+            "description": "映射状态取值",
+            "items": {
+              "type": "string",
+              "description": "映射状态取值"
+            }
+          },
+          "sortFields": {
+            "type": "array",
+            "description": "可排序字段",
+            "items": {
+              "type": "string",
+              "description": "可排序字段"
+            }
+          },
+          "maxSize": {
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer",
+            "description": "每页条数上限",
+            "format": "int32"
+          }
+        },
+        "description": "平台筛选维度取值"
+      },
+      "ListingCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingCapabilityDimension"
+            }
+          },
+          "priceAvailable": {
+            "type": "boolean",
+            "description": "🔴 售价是否已接入：卷 05 整卷未交付，恒为 false，前端据此显示「价格能力未接入」"
+          },
+          "priceOwnerModule": {
+            "type": "string",
+            "description": "🔴 销量的归属模块"
+          },
+          "priceNote": {
+            "type": "string",
+            "description": "🔴 未接入价格时的界面措辞（前端原样展示，不要自己编）"
+          },
+          "statuses": {
+            "type": "array",
+            "description": "平台商品状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台商品状态取值"
+            }
+          },
+          "platformStockStates": {
+            "type": "array",
+            "description": "平台侧可售状态取值（缺货标记的来源）",
+            "items": {
+              "type": "string",
+              "description": "平台侧可售状态取值（缺货标记的来源）"
+            }
+          },
+          "reviewStatuses": {
+            "type": "array",
+            "description": "审核状态取值",
+            "items": {
+              "type": "string",
+              "description": "审核状态取值"
+            }
+          },
+          "mappingStatuses": {
+            "type": "array",
+            "description": "🔴 映射状态取值：UNMAPPED / PARTIAL / MAPPED（列表级聚合，不是单变体值）",
+            "items": {
+              "type": "string",
+              "description": "🔴 映射状态取值：UNMAPPED / PARTIAL / MAPPED（列表级聚合，不是单变体值）"
+            }
+          },
+          "variantMappingStatuses": {
+            "type": "array",
+            "description": "单变体映射状态取值",
+            "items": {
+              "type": "string",
+              "description": "单变体映射状态取值"
+            }
+          },
+          "batchActions": {
+            "type": "array",
+            "description": "批量操作取值",
+            "items": {
+              "type": "string",
+              "description": "批量操作取值"
+            }
+          },
+          "independentStateNote": {
+            "type": "string",
+            "description": "🔴「未映射与缺货是两个独立状态」的说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          }
+        }
+      },
+      "ListingCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "BulkEditCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/BulkEditCapabilityDimension"
+            }
+          },
+          "operationTypes": {
+            "type": "array",
+            "description": "六种批量操作取值",
+            "items": {
+              "type": "string",
+              "description": "六种批量操作取值"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "被改字段取值",
+            "items": {
+              "type": "string",
+              "description": "被改字段取值"
+            }
+          },
+          "outcomes": {
+            "type": "array",
+            "description": "逐条结果取值",
+            "items": {
+              "type": "string",
+              "description": "逐条结果取值"
+            }
+          },
+          "draftStates": {
+            "type": "array",
+            "description": "草稿状态取值",
+            "items": {
+              "type": "string",
+              "description": "草稿状态取值"
+            }
+          },
+          "draftIsolationNote": {
+            "type": "string",
+            "description": "🔴 草稿态与线上态分离的说明；前端据此禁用任何「直接上线」按钮"
+          },
+          "onlineBaselineNote": {
+            "type": "string",
+            "description": "🔴 卖点 / 图片线上基线未接入时的界面措辞（前端原样展示，不要自己编）"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "BulkEditCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "onlineBaselineAvailable": {
+            "type": "boolean",
+            "description": "🔴 该维度的**线上**基线是否可读（false 时 before 只能来自已有草稿）"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       },
       "LabelTemplatePage": {
         "type": "object",
@@ -15650,1281 +18101,6 @@
             "description": "上游依赖说明"
           }
         }
-      },
-      "WritebackTargetInput": {
-        "required": [
-          "externalRef",
-          "shopId",
-          "targetType"
-        ],
-        "type": "object",
-        "properties": {
-          "shopId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "targetType": {
-            "type": "string",
-            "enum": [
-              "LISTING",
-              "SHIPMENT"
-            ]
-          },
-          "externalRef": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string"
-          },
-          "listingRef": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "skuCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "currentStock": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "currentPrice": {
-            "minimum": 0.0001,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "pattern": "^[A-Z]{3}$",
-            "type": "string",
-            "nullable": true
-          },
-          "sourceRef": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "WritebackTargetStatusInput": {
-        "required": [
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "ACTIVE",
-              "BLOCKED"
-            ]
-          },
-          "reason": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "BatchParameters": {
-        "type": "object",
-        "properties": {
-          "stock": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "price": {
-            "minimum": 0.0001,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "pattern": "^[A-Z]{3}$",
-            "type": "string",
-            "nullable": true
-          },
-          "trackingNumber": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "carrierCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "perTarget": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/PerTargetParameters"
-            }
-          }
-        }
-      },
-      "PerTargetParameters": {
-        "required": [
-          "targetId"
-        ],
-        "type": "object",
-        "properties": {
-          "targetId": {
-            "maxLength": 36,
-            "minLength": 0,
-            "type": "string"
-          },
-          "stock": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "price": {
-            "minimum": 0.0001,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "trackingNumber": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "carrierCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "TargetFilter": {
-        "type": "object",
-        "properties": {
-          "shopId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "targetType": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "LISTING",
-              "SHIPMENT"
-            ]
-          },
-          "keyword": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "ACTIVE",
-              "BLOCKED"
-            ]
-          }
-        },
-        "nullable": true
-      },
-      "WritebackBatchInput": {
-        "required": [
-          "kind",
-          "parameters"
-        ],
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "UPDATE_STOCK",
-              "UPDATE_PRICE",
-              "DELIST",
-              "SHIP_UPDATE"
-            ]
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "filter": {
-            "$ref": "#/components/schemas/TargetFilter"
-          },
-          "targetIds": {
-            "maxItems": 500,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "format": "uuid",
-              "nullable": true
-            }
-          },
-          "parameters": {
-            "$ref": "#/components/schemas/BatchParameters"
-          },
-          "idempotencyKey": {
-            "maxLength": 160,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "maxLength": 400,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "WritebackBatchSummary": {
-        "type": "object",
-        "properties": {
-          "outcome": {
-            "type": "string"
-          },
-          "selected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "queued": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rejected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "succeeded": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unknown": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pending": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "WritebackBatchView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "batchNo": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "UPDATE_STOCK",
-              "UPDATE_PRICE",
-              "DELIST",
-              "SHIP_UPDATE"
-            ]
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "idempotencyKey": {
-            "type": "string"
-          },
-          "selectedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rejectedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "filterSnapshot": {
-            "type": "string"
-          },
-          "paramSnapshot": {
-            "type": "string"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/WritebackBatchSummary"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WritebackItemView"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WritebackItemView": {
-        "type": "object",
-        "properties": {
-          "position": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "targetId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "targetType": {
-            "type": "string"
-          },
-          "externalRef": {
-            "type": "string"
-          },
-          "listingRef": {
-            "type": "string"
-          },
-          "skuCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "itemResult": {
-            "type": "string"
-          },
-          "operationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "operationStatus": {
-            "type": "string"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "stock": {
-            "type": "number",
-            "nullable": true
-          },
-          "price": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "trackingNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "carrierCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WritebackBatchParameters": {
-        "type": "object",
-        "properties": {
-          "stock": {
-            "type": "number",
-            "nullable": true
-          },
-          "price": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "trackingNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "carrierCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "perTargetCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "WritebackBatchPreview": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "UPDATE_STOCK",
-              "UPDATE_PRICE",
-              "DELIST",
-              "SHIP_UPDATE"
-            ]
-          },
-          "matched": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "applicable": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "blocked": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "missingParameters": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "issues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WritebackPreviewIssue"
-            }
-          },
-          "parameters": {
-            "$ref": "#/components/schemas/WritebackBatchParameters"
-          }
-        }
-      },
-      "WritebackPreviewIssue": {
-        "type": "object",
-        "properties": {
-          "targetId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "externalRef": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "WritebackTargetPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WritebackTargetView"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/WritebackTargetSummary"
-          }
-        }
-      },
-      "WritebackTargetSummary": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "blockedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "listingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shipmentCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shops": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "WritebackTargetView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "shopName": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "targetType": {
-            "type": "string"
-          },
-          "externalRef": {
-            "type": "string"
-          },
-          "listingRef": {
-            "type": "string"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "currentStock": {
-            "type": "number",
-            "nullable": true
-          },
-          "currentPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "blockedReason": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WritebackBatchPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WritebackBatchView"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/WritebackBatchSummary"
-          }
-        }
-      },
-      "SaveListingRequest": {
-        "required": [
-          "externalItemId",
-          "shopId",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "为空表示新建；非空表示改这条（乐观锁）",
-            "format": "uuid"
-          },
-          "shopId": {
-            "type": "string",
-            "description": "上游 02 店铺 id",
-            "format": "uuid"
-          },
-          "marketplaceId": {
-            "type": "string",
-            "description": "上游 02 站点 id",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文"
-          },
-          "title": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台标题原文"
-          },
-          "categoryPath": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台类目路径原文"
-          },
-          "platformCategoryId": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台类目 id"
-          },
-          "status": {
-            "type": "string",
-            "description": "平台商品状态；为空按 DRAFT 建"
-          },
-          "reviewStatus": {
-            "type": "string",
-            "description": "审核状态；为空按 NOT_SUBMITTED 建"
-          },
-          "reviewMessage": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台驳回原因 / 审核备注"
-          },
-          "platformStockState": {
-            "type": "string",
-            "description": "🔴 平台侧可售状态；缺货标记的来源"
-          },
-          "platformStockQty": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "description": "平台侧可售量"
-          },
-          "rating": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "description": "平台评分"
-          },
-          "ratingCount": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "description": "平台评论数"
-          },
-          "currency": {
-            "maxLength": 3,
-            "minLength": 3,
-            "type": "string",
-            "description": "币种；仅作展示标签"
-          },
-          "launchedAt": {
-            "type": "string",
-            "description": "上架时刻",
-            "format": "date-time"
-          },
-          "lastSyncedAt": {
-            "type": "string",
-            "description": "最近一次平台同步时刻",
-            "format": "date-time"
-          },
-          "variants": {
-            "type": "array",
-            "description": "变体集合；同一请求内按 externalVariantId 幂等",
-            "items": {
-              "$ref": "#/components/schemas/SaveVariantRequest"
-            }
-          },
-          "version": {
-            "type": "integer",
-            "description": "乐观锁版本",
-            "format": "int64"
-          }
-        }
-      },
-      "SaveVariantRequest": {
-        "required": [
-          "externalVariantId"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "为空表示新建；非空表示改这条",
-            "format": "uuid"
-          },
-          "externalVariantId": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "description": "平台变体 ID 原文"
-          },
-          "mappingStatus": {
-            "type": "string",
-            "description": "🔴 映射状态：UNMAPPED / MAPPED / BUNDLE；为空按 UNMAPPED 建"
-          },
-          "internalSkuId": {
-            "type": "string",
-            "description": "🔴 内部 SKU 逻辑 id（03 catalog 拥有，不跨库建 FK）；未映射时为 null",
-            "format": "uuid"
-          },
-          "componentQuantity": {
-            "minimum": 0.000001,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
-          },
-          "attributes": {
-            "type": "string",
-            "description": "平台侧变体属性原文（json 对象字符串）"
-          }
-        },
-        "description": "变体集合；同一请求内按 externalVariantId 幂等"
-      },
-      "ListingRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "listing id",
-            "format": "uuid"
-          },
-          "shopId": {
-            "type": "string",
-            "description": "上游 02 店铺 id",
-            "format": "uuid"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码"
-          },
-          "shopName": {
-            "type": "string",
-            "description": "店铺名"
-          },
-          "platformId": {
-            "type": "string",
-            "description": "平台 id",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "平台编码"
-          },
-          "marketplaceId": {
-            "type": "string",
-            "description": "上游 02 站点 id；为空表示未归站点",
-            "format": "uuid"
-          },
-          "marketplaceCode": {
-            "type": "string",
-            "description": "站点编码；为空表示未归站点"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN / item_id），不折叠大小写"
-          },
-          "title": {
-            "type": "string",
-            "description": "平台标题原文"
-          },
-          "categoryPath": {
-            "type": "string",
-            "description": "平台类目路径原文"
-          },
-          "platformCategoryId": {
-            "type": "string",
-            "description": "平台类目 id"
-          },
-          "status": {
-            "type": "string",
-            "description": "平台商品状态"
-          },
-          "reviewStatus": {
-            "type": "string",
-            "description": "审核状态"
-          },
-          "reviewMessage": {
-            "type": "string",
-            "description": "平台驳回原因 / 审核备注"
-          },
-          "ownerId": {
-            "type": "string",
-            "description": "负责人 id（创建时的归属快照）",
-            "format": "uuid"
-          },
-          "rating": {
-            "type": "number",
-            "description": "平台评分；平台未给则为 null"
-          },
-          "ratingCount": {
-            "type": "number",
-            "description": "平台评论数"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种；仅作展示标签，本模块不据此做任何换算"
-          },
-          "platformStockState": {
-            "type": "string",
-            "description": "🔴 缺货标记（平台侧事实）：IN_STOCK / OUT_OF_STOCK / UNKNOWN"
-          },
-          "platformStockQty": {
-            "type": "number",
-            "description": "平台侧可售量；UNKNOWN 时为 null"
-          },
-          "mappingStatus": {
-            "type": "string",
-            "description": "🔴 内部 SKU 映射状态：UNMAPPED / PARTIAL / MAPPED"
-          },
-          "variantCount": {
-            "type": "integer",
-            "description": "平台变体条数",
-            "format": "int32"
-          },
-          "mappedVariantCount": {
-            "type": "integer",
-            "description": "已映射到内部 SKU 的变体条数",
-            "format": "int32"
-          },
-          "internalSkuIds": {
-            "type": "array",
-            "description": "变体上的内部 SKU 逻辑 id（跨服务，03 拥有）；未映射时为 null",
-            "items": {
-              "type": "string",
-              "description": "变体上的内部 SKU 逻辑 id（跨服务，03 拥有）；未映射时为 null",
-              "format": "uuid"
-            }
-          },
-          "statusChangeCount7d": {
-            "type": "integer",
-            "description": "🔴 近 7 日状态变化次数",
-            "format": "int32"
-          },
-          "recentStatusChanges": {
-            "type": "array",
-            "description": "🔴 近 7 日状态变化明细（新 → 旧）",
-            "items": {
-              "$ref": "#/components/schemas/ListingStatusChange"
-            }
-          },
-          "launchedAt": {
-            "type": "string",
-            "description": "上架时刻",
-            "format": "date-time"
-          },
-          "lastSyncedAt": {
-            "type": "string",
-            "description": "最近一次平台同步时刻",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "更新时刻",
-            "format": "date-time"
-          }
-        }
-      },
-      "ListingStatusChange": {
-        "type": "object",
-        "properties": {
-          "fromStatus": {
-            "type": "string",
-            "description": "原状态；首次登记为 null"
-          },
-          "toStatus": {
-            "type": "string",
-            "description": "新状态"
-          },
-          "source": {
-            "type": "string",
-            "description": "来源：MANUAL 人工 / PLATFORM 平台回流（4.3.2.2）"
-          },
-          "occurredAt": {
-            "type": "string",
-            "description": "发生时刻",
-            "format": "date-time"
-          }
-        },
-        "description": "🔴 近 7 日状态变化明细（新 → 旧）"
-      },
-      "ListingBatchRequest": {
-        "required": [
-          "action",
-          "listingIds"
-        ],
-        "type": "object",
-        "properties": {
-          "action": {
-            "minLength": 1,
-            "type": "string",
-            "description": "ASSIGN_OWNER 批量分配负责人 / DELIST 批量下架 / REPRICE 批量改价 / RESTOCK 批量改库存"
-          },
-          "listingIds": {
-            "minItems": 1,
-            "type": "array",
-            "description": "目标 listing 集合（UUID）",
-            "items": {
-              "type": "string",
-              "description": "目标 listing 集合（UUID）",
-              "format": "uuid"
-            }
-          },
-          "ownerId": {
-            "type": "string",
-            "description": "ASSIGN_OWNER 的目标负责人 id",
-            "format": "uuid"
-          },
-          "price": {
-            "type": "number",
-            "description": "REPRICE 的目标价；本模块显式拒绝（归 05 定价）"
-          },
-          "stockQuantity": {
-            "type": "number",
-            "description": "RESTOCK 的目标库存；本模块显式拒绝（归 07 库存）"
-          }
-        }
-      },
-      "ListingBatchResult": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "type": "string",
-            "description": "批量操作任务 id",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string",
-            "description": "动作"
-          },
-          "outcome": {
-            "type": "string",
-            "description": "SUCCEEDED 已执行 / REJECTED 显式拒绝（归 05 / 07）"
-          },
-          "requestedCount": {
-            "type": "integer",
-            "description": "请求条数",
-            "format": "int32"
-          },
-          "affectedCount": {
-            "type": "integer",
-            "description": "实际影响条数",
-            "format": "int32"
-          },
-          "skipCount": {
-            "type": "integer",
-            "description": "被跳过的条数（不在数据范围内）",
-            "format": "int32"
-          },
-          "skippedIds": {
-            "type": "array",
-            "description": "被跳过的 listing id",
-            "items": {
-              "type": "string",
-              "description": "被跳过的 listing id",
-              "format": "uuid"
-            }
-          },
-          "reason": {
-            "type": "string",
-            "description": "🔴 拒绝 / 说明理由；前端原样展示"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "归属模块；REJECTED 时非空"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "任务创建时刻",
-            "format": "date-time"
-          }
-        }
-      },
-      "ListingPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "当前页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合筛选条件的总条数（不受分页影响）",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码，从 0 起",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "rejectedFilters": {
-            "type": "array",
-            "description": "🔴 未接入的维度名；筛选条件命中它们会被显式拒绝而不是静默忽略",
-            "items": {
-              "type": "string",
-              "description": "🔴 未接入的维度名；筛选条件命中它们会被显式拒绝而不是静默忽略"
-            }
-          }
-        }
-      },
-      "ListingFilterOptions": {
-        "type": "object",
-        "properties": {
-          "statuses": {
-            "type": "array",
-            "description": "平台商品状态取值",
-            "items": {
-              "type": "string",
-              "description": "平台商品状态取值"
-            }
-          },
-          "platformStockStates": {
-            "type": "array",
-            "description": "平台侧可售状态取值",
-            "items": {
-              "type": "string",
-              "description": "平台侧可售状态取值"
-            }
-          },
-          "reviewStatuses": {
-            "type": "array",
-            "description": "审核状态取值",
-            "items": {
-              "type": "string",
-              "description": "审核状态取值"
-            }
-          },
-          "mappingStatuses": {
-            "type": "array",
-            "description": "映射状态取值",
-            "items": {
-              "type": "string",
-              "description": "映射状态取值"
-            }
-          },
-          "sortFields": {
-            "type": "array",
-            "description": "可排序字段",
-            "items": {
-              "type": "string",
-              "description": "可排序字段"
-            }
-          },
-          "maxSize": {
-            "maximum": 200,
-            "minimum": 1,
-            "type": "integer",
-            "description": "每页条数上限",
-            "format": "int32"
-          }
-        },
-        "description": "平台筛选维度取值"
-      },
-      "ListingCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "description": "逐维度能力声明；未交付段 available=false",
-            "items": {
-              "$ref": "#/components/schemas/ListingCapabilityDimension"
-            }
-          },
-          "priceAvailable": {
-            "type": "boolean",
-            "description": "🔴 售价是否已接入：卷 05 整卷未交付，恒为 false，前端据此显示「价格能力未接入」"
-          },
-          "priceOwnerModule": {
-            "type": "string",
-            "description": "🔴 销量的归属模块"
-          },
-          "priceNote": {
-            "type": "string",
-            "description": "🔴 未接入价格时的界面措辞（前端原样展示，不要自己编）"
-          },
-          "statuses": {
-            "type": "array",
-            "description": "平台商品状态取值",
-            "items": {
-              "type": "string",
-              "description": "平台商品状态取值"
-            }
-          },
-          "platformStockStates": {
-            "type": "array",
-            "description": "平台侧可售状态取值（缺货标记的来源）",
-            "items": {
-              "type": "string",
-              "description": "平台侧可售状态取值（缺货标记的来源）"
-            }
-          },
-          "reviewStatuses": {
-            "type": "array",
-            "description": "审核状态取值",
-            "items": {
-              "type": "string",
-              "description": "审核状态取值"
-            }
-          },
-          "mappingStatuses": {
-            "type": "array",
-            "description": "🔴 映射状态取值：UNMAPPED / PARTIAL / MAPPED（列表级聚合，不是单变体值）",
-            "items": {
-              "type": "string",
-              "description": "🔴 映射状态取值：UNMAPPED / PARTIAL / MAPPED（列表级聚合，不是单变体值）"
-            }
-          },
-          "variantMappingStatuses": {
-            "type": "array",
-            "description": "单变体映射状态取值",
-            "items": {
-              "type": "string",
-              "description": "单变体映射状态取值"
-            }
-          },
-          "batchActions": {
-            "type": "array",
-            "description": "批量操作取值",
-            "items": {
-              "type": "string",
-              "description": "批量操作取值"
-            }
-          },
-          "independentStateNote": {
-            "type": "string",
-            "description": "🔴「未映射与缺货是两个独立状态」的说明"
-          },
-          "upstreamNote": {
-            "type": "string",
-            "description": "上游依赖说明"
-          }
-        }
-      },
-      "ListingCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string",
-            "description": "维度键"
-          },
-          "description": {
-            "type": "string",
-            "description": "维度说明"
-          },
-          "available": {
-            "type": "boolean",
-            "description": "本模块是否已交付"
-          },
-          "source": {
-            "type": "string",
-            "description": "数据来源（表 / 上游模块）"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "未交付段的责任模块"
-          },
-          "impact": {
-            "type": "string",
-            "description": "不交付的影响"
-          }
-        },
-        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }

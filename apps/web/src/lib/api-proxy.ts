@@ -1070,6 +1070,43 @@ const services: readonly {
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 4.2.1.2 批量编辑（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支（理由同上面 4.1.1.1 那条：
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突）。
+    // 插入锚点固定在 4.1.1.1 `listings` 条目**之后**、`prefix: 'trade/'` **之前**：
+    // 与兄弟模块相邻但仍是独立元素，各车道插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-bulk-edit/capabilities             能力声明（草稿隔离 + 卖点/图片线上基线未接入 + 发布归 4.3.1.2）
+    //   listing-bulk-edit/templates                平台差异化模板列表（GET）+ 新建/更新（POST）
+    //   listing-bulk-edit/preview                 操作预览：逐条真实 before/after（POST，落 PREVIEWED）
+    //   listing-bulk-edit/confirm                 预览确认（POST，凭 operationId 推进，只写草稿）
+    //   listing-bulk-edit/regex-check             正则 ReDoS 预检（POST）
+    //   listing-bulk-edit/operations              修改记录列表（GET）+ 单次详情 operations/{uuid}（GET）
+    //   listing-bulk-edit/drafts                  待发布草稿清单（GET）+ 单条 drafts/{uuid}（GET）
+    //   listing-bulk-edit/drafts/{uuid}/discard   废弃草稿（POST，保留留痕不删除）
+    //   listing-bulk-edit/scope-check             目标集合可见性预检（GET，跨租户/不存在的 id）
+    //
+    // ⚠️ **刻意不放行裸路径 `listing-bulk-edit`**：本模块没有裸路径资源，
+    //    所以最外层分组**不带 `?`** —— 写了 `?` 就会连裸路径一起放行。
+    //    放行一个后端不存在的映射比 404 更糟：界面会以为功能已交付。
+    // ⚠️ **刻意没有 publish / apply 形状**：蓝图加粗句「批量编辑只改草稿不直接改线上」。
+    //    批量编辑**没有任何**改线上的端点，放行 `…/publish` 等于在代理层凭空造一个
+    //    绕过草稿的入口 —— 那正是「误改全店标题」事故要走的那条路。
+    // ⚠️ 字面量子路径（capabilities/templates/preview/confirm/regex-check/scope-check/
+    //    operations/drafts）各自成一支，不与 uuid 段混在一个 alternation 里：
+    //    uuid 段的 `\/` 必须**与字面量路径的 `\/` 写在同一层**，否则 `drafts/{uuid}` 会静默 404。
+    // ⚠️ `drafts/{uuid}/discard` 的 `discard` 挂在 **uuid 段之后**：
+    //    写成 `/drafts/discard` 会放行一个不存在的「按 listing 废弃全部」的形状。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-bulk\-edit(?:\/(?:capabilities|templates|preview|confirm|regex\-check|scope\-check)|\/operations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/discard)?)?)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
