@@ -57,6 +57,23 @@
 - `/Users/guan/Projects/starcon/.dev-agent/PIPELINE.local.md` — 本机参数与两个 cron_id
 - `/Users/guan/Projects/starcon-worktrees/integration/.dev-agent/` — 编排器状态（lanes.json / dispatch.gate / last-batch-at），并软链到上面的配置
 
+## 复核中修掉的三个真缺陷（派发链路，否则每轮都跑偏）
+
+1. **worker 的 shell 里没有 `$PROJECT_ROOT`。** 子任务模板里的心跳/落地命令
+   `cd "$PROJECT_ROOT" && lane.mjs heartbeat` 是给调度者用的变量；
+   占位符没替换时 worker 的 `cd ""` 留在自己 worktree，`lane.mjs` 的 ROOT 随之变成
+   worktree —— 状态被写进 `<worktree>/.dev-agent/lanes.json`，
+   **调度者永远看不到心跳与落地标记，车道会被当成崩掉回收重派**。
+   改成 `<INTEGRATION_ROOT>` 显式占位符，并在派发步骤加了
+   「逐字检查无残留占位符」的要求与替换对照表。
+2. **协议里写死了过期基线数字**（126 已交付 / 339 未开发 / 5 批/天 / 夜间静默 / 24 天）。
+   cron 任务书自己写着「不要引用任何历史文档里写死的数字」，
+   而这两处正是这种数字 —— 调度者读了会报错进度。改成按当前本地配置现算。
+3. **cron 会话起在主工作区，而主工作区的协议文件是旧版。**
+   主工作区在 `main` 上，那两份协议还写着你那台机器的路径 ——
+   直接读会跑不起来。两个 cron prompt 都已改成**先 `cd "$PROJECT_ROOT"`，
+   再读集成头 worktree 里的协议文件**，并明确写了「主工作区那份是旧版，不要读」。
+
 ## 本机环境事实（2026-10-19 22:0x 实测）
 
 | 项 | 值 |
@@ -83,6 +100,14 @@
 
 **未验证项**：全量 L2（`mvnw verify` 全量 + Next build）本次未跑 —— 它是流水线的
 每批一次发热高峰，由第一个流水线 tick 执行并决定是否 push。协议改动本身只涉及 markdown。
+
+**同步任务首跑（22:15:00 实际触发）**：cron 正常派发，agent 取到协议后
+按步骤取闸 → 判定 `origin/main` 无新提交 → 释放闸 → 结束。
+闸已确认释放，集成头工作区干净。
+
+**网络抖动**：22:3x 推 `80ceecac` 时连续两次 `SSL_ERROR_SYSCALL`（github.com:443），
+第 3 次成功。这台机器的网络本身不稳（其他会话也有 `ERR_NETWORK_IO_SUSPENDED`）——
+定时任务里的 `git fetch` 失败要如实报，不要当成「远端没更新」。
 
 ## 后续待办
 
