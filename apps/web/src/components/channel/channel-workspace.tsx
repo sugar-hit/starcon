@@ -32,6 +32,10 @@ import type {
   SyncFailureSummary,
   SyncFailureView,
   SyncRunView,
+  WebhookDedupDetail,
+  WebhookDedupEventView,
+  WebhookDedupHitView,
+  WebhookDedupSummary,
   WebhookEndpointView,
   WebhookReceiptSummary,
   WebhookReceiptView,
@@ -154,6 +158,12 @@ export function ChannelWorkspace() {
   const [webhookReceipts, setWebhookReceipts] = useState<WebhookReceiptView[]>([]);
   const [webhookSummary, setWebhookSummary] = useState<WebhookReceiptSummary[]>([]);
   const [receiptFilter, setReceiptFilter] = useState('');
+  // 02.6.1.2 去重视图：一个业务事件一行，带重推次数与首次处理结果引用
+  const [dedupEvents, setDedupEvents] = useState<WebhookDedupEventView[]>([]);
+  const [dedupSummary, setDedupSummary] = useState<WebhookDedupSummary | null>(null);
+  const [dedupOnly, setDedupOnly] = useState(false);
+  const [dedupDetail, setDedupDetail] = useState<WebhookDedupDetail | null>(null);
+  const [dedupError, setDedupError] = useState('');
   const [runCursorId, setRunCursorId] = useState<string | null>(null);
   // 店铺要绑连接与法人、负责人要选成员与部门：这些字典在 identity 服务，权限不足时保持空数组，
   // 对应控件会明说"没有权限"，而不是渲染一个看起来能选、其实选不了的下拉。
@@ -206,6 +216,13 @@ export function ChannelWorkspace() {
             `channel/webhook-receipts?limit=50${receiptFilter ? `&status=${receiptFilter}` : ''}`,
           ),
         );
+        // 02.6.1.2 去重视图：默认按最近一次推送倒序，接入排障先看正在被重推的那些
+        setDedupEvents(
+          await api<WebhookDedupEventView[]>(
+            `channel/webhook-dedup?limit=50${dedupOnly ? '&duplicatedOnly=true' : ''}`,
+          ),
+        );
+        setDedupSummary(await api<WebhookDedupSummary>('channel/webhook-dedup/summary'));
       }
     } catch (e) {
       handleError(e);
@@ -223,7 +240,7 @@ export function ChannelWorkspace() {
     } catch (e) {
       setDictionaryError(e instanceof Error ? e.message : '关联数据加载失败');
     }
-  }, [can, handleError, runCursorId, receiptFilter]);
+  }, [can, handleError, runCursorId, receiptFilter, dedupOnly]);
 
   useEffect(() => {
     void load();
@@ -357,20 +374,38 @@ export function ChannelWorkspace() {
         />
       )}
       {section === 'webhooks' && (
-        <WebhookInbox
-          endpoints={webhookEndpoints}
-          receipts={webhookReceipts}
-          summary={webhookSummary}
-          connections={connections}
-          statusFilter={receiptFilter}
-          onFilterChange={setReceiptFilter}
-          can={can}
-          busy={busy}
-          setBusy={setBusy}
-          onDone={load}
-          onError={handleError}
-          onNotice={setNotice}
-        />
+        <>
+          <WebhookInbox
+            endpoints={webhookEndpoints}
+            receipts={webhookReceipts}
+            summary={webhookSummary}
+            connections={connections}
+            statusFilter={receiptFilter}
+            onFilterChange={setReceiptFilter}
+            can={can}
+            busy={busy}
+            setBusy={setBusy}
+            onDone={load}
+            onError={handleError}
+            onNotice={setNotice}
+          />
+          <WebhookDedupPanel
+            events={dedupEvents}
+            summary={dedupSummary}
+            duplicatedOnly={dedupOnly}
+            onDuplicatedOnlyChange={setDedupOnly}
+            detail={dedupDetail}
+            detailError={dedupError}
+            setDetail={setDedupDetail}
+            setDetailError={setDedupError}
+            can={can}
+            busy={busy}
+            setBusy={setBusy}
+            onDone={load}
+            onError={handleError}
+            onNotice={setNotice}
+          />
+        </>
       )}
       {section === 'platforms' && <PlatformDirectory platforms={platforms} term={term} can={can} />}
       {section === 'connections' && (
@@ -2606,6 +2641,337 @@ function WebhookEndpointForm({
           取消
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * 02.6.1.2 去重视图。
+ *
+ * <p>这一段的目的是回答一个具体问题：**同一条平台事件被重推了几次，最后处理成什么样了。**
+ * 所以每行是一个「业务事件」而不是一条「接收记录」——三次投递显示成一行、重推次数 2，
+ * 旁边直接跟着首次处理的结论。只列 event_id 的表回答不了「到底处理了没有」，
+ * 那样的去重视图等于没去重。
+ *
+ * <p>展开后给的是「去重命中记录 + 全部投递时间线」：每条命中都指回首次，
+ * 并带上首次的当前处理结果。
+ */
+function WebhookDedupPanel({
+  events,
+  summary,
+  duplicatedOnly,
+  onDuplicatedOnlyChange,
+  detail,
+  detailError,
+  setDetail,
+  setDetailError,
+  can,
+  busy,
+  setBusy,
+  onDone,
+  onError,
+  onNotice,
+}: {
+  events: WebhookDedupEventView[];
+  summary: WebhookDedupSummary | null;
+  duplicatedOnly: boolean;
+  onDuplicatedOnlyChange: (value: boolean) => void;
+  detail: WebhookDedupDetail | null;
+  detailError: string;
+  setDetail: (value: WebhookDedupDetail | null) => void;
+  setDetailError: (value: string) => void;
+  can: (p: string) => boolean;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+  onDone: () => Promise<void>;
+  onError: (e: unknown) => void;
+  onNotice: (v: string) => void;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  // 本地筛选：事件 ID 与连接两个筛选用本地做，避免每敲一个字就打一次后端。
+  // 结果集上限 50 条，本地筛不会漏掉"页面上本来就能看到的那些"，口径写在文案里。
+  const [term, setTerm] = useState('');
+
+  async function run(work: () => Promise<unknown>, message: string): Promise<void> {
+    setBusy(true);
+    try {
+      await work();
+      onNotice(message);
+      await onDone();
+    } catch (e) {
+      onError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggle(event: WebhookDedupEventView): Promise<void> {
+    if (expanded === event.firstReceiptId) {
+      setExpanded(null);
+      setDetail(null);
+      setDetailError('');
+      return;
+    }
+    setExpanded(event.firstReceiptId);
+    setDetail(null);
+    setDetailError('');
+    setBusy(true);
+    try {
+      setDetail(
+        await api<WebhookDedupDetail>(`channel/webhook-dedup/${event.firstReceiptId}`),
+      );
+    } catch (e) {
+      setDetailError(e instanceof Error ? e.message : '去重详情加载失败，请重试');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const needle = term.trim().toLowerCase();
+  const visible = events.filter(
+    (e) =>
+      !needle ||
+      e.externalEventId.toLowerCase().includes(needle) ||
+      e.platformCode.toLowerCase().includes(needle) ||
+      e.authorizedAccount.toLowerCase().includes(needle) ||
+      (e.eventType || '').toLowerCase().includes(needle),
+  );
+
+  const redelivered = summary?.duplicateDeliveries ?? 0;
+  const duplicated = summary?.duplicatedEvents ?? 0;
+
+  return (
+    <div className="space-y-4">
+      {redelivered > 0 && (
+        <div className="border-warning/40 bg-warning/5 rounded-md border p-4">
+          <p className="text-copy-14 flex items-center gap-2 font-medium">
+            <RefreshCcw className="text-warning h-4 w-4" />
+            平台在重推
+          </p>
+          <ul className="text-copy-13 text-muted-foreground mt-2 space-y-1">
+            <li>
+              {redelivered} 条重复投递，分布在 {duplicated} 个业务事件上。
+              每个事件只会被处理一次，重推的是同一条消息，不会产生第二条业务记录。
+            </li>
+            {summary && summary.worstDuplicateCount > 0 && (
+              <li>
+                重推最多的是事件 {summary.worstExternalEventId || '（平台未带事件 ID）'}，已被重推{' '}
+                {summary.worstDuplicateCount} 次。持续重推通常意味着上一次处理没能及时完成。
+              </li>
+            )}
+            {summary && summary.pendingFirstEvents > 0 && (
+              <li>{summary.pendingFirstEvents} 个事件的首次记录还在等下游认领或处理。</li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-4">
+        {(
+          [
+            ['totalEvents', '业务事件'],
+            ['duplicatedEvents', '被重推的事件'],
+            ['duplicateDeliveries', '重复投递'],
+            ['pendingFirstEvents', '待处理'],
+          ] as const
+        ).map(([key, label]) => (
+          <div key={key} className="border-border bg-card rounded-md border p-3">
+            <p className="text-muted-foreground text-copy-12">{label}</p>
+            <p className="text-copy-14 mt-1 font-medium">{summary?.[key] ?? 0}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-card rounded-md border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-copy-14 font-medium">去重视图</p>
+            <p className="text-copy-12 text-muted-foreground mt-1">
+              以（回调入口，外部事件 ID）为准归并。同一入口下同一条事件只处理一次，重推次数与首次处理结果都在这里。
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="relative block">
+              <span className="sr-only">按事件 ID 或平台筛选</span>
+              <Search className="text-muted-foreground pointer-events-none absolute top-2 left-2 h-4 w-4" />
+              <input
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                placeholder="事件 ID / 平台 / 账号"
+                className="border-border bg-card text-copy-13 h-8 w-56 rounded-md border pr-2 pl-8"
+              />
+            </label>
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-pressed={duplicatedOnly}
+              onClick={() => onDuplicatedOnlyChange(!duplicatedOnly)}
+            >
+              {duplicatedOnly ? '显示全部事件' : '只看重推过的'}
+            </Button>
+          </div>
+        </div>
+
+        {!summary ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">去重数据加载中…</p>
+        ) : visible.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">
+            {needle
+              ? `没有匹配「${term.trim()}」的业务事件`
+              : duplicatedOnly
+                ? '没有任何事件被平台重推过——所有推送都是一次送达。'
+                : '还没有业务事件。平台推送被接收后，这里会按事件归并显示。'}
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {visible.map((e) => (
+              <li key={e.firstReceiptId} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void toggle(e)}
+                    className="min-w-0 text-left"
+                  >
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      {e.eventType || e.topic || '未标注类型'}
+                      <Badge tone={statusTone[e.firstStatus] ?? 'neutral'}>
+                        {statusLabel[e.firstStatus] ?? e.firstStatus}
+                      </Badge>
+                      {e.duplicateCount > 0 ? (
+                        <Badge tone="warning">重推 {e.duplicateCount} 次</Badge>
+                      ) : (
+                        <Badge tone="success">一次送达</Badge>
+                      )}
+                      {e.signatureStatus !== 'VERIFIED' && (
+                        <Badge tone={statusTone[e.signatureStatus] ?? 'danger'}>
+                          {statusLabel[e.signatureStatus] ?? e.signatureStatus}
+                        </Badge>
+                      )}
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                      事件 {e.externalEventId || '（平台未带事件 ID）'} · {e.platformCode} ·{' '}
+                      {e.authorizedAccount} · {e.shopName ?? '未标注店铺'} · 共投递{' '}
+                      {e.deliveryCount} 次
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1">
+                      首次接收 {formatTime(e.firstReceivedAt)} · 最近一次{' '}
+                      {formatTime(e.lastReceivedAt)}
+                      {e.firstProcessedAt && ` · 处理完成 ${formatTime(e.firstProcessedAt)}`}
+                    </p>
+                    {e.firstLastError && (
+                      <p className="text-copy-12 text-destructive mt-1 break-all">
+                        首次处理失败：{e.firstLastError}
+                      </p>
+                    )}
+                  </button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => void toggle(e)}
+                  >
+                    {expanded === e.firstReceiptId ? '收起' : '投递明细'}
+                  </Button>
+                </div>
+
+                {expanded === e.firstReceiptId && (
+                  <div className="border-border bg-muted/40 mt-3 space-y-2 rounded-md border p-3">
+                    {detailError && (
+                      <p role="alert" className="text-destructive text-copy-13">
+                        {detailError}
+                      </p>
+                    )}
+                    {!detailError && !detail && <p className="text-copy-13">明细加载中…</p>}
+                    {detail && detail.event.firstReceiptId !== e.firstReceiptId && (
+                      <p className="text-copy-13 text-muted-foreground">
+                        当前展开的是另一个事件，请重新点击。
+                      </p>
+                    )}
+                    {detail && detail.event.firstReceiptId === e.firstReceiptId && (
+                      <>
+                        <p className="text-copy-13 font-medium">
+                          去重命中 {detail.hits.length} 条 · 全部投递 {detail.deliveries.length} 条
+                        </p>
+                        {detail.hits.length === 0 && (
+                          <p className="text-copy-13 text-muted-foreground">
+                            这条事件只被投递了一次，没有重复推送。
+                          </p>
+                        )}
+                        <ul className="space-y-1">
+                          {detail.hits.map((h) => (
+                            <li
+                              key={h.receiptId}
+                              className="text-copy-12 text-muted-foreground flex flex-wrap items-center gap-2"
+                            >
+                              <Badge tone="warning">第 {h.deliveryAttempt} 次</Badge>
+                              <span>{formatTime(h.receivedAt)}</span>
+                              <span>本次不进入业务处理</span>
+                              <span>
+                                首次处理：
+                                <Badge tone={statusTone[h.firstStatus] ?? 'neutral'}>
+                                  {statusLabel[h.firstStatus] ?? h.firstStatus}
+                                </Badge>
+                              </span>
+                              {h.firstLastError && <span>{h.firstLastError}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-copy-12 text-muted-foreground">
+                          首次处理结果{' '}
+                          {detail.deliveries[0]
+                            ? `${statusLabel[detail.deliveries[0].status] ?? detail.deliveries[0].status}，${formatTime(detail.deliveries[0].processedAt ?? detail.deliveries[0].processingStartedAt)}`
+                            : '未知'}
+                          。重复的这些投递不会产生第二条业务记录。
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {can('channel.sync.update') && events.some((e) => e.processable) && (
+        <div className="bg-card rounded-md border p-4">
+          <p className="text-copy-14 font-medium">按事件认领</p>
+          <p className="text-copy-12 text-muted-foreground mt-1">
+            下游业务服务按外部事件 ID 消费时走这条路径，而不是逐条接收记录。重复的投递连同它的
+            id 都拿不到，没有路径能创建出第二条业务记录；同一事件第二次认领会被拒绝。
+          </p>
+          <ul className="mt-2 space-y-1">
+            {events
+              .filter((e) => e.processable)
+              .slice(0, 10)
+              .map((e) => (
+                <li
+                  key={e.firstReceiptId}
+                  className="text-copy-13 flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span className="break-all">
+                    {e.eventType || e.topic || '未标注类型'} ·{' '}
+                    {e.externalEventId || '（平台未带事件 ID）'}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() =>
+                      void run(
+                        () =>
+                          api(`channel/webhook-dedup/${e.firstReceiptId}/claim`, 'POST', {}),
+                        '已按业务事件认领，同一事件再次认领会被拒绝',
+                      )
+                    }
+                  >
+                    认领
+                  </Button>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
