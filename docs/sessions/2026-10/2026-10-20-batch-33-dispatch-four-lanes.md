@@ -125,6 +125,9 @@ batch-32 的 L2 第二次红，是**真实跨车道缺陷**：4.5.2.1 拿兄弟�
    已记入 `docs/backlog/2026-10-13-flaky-integration-tests-l2-false-red.md` §六，
    建议同族修法：收敛时钟域，或 DB 侧 `GREATEST(clock_timestamp(), started_at)` 兜底。
    **调度者不代改业务代码**，等派修复车道。
+   （2026-10-20 追加：05:00 轮调度者在旁路做了独立只读取证，结论一致 —— 约束编号
+   `fulfillment_request_step_check3` 经源码复核精确对应 `V152` L434 的第 4 条表级 CHECK；
+   详见 backlog §六之二。**该模块 ID 是 `9.3.3.1` 履约请求，不是 `9.3.1.1` 拆单**。）
 2. **`api-proxy.ts` 里 4.5.1.2 条目的注释过期**：仍写着「4.5.1.2 关键词排名，未交付」，
    而该模块已交付。属 4.5.1.2 的文件所有权范围，本轮未改。
 3. **9.1.2.1 曾遇模型网关 504 中断**，遗留 3 个文件（`V207` / `PlatformOrderSyncModels.java` /

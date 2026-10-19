@@ -229,3 +229,35 @@ Failing row contains (..., TRACK, 1, COMPLETED, null, null, 1,
 
 > 批次 32 的 push **建立在这个 flake 的干净窗口补跑之上，不是首次全量绿**。
 > 已在 `docs/sessions/2026-10/2026-10-20-batch-32-four-lane-delivery.md` 如实记录。
+
+### §六之二：跨会话独立复核（2026-10-20 05:00 轮调度者只读取证）
+
+批次 32 的 L2 跑红时，**上一轮（05:00 tick）调度者在旁路做了完全独立的只读取证**，
+结论与本节一致 —— **这是本条 flake 第二次拿到独立确认**。逐项对照如下：
+
+| 项 | 对方结论 | 06:00 轮独立复核 | 一致 |
+| --- | --- | --- | --- |
+| 失败约束 | `fulfillment_request_step_check3` = 第 4 条**表级** CHECK = `CHECK(finished_at IS NULL OR finished_at>=started_at)` | 源码复核 `V152__trade_fulfillment_request.sql` L399–L434：该表**表级** CHECK 依序为 `_check`(L431) / `_check1`(L432) / `_check2`(L433) / **`_check3`(L434)**；列级 CHECK（`step_kind` / `attempt` / `status` / `work_order_count` / `failure_code`）命名为 `<表>_<列>_check` 且**不占用编号** ⇒ `_check3` 精确对应 L434 | ✅ |
+| 时钟源分裂 | `started_at` JVM 写、`finished_at` PG 写 | `FulfillmentRequestService.java:800` `markStepRunning(id, TRACK, attempt, OffsetDateTime.now(), actor)`（JVM 时钟）vs `V152:1290` `complete_fulfillment_step` 内 `finished_at = clock_timestamp()`（PG 时钟）⇒ 报错行 `step_kind='TRACK'` 正是 L800 那一步 | ✅ |
+| 窗口宽度 | ~1ms（`elapsed_seconds=0.001`） | 同上；失败行 finished 比 started 早 **1.006ms** | ✅ |
+| 排除 batch-32 | V207 零 ALTER、surefire 无 parallel、batch-31 的 L2 绿 | 本节 §六 已独立验证（8 文件全 `A`、履约代码零 diff、隔离复跑 3×33/33 绿） | ✅ |
+| 处置 | 隔离复跑、不二分、L2 不绿不 push、修复不塞进本批 | 全部照办：隔离复跑 3 轮全绿 ⇒ **未做 bisect**（非确定性失败二分无意义）→ 干净窗口重跑**整批** L2 ⇒ 第 3 次 🟢 全绿 ⇒ **在绿之后才 push** | ✅ |
+
+⚠️ **一处需要更正：模块 ID 是 `9.3.3.1`，不是 `9.3.1.1`。**
+按蓝图 `docs/product/capability-blueprint/09-order-and-fulfillment.md`：
+
+- **`9.3.3.1` = 履约请求**（L192）—— 编排一次履约、持久化流程状态、**拥有 `V152` 迁移与
+  `FulfillmentRequestService`**，本次违约就在它名下。
+- `9.3.1.1` = **拆单**（L64）—— 把一个订单拆成多个履约单元，**与本次违约无关**。
+
+⇒ 派修复车道时**必须挂 `9.3.3.1`**。挂成 `9.3.1.1` 会让 worker 去改「拆单」，
+真正的约束与函数一个都不碰 ⇒ 修完照样红。**这条更正来自本轮核对，请以本节为准。**
+
+同族修法不变（见上），另补一条**修复时的具体落点**：
+`complete_fulfillment_step`（`V152:1262` 起）里 `finished_at = clock_timestamp()`，
+若选「DB 侧兜底」路线，改成 `GREATEST(clock_timestamp(), started_at)` 的同时
+**必须让 `elapsed_seconds` 与之自洽**（该表 `_check4` 要求 `elapsed_seconds>=0`，
+`GREATEST` 兜底后 `finished_at` 可能等于 `started_at`，此时 `elapsed_seconds` 写 0 合法，
+但**不能写负数**，否则会被 `_check4` 拒绝）。
+若选「同源」路线（`started_at` 也由 DB 写），则 `FulfillmentRequestService` 的
+`OffsetDateTime.now()` 传参路径要改，且 `elapsed_seconds` 的计算基准同步从 JVM 切到 DB。
