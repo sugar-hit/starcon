@@ -1756,6 +1756,55 @@ const services: readonly {
       /^listing\-performance(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/trend)?)?$/,
   },
   {
+    // 4.5.1.2 关键词排名（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.5.1.1 `listing-performance` 那一条**之后** ——
+    // 与本批另外三条车道的锚点互不重叠，git 能干净求并。
+    //
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-keyword-rankings` 这个独立前缀而不是 `listings/{id}/keywords`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段路径登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「关键词排名」与「平台表现」「平台状态回流」本来就是**三条独立通道**
+    //   （一个把名次收回来、一个把表现收回来、一个把状态收回来），
+    //   口径、限流与重试互不干涉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-keyword-rankings                     关键词集合列表（GET 真分页）/ 新建关键词（POST）
+    //   listing-keyword-rankings/capabilities        能力声明（1 工作台 / 14 广告 / 02 抓取调度器未交付
+    //                                               ⇒ available=false + ownerModule）
+    //   listing-keyword-rankings/filter-options      筛选面板选项（平台 / 店铺 / 站点）
+    //   listing-keyword-rankings/crawls              接收排名抓取任务（POST，批次级幂等）
+    //   listing-keyword-rankings/alerts              变化预警列表（GET 真分页）
+    //   listing-keyword-rankings/alerts/{uuid}/acknowledge  人工确认一条预警（PUT）
+    //   listing-keyword-rankings/report              关键词维度报表（GET，真 SQL 聚合）
+    //   listing-keyword-rankings/{uuid}              单个关键词的排名明细（GET）/ 改阈值（PUT）/ 停用（DELETE）
+    //   listing-keyword-rankings/{uuid}/history      排名历史（GET，真分页）
+    //   listing-keyword-rankings/{uuid}/trend        趋势序列（GET，日/周/月）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / crawls / alerts）必须排在
+    //    {uuid} 段**之前**判别，否则会被 {uuid} 通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-keyword-rankings/undeclared-action` —— 本模块**确定没有**的动作
+    //   * `listing-keyword-rankings/{uuid}/crawls`      —— 抓取走集合入口，不按关键词寻址
+    //   * `listing-keyword-rankings/{uuid}/alerts`     —— 预警是集合查询，不按关键词寻址
+    //   * `listing-keyword-rankings/listing-hijackers` —— 🔴 4.5.2.1 跟卖监控（别的模块的职责）
+    //   * `listing-keyword-rankings/{uuid}/ads`        —— 🔴 14 广告关联投放（整卷未交付）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-keyword\-rankings(?:\/capabilities|\/filter\-options|\/crawls|\/report|\/alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/history|\/trend)?)?$/,
+  },
+  {
     // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
