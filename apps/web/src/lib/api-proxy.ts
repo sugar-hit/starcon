@@ -1405,6 +1405,45 @@ const services: readonly {
       /^listing\-content\-writeback(?:\/capabilities|\/writebacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|retry|cancel))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:changes|report)|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/content\-history)$/,
   },
   {
+    // 2.4.2.3 映射缺失队列（channel 服务）。本条目是**新增一条独立的 `channel/` 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在**最后一条 `channel/` 元素**（4.2.2.1 `listing-content-writeback`）
+    // **之后**、既有 `prefix: 'trade/'` **之前**：与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   mapping-gaps                 待映射清单（GET 真分页 + 六个筛选维度）
+    //   mapping-gaps/summary         队列概览（状态 / 原因 / 店铺分布 + 最老的一条）
+    //   mapping-gaps/filter-options  筛选面板词表（不硬编码在前端）
+    //   mapping-gaps/capabilities    能力声明（未交付段 available=false + ownerModule）
+    //   mapping-gaps/orders          09 订单缺映射的**事件接入点**（POST；当前 trade 侧未推）
+    //   mapping-gaps/{uuid}          缺口详情（GET）
+    //   mapping-gaps/{uuid}/map      映射到已有 SKU（POST）
+    //   mapping-gaps/{uuid}/create-sku  登记「新建 SKU」请求（POST；**只登记意图，不建档**）
+    //   mapping-gaps/{uuid}/ignore   标记忽略（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / summary / orders）
+    //    必须排在 `{uuid}` 分支**之前**，否则会被 uuid 段吃掉半截
+    //    （症状是「能力声明 404，但列表页正常」）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    短前缀会被放行到一条根本不存在的路由上。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    // ⚠️ 裸路径 `mapping-gaps` **放行**：本模块的列表就是 `GET /channel/mapping-gaps?...`，
+    //    query string 不参与这里的比对（proxy() 拿的是 params.path，不含 search）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `mapping-gaps/{uuid}/backfill`        —— 回填由映射版本落库的 DB 触发器完成，没有独立端点
+    //   * `mapping-gaps/{uuid}/affected-orders` —— 「回填受影响订单」未接线（09 订单在 trade 服务）
+    //   * `mapping-gaps/{uuid}/suggest`         —— 🔴 **绝不按名称猜 SKU**：本模块不提供任何自动匹配
+    //   * `mapping-gaps/batch`                  —— 批量建立映射归 4.1.2.1，本模块只逐条决策
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^mapping\-gaps(?:\/(?:capabilities|filter\-options|summary|orders|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:map|create\-sku|ignore))?))?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
