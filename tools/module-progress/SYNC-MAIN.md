@@ -91,6 +91,26 @@ git status --porcelain            # 必须为空；有改动就停下汇报，�
 git merge --no-ff "$PUSH_REMOTE"/main -m "merge(main): sync from origin/main"
 ```
 
+⚠️ **合并 commit 的正文要列清并入了哪些 main 提交**（这既是交付记录，也是回归时的定位依据）：
+
+```bash
+cd "$PROJECT_ROOT"
+git log --oneline "$PRE".."$PUSH_REMOTE"/main    # 先看清要并入什么
+```
+
+正文按这个格式写（列模块/提交 ID + 一句话说明）：
+
+```
+merge(main): sync from origin/main
+
+并入 origin/main 的 N 个提交：
+- <commit> <模块ID> <名称> —— <一句话说明>
+- <commit> <模块ID> <名称> —— <一句话说明>
+```
+
+⚠️ 这个 merge commit 之后若流水线 L2 红了，**它就是首要排查对象** ——
+它的代码没经过本流水线的 L1/L2。
+
 **冲突时**：
 
 ```bash
@@ -147,6 +167,7 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate release
 
 - **结果**：已同步（并入 N 个 main 提交，push 到 <hash>）/ 无新提交 / 冲突未并入 / 预检红已回退
 - **差异规模**：并入的 main 提交数、改动文件数
+- **合并 commit**：hash + 正文列出的提交清单
 - **台账变化**：同步前后 已交付 / 进行中 / 未开发
 - **冲突 / 预检错误**：有就点名文件与错误，没有就写「无」
 - **闸**：已释放（写明）

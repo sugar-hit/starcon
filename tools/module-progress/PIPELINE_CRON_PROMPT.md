@@ -466,7 +466,12 @@ node tools/module-progress/sync.mjs --check
 5. 修复后**重跑 L2**，绿了再 push
 6. 连续 3 轮 L2 红且无法定位 → 本轮零派发并在汇报里点名
 
-#### 5.3 写详细功能说明（用户明确要求）
+#### 5.3 ⛔ 收尾三件套：写说明 → commit → push（**每次开发完成都必须做，顺序不可颠倒**）
+
+> **用户明确要求：每次开发完成都要 comment + commit + push。**
+> 三件套缺任何一件，本轮**不算完成**，汇报里必须点名缺哪一件。
+
+**① 写说明（comment）**
 
 **L2 绿之后**，写详细说明到 `docs/sessions/YYYY-MM/YYYY-MM-DD-batch-<n>-<topic>.md`，
 **每个模块一节**，包含：
@@ -486,7 +491,39 @@ node tools/module-progress/sync.mjs --check
 **关键设计决策**：为什么这么做、否决了什么方案
 ```
 
+⚠️ **批次号接着已有往后排**（这条分支上可能有别的 agent 同时在写，不能重号）：
+
+```bash
+cd "$PROJECT_ROOT"
+ls docs/sessions/$(date +%Y-%m)/ | grep -oE 'batch-[0-9]+' | sort -t- -k2 -n | tail -1
+```
+
 同时让集成头的 merge commit 正文列本批模块清单（Conventional Commits）。
+
+**② commit**（**最容易被漏掉的一步，历史上就漏过**）
+
+```bash
+cd "$PROJECT_ROOT"
+node tools/module-progress/sync.mjs
+git add docs/sessions/$(date +%Y-%m)/ docs/product/capability-blueprint/module-progress.md
+git -c user.name="Mavis" -c user.email="mavis@starcon.local" commit \
+  -m "docs(batch-<n>): <模块ID 清单> —— <一句话交付说明>"
+```
+
+⚠️ **说明文件没有 commit 进版本库，就等于没写** —— push 不会带上未提交的文件，
+远端会缺这一批的说明。⚠️ 说明文件与台账**必须同一个 commit**，不要拆开。
+
+**③ push**
+
+**L2 绿、且说明已 commit 之后**才 push：
+
+```bash
+cd "$PROJECT_ROOT"
+git push "$PUSH_REMOTE" integration/module-dev
+```
+
+⚠️ **L2 没绿不 push**，但**说明照写、commit 照做**（记清楚红在哪、二分到哪条车道），
+成果与诊断信息留在集成头本地，修复后随下一批一起 push。
 
 #### 5.4 push（用户明确要求「每次开发完就 push」）
 
@@ -507,6 +544,7 @@ git push "$PUSH_REMOTE" integration/module-dev
 - **静态预检**：互相破坏形状扫描有没有命中
 - **L2 结果**：绿 / 红。红了写明二分到哪条车道、几次、修复派发情况
 - **说明文件**：会话日志路径 + 覆盖模块清单
+- **收尾三件套**：说明 / commit / push 三件各自的结果（**缺哪一件就点名哪一件**）
 - **push 结果**：commit hash + 模块清单；没 push 要明确写「L2 未绿，本轮不 push」
 - **温度观测**：therm 有无降频项；`postgres:16-alpine` 容器数（**只数带 `org.testcontainers.sessionId` 标签的**；无标签的是历史遗留孤儿容器，要单独点名清理）
 - **吞吐预期**：**每次重跑都从 `.dev-agent/PIPELINE.local.md` 的当前 `LANES` + 实际节流间隔重新算**
@@ -519,6 +557,9 @@ git push "$PUSH_REMOTE" integration/module-dev
 ## 5. 最高优先级禁令
 
 - **L2 没绿绝对不 push**
+- **不要漏掉说明文件的 commit** —— 写了说明不 commit 等于没写，push 不会带上未提交的文件
+- **不要把说明文件与台账拆成两个 commit** —— 合成一个 `docs(batch-<n>):` 提交
+- **不要跳过三件套里的任何一件**（写说明 → commit → push），顺序不可颠倒
 - **L2 不得与在途车道的 L1 并发跑** —— 多套 Testcontainers PG 互相抢资源，
   2026-10-19 20:00 那轮实测：L2 与 4 条车道的 L1 并发时 PG 峰值 16，
   后端 1364 例里 3 failures + 24 errors **全是假红**（`seed()` 503 / 连接拒绝），

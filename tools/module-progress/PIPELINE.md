@@ -724,13 +724,27 @@ node tools/module-progress/sync.mjs --check
 
 **L2 红了怎么办**：见上面「批量验证未过时的处置」—— 不 push、二分定位、派修复任务、重跑 L2。
 
-### 5.3 写详细功能说明（用户明确要求）
+### 5.3 ⛔ 收尾三件套：写说明 → commit → push（**每次开发完成都必须做，顺序不可颠倒**）
 
-**L2 绿之后**，为本轮交付写一份**详细的功能说明**，落到两个地方：
+> **用户明确要求：每次开发完成都要 comment + commit + push。**
+> 三件套缺任何一件，本轮都**不算完成**，汇报里必须点名缺哪一件。
+
+```
+① 写说明（comment）→ ② commit → ③ push
+```
+
+**① 写说明**（L2 绿之后）——为本轮交付写一份**详细的功能说明**，落到两个地方：
 
 **(a) 会话日志**（AGENTS.md 规定的归档位置）：
 
 `docs/sessions/YYYY-MM/YYYY-MM-DD-batch-<n>-<topic>.md`
+
+⚠️ **`<n>` 必须接着已有批次号往后排**，不能重号 —— 这条分支上可能有别的 agent 同时在写：
+
+```bash
+cd "$PROJECT_ROOT"
+ls docs/sessions/$(date +%Y-%m)/ | grep -oE 'batch-[0-9]+' | sort -t- -k2 -n | tail -1
+```
 
 内容必须包含，**每个模块一节**：
 
@@ -749,12 +763,25 @@ node tools/module-progress/sync.mjs --check
 **关键设计决策**：为什么这么做、否决了什么方案（必填，尤其涉及金额/时间/多租户的）
 ```
 
-**(b) 集成头的合并 commit**：用 `git commit --amend` 或让 `merge-ready` 的 commit message
-带上本批模块清单。Conventional Commits 格式，正文列本批每个模块的 ID + 名称 + 一句话说明。
+**(b) 集成头的合并 commit**：让 `merge-ready` 的 commit message 带上本批模块清单。
+Conventional Commits 格式，正文列本批每个模块的 ID + 名称 + 一句话说明。
 
-### 5.4 push（用户明确要求「每次开发完就 push」）
+**② commit**（**这一步最容易被漏掉，历史上就漏过**）——把说明文件与台账行**提交进版本库**：
 
-**只在 L2 绿之后 push**：
+```bash
+cd "$PROJECT_ROOT"
+node tools/module-progress/sync.mjs          # 台账行随之更新
+git add docs/sessions/$(date +%Y-%m)/ docs/product/capability-blueprint/module-progress.md
+git -c user.name="Mavis" -c user.email="mavis@starcon.local" commit \
+  -m "docs(batch-<n>): <模块ID 清单> —— <一句话交付说明>"
+```
+
+⚠️ **说明文件没有 commit 进版本库，就等于没写。** push 不会带上未提交的文件，
+远端会缺这一批的说明 —— 后面谁再回看交付记录，这个批次就是空白。
+⚠️ commit 消息用 `docs(batch-<n>):` 前缀，与仓库既有批次惯例一致（batch-21 ~ batch-27）。
+⚠️ 台账的改动与说明文件**放在同一个 commit**里，不要拆成两个。
+
+**③ push**（**只在 L2 绿、且说明已 commit 之后**）：
 
 ```bash
 cd "$PROJECT_ROOT"
@@ -802,6 +829,7 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gc
 - **静态预检**：互相破坏形状扫描有没有命中
 - **L2 批量验证结果**：绿 / 红。红了写明二分定位到哪条车道、二分了几次、修复派发情况
 - **本批说明文件**：会话日志路径 + 覆盖的模块清单
+- **收尾三件套**：说明 / commit / push 三件各自的结果（**缺哪一件就点名哪一件**）
 - **push 结果**：commit hash + 推送了哪些模块；**没 push 就要明确写「L2 未绿，本轮不 push」**
 - **温度观测**：`pmset -g therm` 有没有降频项；`docker ps` 里 **Testcontainers 标签**的 `postgres:16-alpine` 容器数（只数带 `org.testcontainers.sessionId` 标签的；无标签的是历史遗留孤儿容器，会虚高计数，要单独点名清理）
 - **吞吐预期**：按 `.dev-agent/PIPELINE.local.md` 的**当前** `LANES` 与实际批次间隔估算，
@@ -812,6 +840,10 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gc
 ## 禁止事项
 
 - **L2 没绿绝对不 push**（用户要的是「开发完就 push」，而「开发完」的定义包含验证通过）
+- **不要漏掉说明文件的 commit** —— 写了说明不 commit 等于没写：
+  push 不会带上未提交的文件，远端会缺这一批的说明
+- **不要把说明文件与台账拆成两个 commit** —— 合成一个 `docs(batch-<n>):` 提交
+- **不要跳过三件套里的任何一件**（写说明 → commit → push），顺序不可颠倒
 - **不要把 `--lanes` 调回 1、配额调回 2、tick 改回 `0 * * * *` 或 `*/30`**
   （2026-10-08 因用户报「电脑温度太高」降载；2026-10-13 的提速建立在「每批只跑一次全量」这个前提上，
   提速是用户的决定，调度器不得自作主张再往上加）
@@ -824,7 +856,8 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gc
 - 不要把进度数字写死在汇报里 —— 每次都重新跑 sync
 - 不要在汇报里承诺「全部完成」或给出单点完成日期 —— 诚实区间是 22–28 天
 - **不要自行改节流闸阈值**（当前值见 `.dev-agent/PIPELINE.local.md`）。过热回退到更长窗口是**用户的决定**，调度器只负责报出来。
-- **不要改 cron 的 `8-19` 时段**（夜间静默是用户的明确要求）。也**不要把 `0,30` 改回 `0`** ——
+- **不要自行改 `SILENT_WINDOW` 与 cron 的时段**（夜间静默 / 全天运行是用户的决定，由
+  `.dev-agent/PIPELINE.local.md` 决定）。也**不要把 `0,30` 改回 `0`** ——
   定点触发会让非 60 倍数的闸阈值静默退化成 60 的下一个倍数，**吞吐凭空下降且没有任何报错**。
 - 不要为了让 tick 通过而 `force` 清掉别人持有的调度闸
 - **不要谎报「定时任务已关闭」** —— 关不掉就在报告里写明失败原因

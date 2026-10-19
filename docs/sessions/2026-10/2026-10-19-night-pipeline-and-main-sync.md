@@ -57,8 +57,39 @@
 - `/Users/guan/Projects/starcon/.dev-agent/PIPELINE.local.md` — 本机参数与两个 cron_id
 - `/Users/guan/Projects/starcon-worktrees/integration/.dev-agent/` — 编排器状态（lanes.json / dispatch.gate / last-batch-at），并软链到上面的配置
 
-## 复核中修掉的三个真缺陷（派发链路，否则每轮都跑偏）
+## ⛔ 收尾三件套：写说明 → commit → push（用户明确要求，22:2x 追加）
 
+用户要求「**每次开发完成都要 comment commit and push**」。核对协议后发现**中间那一步从来没写过**：
+
+| 协议原文 | 现状 |
+| --- | --- |
+| 5.3 写详细功能说明（写文件） | 有 |
+| 5.4 push（推远端） | 有 |
+| **把说明文件 commit 进版本库** | **缺** |
+
+照字面执行的后果：说明文件是未跟踪/未提交状态，**push 不会带上它**，
+远端永远缺这一批的说明；而 5.4 又要求「push 前确认工作区干净」——
+两条规则互相打架，调度者要么带着脏工作区 push（说明丢失），
+要么卡在「工作区不干净」直接不推（整批交付卡在本地）。
+
+**修法**（PIPELINE.md 5.3 / PIPELINE_CRON_PROMPT.md 5.3 / 两个 cron 任务书同步）：
+
+1. 5.3 改名 **「收尾三件套：写说明 → commit → push」**，顺序写死，三件缺任一件
+   **本轮不算完成**，汇报里必须点名缺哪一件
+2. 补上 ② commit 的完整命令：`sync.mjs` → `git add 说明 + 台账` →
+   `commit -m "docs(batch-<n>): <模块清单> —— <一句话>"`，
+   **说明文件与台账必须同一个 commit**
+3. 批次号 `<n>` **接着已有往后排**（`ls docs/sessions/$(date +%Y-%m)/ | grep -oE 'batch-[0-9]+' | sort -t- -k2 -n | tail -1`）
+   —— 这条分支上可能有别的 agent 同时在写批次文档，重号会互相覆盖
+4. L2 红的路径也明确：**说明照写、commit 照做**（记清红在哪、二分到哪条车道），
+   只是**不 push**；成果与诊断留在集成头本地，修复后随下一批一起 push。
+   这样既不违反「L2 没绿不 push」，也不让诊断信息丢失
+5. 同步任务（main → module-dev）也补上：**合并 commit 的正文要列清并入的 main 提交**，
+   它同时是回归时的首要定位依据
+6. 顺带修掉一条与新配置矛盾的禁令：「不要改 cron 的 `8-19` 时段」→
+   「不要自行改 `SILENT_WINDOW` 与 cron 的时段（由本地配置决定）」
+
+## 复核中修掉的三个真缺陷（派发链路，否则每轮都跑偏）
 1. **worker 的 shell 里没有 `$PROJECT_ROOT`。** 子任务模板里的心跳/落地命令
    `cd "$PROJECT_ROOT" && lane.mjs heartbeat` 是给调度者用的变量；
    占位符没替换时 worker 的 `cd ""` 留在自己 worktree，`lane.mjs` 的 ROOT 随之变成
