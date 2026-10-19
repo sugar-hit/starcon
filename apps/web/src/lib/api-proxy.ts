@@ -1458,6 +1458,52 @@ const services: readonly {
       /^listing\-content\-writeback(?:\/capabilities|\/writebacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|retry|cancel))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:changes|report)|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/content\-history)$/,
   },
   {
+    // 4.2.1.1 刊登编辑器（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.4.2.1 `listing-claims` 元素**之前** —— 与其它车道
+    // （`listing-claims` 之后 / `crm/` 之前 / `services` 数组最末尾）都不重叠。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-editor` 这个独立前缀而不是 `listings/{id}/editor`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「编辑」本来就不是 listing 的一种状态 —— 草稿按 **平台 + 站点 + 语言** 存，
+    //   一条 listing 在不同语言下就是多份草稿，挂 listing 上会把这个维度压扁。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-editor/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   listing-editor/form-schema             🔴 动态表单契约（字段集由平台要求推导）
+    //   listing-editor/validate                字段级校验试算（不落库）
+    //   listing-editor/drafts                  草稿列表（GET）
+    //   listing-editor/drafts/{uuid}           单条草稿（GET）
+    //   listing-editor/drafts/{uuid}/submit    🔴 提交审核 = 入队（POST）
+    //   listing-editor/submissions             入队队列（GET）
+    //   listing-editor/source-product          源商品（03，只读）
+    //   listing-editor/media-assets            媒体库素材（03，只读）
+    //   listing-editor/drafts（POST）          保存草稿（同一形状两种方法）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / form-schema / validate / drafts / submissions /
+    //    source-product / media-assets）**排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-editor/drafts/{uuid}/publish`  —— 🔴 派发归 4.3.1.1，本模块只入队
+    //   * `listing-editor/drafts/{uuid}/dispatch` —— 同上
+    //   * `listing-editor/drafts/{uuid}/apply-template` —— 🔴 4.2.2.1 刊登模板未交付
+    //   * `listing-editor/drafts/{uuid}/delete`   —— 草稿是内容事实，不提供删除
+    //   * `listing-editor/templates`              —— 4.2.2.1 刊登模板未交付
+    //   * `listing-editor/listing/{uuid}`        —— 没有"按 listing 取编辑器"这个形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-editor(?:\/capabilities|\/form\-schema|\/validate|\/submissions|\/source\-product|\/media\-assets|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)?$/,
+  },
+  {
     // 4.4.2.1 商品认领（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
