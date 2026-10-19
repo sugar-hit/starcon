@@ -2698,6 +2698,59 @@ const services: readonly {
     pattern:
       /^inventory\/stockout-alerts\/(?:capabilities|evaluate|starvations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|stockouts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
   },
+  {
+    // 16.2.2.1 合规预检（channel 服务，卷 16「合规与风控」的 L3 锚点 16.2.2）。
+    //
+    // 蓝图：「发布前的合规体检：内容违规、认证缺失、尺寸规格不符、材质与描述不符、危险品与运输限制、
+    // 标签与说明书要求，多维度检查并给出整改建议。输入：listing 内容草稿；商品属性；认证状态；平台要求。
+    // 输出：体检报告（分维度得分 + 问题清单 + 整改建议）。关系：上游 = 4.2.1.1 编辑器；下游 = 16.2.1.2 拦截。
+    // **预检在保存草稿时就跑一次**（即时反馈），发布时再跑一次（强制校验）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 7.8.2.2 的 `inventory/stockout-alerts` 元素
+    // 之后、`];` 之前），与另外三条车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `compliance-precheck` 这个独立前缀：
+    //   * `listing-compliance-precheck` 是同批 4.2.3.2 车道的前缀（卷 04 的「合规预检（违禁词/侵权）」）——
+    //     那是**另一个模块**：那边出「阻断项 + 提醒项」的风险清单，这边出「分维度得分 + 问题清单 +
+    //     整改建议」的体检报告。两边不共用表、不共用端点、不共用页面，也不共用白名单元素。
+    //   * `listing-*` 开头的既有前缀已有 8 条，视觉上再挤一条进去更容易看错行。
+    //   * `compliance-*` 也不选：16.2.1.1 规则库未来会占那个命名空间。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   compliance-precheck/capabilities            能力声明（逐维度量得到 / 量不到 + 归属模块）
+    //   compliance-precheck/drafts                  可供体检的内容草稿（GET，4.2.1.1 的草稿，只读）
+    //   compliance-precheck/drafts/{uuid}/check      🔴 保存草稿时的即时反馈（POST）
+    //   compliance-precheck/drafts/{uuid}/precheck   🔴 发布前的强制校验（POST）
+    //   compliance-precheck/reports                 报告历史（GET，真分页）
+    //   compliance-precheck/reports/{uuid}          单份报告（GET：分维度得分 + 问题清单 + 整改建议）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / drafts / reports）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ `drafts/{uuid}` 的**动作段是必选的**（`(?:check|precheck)` 不带 `?`）：
+    //    后端没有「按草稿取单条体检入口」这个资源，放行 `drafts/{uuid}` 就是凭空多出一条 GET。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `compliance-precheck` —— 本模块没有裸路径资源。
+    //   * `compliance-precheck/drafts/{uuid}` —— 没有「按草稿取单条体检入口」这个资源。
+    //   * `compliance-precheck/reports/{uuid}/publish|block|exempt|approve` ——
+    //     🔴 拦截、豁免与审批归 16.2.1.2（未交付），本模块只出报告与结论。
+    //   * `compliance-precheck/rules|library|certifications` ——
+    //     🔴 16.2.1.1 规则库与 16.2.2.2 认证与资质都未交付，本模块不代它们开形状。
+    //   * `compliance-precheck/reports/{uuid}/delete` —— 报告是那一次判定的凭据，不可删。
+    //   * `listing-compliance-precheck/...` —— 同批 4.2.3.2 车道的形状，不是本模块的。
+    //
+    // 与既有分支不重叠：既有 channel 分支的 alternation 里没有 `compliance-precheck`，
+    // 所以 `compliance-precheck/...` 不会先被既有分支吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
 ];
 
 function resolve(path: string) {
