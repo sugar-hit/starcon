@@ -291,6 +291,92 @@
         }
       }
     },
+    "/channel/bundle-components/components/{id}": {
+      "put": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "put_channel_bundle_components_components_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBundleComponentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleComponentRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "delete_channel_bundle_components_components_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleComponentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/writeback-targets": {
       "get": {
         "tags": [
@@ -3452,6 +3538,514 @@
         }
       }
     },
+    "/channel/listing-publish/tasks/{taskId}/report": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_tasks_taskId_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "failureReason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/rate-limits": {
+      "get": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "get_channel_listing_publish_rate_limits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublishRateLimitRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_rate_limits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRateLimitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishRateLimitRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches": {
+      "get": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "get_channel_listing_publish_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublishBatchRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublishBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/retry": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_retry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/resume": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_resume",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/reorder": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_reorder",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/pause": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_pause",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishBatchStateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/dispatch": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/cancel": {
+      "post": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "post_channel_listing_publish_batches_batchId_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishBatchStateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-mappings": {
       "get": {
         "tags": [
@@ -5161,6 +5755,281 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SyncCarriersResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/bundle-components/components": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_components",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "bindingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "componentSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleComponentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "post_channel_bundle_components_components",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBundleComponentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleComponentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/bundle-components/bindings": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_bindings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "mappingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "listingVariantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "bundleVersionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "RECENT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleBindingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "post_channel_bundle_components_bindings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBundleBindingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleBindingDetail"
                 }
               }
             }
@@ -7699,6 +8568,146 @@
         }
       }
     },
+    "/channel/listing-publish/capabilities": {
+      "get": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "get_channel_listing_publish_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}": {
+      "get": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "get_channel_listing_publish_batches_batchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-publish/batches/{batchId}/tasks": {
+      "get": {
+        "tags": [
+          "publish-controller"
+        ],
+        "operationId": "get_channel_listing_publish_batches_batchId_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublishTaskRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-mappings/{id}": {
       "get": {
         "tags": [
@@ -9373,6 +10382,155 @@
         }
       }
     },
+    "/channel/bundle-components/filter-options": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/bundle-components/capabilities": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleComponentCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/bundle-components/bindings/{id}": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_bindings_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleBindingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/bundle-components/bindings/{id}/sellable-check": {
+      "get": {
+        "tags": [
+          "listing-bundle-component-controller"
+        ],
+        "operationId": "get_channel_bundle_components_bindings_id_sellable_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingBundleSellableCheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/backfills/{id}": {
       "get": {
         "tags": [
@@ -9886,654 +11044,6 @@
           }
         }
       }
-    },
-    "/channel/listing-publish/tasks/{taskId}/report": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_tasks_taskId_report",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "taskId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "success",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "failureReason",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishTaskRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/rate-limits": {
-      "get": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "get_channel_listing_publish_rate_limits",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "platformCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublishRateLimitRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_rate_limits",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishRateLimitRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishRateLimitRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches": {
-      "get": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "get_channel_listing_publish_batches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublishBatchRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePublishBatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishBatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/retry": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_retry",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RetryRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/resume": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_resume",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishBatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/reorder": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_reorder",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReorderRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchActionResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/pause": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_pause",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishBatchStateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishBatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/dispatch": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_dispatch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DispatchResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/cancel": {
-      "post": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "post_channel_listing_publish_batches_batchId_cancel",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishBatchStateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishBatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/capabilities": {
-      "get": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "get_channel_listing_publish_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}": {
-      "get": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "get_channel_listing_publish_batches_batchId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublishBatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-publish/batches/{batchId}/tasks": {
-      "get": {
-        "tags": [
-          "publish-controller"
-        ],
-        "operationId": "get_channel_listing_publish_batches_batchId_tasks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "batchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublishTaskRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -10770,6 +11280,85 @@
           },
           "updatedAt": {
             "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveBundleComponentRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "组件行 id；留空表示新增",
+            "format": "uuid",
+            "nullable": true
+          },
+          "bindingId": {
+            "type": "string",
+            "description": "绑定 id（必须处于当前生效状态）",
+            "format": "uuid"
+          },
+          "componentSkuId": {
+            "type": "string",
+            "description": "🔴 catalog 03 的组件 SKU 逻辑 id（跨服务不建 FK）",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "🔴 每卖 1 件平台套装需要这个组件多少；必须 > 0（NUMERIC(19,6)）"
+          },
+          "role": {
+            "type": "string",
+            "description": "组件角色（主机 / 配件 / 赠品…），只给人看"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "ListingBundleComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "组件行 id",
+            "format": "uuid"
+          },
+          "bindingId": {
+            "type": "string",
+            "description": "绑定 id",
+            "format": "uuid"
+          },
+          "componentSkuId": {
+            "type": "string",
+            "description": "🔴 catalog 03 的组件 SKU 逻辑 id",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "🔴 数量：每卖 1 件平台套装需要这个组件多少；恒 > 0（NUMERIC(19,6)）"
+          },
+          "role": {
+            "type": "string",
+            "description": "组件角色（只给人看，不参与判定）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "bindingCurrent": {
+            "type": "boolean",
+            "description": "该绑定是否当前生效（已退役绑定的组件是历史，只读）"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "落库时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
             "format": "date-time"
           }
         }
@@ -13890,7 +14479,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -14161,6 +14750,500 @@
           }
         }
       },
+      "PublishTaskRow": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "任务 id（4.3.1.3 的跳转参数）",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 平台编码；这条任务按**这个平台**的配额排队"
+          },
+          "rateLimitId": {
+            "type": "string",
+            "description": "🔴 生效的限流配置 id；null = 该平台未配置限流（fail-closed，不派发）",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "description": "🔴 执行顺序（可重排；派发按它升序取）",
+            "format": "int32"
+          },
+          "state": {
+            "type": "string",
+            "description": "PENDING / DISPATCHED / SUCCEEDED / FAILED"
+          },
+          "attempts": {
+            "type": "integer",
+            "description": "已派发次数（重试会累加）",
+            "format": "int32"
+          },
+          "failureReason": {
+            "type": "string",
+            "description": "🔴 失败明细；可跳转 4.3.1.3"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "派发时刻；仅 DISPATCHED/SUCCEEDED/FAILED 非空",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "终态时刻；仅 SUCCEEDED/FAILED 非空",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublishRateLimitRequest": {
+        "required": [
+          "platformId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（channel V1 全局码表）",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "店铺 id；不给 = 平台级默认配额，给了 = 该店铺单独一条",
+            "format": "uuid"
+          },
+          "maxInFlight": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 在途并发上限（1~500）",
+            "format": "int32"
+          },
+          "requestsPerWindow": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 滑动窗口派发上限（1~10000）",
+            "format": "int32"
+          },
+          "windowSeconds": {
+            "maximum": 86400,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 滑动窗口长度秒（1~86400）",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用"
+          }
+        }
+      },
+      "PublishRateLimitRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "限流配置 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名"
+          },
+          "shopId": {
+            "type": "string",
+            "description": "店铺 id；null 表示平台级默认配额",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码；平台级为 null"
+          },
+          "maxInFlight": {
+            "type": "integer",
+            "description": "🔴 在途并发上限：该限流行同一时刻允许多少条在途",
+            "format": "int32"
+          },
+          "requestsPerWindow": {
+            "type": "integer",
+            "description": "🔴 滑动窗口派发上限",
+            "format": "int32"
+          },
+          "windowSeconds": {
+            "type": "integer",
+            "description": "🔴 滑动窗口长度（秒）",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用；停用等价于该行不存在（不派发）"
+          },
+          "currentInFlight": {
+            "type": "integer",
+            "description": "🔴 当前在途数（DISPATCHED，窗口不限）",
+            "format": "int64"
+          },
+          "currentWindowCount": {
+            "type": "integer",
+            "description": "🔴 当前窗口内已派发次数",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreatePublishBatchRequest": {
+        "type": "object",
+        "properties": {
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码筛选（照抄 4.1.1.1）"
+          },
+          "marketplaceCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "站点编码筛选（照抄 4.1.1.1）"
+          },
+          "status": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "listing 状态筛选（照抄 4.1.1.1 的七态）"
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "负责人筛选（照抄 4.1.1.1）",
+            "format": "uuid"
+          },
+          "category": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "类目路径模糊筛选（照抄 4.1.1.1）"
+          },
+          "search": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "标题 / 平台商品 ID 关键字（照抄 4.1.1.1）"
+          },
+          "hasPendingDraft": {
+            "type": "boolean",
+            "description": "🔴 只选**有待发布内容草稿**的 listing（4.2.1.2 的产出）；不勾 = 不按草稿筛"
+          },
+          "excludeAlreadyPublished": {
+            "type": "boolean",
+            "description": "🔴 排除已发布过的（listing.status 已是 ON_SALE / UNDER_REVIEW / APPROVED）"
+          },
+          "limit": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 数量上限（1~1000）：批次最多纳入多少条",
+            "format": "int32"
+          }
+        }
+      },
+      "PublishBatchRow": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "RUNNING 可派发 / PAUSED 停止派发新任务 / COMPLETED 全部终态 / CANCELLED 已中止"
+          },
+          "filterRule": {
+            "type": "string",
+            "description": "🔴 筛选规则快照（提交那一刻的口径）"
+          },
+          "strategy": {
+            "type": "string",
+            "description": "发布策略快照"
+          },
+          "limitCount": {
+            "type": "integer",
+            "description": "数量上限",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "任务总数",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "description": "待派发",
+            "format": "int32"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "description": "🔴 在途（已派发未回报）",
+            "format": "int32"
+          },
+          "succeededCount": {
+            "type": "integer",
+            "description": "🔴 已成功",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "description": "🔴 失败（可批量重试）",
+            "format": "int32"
+          },
+          "progressPercent": {
+            "type": "integer",
+            "description": "🔴 进度百分比（0~100，按已终态/总数；总数为 0 时为 0）",
+            "format": "int32"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "创建人",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "最近更新时刻",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "全部终态的时刻；仅 COMPLETED 非空",
+            "format": "date-time"
+          }
+        }
+      },
+      "RetryRequest": {
+        "type": "object",
+        "properties": {
+          "taskIds": {
+            "type": "array",
+            "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本批次全部失败项）",
+            "items": {
+              "type": "string",
+              "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本批次全部失败项）",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "原因 / 备注"
+          }
+        }
+      },
+      "BatchActionResult": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "本批次状态"
+          },
+          "changedTaskIds": {
+            "type": "array",
+            "description": "🔴 本次实际被改动的任务 id（逐条）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本次实际被改动的任务 id（逐条）",
+              "format": "uuid"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "description": "🔴 被拒绝的任务 id + 原因（如：在途或终态不可重排 / 不属于本批次）",
+            "items": {
+              "type": "string",
+              "description": "🔴 被拒绝的任务 id + 原因（如：在途或终态不可重排 / 不属于本批次）"
+            }
+          },
+          "batch": {
+            "$ref": "#/components/schemas/PublishBatchRow"
+          }
+        }
+      },
+      "ReorderRequest": {
+        "required": [
+          "taskIds"
+        ],
+        "type": "object",
+        "properties": {
+          "taskIds": {
+            "type": "array",
+            "description": "🔴 新的执行次序（**完整**列出要重排的任务 id，顺序即执行次序）",
+            "items": {
+              "type": "string",
+              "description": "🔴 新的执行次序（**完整**列出要重排的任务 id，顺序即执行次序）",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "原因 / 备注"
+          }
+        }
+      },
+      "PublishBatchStateRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "原因 / 备注，落进批次与事件留痕"
+          }
+        }
+      },
+      "DispatchLaneReport": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码；平台级为 null"
+          },
+          "rateLimitId": {
+            "type": "string",
+            "description": "生效的限流配置 id；null = 未配置",
+            "format": "uuid"
+          },
+          "maxInFlight": {
+            "type": "integer",
+            "description": "在途上限",
+            "format": "int32"
+          },
+          "inFlightBefore": {
+            "type": "integer",
+            "description": "🔴 本轮派发前该限流行在途数",
+            "format": "int64"
+          },
+          "requestsPerWindow": {
+            "type": "integer",
+            "description": "🔴 窗口上限（滑动窗口内最多派发多少条）",
+            "format": "int32"
+          },
+          "windowSeconds": {
+            "type": "integer",
+            "description": "🔴 窗口长度（秒）",
+            "format": "int32"
+          },
+          "windowCountBefore": {
+            "type": "integer",
+            "description": "🔴 本轮派发前窗口内已派发次数",
+            "format": "int64"
+          },
+          "dispatched": {
+            "type": "integer",
+            "description": "🔴 本轮实际派发条数",
+            "format": "int32"
+          },
+          "skippedByRateLimit": {
+            "type": "integer",
+            "description": "🔴 本轮因限流未派发的条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 为什么没派；为空串表示按配额正常派发"
+          }
+        },
+        "description": "🔴 逐限流行的派发情况"
+      },
+      "DispatchResponse": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "batchState": {
+            "type": "string",
+            "description": "批次状态；PAUSED 时本轮一律不派发"
+          },
+          "totalDispatched": {
+            "type": "integer",
+            "description": "🔴 本轮一共派发了多少条",
+            "format": "int32"
+          },
+          "totalSkipped": {
+            "type": "integer",
+            "description": "🔴 本轮一共因限流跳过多少条",
+            "format": "int32"
+          },
+          "lanes": {
+            "type": "array",
+            "description": "🔴 逐限流行的派发情况",
+            "items": {
+              "$ref": "#/components/schemas/DispatchLaneReport"
+            }
+          },
+          "batch": {
+            "$ref": "#/components/schemas/PublishBatchRow"
+          }
+        }
+      },
       "SaveMappingRequest": {
         "required": [
           "changeReason",
@@ -14191,7 +15274,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -14534,9 +15617,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -16885,6 +17968,141 @@
             "type": "string"
           }
         }
+      },
+      "SaveBundleBindingRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "绑定 id；留空表示新建",
+            "format": "uuid",
+            "nullable": true
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "4.1.2.1 套装映射 id（relation_type=ONE_TO_MANY 的生效映射）",
+            "format": "uuid"
+          },
+          "bundleVersionId": {
+            "type": "string",
+            "description": "🔴 catalog 3.5.1 套装版本逻辑 id（跨服务不建 FK）",
+            "format": "uuid"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "🔴 生效时间点（半开区间起点）",
+            "format": "date-time"
+          },
+          "changeReason": {
+            "type": "string",
+            "description": "🔴 变更原因"
+          },
+          "retireCurrentAt": {
+            "type": "string",
+            "description": "🔴 退役既有绑定时填写：把当前生效的那一版关闭到这个时刻",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "BundleBindingDetail": {
+        "type": "object",
+        "properties": {
+          "binding": {
+            "$ref": "#/components/schemas/ListingBundleBindingRow"
+          },
+          "components": {
+            "type": "array",
+            "description": "🔴 组件映射记录（逐组件 SKU 与数量）",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleComponentRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 说明：构成的真值在 catalog，本表只记刊登侧的扣减口径"
+          }
+        }
+      },
+      "ListingBundleBindingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "绑定 id",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "映射 id（4.1.2.1 的 listing_mapping）",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "listingVariantId": {
+            "type": "string",
+            "description": "listing 变体 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "externalVariantId": {
+            "type": "string",
+            "description": "平台变体 ID 原文"
+          },
+          "bundleVersionId": {
+            "type": "string",
+            "description": "🔴 catalog 套装版本逻辑 id（3.5.1）",
+            "format": "uuid"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "🔴 生效区间起点",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效区间终点；null = 当前生效",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "🔴 当前生效 = true（effectiveTo 为 null）"
+          },
+          "changeReason": {
+            "type": "string",
+            "description": "变更原因"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作者 id（DB 触发器盖上）",
+            "format": "uuid"
+          },
+          "componentCount": {
+            "type": "integer",
+            "description": "组件条数",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number",
+            "description": "🔴 组件数量合计（每卖 1 件平台套装要扣的总件数；无组件为 0）"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "落库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "绑定本身"
       },
       "BackfillTaskInput": {
         "required": [
@@ -20343,6 +21561,76 @@
         },
         "description": "逐维度能力声明；未交付段 available=false"
       },
+      "PublishCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/PublishCapabilityDimension"
+            }
+          },
+          "batchStates": {
+            "type": "array",
+            "description": "批次状态取值",
+            "items": {
+              "type": "string",
+              "description": "批次状态取值"
+            }
+          },
+          "taskStates": {
+            "type": "array",
+            "description": "任务状态取值",
+            "items": {
+              "type": "string",
+              "description": "任务状态取值"
+            }
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "平台限流口径说明；前端原样展示，不要自己编"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "失败明细跳转目标说明（4.3.1.3）"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "PublishCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
       "MappingPage": {
         "type": "object",
         "properties": {
@@ -22860,6 +24148,251 @@
           }
         }
       },
+      "ListingBundleFilterOptions": {
+        "type": "object",
+        "properties": {
+          "effectiveStates": {
+            "type": "array",
+            "description": "生效状态取值：CURRENT / RETIRED",
+            "items": {
+              "type": "string",
+              "description": "生效状态取值：CURRENT / RETIRED"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序取值",
+            "items": {
+              "type": "string",
+              "description": "排序取值"
+            }
+          },
+          "maxPageSize": {
+            "type": "integer",
+            "description": "🔴 单页上限",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingBundleComponentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "组件明细",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleComponentRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingBundleCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ListingBundleComponentCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleCapabilityDimension"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序取值",
+            "items": {
+              "type": "string",
+              "description": "排序取值"
+            }
+          },
+          "effectiveStates": {
+            "type": "array",
+            "description": "生效状态取值：CURRENT 当前生效 / RETIRED 已退役",
+            "items": {
+              "type": "string",
+              "description": "生效状态取值：CURRENT 当前生效 / RETIRED 已退役"
+            }
+          },
+          "gapNote": {
+            "type": "string",
+            "description": "🔴 未交付段说明（前端原样展示，不要自己编）"
+          },
+          "dependencyNote": {
+            "type": "string",
+            "description": "上游 / 下游依赖说明"
+          }
+        }
+      },
+      "ListingBundleBindingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "绑定明细",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleBindingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "currentInPage": {
+            "type": "integer",
+            "description": "🔴 本页当前生效绑定条数（真实结果，不藏）",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingBundleComponentSellable": {
+        "type": "object",
+        "properties": {
+          "componentId": {
+            "type": "string",
+            "description": "组件行 id",
+            "format": "uuid"
+          },
+          "componentSkuId": {
+            "type": "string",
+            "description": "组件 SKU 逻辑 id",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "每件平台套装需要的数量"
+          },
+          "sellableQuantity": {
+            "type": "number",
+            "description": "该组件在目标仓库的可售量（warehouse 口径：在手 − 预占 − 安全缓冲）"
+          },
+          "setsAvailable": {
+            "type": "number",
+            "description": "🔴 按当前组件数量还能成套卖几件（可售量 ÷ 每件用量，向下取整到件）"
+          },
+          "sellable": {
+            "type": "boolean",
+            "description": "🔴 这一项是否可售：可售量 ≥ 每件用量"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 不可售的原因；可售时为 null"
+          }
+        },
+        "description": "逐组件可售性"
+      },
+      "ListingBundleSellableCheck": {
+        "type": "object",
+        "properties": {
+          "bindingId": {
+            "type": "string",
+            "description": "绑定 id",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "映射 id",
+            "format": "uuid"
+          },
+          "bundleVersionId": {
+            "type": "string",
+            "description": "catalog 套装版本逻辑 id",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "description": "🔴 目标仓库 id（07 库存口径，可售量按该仓库计算）",
+            "format": "uuid"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 上游可售量是否读到；读到才可能判定可售"
+          },
+          "bundleSellable": {
+            "type": "boolean",
+            "description": "🔴 整套是否可售：组件数为 0 或任一组件可售量不足 ⇒ false"
+          },
+          "componentCount": {
+            "type": "integer",
+            "description": "组件条数",
+            "format": "int32"
+          },
+          "unsellableCount": {
+            "type": "integer",
+            "description": "🔴 不可售的组件条数",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 整体不可售的原因；可售时为 null"
+          },
+          "components": {
+            "type": "array",
+            "description": "逐组件可售性",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleComponentSellable"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 说明：可售量口径与跨服务边界"
+          }
+        }
+      },
       "BackfillTaskView": {
         "type": "object",
         "properties": {
@@ -23609,569 +25142,34 @@
           }
         }
       },
-      "PublishTaskRow": {
+      "ListingBundleComponentDetail": {
         "type": "object",
         "properties": {
-          "taskId": {
+          "removedId": {
             "type": "string",
-            "description": "任务 id（4.3.1.3 的跳转参数）",
+            "description": "已删除的组件行 id",
             "format": "uuid"
           },
-          "batchId": {
+          "bindingId": {
             "type": "string",
-            "description": "批次 id",
+            "description": "绑定 id",
             "format": "uuid"
           },
-          "listingId": {
-            "type": "string",
-            "description": "listing id",
-            "format": "uuid"
+          "componentsBeforeRemoval": {
+            "type": "array",
+            "description": "🔴 删除前的组件清单（让界面立刻看出删到哪一步了）",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleComponentRow"
+            }
           },
-          "externalItemId": {
-            "type": "string",
-            "description": "平台商品 ID 原文"
-          },
-          "title": {
-            "type": "string",
-            "description": "标题"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "🔴 平台编码；这条任务按**这个平台**的配额排队"
-          },
-          "rateLimitId": {
-            "type": "string",
-            "description": "🔴 生效的限流配置 id；null = 该平台未配置限流（fail-closed，不派发）",
-            "format": "uuid"
-          },
-          "position": {
-            "type": "integer",
-            "description": "🔴 执行顺序（可重排；派发按它升序取）",
-            "format": "int32"
-          },
-          "state": {
-            "type": "string",
-            "description": "PENDING / DISPATCHED / SUCCEEDED / FAILED"
-          },
-          "attempts": {
-            "type": "integer",
-            "description": "已派发次数（重试会累加）",
-            "format": "int32"
-          },
-          "failureReason": {
-            "type": "string",
-            "description": "🔴 失败明细；可跳转 4.3.1.3"
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "description": "派发时刻；仅 DISPATCHED/SUCCEEDED/FAILED 非空",
-            "format": "date-time"
-          },
-          "completedAt": {
-            "type": "string",
-            "description": "终态时刻；仅 SUCCEEDED/FAILED 非空",
-            "format": "date-time"
-          }
-        }
-      },
-      "PublishRateLimitRequest": {
-        "required": [
-          "platformId"
-        ],
-        "type": "object",
-        "properties": {
-          "platformId": {
-            "type": "string",
-            "description": "平台 id（channel V1 全局码表）",
-            "format": "uuid"
-          },
-          "shopId": {
-            "type": "string",
-            "description": "店铺 id；不给 = 平台级默认配额，给了 = 该店铺单独一条",
-            "format": "uuid"
-          },
-          "maxInFlight": {
-            "maximum": 500,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 在途并发上限（1~500）",
-            "format": "int32"
-          },
-          "requestsPerWindow": {
-            "maximum": 10000,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 滑动窗口派发上限（1~10000）",
-            "format": "int32"
-          },
-          "windowSeconds": {
-            "maximum": 86400,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 滑动窗口长度秒（1~86400）",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "是否启用"
-          }
-        }
-      },
-      "PublishRateLimitRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "限流配置 id",
-            "format": "uuid"
-          },
-          "platformId": {
-            "type": "string",
-            "description": "平台 id",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "平台编码"
-          },
-          "platformName": {
-            "type": "string",
-            "description": "平台名"
-          },
-          "shopId": {
-            "type": "string",
-            "description": "店铺 id；null 表示平台级默认配额",
-            "format": "uuid"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码；平台级为 null"
-          },
-          "maxInFlight": {
-            "type": "integer",
-            "description": "🔴 在途并发上限：该限流行同一时刻允许多少条在途",
-            "format": "int32"
-          },
-          "requestsPerWindow": {
-            "type": "integer",
-            "description": "🔴 滑动窗口派发上限",
-            "format": "int32"
-          },
-          "windowSeconds": {
-            "type": "integer",
-            "description": "🔴 滑动窗口长度（秒）",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "是否启用；停用等价于该行不存在（不派发）"
-          },
-          "currentInFlight": {
-            "type": "integer",
-            "description": "🔴 当前在途数（DISPATCHED，窗口不限）",
-            "format": "int64"
-          },
-          "currentWindowCount": {
-            "type": "integer",
-            "description": "🔴 当前窗口内已派发次数",
-            "format": "int64"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "更新时刻",
-            "format": "date-time"
-          }
-        }
-      },
-      "CreatePublishBatchRequest": {
-        "type": "object",
-        "properties": {
-          "shopCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "description": "店铺编码筛选（照抄 4.1.1.1）"
-          },
-          "marketplaceCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "description": "站点编码筛选（照抄 4.1.1.1）"
-          },
-          "status": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "description": "listing 状态筛选（照抄 4.1.1.1 的七态）"
-          },
-          "ownerId": {
-            "type": "string",
-            "description": "负责人筛选（照抄 4.1.1.1）",
-            "format": "uuid"
-          },
-          "category": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "类目路径模糊筛选（照抄 4.1.1.1）"
-          },
-          "search": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "description": "标题 / 平台商品 ID 关键字（照抄 4.1.1.1）"
-          },
-          "hasPendingDraft": {
-            "type": "boolean",
-            "description": "🔴 只选**有待发布内容草稿**的 listing（4.2.1.2 的产出）；不勾 = 不按草稿筛"
-          },
-          "excludeAlreadyPublished": {
-            "type": "boolean",
-            "description": "🔴 排除已发布过的（listing.status 已是 ON_SALE / UNDER_REVIEW / APPROVED）"
-          },
-          "limit": {
-            "maximum": 1000,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 数量上限（1~1000）：批次最多纳入多少条",
-            "format": "int32"
-          }
-        }
-      },
-      "PublishBatchRow": {
-        "type": "object",
-        "properties": {
-          "batchId": {
-            "type": "string",
-            "description": "批次 id",
-            "format": "uuid"
-          },
-          "state": {
-            "type": "string",
-            "description": "RUNNING 可派发 / PAUSED 停止派发新任务 / COMPLETED 全部终态 / CANCELLED 已中止"
-          },
-          "filterRule": {
-            "type": "string",
-            "description": "🔴 筛选规则快照（提交那一刻的口径）"
-          },
-          "strategy": {
-            "type": "string",
-            "description": "发布策略快照"
-          },
-          "limitCount": {
-            "type": "integer",
-            "description": "数量上限",
-            "format": "int32"
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "任务总数",
-            "format": "int32"
-          },
-          "pendingCount": {
-            "type": "integer",
-            "description": "待派发",
-            "format": "int32"
-          },
-          "dispatchedCount": {
-            "type": "integer",
-            "description": "🔴 在途（已派发未回报）",
-            "format": "int32"
-          },
-          "succeededCount": {
-            "type": "integer",
-            "description": "🔴 已成功",
-            "format": "int32"
-          },
-          "failedCount": {
-            "type": "integer",
-            "description": "🔴 失败（可批量重试）",
-            "format": "int32"
-          },
-          "progressPercent": {
-            "type": "integer",
-            "description": "🔴 进度百分比（0~100，按已终态/总数；总数为 0 时为 0）",
-            "format": "int32"
-          },
-          "actorId": {
-            "type": "string",
-            "description": "创建人",
-            "format": "uuid"
+          "binding": {
+            "$ref": "#/components/schemas/ListingBundleBindingRow"
           },
           "note": {
             "type": "string",
-            "description": "备注"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "创建时刻",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "最近更新时刻",
-            "format": "date-time"
-          },
-          "completedAt": {
-            "type": "string",
-            "description": "全部终态的时刻；仅 COMPLETED 非空",
-            "format": "date-time"
+            "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
-      },
-      "RetryRequest": {
-        "type": "object",
-        "properties": {
-          "taskIds": {
-            "type": "array",
-            "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本批次全部失败项）",
-            "items": {
-              "type": "string",
-              "description": "🔴 只把这些 FAILED 任务打回队列（不给 = 重试本批次全部失败项）",
-              "format": "uuid"
-            }
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "原因 / 备注"
-          }
-        }
-      },
-      "BatchActionResult": {
-        "type": "object",
-        "properties": {
-          "batchId": {
-            "type": "string",
-            "description": "批次 id",
-            "format": "uuid"
-          },
-          "state": {
-            "type": "string",
-            "description": "本批次状态"
-          },
-          "changedTaskIds": {
-            "type": "array",
-            "description": "🔴 本次实际被改动的任务 id（逐条）",
-            "items": {
-              "type": "string",
-              "description": "🔴 本次实际被改动的任务 id（逐条）",
-              "format": "uuid"
-            }
-          },
-          "rejected": {
-            "type": "array",
-            "description": "🔴 被拒绝的任务 id + 原因（如：在途或终态不可重排 / 不属于本批次）",
-            "items": {
-              "type": "string",
-              "description": "🔴 被拒绝的任务 id + 原因（如：在途或终态不可重排 / 不属于本批次）"
-            }
-          },
-          "batch": {
-            "$ref": "#/components/schemas/PublishBatchRow"
-          }
-        }
-      },
-      "ReorderRequest": {
-        "required": [
-          "taskIds"
-        ],
-        "type": "object",
-        "properties": {
-          "taskIds": {
-            "type": "array",
-            "description": "🔴 新的执行次序（**完整**列出要重排的任务 id，顺序即执行次序）",
-            "items": {
-              "type": "string",
-              "description": "🔴 新的执行次序（**完整**列出要重排的任务 id，顺序即执行次序）",
-              "format": "uuid"
-            }
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "原因 / 备注"
-          }
-        }
-      },
-      "PublishBatchStateRequest": {
-        "type": "object",
-        "properties": {
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "原因 / 备注，落进批次与事件留痕"
-          }
-        }
-      },
-      "DispatchLaneReport": {
-        "type": "object",
-        "properties": {
-          "platformCode": {
-            "type": "string",
-            "description": "平台编码"
-          },
-          "shopCode": {
-            "type": "string",
-            "description": "店铺编码；平台级为 null"
-          },
-          "rateLimitId": {
-            "type": "string",
-            "description": "生效的限流配置 id；null = 未配置",
-            "format": "uuid"
-          },
-          "maxInFlight": {
-            "type": "integer",
-            "description": "在途上限",
-            "format": "int32"
-          },
-          "inFlightBefore": {
-            "type": "integer",
-            "description": "🔴 本轮派发前该限流行在途数",
-            "format": "int64"
-          },
-          "requestsPerWindow": {
-            "type": "integer",
-            "description": "🔴 窗口上限（滑动窗口内最多派发多少条）",
-            "format": "int32"
-          },
-          "windowSeconds": {
-            "type": "integer",
-            "description": "🔴 窗口长度（秒）",
-            "format": "int32"
-          },
-          "windowCountBefore": {
-            "type": "integer",
-            "description": "🔴 本轮派发前窗口内已派发次数",
-            "format": "int64"
-          },
-          "dispatched": {
-            "type": "integer",
-            "description": "🔴 本轮实际派发条数",
-            "format": "int32"
-          },
-          "skippedByRateLimit": {
-            "type": "integer",
-            "description": "🔴 本轮因限流未派发的条数",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string",
-            "description": "🔴 为什么没派；为空串表示按配额正常派发"
-          }
-        },
-        "description": "🔴 逐限流行的派发情况"
-      },
-      "DispatchResponse": {
-        "type": "object",
-        "properties": {
-          "batchId": {
-            "type": "string",
-            "description": "批次 id",
-            "format": "uuid"
-          },
-          "batchState": {
-            "type": "string",
-            "description": "批次状态；PAUSED 时本轮一律不派发"
-          },
-          "totalDispatched": {
-            "type": "integer",
-            "description": "🔴 本轮一共派发了多少条",
-            "format": "int32"
-          },
-          "totalSkipped": {
-            "type": "integer",
-            "description": "🔴 本轮一共因限流跳过多少条",
-            "format": "int32"
-          },
-          "lanes": {
-            "type": "array",
-            "description": "🔴 逐限流行的派发情况",
-            "items": {
-              "$ref": "#/components/schemas/DispatchLaneReport"
-            }
-          },
-          "batch": {
-            "$ref": "#/components/schemas/PublishBatchRow"
-          }
-        }
-      },
-      "PublishCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "description": "逐维度能力声明；未交付段 available=false",
-            "items": {
-              "$ref": "#/components/schemas/PublishCapabilityDimension"
-            }
-          },
-          "batchStates": {
-            "type": "array",
-            "description": "批次状态取值",
-            "items": {
-              "type": "string",
-              "description": "批次状态取值"
-            }
-          },
-          "taskStates": {
-            "type": "array",
-            "description": "任务状态取值",
-            "items": {
-              "type": "string",
-              "description": "任务状态取值"
-            }
-          },
-          "rateLimitNote": {
-            "type": "string",
-            "description": "平台限流口径说明；前端原样展示，不要自己编"
-          },
-          "downstreamNote": {
-            "type": "string",
-            "description": "失败明细跳转目标说明（4.3.1.3）"
-          },
-          "relationNote": {
-            "type": "string",
-            "description": "上游 / 下游说明"
-          }
-        }
-      },
-      "PublishCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string",
-            "description": "维度键"
-          },
-          "description": {
-            "type": "string",
-            "description": "维度说明"
-          },
-          "available": {
-            "type": "boolean",
-            "description": "本模块是否已交付"
-          },
-          "source": {
-            "type": "string",
-            "description": "数据来源（表 / 上游模块）"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "未交付段的责任模块"
-          },
-          "impact": {
-            "type": "string",
-            "description": "不交付的影响"
-          }
-        },
-        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
