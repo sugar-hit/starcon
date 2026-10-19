@@ -1860,6 +1860,53 @@ const services: readonly {
       /^product-attribution\/(?:capabilities|attributions|lot-flags|lot-flags\/by-lot)$|^product-attribution\/attributions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:photos|photos\/compare|attribute|supersede|lot-flag\/refresh))?$/,
   },
   {
+    // 11.2.3.3 供应商索赔（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时
+    // 静默删掉同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.1.2.2 `product-attribution` 那条**之后**、11.5.2.1 `quality-analysis` 那条**之前**：
+    // 三条的前缀形状互不相交（`supplier-claims/` vs `product-attribution/` vs `quality-analysis/`），
+    // 谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 命名空间**独立于 `/trade/return-quality` 与 `/trade/product-attribution`**：
+    // 本模块的产物是**另一种单据**（一次对外的商务主张 + 一串协商 + 一笔待确认的赔付），
+    // 不是那两个模块的另一个视图。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `supplier-claims`                                    集合读（GET，真分页 + 多维筛选 + 排序白名单）
+    //                                                        / 发起索赔（POST，建单恒为草稿）
+    //   `supplier-claims/capabilities`                       能力与边界声明（GET）
+    //   `supplier-claims/candidates`                         可索赔候选（GET，**发起索赔的唯一入口素材**）
+    //   `supplier-claims/{uuid}`                             详情（GET）
+    //   `supplier-claims/{uuid}/items`                      加索赔明细（POST）
+    //   `supplier-claims/{uuid}/items/{itemUuid}`           移除索赔明细（DELETE，**仅草稿**）
+    //   `supplier-claims/{uuid}/submit`                     提交索赔（POST）
+    //   `supplier-claims/{uuid}/start-negotiation`          进入协商（POST）
+    //   `supplier-claims/{uuid}/negotiations`               记一条协商（POST）
+    //   `supplier-claims/{uuid}/agree`                      置为已达成（POST）
+    //   `supplier-claims/{uuid}/reject`                     驳回索赔（POST）
+    //   `supplier-claims/{uuid}/withdraw`                   撤回索赔（POST）
+    //   `supplier-claims/{uuid}/settlements`                登记赔付（POST，**幂等**）
+    //   `supplier-claims/{uuid}/settlements/{uuid}/confirm`  财务确认冲减（POST）
+    //   `supplier-claims/{uuid}/settlements/{uuid}/reject`   财务驳回赔付（POST）
+    //
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}/settle` —— 蓝图加粗句「**索赔不是自动到账**」：已结算只能由
+    //     「财务确认赔付分录」这一个动作驱动。放行一个「直接置为已结算」等于让界面显示成
+    //     「登记完赔付就等于钱到账了」，而真相恰恰相反。
+    //   * `{uuid}/confirm` —— 财务确认必须挂在**赔付分录**上（`/settlements/{uuid}/confirm`），
+    //     否则「确认的是哪一笔赔付」在库里没有答案。
+    //   * 任何对**索赔单本身**的 DELETE —— 索赔单与协商记录是要拿去和供应商对质的凭据。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^supplier-claims(?:\/(?:capabilities|candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|start-negotiation|negotiations|agree|reject|withdraw|settlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))?))?$/,
+  },
+  {
     // 11.5.2.1 质量分析（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

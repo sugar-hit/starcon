@@ -2196,6 +2196,694 @@
         }
       }
     },
+    "/trade/supplier-claims": {
+      "get": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "get_trade_supplier_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "liabilityStage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offsetStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_withdraw",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimWithdraw"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/submit": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/start-negotiation": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_start_negotiation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "expectedVersion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/settlements": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_settlements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierSettlementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/settlements/{settlementId}/reject": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_settlements_settlementId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierSettlementReject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/settlements/{settlementId}/confirm": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_settlements_settlementId_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "settlementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierSettlementConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/reject": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimReject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/negotiations": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_negotiations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierNegotiationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/items": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimItemCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/{id}/agree": {
+      "post": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "post_trade_supplier_claims_id_agree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierClaimAgree"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders": {
       "get": {
         "tags": [
@@ -19207,6 +19895,134 @@
         }
       }
     },
+    "/trade/supplier-claims/{id}": {
+      "get": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "get_trade_supplier_claims_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/capabilities": {
+      "get": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "get_trade_supplier_claims_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/supplier-claims/candidates": {
+      "get": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "get_trade_supplier_claims_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/list": {
       "get": {
         "tags": [
@@ -28008,6 +28824,55 @@
           }
         }
       }
+    },
+    "/trade/supplier-claims/{id}/items/{itemId}": {
+      "delete": {
+        "tags": [
+          "supplier-claim-controller"
+        ],
+        "operationId": "delete_trade_supplier_claims_id_items_itemId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -33819,6 +34684,480 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "SupplierClaimCreate": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimReasonCode": {
+            "type": "string"
+          },
+          "claimReasonNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "claimCurrency": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "blockedReason": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/SupplierClaimRow"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimItemRow"
+            }
+          },
+          "negotiations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimNegotiationRow"
+            }
+          },
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimSettlementRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimEventRow"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimAction"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SupplierClaimItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributedStage": {
+            "type": "string"
+          },
+          "attributedStageLabel": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "claimQty": {
+            "type": "number"
+          },
+          "claimAmount": {
+            "type": "number"
+          },
+          "claimCurrency": {
+            "type": "string"
+          },
+          "claimableBaseAmount": {
+            "type": "number"
+          },
+          "maxClaimAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SupplierClaimNegotiationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "negotiationSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "negotiationType": {
+            "type": "string"
+          },
+          "negotiationTypeLabel": {
+            "type": "string"
+          },
+          "participantRole": {
+            "type": "string"
+          },
+          "participantRoleLabel": {
+            "type": "string"
+          },
+          "proposedAmount": {
+            "type": "number"
+          },
+          "agreedAmount": {
+            "type": "number"
+          },
+          "negotiationNote": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SupplierClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNo": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "claimReasonCode": {
+            "type": "string"
+          },
+          "claimReasonLabel": {
+            "type": "string"
+          },
+          "claimCurrency": {
+            "type": "string"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "claimableBaseAmount": {
+            "type": "number"
+          },
+          "agreedAmount": {
+            "type": "number"
+          },
+          "claimStatus": {
+            "type": "string"
+          },
+          "claimStatusLabel": {
+            "type": "string"
+          },
+          "offsetStatus": {
+            "type": "string"
+          },
+          "offsetStatusLabel": {
+            "type": "string"
+          },
+          "appliedOffsetAmount": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierClaimSettlementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementMethod": {
+            "type": "string"
+          },
+          "settlementMethodLabel": {
+            "type": "string"
+          },
+          "settlementCurrency": {
+            "type": "string"
+          },
+          "requestedAmount": {
+            "type": "number"
+          },
+          "effectiveAmount": {
+            "type": "number"
+          },
+          "settlementStatus": {
+            "type": "string"
+          },
+          "settlementStatusLabel": {
+            "type": "string"
+          },
+          "financeReference": {
+            "type": "string"
+          },
+          "confirmedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierClaimWithdraw": {
+        "type": "object",
+        "properties": {
+          "withdrawReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierClaimSubmit": {
+        "type": "object",
+        "properties": {
+          "submitNote": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierSettlementCreate": {
+        "type": "object",
+        "properties": {
+          "settlementMethod": {
+            "type": "string"
+          },
+          "requestedAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "SupplierSettlementReject": {
+        "type": "object",
+        "properties": {
+          "rejectReason": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierSettlementConfirm": {
+        "type": "object",
+        "properties": {
+          "financeReference": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimReject": {
+        "type": "object",
+        "properties": {
+          "rejectReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierNegotiationCreate": {
+        "type": "object",
+        "properties": {
+          "negotiationType": {
+            "type": "string"
+          },
+          "participantRole": {
+            "type": "string"
+          },
+          "proposedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "agreedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "negotiationNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SupplierClaimItemCreate": {
+        "type": "object",
+        "properties": {
+          "inspectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "claimAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "SupplierClaimAgree": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -51169,6 +52508,336 @@
           }
         },
         "description": "更新原因分类（只改这些列；rootKind / categoryCode 刻意不可改）"
+      },
+      "SupplierClaimPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SupplierClaimSummary"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paginationNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "liabilityNote": {
+            "type": "string"
+          },
+          "sortNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submitted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "negotiating": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "agreed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "settled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withdrawn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalClaimedAmount": {
+            "type": "number"
+          },
+          "totalAgreedAmount": {
+            "type": "number"
+          },
+          "totalAppliedOffsetAmount": {
+            "type": "number"
+          },
+          "pendingFinanceConfirmCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierClaimBoundary": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimSectionCapability"
+            }
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimCapabilityAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimBoundary"
+            }
+          },
+          "stateMachine": {
+            "type": "string"
+          },
+          "hardRuleClaimBasis": {
+            "type": "string"
+          },
+          "hardRuleFinanceConfirm": {
+            "type": "string"
+          },
+          "negotiationRule": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimCapabilityAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "blockingReason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimRelatedModule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimSectionCapability": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "landsIn": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimCandidatePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierClaimCandidateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierClaimCandidateRow": {
+        "type": "object",
+        "properties": {
+          "inspectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "conclusionNote": {
+            "type": "string"
+          },
+          "attributionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributionNo": {
+            "type": "string"
+          },
+          "attributedStage": {
+            "type": "string"
+          },
+          "attributedStageLabel": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "lotSupplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "inspectedQty": {
+            "type": "number"
+          },
+          "claimableBaseAmount": {
+            "type": "number"
+          },
+          "maxClaimAmount": {
+            "type": "number"
+          },
+          "claimCurrency": {
+            "type": "string"
+          },
+          "concludedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "SalesOrderPage": {
         "type": "object",
