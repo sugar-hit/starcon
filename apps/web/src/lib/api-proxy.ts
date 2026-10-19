@@ -1707,8 +1707,7 @@ const services: readonly {
     prefix: 'channel/',
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
-    pattern:
-      /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+    pattern: /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
     // 4.4.1.2 批量/插件采集（channel 服务）。本条目是**新增一条 services[] 元素**，
@@ -2064,6 +2063,47 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
+  },
+  {
+    // 9.1.2.1 平台订单同步（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `order-review` 那一条**之后**：各车道的插入点被既有条目隔开，
+    // git 能干净求并（与 9.2.1.2 / 11.3.2.1 等条目同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                能力声明（状态词表 / 下游缺口 / 金额与归一口径）
+    //   webhook                     平台事件实时受理（POST）
+    //   poll                        按来源 + 时间窗轮询补拉（POST）
+    //   batches                     同步批次列表（GET，真分页 + 汇总）
+    //   batches/{uuid}              批次详情（逐条受理结果 + 异常明细）
+    //   orders                      平台单列表（GET，真分页 + 汇总）
+    //   orders/{uuid}               平台单详情（投影 + 组件展开 + 受理记录）
+    //   exceptions                  异常明细列表（GET，真分页 + 按错误码汇总）
+    //   mappings                    映射副本列表（GET）+ 租户自维护登记（POST）
+    //   mappings/sync               从 2.1.2.1（channel）同步映射副本（POST）
+    //
+    // ⚠️ 首段 `platform-orders` 是**独立字面量**：与既有 trade 分支的 `order-review`、
+    //    `order-intercept`、`orders\/risk-validation` 互不吃（首段不同），
+    //    所以本条放在哪个位置都不会误伤它们。
+    // ⚠️ 判别顺序：字面量子路径（capabilities / webhook / poll / exceptions /
+    //    mappings / batches / orders）必须排在 {uuid} 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    // ⚠️ 裸路径 `platform-orders` 本身**不放行**：后端没有这个映射，
+    //    放行它会让界面以为「一条不存在的概览接口」可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `platform-orders/orders/{uuid}/review` —— 9.2 审单的批量判定不属本车道
+    //   * `platform-orders/orders/{uuid}/fulfillment` —— 9.3 履约各动作不属本车道
+    //   * `platform-orders/sales` —— 13 销量的形状不属本车道
+    //   * `platform-orders/mappings/{uuid}` —— 映射副本只有列表与登记，没有按 id 寻址
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^platform\-orders\/(?:capabilities|webhook|poll|exceptions|mappings(?:\/sync)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
     // 11.3.2.1 换货授权（trade 服务）。本条目同样是**新增一条 services[] 元素**，
