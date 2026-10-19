@@ -1324,6 +1324,51 @@ const services: readonly {
       /^listing\-publish(?:\/(?:capabilities|rate\-limits)|\/batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|pause|resume|cancel|reorder|retry))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/report)$/,
   },
   {
+    // 4.3.2.1 内容回写（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 上面那条 `listing-publish`（4.3.1.2 批量发布）**一字未动、也不重排** —— 本文件是多车道
+    // 共用的累积型正则，取错一侧会静默删掉别人已交付的路由，症状是页面 404 而 lint/typecheck 全绿。
+    // 插入锚点固定在 `listing-publish` 那组**之后**、既有 `prefix: 'trade/'` 那条**之前** ——
+    // 各车道的插入点被既有条目隔开，git 能干净求并（与 9.2.1.2 / 10.1.1.2 等条目同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-content-writeback` 这个独立前缀，而不是 `listings/{uuid}/writeback`：
+    //   4.1.1.1 已把 `listings/{uuid}` 那一段登记成「不放行」，在同一棵路径树上开子资源要同时改
+    //   别人已交付的白名单与拒绝清单；而「内容回写」是**批量触发 + 队列 + 限流 + 变更历史**，
+    //   与「列表行」不是同一种资源 —— 强行开在同一棵树上会与 4.1.1.1 / 4.1.1.2 的既有决定打架。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                                能力声明（平台往返 / 上游变更事件 / 描述与 A+ 基线 available=false）
+    //   writebacks                                  建一次回写（POST，按变更类型 / 批量）+ 列表（GET）
+    //   writebacks/{uuid}                           单次触发的总体进度（六计数 + 百分比）
+    //   writebacks/{uuid}/tasks                     任务列表（GET，可按状态筛；跳过用 SKIPPED_NO_CHANGE）
+    //   writebacks/{uuid}/dispatch                  🔴 一轮派发：按各平台配额排队 + 写 02 队列
+    //   writebacks/{uuid}/retry                     🔴 批量重试（只重试 FAILED，不重跑已成功的）
+    //   writebacks/{uuid}/cancel                    人工中止（已在途的不取消）
+    //   tasks/{uuid}/changes                        🔴 逐字段改前 / 改后（含两侧来源）
+    //   tasks/{uuid}/report                         在途任务的成功 / 失败回执（4.3.2.2 回报）
+    //   listings/{uuid}/content-history             某商品的变更历史（按时间倒序）
+    //
+    // ⚠️ 判别顺序：`capabilities` 必须排在所有 `{uuid}` 分支**之前**，否则会被 uuid 分支吃掉半截
+    //    （症状是「能力声明 404，但列表页正常」）。
+    // ⚠️ 三个 uuid 段各自分支：`writebacks/{uuid}` / `tasks/{uuid}/changes|report` /
+    //    `listings/{uuid}/content-history`。⚠️ `tasks` 那段的**动作段是必选的**
+    //    （`(?:...)?` 会连 `tasks/{uuid}` 裸路径一起放行 —— 后端没有这个资源，
+    //    单条任务详情随任务列表返回），写成可选就成了一个凭空多出来的 GET。
+    // ⚠️ 裸路径 `listing-content-writeback` **刻意不放行**（最外层分组不带 `?`）：本模块没有裸路径资源。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-content-writeback/writebacks/{uuid}/writebacks` —— 一次触发只回写一次，没有嵌套触发
+    //   * `listing-content-writeback/tasks/{uuid}`                    —— 单条任务详情随任务列表返回，不单开一条
+    //   * `listing-content-writeback/writebacks/{uuid}/preview`        —— 回写不是编辑，没有「确认前先看看」
+    //   * `listing-content-writeback/prices|stocks`                    —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-content\-writeback(?:\/capabilities|\/writebacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|retry|cancel))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:changes|report)|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/content\-history)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
