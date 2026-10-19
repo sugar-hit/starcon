@@ -132,8 +132,23 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
     `${base}/reports/not-a-uuid`,
     // 多余路径段
     `${base}/a/b`,
-    // 同批 4.2.3.2 车道的形状：不是本模块的（也还不存在）
-    'channel/listing-compliance-precheck/capabilities',
+    // 同批 4.2.3.2 车道的**未登记**形状：不是本模块的，4.2.3.2 也没登记它。
+    //
+    // ⚠️ 这里的**前提**在合并前后不一样，写死一条断言就等于把前提也写死了：
+    //   * 合并**前**（本车道自己的 worktree 里）：4.2.3.2 的前缀还不存在，
+    //     它的任何形状都是 404 —— 当时把 `.../capabilities` 写进这份负向清单是对的。
+    //   * 合并**后**（四条车道并入集成头）：两条前缀都**真实存在**了 ——
+    //       - 4.2.3.2 **已登记**的形状（capabilities / filter-options / risks-decisions /
+    //         drafts / scans / words）由**它自己的**白名单元素放行 ⇒ 代理转发到上游，
+    //         上游不在线时是 **503**，**不是 404**（转发行为正确，503 正是它的证据）；
+    //       - 4.2.3.2 **未登记**的形状（下面的 `/score`）仍然被拒 ⇒ 404。
+    // 所以这份负向清单只保留**未登记**的形状；「另一条车道的形状现在会被转发」
+    // 这件事由下面那条独立的正向断言钉住。
+    //
+    // ⚠️ 各自车道的测试在自己 worktree 里单跑是绿的，合并后才红 ——
+    //    这正是 L2 批量闸存在的意义：只有并入集成头，
+    //    「同批另一条车道的前缀此刻是否已被登记」这个前提才成立。
+    'channel/listing-compliance-precheck/score',
   ]) {
     const response = await callProxy(path, {
       headers: { cookie: 'starcon_session=private-session' },
@@ -141,6 +156,51 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
     expect(response.status, `${path} 不该被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
+});
+
+/**
+ * 同批 4.2.3.2 车道的**已登记**形状，在两条车道并入集成头之后仍然被放行。
+ *
+ * <p>钉住的是「**合并没有把另一条车道的白名单条目弄丢**」：
+ * 4.2.3.2（合规预检 违禁词/侵权）在 `api-proxy.ts` 里有一条**自己的** `services[]` 元素
+ * （前缀 `listing-compliance-precheck`），与本模块的 `compliance-precheck` 元素互不相干。
+ * 那条元素若在合并中丢了，`channel/listing-compliance-precheck/capabilities` 会退回 404 ——
+ * 而 404 在浏览器里是**静默**的（界面只会以为「这功能没交付」），typecheck / lint / vitest 全绿。
+ *
+ * <p>为什么必须单独立一条，而不能塞进上面那份负向清单：
+ * 负向清单那条 `expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled()`
+ * 要求清单里的每条路径都**不许**触发上游调用 —— 而这一条恰恰**要**转发。
+ *
+ * <p>代理的状态码分界（`apps/web/src/lib/api-proxy.ts`）：白名单拒绝 ⇒ 404；
+ * 放行了但上游连不上 ⇒ 503。两种情况都**不是** 404，所以断言落在「不是 404」这一侧，
+ * 并额外钉住「确实转发了、目标就是 channel 出口」——
+ * 免得把「代理自己编了个 200」当成放行成功。
+ */
+it('同批 4.2.3.2 车道的已登记形状在合并后仍被放行 —— 合并没有弄丢它的白名单条目', async () => {
+  const path = 'channel/listing-compliance-precheck/capabilities';
+
+  // 情形一：上游有响应 ⇒ 代理原样透传上游状态码（这里 stub 成 200）。
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const response = await callProxy(path, {
+    headers: { cookie: 'starcon_session=private-session' },
+  });
+  expect(response.status, `${path} 被同批车道的白名单放行后不应是 404`).not.toBe(404);
+  expect(fetcher, '放行的路径必须真的转发到上游，不能是代理自己应答').toHaveBeenCalledWith(
+    expect.stringContaining(':8083/channel/listing-compliance-precheck/capabilities'),
+    expect.anything(),
+  );
+
+  // 情形二：上游不在线 ⇒ 转发后是 503，**仍然不是 404**。
+  // 这一条正面复刻 L2 批量验证当时观察到的现象：
+  // 合并前是 404（另一条车道的前缀还不存在），合并后是 503（已登记 ⇒ 转发）。
+  const offline = vi.fn().mockImplementation(() => Promise.reject(new Error('ECONNREFUSED')));
+  vi.stubGlobal('fetch', offline);
+  const downstream = await callProxy(path, {
+    headers: { cookie: 'starcon_session=private-session' },
+  });
+  expect(downstream.status, '上游不在线时是 503（转发失败），不是 404（白名单没放行）').toBe(503);
+  expect(offline, '上游不在线时也必须已经发起过转发').toHaveBeenCalled();
 });
 
 it('不误伤其他车道已登记的分支：既有 channel / warehouse 路由仍然放行', async () => {
