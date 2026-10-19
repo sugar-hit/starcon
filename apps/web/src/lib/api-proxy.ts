@@ -1594,6 +1594,37 @@ const services: readonly {
       /^listing\-claims(?:\/capabilities|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/claims|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.4.1.1 链接采集（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.2.1 `listing-claims` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-status-events` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-collects                    采集任务列表（GET，真分页 + 状态/来源筛选）/ 发起一次链接采集（POST）
+    //   listing-collects/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   listing-collects/{uuid}              采集任务详情（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-collects/{uuid}/draft`   —— 草稿随任务详情一起返回，不单开一条
+    //   * `listing-collects/{uuid}/retry`   —— 失败重试就是再发一次同一个 URL（后端自己去重）
+    //   * `listing-collects/{uuid}/claim`   —— 🔴 认领是 4.4.1.3 采集箱的职责，尚未交付
+    //   * `listing-collects/batch`          —— 🔴 批量/插件采集是 4.4.1.2 的职责，尚未交付
+    //   * `listing-collects/box`            —— 🔴 采集箱是 4.4.1.3 的职责，尚未交付
+    //   * `listing-collects/sources`        —— 白名单随能力声明一起返回，不单开一条
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 4.3.2.2 平台状态回流（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
