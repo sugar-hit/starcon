@@ -1070,6 +1070,45 @@ const services: readonly {
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 2.6.2.1 增量补拉（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有的 `listings`（4.1.1.1）、`writeback-batches`（2.5.2.1）、`label-templates`
+    // （10.2.2.2）、`ad-type-diffs`（14.1.2.2）等**一字未动、也不重排** —— 本文件是
+    // 多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让 git 必然判冲突且 retry 永远不会自愈。
+    // 插入锚点固定在 `listings` 那条**之后**、`prefix: 'trade/'` **之前**。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   backfills                 集合读（GET，按连接/状态筛选）/ POST 发起补拉
+    //   backfills/capabilities    能力声明（下游同步处理器 available=false + ownerModule）
+    //   backfills/summary         补拉状态分布
+    //   backfills/gaps            漏推缺口检测（按 2.6.1.1 接收记录的静默区间）
+    //   backfills/{uuid}          任务详情
+    //   backfills/{uuid}/records  处理记录集合读（GET）/ 提交一批补拉结果（POST，逐条判定幂等）
+    //   backfills/{uuid}/segments 分段轮询留痕（证明「只给最近 N 条」时分段轮询真的发生了）
+    //   backfills/{uuid}/complete 收尾：结算四个数字 + 推进游标
+    //   backfills/{uuid}/cancel   人工中止
+    //
+    // 判别顺序：字面量子路径（capabilities / summary / gaps）必须排在 uuid 段**之前**。
+    // 写反的话 `c`（capabilities）与 `s`（summary）落在 [0-9a-f] 里，会被 uuid 段提前吃掉 ——
+    // 正则静默匹配失败，或者更糟：拼出一个「id=capabilities 的补拉任务」被凭空放行。
+    // ⚠️ 那个 `\/` 必须写在**字面量子路径与 uuid 段共用的那一层**上，与 listings 同款。
+    // ⚠️ 裸路径 `backfills` **放行**：集合读与发起补拉都是它的入口，
+    //    query string 不参与这里的比对（proxy() 拿的是 params.path，不含 search）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `backfills/{uuid}/records/{recordId}` —— 逐条结果随详情返回，不单开一条
+    //   * `backfills/{uuid}/retry` —— 补拉重试就是「再发起一次」：幂等键相同会拿回同一任务，
+    //     另开一条 retry 只会让人以为重试会绕过幂等
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^backfills(?:\/(?:capabilities|summary|gaps|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:records|segments|complete|cancel))?))?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
