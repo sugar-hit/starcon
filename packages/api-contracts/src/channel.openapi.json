@@ -16403,6 +16403,182 @@
           }
         }
       }
+    },
+    "/channel/listing-collects": {
+      "get": {
+        "tags": [
+          "listing-collect-controller"
+        ],
+        "operationId": "get_channel_listing_collects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingCollectPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-collect-controller"
+        ],
+        "operationId": "post_channel_listing_collects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectListingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-collects/{id}": {
+      "get": {
+        "tags": [
+          "listing-collect-controller"
+        ],
+        "operationId": "get_channel_listing_collects_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectListingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-collects/capabilities": {
+      "get": {
+        "tags": [
+          "listing-collect-controller"
+        ],
+        "operationId": "get_channel_listing_collects_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingCollectCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -39099,6 +39275,419 @@
           }
         },
         "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "CollectListingRequest": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 外部商品链接（http / https；主机必须命中平台白名单）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "CollectListingResult": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/ListingCollectTaskRow"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/ListingCollectDraftRow"
+          },
+          "deduplicated": {
+            "type": "boolean",
+            "description": "🔴 是否因同 URL 去重而未发出请求"
+          }
+        }
+      },
+      "ListingCollectDraftRow": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "description": "采集草稿 id",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "description": "所属采集任务 id",
+            "format": "uuid"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "来源 URL 原文"
+          },
+          "normalizedUrl": {
+            "type": "string",
+            "description": "🔴 规范化 URL（去重键）"
+          },
+          "title": {
+            "type": "string",
+            "description": "🔴 抓到的标题"
+          },
+          "mainImageUrl": {
+            "type": "string",
+            "description": "🔴 主图 URL（只记 URL，不下载二进制）"
+          },
+          "imageUrls": {
+            "type": "array",
+            "description": "🔴 附图 URL 列表（只记 URL，不下载二进制）",
+            "items": {
+              "type": "string",
+              "description": "🔴 附图 URL 列表（只记 URL，不下载二进制）"
+            }
+          },
+          "specs": {
+            "type": "array",
+            "description": "🔴 规格（键值项列表）",
+            "items": {
+              "$ref": "#/components/schemas/ListingCollectKeyValue"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "description": "🔴 属性（键值项列表）",
+            "items": {
+              "$ref": "#/components/schemas/ListingCollectKeyValue"
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "🔴 商品描述"
+          },
+          "sourcePriceAmount": {
+            "type": "number",
+            "description": "🔴 外部页面原文标价（**不是我方售价**）"
+          },
+          "sourcePriceCurrency": {
+            "type": "string",
+            "description": "🔴 外部页面原文标价币种"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 采集草稿（失败时为 null）"
+      },
+      "ListingCollectKeyValue": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "键（如「材质」「品牌」）"
+          },
+          "value": {
+            "type": "string",
+            "description": "值（原文照抄）"
+          }
+        },
+        "description": "🔴 属性（键值项列表）"
+      },
+      "ListingCollectTaskRow": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "采集任务 id",
+            "format": "uuid"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "来源 URL 原文"
+          },
+          "normalizedUrl": {
+            "type": "string",
+            "description": "🔴 规范化 URL（去跟踪参数后的去重键）"
+          },
+          "finalUrl": {
+            "type": "string",
+            "description": "跟随重定向后的最终 URL"
+          },
+          "host": {
+            "type": "string",
+            "description": "来源主机（去端口）"
+          },
+          "sourceCode": {
+            "type": "string",
+            "description": "命中的白名单编码"
+          },
+          "sourceName": {
+            "type": "string",
+            "description": "命中的白名单名称"
+          },
+          "state": {
+            "type": "string",
+            "description": "🔴 抓取结果：SUCCEEDED / FAILED（不是商品生命周期）"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "失败原因（成功时为空串）"
+          },
+          "httpStatus": {
+            "type": "integer",
+            "description": "外部站点的 HTTP 状态码（网络层失败时为 0）",
+            "format": "int32"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "description": "第几次尝试同一个规范化 URL",
+            "format": "int32"
+          },
+          "draftId": {
+            "type": "string",
+            "description": "🔴 采集草稿 id（失败时为 null）",
+            "format": "uuid"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "抓取开始时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "抓取结束时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          }
+        },
+        "description": "采集任务"
+      },
+      "ListingCollectPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingCollectSummaryRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingCollectSummaryRow": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "采集任务 id",
+            "format": "uuid"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "description": "来源 URL 原文"
+          },
+          "normalizedUrl": {
+            "type": "string",
+            "description": "🔴 规范化 URL（去跟踪参数后的去重键）"
+          },
+          "host": {
+            "type": "string",
+            "description": "来源主机（去端口）"
+          },
+          "sourceCode": {
+            "type": "string",
+            "description": "命中的白名单编码"
+          },
+          "sourceName": {
+            "type": "string",
+            "description": "命中的白名单名称"
+          },
+          "state": {
+            "type": "string",
+            "description": "🔴 抓取结果：SUCCEEDED / FAILED（不是商品生命周期）"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "失败原因（成功时为空串）"
+          },
+          "httpStatus": {
+            "type": "integer",
+            "description": "外部站点的 HTTP 状态码（网络层失败时为 0）",
+            "format": "int32"
+          },
+          "attemptNo": {
+            "type": "integer",
+            "description": "第几次尝试同一个规范化 URL",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "description": "🔴 抓到的标题（成功时非空）"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "ListingCollectCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingCollectCapabilityDimension"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "平台白名单（当前允许抓取的来源）",
+            "items": {
+              "$ref": "#/components/schemas/ListingCollectSourceRow"
+            }
+          },
+          "states": {
+            "type": "array",
+            "description": "抓取结果状态取值域",
+            "items": {
+              "type": "string",
+              "description": "抓取结果状态取值域"
+            }
+          },
+          "draftOnly": {
+            "type": "boolean",
+            "description": "🔴 是否保证只产生草稿、不产生商品"
+          },
+          "draftNote": {
+            "type": "string",
+            "description": "🔴 草稿边界的界面措辞（前端原样展示）"
+          },
+          "mediaDownloaded": {
+            "type": "boolean",
+            "description": "🔴 图片是否已下载入媒体库（恒为 false）"
+          },
+          "mediaNote": {
+            "type": "string",
+            "description": "🔴 媒体库归属与未交付原因"
+          },
+          "deduplicated": {
+            "type": "boolean",
+            "description": "🔴 是否做同 URL 去重"
+          },
+          "dedupNote": {
+            "type": "string",
+            "description": "🔴 去重规则的界面措辞"
+          },
+          "rateLimited": {
+            "type": "boolean",
+            "description": "🔴 是否做同 host 限频"
+          },
+          "rateLimitNote": {
+            "type": "string",
+            "description": "🔴 限频规则的界面措辞"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          }
+        }
+      },
+      "ListingCollectCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "ListingCollectSourceRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "白名单编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "来源名称"
+          },
+          "host": {
+            "type": "string",
+            "description": "允许抓取的域名"
+          },
+          "kind": {
+            "type": "string",
+            "description": "平台类别：PLATFORM / SUPPLIER / PEER"
+          },
+          "minIntervalSeconds": {
+            "type": "integer",
+            "description": "同一租户同一 host 的最小抓取间隔（秒）",
+            "format": "int32"
+          }
+        },
+        "description": "平台白名单（当前允许抓取的来源）"
       }
     }
   }
