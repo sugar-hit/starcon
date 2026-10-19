@@ -577,7 +577,11 @@ class ReturnReceiptAllocationIntegrationTest {
   @Test
   void 超期退回按收货时刻与寄回时限判定且时刻零漂移() {
     OffsetDateTime returnByAt = now8().plusDays(10);
-    OffsetDateTime receivedAt = returnByAt.plusDays(4).withHour(9).withMinute(30);
+    // ⚠️ 收货时刻**必须由时限直接平移**，不能在这里改写时刻（如 withHour/withMinute）。
+    //   服务端 daysOverdue = Duration.between(returnByAt, receivedAt).toDays()，向下取整；
+    //   改写时刻会让真实偏移变成「4 天 − (now8() 时刻 − 改写后的时刻)」，于是
+    //   上午 09:30 之前跑 toDays()=4（绿），09:30 之后跑 toDays()=3（红）—— 一个随当天时刻漂移的假失败。
+    OffsetDateTime receivedAt = returnByAt.plusDays(4);
     Seeded s = seed("OVERDUE", new BigDecimal("5"), new BigDecimal("3"), new BigDecimal("2"),
         receivedAt, returnByAt);
     var d = allocate(s, new BigDecimal("2"));
