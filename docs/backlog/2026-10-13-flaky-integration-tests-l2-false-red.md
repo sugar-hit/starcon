@@ -121,3 +121,54 @@ surefire 判定 hang 并强杀 ⇒ reactor 报 FAILURE，但 `surefire-reports/*
 
 ⚠️ 批次 22 的 push **建立在这个 flake 的补跑之上，不是首次全量绿**。
 已在 `docs/sessions/2026-10/2026-10-18-batch-22-*.md` 如实记录，未做「一次就绿」的表述。
+
+---
+
+## 五、批次 23 的两个 flake（2026-10-19）
+
+| 模块 | 现象 | 单独重跑 | 归属 |
+| --- | --- | --- | --- |
+| warehouse `LegalEntityTransferIntegrationTest` | 27 例全 error | **26/26 绿** | 见 ⑤ |
+| trade `RefundStatusTenancyIntegrationTest` | 4 例 `expected:<200/401/404> but was:<503>` | **连跑三次 10/10 绿** | 见 ① |
+
+两次失败的模块在本批改动清单里**零文件涉及**
+（`git diff --name-only 8300d842 647dc079 | grep -E 'warehouse|refundstatus|identity'` 为空）。
+
+### ④ `RefundStatusTenancyIntegrationTest` = ① 的第二个受害者
+
+§① 记的是 `catalog.DuplicateDetectionIntegrationTest`。本例证明**同一根因在 trade 也成立**：
+`RefundStatusTenancyIntegrationTest.java:74` 同样是
+`HttpServer.create(new InetSocketAddress(0), 0)`，第 105 行把它绑进 `IDENTITY_URL`。
+`AccessService` 捕获 `RestClientException` 抛 503。
+
+⇒ §① 的修法**适用面比记录的更广**：凡是用 JDK 内置 `HttpServer` 起身份桩的
+集成测试都算，不是只有 catalog 那一个。建议按前缀搜一遍
+（`grep -rln "new InetSocketAddress(0), 0)" backend/services/*/src/test/java`）。
+
+### ⑤ 新形态：静态初始化里的 PG 握手失败，级联成一整类 error
+
+**这一条与前四条都不同，值得单独记**：不是竞态、不是断言失败，是**一次连接失败**。
+
+```
+Caused by: java.io.EOFException
+    at org.postgresql.core.PGStream.receiveChar(PGStream.java:479)
+    at org.postgresql.core.v3.ConnectionFactoryImpl.enableSSL(ConnectionFactoryImpl.java:627)
+Caused by: java.lang.ExceptionInInitializerError   <- 测试类 <clinit>:131 建连接
+Caused by: java.lang.NoClassDefFoundError          <- 之后 26 例全部级联
+```
+
+结果看起来像「27 个用例挂了」，实际是**一次 PG 握手 EOF 导致类初始化失败**，
+剩下 26 个 `NoClassDefFoundError` 全是级联噪音。
+
+**判据补充**：看到 `Errors` 数量大且报错清一色
+`NoClassDefFoundError: Could not initialize class X` 时，
+**先往上翻第一条** —— 它才是根因，其余都是级联。
+本次若只看数量，很容易误判成「大批功能坏了」而触发二分。
+
+**建议修法**（与上面同类，但更该修的是夹具而非业务代码）：
+静态初始化里建连接本身就脆弱（一次抖动就毒死整类）。改为
+`@BeforeAll` 里建立连接、失败时显式重试或 `Assumptions.abort`，
+避免把一次基础设施抖动放大成整类 error。
+
+> 批次 23 的 push **建立在这两个 flake 的补跑之上，不是首次全量绿**。
+> 已在 `docs/sessions/2026-10/2026-10-19-batch-23-*.md` 如实记录。
