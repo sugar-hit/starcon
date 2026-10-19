@@ -6068,6 +6068,476 @@
         }
       }
     },
+    "/trade/quality-analysis/supplier-refs": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_supplier_refs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierRefPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_supplier_refs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierRefUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierRefRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/supplier-refs/{id}/status": {
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_supplier_refs_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierRefStatus"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierRefRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/defect-observations": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_defect_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "inspectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectObservationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_defect_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectObservationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectObservationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/defect-observations/{id}/void": {
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_defect_observations_id_void",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefectObservationVoid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectObservationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/cost-parameters": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_cost_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostParameterPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_cost_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostParameterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostParameterRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/cost-parameters/{id}/supersede": {
+      "post": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "post_trade_quality_analysis_cost_parameters_id_supersede",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostParameterSupersede"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostParameterRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/product-attribution/attributions": {
       "get": {
         "tags": [
@@ -20013,6 +20483,542 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ReturnAllocationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/supplier-comparison": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_supplier_comparison",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierComparisonReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/quality-cost": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_quality_cost",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityCostReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/photo-clusters": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_photo_clusters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "minClusterSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoClusterReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/overview": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/open-box-rate": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_open_box_rate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenBoxReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/lot-trend": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_lot_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batchNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotTrendReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/improvements": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_improvements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lotCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImprovementReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/defect-distribution": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_defect_distribution",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefectDistributionReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-analysis/capabilities": {
+      "get": {
+        "tags": [
+          "quality-analysis-controller"
+        ],
+        "operationId": "get_trade_quality_analysis_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityAnalysisCapabilities"
                 }
               }
             }
@@ -35367,6 +36373,383 @@
           },
           "expectedVersion": {
             "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierRefUpsert": {
+        "required": [
+          "refSource",
+          "supplierRefId"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "description": "批次上的供应商引用 id（与 product_issue_* 的 lot_supplier_ref_id 同值）",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string",
+            "description": "供应商编码"
+          },
+          "supplierName": {
+            "type": "string",
+            "description": "供应商名称"
+          },
+          "refSource": {
+            "type": "string",
+            "description": "来源 TENANT_MAINTAINED / MODULE_6_PURCHASE_SYNC；后者必须带 sourceReference"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用（同步器必填）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "SupplierRefRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "记录 id",
+            "format": "uuid"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "description": "供应商引用 id（批次上的 lot_supplier_ref_id）",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string",
+            "description": "供应商编码"
+          },
+          "supplierName": {
+            "type": "string",
+            "description": "供应商名称"
+          },
+          "refSource": {
+            "type": "string",
+            "description": "来源"
+          },
+          "sourceReference": {
+            "type": "string",
+            "description": "来源引用"
+          },
+          "refStatus": {
+            "type": "string",
+            "description": "状态"
+          },
+          "refStatusLabel": {
+            "type": "string",
+            "description": "状态中文名"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "一条供应商引用"
+      },
+      "SupplierRefStatus": {
+        "required": [
+          "refStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "refStatus": {
+            "type": "string",
+            "description": "ACTIVE / DISABLED"
+          }
+        }
+      },
+      "DefectObservationCreate": {
+        "required": [
+          "affectedQty",
+          "defectDimension",
+          "discoveredAt",
+          "discoveryStage",
+          "severity"
+        ],
+        "type": "object",
+        "properties": {
+          "inspectionId": {
+            "type": "string",
+            "description": "质检单 id（11.2.3.1）",
+            "format": "uuid"
+          },
+          "checkResultId": {
+            "type": "string",
+            "description": "判 FAIL 的检项 id；V185 守卫②在 DB 层再钉一次",
+            "format": "uuid"
+          },
+          "attributionId": {
+            "type": "string",
+            "description": "可选：关联归因单（11.1.2.2）",
+            "format": "uuid"
+          },
+          "defectCode": {
+            "type": "string",
+            "description": "缺陷编码"
+          },
+          "defectName": {
+            "type": "string",
+            "description": "缺陷名称"
+          },
+          "defectDimension": {
+            "type": "string",
+            "description": "缺陷维度，逐字对齐检项维度"
+          },
+          "discoveryStage": {
+            "type": "string",
+            "description": "发现环节"
+          },
+          "discoveredAt": {
+            "type": "string",
+            "description": "发现时刻（事实发生的那一刻，不是录入时刻）",
+            "format": "date-time"
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "影响件数（不得超过实检数量）"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度 MINOR/MODERATE/MAJOR/CRITICAL"
+          },
+          "observationNote": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "DefectObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "观察 id",
+            "format": "uuid"
+          },
+          "observationNo": {
+            "type": "string",
+            "description": "观察单号"
+          },
+          "inspectionId": {
+            "type": "string",
+            "description": "质检单 id",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string",
+            "description": "质检单号"
+          },
+          "checkResultId": {
+            "type": "string",
+            "description": "检项 id",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string",
+            "description": "检项编码"
+          },
+          "itemName": {
+            "type": "string",
+            "description": "检项名称"
+          },
+          "skuCode": {
+            "type": "string",
+            "description": "SKU 编码"
+          },
+          "defectCode": {
+            "type": "string",
+            "description": "缺陷编码"
+          },
+          "defectName": {
+            "type": "string",
+            "description": "缺陷名称"
+          },
+          "defectDimension": {
+            "type": "string",
+            "description": "缺陷维度"
+          },
+          "defectDimensionLabel": {
+            "type": "string",
+            "description": "维度中文名"
+          },
+          "discoveryStage": {
+            "type": "string",
+            "description": "发现环节"
+          },
+          "discoveryStageLabel": {
+            "type": "string",
+            "description": "环节中文名"
+          },
+          "discoveredAt": {
+            "type": "string",
+            "description": "发现时刻",
+            "format": "date-time"
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "影响件数"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度",
+            "nullable": true
+          },
+          "severityLabel": {
+            "type": "string",
+            "description": "严重度中文名",
+            "nullable": true
+          },
+          "observationStatus": {
+            "type": "string",
+            "description": "状态"
+          },
+          "observationStatusLabel": {
+            "type": "string",
+            "description": "状态中文名"
+          },
+          "observationNote": {
+            "type": "string",
+            "description": "备注"
+          },
+          "voidReason": {
+            "type": "string",
+            "description": "作废理由"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本号",
+            "format": "int64"
+          }
+        },
+        "description": "一条缺陷观察"
+      },
+      "DefectObservationVoid": {
+        "required": [
+          "version",
+          "voidReason"
+        ],
+        "type": "object",
+        "properties": {
+          "voidReason": {
+            "type": "string",
+            "description": "作废理由（必填）"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本号",
+            "format": "int64"
+          }
+        }
+      },
+      "CostParameterCreate": {
+        "required": [
+          "currency",
+          "effectiveFrom",
+          "returnLogisticsPerCase",
+          "reviewImpactPerDefect"
+        ],
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种（三字母大写）"
+          },
+          "returnLogisticsPerCase": {
+            "type": "number",
+            "description": "每一件实收退货的买家回寄物流成本"
+          },
+          "reviewImpactPerDefect": {
+            "type": "number",
+            "description": "每一件缺陷的差评影响估算金额"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起始日",
+            "format": "date"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "口径说明（这个单价是怎么来的）"
+          }
+        }
+      },
+      "CostParameterRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "参数 id",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "returnLogisticsPerCase": {
+            "type": "number",
+            "description": "每件退货物流成本"
+          },
+          "reviewImpactPerDefect": {
+            "type": "number",
+            "description": "每件缺陷的差评影响估算"
+          },
+          "parameterStatus": {
+            "type": "string",
+            "description": "状态"
+          },
+          "parameterStatusLabel": {
+            "type": "string",
+            "description": "状态中文名"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起始日",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效截止日",
+            "format": "date"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "口径说明"
+          },
+          "supersedeReason": {
+            "type": "string",
+            "description": "换版理由"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本号",
+            "format": "int64"
+          }
+        },
+        "description": "一条成本参数"
+      },
+      "CostParameterSupersede": {
+        "required": [
+          "supersedeReason",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "supersedeReason": {
+            "type": "string",
+            "description": "换版理由（必填）"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本号",
             "format": "int64"
           }
         }
@@ -54201,6 +55584,1147 @@
             "nullable": true
           }
         }
+      },
+      "SupplierRefPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierRefRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "basisNote": {
+            "type": "string"
+          }
+        },
+        "description": "供应商引用列表"
+      },
+      "SupplierComparisonReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "对比口径说明"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "description": "纳入对比的供应商数",
+            "format": "int32"
+          },
+          "unnamedCount": {
+            "type": "integer",
+            "description": "名称未登记的供应商数（显示为「未登记供应商」）",
+            "format": "int32"
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierQualityRow"
+            }
+          }
+        },
+        "description": "供应商质量对比"
+      },
+      "SupplierQualityRow": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "description": "供应商引用 id（批次上的 lot_supplier_ref_id）",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string",
+            "description": "供应商编码（未登记时为空串）"
+          },
+          "supplierName": {
+            "type": "string",
+            "description": "供应商名称；未登记时为 null 而非 uuid —— 把 uuid 当名字显示会被当成供应商名",
+            "nullable": true
+          },
+          "registered": {
+            "type": "boolean",
+            "description": "引用是否已登记"
+          },
+          "lotCount": {
+            "type": "integer",
+            "description": "涉及批次数",
+            "format": "int64"
+          },
+          "productionQty": {
+            "type": "number",
+            "description": "归因到生产的件数"
+          },
+          "transportQty": {
+            "type": "number",
+            "description": "归因到运输的件数"
+          },
+          "warehouseQty": {
+            "type": "number",
+            "description": "归因到仓储的件数"
+          },
+          "descriptionQty": {
+            "type": "number",
+            "description": "归因到描述的件数"
+          },
+          "otherQty": {
+            "type": "number",
+            "description": "归因到买家因素/待定的件数"
+          },
+          "productionShare": {
+            "type": "number",
+            "description": "生产责任占比（0-100，两位小数）"
+          },
+          "flaggedLots": {
+            "type": "integer",
+            "description": "被标记为质量问题的批次数（SUSPECT + CONFIRMED）",
+            "format": "int64"
+          },
+          "improvementCount": {
+            "type": "integer",
+            "description": "改进建议条数",
+            "format": "int64"
+          }
+        },
+        "description": "一个供应商的质量对比行"
+      },
+      "CostCurrencyBreakdown": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "loss": {
+            "$ref": "#/components/schemas/CostItem"
+          },
+          "returnLogistics": {
+            "$ref": "#/components/schemas/CostItem"
+          },
+          "reviewImpact": {
+            "$ref": "#/components/schemas/CostItem"
+          },
+          "total": {
+            "type": "number",
+            "description": "可加项合计（NOT_REGISTERED 项被排除在外）"
+          },
+          "excludedItemCount": {
+            "type": "integer",
+            "description": "被排除在合计外的项数",
+            "format": "int32"
+          }
+        },
+        "description": "一个币种的成本分项"
+      },
+      "CostItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "分项 key"
+          },
+          "label": {
+            "type": "string",
+            "description": "分项中文名"
+          },
+          "basis": {
+            "type": "string",
+            "description": "依据等级（实测 / 按参数估算 / 参数未登记）"
+          },
+          "basisLabel": {
+            "type": "string",
+            "description": "依据中文名"
+          },
+          "amount": {
+            "type": "number",
+            "description": "金额；参数未登记时为 **null 而不是 0**",
+            "nullable": true
+          },
+          "basisQty": {
+            "type": "number",
+            "description": "计算基数",
+            "nullable": true
+          },
+          "basisQtyNote": {
+            "type": "string",
+            "description": "基数口径的人话说明"
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "单价（估算项才有）",
+            "nullable": true
+          },
+          "formula": {
+            "type": "string",
+            "description": "公式（人话）"
+          }
+        },
+        "description": "一个成本分项"
+      },
+      "QualityCostReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "成本口径说明"
+          },
+          "parameters": {
+            "type": "array",
+            "description": "已登记的生效成本参数（按币种）",
+            "items": {
+              "$ref": "#/components/schemas/CostParameterRow"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "逐币种分项与合计",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyBreakdown"
+            }
+          },
+          "reviewNote": {
+            "type": "string",
+            "description": "本模块不产出「差评」这个事实的原因说明"
+          }
+        },
+        "description": "质量成本估算"
+      },
+      "PhotoClusterReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "聚类口径说明"
+          },
+          "photoCount": {
+            "type": "integer",
+            "description": "参与聚类的照片数",
+            "format": "int64"
+          },
+          "clusterCount": {
+            "type": "integer",
+            "description": "聚类簇数",
+            "format": "int32"
+          },
+          "repeatedClusterCount": {
+            "type": "integer",
+            "description": "被两张及以上照片共享的簇数（真正的「重复出现」）",
+            "format": "int32"
+          },
+          "clusters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoClusterRow"
+            }
+          }
+        },
+        "description": "缺陷照片聚类"
+      },
+      "PhotoClusterRow": {
+        "type": "object",
+        "properties": {
+          "contentSha256": {
+            "type": "string",
+            "description": "内容指纹（sha256，聚类键）"
+          },
+          "photoCount": {
+            "type": "integer",
+            "description": "簇内照片数",
+            "format": "int32"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "簇内归因单数",
+            "format": "int64"
+          },
+          "lotCount": {
+            "type": "integer",
+            "description": "涉及批次数",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "description": "涉及 SKU 数",
+            "format": "int64"
+          },
+          "stages": {
+            "type": "string",
+            "description": "涉及环节（逗号分隔，取自 V180 六值）"
+          },
+          "repeated": {
+            "type": "boolean",
+            "description": "是否跨归因单重复出现（同一张图被用在多个单子上）"
+          },
+          "firstCapturedAt": {
+            "type": "string",
+            "description": "簇内最早拍摄时刻",
+            "format": "date-time"
+          },
+          "sampleUris": {
+            "type": "string",
+            "description": "簇内对象存储定位符（逗号分隔，最多 5 个）"
+          }
+        },
+        "description": "一个指纹簇"
+      },
+      "CostTotalRow": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "amount": {
+            "type": "number",
+            "description": "可加项合计"
+          },
+          "excludedItemCount": {
+            "type": "integer",
+            "description": "被排除的项数",
+            "format": "int32"
+          },
+          "basis": {
+            "type": "string",
+            "description": "本币种成本的依据等级（混合时取最弱的那个）"
+          },
+          "basisLabel": {
+            "type": "string",
+            "description": "依据中文名"
+          }
+        },
+        "description": "成本合计行"
+      },
+      "LotFlagCounts": {
+        "type": "object",
+        "properties": {
+          "flaggedLots": {
+            "type": "integer",
+            "description": "有标记的批次数",
+            "format": "int64"
+          },
+          "suspectLots": {
+            "type": "integer",
+            "description": "其中 SUSPECT",
+            "format": "int64"
+          },
+          "confirmedLots": {
+            "type": "integer",
+            "description": "其中 CONFIRMED",
+            "format": "int64"
+          }
+        },
+        "description": "批次标记计数"
+      },
+      "QualityOverview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "concludedInspections": {
+            "type": "integer",
+            "description": "已判定质检单数",
+            "format": "int64"
+          },
+          "inspectedQty": {
+            "type": "number",
+            "description": "已判定质检单覆盖的件数"
+          },
+          "defectiveQty": {
+            "type": "number",
+            "description": "缺陷件数（FAIL 检项涉及的单件数合计）"
+          },
+          "nonResalableQty": {
+            "type": "number",
+            "description": "非可再销售件数（DEFECTIVE + SCRAPPED）"
+          },
+          "nonResalableRate": {
+            "type": "number",
+            "description": "非可再销售率（0-100，两位小数）"
+          },
+          "openBoxRate": {
+            "type": "number",
+            "description": "开箱率（0-100，两位小数；仅已登记观察范围内）"
+          },
+          "observationCoverage": {
+            "type": "number",
+            "description": "缺陷观察覆盖率（0-100，两位小数）"
+          },
+          "responsibility": {
+            "type": "array",
+            "description": "责任分布（六环节）",
+            "items": {
+              "$ref": "#/components/schemas/ResponsibilitySlice"
+            }
+          },
+          "lotFlags": {
+            "$ref": "#/components/schemas/LotFlagCounts"
+          },
+          "costTotals": {
+            "type": "array",
+            "description": "成本合计（只含可加项，逐币种）",
+            "items": {
+              "$ref": "#/components/schemas/CostTotalRow"
+            }
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "总览口径说明"
+          }
+        },
+        "description": "质量总览"
+      },
+      "ResponsibilitySlice": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "description": "归因环节（逐字取自 V180 的六值）"
+          },
+          "stageLabel": {
+            "type": "string",
+            "description": "环节中文名"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "归因单数",
+            "format": "int64"
+          },
+          "attributedQty": {
+            "type": "number",
+            "description": "涉及件数"
+          },
+          "share": {
+            "type": "number",
+            "description": "占比（0-100，两位小数）"
+          }
+        },
+        "description": "责任分布的一个环节切片"
+      },
+      "DiscoveryStageSlice": {
+        "type": "object",
+        "properties": {
+          "discoveryStage": {
+            "type": "string",
+            "description": "发现环节"
+          },
+          "stageLabel": {
+            "type": "string",
+            "description": "环节中文名"
+          },
+          "observationCount": {
+            "type": "integer",
+            "description": "观察条数",
+            "format": "int64"
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "件数"
+          },
+          "share": {
+            "type": "number",
+            "description": "占已登记观察件数比（0-100，两位小数）"
+          }
+        },
+        "description": "一个发现环节的切片"
+      },
+      "OpenBoxReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "开箱率口径说明"
+          },
+          "failCheckCount": {
+            "type": "integer",
+            "description": "期间内已判定质检单的 FAIL 检项条数",
+            "format": "int64"
+          },
+          "observationCount": {
+            "type": "integer",
+            "description": "已登记观察条数",
+            "format": "int64"
+          },
+          "observationCoverage": {
+            "type": "number",
+            "description": "观察覆盖率（0-100，两位小数）"
+          },
+          "observedQty": {
+            "type": "number",
+            "description": "已登记观察的件数合计"
+          },
+          "openBoxQty": {
+            "type": "number",
+            "description": "其中买家开箱发现的件数"
+          },
+          "openBoxRate": {
+            "type": "number",
+            "description": "开箱率（0-100，两位小数；分母=已登记观察件数）"
+          },
+          "stages": {
+            "type": "array",
+            "description": "分环节件数分布",
+            "items": {
+              "$ref": "#/components/schemas/DiscoveryStageSlice"
+            }
+          },
+          "bySku": {
+            "type": "array",
+            "description": "按 SKU 下钻",
+            "items": {
+              "$ref": "#/components/schemas/OpenBoxSkuRow"
+            }
+          }
+        },
+        "description": "开箱率（到手即损）"
+      },
+      "OpenBoxSkuRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "description": "SKU id",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "description": "SKU 编码"
+          },
+          "skuName": {
+            "type": "string",
+            "description": "SKU 名称"
+          },
+          "observationCount": {
+            "type": "integer",
+            "description": "已登记观察条数",
+            "format": "int64"
+          },
+          "observedQty": {
+            "type": "number",
+            "description": "已登记观察件数"
+          },
+          "openBoxQty": {
+            "type": "number",
+            "description": "买家开箱件数"
+          },
+          "openBoxRate": {
+            "type": "number",
+            "description": "开箱率（0-100，两位小数）"
+          },
+          "observationCoverage": {
+            "type": "number",
+            "description": "覆盖率（0-100，两位小数）"
+          }
+        },
+        "description": "按 SKU 的开箱率下钻"
+      },
+      "LotTrendBucket": {
+        "type": "object",
+        "properties": {
+          "bucketStart": {
+            "type": "string",
+            "description": "桶起点（含）",
+            "format": "date"
+          },
+          "label": {
+            "type": "string",
+            "description": "桶标签"
+          },
+          "inspectionCount": {
+            "type": "integer",
+            "description": "已判定质检单数",
+            "format": "int64"
+          },
+          "inspectedQty": {
+            "type": "number",
+            "description": "件数"
+          },
+          "nonResalableQty": {
+            "type": "number",
+            "description": "非可再销售件数"
+          },
+          "nonResalableRate": {
+            "type": "number",
+            "description": "非可再销售率（0-100，两位小数）"
+          },
+          "lotCount": {
+            "type": "integer",
+            "description": "涉及批次数",
+            "format": "int64"
+          },
+          "defectiveQty": {
+            "type": "number",
+            "description": "判 FAIL 的检项条数（**不是商品件数**）"
+          }
+        },
+        "description": "一个时间桶"
+      },
+      "LotTrendReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "趋势口径说明"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "时间桶粒度"
+          },
+          "lotCount": {
+            "type": "integer",
+            "description": "被排序限定的批次数",
+            "format": "int32"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/LotTrendTotals"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotTrendBucket"
+            }
+          }
+        },
+        "description": "批次质量趋势"
+      },
+      "LotTrendTotals": {
+        "type": "object",
+        "properties": {
+          "inspectionCount": {
+            "type": "integer",
+            "description": "已判定质检单数",
+            "format": "int64"
+          },
+          "inspectedQty": {
+            "type": "number",
+            "description": "件数"
+          },
+          "nonResalableQty": {
+            "type": "number",
+            "description": "非可再销售件数"
+          },
+          "nonResalableRate": {
+            "type": "number",
+            "description": "非可再销售率（0-100，两位小数）"
+          }
+        },
+        "description": "批次趋势总计"
+      },
+      "ImprovementReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "清单口径说明"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "归因单数（当前生效版本）",
+            "format": "int64"
+          },
+          "itemCount": {
+            "type": "integer",
+            "description": "改进清单条数",
+            "format": "int32"
+          },
+          "responsibility": {
+            "type": "array",
+            "description": "责任分布",
+            "items": {
+              "$ref": "#/components/schemas/ResponsibilitySlice"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImprovementRow"
+            }
+          }
+        },
+        "description": "责任分布 + 改进清单"
+      },
+      "ImprovementRow": {
+        "type": "object",
+        "properties": {
+          "attributionId": {
+            "type": "string",
+            "description": "归因单 id",
+            "format": "uuid"
+          },
+          "attributionNo": {
+            "type": "string",
+            "description": "归因单号"
+          },
+          "lotCode": {
+            "type": "string",
+            "description": "批次编码"
+          },
+          "skuCode": {
+            "type": "string",
+            "description": "SKU 编码"
+          },
+          "skuName": {
+            "type": "string",
+            "description": "SKU 名称"
+          },
+          "stage": {
+            "type": "string",
+            "description": "归因环节"
+          },
+          "stageLabel": {
+            "type": "string",
+            "description": "环节中文名"
+          },
+          "attributedQty": {
+            "type": "number",
+            "description": "涉及件数"
+          },
+          "attributionNote": {
+            "type": "string",
+            "description": "归因理由"
+          },
+          "improvementSuggestion": {
+            "type": "string",
+            "description": "改进建议（逐字取自 11.1.2.2 的必填人写文字）"
+          },
+          "lotFlagged": {
+            "type": "boolean",
+            "description": "该批次是否已被标记为质量问题",
+            "nullable": true
+          },
+          "lotFlagStatus": {
+            "type": "string",
+            "description": "批次标记状态（未标记时为 null）",
+            "nullable": true
+          }
+        },
+        "description": "一条改进清单项"
+      },
+      "DefectObservationPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectObservationRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页号（0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "统计口径说明"
+          },
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "缺陷观察列表"
+      },
+      "DefectDimensionSlice": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度"
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "维度中文名"
+          },
+          "failCheckCount": {
+            "type": "integer",
+            "description": "FAIL 检项条数",
+            "format": "int64"
+          },
+          "share": {
+            "type": "number",
+            "description": "占比（0-100，两位小数）"
+          }
+        },
+        "description": "按维度的切片"
+      },
+      "DefectDistributionReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "参考时刻（整页共用）",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string",
+            "description": "统计期间的人话描述"
+          },
+          "basisNote": {
+            "type": "string",
+            "description": "分布口径说明"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/DefectDistributionTotals"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectDimensionSlice"
+            }
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectTypeRow"
+            }
+          }
+        },
+        "description": "缺陷类型分布"
+      },
+      "DefectDistributionTotals": {
+        "type": "object",
+        "properties": {
+          "inspectionCount": {
+            "type": "integer",
+            "description": "参与统计的已判定质检单数",
+            "format": "int64"
+          },
+          "failCheckCount": {
+            "type": "integer",
+            "description": "FAIL 检项总条数",
+            "format": "int64"
+          },
+          "affectedInspectionCount": {
+            "type": "integer",
+            "description": "涉及的质检单数（去重）",
+            "format": "int64"
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "失败检项涉及件数"
+          },
+          "originalValue": {
+            "type": "number",
+            "description": "缺陷原值合计（已判定质检单的原值）"
+          },
+          "defectiveValueShare": {
+            "type": "number",
+            "description": "不合格检项原值占比（0-100，两位小数）"
+          }
+        },
+        "description": "缺陷分布总计"
+      },
+      "DefectTypeRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度"
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "维度中文名"
+          },
+          "itemCode": {
+            "type": "string",
+            "description": "检项编码（逐字取自 V179 的 item_code）"
+          },
+          "itemName": {
+            "type": "string",
+            "description": "检项名称"
+          },
+          "failCount": {
+            "type": "integer",
+            "description": "FAIL 条数",
+            "format": "int64"
+          },
+          "inspectionCount": {
+            "type": "integer",
+            "description": "涉及质检单数",
+            "format": "int64"
+          },
+          "affectedQty": {
+            "type": "number",
+            "description": "涉及件数"
+          },
+          "share": {
+            "type": "number",
+            "description": "占全部 FAIL 条数比（0-100，两位小数）"
+          },
+          "openBoxQty": {
+            "type": "number",
+            "description": "开箱发现件数（已登记观察范围内）"
+          },
+          "topSeverity": {
+            "type": "string",
+            "description": "责任人建议：按严重度最高的观察给一条"
+          }
+        },
+        "description": "一个缺陷类型（检项粒度）"
+      },
+      "CostParameterPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostParameterRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "basisNote": {
+            "type": "string"
+          }
+        },
+        "description": "成本参数列表"
+      },
+      "QualityAnalysisAction": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "动作 key"
+          },
+          "title": {
+            "type": "string",
+            "description": "动作名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP 方法"
+          },
+          "path": {
+            "type": "string",
+            "description": "路径"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "是否只读"
+          },
+          "precondition": {
+            "type": "string",
+            "description": "前置条件"
+          },
+          "denialHint": {
+            "type": "string",
+            "description": "拒绝理由（权限不足时填）"
+          },
+          "permission": {
+            "type": "string",
+            "description": "被谁授权"
+          }
+        },
+        "description": "本模块的一个端点"
+      },
+      "QualityAnalysisCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "description": "上游数据源（模块号 + 落库位置）",
+            "items": {
+              "type": "string",
+              "description": "上游数据源（模块号 + 落库位置）"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "description": "职责句六项逐块可用性",
+            "items": {
+              "$ref": "#/components/schemas/QualityAnalysisSection"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "description": "上下游模块",
+            "items": {
+              "$ref": "#/components/schemas/QualityAnalysisRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "本模块端点",
+            "items": {
+              "$ref": "#/components/schemas/QualityAnalysisAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "description": "本模块刻意不做的事",
+            "items": {
+              "type": "string",
+              "description": "本模块刻意不做的事"
+            }
+          },
+          "openBoxNote": {
+            "type": "string",
+            "description": "开箱率口径说明"
+          },
+          "costNote": {
+            "type": "string",
+            "description": "质量成本口径说明（哪几项实测、哪几项估算）"
+          },
+          "photoClusterNote": {
+            "type": "string",
+            "description": "照片聚类口径说明"
+          },
+          "crossServiceNote": {
+            "type": "string",
+            "description": "跨服务边界说明"
+          }
+        }
+      },
+      "QualityAnalysisRelatedModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string",
+            "description": "模块号"
+          },
+          "title": {
+            "type": "string",
+            "description": "模块名"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "ownerSystem": {
+            "type": "string",
+            "description": "归属系统（未交付时必填）"
+          },
+          "relation": {
+            "type": "string",
+            "description": "与本模块的关系"
+          },
+          "path": {
+            "type": "string",
+            "description": "页面入口（已交付且同应用时填）"
+          }
+        },
+        "description": "上下游模块"
+      },
+      "QualityAnalysisSection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "块 key"
+          },
+          "title": {
+            "type": "string",
+            "description": "块名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块号"
+          },
+          "basis": {
+            "type": "string",
+            "description": "事实来源 / 口径"
+          },
+          "ownerSystem": {
+            "type": "string",
+            "description": "归属系统"
+          }
+        },
+        "description": "职责句的一块分析"
       },
       "LotFlagPage": {
         "type": "object",

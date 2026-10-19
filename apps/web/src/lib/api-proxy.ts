@@ -1779,6 +1779,49 @@ const services: readonly {
       /^product-attribution\/(?:capabilities|attributions|lot-flags|lot-flags\/by-lot)$|^product-attribution\/attributions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:photos|photos\/compare|attribute|supersede|lot-flag\/refresh))?$/,
   },
   {
+    // 11.5.2.1 质量分析（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.1.2.2 `product-attribution` 那条**之后**：
+    // 两条的前缀形状互不相交（`quality-analysis/` vs `product-attribution/`），
+    // 与其他车道的新增元素被既有条目隔开，git 能干净求并。
+    //
+    //   `quality-analysis/capabilities`                 能力声明与边界（GET）
+    //   `quality-analysis/overview`                     质量总览（GET）
+    //   `quality-analysis/defect-distribution`          缺陷类型分布（GET）
+    //   `quality-analysis/lot-trend`                    批次质量趋势（GET）
+    //   `quality-analysis/supplier-comparison`          供应商质量对比（GET）
+    //   `quality-analysis/photo-clusters`               缺陷照片聚类（GET，**内容指纹**口径）
+    //   `quality-analysis/open-box-rate`                开箱率（GET，**必须与覆盖率一起读**）
+    //   `quality-analysis/quality-cost`                 质量成本估算（GET，逐项标依据等级）
+    //   `quality-analysis/improvements`                 责任分布 + 改进清单（GET）
+    //   `quality-analysis/defect-observations`          集合读（GET）+ 登记（POST）
+    //   `quality-analysis/defect-observations/{uuid}/void`        作废（POST，**终态**）
+    //   `quality-analysis/cost-parameters`              参数集合读（GET）+ 建参数（POST）
+    //   `quality-analysis/cost-parameters/{uuid}/supersede`      换版（POST，**终态**）
+    //   `quality-analysis/supplier-refs`                引用集合读（GET）+ 登记（POST）
+    //   `quality-analysis/supplier-refs/{uuid}/status`  引用启停（POST）
+    //
+    // ⚠️ 五段 alternation 各自**整段锚定到 $**。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}/similarity` / `photo-clusters?similarity=` —— **图像相似度**：本仓没有图像库、
+    //     没有训练好的模型、也没有第三方视觉服务的接入点。放行它等于渲染一个冒充图像
+    //     识别能力的控件；聚类口径是 content_sha256 **完全相同**。
+    //   * 任何 `negative-review` 形状 —— 全库**没有商品评价表**，本模块不产出
+    //     「买家给了差评」这个事实，只在成本里按租户参数**估算**其影响并标成估算项。
+    //   * `PUT {uuid}` —— 缺陷观察与成本参数**都是终态**：作废 / 换版只走各自的
+    //     一个入口留痕。再开一个「直接改」的形状，会让同一个数字出现两个答案。
+    //   * 任何 **DELETE** —— 缺陷观察的发现环节是开箱率的**唯一来源**，
+    //     成本参数换版必须留痕（否则三个月后答不出「上次是多少」）。
+    //     两者都只在 POST 里留痕，删除不在任何路径上。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^quality-analysis\/(?:capabilities|overview|defect-distribution|lot-trend|supplier-comparison|photo-clusters|open-box-rate|quality-cost|improvements|defect-observations|cost-parameters|supplier-refs)$|^quality-analysis\/defect-observations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void$|^quality-analysis\/cost-parameters\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/supersede$|^quality-analysis\/supplier-refs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
