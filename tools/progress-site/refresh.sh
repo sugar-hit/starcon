@@ -86,13 +86,15 @@ else
 fi
 
 echo "== 2/3 构建 =="
+# bash 3.2（macOS 自带）在 set -u 下展开空数组会报 unbound variable，
+# 所以用 ${arr[@]+...} 这个可移植写法，不能直接写 "${arr[@]}"。
 BUILD_ARGS=()
 [ "$SRC" = "working-tree" ] || BUILD_ARGS=(--docs-ref "$SRC")
-node "$SITE/build.mjs" "${BUILD_ARGS[@]}" || { echo "BUILD_FAILED —— 构建报错，放弃发布"; exit 1; }
+node "$SITE/build.mjs" ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} || { echo "BUILD_FAILED —— 构建报错，放弃发布"; exit 1; }
 
 echo "== 3/3 数据自检 =="
 # 自检必须读**同一个来源**的台账，否则比的是两份不同的台账
-node "$SITE/check.mjs" "${BUILD_ARGS[@]}" || { echo "CHECK_FAILED —— 数据与台账对不上，放弃发布"; exit 1; }
+node "$SITE/check.mjs" ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} || { echo "CHECK_FAILED —— 数据与台账对不上，放弃发布"; exit 1; }
 
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 if [ "$SRC" = "origin/main" ]; then

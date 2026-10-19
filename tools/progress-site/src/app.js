@@ -700,7 +700,12 @@
       ':' +
       pad(t.getMinutes());
     $('generated-at').textContent = stamp;
-    $('footer-gen').textContent = '生成于 ' + stamp + ' · node tools/progress-site/build.mjs';
+    $('footer-gen').textContent =
+      '生成于 ' +
+      stamp +
+      ' · 数据来源 ' +
+      (D.sourceRef || 'working-tree') +
+      ' · node tools/progress-site/build.mjs';
   }
 
   /* ── 启动 ─────────────────────────────────────────── */

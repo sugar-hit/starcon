@@ -53,14 +53,19 @@ cd /Users/guan/Projects/starcon && bash tools/progress-site/refresh.sh
 | 1      | 构建/自检失败 | **立刻停止。不要发布。** 旧站点保持不动，汇报失败原因 |
 | 2      | 环境不满足    | **立刻停止。** 汇报缺少什么                           |
 
-成功时脚本最后会输出两行机器可读的状态，**汇报里必须带上**：
+成功时脚本最后会输出四行机器可读的状态，**汇报里必须带上**：
 
 ```
 PULL_STATUS=ok|failed
-SOURCE_COMMIT=<短 commit>
+SOURCE_COMMIT=<短 commit>      # 数据实际来自哪个提交
+SOURCE=origin/main|working-tree # 数据实际来自哪里
+LEDGER_NOTE=none|local-ledger-differs
 ```
 
-`PULL_STATUS=failed` 表示没拉到远端最新，台账可能过期——照实说，别当成"今天没进展"。
+- `PULL_STATUS=failed` —— 没 fetch 到远端，台账可能过期。照实说，别当成"今天没进展"。
+- `SOURCE=working-tree` —— 远端落后于本地，用的是本地工作树。
+- `LEDGER_NOTE=local-ledger-differs` —— **本地台账与 origin/main 不一致**，说明本地有
+  未推送的台账改动，而本次用的是远端版本。要在汇报里点名这件事，让人决定要不要推上去。
 
 **自检失败是最需要重视的一种。** 它意味着台账的「总览声明值」和「逐行模块状态」
 对不上——仓库文档自己矛盾了。这时发布出去，站点上的完成率会和 `module-progress.md`
@@ -72,11 +77,26 @@ SOURCE_COMMIT=<短 commit>
 > 脚本对拉取加了 30 秒硬超时，代理不通时会快速失败并继续用本地工作树，
 > 不会把每天 08:00 的刷新挂死。
 >
-> 拉取用的是 `git pull --rebase --autostash` 而不是 `--ff-only`：站点提交只在本地
-> `main` 上（未 push），远端一旦前进就会分叉 —— 实测 `--ff-only` 在这种状态下直接报
-> `Diverging branches can't be fast-forwarded`，拉取永远失败，站点会**静默停止更新**。
-> rebase 把本地提交重放到远端之上；失败时脚本会 `git rebase --abort` 清掉中间态，
-> 避免明天的拉取跟着一起失败。
+> **同步用的是 `git fetch`，不是 `git pull`。** 这一点很关键：
+> `git pull` 要动本地分支，而站点提交只在本地 `main` 上（未 push），
+> 远端一旦前进就分叉 —— 实测 `git pull --ff-only` 在分叉时直接报
+> `Diverging branches can't be fast-forwarded`，拉取永远失败，站点会**静默停止更新**
+> （仍显示旧数字，没有任何报错）。改用 rebase 也不稳：`.gitignore` 这类共享文件
+> 一旦冲突，失败后每天都会卡在同一处。
+>
+> 所以现在的做法是：`git fetch origin main`（只更新远端引用，不碰工作树），
+> 再按 `git merge-base --is-ancestor origin/main HEAD` 判断：
+>
+> | 远端相对本地            | 数据源         | 理由                       |
+> | ----------------------- | -------------- | -------------------------- |
+> | 远端是 HEAD 的祖先      | `working-tree` | 本地有更新的未推送内容     |
+> | 远端已前进 / 与本地分叉 | `origin/main`  | 远端才是最新的台账         |
+> | fetch 失败              | `working-tree` | 降级用本地，并在报告里点名 |
+>
+> `build.mjs --docs-ref origin/main` 用 `git show <ref>:<path>` 读文档，
+> `check.mjs --docs-ref origin/main` 读**同一个来源**的台账。
+> 这样刷新与本地 git 状态彻底解耦：本地有没有未推送提交、有没有 rebase 中间态、
+> 是否切了分支，都不会让站点停止更新。
 
 ### 第 2 步：原地发布
 
