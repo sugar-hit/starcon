@@ -6,36 +6,43 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 207 |
+| 已交付 | 210 |
 | 进行中 | 0 |
-| **未开发** | **258** |
-| 完成率 | 44.5% |
+| **未开发** | **255** |
+| 完成率 | 45.2% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
 | **D4** | 55 | 0 | 5 | 60 |
-| **D5** | 24 | 0 | 28 | 52 |
+| **D5** | 26 | 0 | 26 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
-| **D7** | 9 | 0 | 146 | 155 |
+| **D7** | 10 | 0 | 145 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 24 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
-| 04 | 刊登与内容系统 | D5 | 8 | 26 |
+| 04 | 刊登与内容系统 | D5 | 10 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 4 | 26 |
 | 07 | 库存核算系统 | D3 | 26 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 24 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 18 | 27 |
-| 11 | 售后与退货系统 | D4 / D7 | 15 | 22 |
+| 11 | 售后与退货系统 | D4 / D7 | 16 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -362,7 +379,7 @@
 | 11.4.2.1 | 工单管理 | — | D7 | 未开发 | — |
 | 11.4.2.2 | 知识库与话术 | — | D4 | 已交付 | 迁移 V100__customer_service_knowledge_base.sql：kb_rule_version（平台规则版本台账）/ kb_entry（话术条目）/ kb_entry_translation（多语言译文，真实表行不是 json 挂一列）/ kb_entry_rule（话术↔规则版本挂钩）/ kb_review_task（政策改版自动生成的待复核任务）/ kb_usage（append-only 引用与命中明细），六张表全部 tenant_id uuid NOT NULL + ENABLE/FORCE ROW LEVEL SECURITY；端点 25 个 /catalog/kb（overview、options、entries 读写与 enabled 启停、translations 多语言、translation-coverage、rule-versions 规则版本台账、entries/{id}/rule-bindings 政策挂钩、review-tasks 待复核、usages 引用、hit-rates 命中率统计），租户只取 AccessService.Access 已认证成员关系不读 X-Tenant-Id；页面 apps/web/src/app/aftersales/knowledge/page.tsx + knowledge-workspace.tsx（概览/话术/译文/规则版本/待复核/命中率六个工作区）；测试 KnowledgeBaseIntegrationTest 33 条（含租户隔离三断言：两租户互不可见、伪造 X-Tenant-Id 无效且行确实落在自称租户名下、连接池归还后 5 轮交替不串租户）、KnowledgeBaseRulesTest 35 条、knowledge-model.test.ts 44 条、api-proxy catalog route.test.ts 38 条 |
 | 11.5.1.1 | 退货分析 | — | D7 | 未开发 | — |
-| 11.5.2.1 | 质量分析 | — | D7 | 已交付 | 迁移 `V185__trade_quality_analysis.sql`（**四张新表、零 ALTER 零 DROP 既有表**，对 V179 `return_quality_*` 簇、V180 `product_issue_*` 簇、V172 `return_receipt_line` **全部只读**，跨车道 DDL 回归面 = 0）：`quality_defect_observation`（缺陷观察，**开箱率的唯一来源**；1:1 挂一条 **FAIL** 检项，`UNIQUE(tenant_id,check_result_id)` 用**部分唯一索引 WHERE observation_status='RECORDED'** —— 用表级 UNIQUE 会让「作废后重记」变成不可能，运营只会去改原行而不留痕）/ `quality_cost_parameter`（成本参数，按币种**每份只有一个生效版本**，老版本保留为已换版）/ `quality_supplier_ref`（供应商引用镜像，见下）/ `quality_analysis_event`（留痕 append-only，运行角色 UPDATE/DELETE 已收回）。四表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT；`quality_supplier_ref` 的 **DELETE 也收回**（同步器写回来会复活，见下）。**七条守卫钉在 DB 层**（服务层与 DB 各判一次，只判一次的话绕过服务层直连 SQL 就能造假）：① 已作废观察的**业务列全部冻结**（作废即终态）；② **只有判 FAIL 的检项**能登记为缺陷（把一条 PASS 检项记成缺陷是最省事的造假）；③ 维度必须与检项**逐字一致**；④ 质检单必须**已判定**；⑤ 件数不得超过实检数量；⑥ **买家开箱发现的时刻不得晚于仓内判定完成**（把入库发现记成「买家开箱」能把 2% 的开箱率报成 30%）；⑦ 成本参数换版**必须先写留痕**（否则三个月后答不出「上次是多少」，这个数字就再也不能用来做改进决策）。· 端点 17 个挂 `/trade/quality-analysis`：capabilities / overview / defect-distribution / lot-trend / supplier-comparison / photo-clusters / open-box-rate / quality-cost / improvements（9 只读）+ defect-observations（GET/POST/void）、cost-parameters（GET/POST/supersede）、supplier-refs（GET/POST/status）· 页面 `/aftersales/quality-analysis`（`quality-analysis-workspace.tsx` + `quality-analysis-model.ts`）、api-proxy **新增一条独立 services[] 元素**（不并进既有 trade 长正则，多车道并入 git 必冲突）· 测试 `QualityAnalysisIntegrationTest` 22 例 + `QualityAnalysisTenancyIntegrationTest` 3 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）· **六项分析逐项落在真表上**：缺陷类型分布读 V179 的 **FAIL 检项**（分母恒等于 FAIL 条数，PASS 不进分布）/ 批次质量趋势按 `date_trunc` **UTC** 分桶（用会话时区的话换一条连接就换一套分桶，趋势图会凭空多出空桶）/ 供应商对比按 **lot_supplier_ref_id** 聚合（一行一个供应商，不是一行一个批次）/ 照片聚类按 **content_sha256 完全相同**（本仓无图像库、无模型、无第三方视觉服务接入点 ⇒ **响应里没有任何「相似度」数字**，编一个 0.87 就是冒充图像识别能力）/ 责任分布按**件数**而非单张数 / 改进清单只列**当前生效归因**且带批次标记的排前面。**加粗句「质量成本（退货物流 + 损耗 + 差评影响）应量化」落成三项**分别标注依据等级、**绝不合成一个来源的总成本**：① 损耗 = 原值 − 残值（V179 两个真列）⇒ **实测**；② 退货物流 —— 本仓**任何表都没有买家回寄运费金额**（V161 `rma_authorization` 只有 carrier / tracking_no / shipped_at，V165 `rma_label` 只有重量长宽高）⇒ **按参数估算** × **全部实收件数**（只按缺陷件算等于让退货里没问题的那些白花的钱从报表上消失）；③ 差评影响 —— 本仓**全库无商品评价表**（无 product_review / rating）⇒ **按参数估算** × 已登记缺陷件数。**参数未登记时标 `NOT_REGISTERED`、金额为 null 而不是 0、并被排除在合计之外**（`excludedItemCount` 一并报出）—— 按 0 算出来的总成本会被读成「质量没花钱」，而**偏小的质量成本正好是改进动力不足的那个方向**；混合了估算的合计依据等级自动降级，绝不冒充全实测。**开箱率必须与覆盖率并排**（分母只取**已登记观察**，覆盖率 = 已登记观察数 ÷ 期间内 FAIL 检项数）：覆盖率 100% 才是完整开箱率，40% 时只代表「已登记的那 40%」，剩下的沉默**不能**被读成「没开箱问题」；**签收时发现刻意不计入分子**（货到买家手上有没有拆开验过没有任何证据）；按 SKU 下钻时覆盖率**各自单独算**。**跨服务边界**：输入句的两项上游（11.2.3.1 / 11.1.2.2）**都在 trade 服务**，本模块是同库只读聚合，**不经任何跨服务调用**；供应商主数据在 catalog 独立库（`party_supplier_profile` / `party_role`）⇒ **不 join、不建视图、不建跨库 FK**，改用 trade 侧 `quality_supplier_ref` 镜像表（**沿用 11.1.2.2 处理 `platform_enum_mapping` 的同一条既有先例**：内部口径 ⇄ 平台码 + 来源 + 采集时刻，同步器按同一形状写入时结构与查询都不用改）；批次真值在 warehouse 独立库，只用 11.1.2.2 已落库的 `lot_code` / `lot_supplier_ref_id` 快照列。**刻意不做**：供应商评级（6.1.1.3 未交付）、供应商索赔（6.4.2.2 未交付）、跨系统分析（13 未交付）、图像相似度聚类、**造一个 `NEGATIVE_REVIEW` 发现环节**（全库没有评价表，声称我们读到过买家评价就是在编）。⚠️ 契约里 `CostItem.amount` / `basisQty` / `unitPrice` **刻意标成 `number | null`** —— 写成非空 number，前端就只会被迫把「算不出来」渲染成 0，「质量没花钱」这句话就从一个 bug 变成了界面上的事实。 |
+| 11.5.2.1 | 质量分析 | — | D7 | 已交付 | 迁移 `V185__trade_quality_analysis.sql`（**四张新表、零 ALTER 零 DROP 既有表**，对 V179 `return_quality_*` 簇、V180 `product_issue_*` 簇、V172 `return_receipt_line` **全部只读**，跨车道 DDL 回归面 = 0）：`quality_defect_observation`（缺陷观察，**开箱率的唯一来源**；1:1 挂一条 **FAIL** 检项，`UNIQUE(tenant_id,check_result_id)` 用**部分唯一索引 WHERE observation_status='RECORDED'** —— 用表级 UNIQUE 会让「作废后重记」变成不可能，运营只会去改原行而不留痕）/ `quality_cost_parameter`（成本参数，按币种**每份只有一个生效版本**，老版本保留为已换版）/ `quality_supplier_ref`（供应商引用镜像，见下）/ `quality_analysis_event`（留痕 append-only，运行角色 UPDATE/DELETE 已收回）。四表 tenant_id NOT NULL + ENABLE **与 FORCE** RLS isolation + GRANT；`quality_supplier_ref` 的 **DELETE 也收回**（同步器写回来会复活，见下）。**七条守卫钉在 DB 层**（服务层与 DB 各判一次，只判一次的话绕过服务层直连 SQL 就能造假）：① 已作废观察的**业务列全部冻结**（作废即终态）；② **只有判 FAIL 的检项**能登记为缺陷（把一条 PASS 检项记成缺陷是最省事的造假）；③ 维度必须与检项**逐字一致**；④ 质检单必须**已判定**；⑤ 件数不得超过实检数量；⑥ **买家开箱发现的时刻不得晚于仓内判定完成**（把入库发现记成「买家开箱」能把 2% 的开箱率报成 30%）；⑦ 成本参数换版**必须先写留痕**（否则三个月后答不出「上次是多少」，这个数字就再也不能用来做改进决策）。· 端点 17 个挂 `/trade/quality-analysis`：capabilities / overview / defect-distribution / lot-trend / supplier-comparison / photo-clusters / open-box-rate / quality-cost / improvements（9 只读）+ defect-observations（GET/POST/void）、cost-parameters（GET/POST/supersede）、supplier-refs（GET/POST/status）· 页面 `/aftersales/quality-analysis`（`quality-analysis-workspace.tsx` + `quality-analysis-model.ts`）、api-proxy **新增一条独立 services[] 元素**（不并进既有 trade 长正则，多车道并入 git 必冲突）· 测试 `QualityAnalysisIntegrationTest` 22 例 + `QualityAnalysisTenancyIntegrationTest` 3 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）· **六项分析逐项落在真表上**：缺陷类型分布读 V179 的 **FAIL 检项**（分母恒等于 FAIL 条数，PASS 不进分布）/ 批次质量趋势按 `date_trunc` **UTC** 分桶（用会话时区的话换一条连接就换一套分桶，趋势图会凭空多出空桶）/ 供应商对比按 **lot_supplier_ref_id** 聚合（一行一个供应商，不是一行一个批次）/ 照片聚类按 **content_sha256 完全相同**（本仓无图像库、无模型、无第三方视觉服务接入点 ⇒ **响应里没有任何「相似度」数字**，编一个 0.87 就是冒充图像识别能力）/ 责任分布按**件数**而非单张数 / 改进清单只列**当前生效归因**且带批次标记的排前面。**加粗句「质量成本（退货物流 + 损耗 + 差评影响）应量化」落成三项**分别标注依据等级、**绝不合成一个来源的总成本**：① 损耗 = 原值 − 残值（V179 两个真列）⇒ **实测**；② 退货物流 —— 本仓**任何表都没有买家回寄运费金额**（V161 `rma_authorization` 只有 carrier / tracking_no / shipped_at，V165 `rma_label` 只有重量长宽高）⇒ **按参数估算** × **全部实收件数**（只按缺陷件算等于让退货里没问题的那些白花的钱从报表上消失）；③ 差评影响 —— 本仓**全库无商品评价表**（无 product_review / rating）⇒ **按参数估算** × 已登记缺陷件数。**参数未登记时标 `NOT_REGISTERED`、金额为 null 而不是 0、并被排除在合计之外**（`excludedItemCount` 一并报出）—— 按 0 算出来的总成本会被读成「质量没花钱」，而**偏小的质量成本正好是改进动力不足的那个方向**；混合了估算的合计依据等级自动降级，绝不冒充全实测。**开箱率必须与覆盖率并排**（分母只取**已登记观察**，覆盖率 = 已登记观察数 ÷ 期间内 FAIL 检项数）：覆盖率 100% 才是完整开箱率，40% 时只代表「已登记的那 40%」，剩下的沉默**不能**被读成「没开箱问题」；**签收时发现刻意不计入分子**（货到买家手上有没有拆开验过没有任何证据）；按 SKU 下钻时覆盖率**各自单独算**。**跨服务边界**：输入句的两项上游（11.2.3.1 / 11.1.2.2）**都在 trade 服务**，本模块是同库只读聚合，**不经任何跨服务调用**；供应商主数据在 catalog 独立库（`party_supplier_profile` / `party_role`）⇒ **不 join、不建视图、不建跨库 FK**，改用 trade 侧 `quality_supplier_ref` 镜像表（**沿用 11.1.2.2 处理 `platform_enum_mapping` 的同一条既有先例**：内部口径 ⇄ 平台码 + 来源 + 采集时刻，同步器按同一形状写入时结构与查询都不用改）；批次真值在 warehouse 独立库，只用 11.1.2.2 已落库的 `lot_code` / `lot_supplier_ref_id` 快照列。**刻意不做**：供应商评级（6.1.1.3 未交付）、供应商索赔（6.4.2.2 未交付）、跨系统分析（13 未交付）、图像相似度聚类、**造一个 `NEGATIVE_REVIEW` 发现环节**（全库没有评价表，声称我们读到过买家评价就是在编）。⚠️ 契约里 `CostItem.amount` / `basisQty` / `unitPrice` **刻意标成 `number |
 | 12.1.1.1 | 应收单管理 | — | D6 | 未开发 | — |
 | 12.1.1.2 | 应收账龄 | — | D6 | 未开发 | — |
 | 12.1.1.3 | 坏账与核销 | — | D6 | 未开发 | — |
