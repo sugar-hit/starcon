@@ -1444,6 +1444,38 @@ const services: readonly {
       /^return-receipts(?:\/(?:capabilities|receivable|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|cancel|photos))?))?$/,
   },
   {
+    // 11.2.2.2 实收分配（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
+    // 同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.2.2.1 `return-receipts` 那条**之后**、11.1.1.2 那条**之前**：
+    // 三条的前缀形状互不相交（`receipt-allocations/` vs `return-receipts/` vs `cases/`），
+    // 谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `receipt-allocations`                        集合读（GET，真分页 + 多维筛选 + 排序白名单）
+    //                                               / 按收货事件分配（POST，**重复提交幂等**）
+    //   `receipt-allocations/capabilities`           能力与硬规则声明（GET）
+    //   `receipt-allocations/order-returns`          订单行已退数量（GET，9 订单的取数面）
+    //   `receipt-allocations/{uuid}`                 详情（GET）
+    //   `receipt-allocations/{uuid}/reconcile`       对账：超收/少收/超期结转（POST）
+    //   `receipt-allocations/{uuid}/reverse`         撤销分配（POST，仅 ALLOCATED，必须写理由）
+    //
+    //   * **刻意不放行** 任何「重复分配 / 强制再记一次已退数量」的形状：蓝图加粗句
+    //     「**按收货事件去重分配，同一批退货不重复记已收数量**」。已退数量是可退余额的
+    //     事实来源，多记一次就是资损；传输层**没有** force / allowDuplicate 开关。
+    //   * **刻意不放行** `{uuid}` 上的 DELETE：分配是资金动作，撤销只能走
+    //     `/reverse`（写理由、走版本校验、由 DB 触发器回冲已退数量）。
+    //   * **刻意不放行** 任何「把差额标记为已解决」的形状：处置结论只有
+    //     「待人工核实 / 按实际退回认可」—— 超收多退的钱要追回还是认了是财务决定，
+    //     编一个「已解决」会让财务侧以为这笔钱已经结清了。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^receipt-allocations(?:\/(?:capabilities|order-returns|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:reconcile|reverse))?))?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
