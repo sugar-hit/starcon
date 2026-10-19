@@ -137,7 +137,14 @@ cd /Users/tommy/Project/starcon
 node tools/module-progress/lane.mjs status | head -30
 uptime
 sysctl -n hw.ncpu
-docker ps --filter "ancestor=postgres:16-alpine" --format '{{.Names}}\t{{.Status}}'
+# PG 闸要数的是**带 Testcontainers 标签的**容器（第二列非空才是）。
+# 只按 ancestor 过滤会把**历史遗留的孤儿容器**也算进来 —— 它们没有 testcontainers 标签、
+# 没有任何连接、且机器上没跑 ryuk 时**永远不会被自动回收**。
+# 2026-10-19 实测：5 个 23 小时~12 天的孤儿容器把 6 个额度吃掉了 5 个，
+# 有效并发额度从 6 掉到 1，闸被长期误触发，批次触发率只有 28%。
+docker ps --filter "ancestor=postgres:16-alpine" \
+  --format '{{.Names}}\t{{.Label "org.testcontainers.sessionId"}}' \
+  | awk -F'\t' '$2 != ""'
 pmset -g therm
 ```
 
@@ -150,13 +157,34 @@ pmset -g therm
 - `status` 里 running 条数 **>= 7**（即超过 `RUNNING_QUOTA=6`；
   配额值以 `.dev-agent/PIPELINE.local.md` 为准，改 lanes 时两处必须同步）
 - load 1min **> 核数**（10 核机即 > 10）
-- Testcontainers PG 容器数 **>= 6**（排除常驻的 `starcon-mig-v2`，它 Up 数天不是 Testcontainers）
+- **Testcontainers** PG 容器数 **>= 6**（只数带 `org.testcontainers.sessionId` 标签的；
+  常驻的 `starcon-mig-v2` 没有该标签，自动排除）
 - `plan` 返回的 `newlyPlanned` 为空数组
 
 **闸的优先级：温度闸 > 配额闸 > PG 闸 > load 闸。**
 
 命中 STOP → **不取闸、不 plan、不派发**。只跑 `sync.mjs` 刷新台账 + 汇报，然后结束。
 「车道全忙，本轮未派发」是完全正常且正确的结果。
+
+**🧹 孤儿容器清理（每轮只读检查顺手做，不算闸）**
+
+同一条 `docker ps` 列出但**第二列为空**（无 testcontainers 标签）的容器是遗留物。
+若它同时**没有任何 established 连接**，它就是死的 —— 而且**没有 ryuk 在跑时它永远不会被回收**。
+这类容器会持续吃内存、推高 PG 闸计数。
+
+处理方式：先在汇报里点名，**确认无连接、无被在途车道引用后**再清：
+
+```bash
+# 只看没有标签的那些
+docker ps --filter "ancestor=postgres:16-alpine" \
+  --format '{{.Names}}\t{{.Label "org.testcontainers.sessionId"}}' \
+  | awk -F'\t' '$2 == "" {print $1}'
+# 逐个确认无连接后清理（常驻的 starcon-mig-v2 不要动）
+docker rm -f <上面列出的名字>
+```
+
+⚠️ **删之前必须确认无 established 连接**，别把在途车道正在用的库删掉。
+清理是运维动作，不改变闸的判定口径 —— 口径永远是「只数带标签的」。
 
 ⚠️ **load 阈值不能低于 10**：空载基线就有 3–7（Docker VM + 常驻应用），
 低于基线不是保护 CPU，是把流水线整个锁死（曾设成 6，自锁过）。

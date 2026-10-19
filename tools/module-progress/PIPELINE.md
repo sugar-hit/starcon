@@ -711,7 +711,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
 - **L2 批量验证结果**：绿 / 红。红了写明二分定位到哪条车道、二分了几次、修复派发情况
 - **本批说明文件**：会话日志路径 + 覆盖的模块清单
 - **push 结果**：commit hash + 推送了哪些模块；**没 push 就要明确写「L2 未绿，本轮不 push」**
-- **温度观测**：`pmset -g therm` 有没有降频项；`docker ps` 里 `postgres:16-alpine` 容器数（非常驻的 `starcon-mig-v2`）
+- **温度观测**：`pmset -g therm` 有没有降频项；`docker ps` 里 **Testcontainers 标签**的 `postgres:16-alpine` 容器数（只数带 `org.testcontainers.sessionId` 标签的；无标签的是历史遗留孤儿容器，会虚高计数，要单独点名清理）
 - **吞吐预期**：按 `.dev-agent/PIPELINE.local.md` 的**当前** `LANES` 与实际批次间隔估算，
   每次重跑取实时值（诚实区间，不要单点数字，也不要引用任何历史文档里的数字）
 - **夜间静默确认**（仅白天轮次需要）：本批是否在 `ACTIVE_HOURS` 结束前收口；若拖过要点名

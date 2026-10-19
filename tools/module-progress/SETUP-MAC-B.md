@@ -256,7 +256,14 @@ mcp_invoke(
 1. **静默窗口**：`date '+%H:%M'`，若 `>= 20:30` 或 `< 08:00` → 结束。
    （cron 的 `8-20` 已经挡住大部分，这道是兜底）
 2. **本机容量**：读 `.dev-agent/PIPELINE.local.md` 的 `RUNNING_QUOTA` / `LOAD_MAX`，
-   跑 `uptime` 与 `docker ps --filter "ancestor=postgres:16-alpine" --format '{{.Status}}' | wc -l`。
+   跑 `uptime` 与下面这条（**只数带 Testcontainers 标签的容器**）：
+
+   ```bash
+   docker ps --filter "ancestor=postgres:16-alpine" \
+     --format '{{.Names}}\t{{.Label "org.testcontainers.sessionId"}}' \
+     | awk -F'\t' '$2 != ""' | wc -l
+   ```
+
    - 在途车道数 >= `RUNNING_QUOTA` → 零领票
    - load 1min > `LOAD_MAX` → 零领票（**看趋势**：1min > 5min 说明正在爬升）
    - PG 容器数 >= 6 → 零领票（降噪闸，**排除常驻的 starcon-mig-v2**）
