@@ -14235,6 +14235,139 @@
         }
       }
     },
+    "/warehouse/inventory/allocation-results/writebacks": {
+      "get": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "get_warehouse_inventory_allocation_results_writebacks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationWritebackPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "post_warehouse_inventory_allocation_results_writebacks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationWritebackInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationWritebackSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/allocation-priority/runs": {
       "post": {
         "tags": [
@@ -26169,6 +26302,339 @@
                   "items": {
                     "$ref": "#/components/schemas/BucketAction"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-results/runs": {
+      "get": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "get_warehouse_inventory_allocation_results_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationResultRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-results/results": {
+      "get": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "get_warehouse_inventory_allocation_results_results",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationResultPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-results/reconciliation": {
+      "get": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "get_warehouse_inventory_allocation_results_reconciliation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allocatedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationReconciliationReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-results/capabilities": {
+      "get": {
+        "tags": [
+          "allocation-result-controller"
+        ],
+        "operationId": "get_warehouse_inventory_allocation_results_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationResultCapabilities"
                 }
               }
             }
@@ -40734,6 +41200,126 @@
           },
           "unitsSold": {
             "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationWritebackInput": {
+        "required": [
+          "asOf",
+          "attemptedQuantity",
+          "referenceId",
+          "runId",
+          "sourceKind",
+          "sourceReference",
+          "sourceSystem",
+          "state",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "attemptedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "writtenQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "consumedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "failureReason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceKind": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceReference": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AllocationWritebackSaved": {
+        "type": "object",
+        "properties": {
+          "observationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED",
+              "PENDING"
+            ]
+          },
+          "platformQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "consumedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
           },
           "message": {
             "type": "string"
@@ -58756,6 +59342,618 @@
           "records": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "AllocationWritebackPage": {
+        "type": "object",
+        "properties": {
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationWritebackRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AllocationWritebackRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED",
+              "PENDING"
+            ]
+          },
+          "attemptedQuantity": {
+            "type": "number"
+          },
+          "platformQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "consumedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "EVENT",
+              "API",
+              "MANUAL"
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AllocationResultRunPage": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationResultRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AllocationResultRunRow": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "bufferQuantity": {
+            "type": "number"
+          },
+          "allocatableQuantity": {
+            "type": "number"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "unallocatedQuantity": {
+            "type": "number"
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "observedShopCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownShopCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AllocationResultPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationResultRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AllocationResultSummary"
+          },
+          "warehouseUnattributedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AllocationResultRow": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "runBufferQuantity": {
+            "type": "number"
+          },
+          "allocatableQuantity": {
+            "type": "number"
+          },
+          "runAllocatedTotal": {
+            "type": "number"
+          },
+          "runUnallocatedQuantity": {
+            "type": "number"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopOperatingMode": {
+            "type": "string"
+          },
+          "allocationOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "salesUnits": {
+            "type": "number"
+          },
+          "salesShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "writebackState": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "SUCCEEDED",
+              "FAILED",
+              "PENDING"
+            ]
+          },
+          "attemptedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "consumedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "remainingQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceKind": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "bufferRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "bufferConfigured": {
+            "type": "boolean"
+          },
+          "bufferQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "writableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "exposureQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "advertisedDelta": {
+            "type": "number",
+            "nullable": true
+          },
+          "consistencyState": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "CONSISTENT",
+              "OVER_ADVERTISED",
+              "UNDER_ADVERTISED"
+            ]
+          },
+          "exposureState": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "NO_EXPOSURE",
+              "WITHIN_BUFFER",
+              "BEYOND_BUFFER"
+            ]
+          },
+          "floorStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorShortfallQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "suppressed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "suppressionReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AllocationResultSummary": {
+        "type": "object",
+        "properties": {
+          "rowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "consumedKnownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consumedTotal": {
+            "type": "number"
+          },
+          "platformKnownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformTotal": {
+            "type": "number"
+          },
+          "unknownStateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consistentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overAdvertisedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "underAdvertisedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownConsistencyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exposureComputableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exposureTotal": {
+            "type": "number"
+          },
+          "withinBufferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "beyondBufferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noExposureCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownExposureCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AllocationReconciliationReport": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/AllocationResultSummary"
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationReconciliationRun"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationReconciliationRun": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownStateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consistentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overAdvertisedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "underAdvertisedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "beyondBufferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withinBufferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exposureComputableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exposureTotal": {
+            "type": "number"
+          }
+        }
+      },
+      "AllocationResultCapabilities": {
+        "type": "object",
+        "properties": {
+          "writebackStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultCapabilityOption"
+            }
+          },
+          "consistencyStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultCapabilityOption"
+            }
+          },
+          "exposureStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultCapabilityOption"
+            }
+          },
+          "sourceKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultCapabilityOption"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultCapabilityOption"
+            }
+          },
+          "writebackProjectionAvailable": {
+            "type": "boolean"
+          },
+          "writebackProjectionNote": {
+            "type": "string"
+          },
+          "unknownStateNote": {
+            "type": "string"
+          },
+          "bufferNote": {
+            "type": "string"
+          },
+          "exposureNote": {
+            "type": "string"
+          },
+          "warehouseNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ResultCapabilityOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
