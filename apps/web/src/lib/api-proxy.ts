@@ -1499,6 +1499,51 @@ const services: readonly {
       /^listing\-claims(?:\/capabilities|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/claims|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'`（9.2.1.2 审单规则）那一条**之前** ——
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-migrations` 这个独立前缀而不是 `listings/{id}/migrations`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「批量搬迁」是**一次批量操作**，不是某个商品的状态 —— 挂在 listing 上
+    //   会让"这个商品的状态"多出第八种含义。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-migrations                        搬迁历史（GET 真分页）/ 执行搬迁（POST）
+    //   listing-migrations/capabilities           能力声明（未交付段 available=false + ownerModule）
+    //   listing-migrations/filter-options         筛选面板选项（源店铺 + 真实类目）
+    //   listing-migrations/preview                预览：筛选命中什么 + 风险 + 标题差异化（POST，不写库）
+    //   listing-migrations/duplicate-risks        「重复铺货风险」查询（GET 真分页）
+    //   listing-migrations/migrated               「已搬迁」查询（GET 真分页）
+    //   listing-migrations/{uuid}                 单个批次详情（GET）
+    //   listing-migrations/{uuid}/items           批次的结果明细（含差异化留痕与风险依据）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / preview / duplicate-risks / migrated）
+    //    **排在** uuid 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-migrations/{uuid}/publish`   —— 🔴 派发归 4.3.1.2 批量发布，本模块只入队
+    //   * `listing-migrations/{uuid}/dispatch`  —— 同上，平台限流与派发都在 4.3.1.2 那条通道
+    //   * `listing-migrations/{uuid}/re-run`    —— 幂等键变了就是**另一个批次**，没有"重跑"这个动作
+    //   * `listing-migrations/{uuid}/abort`     —— 搬迁结果是只追加的事实，没有"作废"这个动作
+    //   * `listing-migrations/{uuid}/diffs`     —— 差异化留痕随结果明细返回，不单开一条
+    //   * `listing-migrations/prices|stocks`    —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-migrations/risks`            —— 风险查询的路径是 `duplicate-risks`
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-migrations(?:\/capabilities|\/filter\-options|\/preview|\/duplicate\-risks|\/migrated|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
