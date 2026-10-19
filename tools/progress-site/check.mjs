@@ -10,17 +10,38 @@
  *   - 台账底部的「## 模块明细」是逐行维护的状态
  *   - 两者若对不上，说明台账自身漂了 —— 此时绝不能发布，否则站点数字与仓库文档互相矛盾
  *
- * 用法：node tools/progress-site/check.mjs
+ * 用法：
+ *   node tools/progress-site/check.mjs                     校验工作树构建的产物
+ *   node tools/progress-site/check.mjs --docs-ref origin/main  校验从 ref 构建的产物
+ *
+ * **必须与 build.mjs 用同一个来源。** 拿工作树的台账去校验 origin/main 构建的产物，
+ * 会拿两份不同的台账互相比 —— 远端一更新就误判失败，把每天的更新挡在门外。
+ *
  * 退出码 0 = 通过；1 = 失败（调用方必须放弃发布）
  */
 
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
-const BP = join(ROOT, 'docs', 'product', 'capability-blueprint');
+const BP_REL = 'docs/product/capability-blueprint';
+
+const REF = (() => {
+  const i = process.argv.indexOf('--docs-ref');
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+
+const readDoc = (relPath) =>
+  REF
+    ? execFileSync('git', ['show', `${REF}:${relPath}`], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        maxBuffer: 128 * 1024 * 1024,
+      })
+    : readFileSync(join(ROOT, relPath), 'utf8');
 
 const failures = [];
 const notes = [];
@@ -29,7 +50,7 @@ const fail = (m) => failures.push(m);
 
 /* ── 1. 读台账的「总览」声明值 ─────────────────────────── */
 
-const ledger = readFileSync(join(BP, 'module-progress.md'), 'utf8');
+const ledger = readDoc(`${BP_REL}/module-progress.md`);
 const overviewStart = ledger.indexOf('## 总览');
 const declared = {};
 if (overviewStart === -1) {
@@ -40,7 +61,7 @@ if (overviewStart === -1) {
     const m = slice.match(
       new RegExp('\\|\\s*\\*?\\*?' + label + '\\*?\\*?\\s*\\|\\s*([^|]+?)\\s*\\|'),
     );
-    return m ? m[1].trim() : null;
+    return m ? m[1].replace(/\*/g, '').trim() : null;
   };
   declared.total = pick('模块总数');
   declared.delivered = pick('已交付');
@@ -63,6 +84,14 @@ try {
 }
 
 const s = data.summary;
+
+// 产物是用哪个来源构建的？必须和本校验读的是同一个，否则比的是两份不同的台账
+const builtFrom = data.sourceRef || 'working-tree';
+if (builtFrom !== (REF || 'working-tree')) {
+  fail(
+    `来源不一致：产物来自 ${builtFrom}，本次校验读的是 ${REF || 'working-tree'} —— 拿两份不同的台账互相比没有意义`,
+  );
+}
 
 /* ── 3. 产物 vs 台账声明值 ──────────────────────────────── */
 

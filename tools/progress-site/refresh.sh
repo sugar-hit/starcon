@@ -86,14 +86,13 @@ else
 fi
 
 echo "== 2/3 构建 =="
-if [ "$SRC" = "working-tree" ]; then
-  node "$SITE/build.mjs" || { echo "BUILD_FAILED —— 构建报错，放弃发布"; exit 1; }
-else
-  node "$SITE/build.mjs" --docs-ref "$SRC" || { echo "BUILD_FAILED —— 构建报错，放弃发布"; exit 1; }
-fi
+BUILD_ARGS=()
+[ "$SRC" = "working-tree" ] || BUILD_ARGS=(--docs-ref "$SRC")
+node "$SITE/build.mjs" "${BUILD_ARGS[@]}" || { echo "BUILD_FAILED —— 构建报错，放弃发布"; exit 1; }
 
 echo "== 3/3 数据自检 =="
-node "$SITE/check.mjs" || { echo "CHECK_FAILED —— 数据与台账对不上，放弃发布"; exit 1; }
+# 自检必须读**同一个来源**的台账，否则比的是两份不同的台账
+node "$SITE/check.mjs" "${BUILD_ARGS[@]}" || { echo "CHECK_FAILED —— 数据与台账对不上，放弃发布"; exit 1; }
 
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 if [ "$SRC" = "origin/main" ]; then
