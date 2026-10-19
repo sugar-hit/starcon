@@ -172,3 +172,60 @@ Caused by: java.lang.NoClassDefFoundError          <- 之后 26 例全部级联
 
 > 批次 23 的 push **建立在这两个 flake 的补跑之上，不是首次全量绿**。
 > 已在 `docs/sessions/2026-10/2026-10-19-batch-23-*.md` 如实记录。
+
+---
+
+## 六、批次 32：`FulfillmentRequestIntegrationTest` 违约（2026-10-20，**第 2 次出现**）
+
+**现象**：L2 跑到 `trade` 模块失败，**全量只有 1 个 error**：
+
+```
+FulfillmentRequestIntegrationTest · 33 例中 1 error
+DataIntegrityViolationException: new row for relation "fulfillment_request_step"
+violates check constraint "fulfillment_request_step_check3"
+Failing row contains (..., TRACK, 1, COMPLETED, null, null, 1,
+                      2026-10-20 06:30:50.327037+08,   <- started_at
+                      2026-10-20 06:30:50.326031+08,   <- finished_at  (比 started_at 早 1.006ms)
+                      0.001, ...)
+```
+
+**取证（按 §「判据」三步走）**：
+
+| 步骤 | 结果 |
+| --- | --- |
+| `git diff 89dd3148..HEAD -- '*Fulfillment*' 'V152__trade_fulfillment_request.sql'` | **空** —— 履约代码与定义该约束的 V152 迁移**逐字节未变** |
+| 本批在 trade 的全部改动 | **8 个文件全部是 `A`（新增）**；V207 里 `fulfillment_request` 出现 0 次；零 ALTER 既有表 |
+| 隔离复跑该类 | **连跑 3 轮，每轮 33/33 全绿**（BUILD SUCCESS ×3） |
+| surefire 并行配置 | 无 `parallel` / `threadCount` ⇒ 测试类**串行**执行，不存在并发干扰 |
+
+**根因（与 §四 同族：跨时钟域竞态）**：
+`FulfillmentRequestService.completeStep` 用 **JVM 时钟** `OffsetDateTime.now()` 写 `started_at`，
+而 DB 函数 `complete_fulfillment_step` 用 **PG 时钟** `clock_timestamp()` 写 `finished_at`。
+表上的 `CHECK(finished_at IS NULL OR finished_at >= started_at)` 因此在
+「这一步在 1ms 内完成 + JVM 时钟比 PG 快哪怕 1ms」时翻负。
+**窗口宽度约 1ms** —— 与 §四 的 `effective_from <= now()` 是同一类病。
+
+**这是同一个约束的**第 2 次**出现**：
+批次 26（2026-10-19）记过**完全相同**的一例 —— 同一个 `fulfillment_request_step_check3`、
+同样「隔离复跑 33/33 绿」、同样「本批未碰该测试、该服务与该约束」。
+**两次的报错信息一字不差** ⇒ 这不是新问题，是**同一个坑第 2 次踩**。
+
+**建议修法（派 worker 做，不要在批次中途改）**：
+
+1. **主修（收敛时钟域）**：让 `started_at` 与 `finished_at` 来自**同一个时钟**。
+   二选一：
+   - 夹具/服务侧：`started_at` 也用 DB 的 `now()`（`select now()` 的结果绑 `?::timestamptz`），
+     与函数里的 `clock_timestamp()` 保持同源；
+   - 或函数侧：把 `finished_at` 改成 `GREATEST(clock_timestamp(), started_at)` 兜底，
+     并让 `elapsed_seconds` 与之自洽（**注意别把负数 elapsed 写进表**）。
+2. **兜底（DB 侧约束放宽）**：`CHECK(finished_at IS NULL OR finished_at >= started_at)`
+   可改为容忍 1ms 级误差（如 `finished_at >= started_at - interval '1 second'`），
+   但**这只是掩盖**，优先做 ①。
+3. **归并到统一扫描**：本条与 §四 同族，建议按「JVM `now()` 写时间戳 + DB `now()`/`clock_timestamp()`
+   读时间戳」的组合全局搜一遍
+   （`grep -rn "OffsetDateTime.now()" backend/services/*/src/main/java` 配合
+   `grep -rn "clock_timestamp()\|now()" backend/services/*/src/main/resources/db/migration`），
+   一次性把同族问题收干净，而不是每次等 L2 撞出来。
+
+> 批次 32 的 push **建立在这个 flake 的干净窗口补跑之上，不是首次全量绿**。
+> 已在 `docs/sessions/2026-10/2026-10-20-batch-32-four-lane-delivery.md` 如实记录。
