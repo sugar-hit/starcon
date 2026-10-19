@@ -15958,6 +15958,451 @@
           }
         }
       }
+    },
+    "/channel/listing-lifecycles/{listingId}/platform-status": {
+      "post": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "post_channel_listing_lifecycles_listingId_platform_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleActionReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/{listingId}/actions": {
+      "post": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "post_channel_listing_lifecycles_listingId_actions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleActionReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/sync": {
+      "post": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "post_channel_listing_lifecycles_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleSyncReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyDivergence",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecyclePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/{listingId}": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles_listingId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecycleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/{listingId}/timeline": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles_listingId_timeline",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecycleEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/filter-options": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecycleFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/diff": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles_diff",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecycleDivergencePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-lifecycles/capabilities": {
+      "get": {
+        "tags": [
+          "listing-lifecycle-controller"
+        ],
+        "operationId": "get_channel_listing_lifecycles_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingLifecycleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -18671,7 +19116,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -20620,7 +21065,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -22834,7 +23279,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -23177,9 +23622,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -37898,6 +38343,762 @@
             "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
+      },
+      "PlatformStatusRequest": {
+        "type": "object",
+        "properties": {
+          "platformEventId": {
+            "type": "string",
+            "description": "🔴 4.3.2.2 已落库的平台事件 id（给了就以它为准）",
+            "format": "uuid"
+          },
+          "eventType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台事件类型：APPROVED / REJECTED / DELISTED / THROTTLED / SUPPRESSED / CATEGORY_REVIEW / PRICE_ALERT"
+          },
+          "platformStatus": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 平台的权威状态原文（平台自己的 token，原样存不折叠大小写）"
+          },
+          "rejectionReason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "驳回原因（平台原文；REJECTED 必填）"
+          },
+          "ingestChannel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "事件进来的通道：WEBHOOK / POLL / API"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "平台事件发生时刻（不给 = 入库时刻）",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          }
+        }
+      },
+      "LifecycleActionReceipt": {
+        "type": "object",
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "description": "🔴 动作 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "动作类型"
+          },
+          "fromStatus": {
+            "type": "string",
+            "description": "动作前的状态"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "🔴 动作后的状态"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：MANUAL / PLATFORM"
+          },
+          "writebackRequested": {
+            "type": "boolean",
+            "description": "🔴 这次动作是否回写了平台"
+          },
+          "writebackBatchId": {
+            "type": "string",
+            "description": "🔴 平台操作任务批次 id（未回写为 null）",
+            "format": "uuid"
+          },
+          "writebackBatchNo": {
+            "type": "string",
+            "description": "🔴 平台操作任务批次号（未回写为空串）"
+          },
+          "operationId": {
+            "type": "string",
+            "description": "🔴 平台队列任务 id（未回写为 null）",
+            "format": "uuid"
+          },
+          "statusEventId": {
+            "type": "string",
+            "description": "🔴 落库的状态变更事件 id（由 DB 触发器落，服务层不直接 INSERT）",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "LifecycleActionRequest": {
+        "required": [
+          "action"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 动作类型：DELIST 主动下架 / REPUBLISH 重新上架 / SUBMIT_REVIEW 提交平台审核 / MARK_BLOCKED 标记被封禁"
+          },
+          "writebackToPlatform": {
+            "type": "boolean",
+            "description": "🔴 主动下架时是否回写平台（仅 DELIST 有效；默认 false = 只改内部状态）"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "动因（为什么下架 / 为什么重新上架）"
+          }
+        }
+      },
+      "LifecycleSyncReceipt": {
+        "type": "object",
+        "properties": {
+          "appliedCount": {
+            "type": "integer",
+            "description": "🔴 真的联动了几条",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "🔴 未联动几条",
+            "format": "int32"
+          },
+          "applied": {
+            "type": "array",
+            "description": "🔴 逐条回执（真的联动的）",
+            "items": {
+              "type": "string",
+              "description": "🔴 逐条回执（真的联动的）"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "description": "🔴 被跳过的条目 + 原因",
+            "items": {
+              "type": "string",
+              "description": "🔴 被跳过的条目 + 原因"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "ListingLifecyclePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          }
+        }
+      },
+      "ListingLifecycleRow": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "status": {
+            "type": "string",
+            "description": "🔴 当前内部状态（七态）"
+          },
+          "lastChangeSource": {
+            "type": "string",
+            "description": "🔴 最近一次状态变更的来源：MANUAL / PLATFORM"
+          },
+          "lastChangeAt": {
+            "type": "string",
+            "description": "最近一次状态变更的时刻",
+            "format": "date-time"
+          },
+          "lastChangeFrom": {
+            "type": "string",
+            "description": "最近一次状态变更的起始状态"
+          },
+          "lastChangeTo": {
+            "type": "string",
+            "description": "最近一次状态变更的目标状态"
+          },
+          "platformStatus": {
+            "type": "string",
+            "description": "平台侧最新权威状态原文（没有平台事件时为空串）"
+          },
+          "platformEventType": {
+            "type": "string",
+            "description": "平台侧最新事件类型（没有平台事件时为空串）"
+          },
+          "platformEventAt": {
+            "type": "string",
+            "description": "平台侧最新事件的时刻",
+            "format": "date-time"
+          },
+          "divergence": {
+            "type": "boolean",
+            "description": "🔴 是否存在平台侧与内部侧的差异"
+          },
+          "divergenceKind": {
+            "type": "string",
+            "description": "🔴 差异类型（无差异时为空串）"
+          },
+          "divergenceNote": {
+            "type": "string",
+            "description": "🔴 差异说明（逐字写出两边状态）"
+          },
+          "allowedActions": {
+            "type": "array",
+            "description": "🔴 当前状态下合法的人工动作（服务端算，页面据此渲染按钮）",
+            "items": {
+              "type": "string",
+              "description": "🔴 当前状态下合法的人工动作（服务端算，页面据此渲染按钮）"
+            }
+          },
+          "eventCount": {
+            "type": "integer",
+            "description": "该商品的状态变更事件条数",
+            "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "最近更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingLifecycleActionRow": {
+        "type": "object",
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "description": "动作 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "🔴 动作类型"
+          },
+          "fromStatus": {
+            "type": "string",
+            "description": "动作前的内部状态"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "动作后的内部状态"
+          },
+          "source": {
+            "type": "string",
+            "description": "🔴 来源：MANUAL / PLATFORM"
+          },
+          "platformEventType": {
+            "type": "string",
+            "description": "平台事件类型（平台联动才有）"
+          },
+          "platformStatus": {
+            "type": "string",
+            "description": "平台权威状态原文（平台联动才有）"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "description": "驳回原因"
+          },
+          "reason": {
+            "type": "string",
+            "description": "人工动因"
+          },
+          "writebackRequested": {
+            "type": "boolean",
+            "description": "🔴 这次动作是否选择了回写平台"
+          },
+          "writebackBatchId": {
+            "type": "string",
+            "description": "🔴 平台操作任务批次 id（未回写为 null）",
+            "format": "uuid"
+          },
+          "writebackBatchNo": {
+            "type": "string",
+            "description": "🔴 平台操作任务批次号（未回写为空串）"
+          },
+          "writebackItemId": {
+            "type": "string",
+            "description": "平台操作任务条目 id（未回写为 null）",
+            "format": "uuid"
+          },
+          "operationId": {
+            "type": "string",
+            "description": "🔴 平台队列任务 id（未回写为 null）",
+            "format": "uuid"
+          },
+          "platformEventId": {
+            "type": "string",
+            "description": "响应的那条平台事件 id（平台联动才有）",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作人",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "动作时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 人工动作留痕（谁 / 为什么 / 是否回写平台）"
+      },
+      "ListingLifecycleDetail": {
+        "type": "object",
+        "properties": {
+          "listing": {
+            "$ref": "#/components/schemas/ListingLifecycleRow"
+          },
+          "timeline": {
+            "type": "array",
+            "description": "🔴 状态变更时间线（occurred_at 倒序）",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleEventRow"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "🔴 人工动作留痕（谁 / 为什么 / 是否回写平台）",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleActionRow"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "description": "🔴 下一次合法动作（服务端算，前端按它渲染按钮）",
+            "items": {
+              "type": "string",
+              "description": "🔴 下一次合法动作（服务端算，前端按它渲染按钮）"
+            }
+          },
+          "stateMachineRule": {
+            "type": "string",
+            "description": "🔴 状态机的完整规则说明"
+          }
+        }
+      },
+      "ListingLifecycleEventRow": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "description": "事件 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "fromStatus": {
+            "type": "string",
+            "description": "🔴 起始状态"
+          },
+          "toStatus": {
+            "type": "string",
+            "description": "🔴 目标状态（七态 ⇒ 内部状态变更；否则 ⇒ 平台事件原文）"
+          },
+          "source": {
+            "type": "string",
+            "description": "🔴 来源：MANUAL 人工 / PLATFORM 平台"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "事件类型：STATUS_CHANGE / APPROVED / REJECTED / DELISTED / …"
+          },
+          "platformStatus": {
+            "type": "string",
+            "description": "平台权威状态原文"
+          },
+          "internalStatus": {
+            "type": "string",
+            "description": "判定冲突时的内部状态快照"
+          },
+          "conflictDetected": {
+            "type": "boolean",
+            "description": "🔴 是否与内部状态冲突（服务端判定）"
+          },
+          "conflictNote": {
+            "type": "string",
+            "description": "冲突说明"
+          },
+          "resolution": {
+            "type": "string",
+            "description": "处置口径：PLATFORM_WINS / NOT_REQUIRED"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "description": "驳回原因（平台原文）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "internalStateChange": {
+            "type": "boolean",
+            "description": "🔴 这条事件是「内部状态变更」还是「平台事件原文」（服务端判定）"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "🔴 发生时刻（平台事件是平台那边发生的时刻）",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "description": "入库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 状态变更时间线（occurred_at 倒序）"
+      },
+      "ListingLifecycleEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          }
+        }
+      },
+      "ListingLifecycleFilterOptions": {
+        "type": "object",
+        "properties": {
+          "lifecycleStatuses": {
+            "type": "array",
+            "description": "七态取值域",
+            "items": {
+              "type": "string",
+              "description": "七态取值域"
+            }
+          },
+          "actionSources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "动作类型取值域",
+            "items": {
+              "type": "string",
+              "description": "动作类型取值域"
+            }
+          },
+          "platformEventTypes": {
+            "type": "array",
+            "description": "平台事件类型取值域",
+            "items": {
+              "type": "string",
+              "description": "平台事件类型取值域"
+            }
+          },
+          "ingestChannels": {
+            "type": "array",
+            "description": "平台事件通道取值域",
+            "items": {
+              "type": "string",
+              "description": "平台事件通道取值域"
+            }
+          },
+          "divergenceKinds": {
+            "type": "array",
+            "description": "差异类型取值域",
+            "items": {
+              "type": "string",
+              "description": "差异类型取值域"
+            }
+          }
+        }
+      },
+      "ListingLifecycleDivergencePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleDivergenceRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          }
+        }
+      },
+      "ListingLifecycleDivergenceRow": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文"
+          },
+          "title": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "internalStatus": {
+            "type": "string",
+            "description": "🔴 内部状态"
+          },
+          "platformStatus": {
+            "type": "string",
+            "description": "🔴 平台侧状态原文"
+          },
+          "platformEventType": {
+            "type": "string",
+            "description": "🔴 平台侧事件类型"
+          },
+          "divergenceKind": {
+            "type": "string",
+            "description": "🔴 差异类型"
+          },
+          "divergenceNote": {
+            "type": "string",
+            "description": "🔴 差异说明（逐字写出两边状态）"
+          },
+          "severity": {
+            "type": "string",
+            "description": "🔴 严重程度：HIGH 漏单风险 / MEDIUM 需跟进"
+          },
+          "internalChangedAt": {
+            "type": "string",
+            "description": "内部状态最近一次变化时刻",
+            "format": "date-time"
+          },
+          "platformChangedAt": {
+            "type": "string",
+            "description": "平台侧最近一条事件的时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingLifecycleCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingLifecycleCapabilityDimension"
+            }
+          },
+          "lifecycleStatuses": {
+            "type": "array",
+            "description": "七态取值域",
+            "items": {
+              "type": "string",
+              "description": "七态取值域"
+            }
+          },
+          "actionSources": {
+            "type": "array",
+            "description": "事件来源取值域：MANUAL / PLATFORM",
+            "items": {
+              "type": "string",
+              "description": "事件来源取值域：MANUAL / PLATFORM"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "动作类型取值域",
+            "items": {
+              "type": "string",
+              "description": "动作类型取值域"
+            }
+          },
+          "platformEventTypes": {
+            "type": "array",
+            "description": "平台事件类型取值域（复用 4.3.2.2）",
+            "items": {
+              "type": "string",
+              "description": "平台事件类型取值域（复用 4.3.2.2）"
+            }
+          },
+          "ingestChannels": {
+            "type": "array",
+            "description": "平台事件通道取值域",
+            "items": {
+              "type": "string",
+              "description": "平台事件通道取值域"
+            }
+          },
+          "stateMachineRule": {
+            "type": "string",
+            "description": "🔴 状态机规则（服务端算，前端原样显示）"
+          },
+          "divergenceRule": {
+            "type": "string",
+            "description": "🔴 「平台下架 vs 内部下架」的判定口径"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "ListingLifecycleCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }

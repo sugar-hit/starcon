@@ -1085,6 +1085,42 @@ const services: readonly {
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 4.1.1.3 生命周期与下架（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.1.1.1 `listings` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listing-claims` / `listing-status-events` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-lifecycles                    生命周期列表（GET，真分页 + 七态/来源/店铺/平台/关键词筛选）
+    //   listing-lifecycles/capabilities       能力声明（未交付段 available=false + ownerModule）
+    //   listing-lifecycles/filter-options     筛选面板词表（不硬编码在前端）
+    //   listing-lifecycles/diff               🔴 平台下架 vs 内部下架的差异区（真分页）
+    //   listing-lifecycles/sync               🔴 批量同步：把还没联动过的平台事件应用到内部状态（POST）
+    //   listing-lifecycles/{uuid}             单个 listing 的生命周期视图（GET）
+    //   listing-lifecycles/{uuid}/timeline    🔴 状态变更时间线（GET，真分页 + 按来源筛）
+    //   listing-lifecycles/{uuid}/actions     🔴 人工动作：主动下架 / 重新上架 / 提交审核 / 标记封禁（POST）
+    //   listing-lifecycles/{uuid}/platform-status 🔴 平台状态被动同步（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / diff / sync）必须排在 uuid 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `d`（diff 的首字母）当 id 吃掉，`listing-lifecycles/d` 会被凭空放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-lifecycles/{uuid}/publish`  —— 发布流程归 4.3.1，本模块只管状态
+    //   * `listing-lifecycles/{uuid}/batch`     —— 批量生命周期动作归 4.1.1.1（见能力声明 ownerModule）
+    //   * `listing-lifecycles/{uuid}/appeal`    —— 被封禁的申诉工单归 4.3.2.2 / 16.2.1.2，未交付
+    //   * `listing-lifecycles/{uuid}/republish` —— 重新上架的平台回写归 4.3.1.2 / 4.3.2.2，未交付
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-lifecycles(?:\/(?:capabilities|filter\-options|diff|sync)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:timeline|actions|platform\-status))?)?$/,
+  },
+  {
     // 4.1.2.1 映射管理（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往 4.1.1.1 的 `listings` 分支里并子路径 —— 那条分支是已交付车道的成果，
     // 多车道同时改同一段正则必然判冲突（结构性，retry 不会自愈）。
