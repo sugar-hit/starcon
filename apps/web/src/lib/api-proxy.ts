@@ -2529,6 +2529,52 @@ const services: readonly {
     // 裸路径 knowledge **刻意不放行**：后端没有这个映射，
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
+  {
+    // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
+    //
+    // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
+    // 区分两者给出不同处置建议。输入：分摊结果；店铺销售与绩效；总可用量。
+    // 输出：饥饿店铺清单 + 缺货清单 + 建议（调优先级/调保留/补货）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 warehouse 那条巨型正则里并 ——
+    // 那一行被好几条车道共用，同时改它必然撞车。插入锚点固定在 services[] 的**最末尾**
+    // （紧挨着 `];`），与另外三条车道的插入点互不重叠。
+    //
+    // 形状逐条列出（11 个）：
+    //   capabilities            能力声明（两类判定的差别 / 未知态语义 / 未交付的三环）
+    //   evaluate                一次评估（POST）—— 分别判定「缺货」与「饥饿」，各自落各自的表
+    //   starvations             饥饿店铺清单（GET）
+    //   starvations/{uuid}      单条详情（GET）
+    //   starvations/{uuid}/acknowledge   认领（POST）
+    //   starvations/{uuid}/resolve       处置（POST，处置说明必填）
+    //   stockouts               缺货清单（GET）
+    //   stockouts/{uuid}        单条详情（GET）
+    //   stockouts/{uuid}/acknowledge     认领（POST）
+    //   stockouts/{uuid}/resolve         处置（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / evaluate / starvations / stockouts）排在
+    // {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两段形状（{uuid}/acknowledge、{uuid}/resolve）挂在单段 {uuid} 组的可选后缀里，
+    // 否则会被单段分支吃掉半截、把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状：
+    //   裸路径 inventory/stockout-alerts —— 后端没有这个映射（清单在 /starvations 与 /stockouts 两个子路径上）。
+    //   任何 {uuid} 之外的第三层子路径 —— 后端只有 acknowledge 与 resolve 两个动作。
+    //   任何 DELETE / PUT 形状 —— 后端根本没有对应端点（405），而 V192 的 REVOKE DELETE
+    //   与不可删触发器还会各挡一次。注意白名单是**按路径登记、不区分方法**的，
+    //   所以「不能删」的防线在服务端与 DB，不在这里。
+    //
+    // 与既有分支不重叠：既有 warehouse 那条巨型正则的 alternation 里
+    // 没有 `stockout-alerts`（`stocktakes` / `stocktake-variances` 与它不是一回事），
+    // 所以 `inventory/stockout-alerts/...` 不会先被既有分支吃掉。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^inventory\/stockout-alerts\/(?:capabilities|evaluate|starvations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|stockouts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
+  },
 ];
 
 function resolve(path: string) {
