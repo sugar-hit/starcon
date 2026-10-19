@@ -1,8 +1,36 @@
 # starcon 并行车道开发流水线
 
-项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守仓库根 `AGENTS.md`）。
+Java Spring Boot 微服务 + Next.js 双栈，遵守仓库根 `AGENTS.md`。
 
 你每次运行是一个**全新的独立会话**，不继承上次上下文。所有判断必须从仓库现状重新取证，不能凭记忆。
+
+## 0. 本地参数（先读：机器相关的一切都在这里）
+
+流水线跑在**独立 worktree**（集成头 `integration/module-dev`）里，主工作区留给人工。
+所有机器相关参数集中在**本地配置文件**（不进版本库）：
+
+```bash
+TOP=$(git rev-parse --show-toplevel)             # 本任务的工作目录（主工作区）
+CFG="$TOP/.dev-agent/PIPELINE.local.md"
+
+PROJECT_ROOT=$(grep -E '^PROJECT_ROOT='   "$CFG" | cut -d= -f2-)  # 集成头 worktree 绝对路径
+PUSH_REMOTE=$(grep -E '^PUSH_REMOTE='   "$CFG" | cut -d= -f2-)  # git 远端名
+LANES=$(grep -E '^LANES='            "$CFG" | cut -d= -f2-)  # 每批车道数
+THROTTLE_MIN=$(grep -E '^THROTTLE_MIN='  "$CFG" | cut -d= -f2-)  # 节流闸阈值（分钟）
+SILENT_WINDOW=$(grep -E '^SILENT_WINDOW=' "$CFG" | cut -d= -f2-)  # 1=夜间静默 0=全天运行
+TOKEN_HORIZON=$(grep -E '^TOKEN_HORIZON=' "$CFG" | cut -d= -f2-)  # 高强度模式截止时刻
+
+cd "$PROJECT_ROOT"      # 之后所有命令都在集成头 worktree 里跑
+```
+
+⚠️ **下面所有 `<PROJECT_ROOT>` 都指这个值，不要写死绝对路径。**
+
+⚠️ `.dev-agent/` 里有两类东西，**别搞混**：
+
+| 位置                        | 内容                                                | 谁写   |
+| --------------------------- | --------------------------------------------------- | ------ |
+| 主工作区 `.dev-agent/`      | `PIPELINE.local.md`（**配置**，人改）               | 人     |
+| 集成头 `.dev-agent/`        | `lanes.json` / `dispatch.gate` / `last-batch-at`（**状态**） | 脚本 |
 
 ## 你的职责
 
@@ -211,7 +239,7 @@ cron = 0 8-20 * * *（整点栅格，间隔 60 分钟），闸阈值 = 60
 每次运行**第一步先跑台账**：
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
+cd "$PROJECT_ROOT" && node tools/module-progress/sync.mjs
 ```
 
 - **未开发 > 0** → 照常执行第 1–6 步
@@ -245,6 +273,20 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 连续 **3 轮**「派发了车道但一条都没交付」→ 本轮零派发，出停滞报告点名原因
 （上游依赖未交付 / 反复 BLOCKED / L2 长期红 / 机器闸长期命中）。
 此时**不要**靠加并发硬推，先把阻塞点在报告里讲清楚。
+
+## ⏳ 强度档位与 token 期限（`TOKEN_HORIZON`）
+
+`.dev-agent/PIPELINE.local.md` 里的 `TOKEN_HORIZON` 是一个时刻（ISO8601，带时区）。
+
+- **当前时刻 < `TOKEN_HORIZON`** ⇒ **高强度模式**：按本地配置的 `LANES` 满档跑，
+  节流闸按 `THROTTLE_MIN` 放行，**昼夜不停**（前提是 `SILENT_WINDOW=0`）。
+- **当前时刻 ≥ `TOKEN_HORIZON`** ⇒ **降档模式**：token 不再是免费的，
+  此时**主动降速** —— 每批 `LANES` 减半（向下取整，最少 1），
+  节流闸阈值按 `THROTTLE_MIN` 的 **2 倍**执行，
+  并在汇报里明确写「已进入降档模式，原因：超过 token 期限」。
+
+⚠️ **降档是自动的，不要问、也不要自作主张改回高强度。** 期限是用户定的边界。
+⚠️ 期限**不改变**停机条件：停机只看「全部 465 个模块已交付」。
 
 ## 你的并发配额
 
@@ -319,15 +361,33 @@ load 不随车道数线性涨，而随**同时处于构建高峰的车道数**�
 若 load 持续超阈值或有车道报 `RESOURCE_BLOCKED`，说明当前档位偏高，
 **报给用户由用户决定是否继续减负。**
 
-## 🔕 静默窗口闸：20:30 → 次日 08:00 不得发起（用户明确要求，最高优先级）
+## 🔕 静默窗口闸（**由 `SILENT_WINDOW` 开关控制**）
 
-**20:30 到次日 08:00 之间，一个新任务都不许发起。** 这条优先于节流闸、
-优先于容量闸、优先于「本轮该干活」的任何判断。
+**开关语义**（读 `.dev-agent/PIPELINE.local.md`）：
 
-### 为什么不能只靠 cron
+| `SILENT_WINDOW` | 行为                                                                       |
+| --------------- | -------------------------------------------------------------------------- |
+| `1`             | **夜间静默**：20:30 → 次日 08:00 之间一个新任务都不许发起（历史档位）      |
+| `0`             | **全天运行**：不设时段闸，节奏完全由 cron + 节流闸决定                      |
 
-当前 cron 是 `0 8-20`，最后一格 20:00，**结构上**确实不会在窗口内触发。
-但下面两种情况仍会让任务在 20:30 之后被发起：
+⚠️ **`SILENT_WINDOW=0` 不等于没有保护**：温度闸、容量闸、节流闸**全部照旧生效**。
+关掉的只是「按钟点不干活」这一条，机器的物理约束没有变。
+
+判定（每个 tick 的第一件事，先于一切动作）：
+
+```bash
+cd "$PROJECT_ROOT"
+SILENT_WINDOW=$(grep -E '^SILENT_WINDOW=' "$TOP/.dev-agent/PIPELINE.local.md" | cut -d= -f2-)
+if [ "$SILENT_WINDOW" = "1" ]; then
+  NOW_H=$(date +%H); NOW_M=$(date +%M)
+  MINUTES=$(( NOW_H * 60 + NOW_M ))
+  if [ "$MINUTES" -ge 1230 ] || [ "$MINUTES" -lt 480 ]; then   # 1230=20:30, 480=08:00
+    echo "静默窗口命中：$(date '+%H:%M')"
+  fi
+fi
+```
+
+### 为什么窗口内仍然要有这道闸（`SILENT_WINDOW=1` 时才生效）
 
 1. **cron 漂移 / 上一格未收工** —— 19:00 或 20:00 那一格如果耗时超预期，
    可能在 20:30 之后才继续往下走并派发。
@@ -335,26 +395,6 @@ load 不随车道数线性涨，而随**同时处于构建高峰的车道数**�
    `*/30` 会在 20:30、21:00… 持续触发。
 
 ⇒ **cron 是第一道闸，本闸是最后一道闸。** 即使 cron 被改错，本闸仍会兜住。
-
-### 判定（每个 tick 的第一件事，先于一切动作）
-
-```bash
-cd /Users/tommy/Project/starcon
-H=$(date +%H)
-if [ "$H" -ge 20 ] || [ "$H" -lt 8 ]; then
-  echo "静默窗口：当前 $(date '+%H:%M') 在 20:30-08:00 内"
-fi
-```
-
-⚠️ **`H >= 20` 是粗判**（覆盖 20:00–20:29）。要精确到 20:30：
-
-```bash
-NOW_H=$(date +%H); NOW_M=$(date +%M)
-MINUTES=$(( NOW_H * 60 + NOW_M ))
-if [ "$MINUTES" -ge 1230 ] || [ "$MINUTES" -lt 480 ]; then   # 1230=20:30, 480=08:00
-  echo "静默窗口命中：$(date '+%H:%M')"
-fi
-```
 
 ### 命中后的行为（硬规定）
 
@@ -379,7 +419,7 @@ fi
 ## 第 1 步：同步台账
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
+cd "$PROJECT_ROOT" && node tools/module-progress/sync.mjs
 ```
 
 从 18 卷蓝图解析出全部 465 个 L4 模块并回写台账，打印统计。
@@ -391,7 +431,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 ## 第 2 步：取调度闸
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gate acquire
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate acquire
 ```
 
 退出码 3 = 另一个 tick 正在派发。**此时不要做任何改动**，只汇报进度就结束本次运行。
@@ -402,14 +442,14 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gate acqu
 ## 第 3 步：回收已落地的车道
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs merge-ready
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs merge-ready
 ```
 
 它把所有 `ready` 车道的分支并入集成头 `integration/module-dev`，成功后：
 跑一次 `node tools/module-progress/sync.mjs` 刷新台账汇总数字，再：
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gc
 ```
 
 清理已合并车道的 worktree。退出码 2 = 有车道并入冲突，脚本已把状态标成 `conflict`
@@ -418,8 +458,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
 ## 第 4 步：排车道并派发
 
 ```bash
-cd /Users/tommy/Project/starcon && eval "$(grep -E '^LANES=' .dev-agent/PIPELINE.local.md)"
-node tools/module-progress/lane.mjs plan --lanes "$LANES"
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs plan --lanes "$LANES"
 ```
 
 它会：读台账 + 读蓝图「关系」字段 → 挑出**上游已交付、L3 锚点互不相同、
@@ -503,8 +542,8 @@ node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
 分支 <BRANCH> 已创建，依赖已安装好，基线是集成头 integration/module-dev。
 **不要 checkout 别的分支，不要切回主工作区，所有命令都在 <WORKTREE> 目录下执行。**
 
-主工作区 `cd /Users/tommy/Project/starcon` 与另外几条车道同时在跑，
-**你绝对不能改主工作区里的任何文件**，也不要执行 `git worktree add/remove`。
+调度者工作区（集成头 `cd "$PROJECT_ROOT"`）与另外几条车道同时在跑，
+**你绝对不能改集成头里的任何文件**，也不要执行 `git worktree add/remove`。
 
 ## Flyway 版本号已预分配
 
@@ -592,16 +631,16 @@ node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
    （`feat:` / `fix:` / `refactor:` / `docs:` / `test:` / `chore:`），正文写清做了什么、
    为什么、影响面、验证方式。**只 commit 到本车道分支，不要 push。**
 9. **落盘位置纪律**：所有临时产物（脚本输出、调试文件、截图）必须写在 `<WORKTREE>/.tmp/`，
-   绝不能写到 `/Users/tommy/` 家目录或 `/tmp/`。
+   绝不能写到 `$HOME` 家目录或 `/tmp/`。
 10. **会话日志**：在 `<WORKTREE>/docs/sessions/YYYY-MM/YYYY-MM-DD-<kebab-case-topic>.md`
     落一份记录，写决策摘要 + 关键 trade-off + 文件清单 + 后续待办，不复述过程。
 11. **心跳**：每 25 分钟续一次，超 90 分钟失联会被调度器判定崩掉并回收重派：
     ```bash
-    cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs heartbeat --lane <模块ID> --note "<当前进展>"
+    cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs heartbeat --lane <模块ID> --note "<当前进展>"
     ```
 12. **落地**：全部验证跑绿、commit 完之后，标记本车道已就绪：
     ```bash
-    cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs land --lane <模块ID>
+    cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs land --lane <模块ID>
     ```
     这一步会校验「工作区干净 + 确实有新提交」，不满足会拒绝。
     **并入集成头由调度器做，你不要自己 merge、不要 checkout 集成分支。**
@@ -644,7 +683,7 @@ node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
 ### 5.2 L2 批量验证（全量，在集成头上跑一次）
 
 ```bash
-cd /Users/tommy/Project/starcon
+cd "$PROJECT_ROOT"
 node tools/module-progress/lane.mjs merge-ready    # 先把 ready 车道并进集成头
 node tools/module-progress/sync.mjs                 # 刷新台账
 
@@ -693,8 +732,8 @@ node tools/module-progress/sync.mjs --check
 **只在 L2 绿之后 push**：
 
 ```bash
-cd /Users/tommy/Project/starcon
-git push upstream integration/module-dev
+cd "$PROJECT_ROOT"
+git push "$PUSH_REMOTE" integration/module-dev
 ```
 
 - **push 前必须确认工作区干净、L2 是绿的。** 不要 push 红的。
@@ -705,10 +744,25 @@ git push upstream integration/module-dev
 ### 5.5 批次之间：gc
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
+cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gc
 ```
 
 回收已并入的车道 worktree，保持 `.worktrees/` 不无限膨胀。
+
+### 5.6 集成头与 `main` 的关系（**不要自己 merge main**）
+
+`main` 由**其他 agent** 在每天 00:00 之后合并推进。本流水线的集成头
+`integration/module-dev` 通过**另一个定时任务**（协议见
+`tools/module-progress/SYNC-MAIN.md`）把 `origin/main` 同步进来。
+
+⚠️ **本流水线不要自己去 merge `origin/main`** —— 那是同步任务的职责，
+两个任务并发改集成头会留 MERGE_HEAD 残骸。
+⚠️ 两个任务用**同一个调度闸**互斥，所以同步任务撞上正在跑的流水线时是零改动退出。
+
+⚠️ **L2 红了要先看「最近有没有并入 main」**：同步任务 push 的 main merge commit
+是跨车道破坏的**首要嫌疑对象**（它的代码没经过本流水线的 L1/L2）。
+二分定位到 main merge commit 时，**不要试图修 main 的代码** ——
+如实汇报「疑似 main 带进来的回归」，交由同步任务下一轮回退或人工处理。
 
 ---
 
