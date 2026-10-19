@@ -25,12 +25,45 @@
 6. **发布必须带 `node_id=454096010989704`**。不带就是新建站点——每天堆一个云盘节点、产生一个新 URL、已分发的链接停在旧数据上。协议里把这条标成硬约束。
 7. **发布前有一道数据自检闸**（`check.mjs`）。它不比对「解析没报错」，而是比对「构建产物 vs 台账顶部『总览』的声明值」。台账自身漂了（声明值与逐行状态对不上）就**放弃发布**，让站点保持上一次正确状态 —— 否则站点上的完成率会和 `module-progress.md` 顶部的数字互相矛盾，看的人会以为看板算错了。
 8. **cron prompt 里写死了「例行发布不再逐次确认」**。无人值守时每次问一次确认，任务会每晚卡住。用户的授权是常驻的。
+9. **定时任务**：cron id `8f4761bb-c483-4695-b95f-e0c8bdc92444`，`0 8 * * *` / `Asia/Shanghai`，
+   每次跑开一个全新会话（`session.mode=new`），模型继承当前。首次触发 2026-10-20 08:00。
+
+### 刷新机制为什么最终是「fetch + 从 ref 读文档」
+
+最初的直觉是 `git pull --ff-only`。**它是错的，而且错得很安静**：
+
+- 站点提交只在本地 `main`（未 push），远端一旦前进就分叉；
+  实测 `--ff-only` 直接报 `Diverging branches can't be fast-forwarded`，
+  拉取永远失败 → 站点**静默停止更新**，仍显示旧数字，没有任何报错。
+- 改用 `git pull --rebase --autostash` 能解决分叉，但 `.gitignore` 这类共享文件
+  一旦冲突，失败后每天都会卡在同一处。
+
+最终方案：**`git fetch origin main`（不碰工作树）+ `build.mjs --docs-ref origin/main`**
+（用 `git show <ref>:<path>` 读台账与蓝图）+ `check.mjs --docs-ref` 读同一来源。
+刷新与本地 git 状态彻底解耦。
+
+### 两个模拟场景（都实测过，不是推演）
+
+| 场景                                                 | 旧版行为                | 新版行为                                                 |
+| ---------------------------------------------------- | ----------------------- | -------------------------------------------------------- |
+| 远端推进 + 本地有未推送提交（分叉）                  | pull 失败，站点停在 190 | fetch 成功 → 数据源切 origin/main → 站点显示 191         |
+| 远端改了模块行但没改台账顶部「总览」（台账自身矛盾） | —                       | 自检失败 → `exit=1` → **拒绝发布**，站点保持上次正确状态 |
+
+### 期间修掉的三个真 bug
+
+1. **bash 3.2 空数组展开**：macOS 自带 bash 3.2 在 `set -u` 下展开空数组报
+   `unbound variable` → 每天 08:00 的刷新会直接挂掉。改用 `${arr[@]+...}`。
+2. **自检与构建读的不是同一份台账**：自检固定读工作树，构建可能读 origin/main，
+   远端一更新就误判失败，把更新挡在门外。已让两者同参，并校验
+   `data.json` 的 `sourceRef` 与校验来源一致。
+3. **`meta.volumeFile` 改名后引用漏改**：`parseVolume` 退化成空壳，465 个模块的
+   职责和 110 个二级功能全丢。由自检的「有职责描述 465/465」一项抓出来。
 
 ## 涉及文件
 
-- `tools/progress-site/build.mjs` —— 数据构建脚本（解析台账 + 蓝图 + 统计工程现状 → `dist/data.json`）
-- `tools/progress-site/check.mjs` —— 数据自检（产物 vs 台账声明值，不一致则拒绝发布）
-- `tools/progress-site/refresh.sh` —— 每日刷新确定性部分（同步 → 构建 → 自检；含 git 非交互与 30s 硬超时）
+- `tools/progress-site/build.mjs` —— 数据构建脚本（解析台账 + 蓝图 + 统计工程现状 → `dist/data.json`；支持 `--docs-ref`）
+- `tools/progress-site/check.mjs` —— 数据自检（产物 vs 台账声明值，不一致则拒绝发布；支持 `--docs-ref`）
+- `tools/progress-site/refresh.sh` —— 每日刷新确定性部分（fetch → 构建 → 自检；含 git 非交互与 30s 硬超时）
 - `tools/progress-site/REFRESH.md` —— 每日刷新的完整协议（cron prompt 的唯一来源）
 - `tools/progress-site/src/{index.html,styles.css,app.js}` —— 站点源码
 - `tools/progress-site/verify.mjs` —— Playwright 双视口截图与控制台报错回归
@@ -50,7 +83,13 @@
 - 台账的「状态」「证据」两列仍是人工维护；若后续 `tools/module-progress/sync.mjs` 改为输出机器可读格式，应把 `build.mjs` 改成直接读 JSON，去掉 Markdown 解析。
 - `apps/admin` 目前只有空脚手架（0 个页面），看板如实显示；admin 开工后数字会自动跟上。
 - 每天 08:00 的自动刷新依赖本机代理 `127.0.0.1:7897` 可用。换机器或代理端口变更时，要同步改 `.git/config` 的 `http.proxy` 与 `REFRESH.md` 里的说明。
+- **部署端点在本轮出现过 `401 invalid access token`**（runtime 侧令牌问题，非代码问题），
+  连续重试 4 次均失败。线上站点不受影响，继续正常服务（内容是上一次正确构建的版本）。
+  cron prompt 已写明：遇 401 等 30 秒重试、最多 3 次，仍失败就如实报告发布失败，
+  **不许改用新建站点绕过**。若明早 08:00 仍是 401，需要先解决 runtime 授权。
 - 本次提交**只在本地 main，未 push**。要发布到远端需另开分支走 PR（仓库规定不直接 push main）。
+  但注意：**在 push 之前，远端流水线推进时本地会分叉** —— 刷新已用 fetch + ref 读取解耦，
+  不受影响；只是「本地未推送的台账改动」会进不了站点（`LEDGER_NOTE=local-ledger-differs` 会点名）。
 
 ## 关联
 
