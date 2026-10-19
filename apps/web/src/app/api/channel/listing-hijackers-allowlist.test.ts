@@ -131,6 +131,8 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
   const base = 'channel/listing-hijackers';
   for (const path of [
     // 🔴 本模块**确定没有登记**的形状（只能选自己前缀下的）
+    // ⚠️ 负向断言**只能用自己前缀下的形状**：兄弟车道的前缀（如 listing-keyword-rankings）
+    //    在同批并入后就是**已登记的合法前缀**，拿它断言 404 必然假红。
     `${base}/undeclared-action`,
     // 🔴 投诉 / 举报 / 申诉在**平台侧**完成 —— 本模块没有这些动作端点
     `${base}/${ID}/complaint`,
@@ -140,10 +142,11 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
     `${base}/notifications`,
     // 🔴 16 合规品牌保护未交付（capabilities 里 available=false）
     `${base}/brand-protection`,
+    // 🔴 16 合规品牌保护的**处置动作**端点未交付（capabilities 里
+    // brand_protection_enforcement 维度 available=false，ownerModule=16）
+    `${base}/brand-protection-enforcement`,
     // 🔴 02 抓取调度器未交付（capabilities 里 available=false）
     `${base}/crawlers`,
-    // 🔴 4.5.1.2 关键词排名是**别的模块**的前缀，且未交付
-    'channel/listing-keyword-rankings',
   ]) {
     const response = await callProxy(path, {
       method: 'POST',
