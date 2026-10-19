@@ -6811,6 +6811,339 @@
         }
       }
     },
+    "/channel/mapping-versions": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "mappingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "listingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "listingVariantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "internalSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "relationType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "changeSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "RECENT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-versions/{id}": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingVersionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-versions/{id}/product-scope": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions_id_product_scope",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionProductScope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-versions/{id}/affected-orders": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions_id_affected_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionAffectedOrders"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-versions/filter-options": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/mapping-versions/capabilities": {
+      "get": {
+        "tags": [
+          "listing-mapping-version-controller"
+        ],
+        "operationId": "get_channel_mapping_versions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingMappingVersionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/logistics-transit-limits/transit-rules/{id}": {
       "get": {
         "tags": [
@@ -18343,6 +18676,382 @@
             "type": "boolean"
           }
         }
+      },
+      "VersionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "版本明细",
+            "items": {
+              "$ref": "#/components/schemas/VersionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "currentInPage": {
+            "type": "integer",
+            "description": "🔴 本页当前生效版本条数（当前生效也是真实结果，不藏）",
+            "format": "int32"
+          }
+        }
+      },
+      "VersionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "版本 id",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "映射 id（4.1.2.1 的 listing_mapping）",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "description": "版本号（同一条映射内从 1 递增）",
+            "format": "int32"
+          },
+          "relationType": {
+            "type": "string",
+            "description": "🔴 映射基数：ONE_TO_ONE / ONE_TO_MANY / MANY_TO_ONE"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "description": "MAPPED / BUNDLE / UNMAPPED（解除映射的那一版）"
+          },
+          "internalSkuId": {
+            "type": "string",
+            "description": "🔴 该版本指向的内部 SKU 逻辑 id（03 拥有，跨服务不建 FK）；解除版本为 null",
+            "format": "uuid"
+          },
+          "componentQuantity": {
+            "type": "number",
+            "description": "套装组件数量；仅 ONE_TO_MANY 有值，NUMERIC(19,6)"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "🔴 生效时间点：区间为 [effectiveFrom, effectiveTo)",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效时间点终点；null = 当前生效版本",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "🔴 当前生效 = true（effectiveTo 为 null）"
+          },
+          "changeReason": {
+            "type": "string",
+            "description": "🔴 变更原因"
+          },
+          "changeSource": {
+            "type": "string",
+            "description": "MANUAL 人工建立 / BATCH_CONFIRMED 批量候选人工确认"
+          },
+          "actorId": {
+            "type": "string",
+            "description": "操作者 id（DB 触发器盖上，服务层写不出）",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（版本落库时的快照）"
+          },
+          "titleSnapshot": {
+            "type": "string",
+            "description": "平台标题原文（版本落库时的快照）"
+          },
+          "listingVariantId": {
+            "type": "string",
+            "description": "平台变体 id",
+            "format": "uuid"
+          },
+          "externalVariantId": {
+            "type": "string",
+            "description": "平台变体 ID 原文（版本落库时的快照）"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码（版本落库时的快照）"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "范围抓取时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "落库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "版本明细"
+      },
+      "MappingVersionDetail": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/VersionRow"
+          },
+          "productScope": {
+            "$ref": "#/components/schemas/VersionProductScope"
+          },
+          "previousVersionNo": {
+            "type": "integer",
+            "description": "上一版版本号；首版为 null",
+            "format": "int32"
+          },
+          "nextVersionNo": {
+            "type": "integer",
+            "description": "下一版版本号；当前生效版为 null",
+            "format": "int32"
+          },
+          "changedFields": {
+            "type": "array",
+            "description": "🔴 本版相对上一版的变更字段（RELATION_TYPE / INTERNAL_SKU_ID / COMPONENT_QUANTITY / MAPPING_STATUS）",
+            "items": {
+              "type": "string",
+              "description": "🔴 本版相对上一版的变更字段（RELATION_TYPE / INTERNAL_SKU_ID / COMPONENT_QUANTITY / MAPPING_STATUS）"
+            }
+          },
+          "affectedOrders": {
+            "$ref": "#/components/schemas/VersionAffectedOrders"
+          }
+        }
+      },
+      "VersionAffectedOrders": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "description": "版本 id",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "description": "版本号",
+            "format": "int32"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 是否可查；本模块固定为 false（09 订单侧尚无已交付查询端点）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "🔴 责任模块"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 不可用的原因"
+          },
+          "prerequisite": {
+            "type": "string",
+            "description": "🔴 变成可查需要下游先交付什么"
+          }
+        },
+        "description": "🔴 受影响订单范围（available=false，无 items 字段）"
+      },
+      "VersionProductScope": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "description": "版本 id",
+            "format": "uuid"
+          },
+          "mappingId": {
+            "type": "string",
+            "description": "映射 id",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（版本落库时的快照）"
+          },
+          "titleSnapshot": {
+            "type": "string",
+            "description": "平台标题原文（版本落库时的快照）"
+          },
+          "listingVariantId": {
+            "type": "string",
+            "description": "平台变体 id",
+            "format": "uuid"
+          },
+          "externalVariantId": {
+            "type": "string",
+            "description": "平台变体 ID 原文（版本落库时的快照）"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码（版本落库时的快照）"
+          },
+          "currentExternalItemId": {
+            "type": "string",
+            "description": "平台商品 ID 原文（平台侧**当前**值，用于与快照对照）"
+          },
+          "currentTitle": {
+            "type": "string",
+            "description": "平台标题原文（平台侧**当前**值，用于与快照对照）"
+          },
+          "driftedFromPlatform": {
+            "type": "boolean",
+            "description": "🔴 快照与当前值是否已经不一致（平台侧后来被重新同步过）"
+          },
+          "capturedAt": {
+            "type": "string",
+            "description": "范围抓取时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 说明：平台侧当前值只读自 listing，本模块不改它"
+          }
+        },
+        "description": "该版本对应的商品范围（冻结快照）"
+      },
+      "VersionFilterOptions": {
+        "type": "object",
+        "properties": {
+          "relationTypes": {
+            "type": "array",
+            "description": "映射基数取值",
+            "items": {
+              "type": "string",
+              "description": "映射基数取值"
+            }
+          },
+          "changeSources": {
+            "type": "array",
+            "description": "变更来源取值",
+            "items": {
+              "type": "string",
+              "description": "变更来源取值"
+            }
+          },
+          "effectiveStates": {
+            "type": "array",
+            "description": "生效状态取值：CURRENT 当前生效 / CLOSED 已关闭",
+            "items": {
+              "type": "string",
+              "description": "生效状态取值：CURRENT 当前生效 / CLOSED 已关闭"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序取值",
+            "items": {
+              "type": "string",
+              "description": "排序取值"
+            }
+          },
+          "maxPageSize": {
+            "type": "integer",
+            "description": "🔴 单页上限",
+            "format": "int32"
+          }
+        }
+      },
+      "ListingMappingVersionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/VersionCapabilityDimension"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "description": "排序取值",
+            "items": {
+              "type": "string",
+              "description": "排序取值"
+            }
+          },
+          "changeSources": {
+            "type": "array",
+            "description": "变更来源取值：MANUAL 人工 / BATCH_CONFIRMED 批量候选人工确认",
+            "items": {
+              "type": "string",
+              "description": "变更来源取值：MANUAL 人工 / BATCH_CONFIRMED 批量候选人工确认"
+            }
+          },
+          "relationTypes": {
+            "type": "array",
+            "description": "映射基数取值：ONE_TO_ONE / ONE_TO_MANY / MANY_TO_ONE",
+            "items": {
+              "type": "string",
+              "description": "映射基数取值：ONE_TO_ONE / ONE_TO_MANY / MANY_TO_ONE"
+            }
+          },
+          "gapNote": {
+            "type": "string",
+            "description": "🔴 未交付段说明（前端原样展示，不要自己编）"
+          },
+          "dependencyNote": {
+            "type": "string",
+            "description": "上游 / 下游依赖说明"
+          }
+        }
+      },
+      "VersionCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       },
       "TransitRulePage": {
         "type": "object",
