@@ -7861,6 +7861,204 @@
           }
         }
       }
+    },
+    "/channel/webhook-dedup/{firstReceiptId}/claim": {
+      "post": {
+        "tags": [
+          "webhook-dedup-controller"
+        ],
+        "operationId": "post_channel_webhook_dedup_firstReceiptId_claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "firstReceiptId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookDedupClaimInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDedupClaimResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-dedup": {
+      "get": {
+        "tags": [
+          "webhook-dedup-controller"
+        ],
+        "operationId": "get_channel_webhook_dedup",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "externalEventId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "firstStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "duplicatedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookDedupEventView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-dedup/{firstReceiptId}": {
+      "get": {
+        "tags": [
+          "webhook-dedup-controller"
+        ],
+        "operationId": "get_channel_webhook_dedup_firstReceiptId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "firstReceiptId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDedupDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/webhook-dedup/summary": {
+      "get": {
+        "tags": [
+          "webhook-dedup-controller"
+        ],
+        "operationId": "get_channel_webhook_dedup_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDedupSummary"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11187,7 +11385,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -17876,6 +18074,223 @@
           "upstreamNote": {
             "type": "string",
             "description": "上游依赖说明"
+          }
+        }
+      },
+      "WebhookDedupClaimInput": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookDedupClaimResult": {
+        "type": "object",
+        "properties": {
+          "firstReceiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "processingStartedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookDedupEventView": {
+        "type": "object",
+        "properties": {
+          "firstReceiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endpointId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorizedAccount": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopName": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalEventId": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "signatureStatus": {
+            "type": "string"
+          },
+          "deliveryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duplicateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastDeliveryAttempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstReceivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReceivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstStatus": {
+            "type": "string"
+          },
+          "payloadDigest": {
+            "type": "string"
+          },
+          "firstProcessingStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstProcessedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstLastError": {
+            "type": "string"
+          },
+          "processable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WebhookDedupDetail": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/WebhookDedupEventView"
+          },
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookDedupHitView"
+            }
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookReceiptView"
+            }
+          }
+        }
+      },
+      "WebhookDedupHitView": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstReceiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalEventId": {
+            "type": "string"
+          },
+          "deliveryAttempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signatureStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "payloadDigest": {
+            "type": "string"
+          },
+          "firstStatus": {
+            "type": "string"
+          },
+          "firstProcessedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstLastError": {
+            "type": "string"
+          }
+        }
+      },
+      "WebhookDedupSummary": {
+        "type": "object",
+        "properties": {
+          "totalEvents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duplicatedEvents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duplicateDeliveries": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "singleDeliveryEvents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingFirstEvents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "worstExternalEventId": {
+            "type": "string"
+          },
+          "worstDuplicateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oldestDuplicateAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       }
