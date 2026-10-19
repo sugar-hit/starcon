@@ -1444,6 +1444,57 @@ const services: readonly {
       /^return-receipts(?:\/(?:capabilities|receivable|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:post|cancel|photos))?))?$/,
   },
   {
+    // 11.2.3.1 质检与判定（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
+    // 同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.2.2.1 `return-receipts` 那条**之后**、11.1.1.2 那条**之前**：
+    // 三条的前缀形状互不相交（`return-quality/` vs `return-receipts/` vs `aftersales/cases/`），
+    // 谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 命名空间**独立于 `/trade/return-receipts`**：本模块的产物是**另一种单据**
+    // （质检判定 = 一个结论 + 一张交给下游的指令），不是实收单的另一个视图。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `return-quality/capabilities`               能力与上下游可用性声明（GET）
+    //   `return-quality/categories`                类目集合读（GET） / 建类目（POST）
+    //   `return-quality/categories/{uuid}`         改类目名称与启停（PUT，**刻意不给改编码的入口**）
+    //   `return-quality/categories/{uuid}/skus`    把 SKU 归到质检类目（POST）
+    //   `return-quality/templates`                 模板集合读（GET） / 建模板草稿（POST）
+    //   `return-quality/templates/{uuid}`          模板详情（GET） / 改草稿（PUT，**仅 DRAFT**）
+    //   `return-quality/templates/{uuid}/activate` 启用模板（POST）
+    //   `return-quality/templates/{uuid}/retire`   停用模板（POST，**刻意用 POST 不是 DELETE**：
+    //                                               停用是口径变更，历史质检单要能复现当时的口径）
+    //   `return-quality/queue`                     待检队列（GET，**质检员上班第一屏**）
+    //   `return-quality/verdict-preview`          判定预览（GET，提交前就知道能判成什么）
+    //   `return-quality/inspections`               质检单集合读（GET） / 开单（POST）
+    //   `return-quality/inspections/{uuid}`        详情（GET） / 录逐项结果（PUT，**仅 DRAFT**）
+    //   `return-quality/inspections/{uuid}/conclude` 判定（POST，结论 + 理由 → **残值由公式算出**）
+    //   `return-quality/inspections/{uuid}/cancel`   撤销（POST，仅 DRAFT，已判定是终态）
+    //
+    // ⚠️ 四段 alternation 各自**整段锚定到 $**，所以不存在「字面量子路径被 uuid 段吃掉」
+    //   的顺序陷阱（capabilities / queue 这些字面量段与 UUID 形状互不相交）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}/resell` / `{uuid}/dispose` / `{uuid}/scrap` —— 处置属 **11.2.3.2，未交付**。
+    //     蓝图加粗句「**报废是不可逆的**，需审批与原因，不能由客服随手处理」正是这条规则的落点：
+    //     放行它等于把不可逆动作做成一个按钮。
+    //   * `{uuid}/salvage-posting` —— 残值入账属 **12 财务，未交付**，且是**独立数据库**，
+    //     跨服务写账被 AGENTS.md 模块边界纪律明令禁止。
+    //   * `{uuid}/claim` —— 供应商索赔属 **11.2.3.3，未交付**。本模块只提供举证材料。
+    //   * `{uuid}/verdict` —— 结论**终态不可逆**：判定只走 `conclude`，判错了只能作废重判。
+    //     再开一个「直接改结论」的形状，会让「这批货到底判成什么」出现两个答案。
+    //   * 任何 **DELETE** —— 质检结论与逐项结果是要拿去索赔的举证材料
+    //     （运行角色对该表的 UPDATE/DELETE 已在 DB 层收回）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^return-quality\/(?:capabilities|categories|templates|queue|verdict-preview|inspections)$|^return-quality\/categories\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?$|^return-quality\/templates\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|retire))?$|^return-quality\/inspections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:conclude|cancel))?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
