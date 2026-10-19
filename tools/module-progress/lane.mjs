@@ -469,9 +469,25 @@ const GATE_DIR = join(STATE_DIR, 'dispatch.gate');
  * 有网络与 git 操作，耗时可达十几秒。两次 tick 撞在一起时，
  * 两个调度者会同时读台账、同时排出同一个模块、同时写 lanes.json ——
  * 于是同一个模块被两条车道同时开工，两边都在同一个 worktree 里改代码。
- * 闸只在派发窗口持有（秒级），不会把并行开发重新变成串行。
+ *
+ * ⚠️ **TTL 必须覆盖一个完整 tick 的时长，不能按「派发窗口是秒级」来设。**
+ * 原实现 TTL=600（10 分钟），前提是「闸只在派发窗口持有（秒级）」——
+ * 那个前提在组批协议下已经不成立：现行流程让 tick **持闸跑完 merge + L2**，
+ * 实测单轮 40–60 分钟（2026-10-19 20:00 那轮 20:00→20:59）。
+ *
+ * TTL=600 时，**下一轮 tick 会在持闸者还活着的时候把闸抢走** ⇒ 两个 tick 同时
+ * `plan`（版本号在内存里分配，两边会拿到同一个号）、同时 `merge-ready`
+ * （主工作区留 MERGE_HEAD 残骸）、同时跑 L2（互相争抢 Testcontainers → 成片假红）。
+ * 记忆取证同源：`ageSeconds > 600` **不是「持闸者已死」的证据**，
+ * 取到闸的 tick 紧接着跑 L2，闸本来就会自然超过 600 秒。
+ *
+ * 现在 TTL=4200（70 分钟）= 单轮实测最坏 60 分钟 + 10 分钟余量。
+ * 代价：tick 崩在闸里，最多挡住下一轮（下一轮做只读 + 汇报，再下一轮自动接管）。
+ * 取舍明确：**宁可挡住一轮，也不能双派发** —— 后者会污染版本号与集成头。
  */
-function gateAcquire(ttlSeconds = 600) {
+const GATE_TTL_SECONDS = 4200;
+
+function gateAcquire(ttlSeconds = GATE_TTL_SECONDS) {
   mkdirSync(STATE_DIR, { recursive: true });
   try {
     mkdirSync(GATE_DIR);
@@ -520,7 +536,17 @@ if (cmd === 'gate') {
   } catch {
     held = false;
   }
-  console.log(JSON.stringify({ gate: held ? 'held' : 'free', ageSeconds }, null, 2));
+  // **必须把 TTL 和 stale 一起输出。**
+  // 只给 ageSeconds 的话，调度者无从判断「这闸还能不能抢」——
+  // 2026-10-19 那轮就是因为缺这个判据，把「PG 闸误触发」误诊成「调度闸泄漏 3 小时」。
+  const stale = held && ageSeconds > GATE_TTL_SECONDS;
+  console.log(
+    JSON.stringify(
+      { gate: held ? 'held' : 'free', ageSeconds, ttlSeconds: GATE_TTL_SECONDS, stale },
+      null,
+      2,
+    ),
+  );
   process.exit(0);
 }
 

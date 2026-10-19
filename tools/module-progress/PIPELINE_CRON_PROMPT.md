@@ -199,8 +199,32 @@ docker rm -f <上面列出的名字>
 ### 3.3 取闸顺序
 
 先 `gate status`（只读），确认要派发且闸空闲，再 `gate acquire`。
-撞闸（退出码 3）后仍要数 running：撞闸往往正是「别停手」的信号。
+
+```bash
+node tools/module-progress/lane.mjs gate status
+# 输出含 gate / ageSeconds / ttlSeconds / stale —— 四个都要看
+```
+
+**判据（照抄 `gate status` 的 `stale` 字段，不要自己按 ageSeconds 猜）**：
+
+| `gate` | `stale` | 含义 | 动作 |
+| --- | --- | --- | --- |
+| `free` | false | 闸空闲 | 可以 `acquire` |
+| `held` | false | **有活着的 tick 持着闸** | **不要抢**。做纯只读检查 + 汇报，结束本轮 |
+| `held` | true | 持闸者崩了（超过 TTL 70 分钟） | 可以 `acquire` 接管 |
+
+⚠️ **`stale=false` 不等于「持闸者在偷懒」——它可能正在跑 L2。**
+一个 tick 持闸要跑完 merge + L2，实测单轮 **40–60 分钟**。
+TTL 定成 4200 秒（70 分钟）就是为了覆盖它。
+2026-10-16 取证过同源的一件事：**`ageSeconds > 600` 不是「持闸者已死」的证据** ——
+取到闸的 tick 紧接着跑 L2，闸本来就会自然超过 10 分钟。
+（owner 文件里的 PID 也不可判活：写入它的 `gate acquire` 命令写完就退出。）
+
+**所以：撞闸（`acquire` 退出码 3）时，正确动作是「本轮零派发 + 只读 + 简短汇报」，
+不是清闸、不是 `force`。** 崩掉的闸会被 TTL 自动接管（最多挡一轮）。
+
 闸被占时仍可做纯只读：`sync.mjs`、`lane.mjs status`、台账完整性 grep。
+**不要做**：`merge-ready`、`gc`、`plan`、`heartbeat`（会覆盖 worker 自己那条有信息量的 note）。
 
 ---
 
@@ -277,7 +301,22 @@ echo "距上批 $ELAPSED 分钟"
 node tools/module-progress/lane.mjs gate acquire
 ```
 
-（仅在判定 GO 且 `gate status` 显示空闲时）
+（仅在判定 GO 且 `gate status` 显示 `gate=free` 时）
+
+**持闸要贯穿整轮**（plan → 派发 → merge-ready → L2 → commit → push），
+因为**两个 tick 同时 merge 同一个集成头会留 MERGE_HEAD 残骸**。
+
+**收尾必须 `gate release`**：
+
+```bash
+node tools/module-progress/lane.mjs gate release
+```
+
+⚠️ 本轮若因任何原因提前结束（闸门 STOP、撞闸、异常），**也要 release**
+—— 你已经拿到闸了，不释放就等于把下一轮挡住。
+闸的 TTL 是 70 分钟（覆盖单轮 40–60 分钟 + 余量），
+**崩掉的闸最多挡住下一轮，再下一轮自动接管** —— 这是刻意的取舍：
+宁可挡一轮，也不能让两个 tick 同时派发（版本号撞号、集成头残骸、L2 成片假红）。
 
 ### 第 3 步：回收已落地的车道
 
@@ -408,19 +447,29 @@ git push upstream integration/module-dev
 ## 5. 最高优先级禁令
 
 - **L2 没绿绝对不 push**
+- **L2 不得与在途车道的 L1 并发跑** —— 多套 Testcontainers PG 互相抢资源，
+  2026-10-19 20:00 那轮实测：L2 与 4 条车道的 L1 并发时 PG 峰值 16，
+  后端 1364 例里 3 failures + 24 errors **全是假红**（`seed()` 503 / 连接拒绝），
+  机器空闲后隔离复跑 61 例全绿。**先等在途车道落地，再跑 L2**；
+  已经是这种形状的成片失败 ⇒ **先隔离复跑最大那一堆**，不要直接归因成回归。
 - **未开发 == 0 后绝不派发新车道**
 - **过不了批次节流闸（阈值见本地文件）就直接结束** —— 不要为了「有事做」而硬派
 - **不要在通过节流闸之前写 `.dev-agent/last-batch-at`** —— 会把节奏无限往后推，流水线永远跑不起来
 - **容量闸判 STOP 时绝不派发、不取闸、不跑 plan**
 - **不要让 worker 跑全量 `mvnw verify`**（那是你的 L2，每批一次）
-- **不要把 `--lanes` 调回 1**，也不要自行往上调
+- **不要把 `--lanes` 调回 1**，也不要自行往上调。**`--lanes` 必须 ≤ runtime 的子任务并发上限**
+  （当前上限 4；配 6 就会出现「排出来 ≠ 派得出去」，每轮白规划再释放）
 - **不要自行改节流闸阈值**（当前值见 `.dev-agent/PIPELINE.local.md`）。过热回退到更长窗口是用户的决定
-- **不要绕过温度闸**，或把 PG 闸从 4 调高
+- **不要绕过温度闸**，或把 PG 闸从 6 调高
+- **PG 闸只数带 `org.testcontainers.sessionId` 标签的容器** —— 无标签的是历史遗留孤儿容器，
+  它们会虚高计数（2026-10-19 实测 5 个孤儿吃掉 5/6 额度，有效并发额度从 6 掉到 1）。
+  清理规则见 3.1
 - 不要 push 到 `main`；不要手动 merge 车道分支；不要 checkout 集成分支
 - 不要在 commit / 说明文件里贴 secret
 - 不要把进度数字写死在汇报里（每次重跑 sync）
-- 不要承诺「全部完成」或给单点完成日期 —— 诚实区间 10–14 天
-- 不要为了让 tick 通过而 `force` 清掉别人持有的调度闸
+- 不要承诺「全部完成」或给单点完成日期 —— 诚实区间，且**每次按当前档位重算**（不要引用任何历史文档里的天数）
+- **不要为了让 tick 通过而 `force` 清掉别人持有的调度闸** —— 撞闸的正确动作是零派发 + 只读 + 汇报；
+  只有 `gate status` 的 `stale=true`（超过 TTL 70 分钟）才允许接管
 - **不要谎报「定时任务已关闭」**
 
 ---
