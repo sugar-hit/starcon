@@ -134,28 +134,42 @@ L3 锚点互不相同（4.4.1 / 4.5.1 / 4.5.2 / 9.1.2），`serviceBlocked` 为�
 并复核续做时对上一轮三个文件做了什么处理（保留 / 局部修改 / 推翻并说明理由）。
 若它再崩，**先查 504 是否复现**（网关侧），不要当成业务缺陷去二分。
 
-## ✅ 车道 4.5.1.2 已落地（05:39），调度者独立复核通过
+## ✅ 三条车道已落地，调度者独立复核通过（4.4.1.2 / 4.5.1.2 / 4.5.2.1）
 
-`state=ready`，commit `3042d119`（分支 `feat/4-5-1-2`，未 push），`land` 返回
-`{"ok":true,"lane":"4.5.1.2","head":"3042d11"}`。
+| 模块 | commit | api-proxy 增删 | 契约 path / schema（相对基线） | L1 自报 |
+| --- | --- | --- | --- | --- |
+| 4.5.1.2 关键词排名 | `3042d119` | **+49 / −0** | +10 path / +19 schema，**删 0** | 后端 29 例绿 + 前端 28 例绿 + allowlist 全量 553 例绿 |
+| 4.5.2.1 跟卖监控 | `5ea3ad8e` | **+50 / −0** | +8 path / +19 schema，**删 0** | 后端 27 例绿 + 前端 22 例绿 + allowlist 全量 553 例绿 |
+| 4.4.1.2 批量/插件采集 | `146c3ec6` | **+39 / −0** | +6 path / +12 schema，**删 0** | 后端 24 例绿 + 前端 26 例绿 + allowlist 全量 554 例绿 |
 
-### 复核结论（不是转述 worker 的自报，是调度者独立取证）
+三条车道的 `land` 均返回 `ok:true`，分支 `feat/4-5-1-2` / `feat/4-5-2-1` / `feat/4-4-1-2`（均未 push）。
+PG 容器：每条车道 L1 期间峰值 2 个 `postgres:16-alpine` + 1 个 ryuk，**结束后全部被 ryuk 回收，无孤儿**。
+
+### 复核方法（不是转述 worker 自报，是调度者独立取证）
 
 | 复核项 | 方法 | 结果 |
 | --- | --- | --- |
-| api-proxy 白名单 | `git diff --numstat` | **+49 / -0，纯新增**，既有元素一行未改 ✓ |
-| 契约有没有误删别人的东西 | 解 JSON 比对 paths / schemas 集合 | **移除 0 个 path、0 个 schema**；新增 10 path + 19 schema，全部 `ListingKeywordRanking*` ✓ |
+| api-proxy 白名单有没有误删别人路由 | `git diff --numstat` 逐条车道 | 三条都是 **纯新增、0 删除** ✓ |
+| 契约有没有误删别人的 path / schema | 解 JSON 比对 sets | 三条都是 **移除 0 个 path、0 个 schema**，新增全是各自 `ListingKeywordRanking*` / `ListingHijacker*` / `ListingBulkCollect*` ✓ |
 | 契约大 diff 是真改还是重排 | 与 batch-31 三条车道同款对比 | 4.4.1.1 是 7216/6627、4.1.1.3 是 9360/8159、4.5.1.1 是 3423/2397 ⇒ **本仓 codegen 的既有重排特征**，那三条都并入过且 L2 绿 ✓ |
 | 其他 5 个服务的契约 | 逐文件 sha256 | catalog / identity / trade / warehouse / crm **逐字节不变** ✓ |
-| `packages/sdk` | 是否需要重生成 | `packages/sdk/src` **当前为空**（未覆盖 channel 端点）⇒ 本车道不动它是对的 ✓ |
-| 集成头是否被污染 | `git status` | 干净，HEAD 仍是 `b042f648` ✓ |
-| PG 容器 | `docker ps -a` | 测试结束已被 ryuk 全部回收，**无孤儿** ✓ |
+| `packages/sdk` | 是否需要重生成 | `packages/sdk/src` **当前为空**（未覆盖 channel 端点）⇒ 不动它是对的 ✓ |
+| 集成头是否被污染 | `git status` | 干净，HEAD 仍停在调度者的 docs commit ✓ |
 
-L1 自报结果：后端 **29 例 0 失败 0 错误**（`ListingKeywordRankingIntegrationTest` 25 + `TenancyIntegrationTest` 4），
-前端 **28 例全绿**（model 24 + allowlist 4），**全量 allowlist 回归 553 例全绿**，
-`pnpm typecheck` 3/3、`pnpm lint` 零告警。
+### 🔍 合并预演（调度者用 `git merge-tree` 干跑，**没有碰任何分支/工作区**）
 
-### 三处值得后续车道避开的坑（worker 自己踩出来并修好的）
+union 合并驱动器已在 git config 注册（`merge.contract-union.driver` = `node tools/module-progress/merge-union.mjs %O %A %B`），
+`.gitattributes` 覆盖 `packages/api-contracts/src/**` 与台账。预演结果：
+
+- 2 路（4.5.1.2 + 4.5.2.1）→ **CLEAN**，无冲突；
+- 3 路（再并 4.4.1.2，用 `git commit-tree` 造**悬空 commit** 当中间提交，不建任何 ref）→ **CLEAN**；
+- 合并树校验：契约 **移除 0 个 path**、新增 24 个（10 + 8 + 6）、schema 移除 0 个新增 50 个；
+  api-proxy 三个新前缀 `listing-bulk-collects` / `listing-hijackers` / `listing-keyword-rankings` **都在**；
+  台账 **465 行**、三行状态已变「已交付」。
+
+⇒ **下一轮 merge-ready 预计零冲突**（9.1.2.1 落地后需再补一次 4 路预演）。
+
+### 三处值得后续车道避开的坑（4.5.1.2 的 worker 自己踩出来并修好的）
 
 1. **Java 可变参数不展开尾部 `Object[]`** —— `sql.fetch(sql, a, b, c, d, arr)` 里 `arr` 被当成
    **一个**绑定（jOOQ 渲染成 `cast(? as any[])`），PG 报「参数 N 没有值」。
@@ -177,6 +191,19 @@ L1 自报结果：后端 **29 例 0 失败 0 错误**（`ListingKeywordRankingIn
 
 ⚠️ 另记：真实平台排名抓取调度器归 **02 通道**，本模块只做抓取结果入库
 ⇒ 能力声明里 `available=false` + `ownerModule` + `impact` 显式标注，**不发假数据**（诚实边界）。
+
+### 另外两条车道各自划清的边界（同样已记在各自会话日志里）
+
+- **4.4.1.2**：浏览器扩展**本体**（取数/安装/升级）不在本仓，只交付服务端上报入口 ⇒
+  能力表 `browser_extension` available=false + ownerModule + impact；
+  媒体库下载归 03 catalog（**跨服务写表被 AGENTS.md 禁止**）、采集箱归 4.4.1.3、认领 SPU 归 3.1.1.1、
+  我方售价归 05、内部可售量归 07 ⇒ 逐条 available=false，页面不画这些入口。
+  限频做了三层（并发数 / 任务启动间隔 / 同 host 抓取间隔），各有 429 + 可读原因；
+  去重跨「链接采集 / 批量 / 插件」三种入口共享同一规范化 URL 事实。
+- **4.5.2.1**：「只能作为参考」落到**结构**上 —— 表里无处置状态、无投诉/举报端点，
+  每响应带 `dataSource='PLATFORM_SCRAPED'` + `sourceNote` + `actionsNote`；
+  价格差比例**不落表**、SQL 现算、**分母为 0 返回 null**；
+  跟卖者「所在平台」由 `listing → shop → platform` 派生，不冗余存第二份答案。
 
 ## 静态预检
 
