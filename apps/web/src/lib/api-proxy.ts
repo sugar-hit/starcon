@@ -1661,6 +1661,45 @@ const services: readonly {
       /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.4.1.2 批量/插件采集（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.1 `listing-collects` 那一条**之后** ——
+    // 与本批另外三条车道的锚点互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-bulk-collects` 这个**独立前缀**而不是 `listing-collects/batch`：
+    //   4.4.1.1 的 `listing-collects` 元素刻意**没有**放行 `/batch`（那是本模块的职责）。
+    //   若把批量采集挂在它下面，就必须去改别人已交付的那一条元素 —— 那是别人的成果。
+    //   批量采集本来就不是「一次链接采集」的一种，它是一批 URL 的批量动作，
+    //   独立前缀更贴切（与 4.4.2.1 `listing-claims`、4.3.2.2 `listing-status-events` 同一手法）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-bulk-collects                     批量任务列表（GET，真分页 + 模式/状态/来源筛选）/ 发起批量采集（POST）
+    //   listing-bulk-collects/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   listing-bulk-collects/plugin-reports      浏览器插件上报入口（POST）
+    //   listing-bulk-collects/{uuid}              批量任务详情（GET）
+    //   listing-bulk-collects/{uuid}/results      结果清单（GET，真分页 + 状态筛选）
+    //   listing-bulk-collects/{uuid}/run          执行一次批量采集（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / plugin-reports）必须排在 uuid 段**之前**，
+    //    否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-bulk-collects/box`             —— 🔴 采集箱是 4.4.1.3 的职责，尚未交付
+    //   * `listing-bulk-collects/{uuid}/claim`     —— 🔴 认领是 4.4.1.3 采集箱的职责，尚未交付
+    //   * `listing-bulk-collects/{uuid}/draft`    —— 草稿随结果清单一起返回，不单开一条
+    //   * `listing-bulk-collects/{uuid}/retry`    —— 继续采集就是再调一次 `/run`（服务端保留断点）
+    //   * `listing-bulk-collects/undeclared-action` —— 不存在的动作
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-bulk\-collects(?:\/capabilities|\/plugin\-reports|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run|\/results)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 4.3.2.2 平台状态回流（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
