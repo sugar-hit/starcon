@@ -1647,6 +1647,50 @@ const services: readonly {
       /^return-quality\/(?:capabilities|categories|templates|queue|verdict-preview|inspections)$|^return-quality\/categories\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?$|^return-quality\/templates\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|retire))?$|^return-quality\/inspections\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:conclude|cancel))?$/,
   },
   {
+    // 11.1.2.2 商品问题归因（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的超长单行 alternation 里并分支 —— 那一支多车道同时并进去
+    // git 必然判冲突（结构性，retry 永远不会自愈），而**求并**又会在取错一侧时静默删掉
+    // 同批兄弟车道已交付的路由（表现是页面 404，而 typecheck / lint / vitest 全绿）。
+    // 插入锚点固定在 11.2.3.1 `return-quality` 那条**之后**、11.1.1.2 那条**之前**：
+    // 三条的前缀形状互不相交（`product-attribution/` vs `return-quality/` vs `cases/`），
+    // 谁先被匹配都不误吃，且插入点被既有条目隔开，git 能干净求并。
+    //
+    // 命名空间**独立于 `/trade/return-quality`**：本模块判的是「这事该谁负责」，
+    // 11.2.3.1 判的是「这批货怎么样」—— 两者的输出句不同，形状就不能混。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   `product-attribution/capabilities`                   能力声明与边界（GET）
+    //   `product-attribution/attributions`                   集合读（GET）+ 建单（POST）
+    //   `product-attribution/attributions/{uuid}`            详情（GET）
+    //   `product-attribution/attributions/{uuid}/photos`      登记 / 替换照片（PUT，整单替换）
+    //   `product-attribution/attributions/{uuid}/photos/compare` 照片比对（POST，**内容指纹**口径）
+    //   `product-attribution/attributions/{uuid}/attribute`   出归因结论（POST）
+    //   `product-attribution/attributions/{uuid}/supersede`  改判留痕（POST，终态不可逆）
+    //   `product-attribution/attributions/{uuid}/lot-flag/refresh` 刷新批次质量标记（POST）
+    //   `product-attribution/lot-flags`                      批次质量标记列表（GET）
+    //   `product-attribution/lot-flags/by-lot`               单批次标记（GET）
+    //
+    // ⚠️ 四段 alternation 各自**整段锚定到 $**，所以不存在「字面量子路径被 uuid 段吃掉」
+    //   的顺序陷阱。id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），
+    //   不是 `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `{uuid}/claim` —— 供应商索赔属 **6.4.2.2，未交付**。归因结论与批次标记是索赔的
+    //     **举证材料**，但索赔单的创建、协商记录与赔付处理都不在本模块。
+    //   * `{uuid}/rating` —— 供应商评级属 **6.1.1.3，未交付**。
+    //   * `{uuid}/similarity` —— **图像相似度**：本仓没有图像库、没有训练好的模型、
+    //     也没有第三方视觉服务的接入点。放行它等于渲染一个冒充图像识别能力的控件。
+    //   * `{uuid}/verdict` / `PUT {uuid}` —— 归因结论**终态不可逆**：改判只走 `/supersede`
+    //     留痕另起一版。再开一个「直接改结论」的形状，会让「这批货到底归给谁」出现两个答案。
+    //   * 任何 **DELETE** —— 归因结论、照片与比对是要拿去索赔的举证材料
+    //     （留痕表的 UPDATE/DELETE 已在 DB 层收回）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^product-attribution\/(?:capabilities|attributions|lot-flags|lot-flags\/by-lot)$|^product-attribution\/attributions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:photos|photos\/compare|attribute|supersede|lot-flag\/refresh))?$/,
+  },
+  {
     // 11.1.1.2 售后单详情（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
