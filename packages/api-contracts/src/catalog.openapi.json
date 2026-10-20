@@ -27997,6 +27997,685 @@
           }
         }
       }
+    },
+    "/catalog/platform-fees/rules/{ruleId}": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "put_catalog_platform_fees_rules_ruleId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeeRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/rules/{ruleId}/tiers": {
+      "put": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "put_catalog_platform_fees_rules_ruleId_tiers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TierListInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/rules": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "feeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeRuleListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "post_catalog_platform_fees_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeeRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/actuals": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_actuals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "feeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeActualListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "post_catalog_platform_fees_actuals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeeActualInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeActualSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/actuals/{actualId}/void": {
+      "post": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "post_catalog_platform_fees_actuals_actualId_void",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actualId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeeVoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeActualSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/variance": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_variance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "feeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeVarianceReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/estimate": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_estimate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalCategoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCategoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "saleAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeEstimate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/directory": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_directory",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformDirectory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/platform-fees/capabilities": {
+      "get": {
+        "tags": [
+          "platform-fee-controller"
+        ],
+        "operationId": "get_catalog_platform_fees_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformFeeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -54351,6 +55030,998 @@
             "type": "string"
           }
         }
+      },
+      "FeeRuleInput": {
+        "required": [
+          "chargeBasis",
+          "effectiveFrom",
+          "feeType",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{0,31}$",
+            "type": "string",
+            "description": "平台码（必填）"
+          },
+          "siteCode": {
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{0,31}$",
+            "type": "string",
+            "description": "站点码（可空 = 该平台全部站点）"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "description": "内部分类 id（可空 = 不限定类目）",
+            "format": "uuid"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id（可空 = 不限定类目）",
+            "format": "uuid"
+          },
+          "feeType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "费用类型"
+          },
+          "chargeBasis": {
+            "minLength": 1,
+            "type": "string",
+            "description": "计价形态"
+          },
+          "rate": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "费率（小数口径，0.15 = 15%）"
+          },
+          "fixedAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "固定额"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "description": "固定额币种"
+          },
+          "periodTotalAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "订阅费周期总额"
+          },
+          "periodCurrency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "description": "订阅费周期总额币种"
+          },
+          "allocationBasis": {
+            "type": "string",
+            "description": "订阅费分摊口径（PER_ORDER / PER_UNIT）"
+          },
+          "allocationDivisor": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "订阅费分摊基数（期间单量 / 件量）"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起点（必填）",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效终点（可空 = 长期有效）",
+            "format": "date-time"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用（默认启用）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本（修改时必填）",
+            "format": "int64"
+          }
+        }
+      },
+      "FeeRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id"
+          },
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "chargeBasis": {
+            "type": "string",
+            "description": "计价形态"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起点"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          }
+        }
+      },
+      "FeeTierInput": {
+        "required": [
+          "minAmount",
+          "rate"
+        ],
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "description": "档位序号（从 1 起）",
+            "format": "int32"
+          },
+          "minAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "下界（含）"
+          },
+          "maxAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "上界（不含，null = 无上限）"
+          },
+          "rate": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "该档费率（小数口径）"
+          }
+        },
+        "description": "阶梯（空数组 = 清空阶梯）"
+      },
+      "TierListInput": {
+        "type": "object",
+        "properties": {
+          "tiers": {
+            "type": "array",
+            "description": "阶梯（空数组 = 清空阶梯）",
+            "items": {
+              "$ref": "#/components/schemas/FeeTierInput"
+            }
+          }
+        }
+      },
+      "FeeRuleDetail": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/FeeRuleRow"
+          },
+          "tiers": {
+            "type": "array",
+            "description": "阶梯（无阶梯时为空数组）",
+            "items": {
+              "$ref": "#/components/schemas/FeeTierRow"
+            }
+          },
+          "scopeBasis": {
+            "type": "string",
+            "description": "这条规则的作用域口径"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "FeeRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "siteCode": {
+            "type": "string",
+            "description": "站点码（null = 该平台全部站点）"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "description": "内部分类 id",
+            "format": "uuid"
+          },
+          "internalCategoryName": {
+            "type": "string",
+            "description": "内部分类名"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id",
+            "format": "uuid"
+          },
+          "platformCategoryName": {
+            "type": "string",
+            "description": "平台类目名"
+          },
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "feeTypeLabel": {
+            "type": "string",
+            "description": "费用类型中文名"
+          },
+          "chargeBasis": {
+            "type": "string",
+            "description": "计价形态"
+          },
+          "chargeBasisLabel": {
+            "type": "string",
+            "description": "计价形态中文名"
+          },
+          "rate": {
+            "type": "string",
+            "description": "费率（小数口径）"
+          },
+          "fixedAmount": {
+            "type": "string",
+            "description": "固定额"
+          },
+          "currency": {
+            "type": "string",
+            "description": "固定额币种"
+          },
+          "periodTotalAmount": {
+            "type": "string",
+            "description": "订阅费周期总额"
+          },
+          "periodCurrency": {
+            "type": "string",
+            "description": "订阅费周期总额币种"
+          },
+          "allocationBasis": {
+            "type": "string",
+            "description": "订阅费分摊口径"
+          },
+          "allocationDivisor": {
+            "type": "string",
+            "description": "订阅费分摊基数"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起点"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效终点（null = 长期有效）"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "tierCount": {
+            "type": "integer",
+            "description": "阶梯档数",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时间"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时间"
+          }
+        },
+        "description": "规则"
+      },
+      "FeeTierRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "阶梯行 id",
+            "format": "uuid"
+          },
+          "seq": {
+            "type": "integer",
+            "description": "档位序号",
+            "format": "int32"
+          },
+          "minAmount": {
+            "type": "string",
+            "description": "下界（含）"
+          },
+          "maxAmount": {
+            "type": "string",
+            "description": "上界（不含，null = 无上限）"
+          },
+          "rate": {
+            "type": "string",
+            "description": "该档费率（小数口径）"
+          }
+        },
+        "description": "阶梯（无阶梯时为空数组）"
+      },
+      "FeeActualInput": {
+        "required": [
+          "amount",
+          "currency",
+          "feeType",
+          "occurredOn",
+          "platformCode",
+          "quantity",
+          "saleAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{0,31}$",
+            "type": "string",
+            "description": "平台码（必填）"
+          },
+          "siteCode": {
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{0,31}$",
+            "type": "string",
+            "description": "站点码（可空 = 平台级）"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "description": "内部分类 id（可空）",
+            "format": "uuid"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id（可空）",
+            "format": "uuid"
+          },
+          "feeType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "费用类型"
+          },
+          "amount": {
+            "type": "number",
+            "description": "实际发生额（可负 = 冲回）"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "description": "币种（必填）"
+          },
+          "saleAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "销售额基数（差异计算用，必填）"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "数量基数（差异计算用，必填）"
+          },
+          "occurredOn": {
+            "type": "string",
+            "description": "费用发生日（必填）",
+            "format": "date"
+          },
+          "sourceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "平台账单号等外部凭据"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "FeeActualSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "实际费用 id"
+          },
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "amount": {
+            "type": "string",
+            "description": "实际发生额"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "occurredOn": {
+            "type": "string",
+            "description": "费用发生日"
+          }
+        }
+      },
+      "FeeVoidInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "minLength": 1,
+            "type": "string",
+            "description": "作废理由（必填）"
+          }
+        }
+      },
+      "FeeVarianceGroup": {
+        "type": "object",
+        "properties": {
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "feeTypeLabel": {
+            "type": "string",
+            "description": "费用类型中文名"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "actualAmount": {
+            "type": "string",
+            "description": "实际费用合计"
+          },
+          "estimatedAmount": {
+            "type": "string",
+            "description": "按规则测算的合计（null = 算不出来）"
+          },
+          "varianceAmount": {
+            "type": "string",
+            "description": "费用差异 = 实际 − 测算（null = 算不出来）"
+          },
+          "actualCount": {
+            "type": "integer",
+            "description": "实际费用笔数",
+            "format": "int64"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "description": "可比笔数（有生效规则可对照的）",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string",
+            "description": "算不出来时的原因"
+          }
+        },
+        "description": "逐费用类型对照"
+      },
+      "FeeVarianceReport": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "是否算得出差异"
+          },
+          "reason": {
+            "type": "string",
+            "description": "算不出来时的原因"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "siteCode": {
+            "type": "string",
+            "description": "站点码"
+          },
+          "from": {
+            "type": "string",
+            "description": "区间起"
+          },
+          "to": {
+            "type": "string",
+            "description": "区间止"
+          },
+          "groups": {
+            "type": "array",
+            "description": "逐费用类型对照",
+            "items": {
+              "$ref": "#/components/schemas/FeeVarianceGroup"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "口径说明"
+          }
+        }
+      },
+      "FeeRuleListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页规则",
+            "items": {
+              "$ref": "#/components/schemas/FeeRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "口径说明"
+          }
+        }
+      },
+      "FeeEstimate": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "siteCode": {
+            "type": "string",
+            "description": "站点码"
+          },
+          "saleAmount": {
+            "type": "string",
+            "description": "参与测算的销售额"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "参与测算的数量"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "测算基准时刻"
+          },
+          "items": {
+            "type": "array",
+            "description": "逐项费用",
+            "items": {
+              "$ref": "#/components/schemas/FeeEstimateItem"
+            }
+          },
+          "totalAmount": {
+            "type": "string",
+            "description": "费用合计（不完整时为 null）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "合计币种"
+          },
+          "complete": {
+            "type": "boolean",
+            "description": "合计是否完整"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "FeeEstimateItem": {
+        "type": "object",
+        "properties": {
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "feeTypeLabel": {
+            "type": "string",
+            "description": "费用类型中文名"
+          },
+          "chargeBasis": {
+            "type": "string",
+            "description": "计价形态"
+          },
+          "chargeBasisLabel": {
+            "type": "string",
+            "description": "计价形态中文名"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "命中的规则 id（null = 该类型没有生效规则）",
+            "format": "uuid"
+          },
+          "scopeBasis": {
+            "type": "string",
+            "description": "命中规则的作用域口径"
+          },
+          "amount": {
+            "type": "string",
+            "description": "测算出的费用（null = 该类型算不出来）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "rate": {
+            "type": "string",
+            "description": "本次用到的费率 / 档位"
+          },
+          "basis": {
+            "type": "string",
+            "description": "算式说明"
+          },
+          "applicable": {
+            "type": "boolean",
+            "description": "是否适用（false = 规则存在但不适用于本次金额）"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        },
+        "description": "逐项费用"
+      },
+      "DirectoryMarketplace": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "站点码"
+          },
+          "name": {
+            "type": "string",
+            "description": "站点名"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "国家码"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "description": "默认币种"
+          },
+          "currencyScale": {
+            "type": "integer",
+            "description": "币种小数位",
+            "format": "int32"
+          },
+          "vatRequired": {
+            "type": "boolean",
+            "description": "是否需要增值税"
+          }
+        },
+        "description": "站点"
+      },
+      "DirectoryPlatform": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名"
+          },
+          "marketplaces": {
+            "type": "array",
+            "description": "站点",
+            "items": {
+              "$ref": "#/components/schemas/DirectoryMarketplace"
+            }
+          }
+        },
+        "description": "平台清单"
+      },
+      "PlatformDirectory": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台清单",
+            "items": {
+              "$ref": "#/components/schemas/DirectoryPlatform"
+            }
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "来源说明"
+          }
+        }
+      },
+      "ChargeBasisOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "basis": {
+            "type": "string",
+            "description": "口径说明"
+          }
+        },
+        "description": "计价形态词表"
+      },
+      "FeeCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "维度码"
+          },
+          "label": {
+            "type": "string",
+            "description": "维度名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否已交付 / 可取到"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块（未交付时点名）"
+          },
+          "impact": {
+            "type": "string",
+            "description": "缺了它会怎样"
+          },
+          "basis": {
+            "type": "string",
+            "description": "口径说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "逐维度能力声明"
+      },
+      "FeeTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "basis": {
+            "type": "string",
+            "description": "口径说明"
+          }
+        },
+        "description": "订阅费分摊口径词表"
+      },
+      "PlatformFeeCapabilities": {
+        "type": "object",
+        "properties": {
+          "feeTypes": {
+            "type": "array",
+            "description": "费用类型词表",
+            "items": {
+              "$ref": "#/components/schemas/FeeTypeOption"
+            }
+          },
+          "chargeBases": {
+            "type": "array",
+            "description": "计价形态词表",
+            "items": {
+              "$ref": "#/components/schemas/ChargeBasisOption"
+            }
+          },
+          "allocationBases": {
+            "type": "array",
+            "description": "订阅费分摊口径词表",
+            "items": {
+              "$ref": "#/components/schemas/FeeTypeOption"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明",
+            "items": {
+              "$ref": "#/components/schemas/FeeCapabilityDimension"
+            }
+          },
+          "ruleBasis": {
+            "type": "string",
+            "description": "规则口径说明"
+          },
+          "actualBasis": {
+            "type": "string",
+            "description": "实际费用口径说明"
+          },
+          "varianceBasis": {
+            "type": "string",
+            "description": "费用差异口径说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游说明"
+          },
+          "downstreamNote": {
+            "type": "string",
+            "description": "下游说明"
+          },
+          "actionsNote": {
+            "type": "string",
+            "description": "本模块动作说明"
+          }
+        }
+      },
+      "FeeActualListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页实际费用",
+            "items": {
+              "$ref": "#/components/schemas/FeeActualRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "口径说明"
+          }
+        }
+      },
+      "FeeActualRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "实际费用 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台码"
+          },
+          "siteCode": {
+            "type": "string",
+            "description": "站点码"
+          },
+          "internalCategoryId": {
+            "type": "string",
+            "description": "内部分类 id",
+            "format": "uuid"
+          },
+          "platformCategoryId": {
+            "type": "string",
+            "description": "平台类目 id",
+            "format": "uuid"
+          },
+          "feeType": {
+            "type": "string",
+            "description": "费用类型"
+          },
+          "feeTypeLabel": {
+            "type": "string",
+            "description": "费用类型中文名"
+          },
+          "amount": {
+            "type": "string",
+            "description": "实际发生额"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "saleAmount": {
+            "type": "string",
+            "description": "销售额基数（差异计算用）"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "数量基数（差异计算用）"
+          },
+          "occurredOn": {
+            "type": "string",
+            "description": "费用发生日"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源码"
+          },
+          "sourceLabel": {
+            "type": "string",
+            "description": "来源中文名"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "平台账单号等外部凭据"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "isVoid": {
+            "type": "boolean",
+            "description": "是否已作废"
+          },
+          "voidReason": {
+            "type": "string",
+            "description": "作废理由"
+          },
+          "voidedAt": {
+            "type": "string",
+            "description": "作废时间"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "登记时间"
+          }
+        },
+        "description": "本页实际费用"
       }
     }
   }
