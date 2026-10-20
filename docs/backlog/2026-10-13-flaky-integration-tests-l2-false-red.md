@@ -338,3 +338,56 @@ OrderPendingReviewIntegrationTest,OrderPendingReviewTenancyIntegrationTest' \
 
 > 批次 33 的 push 建立在**时钟对齐后的整批 L2 重跑全绿**之上，不是首次全量绿。
 > 已在 `docs/sessions/2026-10/2026-10-20-batch-33-four-lane-delivery.md` 如实记录。
+
+---
+
+## 七、批次 36：`ImportWizardIntegrationTest` 任务时间戳（2026-10-20）—— 同族第 4 次，且**偏差达 ~5 分钟**
+
+**现象**：L2 第一轮后端红 **1/1527**，唯一失败例：
+
+```
+[ERROR] ImportWizardIntegrationTest.任务时间戳是带时区写回的值:897
+Expecting actual:
+  2026-10-20T07:04:04.678109Z
+to be after or equal to:
+  2026-10-20T07:09:01.931931Z
+```
+
+**取证**：
+
+| 步骤 | 结果 |
+| --- | --- |
+| 断言位置 | `backend/services/catalog/src/test/java/com/starcon/catalog/ImportWizardIntegrationTest.java:897` |
+| `before` 的时钟源 | **JVM**：`OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(1)`（L889） |
+| `job.createdAt()` 的时钟源 | **PG**：`V29__import_wizard.sql:239` `created_at timestamptz NOT NULL DEFAULT now()` |
+| 本批是否碰 catalog / V29 / ImportWizard | **零文件涉及**（本批 4 个模块全在 channel） |
+| 隔离复跑该类 | **19/19 全绿**（BUILD SUCCESS） |
+| 命中家族 | §六之三 的「JVM 写 vs PG 写」跨时钟域族 |
+
+**偏差量级异常**：这次量到 **PG 比 JVM 慢约 297 秒（≈4 分 57 秒）**，
+远大于历史上记录过的 542ms（§六之三）与 1.006ms（§六）。
+⇒ 时钟漂移**没有上界**，不能靠「几百毫秒以内可忽略」来假设。
+
+**本轮的特殊背景（首次值得记的一条）**：这次 L2 是**与 4 条 worker 车道并发**跑的
+（PG 容器峰值 41、load 峰值 63）。历史记录里 §六之三 的 542ms 发生在**单独跑**时。
+⇒ **高并发负载与宿主机/VM 时钟漂移幅度之间可能存在相关性**，
+这与 §六之三 §流水线侧「开工前量偏差、超阈值别开跑」的建议方向一致，
+但建议把阈值从 100ms 放宽到「**秒级**」并**在 L2 全程复查**（而不是只在开工前量一次）。
+
+**建议修法**：
+
+1. **主修（同族统一做法）**：该断言拿 JVM 时钟去比 PG 写的列，属于**设计上的跨时钟域比较**。
+   两条出路二选一：
+   - 断言改成**只比同源的两列**（如 `finishedAt >= startedAt`，二者都由应用写），
+     **删掉** `createdAt >= JVM now` 这条跨域断言 —— 这条断言本来也不是它想验证的东西
+     （它想验证的是「时区没被二次偏移」，`finishedAt >= startedAt` 才是那个证据，L902 已经有了）；
+   - 或让被比较的列也由 **DB 写**（`created_at` 已是 DB 写，那 `before` 也应改成 `select now()` 的结果）。
+   - **首选前者**：把跨域断言去掉，本测试就与时钟漂移**彻底解耦**。
+2. **收口动作**：按 §六之三 的全局扫描建议，
+   `grep -rn "OffsetDateTime.now()" backend/services/*/src/test/java | grep -i "isAfterOrEqualTo\|isBefore"`
+   把「用 JVM 时钟去比 PG 写的列」的断言**一次性找齐**，
+   而不是每次等 L2 撞出来再补一条。
+3. **流水线侧**：见上 —— 阈值放宽到秒级 + L2 全程复查。
+
+> 批次 36 的 push 建立在这个 flake 的**干净窗口补跑全绿**之上，不是首次全量绿。
+> 已在 `docs/sessions/2026-10/2026-10-20-batch-36-merge-4-lanes-and-l2.md` 如实记录。
