@@ -21925,6 +21925,847 @@
           }
         }
       }
+    },
+    "/channel/logistics-tracking/exceptions": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exceptionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerMembershipId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionCasePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "post_channel_logistics_tracking_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExceptionCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionCaseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/{id}/dispositions": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_id_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionDispositionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "post_channel_logistics_tracking_exceptions_id_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDispositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionDispositionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/{id}/claims": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_id_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "claimType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionClaimPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "post_channel_logistics_tracking_exceptions_id_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExceptionClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/scan": {
+      "post": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "post_channel_logistics_tracking_exceptions_scan",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionScanResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/rules": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "post_channel_logistics_tracking_exceptions_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExceptionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/{id}": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/overview": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsExceptionOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/exceptions/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_exceptions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsExceptionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/dispositions": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_dispositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionDispositionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/dispositions/{id}": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_dispositions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionDispositionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/dispositions/claims": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_dispositions_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "claimType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionClaimPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-tracking/dispositions/claims/{id}": {
+      "get": {
+        "tags": [
+          "logistics-exception-controller"
+        ],
+        "operationId": "get_channel_logistics_tracking_dispositions_claims_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionClaimDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -25987,7 +26828,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -27848,7 +28689,7 @@
             "type": "string"
           },
           "amountPerWaybill": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -28688,7 +29529,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -31126,7 +31967,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -31469,9 +32310,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -53888,6 +54729,1000 @@
           "note": {
             "type": "string",
             "description": "🔴 说明：删到一条不剩时整套不可售"
+          }
+        }
+      },
+      "CreateExceptionCaseRequest": {
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceEventId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "exceptionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerFeedback": {
+            "type": "string",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExceptionCaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "exceptionType": {
+            "type": "string"
+          },
+          "exceptionTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceEventId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "stalledDurationMinutes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stalledDurationHours": {
+            "type": "number"
+          },
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "customerFeedback": {
+            "type": "string"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closeReason": {
+            "type": "string"
+          },
+          "dispositionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AddDispositionRequest": {
+        "type": "object",
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetOwnerMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ExceptionDispositionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "actionTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "targetOwnerMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "resultNote": {
+            "type": "string"
+          },
+          "operatorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "downstreamTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreateExceptionClaimRequest": {
+        "type": "object",
+        "properties": {
+          "claimType": {
+            "type": "string"
+          },
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "qty": {
+            "type": "number",
+            "nullable": true
+          },
+          "evidenceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExceptionClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimNo": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExceptionScanResult": {
+        "type": "object",
+        "properties": {
+          "ruleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionScanSkip"
+            }
+          },
+          "createdCaseNos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ExceptionScanSkip": {
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SaveExceptionRuleRequest": {
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "matchNode": {
+            "type": "string",
+            "nullable": true
+          },
+          "matchExceptionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "thresholdMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string"
+          },
+          "resolveSlaMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExceptionRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "ruleTypeLabel": {
+            "type": "string"
+          },
+          "matchNode": {
+            "type": "string"
+          },
+          "matchExceptionCode": {
+            "type": "string"
+          },
+          "thresholdMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "resolveSlaMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExceptionCasePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionCaseRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "responsibilityNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DownstreamTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "claimId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "downstreamModule": {
+            "type": "string"
+          },
+          "downstreamModuleLabel": {
+            "type": "string"
+          },
+          "downstreamStatus": {
+            "type": "string"
+          },
+          "downstreamStatusLabel": {
+            "type": "string"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ExceptionCaseDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ExceptionCaseRow"
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionDispositionRow"
+            }
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionClaimRow"
+            }
+          },
+          "downstreamTasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownstreamTaskRow"
+            }
+          },
+          "upstream": {
+            "$ref": "#/components/schemas/ExceptionUpstreamContext"
+          }
+        }
+      },
+      "ExceptionUpstreamContext": {
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "latestNode": {
+            "type": "string"
+          },
+          "latestOccurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "eventCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exceptionFlag": {
+            "type": "boolean"
+          },
+          "lastExceptionCode": {
+            "type": "string"
+          },
+          "lastExceptionAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "subjectStatus": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "ExceptionDispositionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionDispositionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ExceptionClaimPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionClaimRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "moneyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ExceptionRulePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsExceptionOverview": {
+        "type": "object",
+        "properties": {
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "investigatingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "actionedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "voidCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingDownstreamCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reshipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "carrierClaimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotal"
+            }
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypeCount"
+            }
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            }
+          },
+          "bySeverity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeverityCount"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "moneyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SeverityCount": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TypeCount": {
+        "type": "object",
+        "properties": {
+          "exceptionType": {
+            "type": "string"
+          },
+          "exceptionTypeLabel": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LogisticsExceptionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapabilityDimension"
+            }
+          },
+          "exceptionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caseStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "actionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "responsibilityNote": {
+            "type": "string"
+          },
+          "durationNote": {
+            "type": "string"
+          },
+          "moneyNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ExceptionDispositionDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ExceptionDispositionRow"
+          },
+          "downstreamTasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownstreamTaskRow"
+            }
+          }
+        }
+      },
+      "ExceptionClaimDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ExceptionClaimRow"
+          },
+          "downstreamTasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownstreamTaskRow"
+            }
           }
         }
       }

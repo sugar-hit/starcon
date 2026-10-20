@@ -905,6 +905,56 @@ const services: readonly {
       /^logistics\-tracking\/(?:capabilities|overview|events|pull\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|subjects(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 10.3.1.2 异常件（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.3.1.1 `logistics-tracking` 那条**之后**、10.1.1.3
+    // `logistics-transit-limits` 那条**之前** —— 另外三条车道的锚点
+    // （10.3.2.2 / 10.6.2.1 / 10.7.1.2）都落在别处，四个锚点互不重叠，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-tracking/exceptions                     异常件清单（GET，真分页 + 筛选）/ 登记（POST）
+    //   logistics-tracking/exceptions/capabilities         能力声明（未交付段 available=false + ownerModule）
+    //   logistics-tracking/exceptions/overview             全量概览（不受筛选与分页影响）
+    //   logistics-tracking/exceptions/rules                异常识别规则（GET 清单 / POST 登记）
+    //   logistics-tracking/exceptions/scan                 按规则扫描建件（POST，幂等）
+    //   logistics-tracking/exceptions/{uuid}              异常件详情（GET）
+    //   logistics-tracking/exceptions/{uuid}/dispositions  该件的处置记录（GET 列表 / POST 追加）
+    //   logistics-tracking/exceptions/{uuid}/claims       该件的单据（GET 列表 / POST 发起）
+    //   logistics-tracking/dispositions                   全量处置记录（GET，真分页 + 筛选）
+    //   logistics-tracking/dispositions/{uuid}            处置记录详情（GET）
+    //   logistics-tracking/dispositions/claims             全量理赔 / 补发单（GET）
+    //   logistics-tracking/dispositions/claims/{uuid}      单据详情（GET）
+    //
+    // ⚠️ **裸路径 `logistics-tracking` 仍不放行**：10.3.1.1 的那条元素已明确说明
+    //    后端**没有**裸集合读，本模块也不新增一个（异常件清单在 `/exceptions`）。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / rules / scan）**排在 uuid 段之前**。
+    //    写反的话 `s`(scan) / `r`(rules) / `c`(capabilities) / `o`(overview) 落在
+    //    [0-9a-f] 里会被 uuid 分支提前吃掉 —— 而且这几个首字母都不是十六进制，
+    //    真正危险的是 `claims` 与 `capabilities` 同首字母 `c` 时容易顺手写歪。
+    //    `dispositions` 下同理：`claims`（字面量）排在 uuid 段之前。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    //    `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行，
+    //    症状是有人 GET /api/channel/logistics-tracking/exceptions/c 会拿到一个
+    //    「异常件 id 是 c」的请求打到后端，而不是被白名单当场 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-tracking/exceptions/{uuid}/rules`  —— 规则是**租户级**集合，不挂在某一件上
+    //   * `logistics-tracking/exceptions/{uuid}/scan`   —— 扫描是集合级动作，不对单件做
+    //   * `logistics-tracking/exceptions/{uuid}/events` —— 轨迹事件归 10.3.1.1，不在这里
+    //   * `logistics-tracking/dispositions/{uuid}/claims` —— 单据挂在**异常件**上，不挂在处置记录上
+    //   * `logistics-tracking/exceptions/{uuid}/downstream-tasks`
+    //     —— 下游待通知任务在异常件详情里，没有第二个形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-tracking\/(?:exceptions(?:\/capabilities|\/overview|\/rules|\/scan|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/dispositions|\/claims)?)?|dispositions(?:\/claims(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 10.1.1.3 时效与限制（**本条目是新增一条 services[] 元素**，不是往既有 channel
     // 分支的 alternation 里并）。插入锚点与 10.1.1.2 同款：固定在 `prefix: 'trade/'`
     // 之前，纯增量，不重排既有条目与 import。
