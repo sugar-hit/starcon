@@ -4283,6 +4283,66 @@ const services: readonly {
       /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 10.4.2.2 备货预报（channel 服务，卷 10「物流与货运」的 L3 锚点 10.4.2）。
+    //
+    // 蓝图：「向海外仓/平台仓提交备货计划：SKU 与数量、目的仓、期望到货时间、平台货件编号，
+    // 接收仓端接收与拒收反馈。」加粗句：「**平台仓备货有严格规格**（箱型、贴标、托盘、混装限制），
+    // 规格不符会被拒收造成额外成本与延误。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 16.2.2.1 的 `compliance-precheck` 元素之后、10.7.1.3 的 `return-disposals`
+    // 元素之前 —— 与另外三条车道（catalog 调价单 / catalog 价格历史 / trade 采购计划）的
+    // 插入点互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `stock-forecasts` 这个独立前缀：
+    //   * 既有 10.4.2.1 海外仓连接走的是 `warehouse-providers`（服务商目录 / 连接 / 仓账户 /
+    //     库存同步 / 外部库存观测），本模块是**它的下游动作**（把货备到那个仓去），
+    //     两者语义不同、不共用端点、不共用表，必须分得开。
+    //   * 既有 `warehouse-providers` 元素的首 token 是 `warehouse-providers`，本元素的首 token
+    //     是 `stock-forecasts`，**首 token 不同就互不遮蔽**（既有正则都是锚定的 `/^token(...)?$/`）。
+    //   * 已用脚本逐条核对本文件里**全部**既有正则：`stock-forecasts/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   stock-forecasts                              集合读（GET，真分页 + 真筛选 + 真排序）/ 建预报单（POST）
+    //   stock-forecasts/capabilities                 能力声明（未接通维度 available=false + ownerModule + impact）
+    //   stock-forecasts/accounts                     目的仓下拉项（10.4.2.1 的仓账户，同库同服务）
+    //   stock-forecasts/specs                        备货规格集合读（GET）/ 新建规格版本（POST）
+    //   stock-forecasts/specs/{uuid}/retire          停用一版规格（POST）
+    //   stock-forecasts/{uuid}                       预报单详情（GET）
+    //   stock-forecasts/{uuid}/lines                 替换明细（PUT，**只在草稿态允许**）
+    //   stock-forecasts/{uuid}/spec-check            规格校验结果（GET，只读不改状态）
+    //   stock-forecasts/{uuid}/validate              过规格闸（POST；规格不过 ⇒ 422 + violations 数组）
+    //   stock-forecasts/{uuid}/submit                提交预报 → 生成平台货件创建任务（POST）
+    //   stock-forecasts/{uuid}/cancel                作废预报单（POST）
+    //   stock-forecasts/{uuid}/availability          备货可用性（GET，自营可售量 + 头程在途，只读 Port）
+    //   stock-forecasts/{uuid}/shipment-task         平台货件创建任务（GET）
+    //   stock-forecasts/{uuid}/shipment-task/dispatch 推进货件任务（POST；服务商侧失败 ⇒ 502 + 任务体）
+    //   stock-forecasts/{uuid}/shipment-task/retry   重试失败的货件任务（POST）
+    //   stock-forecasts/{uuid}/shipment-reports      平台货件报送行（GET 集合读 / POST 登记）
+    //   stock-forecasts/{uuid}/receipts              仓端接收/拒收回执（GET 集合读 / POST 登记）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / accounts / specs）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `stock-forecasts/{uuid}/delete` —— 预报单靠状态机收口（作废），不靠物理删除；
+    //     仓端回执是 append-only 的凭据，更不能删。
+    //   * `stock-forecasts/{uuid}/shipment-task/{任意动作}` —— {uuid} 之下只认
+    //     dispatch 与 retry 两个动作；多放一层会让一个还不存在的动作看起来像已交付。
+    //   * `stock-forecasts/{uuid}/receipts/{任意}` —— 回执按预报单寻址，没有单条回执端点。
+    //   * `stock-forecasts/{uuid}/platform-shipment` —— 平台货件接口直连**未接通**
+    //     （本仓库没有真实平台账号与网络出口），放行它只会让界面以为已交付。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^stock-forecasts(?:\/capabilities|\/accounts|\/specs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/retire)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|spec-check|validate|submit|cancel|availability|shipment-task(?:\/(?:dispatch|retry))?|shipment-reports|receipts))?)?$/,
+  },
+  {
     // 10.7.1.3 弃置与销毁（channel 服务，卷 10「物流与货运」的 L3 锚点 10.7.1）。
     //
     // 蓝图：「管理弃置与销毁：无销售价值/品牌方要求/法规不允许再销售的退货，处理销毁、
