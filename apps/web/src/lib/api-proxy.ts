@@ -4648,6 +4648,64 @@ const services: readonly {
     pattern:
       /^batch-price-adjustments(?:\/(?:capabilities|sites|preview)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
   },
+  {
+    // 5.4.1.1 调价单（catalog 服务，卷 05 定价与价目的 L3 锚点 5.4.1）。
+    //
+    // 蓝图：「**职责**：发起价格变更：选择 SKU 与目标店铺、输入新旧价、说明原因、提交审批（若启用）；
+    // 记录变更前后值。**输入**：调价请求；`expected_version`；审批要求（17 组织的审批规则）。
+    // **输出**：调价单（草稿/待审/已批/已执行/已驳回）；生效后触发平台回写。
+    // **关系**：上游 = 5.3.1.1、5.3.2.2；下游 = 5.4.2.1、17 审批。**调价是受控动作**：
+    // 大额或大幅调价走审批，普通调整可配置免审。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.4.1.2 批量调价」元素之后、数组结尾的 `];` 之前（数组最末尾），
+    // 与同批另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `price-adjustments` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `price-adjustments`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`price-adjustments/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.4.1.1 调价单与 5.4.1.2 批量调价共用 L3 锚点 5.4.1，但**不共用端点**：
+    //     一张单与一批批量的生命周期、审批口径、版本闸都不一样。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-adjustments                        集合读（GET 台账）/ 建单（POST，草稿）
+    //   price-adjustments/capabilities           能力声明（listing 的定义 / 当前价来源 / 审批口径 / 状态机 / 版本闸 / 舍入）
+    //   price-adjustments/current-price          当前价解析（GET；取不到时后端返回 price=null 而不是 0）
+    //   price-adjustments/writebacks             待回写事实（GET，真分页 + 真筛选）—— 给下游 5.4.2.1
+    //   price-adjustments/writebacks/{uuid}/ack  待回写事实的回执（POST，由下游 5.4.2.1 调用）
+    //   price-adjustments/{uuid}                 单张调价单（GET 详情；读详情会顺带拉一次审批状态）
+    //   price-adjustments/{uuid}/submit          提交（草稿 → 待审 / 已批）
+    //   price-adjustments/{uuid}/execute         执行（已批 → 已执行，并产出待回写事实）
+    //   price-adjustments/{uuid}/reject          驳回（草稿 / 待审 → 已驳回）
+    //   price-adjustments/{uuid}/approval/refresh 刷新审批状态（拉取式同步 17 组织的审批结论）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / current-price / writebacks）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ `writebacks/{uuid}/ack` 的 uuid 段**必须**在 `ack` 之前，且 `ack` 是**唯一**允许的后缀 ——
+    //    `writebacks/{uuid}`（没有 ack）这个形状后端**不存在**，放行它会让界面以为能查单条回写。
+    // ⚠️ 外层分组**带 `?`**：本模块**有**裸集合路径（GET 列表 / POST 建单），所以裸路径要放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `price-adjustments/{uuid}/sync` —— 5.4.2.1 平台价格同步**未交付**，
+    //     本模块只产出「待回写」事实，不代它开形状（那会把「已回写平台」这个动作凭空放出来）。
+    //   * `price-adjustments/{uuid}/approve` —— 审批结论由 17 组织那边的人做出，
+    //     本模块**没有**「本地批准」端点：凭空放行它等于把审批流本地化，
+    //     而 identity 那边会什么都不知道（那边还有一条永远没人管的待办）。
+    //   * `price-adjustments/{uuid}/export` —— 本模块**不导出 CSV**（蓝图的输出是调价单，
+    //     不是导出件）；放行它只会让界面以为有下载按钮。
+    //   * `price-adjustments/rules` —— 5.3.2.2 价格规则的端点不是本模块的形状。
+    //   * `price-adjustments/approval-rules` —— 审批规则**归 17 组织**（identity 的
+    //     `/identity/approval-rules/**`），本模块只做**求值**，不代它开配置形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-adjustments(?:\/(?:capabilities|current-price|writebacks)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|execute|reject|approval\/refresh))?)?$/,
+  },
 ];
 
 function resolve(path: string) {
