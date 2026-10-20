@@ -11,8 +11,11 @@ import { ListingClaimWorkspace } from '@/components/listing-claim/listing-claim-
  *   <li><b>4.4.2.1 商品认领</b> —— 把已在 A 店铺的 listing 认领到 B 店铺，复用原商品内容与映射，
  *       生成 B 店铺的新 listing 草稿 + 待发布任务。<strong>已交付</strong>，就是本页。
  *   <li><b>4.4.2.2 批量搬迁</b> —— 批量把一批 listing 从一个店铺搬到多个店铺，并对重复铺货风险
- *       给出提示。<strong>尚未开发</strong>；本页的「标题逐字沿用」会提示重复铺货风险，
- *       但标题差异化本身是 4.4.2.2 的职责，这里只提示、不代改。
+ *       给出提示。<strong>已交付</strong>，在 <code>/listings/migrations</code>：
+ *       搬迁时**自动做标题差异化**并逐条留痕（原标题 vs 差异化后的标题 + 依据的规则），
+ *       重复度分值由标题 / 类目 / 属性三轴相似度算出并附判定依据。
+ *       本页的「标题逐字沿用」仍只**提示**风险、不代改 —— 单条认领不代改标题，
+ *       差异化是批量搬迁那一步的职责。
  * </ul>
  *
  * <p>与 `/listings/publish`（4.3.1.2 批量发布）各挂一个工作区是同一手法：认领产出的是

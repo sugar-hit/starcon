@@ -320,6 +320,33 @@ const services: readonly {
       /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|attributes(?:\/(?:overview|category-rules|options(?:\/(?:lifecycle|order))?|[0-9a-f-]+(?:\/(?:options|category-rules))?))?|brands(?:\/(?:overview|candidates|listing-eligibility|[0-9a-f-]+(?:\/(?:listing-eligibility|enabled|authorizations(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|parties(?:\/(?:overview|candidates|[0-9a-f-]+(?:\/(?:status|roles(?:\/[0-9a-f-]+)?|role-profiles|(?:supplier|customer|carrier)-profile|addresses(?:\/(?:defaults|candidates|[0-9a-f-]+(?:\/(?:usages|default|versions(?:\/[0-9]+)?))?))?|contacts(?:\/(?:default|candidates|[0-9a-f-]+(?:\/primary)?))?))?))?|categories(?:\/(?:overview|trees(?:\/[0-9a-f-]+(?:\/nodes)?)?|nodes\/[0-9a-f-]+(?:\/(?:move|enabled))?|spus\/[0-9a-f-]+|attribute-requirements(?:\/overview|\/[0-9a-f-]+(?:\/[0-9a-f-]+(?:\/enabled)?|\/(?:effective|entry-form-schema|validate))?)))|category-mappings(?:\/(?:overview|platform-sites|attribute-options|resolve|[0-9a-f-]+(?:\/(?:default|enabled|attributes(?:\/[0-9a-f-]+(?:\/enabled)?)?))?))?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|media(?:\/(?:overview|verify-sweep|references|tags|processing(?:\/(?:overview|recipes(?:\/[0-9a-f-]+(?:\/enabled)?)?|jobs(?:\/[0-9a-f-]+(?:\/(?:items|cancel))?)?|assets\/[0-9a-f-]+\/history)?)?)|[0-9a-f-]+(?:\/(?:versions|references(?:\/[0-9a-f-]+)?|integrity-checks|enabled))?|tags\/[0-9a-f-]+(?:\/enabled)?)?|skus(?:\/(?:capabilities|batch|export))?|unit-groups(?:\/(?:overview|convert|[0-9a-f-]+(?:\/(?:enabled|conversions(?:\/[0-9a-f-]+)?))?))?|unit-conversion(?:\/(?:units(?:\/[0-9a-f-]+)?|overview|skus\/[0-9a-f-]+(?:\/conversions)?|convert|snapshots))?|spec-axis(?:\/(?:overview|axes(?:\/[0-9a-f-]+(?:\/options)?)?|spus\/[0-9a-f-]+(?:\/axes(?:\/[0-9a-f-]+)?)?|category-rules))?|variant-combination(?:\/(?:overview|spus\/[0-9a-f-]+(?:\/(?:combinations|check|drafts(?:\/[0-9a-f-]+)?))?))?|sku-attribute-override\/skus\/[0-9a-f-]+(?:\/attribute-overrides\/[0-9a-f-]+(?:\/clear)?)?|titles(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|keywords(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|generations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/skus)?)?|records(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:select|deselect|reject))?)?))?|descriptions(?:\/(?:overview|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|translation-coveragetranslations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|phrases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:skus|missing-variables))?)?|translations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|sections(?:\/export)?))?|bundles(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|components|component-check))?)?|components(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?|bundle-skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|boms(?:\/(?:overview|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|effective|versions))?))?|bom-versions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:publish|close|copy|components|requirement))?)?|bom-components\/usage|bom-explosions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)?|import-field-mappings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|import-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:mapping|prevalidate|execute|cancel|rows|errors|report(?:\/(?:issues|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/file)?))?))?)?|supplier-quotes(?:\/(?:overview|options|effective(?:\/resolve)?|[0-9a-f-]+(?:\/tiers)?))?|role-profiles(?:\/(?:overview|options))?|translations(?:\/(?:overview|locales(?:\/(?:requirements|sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?))?|spus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/entries)?|entries(?:\/export|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|coverage|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adopt|reject))?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))|duplicate-scans(?:\/(?:overview|[0-9a-f-]+(?:\/candidates)?)?)?|duplicate-candidates\/[0-9a-f-]+(?:\/(?:decision|merge-preview|merge)?)?|export-sources|export-jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:file|cancel))?)?|zombie-candidates(?:\/(?:overview|options|rules(?:\/[A-Za-z0-9_]+)?|evidence|reference-stats|deactivate|records|deactivation-targets))?|completeness(?:\/(?:overview|options|gaps(?:\/summary)?|evaluations(?:\/[0-9a-f-]+)?|precheck\/(?:listing|customs)|customs\/skus\/[0-9a-f-]+|certifications\/skus\/[0-9a-f-]+(?:\/[0-9a-f-]+)?|(?:SPU|SKU)\/[0-9a-f-]+))?|customs-attributes(?:\/profiles|\/skus\/[0-9a-f-]+(?:\/(?:submit|review))?|\/declaration-ready)|sku-merges(?:\/overview|\/by-candidate\/[0-9a-f-]+|\/by-sku\/[0-9a-f-]+|\/[0-9a-f-]+)?|description-templates(?:\/(?:overview|options|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:enabled|sections))?)?|renders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?|kb(?:\/(?:overview|options|entries(?:\/[0-9a-f-]+(?:\/(?:enabled|translations(?:\/[0-9a-f-]+)?|translation-coverage|rule-bindings(?:\/[0-9a-f-]+)?|usages))?)?|translations\/[0-9a-f-]+|rule-versions(?:\/[0-9a-f-]+)?|review-tasks(?:\/[0-9a-f-]+)?|usages|hit-rates))?|customs-destination-versions(?:\/effective|\/requirements|\/skus\/[0-9a-f-]+|\/[0-9a-f-]+\/publish)|customs-declaration\/resolve|supply\/vendors(?:\/(?:options|overview)|\/[0-9a-f-]+(?:\/(?:profile|panorama|purchase-history|quotes|settlement-terms|deliveries(?:\/[0-9a-f-]+\/void)?|quality-inspections(?:\/[0-9a-f-]+\/void)?|qualifications(?:\/[0-9a-f-]+)?))?)?)$/,
   },
   {
+    // 5.2.1.1 成本构成：SKU 的单位成本构成（分项 + 合计 + 生效时间）与成本变动历史。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   sku-cost-compositions                                 构成台账（集合读；筛选/分页在服务端）
+    //   sku-cost-compositions/capabilities                    能力声明（五个分项的来源 + 三种成本法）
+    //   sku-cost-compositions/{skuId}                         构成明细（GET）+ 保存构成（PUT）
+    //   sku-cost-compositions/{skuId}/adjustments             追加手工调整项（POST）
+    //   sku-cost-compositions/{skuId}/adjustments/{id}/void   作废调整项（POST，要理由）
+    //   sku-cost-compositions/{skuId}/revisions               成本变动历史（只读）
+    //
+    // 🔴 `capabilities` 与 `adjustments` 的首字母都落在 [0-9a-f] 里，
+    // 所以字面量子路径必须排在 uuid 分支**之前**判别，否则它们会被当成
+    // 「id=capabilities 的那个 SKU」拼出去（这是本仓反复踩过的坑）。
+    //
+    // 🔴 刻意**不**放行：到岸成本（5.2.1.2）与成本分摊（5.2.1.3）尚未交付 ——
+    // 那两个模块共用页面路由 /pricing/cost，但端点各自独立。
+    // 放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `sku-cost-compositions`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^sku-cost-compositions(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|revisions))?)?$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
@@ -831,6 +858,103 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 10.3.1.1 轨迹查询（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.1.1.2 `logistics-channels` 那条**之后**、10.1.1.3
+    // `logistics-transit-limits` 那条**之前** —— 三个锚点被既有条目隔开，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-tracking/capabilities      能力声明（未交付段 available=false）
+    //   logistics-tracking/overview          全量概览（不受筛选与分页影响）
+    //   logistics-tracking/subjects          轨迹清单（GET，真分页 + 筛选）
+    //   logistics-tracking/subjects/sync     从上游同步运单集合（POST，唯一写入口之一）
+    //   logistics-tracking/subjects/{uuid}   单票轨迹时间线 + 时效对比（GET）
+    //   logistics-tracking/events            事件流（GET，真分页 + 筛选）/ 承运商推送（POST）
+    //   logistics-tracking/pull-tasks        拉取任务列表（GET）/ 建轮次（POST）
+    //   logistics-tracking/pull-tasks/{uuid} 拉取任务详情（含逐票结果，GET）
+    //
+    // ⚠️ **裸路径 `logistics-tracking` 不放行**：后端这一组端点**没有**裸集合读
+    // （不像 10.1.1.2 的 `logistics-channels` 那样有），契约里也不存在
+    // `/channel/logistics-tracking` 这一条。多放一段会让一个**还不存在**的路径
+    // 看起来像已交付 —— 界面点下去得到 404，而后端其实从来就没实现它。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / sync）**排在 uuid 段之前**。
+    // 写反的话 `s`(sync) 落在 `[0-9a-f]` 里会被 uuid 分支提前吃掉 —— 而
+    // `logistics-tracking/subjects/sync` 根本不是 uuid，正则会静默匹配失败，
+    // 或者更糟：拼出一个「id 是 sync 的轨迹主体」被凭空放行。
+    // 同理**裸 uuid 也不放行**：`logistics-tracking/subjects/{uuid}` 之外的
+    // `logistics-tracking/{uuid}` 不是任何端点。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    //    `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行，
+    //    症状是有人 GET /api/channel/logistics-tracking/c 会拿到一个「主体 id 是 c」
+    //    的请求打到后端，而不是被白名单当场 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-tracking/subjects/{uuid}/events` —— 时间线就在详情里，没有第二个形状
+    //   * `logistics-tracking/events/{uuid}`             —— 事件按事件 ID 定位，不按 id
+    //   * `logistics-tracking/pull-tasks/{uuid}/items`   —— 逐票结果在任务详情里
+    //   * `logistics-tracking/exceptions` / `/dispositions`
+    //     —— 异常**处置**归 10.3.1.2（未交付），本页只标记异常节点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-tracking\/(?:capabilities|overview|events|pull\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|subjects(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
+    // 10.3.1.2 异常件（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.3.1.1 `logistics-tracking` 那条**之后**、10.1.1.3
+    // `logistics-transit-limits` 那条**之前** —— 另外三条车道的锚点
+    // （10.3.2.2 / 10.6.2.1 / 10.7.1.2）都落在别处，四个锚点互不重叠，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-tracking/exceptions                     异常件清单（GET，真分页 + 筛选）/ 登记（POST）
+    //   logistics-tracking/exceptions/capabilities         能力声明（未交付段 available=false + ownerModule）
+    //   logistics-tracking/exceptions/overview             全量概览（不受筛选与分页影响）
+    //   logistics-tracking/exceptions/rules                异常识别规则（GET 清单 / POST 登记）
+    //   logistics-tracking/exceptions/scan                 按规则扫描建件（POST，幂等）
+    //   logistics-tracking/exceptions/{uuid}              异常件详情（GET）
+    //   logistics-tracking/exceptions/{uuid}/dispositions  该件的处置记录（GET 列表 / POST 追加）
+    //   logistics-tracking/exceptions/{uuid}/claims       该件的单据（GET 列表 / POST 发起）
+    //   logistics-tracking/dispositions                   全量处置记录（GET，真分页 + 筛选）
+    //   logistics-tracking/dispositions/{uuid}            处置记录详情（GET）
+    //   logistics-tracking/dispositions/claims             全量理赔 / 补发单（GET）
+    //   logistics-tracking/dispositions/claims/{uuid}      单据详情（GET）
+    //
+    // ⚠️ **裸路径 `logistics-tracking` 仍不放行**：10.3.1.1 的那条元素已明确说明
+    //    后端**没有**裸集合读，本模块也不新增一个（异常件清单在 `/exceptions`）。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / rules / scan）**排在 uuid 段之前**。
+    //    写反的话 `s`(scan) / `r`(rules) / `c`(capabilities) / `o`(overview) 落在
+    //    [0-9a-f] 里会被 uuid 分支提前吃掉 —— 而且这几个首字母都不是十六进制，
+    //    真正危险的是 `claims` 与 `capabilities` 同首字母 `c` 时容易顺手写歪。
+    //    `dispositions` 下同理：`claims`（字面量）排在 uuid 段之前。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    //    `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行，
+    //    症状是有人 GET /api/channel/logistics-tracking/exceptions/c 会拿到一个
+    //    「异常件 id 是 c」的请求打到后端，而不是被白名单当场 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-tracking/exceptions/{uuid}/rules`  —— 规则是**租户级**集合，不挂在某一件上
+    //   * `logistics-tracking/exceptions/{uuid}/scan`   —— 扫描是集合级动作，不对单件做
+    //   * `logistics-tracking/exceptions/{uuid}/events` —— 轨迹事件归 10.3.1.1，不在这里
+    //   * `logistics-tracking/dispositions/{uuid}/claims` —— 单据挂在**异常件**上，不挂在处置记录上
+    //   * `logistics-tracking/exceptions/{uuid}/downstream-tasks`
+    //     —— 下游待通知任务在异常件详情里，没有第二个形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-tracking\/(?:exceptions(?:\/capabilities|\/overview|\/rules|\/scan|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/dispositions|\/claims)?)?|dispositions(?:\/claims(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 10.1.1.3 时效与限制（**本条目是新增一条 services[] 元素**，不是往既有 channel
     // 分支的 alternation 里并）。插入锚点与 10.1.1.2 同款：固定在 `prefix: 'trade/'`
     // 之前，纯增量，不重排既有条目与 import。
@@ -863,6 +987,134 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^logistics\-transit\-limits(?:\/(?:capabilities|overview|precheck|estimate|transit-rules|size-limits|markings|(?:transit-rules|size-limits|markings)\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
+    // 10.3.2.2 揽收与签收确认（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.1.1.3 `logistics-transit-limits` 那条**之后**、10.7.1.1
+    // `return-dispositions` 那条**之前** —— 与另外三条车道（10.3.1.2 / 10.6.2.1 / 10.7.1.2）
+    // 的锚点互不重叠，git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-pickup-signoff/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   logistics-pickup-signoff/overview            全量概览（不受筛选与分页影响）
+    //   logistics-pickup-signoff/cases               确认单清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/cases/sync          从交运批次同步确认单（POST，幂等投影）
+    //   logistics-pickup-signoff/cases/{uuid}        确认单详情（GET，含时间线 / 提醒 / 待通知）
+    //   logistics-pickup-signoff/cases/{uuid}/attest 人工确认揽收 / 签收（POST）
+    //   logistics-pickup-signoff/reconcile           巡检（POST）：推进状态 + 判超时 + 生成提醒
+    //   logistics-pickup-signoff/reminders           提醒任务清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/reminders/{uuid}/acknowledge 认领提醒（POST）
+    //   logistics-pickup-signoff/reminders/{uuid}/resolve    处置提醒（POST）
+    //   logistics-pickup-signoff/notifications       下游待通知清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/notifications/{uuid}/consume 登记下游消费结果（POST）
+    //   logistics-pickup-signoff/events              确认事件流（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/sla-rules           时限规则清单（GET）/ 登记或改（POST）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `logistics-pickup-signoff` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `logistics-pickup-signoff/cases/{uuid}/events` —— 确认时间线就在详情里，没有第二个形状
+    //   * `logistics-pickup-signoff/cases/{uuid}/reminders` —— 提醒按确认单聚合在详情里
+    //   * `logistics-pickup-signoff/sla-rules/{uuid}` —— 规则按承运商 + 渠道定位，不按 id
+    //   * `logistics-pickup-signoff/notifications/{uuid}/retry`
+    //     —— 下游消费由下游自己重试，本模块只登记结果
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处），不是 `[0-9a-f-]+`：
+    //    后者把单字符 `e` 当合法 id，症状是有人 GET .../cases/e 会打到后端。
+    // ⚠️ 字面量子路径（capabilities / overview / cases / reconcile / reminders /
+    //    notifications / events / sla-rules）**排在 uuid 段之前**判别：写反的话
+    //    `cases` 里的 `c`、`events` 里的 `e` 落在 [0-9a-f] 里会被 uuid 分支提前吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-pickup\-signoff(?:\/(?:capabilities|overview|cases|reconcile|reminders|notifications|events|sla-rules)|\/cases\/(?:sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})(?:\/attest)?|\/reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve)|\/notifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/consume)$/,
+  },
+  {
+    // 10.7.1.1 退货接收与处置决策（**本条目是新增一条 services[] 元素**，不是往既有
+    // channel 分支的 alternation 里并）。插入锚点固定在本文件里
+    // `logistics-transit-limits/`（10.1.1.3）那条**之后**、`freight/`（10.1.2.1）
+    // 那条**之前** —— 两条既有条目把本车道的插入点夹在中间，与其他车道两两被隔开，
+    // git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-dispositions/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   return-dispositions/overview                全量概览（不受筛选与分页影响）
+    //   return-dispositions/registrations           接收登记集合读（GET，真分页 + 筛选）/ 登记（POST）
+    //   return-dispositions/registrations/{uuid}    接收登记详情（GET，含决策与留痕）
+    //   return-dispositions/restrictions            再销售限制集合读（GET）/ 登记（POST）
+    //   return-dispositions/restrictions/{uuid}/revoke 撤销再销售限制（POST）
+    //   return-dispositions/eligibility             🔴 可行性判定（GET，只读无副作用）
+    //   return-dispositions/decisions               处置决策集合读（GET）/ 记录决策（POST）
+    //   return-dispositions/decisions/{uuid}        处置决策详情（GET）
+    //   return-dispositions/orders                  处置单集合读（GET）/ 下发处置单（POST）
+    //   return-dispositions/orders/{uuid}           处置单详情（GET，含成本明细与库存指令）
+    //   return-dispositions/orders/{uuid}/costs     追加处置成本（POST）
+    //   return-dispositions/orders/{uuid}/cancel    撤销处置单（POST）
+    //   return-dispositions/events                  留痕集合读（GET，真分页 + 筛选）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / overview / registrations /
+    // restrictions / eligibility / decisions / orders / events）排在 uuid 分支之前。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    // `[0-9a-f-]+`：后者把单字符 `e` 当合法 id，症状是有人 GET .../orders/e 会打到后端。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-dispositions` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `return-dispositions/decisions/{uuid}/consume` —— 决策只能被下发处置单消费，
+    //     没有独立消费端点
+    //   * `return-dispositions/orders/{uuid}/instructions` —— 库存状态变更指令是**只出
+    //     不消费**的事实，消费方 7.4.1.1 调整单管理未交付，放行它只会让人以为本页
+    //     能确认指令已被 7 库存执行
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-dispositions(?:\/(?:capabilities|overview|registrations|restrictions|eligibility|decisions|orders|events)|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/restrictions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke|\/decisions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/costs|\/cancel)?)$/,
+  },
+  {
+    // 10.6.2.1 时效分析（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.7.1.1 `return-dispositions` 那条**之后**、10.1.2.1 `freight/`
+    // 那条**之前** —— 与另外三条车道的锚点两两被既有条目隔开，git 能干净求并。
+    // 既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-timeliness/capabilities            能力声明（未交付段 available=false）
+    //   logistics-timeliness/overview                全量概览（不受筛选与分页影响）
+    //   logistics-timeliness/reports/matrix          🔴 渠道 × 国家交叉报表（GET，真分页 + 筛选）
+    //   logistics-timeliness/reports/monthly         月度趋势 / 旺季变化（GET）
+    //   logistics-timeliness/reports/anomalies       异常集中分析（GET，帕累托）
+    //   logistics-timeliness/reports/scores          渠道时效评分（GET，实时计算）
+    //   logistics-timeliness/reports/score-snapshots  评分台账（GET，真分页）/ 重算落库（POST）
+    //   logistics-timeliness/subjects                逐票时效明细（GET，真分页 + 筛选）
+    //
+    // ⚠️ **裸路径 `logistics-timeliness` 不放行**：后端这一组端点**没有**裸集合读
+    // （本模块是报表模块，一切入口都带子路径），契约里也不存在
+    // `/channel/logistics-timeliness` 这一条。多放一段会让一个**还不存在**的路径
+    // 看起来像已交付 —— 界面点下去得到 404，而后端其实从来就没实现它。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / reports / subjects）
+    // **排在各自的子路径之前**。
+    //
+    // ⚠️ **本条目一段 uuid 都没有**：本模块的端点全是「集合读 + 明细读」，
+    // 没有一条是按 uuid 定位单个资源（明细是「窗口 + 筛选 + 分页」，
+    // 不是 `logistics-timeliness/subjects/{uuid}`）。所以这里**没有** uuid 段，
+    // 也就没有「单字符 e 被当 uuid 放行」那类坑 —— 少一段正则胜过写一段防错。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-timeliness/subjects/{uuid}` —— 明细按窗口 + 筛选 + 分页取，没有单票形状
+    //   * `logistics-timeliness/reports/{anything}` —— reports 下只有上面列出的五个子路径
+    //   * `logistics-timeliness/snapshots` —— 评分台账的路径是 reports/score-snapshots
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-timeliness\/(?:capabilities|overview|subjects|reports\/(?:matrix|monthly|anomalies|scores|score\-snapshots))$/,
   },
   {
     // 10.1.2.1 运费计算器（**本条目是新增一条 services[] 元素**，与 10.1.1.2 渠道配置
@@ -939,6 +1191,50 @@ const services: readonly {
       /^rate\-comparison(?:\/(?:capabilities|compare|comparisons|ratings|shop\-priorities)|\/comparisons\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 10.7.1.2 退运回国（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有的 `rate-comparison/`（10.1.2.2）、`label-templates`（10.2.2.2）、`freight/`
+    // （10.1.2.1）、`logistics-transit-limits/`（10.1.1.3）、`logistics-channels/`
+    // （10.1.1.2）**一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段
+    // 超长单行正则，往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会
+    // 自愈。插入锚点固定在本文件里 `rate-comparison/`（10.1.2.2）那条**之后**、
+    // `14.1.2.2 广告类型差异` 那条**之前** —— 四个车道的插入点两两被既有条目隔开。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-shipbacks/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   return-shipbacks/overview                全量概览（不受筛选与分页影响）
+    //   return-shipbacks/candidates              待退运清单（只取 10.7.1.1 决策为「退运回国」的处置单）
+    //   return-shipbacks/consignments            退运单集合读（GET，真分页 + 筛选）/ 建退运单（POST，**合单**）
+    //   return-shipbacks/consignments/{uuid}     退运单详情（GET，含明细行 / 报关 / 成本 / 分摊 / 收货 / 分录）
+    //   return-shipbacks/consignments/{uuid}/lines     往既有退运单加一行（继续凑单，POST）
+    //   return-shipbacks/consignments/{uuid}/customs   登记报关资料（POST）
+    //   return-shipbacks/consignments/{uuid}/costs     登记成本并**立刻分摊**（POST）
+    //   return-shipbacks/consignments/{uuid}/allocations 成本分摊明细（GET，逐行权重 / 比例 / 尾差）
+    //   return-shipbacks/consignments/{uuid}/confirm   确认退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/dispatch  发出退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/arrival   登记回国收货（POST）
+    //   return-shipbacks/consignments/{uuid}/entries   登记重新入库 / 报废分录（POST）
+    //   return-shipbacks/consignments/{uuid}/close     关闭退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/cancel    取消退运单（POST）
+    //   return-shipbacks/events                 留痕集合读（GET，真分页 + 筛选）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / overview / candidates /
+    // consignments / events）排在 uuid 分支之前，否则会被 uuid 分支提前吃掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    // `[0-9a-f-]+`：后者把单字符 `e` 当合法 id，症状是有人 GET .../consignments/e 会打到后端。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-shipbacks` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `return-shipbacks/consignments/{uuid}/repatriation` —— 退运单本身就是退运，
+    //     没有「再退运一次」的子资源
+    //   * `return-shipbacks/consignments/{uuid}/costs/{uuid}` —— 成本没有独立删除端点
+    //     （成本只追加、错单靠退运单取消来纠正）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-shipbacks(?:\/(?:capabilities|overview|candidates|consignments|events)|\/consignments\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|customs|costs|allocations|confirm|dispatch|arrival|entries|close|cancel))?)$/,
+  },
+  {
     // 14.1.2.2 广告类型差异（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
     // 既有的 `rate-comparison/`（10.1.2.2）、`label-templates`（10.2.2.2）、`freight/`
     // （10.1.2.1）、`logistics-transit-limits/`（10.1.1.3）、`logistics-channels/`
@@ -1008,6 +1304,46 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
+  },
+  {
+    // 10.6.1.1 成本分析（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 10.2.2.2 `label-templates` 那条**之后**、2.5.2.1
+    // `writeback-batches` 那条**之前**：与本批另外三条车道的插入点被既有条目隔开，
+    // git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-cost-analysis/capabilities        能力声明（五个分量的来源 / 可得性）
+    //   logistics-cost-analysis/overview            成本报表（逐币种合计 + 覆盖说明）
+    //   logistics-cost-analysis/by-channel          各渠道成本对比
+    //   logistics-cost-analysis/over-cost-orders    超成本订单清单（真分页）
+    //   logistics-cost-analysis/allocation-rules    分摊规则版本列表 / POST 新建版本
+    //   logistics-cost-analysis/allocations         分摊单列表 / POST 发起分摊
+    //   logistics-cost-analysis/allocations/{uuid}  分摊单详情（头 + 逐行明细）
+    //   logistics-cost-analysis/allocations/{uuid}/lock  结账（锁定后不可再改）
+    //   logistics-cost-analysis/parameters          成本参数列表 / POST 维护 / DELETE {uuid}
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / by-channel /
+    //    over-cost-orders / allocation-rules / allocations / parameters）排在 uuid 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `p`（parameters 的首字母）当 id 吃掉，`.../parameters/p` 会被凭空放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    // ⚠️ **裸路径不放行**：后端没有 `GET /channel/logistics-cost-analysis` 这个映射，
+    //    放行它只会把「这里没有这个接口」从代理层的 404 推迟到后端的 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-cost-analysis/allocations/{uuid}/lines` —— 逐行明细随详情一起返回
+    //   * `logistics-cost-analysis/allocations/{uuid}/supersede` —— 取代是重算分摊的自然结果，
+    //     不另开一个动作端点（那会让「谁取代了谁」有两个入口）
+    //   * `logistics-cost-analysis/report` —— 报表就是 overview，不开别名
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-cost\-analysis\/(?:capabilities|overview|by\-channel|over\-cost\-orders|allocation\-rules|parameters(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|allocations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/lock)?)?)$/,
   },
   {
     // 2.5.2.1 常用回写操作（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
@@ -1083,6 +1419,42 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^listings(?:\/(?:batch\-tasks|batch|capabilities|filter\-options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
+  },
+  {
+    // 4.1.1.3 生命周期与下架（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.1.1.1 `listings` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listing-claims` / `listing-status-events` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-lifecycles                    生命周期列表（GET，真分页 + 七态/来源/店铺/平台/关键词筛选）
+    //   listing-lifecycles/capabilities       能力声明（未交付段 available=false + ownerModule）
+    //   listing-lifecycles/filter-options     筛选面板词表（不硬编码在前端）
+    //   listing-lifecycles/diff               🔴 平台下架 vs 内部下架的差异区（真分页）
+    //   listing-lifecycles/sync               🔴 批量同步：把还没联动过的平台事件应用到内部状态（POST）
+    //   listing-lifecycles/{uuid}             单个 listing 的生命周期视图（GET）
+    //   listing-lifecycles/{uuid}/timeline    🔴 状态变更时间线（GET，真分页 + 按来源筛）
+    //   listing-lifecycles/{uuid}/actions     🔴 人工动作：主动下架 / 重新上架 / 提交审核 / 标记封禁（POST）
+    //   listing-lifecycles/{uuid}/platform-status 🔴 平台状态被动同步（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / diff / sync）必须排在 uuid 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `d`（diff 的首字母）当 id 吃掉，`listing-lifecycles/d` 会被凭空放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-lifecycles/{uuid}/publish`  —— 发布流程归 4.3.1，本模块只管状态
+    //   * `listing-lifecycles/{uuid}/batch`     —— 批量生命周期动作归 4.1.1.1（见能力声明 ownerModule）
+    //   * `listing-lifecycles/{uuid}/appeal`    —— 被封禁的申诉工单归 4.3.2.2 / 16.2.1.2，未交付
+    //   * `listing-lifecycles/{uuid}/republish` —— 重新上架的平台回写归 4.3.1.2 / 4.3.2.2，未交付
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-lifecycles(?:\/(?:capabilities|filter\-options|diff|sync)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:timeline|actions|platform\-status))?)?$/,
   },
   {
     // 4.1.2.1 映射管理（channel 服务）。本条目是**新增一条 services[] 元素**，
@@ -1458,6 +1830,151 @@ const services: readonly {
       /^listing\-content\-writeback(?:\/capabilities|\/writebacks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:tasks|dispatch|retry|cancel))?)?|\/tasks\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:changes|report)|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/content\-history)$/,
   },
   {
+    // 4.2.1.1 刊登编辑器（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.4.2.1 `listing-claims` 元素**之前** —— 与其它车道
+    // （`listing-claims` 之后 / `crm/` 之前 / `services` 数组最末尾）都不重叠。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-editor` 这个独立前缀而不是 `listings/{id}/editor`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「编辑」本来就不是 listing 的一种状态 —— 草稿按 **平台 + 站点 + 语言** 存，
+    //   一条 listing 在不同语言下就是多份草稿，挂 listing 上会把这个维度压扁。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-editor/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   listing-editor/form-schema             🔴 动态表单契约（字段集由平台要求推导）
+    //   listing-editor/validate                字段级校验试算（不落库）
+    //   listing-editor/drafts                  草稿列表（GET）
+    //   listing-editor/drafts/{uuid}           单条草稿（GET）
+    //   listing-editor/drafts/{uuid}/submit    🔴 提交审核 = 入队（POST）
+    //   listing-editor/submissions             入队队列（GET）
+    //   listing-editor/source-product          源商品（03，只读）
+    //   listing-editor/media-assets            媒体库素材（03，只读）
+    //   listing-editor/drafts（POST）          保存草稿（同一形状两种方法）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / form-schema / validate / drafts / submissions /
+    //    source-product / media-assets）**排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-editor/drafts/{uuid}/publish`  —— 🔴 派发归 4.3.1.1，本模块只入队
+    //   * `listing-editor/drafts/{uuid}/dispatch` —— 同上
+    //   * `listing-editor/drafts/{uuid}/apply-template` —— 🔴 4.2.2.1 刊登模板未交付
+    //   * `listing-editor/drafts/{uuid}/delete`   —— 草稿是内容事实，不提供删除
+    //   * `listing-editor/templates`              —— 4.2.2.1 刊登模板未交付
+    //   * `listing-editor/listing/{uuid}`        —— 没有"按 listing 取编辑器"这个形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-editor(?:\/capabilities|\/form\-schema|\/validate|\/submissions|\/source\-product|\/media\-assets|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)?$/,
+  },
+  {
+    // 4.2.3.2 合规预检（违禁词/侵权）（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.2.1.1 `listing-editor` 元素**之后**、4.4.2.1 `listing-claims` 元素**之前**。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-compliance-precheck` 这个独立前缀：
+    //   * 它**不是** `compliance-precheck` —— 那是同批并行那条车道（16.2.2.1 合规体检报告，
+    //     合规域 D7）的前缀。两边名字几乎一样但**不共表、不共端点、不共页面**，
+    //     用错前缀会打到别人的端点上去。
+    //   * 它也**不是** `listings/{id}/compliance` —— `/channel/listings/{uuid}/...` 那一段
+    //     由 4.1.1.1 登记成「不放行」，在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，
+    //     而那份清单是别人的成果。而且「合规预检」不是 listing 的一种状态，
+    //     它是**发布前对一份草稿的一次扫描**（按 平台 + 站点 + 语言 分别存的那一份内容）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-compliance-precheck/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   listing-compliance-precheck/filter-options           筛选项词表
+    //   listing-compliance-precheck/drafts                   可扫描的编辑器草稿（GET）
+    //   listing-compliance-precheck/drafts/{uuid}/publish-gate  🔴 服务端发布闸门（GET）
+    //   listing-compliance-precheck/scans                    触发扫描（POST）/ 扫描历史（GET）
+    //   listing-compliance-precheck/scans/{uuid}             单次扫描详情（GET）
+    //   listing-compliance-precheck/risks/decisions          风险批量处置（POST）
+    //   listing-compliance-precheck/words                    词库（GET）/ 新增词（POST）
+    //   listing-compliance-precheck/words/{uuid}             改词（PUT）/ 删词（DELETE）
+    //   listing-compliance-precheck/words/{uuid}/enabled     启停词（PUT）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / drafts / scans / risks / words）
+    //    **排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    //    `drafts/{uuid}/publish-gate` 这一支排在裸 `drafts/{uuid}` 段之前（首段是字面量 `drafts`，
+    //    与 uuid 段不会互相吃掉，但顺序保持「字面量在前」这一条文件的统一口径）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-compliance-precheck/drafts/{uuid}/publish`  —— 🔴 发布归 4.3.1.1，本模块只出闸门结论
+    //   * `listing-compliance-precheck/drafts/{uuid}/dispatch` —— 同上
+    //   * `listing-compliance-precheck/scans/{uuid}/publish`   —— 同上
+    //   * `listing-compliance-precheck/compliance-precheck`   —— 🔴 那是 16.2.2.1 的前缀，不属于本模块
+    //   * `listing-compliance-precheck/words/{uuid}/scan`     —— 扫描是针对草稿的，不是针对词的
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-compliance\-precheck(?:\/capabilities|\/filter\-options|\/risks\/decisions|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/publish\-gate)?|\/scans(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/words(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/enabled)?)?)$/,
+  },
+  {
+    // 4.5.2.1 跟卖监控（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 4.2.3.2 `listing-compliance-precheck` 那条**之后**、
+    // 4.4.2.1 `listing-claims` 那条**之前** —— 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-hijackers` 这个独立前缀：
+    //   * 跟卖在跨境电商语境里英文是 **hijacker**（抢listing的人），所以前缀是 `listing-hijackers`。
+    //   * 它**不是** `listing-claims`（4.4.2.1 商品认领，跨店搬家的 listing 草稿）——
+    //     那是"把 listing 搬走"，本模块是"盯着别人抢我的 listing"，两码事。
+    //   * 它**不是** `listing-compliance-precheck`（4.2.3.2 发布前的违禁词/侵权扫描）——
+    //     那是"扫内容"，本模块是"看价格"。
+    //   * 它**不是** `listing-keyword-rankings`（4.5.1.2 关键词排名，未交付）——
+    //     那是"看排名"，与跟卖价无关。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-hijackers/capabilities              能力声明（未交付段 available=false + ownerModule）
+    //   listing-hijackers/filter-options           筛选项词表
+    //   listing-hijackers/watches                   监控对象列表（GET）/ 新建监控对象（POST）
+    //   listing-hijackers/watches/{uuid}           改监控对象（PUT）/ 删除监控对象（DELETE）
+    //   listing-hijackers/records                   跟卖记录列表（GET）/ 接收跟卖信息（POST）
+    //   listing-hijackers/alerts                    预警记录列表（GET）
+    //   listing-hijackers/alerts/{uuid}/acknowledge 标记预警已阅（PUT）
+    //   listing-hijackers/comparison               价格对比视图（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / watches / records / alerts /
+    //    comparison）**排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    //    `alerts/{uuid}/acknowledge` 这一支排在裸 `alerts` 段之后 —— 首段是字面量 `alerts`，
+    //    与 uuid 段不会互相吃掉，但顺序保持「字面量在前」这一条文件的统一口径。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-hijackers/{uuid}/complaint`       —— 🔴 投诉/举报/申诉在**平台侧**完成，
+    //     本模块只负责发现与提醒，**没有**这些动作端点
+    //   * `listing-hijackers/{uuid}/report`          —— 同上
+    //   * `listing-hijackers/{uuid}/appeal`          —— 同上
+    //   * `listing-hijackers/notifications`          —— 🔴 1 工作台预警未交付（available=false）
+    //   * `listing-hijackers/brand-protection`        —— 🔴 16 合规品牌保护未交付（available=false）
+    //   * `listing-hijackers/crawlers`                —— 🔴 02 抓取调度器未交付（available=false）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-hijackers(?:\/capabilities|\/filter\-options|\/comparison|\/watches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/records|\/alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?)$/,
+  },
+  {
     // 4.4.2.1 商品认领（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -1499,6 +2016,457 @@ const services: readonly {
       /^listing\-claims(?:\/capabilities|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/claims|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.4.1.1 链接采集（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.2.1 `listing-claims` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-status-events` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-collects                    采集任务列表（GET，真分页 + 状态/来源筛选）/ 发起一次链接采集（POST）
+    //   listing-collects/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   listing-collects/{uuid}              采集任务详情（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-collects/{uuid}/draft`   —— 草稿随任务详情一起返回，不单开一条
+    //   * `listing-collects/{uuid}/retry`   —— 失败重试就是再发一次同一个 URL（后端自己去重）
+    //   * `listing-collects/{uuid}/claim`   —— 🔴 认领是 4.4.1.3 采集箱的职责，尚未交付
+    //   * `listing-collects/batch`          —— 🔴 批量/插件采集是 4.4.1.2 的职责，尚未交付
+    //   * `listing-collects/box`            —— 🔴 采集箱是 4.4.1.3 的职责，尚未交付
+    //   * `listing-collects/sources`        —— 白名单随能力声明一起返回，不单开一条
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern: /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 4.4.1.2 批量/插件采集（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.1 `listing-collects` 那一条**之后** ——
+    // 与本批另外三条车道的锚点互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-bulk-collects` 这个**独立前缀**而不是 `listing-collects/batch`：
+    //   4.4.1.1 的 `listing-collects` 元素刻意**没有**放行 `/batch`（那是本模块的职责）。
+    //   若把批量采集挂在它下面，就必须去改别人已交付的那一条元素 —— 那是别人的成果。
+    //   批量采集本来就不是「一次链接采集」的一种，它是一批 URL 的批量动作，
+    //   独立前缀更贴切（与 4.4.2.1 `listing-claims`、4.3.2.2 `listing-status-events` 同一手法）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-bulk-collects                     批量任务列表（GET，真分页 + 模式/状态/来源筛选）/ 发起批量采集（POST）
+    //   listing-bulk-collects/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   listing-bulk-collects/plugin-reports      浏览器插件上报入口（POST）
+    //   listing-bulk-collects/{uuid}              批量任务详情（GET）
+    //   listing-bulk-collects/{uuid}/results      结果清单（GET，真分页 + 状态筛选）
+    //   listing-bulk-collects/{uuid}/run          执行一次批量采集（POST）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / plugin-reports）必须排在 uuid 段**之前**，
+    //    否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-bulk-collects/box`             —— 🔴 采集箱是 4.4.1.3 的职责，尚未交付
+    //   * `listing-bulk-collects/{uuid}/claim`     —— 🔴 认领是 4.4.1.3 采集箱的职责，尚未交付
+    //   * `listing-bulk-collects/{uuid}/draft`    —— 草稿随结果清单一起返回，不单开一条
+    //   * `listing-bulk-collects/{uuid}/retry`    —— 继续采集就是再调一次 `/run`（服务端保留断点）
+    //   * `listing-bulk-collects/undeclared-action` —— 不存在的动作
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-bulk\-collects(?:\/capabilities|\/plugin\-reports|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run|\/results)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.2 `listing-bulk-collects` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`order-intercept` / `fulfillment/consolidation` /
+    // `listing-keyword-rankings` 之后）互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-collect-box` 这个**独立前缀**而不是 `listing-collects/box`：
+    //   4.4.1.1 的 `listing-collects` 元素刻意**没有**放行 `/box`（那是本模块的职责），
+    //   若把采集箱挂在它下面，就必须去改别人已交付的那一条元素 —— 那是别人的成果。
+    //   采集箱本来就不是「一次链接采集」的一种状态，是**一批草稿的暂存区**，
+    //   独立前缀更贴切（与 4.4.2.1 `listing-claims`、4.5.2.1 `listing-hijackers` 同一手法）。
+    //
+    // 🔴 首 token 与既有每一条都不同（既有：`listing-collects` / `listing-bulk-collects` /
+    //   `listing-keyword-rankings` / `listing-hijackers` / `listing-claims` /
+    //   `listing-compliance-precheck` / `listing-performance`），而白名单里的正则都是
+    //   **锚定**的（`/^token(...)?$/`）⇒ 首 token 不同 ⇒ 互不覆盖、互不吃掉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-collect-box/capabilities               能力声明（未交付段 available=false + ownerModule）
+    //   listing-collect-box/items                      采集箱条目（GET，真分页 + 筛选）/ 收录（POST）
+    //   listing-collect-box/items/{uuid}               单个条目详情（GET）
+    //   listing-collect-box/items/claim                批量认领（POST）
+    //   listing-collect-box/items/tags                 批量打标（POST）
+    //   listing-collect-box/items/remove               批量删除 / 移出采集箱（POST）
+    //   listing-collect-box/groups                     分组统计（GET）
+    //   listing-collect-box/candidates                 还没进箱的采集草稿（GET，真分页）
+    //   listing-collect-box/tags                       标签词表（GET / POST）/ 删标签（DELETE /{uuid}）
+    //   listing-collect-box/rules                      认领规则（GET / POST）/ 删规则（DELETE /{uuid}）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / groups / candidates / claim / tags / remove）
+    //    必须排在 uuid 段**之前**判别，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-collect-box/undeclared-action`      —— 不存在的动作
+    //   * `listing-collect-box/items/{uuid}/claim`      —— 认领是**批量**动作，勾选后一次提交
+    //   * `listing-collect-box/items/{uuid}/tags`       —— 打标同样是批量动作
+    //   * `listing-collect-box/items/{uuid}/remove`     —— 同上
+    //   * `listing-collect-box/items/{uuid}/draft`      —— 草稿内容随条目详情一起返回，不单开一条
+    //   * `listing-collect-box/claim`                   —— 认领走集合入口（/items/claim），不单开一条
+    //   * `listing-collect-box/box`                     —— 本模块自己的前缀，不该再套一层
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-collect\-box(?:\/capabilities|\/groups|\/candidates|\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/items(?:\/claim|\/tags|\/remove|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
+  },
+  {
+    // 4.3.2.2 平台状态回流（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-claims` 那一条**之后**（4.4.2.1 商品认领已交付），
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-status-events` 这个独立前缀而不是 `listings/{id}/status-events`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「平台状态回流」与「内容回写」是**两条独立通道**（一个把内部变更推出去、
+    //   一个把平台状态收回来），状态机、限流与重试互不干涉 —— 挂在 listing 上会让
+    //   "这个商品的状态"多出第九种含义。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-status-events                            ✗ 刻意**不放行**：本模块没有裸路径资源
+    //   listing-status-events/capabilities               能力声明（未交付段 available=false + ownerModule）
+    //   listing-status-events/events                     状态变更记录（GET 真分页）/ 接收一条平台事件（POST）
+    //   listing-status-events/events/{uuid}              单条状态变更记录（GET）
+    //   listing-status-events/queue                      需处理队列（GET 真分页 + 按驳回原因筛选）
+    //   listing-status-events/queue/{uuid}               单条队列项（GET）
+    //   listing-status-events/queue/{uuid}/acknowledge   人工确认（POST）
+    //   listing-status-events/queue/{uuid}/resolve       人工处理完成（POST）
+    //   listing-status-events/conflicts                  冲突与告警（GET 真分页）
+    //   listing-status-events/actions/republish          一键处理：按驳回原因批量修正重发（POST）
+    //   listing-status-events/listings/{uuid}/history     某个商品的状态变更记录（GET）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / events / queue / conflicts / actions/republish）
+    //    **排在** uuid 段之前，否则会被 uuid 段吃掉半截；`listings/{uuid}/history` 这一支的
+    //    首段是字面量 `listings`，与 uuid 段不会互相吃掉，但顺序保持"字面量在前"这一条文件的统一口径。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-status-events`                      —— 裸路径：本模块没有裸资源
+    //   * `listing-status-events/{uuid}`                —— 单条事件在 `events/{uuid}` 下，不在裸 uuid 下
+    //   * `listing-status-events/events/{uuid}/dispatch` —— 🔴 派发归 4.3.1.2 批量发布与 02 限流队列
+    //   * `listing-status-events/events/{uuid}/report`  —— 4.3.2.1 的任务回执形状在**它自己的**前缀下
+    //   * `listing-status-events/events/{uuid}/republish` —— 动作统一在 `actions/republish`，不按事件寻址
+    //   * `listing-status-events/queue/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-status-events/actions/publish`       —— 4.3.1.2 批量发布
+    //   * `listing-status-events/actions/preview`       —— 本模块没有"确认前先看看"这个状态
+    //   * `listing-status-events/lifecycle`             —— 4.1.1.3 生命周期与下架（未交付）
+    //   * `listing-status-events/publish-tasks`         —— 4.3.1.3 发布任务（未交付）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-status\-events(?:\/capabilities|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/conflicts|\/actions\/republish|\/listings\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/history)$/,
+  },
+  {
+    // 4.5.1.1 Listing 表现（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.3.2.2 `listing-status-events` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-claims` / `one-click-publish` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-performance` 这个独立前缀而不是 `listings/{id}/performance`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段路径登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「平台表现」与「平台状态回流」本来就是**两条独立通道**（一个把状态收回来、
+    //   一个把表现收回来），口径、限流与重试互不干涉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-performance                    表现快照列表（GET 真分页 + 商品/店铺/平台/时间范围筛选）
+    //                                          / 接收平台表现数据同步结果（POST，批次级幂等）
+    //   listing-performance/capabilities       能力声明（卷 13 / 卷 14 未交付 ⇒ available=false + ownerModule）
+    //   listing-performance/{uuid}             单个 listing 的表现明细（GET）+ 时间范围对比
+    //   listing-performance/{uuid}/trend       趋势序列（GET，日/周/月）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-performance/syncs`         —— 同步结果是入库回执，不单开一条查询形状
+    //   * `listing-performance/{uuid}/orders`  —— 🔴 内部订单是 09 的事实，本模块不跨服务读它
+    //   * `listing-performance/{uuid}/ads`     —— 🔴 14 广告关联投放（整卷未交付）
+    //   * `listing-performance/{uuid}/product` —— 🔴 13 产品表现下钻（整卷未交付）
+    //   * `listing-performance/{uuid}/sync`    —— 同步走 POST 集合入口，不按商品寻址
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-performance(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/trend)?)?$/,
+  },
+  {
+    // 4.5.1.2 关键词排名（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.5.1.1 `listing-performance` 那一条**之后** ——
+    // 与本批另外三条车道的锚点互不重叠，git 能干净求并。
+    //
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-keyword-rankings` 这个独立前缀而不是 `listings/{id}/keywords`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段路径登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「关键词排名」与「平台表现」「平台状态回流」本来就是**三条独立通道**
+    //   （一个把名次收回来、一个把表现收回来、一个把状态收回来），
+    //   口径、限流与重试互不干涉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-keyword-rankings                     关键词集合列表（GET 真分页）/ 新建关键词（POST）
+    //   listing-keyword-rankings/capabilities        能力声明（1 工作台 / 14 广告 / 02 抓取调度器未交付
+    //                                               ⇒ available=false + ownerModule）
+    //   listing-keyword-rankings/filter-options      筛选面板选项（平台 / 店铺 / 站点）
+    //   listing-keyword-rankings/crawls              接收排名抓取任务（POST，批次级幂等）
+    //   listing-keyword-rankings/alerts              变化预警列表（GET 真分页）
+    //   listing-keyword-rankings/alerts/{uuid}/acknowledge  人工确认一条预警（PUT）
+    //   listing-keyword-rankings/report              关键词维度报表（GET，真 SQL 聚合）
+    //   listing-keyword-rankings/{uuid}              单个关键词的排名明细（GET）/ 改阈值（PUT）/ 停用（DELETE）
+    //   listing-keyword-rankings/{uuid}/history      排名历史（GET，真分页）
+    //   listing-keyword-rankings/{uuid}/trend        趋势序列（GET，日/周/月）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / crawls / alerts）必须排在
+    //    {uuid} 段**之前**判别，否则会被 {uuid} 通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-keyword-rankings/undeclared-action` —— 本模块**确定没有**的动作
+    //   * `listing-keyword-rankings/{uuid}/crawls`      —— 抓取走集合入口，不按关键词寻址
+    //   * `listing-keyword-rankings/{uuid}/alerts`     —— 预警是集合查询，不按关键词寻址
+    //   * `listing-keyword-rankings/listing-hijackers` —— 🔴 4.5.2.1 跟卖监控（别的模块的职责）
+    //   * `listing-keyword-rankings/{uuid}/ads`        —— 🔴 14 广告关联投放（整卷未交付）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-keyword\-rankings(?:\/capabilities|\/filter\-options|\/crawls|\/report|\/alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/history|\/trend)?)?$/,
+  },
+  {
+    // 4.5.2.2 上新与变更监控（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-keyword-rankings`（4.5.1.2 关键词排名）那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listing-bulk-collects` / `order-intercept` /
+    // `fulfillment/consolidation`）两两相隔 ≥ 74 行，默认 3 行上下文窗口不会互相覆盖。
+    //
+    // 🔴 为什么用 `listing-changes` 这个独立前缀：
+    //   * 4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 登记成「不放行」，
+    //     在同一棵路径树上开子资源要同时改别人已交付的白名单与拒绝清单；
+    //   * 而且「竞品变更监控」是**对外部目标的观测**（目标身份 = 平台 + ASIN，
+    //     与自有商品模型零引用关系），口径、限流与权限都与「listing 本身」不同。
+    //
+    // 🔴 前缀不与既有任何 `listing-*` token 撞车：既有 token 全是
+    //     `listing-collects` / `listing-bulk-collects` / `listing-keyword-rankings` /
+    //     `listing-hijackers` / `listing-claims` / `listing-compliance-precheck` /
+    //     `listing-performance` / `listing-lifecycles` / `listing-mappings` /
+    //     `listing-migrations` / `listing-publish` / `listing-publish-tasks` /
+    //     `listing-status-events` / `listing-content-writeback` / `listing-details` /
+    //     `listing-editor` / `listing-templates`。
+    //     既有正则**都是锚定的**（`/^token(...)?$`），所以只要**首 token 不同**即可；
+    //     `listing-changes` 与上述任何一条的首 token 都不同（`changes` ≠ `collects` /
+    //     `hijackers` / `claims` / `performance` / …），既不会被既有分支吃掉，
+    //     也不会吃掉既有分支。
+    //
+    //   listing-changes/capabilities              能力声明（02 抓取调度器 / 13 分析 / 1 工作台
+    //                                             未交付 ⇒ available=false + ownerModule）
+    //   listing-changes/filter-options            筛选面板选项（平台 / 站点 / 枚举取值域）
+    //   listing-changes/watches                   监控对象列表（GET 真分页 + 真筛选）/ 新建（POST）
+    //   listing-changes/watches/{uuid}            改抓取频率与机会阈值（PUT）/ 删除（DELETE）
+    //   listing-changes/crawls                    接收抓取任务结果（POST，批次级幂等）/ 批次列表（GET）
+    //   listing-changes/events                    变更事件流（GET 真分页 + 真筛选）
+    //   listing-changes/opportunities             市场机会列表（GET 真分页）
+    //   listing-changes/opportunities/{uuid}/acknowledge  标记机会已阅（PUT）
+    //   listing-changes/watches/{uuid}/history    观测历史（GET 真分页，历史对比的事实源）
+    //   listing-changes/watches/{uuid}/comparison 历史对比（GET，服务端 SQL 聚合 + 现算比率）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-changes/undeclared-action`   —— 本模块**确定没有**的动作
+    //   * `listing-changes/{uuid}/crawls`        —— 抓取走集合入口，不按监控对象寻址
+    //   * `listing-changes/{uuid}/events`        —— 事件是集合查询，不按监控对象寻址
+    //   * `listing-changes/{uuid}/opportunities` —— 机会是集合查询，不按监控对象寻址
+    //   * `listing-changes/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-changes/actions/undercut`     —— 🔴 本模块**不提供**抢占 / 调价动作
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-changes(?:\/capabilities|\/filter\-options|\/crawls|\/events|\/opportunities(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|\/watches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:history|comparison))?)?)?$/,
+  },
+  {
+    // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'`（9.2.1.2 审单规则）那一条**之前** ——
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `listing-migrations` 这个独立前缀而不是 `listings/{id}/migrations`：
+    //   4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 那一段登记成「不放行」，
+    //   在同一棵路径树上开子资源要同时改它的白名单与拒绝清单，而那份清单是别人的成果。
+    //   而且「批量搬迁」是**一次批量操作**，不是某个商品的状态 —— 挂在 listing 上
+    //   会让"这个商品的状态"多出第八种含义。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-migrations                        搬迁历史（GET 真分页）/ 执行搬迁（POST）
+    //   listing-migrations/capabilities           能力声明（未交付段 available=false + ownerModule）
+    //   listing-migrations/filter-options         筛选面板选项（源店铺 + 真实类目）
+    //   listing-migrations/preview                预览：筛选命中什么 + 风险 + 标题差异化（POST，不写库）
+    //   listing-migrations/duplicate-risks        「重复铺货风险」查询（GET 真分页）
+    //   listing-migrations/migrated               「已搬迁」查询（GET 真分页）
+    //   listing-migrations/{uuid}                 单个批次详情（GET）
+    //   listing-migrations/{uuid}/items           批次的结果明细（含差异化留痕与风险依据）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / filter-options / preview / duplicate-risks / migrated）
+    //    **排在** uuid 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-migrations/{uuid}/publish`   —— 🔴 派发归 4.3.1.2 批量发布，本模块只入队
+    //   * `listing-migrations/{uuid}/dispatch`  —— 同上，平台限流与派发都在 4.3.1.2 那条通道
+    //   * `listing-migrations/{uuid}/re-run`    —— 幂等键变了就是**另一个批次**，没有"重跑"这个动作
+    //   * `listing-migrations/{uuid}/abort`     —— 搬迁结果是只追加的事实，没有"作废"这个动作
+    //   * `listing-migrations/{uuid}/diffs`     —— 差异化留痕随结果明细返回，不单开一条
+    //   * `listing-migrations/prices|stocks`    —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-migrations/risks`            —— 风险查询的路径是 `duplicate-risks`
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-migrations(?:\/capabilities|\/filter\-options|\/preview|\/duplicate\-risks|\/migrated|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
+  },
+  {
+    // 4.3.1.1 一键刊登（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-migrations`（4.4.2.2 批量搬迁）那一条**之后** ——
+    // 与既有条目被隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `one-click-publish` 这个独立前缀：
+    //   4.3.1.2 批量发布已经占了 `/channel/listing-publish`（batches / rate-limits /
+    //   dispatch / pause / resume / cancel / reorder / retry）。两条通道的语义完全不同 ——
+    //   一键刊登是「一个 SKU → N 个目标，每个目标各自成败、各自重试」，
+    //   批量发布是「一个批次 → 一条队列，按平台 API 配额排队」。
+    //   共用前缀会让「一个平台失败」被误写成「整批失败」，正是蓝图那句加粗要防的事。
+    //   也不用 `listing-publish-jobs`：既有正则锚定 `^listing\-publish(...)?$`，
+    //   虽不匹配，但极易被后来人误写成 `listing\-publish\-jobs` 而互相吃掉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   one-click-publish/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   one-click-publish/target-options          目标店铺 / 站点候选（只列已启用站点）
+    //   one-click-publish/content-sources         内容来源候选（编辑器入队记录 + 刊登模板）
+    //   one-click-publish/jobs                    作业列表（GET）+ 建作业（POST，幂等）
+    //   one-click-publish/jobs/{uuid}             单个作业详情（GET）
+    //   one-click-publish/jobs/{uuid}/targets     该作业的发布任务（每个目标一个）
+    //   one-click-publish/jobs/{uuid}/steps       该作业的步骤时间线
+    //   one-click-publish/jobs/{uuid}/dispatch    派发（逐目标独立，一个失败不影响其他）
+    //   one-click-publish/targets/{uuid}          单个发布任务（GET）
+    //   one-click-publish/targets/{uuid}/report   平台回执（成功 / 驳回 / 失败）
+    //   one-click-publish/targets/{uuid}/retry    独立重试（只重试失败的那一个）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / target-options / content-sources）
+    //    **排在** {uuid} 段之前，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`，
+    //    只锚定首尾两项，中间分支静默失效且不报错）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸 `one-click-publish`            —— 后端没有「列出全部」的映射在裸路径上
+    //   * `one-click-publish/jobs/{uuid}/cancel` —— 撤销未实现
+    //   * `one-click-publish/jobs/{uuid}/timeline` —— 单次发布任务的时间线页归 4.3.1.3（未交付）
+    //   * `one-click-publish/jobs/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `one-click-publish/{uuid}`        —— 没有「按 id 直接取作业」的裸形状
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^one\-click\-publish(?:\/capabilities|\/target\-options|\/content\-sources|\/jobs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:targets|steps|dispatch))?)?|\/targets\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:report|retry))?)$/,
+  },
+  {
+    // 4.3.1.3 发布任务（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.3.1.1 `one-click-publish` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listings` / `listing-claims` / `listing-status-events` 之后）互不重叠，
+    // git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-publish-tasks` 这个独立前缀：
+    //   4.3.1.1 一键刊登占了 `/channel/one-click-publish`（一个 SKU → N 个目标，各自成败），
+    //   4.3.1.2 批量发布占了 `/channel/listing-publish`（一个批次 → 一条队列，按平台配额排队），
+    //   本模块是**单次发布任务的进度视图**（步骤时间线 + 错误明细 + 重试操作）。
+    //   三者是三套独立的状态机，共用前缀会让「一个平台失败」被误写成「整批失败」。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-publish-tasks/capabilities               能力声明（阶段→步骤键映射 + 未交付段）
+    //   listing-publish-tasks/tasks                      任务列表（GET，真分页 + 来源/阶段/平台/店铺筛选）
+    //   listing-publish-tasks/tasks/{uuid}               任务详情（步骤时间线 + 错误明细 + 重试尝试）
+    //   listing-publish-tasks/tasks/{uuid}/steps         步骤时间线（单独一条，便于只刷新时间线）
+    //   listing-publish-tasks/tasks/{uuid}/retry         任务级重试（整条任务重来）
+    //   listing-publish-tasks/tasks/{uuid}/steps/{key}/retry  步骤级重试
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / tasks）必须排在 uuid 段**之前**判别。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    // ⚠️ steps 段下的 stepKey 只放行 4.3.1.1 落的八个步骤键（PRICE / STOCK 是作业级步骤，
+    //    也在同一段里 —— 它们出现在**作业级**时间线上，不是目标级）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸 `listing-publish-tasks`        —— 后端没有「列出全部」的映射在裸路径上
+    //   * `listing-publish-tasks/jobs`      —— 作业归 4.3.1.1（one-click-publish）
+    //   * `listing-publish-tasks/batches`   —— 批次归 4.3.1.2（listing-publish）
+    //   * `listing-publish-tasks/tasks/{uuid}/cancel` —— 撤销未实现
+    //   * `listing-publish-tasks/tasks/{uuid}/report` —— 平台回执归 4.3.1.1 / 4.3.2.2
+    //   * `listing-publish-tasks/tasks/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-publish\-tasks(?:\/capabilities|\/tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:steps(?:\/(?:TEMPLATE|CONTENT|MAPPING|MEDIA|PRICE|STOCK|SUBMIT|RESULT)\/retry)?|retry))?)?)$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -1533,6 +2501,47 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8085',
     pattern:
       /^order\-review\/(?:capabilities|buyer\-profiles|evaluations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:review|trial))$/,
+  },
+  {
+    // 9.1.2.1 平台订单同步（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `order-review` 那一条**之后**：各车道的插入点被既有条目隔开，
+    // git 能干净求并（与 9.2.1.2 / 11.3.2.1 等条目同一手法）。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                能力声明（状态词表 / 下游缺口 / 金额与归一口径）
+    //   webhook                     平台事件实时受理（POST）
+    //   poll                        按来源 + 时间窗轮询补拉（POST）
+    //   batches                     同步批次列表（GET，真分页 + 汇总）
+    //   batches/{uuid}              批次详情（逐条受理结果 + 异常明细）
+    //   orders                      平台单列表（GET，真分页 + 汇总）
+    //   orders/{uuid}               平台单详情（投影 + 组件展开 + 受理记录）
+    //   exceptions                  异常明细列表（GET，真分页 + 按错误码汇总）
+    //   mappings                    映射副本列表（GET）+ 租户自维护登记（POST）
+    //   mappings/sync               从 2.1.2.1（channel）同步映射副本（POST）
+    //
+    // ⚠️ 首段 `platform-orders` 是**独立字面量**：与既有 trade 分支的 `order-review`、
+    //    `order-intercept`、`orders\/risk-validation` 互不吃（首段不同），
+    //    所以本条放在哪个位置都不会误伤它们。
+    // ⚠️ 判别顺序：字面量子路径（capabilities / webhook / poll / exceptions /
+    //    mappings / batches / orders）必须排在 {uuid} 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    // ⚠️ 裸路径 `platform-orders` 本身**不放行**：后端没有这个映射，
+    //    放行它会让界面以为「一条不存在的概览接口」可用。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `platform-orders/orders/{uuid}/review` —— 9.2 审单的批量判定不属本车道
+    //   * `platform-orders/orders/{uuid}/fulfillment` —— 9.3 履约各动作不属本车道
+    //   * `platform-orders/sales` —— 13 销量的形状不属本车道
+    //   * `platform-orders/mappings/{uuid}` —— 映射副本只有列表与登记，没有按 id 寻址
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^platform\-orders\/(?:capabilities|webhook|poll|exceptions|mappings(?:\/sync)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
     // 11.3.2.1 换货授权（trade 服务）。本条目同样是**新增一条 services[] 元素**，
@@ -2218,6 +3227,58 @@ const services: readonly {
       /^order\-intercept\/(?:capabilities|overview|policy|restrictions|sku\-costs|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disposition)?)?)$/,
   },
   {
+    // 9.2.1.1 待审队列（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 9.2.1.3 `order-intercept` 那一条**之后**：
+    // 与并行车道（4.4.1.3 → listing-bulk-collects、9.2.2.1 → fulfillment/consolidation、
+    // 4.5.2.2 → listing-keyword-rankings）的插入点两两相隔 ≥ 74 行，
+    // 默认 3 行上下文窗口不会互相覆盖，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ **首 token 为什么是 `order-pending-review`**：
+    //   本仓既有白名单的正则**全部锚定**（`/^token(...)?$/`），所以只要**首 token 不同**就互不吃。
+    //   逐条核对过本仓全部 46 条 pattern 的首 token：
+    //     `order-review`（9.2.1.2 审单规则，形状是 `order-review/...`）—— 不同；
+    //     `order-intercept`（9.2.1.3 异常拦截）—— 不同；
+    //     `orders`（9.2.2.2 风控校验，形状是 `orders/risk-validation/...`）—— 不同；
+    //     `platform-orders`（9.1.2.1 平台订单同步）—— 不同；
+    //     `fulfillment`（9.3.x 履约）、`aftersales`（11.x 售后）、`sales-orders`（9.1.x 订单）……
+    //     —— 首 token 全部不同。
+    //   ⇒ `order-pending-review` 与既有任何一条都不撞车；
+    //   而它**读起来也不会被误认**成 `order-review`（审单规则）——
+    //   「排队等人审」与「配规则」是两件事，权限与日志都该分得开。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力与上下游可用性 + **可作为批量通过依据的规则清单**
+    //   summary                          队列概览（待审 / 已挂起 / 已通过 / 已驳回 / 已超时 / 未评估 / 高风险）
+    //   queue                            待审列表（GET，真分页 + 真筛选 + DB 层真排序）
+    //   queue/{uuid}                     单条详情（订单事实 + 风险五维 + 完整命中链 + 批次历史）
+    //   queue/{uuid}/evaluate            按当前生效规则试算（POST，标 DRY_RUN 不冒充结论）
+    //   batches                          批量回执列表（GET，真分页 + 真搜索）
+    //   batches                          POST 批量通过 / 驳回 / 挂起（**必须带幂等键**）
+    //   batches/{uuid}                   批量回执详情（含逐条结果）
+    // 判别顺序：字面量子路径（capabilities / summary / queue / batches）排在 {uuid} 分支之前，
+    // 否则会被 uuid 分支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `order-pending-review` —— 后端没有对应映射
+    //   * `order-pending-review/bulk-approve` / `order-pending-review/decisions` ——
+    //     批量动作只有一个入口：`POST /batches`（带幂等键）。放行一个「一键全过」形状
+    //     就是在接口层给蓝图加粗句「批量通过必须基于明确的规则，而不是默认全过」开后门
+    //   * `order-pending-review/queue/{uuid}/auto-approve` / `/bulk` / `/status` ——
+    //     改审单结论的唯一入口是批量端点；单条「改状态」的裸端点不存在
+    //   * `order-pending-review/queue/{uuid}/evaluate/extra` —— 多一层就 404
+    //   * `order-pending-review/batches/{uuid}/items` —— 逐条结果在 `batches/{uuid}` 里，
+    //     不另开一个形状
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-pending\-review\/(?:capabilities|summary|queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluate)?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -2377,6 +3438,47 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 9.2.2.1 地址与支付校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `fulfillment/consolidation`（9.3.1.2 合单）那条**之后**：
+    // 与其余车道（4.4.1.3 / 9.2.1.1 / 4.5.2.2）的插入点两两相隔 ≥ 74 行，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // ⚠️ 首 token 是 `order-address-payment-check`，与既有 `order-review`（9.2.1.2）、
+    //   `order-intercept`（9.2.1.3）、`orders`（含 orders/risk-validation）、
+    //   `fulfillment`、`aftersales`、`platform-orders`（9.1.2.1）**首 token 全都不同**，
+    //   而既有正则都是锚定的（`/^token(...)?$/`），所以新前缀不会与任何一条抢路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力与上下游可用性（**明说保险策略未交付**）
+    //   overview                              全量概览（不受筛选与分页影响）
+    //   policy / policy                       校验策略（GET 读 + PUT upsert）
+    //   embargo-rules                         禁运国家清单（GET 真分页 / POST 登记）
+    //   country-rules                         国别地址格式规则（GET 真分页 / POST 登记）
+    //   payment-rules                         支付状态一致性规则（GET 真分页 / POST 登记）
+    //   checks                                校验结果列表（GET 真分页 + 风险等级/可投递性筛选）
+    //   checks                                POST 落一次校验
+    //   {uuid}                                校验详情（GET，头 + 七行明细）
+    //   orders/{uuid}/latest                  某订单最近一次校验（**9.2.1.3 异常拦截的读路径**）
+    // 判别顺序：字面量子路径（capabilities / overview / policy / embargo-rules /
+    // country-rules / payment-rules / checks）排在 {uuid} 分支之前，
+    // 否则会被 uuid 分支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `order-address-payment-check/undeclared-action` —— **本模块确定没有**的动作
+    //   * `order-address-payment-check/checks/{uuid}/auto-release` —— 本模块**不**改写已落库的结论
+    //   * `order-address-payment-check/checks/{uuid}/insurance-quote` —— 保险策略未交付
+    //   * `order-address-payment-check/orders/{uuid}` —— 裸路径，没有对应映射
+    //   * 裸路径 `order-address-payment-check` —— 后端没有对应映射
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-address\-payment\-check\/(?:capabilities|overview|policy|embargo\-rules|country\-rules|payment\-rules|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/latest)$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
@@ -2495,6 +3597,38 @@ const services: readonly {
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // listing-templates 是 4.2.2.1 刊登模板的**独立前缀**（channel 服务，端口 8083）。
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 长正则的 alternation 里并 ——
+    // 那样本车道与并行车道的插入点会被隔开，git 能干净求并。
+    //
+    // 形状逐条列出：
+    //   listing-templates                      集合读（真分页 + 真筛选：作用域/平台/店铺/类目/状态/关键字）
+    //   listing-templates/capabilities         能力声明（编辑器侧套用入口 available=false + ownerModule=4.2.1.1）
+    //   listing-templates/filter-options       筛选项词表（平台 / 店铺 / 站点，不硬编码在前端）
+    //   listing-templates/apply                一键套用（POST，产出的是**草稿**，不写线上）
+    //   listing-templates/applies              套用记录列表（GET 真分页）
+    //   listing-templates/applies/{uuid}       单次套用详情（逐字段求值明细 + 必填违规清单）
+    //   listing-templates/{uuid}               模板详情（GET）/ 新建与更新（POST）/ 删除（DELETE）
+    //   listing-templates/{uuid}/status        启停模板（PUT）
+    //   listing-templates/{uuid}/matches      适用范围命中的 listing（GET 真分页 —— 判定有真实数据支撑）
+    //
+    // 字面量子路径（capabilities / filter-options / apply / applies）一律排在 {uuid} 段**之前**判别，
+    // 否则 apply / applies 会被 UUID 分支吃掉。id 段用**完整 UUID 形状**
+    // [0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}（不是 [0-9a-f-]+）——
+    // 宽松的字符集会把 `listing-templates/apply` 之外的任意串也当成 id 放行。
+    //
+    // **刻意不放行**：
+    //   * 裸的 `listing-templates/{uuid}/{任意动作}` —— {uuid} 之后只认 status 与 matches 两个
+    //     已实现的子资源；多放一段会让一个还不存在的路径看起来像已交付。
+    //   * 任何「直接上线 / 发布」形状 —— 刊登模板只产出草稿，发布归 4.3.1.2；
+    //     放行一个发布形状只会让界面以为有直接上线入口。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing-templates(?:\/(?:capabilities|filter-options|apply|applies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|matches))?))?$/,
+  },
+  {
     // crm 是 15 客户与客服的服务（端口 8086，数据库 starcon_crm），15.4.2.1 知识库
     // 是它的第一条业务端点。本条目是**新增一条 services[] 元素**，
     // 不是往既有分支的 alternation 里并 —— 所以前六个分支逐字未动
@@ -2528,6 +3662,105 @@ const services: readonly {
       /^knowledge\/(?:capabilities|scopes|review-due|entries(?:\/effective|\/[0-9a-f-]+(?:\/(?:versions|references))?)?|versions\/[0-9a-f-]+\/(?:publish|close|references))$/,
     // 裸路径 knowledge **刻意不放行**：后端没有这个映射，
     // 放行它会让界面以为「一条不存在的列表接口」可用。
+  },
+  {
+    // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
+    //
+    // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
+    // 区分两者给出不同处置建议。输入：分摊结果；店铺销售与绩效；总可用量。
+    // 输出：饥饿店铺清单 + 缺货清单 + 建议（调优先级/调保留/补货）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 warehouse 那条巨型正则里并 ——
+    // 那一行被好几条车道共用，同时改它必然撞车。插入锚点固定在 services[] 的**最末尾**
+    // （紧挨着 `];`），与另外三条车道的插入点互不重叠。
+    //
+    // 形状逐条列出（11 个）：
+    //   capabilities            能力声明（两类判定的差别 / 未知态语义 / 未交付的三环）
+    //   evaluate                一次评估（POST）—— 分别判定「缺货」与「饥饿」，各自落各自的表
+    //   starvations             饥饿店铺清单（GET）
+    //   starvations/{uuid}      单条详情（GET）
+    //   starvations/{uuid}/acknowledge   认领（POST）
+    //   starvations/{uuid}/resolve       处置（POST，处置说明必填）
+    //   stockouts               缺货清单（GET）
+    //   stockouts/{uuid}        单条详情（GET）
+    //   stockouts/{uuid}/acknowledge     认领（POST）
+    //   stockouts/{uuid}/resolve         处置（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / evaluate / starvations / stockouts）排在
+    // {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两段形状（{uuid}/acknowledge、{uuid}/resolve）挂在单段 {uuid} 组的可选后缀里，
+    // 否则会被单段分支吃掉半截、把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状：
+    //   裸路径 inventory/stockout-alerts —— 后端没有这个映射（清单在 /starvations 与 /stockouts 两个子路径上）。
+    //   任何 {uuid} 之外的第三层子路径 —— 后端只有 acknowledge 与 resolve 两个动作。
+    //   任何 DELETE / PUT 形状 —— 后端根本没有对应端点（405），而 V192 的 REVOKE DELETE
+    //   与不可删触发器还会各挡一次。注意白名单是**按路径登记、不区分方法**的，
+    //   所以「不能删」的防线在服务端与 DB，不在这里。
+    //
+    // 与既有分支不重叠：既有 warehouse 那条巨型正则的 alternation 里
+    // 没有 `stockout-alerts`（`stocktakes` / `stocktake-variances` 与它不是一回事），
+    // 所以 `inventory/stockout-alerts/...` 不会先被既有分支吃掉。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^inventory\/stockout-alerts\/(?:capabilities|evaluate|starvations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|stockouts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
+  },
+  {
+    // 16.2.2.1 合规预检（channel 服务，卷 16「合规与风控」的 L3 锚点 16.2.2）。
+    //
+    // 蓝图：「发布前的合规体检：内容违规、认证缺失、尺寸规格不符、材质与描述不符、危险品与运输限制、
+    // 标签与说明书要求，多维度检查并给出整改建议。输入：listing 内容草稿；商品属性；认证状态；平台要求。
+    // 输出：体检报告（分维度得分 + 问题清单 + 整改建议）。关系：上游 = 4.2.1.1 编辑器；下游 = 16.2.1.2 拦截。
+    // **预检在保存草稿时就跑一次**（即时反馈），发布时再跑一次（强制校验）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 7.8.2.2 的 `inventory/stockout-alerts` 元素
+    // 之后、`];` 之前），与另外三条车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `compliance-precheck` 这个独立前缀：
+    //   * `listing-compliance-precheck` 是同批 4.2.3.2 车道的前缀（卷 04 的「合规预检（违禁词/侵权）」）——
+    //     那是**另一个模块**：那边出「阻断项 + 提醒项」的风险清单，这边出「分维度得分 + 问题清单 +
+    //     整改建议」的体检报告。两边不共用表、不共用端点、不共用页面，也不共用白名单元素。
+    //   * `listing-*` 开头的既有前缀已有 8 条，视觉上再挤一条进去更容易看错行。
+    //   * `compliance-*` 也不选：16.2.1.1 规则库未来会占那个命名空间。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   compliance-precheck/capabilities            能力声明（逐维度量得到 / 量不到 + 归属模块）
+    //   compliance-precheck/drafts                  可供体检的内容草稿（GET，4.2.1.1 的草稿，只读）
+    //   compliance-precheck/drafts/{uuid}/check      🔴 保存草稿时的即时反馈（POST）
+    //   compliance-precheck/drafts/{uuid}/precheck   🔴 发布前的强制校验（POST）
+    //   compliance-precheck/reports                 报告历史（GET，真分页）
+    //   compliance-precheck/reports/{uuid}          单份报告（GET：分维度得分 + 问题清单 + 整改建议）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / drafts / reports）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ `drafts/{uuid}` 的**动作段是必选的**（`(?:check|precheck)` 不带 `?`）：
+    //    后端没有「按草稿取单条体检入口」这个资源，放行 `drafts/{uuid}` 就是凭空多出一条 GET。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `compliance-precheck` —— 本模块没有裸路径资源。
+    //   * `compliance-precheck/drafts/{uuid}` —— 没有「按草稿取单条体检入口」这个资源。
+    //   * `compliance-precheck/reports/{uuid}/publish|block|exempt|approve` ——
+    //     🔴 拦截、豁免与审批归 16.2.1.2（未交付），本模块只出报告与结论。
+    //   * `compliance-precheck/rules|library|certifications` ——
+    //     🔴 16.2.1.1 规则库与 16.2.2.2 认证与资质都未交付，本模块不代它们开形状。
+    //   * `compliance-precheck/reports/{uuid}/delete` —— 报告是那一次判定的凭据，不可删。
+    //   * `listing-compliance-precheck/...` —— 同批 4.2.3.2 车道的形状，不是本模块的。
+    //
+    // 与既有分支不重叠：既有 channel 分支的 alternation 里没有 `compliance-precheck`，
+    // 所以 `compliance-precheck/...` 不会先被既有分支吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
 ];
 

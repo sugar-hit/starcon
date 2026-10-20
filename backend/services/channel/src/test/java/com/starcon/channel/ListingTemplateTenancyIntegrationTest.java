@@ -1,0 +1,424 @@
+package com.starcon.channel;
+
+import static com.starcon.channel.ListingTemplateModels.*;
+import static com.starcon.channel.ListingModels.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+/**
+ * 4.2.2.1 刊登模板 的多租户三断言（AGENTS.md 硬性要求，缺一不可）。
+ *
+ * <ol>
+ *   <li><b>两租户互不可见</b>（模板 / 规则 / 套用记录 / 套用明细 / 草稿都不可见）
+ *   <li><b>伪造 tenant header 无效</b>（租户只来自已认证成员关系）
+ *   <li><b>连接池归还后不串租户</b>（池压到 1，A→B→A 三轮）
+ * </ol>
+ *
+ * <p>🔴 <b>按主键直查那条必须用 {@code channel_app} 连，不能用 Testcontainers 默认的超级用户。</b>
+ * 超级用户<b>绕过 RLS</b> —— 用它查「读不到对方数据」会永远得到「读得到」，
+ * 那不是隔离被破坏，而是这个断言本身失效了。
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+class ListingTemplateTenancyIntegrationTest {
+
+  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  static final UUID user = UUID.randomUUID();
+  static HttpServer identity;
+  static StubCatalogServer catalog;
+  static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
+  static final ObjectMapper JSON = new ObjectMapper();
+
+  UUID a, b;
+  AccessService.Access actorA, actorB;
+  String bearerA, bearerB;
+
+  static final UUID AMAZON = UUID.fromString("11111111-1111-1111-1111-111111111101");
+  UUID siteUs;
+
+  static final String ALL_SCOPE_GRANTS =
+      "[{\"permissions\":[\"channel.operation.read\",\"channel.operation.create\","
+          + "\"channel.operation.update\",\"channel.operation.delete\"],\"scopeMode\":\"ALL\"}]";
+
+  static final List<String> allPermissions =
+      java.util.stream.Stream.of("registry", "connection", "shop", "sync", "operation")
+          .flatMap(
+              p ->
+                  java.util.stream.Stream.concat(
+                      java.util.stream.Stream.of("read", "create", "update", "delete")
+                          .map(op -> "channel." + p + "." + op),
+                      p.equals("sync")
+                          ? java.util.stream.Stream.of("channel.sync.trigger", "channel.sync.complete")
+                          : java.util.stream.Stream.empty()))
+          .distinct()
+          .toList();
+
+  static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
+    return new AccessService.Access(
+        uid, tenant, "Test", UUID.randomUUID(), null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
+  }
+
+  static AccessService.Grant grant(String scope, List<String> permissions) {
+    return new AccessService.Grant(UUID.randomUUID(), "TEST", scope, permissions);
+  }
+
+  static {
+    pg.start();
+    try {
+      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+          var s = c.createStatement()) {
+        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
+            + " then create role starcon_app nologin; end if; end $$");
+        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
+            + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
+        s.execute("alter role channel_app login password 'test-only' nosuperuser nobypassrls");
+      }
+      identity = HttpServer.create(new InetSocketAddress(0), 0);
+      identity.createContext(
+          "/internal/access",
+          e -> {
+            AccessService.Access who = actors.get(e.getRequestHeaders().getFirst("Authorization"));
+            if (who == null) {
+              e.sendResponseHeaders(401, -1);
+              e.close();
+              return;
+            }
+            byte[] body = new ObjectMapper().writeValueAsBytes(who);
+            e.getResponseHeaders().add("Content-Type", "application/json");
+            e.sendResponseHeaders(200, body.length);
+            e.getResponseBody().write(body);
+            e.close();
+          });
+      identity.start();
+      catalog = new StubCatalogServer();
+    } catch (Exception e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  @BeforeEach
+  void freshTenants() {
+    a = UUID.randomUUID();
+    b = UUID.randomUUID();
+    bearerA = "Bearer t-a-" + a;
+    bearerB = "Bearer t-b-" + b;
+    List<AccessService.Grant> grants = List.of(grant("ALL", allPermissions));
+    actors.put(bearerA, actor(user, a, grants));
+    actors.put(bearerB, actor(user, b, grants));
+    actorA = actors.get(bearerA);
+    actorB = actors.get(bearerB);
+    siteUs = marketplaceId(AMAZON, "US");
+    assertThat(siteUs).as("V1 迁移应当发布了 AMAZON 的美国站").isNotNull();
+  }
+
+  @DynamicPropertySource
+  static void properties(DynamicPropertyRegistry r) {
+    r.add("DB_URL", pg::getJdbcUrl);
+    r.add("DB_USER", () -> "channel_app");
+    r.add("DB_PASSWORD", () -> "test-only");
+    r.add("DB_MIGRATION_USER", pg::getUsername);
+    r.add("DB_MIGRATION_PASSWORD", pg::getPassword);
+    r.add("IDENTITY_URL", () -> "http://localhost:" + identity.getAddress().getPort());
+    r.add("CATALOG_URL", catalog::base);
+    r.add("INTERNAL_KEY", () -> "test-key");
+    // 连接池压到 1：多租户串租户在单连接下最容易暴露。
+    r.add("spring.datasource.hikari.maximum-pool-size", () -> "1");
+  }
+
+  @Autowired ListingTemplateService service;
+  @Autowired ListingService listService;
+  @Autowired AccessService access;
+  @Autowired MockMvc http;
+
+  // ==================================================================
+  // 辅助
+  // ==================================================================
+
+  <T> T as(AccessService.Access who, String permission, java.util.function.Supplier<T> work) {
+    return access.run(who, permission, work);
+  }
+
+  static void execAsTenant(UUID tenant, String sql) {
+    try (Connection c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement()) {
+      s.execute("select set_config('app.current_tenant','" + tenant + "',false)");
+      s.execute("select set_config('app.actor','" + user + "',false)");
+      s.execute("select set_config('app.department','',false)");
+      s.execute("select set_config('app.permission','channel.operation.create',false)");
+      s.execute("select set_config('app.grants','" + ALL_SCOPE_GRANTS + "',false)");
+      s.execute(sql);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * 以<b>应用角色 channel_app</b>（非超级用户）直查一行计数。
+   *
+   * <p>🔴 必须用 channel_app 连：超级用户<b>绕过 RLS</b>。
+   */
+  static long countAsTenant(UUID tenant, String sql) {
+    try (Connection c =
+        DriverManager.getConnection(pg.getJdbcUrl(), "channel_app", "test-only");
+        var s = c.createStatement()) {
+      s.execute("select set_config('app.current_tenant','" + tenant + "',false)");
+      s.execute("select set_config('app.actor','" + user + "',false)");
+      s.execute("select set_config('app.department','',false)");
+      s.execute("select set_config('app.permission','channel.operation.create',false)");
+      s.execute("select set_config('app.grants','" + ALL_SCOPE_GRANTS + "',false)");
+      try (var rs = s.executeQuery(sql)) {
+        return rs.next() ? rs.getLong(1) : 0L;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /** 以管理员连接读一行标量（只用于读全局码表这类不受 RLS 约束的事实）。 */
+  static String scalar(String sql) {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement();
+        var rs = s.executeQuery(sql)) {
+      return rs.next() ? rs.getString(1) : null;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  static UUID marketplaceId(UUID platformId, String code) {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var s = c.createStatement();
+        var rs = s.executeQuery(
+            "select id from marketplace where platform_id='" + platformId + "' and code='" + code + "'")) {
+      return rs.next() ? UUID.fromString(rs.getString(1)) : null;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  UUID seedShop(UUID tenant, String code) {
+    UUID id = UUID.randomUUID();
+    execAsTenant(tenant,
+        "insert into shop (tenant_id,id,platform_id,code,name) values ('" + tenant + "','" + id
+            + "','" + AMAZON + "','" + code + "','测试店铺 " + code + "')"
+            + " on conflict (tenant_id,code) do nothing");
+    execAsTenant(tenant,
+        "insert into shop_marketplace (tenant_id,shop_id,marketplace_id,status)"
+            + " values ('" + tenant + "','" + id + "','" + siteUs + "','ACTIVE')"
+            + " on conflict (tenant_id,shop_id,marketplace_id) do update set status='ACTIVE'");
+    return id;
+  }
+
+  ListingRow seedListing(AccessService.Access who, UUID shopId, String externalItemId, String title) {
+    return as(who,
+        "channel.operation.create",
+        () ->
+            listService.save(
+                new SaveListingRequest(
+                    null, shopId, siteUs, externalItemId, title, "Electronics > Audio", "cat-1",
+                    "ON_SALE", "APPROVED", "", "IN_STOCK", null, null, null, "USD",
+                    null, null,
+                    List.of(
+                        new SaveVariantRequest(
+                            null, "v-1", "MAPPED", UUID.randomUUID(), null, "{}")),
+                    null)));
+  }
+
+  /** 租户建一个模板并套用到自己的商品上。 */
+  record Fixture(UUID templateId, UUID listingId, UUID applyId) {}
+
+  Fixture seedTemplateAndApply(AccessService.Access who, UUID tenant, UUID shopId, String suffix) {
+    var template =
+        as(who,
+            "channel.operation.create",
+            () ->
+                service.save(
+                    new SaveListingTemplateRequest(
+                        null, "TEN-" + suffix, "租户模板 " + suffix, "", "CATEGORY", AMAZON,
+                        siteUs.toString(), "Electronics > Audio", null, "en-US", "ACTIVE",
+                        List.of(
+                            new ListingTemplateFieldInput(
+                                "TITLE", "LITERAL", "", "标题 " + suffix, true, 0)),
+                        List.of())));
+    var listing = seedListing(who, shopId, "TEN-" + suffix + "-ITEM", "线上标题 " + suffix);
+    var applied =
+        as(who,
+            "channel.operation.create",
+            () ->
+                service.apply(
+                    new ApplyListingTemplateRequest(
+                        template.template().id(), listing.id(), null, ""),
+                    "Bearer t-" + tenant));
+    return new Fixture(template.template().id(), listing.id(), applied.applyId());
+  }
+
+  // ==================================================================
+  // 断言一：两租户互不可见
+  // ==================================================================
+
+  @Test
+  @DisplayName("4.2.2.1 断言一：两租户互不可见（模板 / 规则 / 套用记录 / 草稿都不可见）")
+  void tenantsAreIsolated() {
+    UUID shopA = seedShop(a, "TEN-A-1");
+    UUID shopB = seedShop(b, "TEN-B-1");
+    Fixture fixture = seedTemplateAndApply(actorA, a, shopA, "A1");
+
+    // B 看不到 A 的模板
+    var pageB =
+        as(actorB, "channel.operation.read", () -> service.list(0, 50, null, null, null, null, null, null));
+    assertThat(pageB.items()).as("B 的租户上下文里读不到 A 的模板").isEmpty();
+    assertThat(
+            org.assertj.core.api.Assertions.catchThrowable(
+                () -> as(actorB, "channel.operation.read", () -> service.load(fixture.templateId().toString()))))
+        .as("B 按 id 取 A 的模板必须 404")
+        .isNotNull();
+    assertThat(
+            org.assertj.core.api.Assertions.catchThrowable(
+                () -> as(actorB, "channel.operation.create", () -> service.apply(
+                    new ApplyListingTemplateRequest(fixture.templateId(), fixture.listingId(), null, ""),
+                    bearerB))))
+        .as("B 不能拿 A 的模板套用")
+        .isNotNull();
+
+    // B 看不到 A 的套用记录
+    assertThat(as(actorB, "channel.operation.read", () -> service.applies(0, 50, null, null)).total())
+        .isZero();
+
+    // 🔴 按主键直查（用 channel_app 连，超级用户绕过 RLS 会让这个断言永远「通过」）
+    assertThat(countAsTenant(b, "select count(*) from listing_template where id='" + fixture.templateId() + "'"))
+        .as("B 的上下文里直查 A 的模板必须读到零行")
+        .isZero();
+    assertThat(countAsTenant(b,
+            "select count(*) from listing_template_field where template_id='" + fixture.templateId() + "'"))
+        .as("B 的上下文里直查 A 的规则必须读到零行")
+        .isZero();
+    assertThat(countAsTenant(b, "select count(*) from listing_template_apply where id='" + fixture.applyId() + "'"))
+        .as("B 的上下文里直查 A 的套用记录必须读到零行")
+        .isZero();
+    assertThat(countAsTenant(b,
+            "select count(*) from listing_template_apply_field where apply_id='" + fixture.applyId() + "'"))
+        .as("B 的上下文里直查 A 的套用明细必须读到零行")
+        .isZero();
+    assertThat(countAsTenant(b, "select count(*) from listing_content_draft where listing_id='"
+        + fixture.listingId() + "'"))
+        .as("B 的上下文里直查 A 的草稿必须读到零行")
+        .isZero();
+    assertThat(countAsTenant(b, "select count(*) from listing where id='" + fixture.listingId() + "'"))
+        .as("B 的上下文里直查 A 的 listing 必须读到零行")
+        .isZero();
+
+    // 同一机制在本租户自己的数据上必须看得见行 —— 否则上面那些「零行」可能只是查询一直返回 0
+    assertThat(countAsTenant(a, "select count(*) from listing_template where id='" + fixture.templateId() + "'"))
+        .as("A 的上下文必须能直查 A 自己的模板（证明上面那个 0 是隔离，不是查询失效）")
+        .isEqualTo(1);
+    assertThat(countAsTenant(a,
+            "select count(*) from listing_template_field where template_id='" + fixture.templateId() + "'"))
+        .isEqualTo(1);
+    assertThat(countAsTenant(a, "select count(*) from listing_template_apply where id='" + fixture.applyId() + "'"))
+        .isEqualTo(1);
+    assertThat(countAsTenant(a, "select count(*) from listing_content_draft where listing_id='"
+        + fixture.listingId() + "'"))
+        .isEqualTo(1);
+
+    // 五张新表都必须是 FORCE RLS
+    for (String table :
+        List.of(
+            "listing_template",
+            "listing_template_field",
+            "listing_template_asset_group",
+            "listing_template_apply",
+            "listing_template_apply_field")) {
+      assertThat(scalar("select relforcerowsecurity::text from pg_class where relname='" + table + "'"))
+          .as(table + " 必须 FORCE RLS")
+          .isEqualTo("true");
+    }
+  }
+
+  // ==================================================================
+  // 断言二：伪造 tenant header 无效
+  // ==================================================================
+
+  @Test
+  @DisplayName("4.2.2.1 断言二：伪造 tenant header 无效（租户只来自已认证成员关系）")
+  void forgedTenantHeaderIsIgnored() throws Exception {
+    UUID shopA = seedShop(a, "FORGE-A");
+    UUID shopB = seedShop(b, "FORGE-B");
+    seedTemplateAndApply(actorA, a, shopA, "FORGE-A");
+    seedTemplateAndApply(actorB, b, shopB, "FORGE-B");
+
+    // A 的会话 + B 的头 ⇒ 仍然只看到 A 自己的
+    http.perform(get("/channel/listing-templates").header("Authorization", bearerA)
+            .header("X-Tenant-Id", b.toString()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items.length()").value(1))
+        .andExpect(jsonPath("$.items[0].code").value("TEN-FORGE-A"));
+
+    http.perform(get("/channel/listing-templates").header("Authorization", bearerB)
+            .header("X-Tenant-Id", a.toString()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items.length()").value(1))
+        .andExpect(jsonPath("$.items[0].code").value("TEN-FORGE-B"));
+
+    // 无会话一律 401（伪造的头救不了）
+    http.perform(get("/channel/listing-templates/capabilities")
+            .header("X-Tenant-Id", b.toString()))
+        .andExpect(status().isUnauthorized());
+  }
+
+  // ==================================================================
+  // 断言三：连接池归还后不串租户
+  // ==================================================================
+
+  @Test
+  @DisplayName("4.2.2.1 断言三：连接池归还后不串租户（池压到 1，A→B→A 三轮）")
+  void pooledConnectionsDoNotBleedTenants() {
+    UUID shopA = seedShop(a, "POOL-A");
+    UUID shopB = seedShop(b, "POOL-B");
+    Fixture fixtureA = seedTemplateAndApply(actorA, a, shopA, "POOL-A");
+    Fixture fixtureB = seedTemplateAndApply(actorB, b, shopB, "POOL-B");
+
+    for (int i = 0; i < 3; i++) {
+      var listA = as(actorA, "channel.operation.read", () -> service.list(0, 50, null, null, null, null, null, null));
+      assertThat(listA.items()).hasSize(1);
+      assertThat(listA.items().get(0).id()).isEqualTo(fixtureA.templateId());
+      assertThat(listA.items().get(0).code()).isEqualTo("TEN-POOL-A");
+
+      var listB = as(actorB, "channel.operation.read", () -> service.list(0, 50, null, null, null, null, null, null));
+      assertThat(listB.items()).hasSize(1);
+      assertThat(listB.items().get(0).id()).isEqualTo(fixtureB.templateId());
+      assertThat(listB.items().get(0).code()).isEqualTo("TEN-POOL-B");
+
+      // 草稿也必须跟着租户走：串了就会读到别人的草稿
+      assertThat(as(actorA, "channel.operation.read",
+              () -> listService.load(fixtureA.listingId().toString()))
+              .title())
+          .isEqualTo("线上标题 POOL-A");
+      assertThat(as(actorB, "channel.operation.read",
+              () -> listService.load(fixtureB.listingId().toString()))
+              .title())
+          .isEqualTo("线上标题 POOL-B");
+    }
+  }
+}

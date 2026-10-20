@@ -9161,6 +9161,226 @@
         }
       }
     },
+    "/warehouse/inventory/stockout-alerts/stockouts/{id}/resolve": {
+      "post": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "post_warehouse_inventory_stockout_alerts_stockouts_id_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockoutAlertResolutionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/stockouts/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "post_warehouse_inventory_stockout_alerts_stockouts_id_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/starvations/{id}/resolve": {
+      "post": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "post_warehouse_inventory_stockout_alerts_starvations_id_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockoutAlertResolutionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/starvations/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "post_warehouse_inventory_stockout_alerts_starvations_id_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/evaluate": {
+      "post": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "post_warehouse_inventory_stockout_alerts_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockoutEvaluationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutEvaluationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/serials": {
       "get": {
         "tags": [
@@ -21575,6 +21795,320 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/StocktakeVarianceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/stockouts": {
+      "get": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "get_warehouse_inventory_stockout_alerts_stockouts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lifecycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/stockouts/{id}": {
+      "get": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "get_warehouse_inventory_stockout_alerts_stockouts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/starvations": {
+      "get": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "get_warehouse_inventory_stockout_alerts_starvations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "policyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopOperatingMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lifecycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StarvationAlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/starvations/{id}": {
+      "get": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "get_warehouse_inventory_stockout_alerts_starvations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StarvationAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stockout-alerts/capabilities": {
+      "get": {
+        "tags": [
+          "stockout-alert-controller"
+        ],
+        "operationId": "get_warehouse_inventory_stockout_alerts_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockoutAlertCapabilities"
                 }
               }
             }
@@ -36543,6 +37077,124 @@
           },
           "postedQty": {
             "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StockoutAlertResolutionInput": {
+        "required": [
+          "note"
+        ],
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "StockoutAlertActionResult": {
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertKind": {
+            "type": "string"
+          },
+          "lifecycleState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "StockoutEvaluationRequest": {
+        "type": "object",
+        "properties": {
+          "windowRounds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "coverageThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "zeroRoundRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "demandWindowDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "StockoutEvaluationResult": {
+        "type": "object",
+        "properties": {
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowRounds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scannedStockoutCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scannedStarvationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stockoutProblemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "starvationProblemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "excludedByStockoutCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unknownDemandCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "note": {
             "type": "string"
@@ -52410,6 +53062,742 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "AlertRecommendation": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "RAISE_FLOOR",
+              "RAISE_PRIORITY",
+              "REGISTER_SALES",
+              "REPLENISH",
+              "NONE"
+            ]
+          },
+          "target": {
+            "type": "string"
+          },
+          "targetLabel": {
+            "type": "string"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "currentValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "suggestedValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "StockoutAlertPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockoutAlertRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/StockoutAlertSummary"
+          }
+        }
+      },
+      "StockoutAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHandQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "reservedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "availableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "networkOnHandQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "networkReservedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "networkAvailableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "runAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "runMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "runAvailableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "runAllocatableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "runUnallocatedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "runAllocatedTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "demandUnits": {
+            "type": "number",
+            "nullable": true
+          },
+          "demandRegistered": {
+            "type": "boolean"
+          },
+          "demandWindowStart": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "demandWindowEnd": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "demandShopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coverageRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "daysOfCover": {
+            "type": "number",
+            "nullable": true
+          },
+          "alertState": {
+            "type": "string",
+            "enum": [
+              "NO_LEDGER_RECORD",
+              "NETWORK_STOCKED_OUT",
+              "WAREHOUSE_STOCKED_OUT",
+              "AT_RISK",
+              "UNKNOWN_DEMAND",
+              "HEALTHY"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "demandState": {
+            "type": "string",
+            "enum": [
+              "KNOWN",
+              "UNKNOWN"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendation": {
+            "$ref": "#/components/schemas/AlertRecommendation"
+          },
+          "lifecycleState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "acknowledgedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "recurrenceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StockoutAlertSummary": {
+        "type": "object",
+        "properties": {
+          "rowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "networkStockedOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warehouseStockedOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "atRiskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noLedgerRecordCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownDemandCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acknowledgedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "availableTotal": {
+            "type": "number"
+          },
+          "availableKnownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "demandTotal": {
+            "type": "number"
+          },
+          "demandKnownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "networkStockedOutSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastDetectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "StarvationAlertPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StarvationAlertRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/StarvationAlertSummary"
+          }
+        }
+      },
+      "StarvationAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopOperatingMode": {
+            "type": "string"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedRunCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "zeroRoundCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "maxRunAvailableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "minRunAvailableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "lastAllocationOrder": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lastOutcome": {
+            "type": "string"
+          },
+          "lastRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "demandUnits": {
+            "type": "number",
+            "nullable": true
+          },
+          "demandRegistered": {
+            "type": "boolean"
+          },
+          "demandWindowStart": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "demandWindowEnd": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "coverageRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "memberPriority": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "memberShareLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "memberEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "floorOrder": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "floorStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorShortfallQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "floorSuppressed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "floorSuppressionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorCommittedMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorCommittedRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "floorCommittedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "floorSafetyQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "alertState": {
+            "type": "string",
+            "enum": [
+              "STARVED",
+              "UNDER_SUPPLIED",
+              "UNKNOWN_DEMAND",
+              "HEALTHY"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "demandState": {
+            "type": "string",
+            "enum": [
+              "KNOWN",
+              "UNKNOWN"
+            ]
+          },
+          "rootCause": {
+            "type": "string",
+            "enum": [
+              "FLOOR",
+              "PRIORITY",
+              "SHARE_LIMIT",
+              "NO_SALES",
+              "UNKNOWN"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "recommendation": {
+            "$ref": "#/components/schemas/AlertRecommendation"
+          },
+          "lifecycleState": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "acknowledgedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "recurrenceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StarvationAlertSummary": {
+        "type": "object",
+        "properties": {
+          "rowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "starvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "underSuppliedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unknownDemandCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acknowledgedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "floorShortfallCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "demandTotal": {
+            "type": "number"
+          },
+          "demandKnownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastDetectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "StockoutAlertCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockoutAlertCapabilityDimension"
+            }
+          },
+          "starvationStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stockoutStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendationKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lifecycleStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "performanceAvailable": {
+            "type": "boolean"
+          },
+          "performanceOwnerModule": {
+            "type": "string"
+          },
+          "replenishmentAvailable": {
+            "type": "boolean"
+          },
+          "replenishmentOwnerModule": {
+            "type": "string"
+          },
+          "workbenchAlertAvailable": {
+            "type": "boolean"
+          },
+          "workbenchAlertOwnerModule": {
+            "type": "string"
+          },
+          "separationNote": {
+            "type": "string"
+          },
+          "unknownNote": {
+            "type": "string"
+          },
+          "availableNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "StockoutAlertCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       },

@@ -1972,6 +1972,120 @@
         }
       }
     },
+    "/catalog/sku-cost-compositions/{skuId}": {
+      "get": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "get_catalog_sku_cost_compositions_skuId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "put_catalog_sku_cost_compositions_skuId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/sku-code/skus/{id}/code": {
       "put": {
         "tags": [
@@ -11164,6 +11278,115 @@
         }
       }
     },
+    "/catalog/sku-cost-compositions/{skuId}/adjustments": {
+      "post": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "post_catalog_sku_cost_compositions_skuId_adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-cost-compositions/{skuId}/adjustments/{adjustmentId}/void": {
+      "post": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "post_catalog_sku_cost_compositions_skuId_adjustments_adjustmentId_void",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/sku-code/skus/{id}/identifiers": {
       "post": {
         "tags": [
@@ -20213,6 +20436,187 @@
         }
       }
     },
+    "/catalog/sku-cost-compositions": {
+      "get": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "get_catalog_sku_cost_compositions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "costMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maintained",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-cost-compositions/{skuId}/revisions": {
+      "get": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "get_catalog_sku_cost_compositions_skuId_revisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RevisionRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-cost-compositions/capabilities": {
+      "get": {
+        "tags": [
+          "sku-cost-composition-controller"
+        ],
+        "operationId": "get_catalog_sku_cost_compositions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/sku-code/skus/{id}": {
       "get": {
         "tags": [
@@ -26990,6 +27394,71 @@
           }
         }
       },
+      "ProfileInput": {
+        "required": [
+          "changeReason",
+          "costMethod",
+          "currency",
+          "effectiveFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "costMethod": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "packagingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "changeReason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostSaved": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "SkuCodeInput": {
         "required": [
           "code"
@@ -33679,6 +34148,52 @@
             "items": {
               "$ref": "#/components/schemas/SkuBatchItem"
             }
+          }
+        }
+      },
+      "AdjustmentInput": {
+        "required": [
+          "amount",
+          "component",
+          "currency",
+          "effectiveFrom",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "component": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VoidInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
           }
         }
       },
@@ -41125,6 +41640,559 @@
             "$ref": "#/components/schemas/SkuMergeReport"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CostListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CostRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "skuStatus": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "maintained": {
+            "type": "boolean"
+          },
+          "costMethod": {
+            "type": "string"
+          },
+          "costMethodLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "packagingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "otherDirectCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "purchaseCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "purchaseDeliveryCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "revisionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AdjustmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "component": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isVoid": {
+            "type": "boolean"
+          },
+          "voidReason": {
+            "type": "string"
+          },
+          "voidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AmountRow": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "CostComponentRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "amounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmountRow"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CostDetail": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "maintained": {
+            "type": "boolean"
+          },
+          "costMethod": {
+            "type": "string"
+          },
+          "costMethodLabel": {
+            "type": "string"
+          },
+          "costMethodBasis": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostComponentRow"
+            }
+          },
+          "totals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmountRow"
+            }
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalComplete": {
+            "type": "boolean"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "partialComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedDeliveryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "foreignAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForeignAmount"
+            }
+          },
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdjustmentRow"
+            }
+          },
+          "recentRevisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevisionRow"
+            }
+          },
+          "lots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotRow"
+            }
+          },
+          "quoteReference": {
+            "$ref": "#/components/schemas/QuoteReference"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ForeignAmount": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "LotRow": {
+        "type": "object",
+        "properties": {
+          "lotRef": {
+            "type": "string"
+          },
+          "receivedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "unitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "QuoteReference": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "minQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "purchaseUnitCode": {
+            "type": "string"
+          },
+          "supplierRoleId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RevisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "costMethod": {
+            "type": "string"
+          },
+          "costMethodLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "purchaseCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "firstMileAllocation": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "dutyCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "otherDirectCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "snapshotComplete": {
+            "type": "boolean"
+          },
+          "missingComponents": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changeReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ComponentCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CostCapabilities": {
+        "type": "object",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComponentCapability"
+            }
+          },
+          "costMethods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MethodOption"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "costBasisNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "MethodOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "basis": {
             "type": "string"
           }
         }

@@ -8087,6 +8087,243 @@
         }
       }
     },
+    "/trade/platform-orders/webhook": {
+      "post": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "post_trade_platform_orders_webhook",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOrderSyncWebhookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/poll": {
+      "post": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "post_trade_platform_orders_poll",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOrderSyncPollInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/mappings": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enumKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mappingSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncMappingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "post_trade_platform_orders_mappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOrderSyncMappingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncMappingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/mappings/sync": {
+      "post": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "post_trade_platform_orders_mappings_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOrderSyncMappingSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncMappingSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/orders/risk-validation/signals": {
       "get": {
         "tags": [
@@ -8679,6 +8916,161 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/queue/{orderId}/evaluate": {
+      "post": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "post_trade_order_pending_review_queue_orderId_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/batches": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "post_trade_order_pending_review_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchReceipt"
                 }
               }
             }
@@ -22140,6 +22532,358 @@
         }
       }
     },
+    "/trade/platform-orders/orders": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "normalizedStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncOrderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/orders/{id}": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/exceptions": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "errorCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "externalOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncExceptionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/capabilities": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/batches": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "triggerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncBatchPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/platform-orders/batches/{id}": {
+      "get": {
+        "tags": [
+          "platform-order-sync-controller"
+        ],
+        "operationId": "get_trade_platform_orders_batches_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOrderSyncBatchDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/orders/risk-validation/overview": {
       "get": {
         "tags": [
@@ -22399,6 +23143,239 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderReviewRuleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/summary": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/queue": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_queue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queueStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewDecision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "riskEvaluated",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/queue/{orderId}": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_queue_orderId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/capabilities": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/batches/{batchId}": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_batches_batchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchReceipt"
                 }
               }
             }
@@ -28873,6 +29850,651 @@
           }
         }
       }
+    },
+    "/trade/order-address-payment-check/policy": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentPolicy"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "put_trade_order_address_payment_check_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPaymentPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentPolicy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/payment-rules": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_payment_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "paymentMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "observedStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentPaymentRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "post_trade_order_address_payment_check_payment_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPaymentPaymentRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentPaymentRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/embargo-rules": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_embargo_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "embargoLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentEmbargoRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "post_trade_order_address_payment_check_embargo_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPaymentEmbargoRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentEmbargoRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/country-rules": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_country_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCountryRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "post_trade_order_address_payment_check_country_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPaymentCountryRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCountryRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/checks": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_checks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "riskLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deliveryStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCheckPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "post_trade_order_address_payment_check_checks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPaymentCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCheckSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/overview": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/orders/{orderId}/latest": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_orders_orderId_latest",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCheckDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/checks/{checkId}": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_checks_checkId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "checkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCheckDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-address-payment-check/capabilities": {
+      "get": {
+        "tags": [
+          "address-payment-check-controller"
+        ],
+        "operationId": "get_trade_order_address_payment_check_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressPaymentCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -29105,7 +30727,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -32776,49 +34398,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -32843,7 +34465,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -33323,14 +34945,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -38766,6 +40388,616 @@
           }
         }
       },
+      "PlatformOrderSyncAddressInput": {
+        "required": [
+          "addressLine1",
+          "countryCode",
+          "recipientName"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recipientPhone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recipientEmail": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string"
+          },
+          "companyName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "province": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "district": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "postcode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "addressLine1": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "addressLine2": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxId": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncAttributeInput": {
+        "required": [
+          "attributeName"
+        ],
+        "type": "object",
+        "properties": {
+          "attributeName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "attributeValue": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "attributeUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceVersion": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncComponentInput": {
+        "required": [
+          "componentCode",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "componentCode": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "componentName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "componentType": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PlatformOrderSyncEventInput": {
+        "required": [
+          "buyerId",
+          "currency",
+          "externalOrderNo",
+          "lines",
+          "platformStatus",
+          "shippingAddress"
+        ],
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "ORDER_CREATED",
+              "ORDER_UPDATED",
+              "ORDER_CANCELLED"
+            ]
+          },
+          "externalOrderNo": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformStatus": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformEventVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformPlacedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "platformUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "PREPAID",
+              "COD",
+              "BANK_TRANSFER",
+              "CREDIT_TERM",
+              "FREIGHT_FORWARDER",
+              "OTHER"
+            ]
+          },
+          "paymentTermsDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "buyerId": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "buyerType": {
+            "type": "string",
+            "enum": [
+              "ORGANIZATION",
+              "INDIVIDUAL"
+            ]
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "shippingAmount": {
+            "type": "number"
+          },
+          "otherAmount": {
+            "type": "number"
+          },
+          "platformGrandTotalAmount": {
+            "type": "number"
+          },
+          "shippingAddress": {
+            "$ref": "#/components/schemas/PlatformOrderSyncAddressInput"
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/PlatformOrderSyncAddressInput"
+          },
+          "lines": {
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncLineInput"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncLineInput": {
+        "required": [
+          "quantity",
+          "skuCode",
+          "skuId",
+          "skuName",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "specSnapshot": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuMappingVersion": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "discountedUnitPrice": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncAttributeInput"
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncComponentInput"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncWebhookInput": {
+        "required": [
+          "events",
+          "platformCode",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "events": {
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncEventInput"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncEventResult": {
+        "type": "object",
+        "properties": {
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "normalizedStatus": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncResult": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "triggerType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duplicateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mappingVersion": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncEventResult"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncPollInput": {
+        "required": [
+          "orders",
+          "platformCode",
+          "shopCode",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orders": {
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncEventInput"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncMappingInput": {
+        "required": [
+          "enumKind",
+          "externalValue",
+          "internalValue",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enumKind": {
+            "type": "string",
+            "enum": [
+              "ORDER_STATUS",
+              "PAYMENT_METHOD",
+              "COMPONENT_TYPE"
+            ]
+          },
+          "externalValue": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "internalValue": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncMappingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "enumKind": {
+            "type": "string"
+          },
+          "externalValue": {
+            "type": "string"
+          },
+          "internalValue": {
+            "type": "string"
+          },
+          "mappingSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "mappingVersion": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformOrderSyncMappingSyncInput": {
+        "required": [
+          "enumKind",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enumKind": {
+            "type": "string",
+            "enum": [
+              "ORDER_STATUS",
+              "PAYMENT_METHOD",
+              "COMPONENT_TYPE"
+            ]
+          }
+        }
+      },
+      "PlatformOrderSyncMappingSyncResult": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "enumKind": {
+            "type": "string"
+          },
+          "mappingVersion": {
+            "type": "string"
+          },
+          "importedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supersededCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "source": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "RiskSignalInput": {
         "required": [
           "capturedAt",
@@ -38801,7 +41033,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39658,6 +41890,213 @@
         },
         "description": "命中链一行（未命中的规则也在内）"
       },
+      "EvaluateInput": {
+        "type": "object",
+        "properties": {
+          "evaluatedAt": {
+            "type": "string",
+            "description": "判定时刻（timestamptz）；不给 = 服务器当前时刻",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "试算请求"
+      },
+      "BatchDecisionInput": {
+        "required": [
+          "action",
+          "idempotencyKey",
+          "orderIds"
+        ],
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "幂等键：同一租户内唯一；重复提交同一个键只生效一次"
+          },
+          "action": {
+            "type": "string",
+            "description": "批量动作：APPROVE 通过 / REJECT 驳回 / SUSPEND 挂起",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "orderIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "description": "订单 id 列表（1..100 条，同一批内不许重复）",
+            "items": {
+              "type": "string",
+              "description": "订单 id 列表（1..100 条，同一批内不许重复）",
+              "format": "uuid"
+            }
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号；action=APPROVE 时必填",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本；action=APPROVE 时必填",
+            "format": "int64",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "理由；action=REJECT / SUSPEND 时必填",
+            "nullable": true
+          }
+        },
+        "description": "批量审单请求"
+      },
+      "BatchItemResult": {
+        "type": "object",
+        "properties": {
+          "seqNo": {
+            "type": "integer",
+            "description": "请求内的序号（从 1 开始）",
+            "format": "int32"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号；查不到时为 null",
+            "nullable": true
+          },
+          "outcome": {
+            "type": "string",
+            "description": "这一条的结论",
+            "enum": [
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED",
+              "SKIPPED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string",
+            "description": "这一条的结论中文"
+          },
+          "reason": {
+            "type": "string",
+            "description": "为什么是这个结论"
+          }
+        },
+        "description": "批量审单的逐条结果"
+      },
+      "BatchReceipt": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "批次动作中文"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求了几条",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "description": "本批实际通过了几条",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "本批实际驳回了几条",
+            "format": "int32"
+          },
+          "suspendedCount": {
+            "type": "integer",
+            "description": "本批实际挂起了几条",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "本批跳过了几条",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "description": "批次理由"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "是否已完成"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "完成时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "description": "操作人（已认证成员）",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "description": "逐条结果（按请求下标）",
+            "items": {
+              "$ref": "#/components/schemas/BatchItemResult"
+            }
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "本次是否为幂等回放（true = 之前已经处理过，没有再次改状态）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "批量审单回执"
+      },
       "InterceptSkuCostInput": {
         "required": [
           "capturedAt",
@@ -39682,7 +42121,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -48452,12 +50891,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -50262,9 +52701,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -59012,6 +61451,604 @@
           }
         }
       },
+      "PlatformOrderSyncOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inFulfillmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duplicateEventCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformOrderSyncOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "documentStatus": {
+            "type": "string"
+          },
+          "platformStatus": {
+            "type": "string"
+          },
+          "normalizedStatus": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "platformOriginalAmount": {
+            "type": "number"
+          },
+          "platformDiscountAmount": {
+            "type": "number"
+          },
+          "platformTaxAmount": {
+            "type": "number"
+          },
+          "platformShippingAmount": {
+            "type": "number"
+          },
+          "platformGrandTotalAmount": {
+            "type": "number"
+          },
+          "restoredGrandTotalAmount": {
+            "type": "number"
+          },
+          "mappingVersion": {
+            "type": "string"
+          },
+          "platformPlacedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "platformUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformOrderSyncComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "componentSource": {
+            "type": "string"
+          },
+          "componentSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "componentCode": {
+            "type": "string"
+          },
+          "componentName": {
+            "type": "string"
+          },
+          "componentType": {
+            "type": "string"
+          },
+          "externalType": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "mappingVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "platformStatus": {
+            "type": "string"
+          },
+          "normalizedStatus": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "platformEventVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformOrderSyncOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/PlatformOrderSyncOrderRow"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncComponentRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncEventRow"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncMappingPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncMappingRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mappingVersions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncExceptionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncExceptionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmappedStatusCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amountMismatchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "frozenCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformOrderSyncExceptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformOrderSyncCapabilities": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MANUAL",
+                "PLATFORM",
+                "AMAZON",
+                "SHOPIFY",
+                "EBAY",
+                "TIKTOK_SHOP",
+                "ALIBABA_1688"
+              ]
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PENDING_CONFIRMATION",
+                "CONFIRMED",
+                "IN_FULFILLMENT",
+                "COMPLETED",
+                "CANCELLED",
+                "ON_HOLD"
+              ]
+            }
+          },
+          "eventTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ORDER_CREATED",
+                "ORDER_UPDATED",
+                "ORDER_CANCELLED"
+              ]
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "WEBHOOK",
+                "POLL"
+              ]
+            }
+          },
+          "enumKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ORDER_STATUS",
+                "PAYMENT_METHOD",
+                "COMPONENT_TYPE"
+              ]
+            }
+          },
+          "mappingSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TENANT_MAINTAINED",
+                "MODULE_2_ENUM_MAPPING"
+              ]
+            }
+          },
+          "errorCodes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "UNMAPPED_PLATFORM_STATUS",
+                "AMOUNT_MISMATCH",
+                "INVALID_PAYLOAD",
+                "ORDER_SNAPSHOT_FROZEN",
+                "ORDER_CONTENT_DIVERGED",
+                "EXTERNAL_ORDER_NO_COLLISION",
+                "MAPPING_SYNC_FAILED",
+                "PLATFORM_CALL_FAILED"
+              ]
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enumMappingSyncAvailable": {
+            "type": "boolean"
+          },
+          "enumMappingNote": {
+            "type": "string"
+          },
+          "sharedOrderModel": {
+            "type": "boolean"
+          },
+          "sharedOrderModelNote": {
+            "type": "string"
+          },
+          "statusNormalizationNote": {
+            "type": "string"
+          },
+          "amountRestorationNote": {
+            "type": "string"
+          },
+          "downstreamGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncDownstreamGap"
+            }
+          }
+        }
+      },
+      "PlatformOrderSyncDownstreamGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "blueprint": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOrderSyncBatchPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncBatchRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "webhookCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pollCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duplicateCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformOrderSyncBatchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "triggerType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duplicateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mappingVersion": {
+            "type": "string"
+          },
+          "windowStartAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlatformOrderSyncBatchDetail": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/PlatformOrderSyncBatchRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncEventRow"
+            }
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformOrderSyncExceptionRow"
+            }
+          }
+        }
+      },
       "RiskSignalPage": {
         "type": "object",
         "properties": {
@@ -59677,6 +62714,729 @@
           }
         },
         "description": "买家画像分页"
+      },
+      "PendingReviewSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "队列里的订单总数（已提交且未终结）",
+            "format": "int64"
+          },
+          "pending": {
+            "type": "integer",
+            "description": "待审（没有任何结论）",
+            "format": "int64"
+          },
+          "suspended": {
+            "type": "integer",
+            "description": "已挂起（仍在队列里等人）",
+            "format": "int64"
+          },
+          "approved": {
+            "type": "integer",
+            "description": "已通过",
+            "format": "int64"
+          },
+          "rejected": {
+            "type": "integer",
+            "description": "已驳回",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "description": "已超时（等得最久的一批）",
+            "format": "int64"
+          },
+          "unevaluated": {
+            "type": "integer",
+            "description": "还没有风险评估的订单数",
+            "format": "int64"
+          },
+          "highRisk": {
+            "type": "integer",
+            "description": "风险分 ≥ 60 的订单数",
+            "format": "int64"
+          },
+          "at": {
+            "type": "string",
+            "description": "概览基准时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "待审队列概览（不受列表筛选与分页影响）"
+      },
+      "PendingReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的行",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "筛选后的总行数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 开始）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "sortNote": {
+            "type": "string",
+            "description": "本批的排序键说明（风险分 → 时效分）"
+          }
+        },
+        "description": "待审队列分页"
+      },
+      "PendingReviewRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "平台/外部单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "grandTotal": {
+            "type": "number",
+            "description": "订单总额（numeric(19,4)）"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻（进队列的时刻）",
+            "format": "date-time"
+          },
+          "waitingHours": {
+            "type": "number",
+            "description": "已等候小时数（numeric，秒→小时的整数除法）"
+          },
+          "timelinessScore": {
+            "type": "number",
+            "description": "时效分 0..100（DB 函数现算）"
+          },
+          "timelinessState": {
+            "type": "string",
+            "description": "时效状态"
+          },
+          "timelinessStateLabel": {
+            "type": "string",
+            "description": "时效状态中文"
+          },
+          "queueStatus": {
+            "type": "string",
+            "description": "队列状态"
+          },
+          "queueStatusLabel": {
+            "type": "string",
+            "description": "队列状态中文"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "结论时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "结论理由",
+            "nullable": true
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "结论依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "结论依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "string",
+            "description": "产生该结论的批次 id",
+            "format": "uuid",
+            "nullable": true
+          },
+          "riskScore": {
+            "type": "number",
+            "description": "风险分 0..100；null = 没评估过，不是 0",
+            "nullable": true
+          },
+          "riskRecommendedAction": {
+            "type": "string",
+            "description": "风控建议动作（RELEASE / MANUAL_REVIEW / HOLD_SHIPMENT）",
+            "nullable": true
+          },
+          "riskManualReviewRequired": {
+            "type": "boolean",
+            "description": "风控是否要求人工复核",
+            "nullable": true
+          },
+          "riskEvaluationStatus": {
+            "type": "string",
+            "description": "风控评估状态（SCORED / INSUFFICIENT_SIGNALS）",
+            "nullable": true
+          },
+          "reviewDecision": {
+            "type": "string",
+            "description": "审单判定结论（AUTO_APPROVE / MANUAL_REVIEW）；null = 没判定过",
+            "nullable": true
+          },
+          "reviewMode": {
+            "type": "string",
+            "description": "判定的模式（RECORDED 生效判定 / DRY_RUN 试跑）；null = 没判定过",
+            "nullable": true
+          },
+          "reviewDecisionReason": {
+            "type": "string",
+            "description": "审单判定的一句话结论",
+            "nullable": true
+          },
+          "winningRuleCode": {
+            "type": "string",
+            "description": "决定结论的规则编号",
+            "nullable": true
+          },
+          "winningRuleName": {
+            "type": "string",
+            "description": "决定结论的规则名称",
+            "nullable": true
+          },
+          "matchedRuleCount": {
+            "type": "integer",
+            "description": "命中的规则条数",
+            "format": "int32"
+          },
+          "forcedRuleCount": {
+            "type": "integer",
+            "description": "强制转人工的规则条数",
+            "format": "int32"
+          },
+          "hitRuleCodes": {
+            "type": "array",
+            "description": "命中的规则编号（可回溯到具体规则）",
+            "items": {
+              "type": "string",
+              "description": "命中的规则编号（可回溯到具体规则）"
+            }
+          },
+          "addressAnomalyCodes": {
+            "type": "array",
+            "description": "命中的地址异常码",
+            "items": {
+              "type": "string",
+              "description": "命中的地址异常码"
+            }
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人姓名",
+            "nullable": true
+          },
+          "shippingCountry": {
+            "type": "string",
+            "description": "收货国家",
+            "nullable": true
+          }
+        },
+        "description": "待审队列的一行"
+      },
+      "OrderSnapshot": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "平台/外部单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源"
+          },
+          "manualKind": {
+            "type": "string",
+            "description": "手工单子类；平台单为空串"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "subtotalAmount": {
+            "type": "number",
+            "description": "小计"
+          },
+          "discountAmount": {
+            "type": "number",
+            "description": "折扣额"
+          },
+          "taxAmount": {
+            "type": "number",
+            "description": "税费"
+          },
+          "shippingAmount": {
+            "type": "number",
+            "description": "运费"
+          },
+          "otherAmount": {
+            "type": "number",
+            "description": "其他费用"
+          },
+          "grandTotal": {
+            "type": "number",
+            "description": "总额"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          },
+          "documentStatus": {
+            "type": "string",
+            "description": "单据状态（DRAFT / SUBMITTED）"
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人姓名"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收件人电话"
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收件人邮箱"
+          },
+          "shippingCountry": {
+            "type": "string",
+            "description": "收货国家"
+          },
+          "shippingCity": {
+            "type": "string",
+            "description": "收货城市"
+          },
+          "shippingPostcode": {
+            "type": "string",
+            "description": "收货邮编"
+          },
+          "shippingAddressLine1": {
+            "type": "string",
+            "description": "收货地址行"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "订单行数",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number",
+            "description": "订单件数（numeric(19,6)）"
+          }
+        },
+        "description": "订单快照（审单要看的那些事实）"
+      },
+      "PendingReviewBatchRef": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "批次创建时刻",
+            "format": "date-time"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "这一单在该批次里的结论"
+          },
+          "reason": {
+            "type": "string",
+            "description": "这一单在该批次里的理由"
+          }
+        },
+        "description": "这一单最近几次批量审单的结果"
+      },
+      "PendingReviewDetail": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "$ref": "#/components/schemas/PendingReviewRow"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OrderSnapshot"
+          },
+          "queueCase": {
+            "$ref": "#/components/schemas/QueueCaseInfo"
+          },
+          "riskAssessment": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "riskComponents": {
+            "type": "array",
+            "description": "风控五个维度的明细（恒 5 行；没评估过时为空表）",
+            "items": {
+              "$ref": "#/components/schemas/RiskComponent"
+            }
+          },
+          "reviewDecision": {
+            "$ref": "#/components/schemas/ReviewDecision"
+          },
+          "hits": {
+            "type": "array",
+            "description": "命中链（逐条件到订单字段与实际值）；没判定过时为空表",
+            "items": {
+              "$ref": "#/components/schemas/RuleHit"
+            }
+          },
+          "recentBatches": {
+            "type": "array",
+            "description": "这一单最近几次批量审单的结果",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewBatchRef"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "待审队列的单条详情"
+      },
+      "QueueCaseInfo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "结论状态"
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "结论中文"
+          },
+          "enqueuedAt": {
+            "type": "string",
+            "description": "入队时刻",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "结论时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedByMembershipId": {
+            "type": "string",
+            "description": "结论人（已认证成员）",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "结论理由"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "evaluationId": {
+            "type": "string",
+            "description": "依据的判定留痕 id",
+            "format": "uuid",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "string",
+            "description": "产生该结论的批次 id",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "description": "这一单当前的审单结论",
+        "nullable": true
+      },
+      "ApprovableRule": {
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编号"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "version": {
+            "type": "integer",
+            "description": "规则版本（批量通过要连版本一起带）",
+            "format": "int64"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止；null = 长期有效",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "description": "为什么这条能当依据"
+          }
+        },
+        "description": "可作为批量通过依据的规则"
+      },
+      "PendingReviewCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "上游数据源逐项可用性",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewDimension"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "description": "下游模块逐项交付状态",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewDownstream"
+            }
+          },
+          "activeRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的审单规则条数",
+            "format": "int32"
+          },
+          "autoApproveRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的「自动通过」规则条数",
+            "format": "int32"
+          },
+          "forcedManualRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的「强制转人工」规则条数",
+            "format": "int32"
+          },
+          "approvableRules": {
+            "type": "array",
+            "description": "**可作为批量通过依据**的规则清单（编号 + 版本）。批量通过必须从这里挑一条 —— 没有规则就没有「明确的规则」",
+            "items": {
+              "$ref": "#/components/schemas/ApprovableRule"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "9.2.1.1 待审队列的能力与上下游可用性"
+      },
+      "PendingReviewDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "能力码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "是否已接通"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "note": {
+            "type": "string",
+            "description": "缺口说明；已接通时为空串"
+          }
+        },
+        "description": "待审队列的一项能力/上游数据源"
+      },
+      "PendingReviewDownstream": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "模块号"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属服务"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "note": {
+            "type": "string",
+            "description": "交接说明"
+          }
+        },
+        "description": "下游模块的交付状态"
+      },
+      "BatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的行",
+            "items": {
+              "$ref": "#/components/schemas/BatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总行数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 开始）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          }
+        },
+        "description": "批量审单回执分页"
+      },
+      "BatchRow": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "批次动作中文"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求了几条",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "description": "实际通过几条",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "实际驳回几条",
+            "format": "int32"
+          },
+          "suspendedCount": {
+            "type": "integer",
+            "description": "实际挂起几条",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过几条",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "description": "批次理由"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "是否已完成"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "批量审单回执列表的一行"
       },
       "InterceptSkuCostPage": {
         "type": "object",
@@ -72240,6 +76000,781 @@
             "type": "string"
           }
         }
+      },
+      "AddressPaymentPolicyInput": {
+        "required": [
+          "missingReferencePolicy",
+          "policyName"
+        ],
+        "type": "object",
+        "properties": {
+          "policyName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "missingReferencePolicy": {
+            "type": "string",
+            "enum": [
+              "ASSESS_KNOWN_ONLY",
+              "BLOCK_DECISION"
+            ]
+          }
+        },
+        "description": "登记校验策略（upsert；不提供默认策略，必须显式登记）"
+      },
+      "AddressPaymentPolicy": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "missingReferencePolicy": {
+            "type": "string",
+            "enum": [
+              "ASSESS_KNOWN_ONLY",
+              "BLOCK_DECISION"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "校验策略（每租户一条）"
+      },
+      "AddressPaymentPaymentRuleInput": {
+        "required": [
+          "expectedSeverity",
+          "observedStatus",
+          "paymentMethod"
+        ],
+        "type": "object",
+        "properties": {
+          "paymentMethod": {
+            "minLength": 1,
+            "pattern": "^(PREPAID|COD|BANK_TRANSFER|CREDIT_TERM|FREIGHT_FORWARDER|OTHER)$",
+            "type": "string"
+          },
+          "observedStatus": {
+            "minLength": 1,
+            "pattern": "^(PAID|UNPAID|PARTIAL|COD)$",
+            "type": "string"
+          },
+          "expectedSeverity": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "WARN",
+              "BLOCK"
+            ]
+          },
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "description": "登记支付状态一致性规则（expectedSeverity=OK 表示自洽）"
+      },
+      "AddressPaymentPaymentRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "observedStatus": {
+            "type": "string"
+          },
+          "expectedConsistent": {
+            "type": "boolean",
+            "description": "该组合是否自洽（true ⇒ 明细落 CLEARED，false ⇒ FLAGGED）"
+          },
+          "expectedSeverity": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "支付状态一致性规则（付款方式 × 观察到的支付状态）"
+      },
+      "AddressPaymentEmbargoRuleInput": {
+        "required": [
+          "countryCode",
+          "embargoLevel",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "embargoLevel": {
+            "type": "string",
+            "enum": [
+              "BLOCK",
+              "REVIEW"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_16_COMPLIANCE"
+            ]
+          },
+          "sourceReference": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "description": "登记一条禁运国家（ISO alpha-2 大写）"
+      },
+      "AddressPaymentEmbargoRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "embargoLevel": {
+            "type": "string",
+            "enum": [
+              "BLOCK",
+              "REVIEW"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "TENANT_MAINTAINED",
+              "MODULE_16_COMPLIANCE"
+            ]
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "禁运国家清单（收货国）"
+      },
+      "AddressPaymentCountryRuleInput": {
+        "required": [
+          "countryCode"
+        ],
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "postcodeRequired": {
+            "type": "boolean"
+          },
+          "postcodePattern": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "postcodeNote": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "streetRequired": {
+            "type": "boolean"
+          },
+          "streetMinLength": {
+            "maximum": 300,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "cityRequired": {
+            "type": "boolean"
+          },
+          "regionRequired": {
+            "type": "boolean"
+          },
+          "phoneRequired": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "description": "登记国别地址格式规则（邮编正则在服务端校验可编译）"
+      },
+      "AddressPaymentCountryRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "postcodeRequired": {
+            "type": "boolean"
+          },
+          "postcodePattern": {
+            "type": "string"
+          },
+          "postcodeNote": {
+            "type": "string"
+          },
+          "streetRequired": {
+            "type": "boolean"
+          },
+          "streetMinLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cityRequired": {
+            "type": "boolean"
+          },
+          "regionRequired": {
+            "type": "boolean"
+          },
+          "phoneRequired": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "国别地址格式规则（一个国家一套）"
+      },
+      "AddressPaymentCheckInput": {
+        "required": [
+          "orderId"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "description": "支付状态观察值；本服务没有支付状态事实（12 财务未交付），由调用方提供；null ⇒ 该项缺参照",
+            "nullable": true,
+            "enum": [
+              "PAID",
+              "UNPAID",
+              "PARTIAL",
+              "COD"
+            ]
+          },
+          "paymentStatusSource": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PLATFORM_CALLBACK",
+              "TENANT_REPORTED",
+              "FINANCE_LEDGER"
+            ]
+          },
+          "paymentStatusObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "对一张订单跑一次地址与支付校验"
+      },
+      "AddressPaymentCheck": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "orderCurrency": {
+            "type": "string"
+          },
+          "orderAmount": {
+            "type": "number"
+          },
+          "orderSubmittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentStatusSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentStatusObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "shippingCountryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shippingPostcode": {
+            "type": "string"
+          },
+          "shippingStreet": {
+            "type": "string"
+          },
+          "policyName": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "assessedReferenceAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryStatus": {
+            "type": "string",
+            "description": "输出之一：校验结果（可投递性）"
+          },
+          "riskLevel": {
+            "type": "string",
+            "description": "输出之二：风险等级"
+          },
+          "codFlagged": {
+            "type": "boolean",
+            "description": "是否货到付款（CRITICAL 的唯一来源）"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "flaggedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clearedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noReferenceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "upstreamUnavailableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notApplicableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warnCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "地址与支付校验结果（一张订单一次校验 = 一行）"
+      },
+      "AddressPaymentCheckDetail": {
+        "type": "object",
+        "properties": {
+          "check": {
+            "$ref": "#/components/schemas/AddressPaymentCheck"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentCheckItem"
+            }
+          }
+        },
+        "description": "地址与支付校验详情"
+      },
+      "AddressPaymentCheckItem": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string"
+          },
+          "itemLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "evidenceSource": {
+            "type": "string"
+          },
+          "observedValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "matchCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evidenceReference": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        },
+        "description": "校验明细（七项恒定各占一行）"
+      },
+      "AddressPaymentCheckSaved": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/AddressPaymentCheckDetail"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "description": "落一次地址与支付校验"
+      },
+      "AddressPaymentPaymentRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentPaymentRule"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "支付状态一致性规则分页"
+      },
+      "AddressPaymentOverview": {
+        "type": "object",
+        "properties": {
+          "totalChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "codChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notDeliverableChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "undeterminedChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "highChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "embargoRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "paymentRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastAssessedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "地址与支付校验概览"
+      },
+      "AddressPaymentEmbargoRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentEmbargoRule"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "禁运国家清单分页"
+      },
+      "AddressPaymentCountryRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentCountryRule"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "国别地址格式规则分页"
+      },
+      "AddressPaymentCheckPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentCheck"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "校验结果分页"
+      },
+      "AddressPaymentCapabilities": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "七个检查项逐项的可用性",
+            "items": {
+              "$ref": "#/components/schemas/AddressPaymentCapabilityItem"
+            }
+          },
+          "boldRule": {
+            "type": "string",
+            "description": "蓝图加粗句原文与本模块的落点"
+          },
+          "riskOrder": {
+            "type": "string",
+            "description": "风险等级判定顺序原文"
+          },
+          "deliveryOrder": {
+            "type": "string",
+            "description": "可投递性判定顺序原文"
+          },
+          "policyConfigured": {
+            "type": "boolean",
+            "description": "本租户是否已登记校验策略"
+          },
+          "embargoListConfigured": {
+            "type": "boolean",
+            "description": "禁运清单是否非空（空清单 = 没禁运任何国家，不是「都通过」）"
+          },
+          "gaps": {
+            "type": "string",
+            "description": "上游与下游缺口原文"
+          }
+        },
+        "description": "9.2.2.1 地址与支付校验能力与上下游可用性"
+      },
+      "AddressPaymentCapabilityItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "检查项码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "source": {
+            "type": "string",
+            "description": "判定输入来源原文"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否真接通（false = 租户维护或上游未交付）"
+          },
+          "thresholdSource": {
+            "type": "string",
+            "description": "取哪一列阈值（真实 SQL / 租户维护 / 无阈值）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付时的归属模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "缺口对业务的影响；已接通为 null"
+          }
+        },
+        "description": "单个检查项的可用性"
       }
     }
   }

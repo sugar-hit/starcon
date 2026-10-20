@@ -435,9 +435,42 @@ cd "$PROJECT_ROOT" && node tools/module-progress/lane.mjs gate acquire
 ```
 
 退出码 3 = 另一个 tick 正在派发。**此时不要做任何改动**，只汇报进度就结束本次运行。
-闸只在派发窗口持有（秒级），不会把并行开发变回串行。
 
-**收尾时必须 `lane.mjs gate release`**，否则下一个 tick 会一直撞闸。
+⚠️ **闸不是「派发窗口（秒级）」，TTL 是 70 分钟**（`GATE_TTL_SECONDS = 4200`）。
+现行流程让一个 tick **持闸跑完 merge + L2 + 三件套**，实测单轮 40–100 分钟。
+判龄用的是**闸目录的 mtime**（`statSync(GATE_DIR).mtimeMs`）：超 TTL 即视为陈旧闸，
+下一个 tick 会**删掉闸目录重建**（= 抢闸）⇒ 两个 tick 同时改集成头、同时跑 L2
+抢 Testcontainers ⇒ 成片假红。**这正是这道闸要防的事，所以宁可续期也不要让它过期。**
+
+### 闸的续期（自己的活儿干不完 70 分钟时必须做）
+
+典型场景：一批 4 条车道落地 → 合并 → L2（约 25–40 分钟）→ 说明/commit/push，
+整轮必然跨过 TTL。**在关键节点续期**：
+
+```bash
+# ✅ 续期：在闸目录里「新建一个文件」⇒ 目录 mtime 刷新，TTL 重新推满 70 分钟
+touch "$PROJECT_ROOT/.dev-agent/dispatch.gate/keepalive-$(date +%H%M%S)"
+```
+
+⚠️ **三个实测语义**（2026-10-20 在本仓实测，见下表）：
+
+| 操作 | 闸目录 mtime | 能否续期 |
+| --- | --- | --- |
+| `touch keepalive-<新名字>`（新建文件） | 刷新 | ✅ |
+| `echo x >> owner`（往已有文件写内容） | **不变** | ❌ |
+| `touch keepalive-<已存在>`（touch 已存在文件） | **不变** | ❌ |
+
+⇒ **必须用新文件名**。`touch` 一个已存在的文件、或只往 `owner` 里写内容，
+**都不会**续期 —— 这两个是最容易踩的，因为看起来都像「动了闸目录」。
+
+**续期时机**：合并前一次、**L2 启动前一次**（L2 最长），
+保证 TTL 覆盖到 push 结束。续期不改变归属，也不需要重新取闸。
+
+**收尾时必须 `lane.mjs gate release`**（release 会删掉整个闸目录，含 keepalive 文件），
+否则下一个 tick 会一直撞闸。
+
+> 备选（不推荐）：`gate release` 后再 `gate acquire` 也能刷新计时，
+> 但两者之间若有别的 tick 插进来就会真的撞闸。`touch` 新文件没有这个窗口。
 
 ## 第 3 步：回收已落地的车道
 

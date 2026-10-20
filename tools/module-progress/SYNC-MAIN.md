@@ -55,12 +55,45 @@ node tools/module-progress/lane.mjs gate status
 | `gate` | `stale` | 动作                                                          |
 | ------ | ------- | ------------------------------------------------------------- |
 | `free` | false   | `gate acquire` 继续                                          |
-| `held` | false   | **有活着的流水线 tick 持闸** ⇒ 本轮零改动，结束并如实汇报    |
+| `held` | false   | **有活着的流水线 tick 持闸** ⇒ **等它释放**（见下「等闸」），不抢、不清、不 force |
 | `held` | true    | 持闸者已崩（超 TTL）⇒ 可以 `acquire` 接管                    |
 
 ⚠️ **必须走 `gate status` 的 `stale` 字段判据，不要自己按 ageSeconds 猜。**
 ⚠️ **收尾必须 `node tools/module-progress/lane.mjs gate release`** ——
 提前结束也要释放，否则会挡住流水线下一轮。
+
+#### 等闸：密集 `acquire` 竞态，不要低频 `status` 观测
+
+`held + stale=false` 时**不要**立刻放弃 —— 等到闸释放，本轮就能正常同步。
+但**不要**用「每 20 秒 `gate status` → 看到 free 再 `acquire`」：
+闸的交接窗口可以**窄到零宽度**（2026-10-20 03:04:02 实测：持闸者释放，下一 tick 同一秒重新 acquire），
+「先观测到 free」这种写法会**整段错过**它。
+
+正确做法是**直接竞态 `gate acquire`**（`mkdirSync` 是原子互斥：持有且未过期时 mkdir 失败且**无任何副作用**；
+空闲时 mkdir 成功即取得；`age > TTL` 时按 TTL 接管 —— 与 `gate status` 的 `stale` 是**同一套阈值**）：
+
+```bash
+cd "$PROJECT_ROOT"
+while true; do
+  if node tools/module-progress/lane.mjs gate acquire | grep -q '"ok": true'; then
+    echo "GATE ACQUIRED"; break
+  fi
+  sleep 1          # 密度越高越保险；20 秒也实测够用，但窗口可能更窄
+done
+```
+
+⚠️ **`.dev-agent/dispatch.gate/owner` 里的 PID 不是闸存活证据** ——
+`gate acquire` 是短命进程，写完 `owner` 就退出，真正的持闸者是后续长跑的调度器。
+（2026-10-20 03:15 轮实测：owner pid `15173` 查无此进程，而持闸 tick 同时正在同一 worktree 里跑 `mvnw verify`。）
+判活**只能**用 `stale` 字段；活性取证要看**闸外**：同 worktree 里的构建进程（`ps`）。
+
+⚠️ **没拿到过闸就绝对不要 `gate release`** ——
+`gate release` 的实现是无条件 `rmSync(GATE_DIR)`，会把**别人活着的闸删掉**（= 清闸，破坏互斥）。
+「收尾必须 release」的前提是**本轮真的 `acquire` 成功过**。
+
+⚠️ **等闸期间不要跑第二个构建** ——
+持闸 tick 的 L2（`mvnw verify`）与你的预检**共用 `backend/**/target/` 与 PG 容器** ⇒ 并发必假红。
+等闸期间只做**只读**取证（`gate status` / `cat owner` / `ps` / `git log`），**连 `git fetch` 都先别跑**。
 
 ### 第 2 步：拉取并判断有没有新东西
 
