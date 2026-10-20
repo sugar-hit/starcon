@@ -4353,6 +4353,57 @@ const services: readonly {
       /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
   },
   {
+    // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
+    //
+    // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
+    // + 动作（降价/涨价/暂停促销/下架），支持优先级与生效时段。」输入「规则条件与动作；作用范围；
+    // 生效时段」，输出「规则记录 + 命中记录 + 建议调价列表」，并加粗
+    // 「**自动调价必须先"建议"再"执行"**，高风险规则（降价超过 X%）需人工确认，
+    // 避免错误规则批量改价造成损失」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.3.2.1 定价模板」元素**之前**，与另外几条车道的插入点互不重叠。
+    // 既有条目一字未动。
+    //
+    // 🔴 为什么用 `pricing-rules` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `pricing-rules`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`pricing-rules/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.3.2.1 定价模板与本模块共用 L3 锚点 5.3.2，但**不共用端点**：
+    //     模板是「怎么算」，本模块是「什么时候改、改成多少」。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pricing-rules/capabilities                 能力声明（触发条件 / 动作 / 作用范围 / 状态）
+    //   pricing-rules/directory                    作用范围目录（内部分类 + 品牌）
+    //   pricing-rules/rules                        规则集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   pricing-rules/rules/{uuid}                 规则详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //   pricing-rules/evaluate                     跑一次评估（POST）→ 命中记录 + 建议调价列表
+    //   pricing-rules/hits                         命中记录（GET，真分页 + 筛选）
+    //   pricing-rules/suggestions                  建议调价列表（GET，真分页 + 筛选）
+    //   pricing-rules/suggestions/{uuid}/decide    人工确认 / 驳回一条建议（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / rules / evaluate / hits /
+    //    suggestions）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    //    顺序反了会被 uuid 支吃掉半截（`rules` / `suggestions` 的首字母都落在 [0-9a-f] 里）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `rules` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `pricing-rules` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pricing-rules` —— 本模块没有裸路径资源。
+    //   * `pricing-rules/rules/{uuid}/execute` —— 🔴 本模块只产出**建议调价**，
+    //     **不改价**：改价是 5.4.1.1 调价单的写入所有权（蓝图关系句：下游 = 5.4.1.1）。
+    //   * `pricing-rules/rules/{uuid}/prices` —— 本模块**不建价目表**（5.1.1.2 的写入所有权）。
+    //   * `pricing-rules/suggestions/{uuid}/apply` —— 建议调价没有「直接执行」的端点：
+    //     高风险建议必须先经 `decide` 人工确认。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^pricing\-rules(?:\/(?:capabilities|directory|evaluate|hits|rules|suggestions)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/suggestions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/decide)$/,
+  },
+  {
     // 5.3.2.1 定价模板（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
     //
     // 蓝图：「沉淀定价策略模板：成本加成、固定毛利、竞品跟随（若允许）、按站点差异化、
