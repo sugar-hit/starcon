@@ -105,6 +105,50 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
+    // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 `catalog/` SKU 列表那条元素**之前** —— 那样本车道与其他三条车道的
+    // 插入点被隔开，git 能干净求并。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-anomaly-alerts                          —— 🔴 **刻意不放行裸路径**：后端没有
+    //     「GET /catalog/price-anomaly-alerts」这个端点（集合读是 /events 与 /observations），
+    //     放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //   price-anomaly-alerts/capabilities             能力声明（四个输入的真值 + 四类异常口径）
+    //   price-anomaly-alerts/observations             价格观测台账（GET）+ 登记观测（POST）
+    //   price-anomaly-alerts/events                   异常清单（GET）
+    //   price-anomaly-alerts/events/{id}              异常详情（GET）
+    //   price-anomaly-alerts/events/{id}/acknowledge  确认异常（POST）
+    //   price-anomaly-alerts/events/{id}/resolve      消解异常（POST）
+    //   price-anomaly-alerts/rules                   判定规则（GET）+ 保存规则（POST）
+    //   price-anomaly-alerts/notifications           预警通知（集合读）
+    //   price-anomaly-alerts/detect                  运行检测（POST）
+    //
+    // 🔴 `capabilities` / `observations` / `events` / `rules` / `notifications` / `detect`
+    //   的首字母都不落在 [0-9a-f] 里，所以字面量子路径不会被 uuid 分支提前吃掉；
+    //   uuid 分支只出现在 `events/` 下面，且**只接 acknowledge / resolve 两个动作**
+    //   —— 不接的动作（不存在的后端端点）一律 404。
+    //
+    // 🔴 token 与既有条目**不撞**：既有 catalog 元素的首 token 是 products / attributes /
+    //   brands / parties / categories / category-mappings / records / media / skus /
+    //   unit-groups / unit-conversion / spec-axis / variant-combination / … 以及
+    //   `sku-cost-compositions`（5.2.1.1 成本构成）；channel 元素的首 token 是 listings /
+    //   listing-details / listing-performance / listing-changes / listing-bulk-migrations 等。
+    //   本条目的首 token `price-anomaly-alerts` 与它们**首 token 全不相同**；
+    //   且既有正则都是**锚定**的（`/^token(...)?$/`），所以两者互不遮蔽。
+    //
+    // 🔴 刻意**不放行**：5.5.1.1 价格历史（**未交付**）—— 它与本模块同属 L3「5.5 价格监控」，
+    //   但端点命名空间不同，放行后端不存在的路径比 404 更糟。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
