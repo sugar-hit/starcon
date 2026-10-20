@@ -192,7 +192,7 @@
 | 5.1.1.1 | 价目表列表 | /pricing/lists | D6 | 未开发 | — |
 | 5.1.1.2 | 价目项批量维护 | /pricing/lists | D6 | 未开发 | — |
 | 5.1.2.1 | 优先级与冲突检测 | — | D6 | 未开发 | — |
-| 5.2.1.1 | 成本构成 | /pricing/cost | D6 | 未开发 | — |
+| 5.2.1.1 | 成本构成 | /pricing/cost | D6 | 已交付 | catalog V215 sku_cost_profile/sku_cost_adjustment/sku_cost_revision（tenant_id NOT NULL + RLS）+ 7 个端点 /catalog/sku-cost-compositions/**（jOOQ 显式 SQL）+ /pricing/cost 成本构成段（成本法 + 生效时间 + 分项来源明示）+ 成本法加权引擎（SkuCostCompositionRules，三法 BigDecimal + 4 位 HALF_UP） |
 | 5.2.1.2 | 到岸成本 | /pricing/cost | D6 | 未开发 | — |
 | 5.2.1.3 | 成本分摊 | /pricing/cost | D6 | 未开发 | — |
 | 5.2.2.1 | 汇率查询 | /pricing/rates | D6 | 未开发 | — |
