@@ -84,6 +84,7 @@
 
 - `backend/services/channel/src/test/java/com/starcon/channel/StockForecastIntegrationTest.java` — 13 例。
 - `backend/services/channel/src/test/java/com/starcon/channel/StockForecastTenancyIntegrationTest.java` — 3 例（多租户三断言）。
+- `backend/services/channel/src/test/java/com/starcon/channel/StockForecastAvailabilityPortTest.java` — 6 例（两个只读 Port 的语义测试：对本地 stub HTTP server 跑，不需要数据库 —— 证明**模糊命中被挡掉**、**无记录是 `null` 不是 0**、**上游报错/不可达一律 503「读不到」**、**转发调用方自己的 bearer 且不传租户号**）。
 
 ### 前端
 
