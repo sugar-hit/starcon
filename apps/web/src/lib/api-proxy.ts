@@ -831,6 +831,53 @@ const services: readonly {
     // 裸路径 logistics-channels **放行**：它就是本模块的集合读 + POST 登记入口。
   },
   {
+    // 10.3.1.1 轨迹查询（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.1.1.2 `logistics-channels` 那条**之后**、10.1.1.3
+    // `logistics-transit-limits` 那条**之前** —— 三个锚点被既有条目隔开，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-tracking/capabilities      能力声明（未交付段 available=false）
+    //   logistics-tracking/overview          全量概览（不受筛选与分页影响）
+    //   logistics-tracking/subjects          轨迹清单（GET，真分页 + 筛选）
+    //   logistics-tracking/subjects/sync     从上游同步运单集合（POST，唯一写入口之一）
+    //   logistics-tracking/subjects/{uuid}   单票轨迹时间线 + 时效对比（GET）
+    //   logistics-tracking/events            事件流（GET，真分页 + 筛选）/ 承运商推送（POST）
+    //   logistics-tracking/pull-tasks        拉取任务列表（GET）/ 建轮次（POST）
+    //   logistics-tracking/pull-tasks/{uuid} 拉取任务详情（含逐票结果，GET）
+    //
+    // ⚠️ **裸路径 `logistics-tracking` 不放行**：后端这一组端点**没有**裸集合读
+    // （不像 10.1.1.2 的 `logistics-channels` 那样有），契约里也不存在
+    // `/channel/logistics-tracking` 这一条。多放一段会让一个**还不存在**的路径
+    // 看起来像已交付 —— 界面点下去得到 404，而后端其实从来就没实现它。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / sync）**排在 uuid 段之前**。
+    // 写反的话 `s`(sync) 落在 `[0-9a-f]` 里会被 uuid 分支提前吃掉 —— 而
+    // `logistics-tracking/subjects/sync` 根本不是 uuid，正则会静默匹配失败，
+    // 或者更糟：拼出一个「id 是 sync 的轨迹主体」被凭空放行。
+    // 同理**裸 uuid 也不放行**：`logistics-tracking/subjects/{uuid}` 之外的
+    // `logistics-tracking/{uuid}` 不是任何端点。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    //    `[0-9a-f-]+`：后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行，
+    //    症状是有人 GET /api/channel/logistics-tracking/c 会拿到一个「主体 id 是 c」
+    //    的请求打到后端，而不是被白名单当场 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-tracking/subjects/{uuid}/events` —— 时间线就在详情里，没有第二个形状
+    //   * `logistics-tracking/events/{uuid}`             —— 事件按事件 ID 定位，不按 id
+    //   * `logistics-tracking/pull-tasks/{uuid}/items`   —— 逐票结果在任务详情里
+    //   * `logistics-tracking/exceptions` / `/dispositions`
+    //     —— 异常**处置**归 10.3.1.2（未交付），本页只标记异常节点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-tracking\/(?:capabilities|overview|events|pull\-tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|subjects(?:\/sync|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 10.1.1.3 时效与限制（**本条目是新增一条 services[] 元素**，不是往既有 channel
     // 分支的 alternation 里并）。插入锚点与 10.1.1.2 同款：固定在 `prefix: 'trade/'`
     // 之前，纯增量，不重排既有条目与 import。
