@@ -24202,6 +24202,818 @@
           }
         }
       }
+    },
+    "/channel/return-shipbacks/consignments": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_consignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transportMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConsignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/lines": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddLineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/entries": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_entries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordShipbackEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/dispatch": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvanceShipbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/customs": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_customs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordShipbackDeclarationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDeclarationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/costs": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordShipbackCostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipbackAllocationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/confirm": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvanceShipbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/close": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvanceShipbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/cancel": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvanceShipbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/arrival": {
+      "post": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "post_channel_return_shipbacks_consignments_id_arrival",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordShipbackArrivalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/overview": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/events": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "consignmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_consignments_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/consignments/{id}/allocations": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_consignments_id_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReturnShipbackAllocationRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/capabilities": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnShipbackCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-shipbacks/candidates": {
+      "get": {
+        "tags": [
+          "return-shipback-controller"
+        ],
+        "operationId": "get_channel_return_shipbacks_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipbackCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -59035,6 +59847,1220 @@
             "type": "string"
           },
           "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateConsignmentRequest": {
+        "type": "object",
+        "properties": {
+          "transportMode": {
+            "type": "string"
+          },
+          "originCountry": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "originWarehouseRef": {
+            "type": "string"
+          },
+          "domesticWarehouseRef": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "departurePort": {
+            "type": "string",
+            "nullable": true
+          },
+          "arrivalPort": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "trackingNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "plannedDepartureAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "plannedArrivalAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "consolidationNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipbackLineDraft"
+            }
+          }
+        }
+      },
+      "ShipbackLineDraft": {
+        "type": "object",
+        "properties": {
+          "dispositionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "weightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeM3": {
+            "type": "number",
+            "nullable": true
+          },
+          "hsCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "declaredItemName": {
+            "type": "string",
+            "nullable": true
+          },
+          "declaredValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "declaredCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "salvageAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "salvageCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnShipbackAllocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedBasis": {
+            "type": "string"
+          },
+          "requestedBasisLabel": {
+            "type": "string"
+          },
+          "appliedBasis": {
+            "type": "string"
+          },
+          "appliedBasisLabel": {
+            "type": "string"
+          },
+          "basisValue": {
+            "type": "number"
+          },
+          "basisTotal": {
+            "type": "number"
+          },
+          "allocationRatio": {
+            "type": "number"
+          },
+          "allocatedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "residualAmount": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackArrivalRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domesticWarehouseRef": {
+            "type": "string"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "damagedQty": {
+            "type": "number"
+          },
+          "shortageQty": {
+            "type": "number"
+          },
+          "receivedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackCostRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "costTypeLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "allocationBasis": {
+            "type": "string"
+          },
+          "allocationBasisLabel": {
+            "type": "string"
+          },
+          "vendorRef": {
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackDeclarationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "declarationNo": {
+            "type": "string"
+          },
+          "declarationType": {
+            "type": "string"
+          },
+          "declarationTypeLabel": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredQty": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "declaredCurrency": {
+            "type": "string"
+          },
+          "tariffRate": {
+            "type": "number"
+          },
+          "tariffAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clearedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnShipbackRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackLineRow"
+            }
+          },
+          "declarations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackDeclarationRow"
+            }
+          },
+          "costs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackCostRow"
+            }
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackAllocationRow"
+            }
+          },
+          "arrivals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackArrivalRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackEntryRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackEventRow"
+            }
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackEntryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "entryTypeLabel": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "domesticWarehouseRef": {
+            "type": "string"
+          },
+          "entryNo": {
+            "type": "string"
+          },
+          "postingStatus": {
+            "type": "string"
+          },
+          "consumerModule": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "declarationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "consignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "weightKg": {
+            "type": "number"
+          },
+          "volumeM3": {
+            "type": "number"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "declaredCurrency": {
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "allocatedCost": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipbackNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "transportModeLabel": {
+            "type": "string"
+          },
+          "originCountry": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "originWarehouseRef": {
+            "type": "string"
+          },
+          "domesticWarehouseRef": {
+            "type": "string"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "totalQty": {
+            "type": "number"
+          },
+          "totalWeightKg": {
+            "type": "number"
+          },
+          "totalVolumeM3": {
+            "type": "number"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "customsStatus": {
+            "type": "string"
+          },
+          "customsStatusLabel": {
+            "type": "string"
+          },
+          "customsDeclarationNo": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "plannedDepartureAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedArrivalAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualDepartureAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualArrivalAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consolidationNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AddLineRequest": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "$ref": "#/components/schemas/ShipbackLineDraft"
+          }
+        }
+      },
+      "RecordShipbackEntryRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "domesticWarehouseRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdvanceShipbackRequest": {
+        "type": "object",
+        "properties": {
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "trackingNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "RecordShipbackDeclarationRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "declarationType": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredQty": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "declaredCurrency": {
+            "type": "string"
+          },
+          "tariffRate": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "declarationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clearedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RecordShipbackCostRequest": {
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "allocationBasis": {
+            "type": "string"
+          },
+          "vendorRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ShipbackAllocationResult": {
+        "type": "object",
+        "properties": {
+          "costId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requestedBasis": {
+            "type": "string"
+          },
+          "appliedBasis": {
+            "type": "string"
+          },
+          "basisFallback": {
+            "type": "boolean"
+          },
+          "totalAllocated": {
+            "type": "number"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackAllocationRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RecordShipbackArrivalRequest": {
+        "type": "object",
+        "properties": {
+          "domesticWarehouseRef": {
+            "type": "string"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "damagedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "shortageQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnShipbackOverview": {
+        "type": "object",
+        "properties": {
+          "consignmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "arrivedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidateQty": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "costTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipbackCurrencyTotal"
+            }
+          },
+          "declaredValueTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipbackCurrencyTotal"
+            }
+          },
+          "restockEntryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scrapEntryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipbackCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnShipbackEventPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnShipbackRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnShipbackCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipbackCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transportModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "costTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allocationBases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarationTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entryTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consolidationNote": {
+            "type": "string"
+          },
+          "allocationNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "customsNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipbackCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipbackCandidatePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipbackCandidateRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQty": {
+            "type": "number"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipbackCandidateRow": {
+        "type": "object",
+        "properties": {
+          "dispositionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "disposedQty": {
+            "type": "number"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "dispositionMethodLabel": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }
