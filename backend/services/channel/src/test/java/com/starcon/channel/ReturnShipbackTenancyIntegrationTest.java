@@ -154,12 +154,15 @@ class ReturnShipbackTenancyIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
+      // CASCADE：这些表当前还没有外键引用，但以后任何车道给它们加外键时，
+      // 引用方不在同一条 truncate 语句里 PG 会直接拒
+      // （cannot truncate a table referenced in a foreign key constraint），级联一并清干净。
       s.execute("truncate return_shipback_event, return_shipback_inventory_entry,"
           + " return_shipback_arrival, return_shipback_cost_allocation, return_shipback_cost,"
           + " return_shipback_customs_declaration, return_shipback_line,"
           + " return_shipback_consignment, return_inventory_change_instruction,"
           + " return_disposition_cost, return_disposition_order, return_disposition_decision,"
-          + " return_resale_restriction, return_receiving_registration");
+          + " return_resale_restriction, return_receiving_registration cascade");
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }

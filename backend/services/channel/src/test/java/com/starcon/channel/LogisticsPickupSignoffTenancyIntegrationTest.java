@@ -155,11 +155,15 @@ class LogisticsPickupSignoffTenancyIntegrationTest {
   void truncateAll() {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
+      // CASCADE：V216 的 logistics_exception_case、V217 的 logistics_pickup_signoff_case
+      // 以外键引用 logistics_tracking_subject / logistics_tracking_event / handover_manifest_item，
+      // 引用方不在同一条 truncate 语句里，PG 会直接拒
+      // （cannot truncate a table referenced in a foreign key constraint），级联一并清干净。
       s.execute("truncate logistics_pickup_signoff_notification, logistics_pickup_signoff_reminder,"
           + " logistics_pickup_signoff_event, logistics_pickup_signoff_case,"
           + " logistics_pickup_signoff_sla_rule,"
           + " logistics_tracking_event, logistics_tracking_subject,"
-          + " handover_manifest_item, handover_candidate, handover_event, handover_batch");
+          + " handover_manifest_item, handover_candidate, handover_event, handover_batch cascade");
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
