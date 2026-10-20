@@ -3826,6 +3826,22 @@ const services: readonly {
     pattern:
       /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
   },
+  {
+    // 5.3.1.1 利润测算器：利润拆解（售价 → 每一项扣减 → 毛利）+ 测算方案。
+    // 形状逐个列出：
+    //   capabilities —— 能力声明（逐项标注上游真实交付状态与归谁管），字面量子路径；
+    //   sites —— 目标店铺（站点）列表，来自 2.1.1.1 平台目录，字面量子路径；
+    //   calculate —— 一次测算（POST），字面量子路径；
+    //   scenarios —— 方案集合（GET 列表 / POST 新建），字面量子路径；
+    //   scenarios/{uuid} —— 单个方案（GET 详情 / DELETE 删除）。
+    // `capabilities` 与 `calculate` 的首字母都落在 [0-9a-f] 里，但它们是**字面量**分支，
+    // 而 uuid 只出现在 `scenarios/` 之下 ⇒ 两者不会互相吃掉。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^profit-calculator(?:\/(?:capabilities|sites|calculate)|\/scenarios(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
+  },
 ];
 
 function resolve(path: string) {
