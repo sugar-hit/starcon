@@ -26589,6 +26589,1623 @@
           }
         }
       }
+    },
+    "/catalog/price-anomaly-alerts/rules": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnomalyRuleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnomalyRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/observations": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceChangeSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservationListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}/resolve": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStatusSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}/acknowledge": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStatusSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/detect": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_detect",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectionRun"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/notifications": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_notifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "anomalyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "anomalyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_events_eventId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/capabilities": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAnomalyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/parameters": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostParameterPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "put_catalog_landed_costs_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LandedCostParameterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostParameterRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "computedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "computedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "post_catalog_landed_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LandedCostComputeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComputed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}/recompute": {
+      "post": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "post_catalog_landed_costs_statementId_recompute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComputed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_statementId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}/components": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_statementId_components",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComponentPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/comparisons": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_comparisons",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/capabilities": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/{id}": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "put_catalog_exchange_rates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/sources/{code}": {
+      "put": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "put_catalog_exchange_rates_sources_code",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateSourceUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateSourceView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "baseCurrency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quoteCurrency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "post_catalog_exchange_rates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/sources": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_sources",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RateSourceView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "post_catalog_exchange_rates_sources",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateSourceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateSourceView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/sources/initialize": {
+      "post": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "post_catalog_exchange_rates_sources_initialize",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RateSourceView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/fetch": {
+      "post": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "post_catalog_exchange_rates_fetch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/latest": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_latest",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "baseCurrency",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quoteCurrency",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/functional-currencies": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_functional_currencies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionalCurrencyPanel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/fetch-log": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_fetch_log",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FetchLogRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/exchange-rates/capabilities": {
+      "get": {
+        "tags": [
+          "exchange-rate-controller"
+        ],
+        "operationId": "get_catalog_exchange_rates_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -36839,9 +38456,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -51355,6 +52972,1886 @@
         "properties": {
           "deleted": {
             "type": "boolean"
+          }
+        }
+      },
+      "AnomalyRuleInput": {
+        "required": [
+          "anomalyType",
+          "name",
+          "severity"
+        ],
+        "type": "object",
+        "properties": {
+          "anomalyType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratioThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "minDurationDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AnomalyRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratioThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "minDurationDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overridden": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ObservationInput": {
+        "required": [
+          "currency",
+          "observedAt",
+          "platformCode",
+          "priceChangeSource",
+          "siteCode",
+          "skuId",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "siteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "internalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceChangeSource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "comparisonCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRateDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "fxRateSource": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ObservationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EventStatusSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DetectionRun": {
+        "type": "object",
+        "properties": {
+          "windowFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "observationsScanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsOpened": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsResolved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notificationsRaised": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeSummary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectionTypeSummary"
+            }
+          },
+          "uncomparablePairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UncomparablePair"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DetectionTypeSummary": {
+        "type": "object",
+        "properties": {
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "evaluated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "UncomparablePair": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "relatedPlatformCode": {
+            "type": "string"
+          },
+          "relatedSiteCode": {
+            "type": "string"
+          },
+          "relatedCurrency": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ObservationListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObservationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "internalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceChangeSource": {
+            "type": "string"
+          },
+          "priceChangeSourceLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "comparisonCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRateDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "fxRateSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "recipientScope": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "relatedPlatformCode": {
+            "type": "string"
+          },
+          "relatedSiteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "gapAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "gapRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "costLine": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "costComplete": {
+            "type": "boolean"
+          },
+          "costSnapshotAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventDetail": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventRow"
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRow"
+            }
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObservationRow"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AnomalyCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "detectedBy": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "thresholdNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InputCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PriceAnomalyCapabilities": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InputCapability"
+            }
+          },
+          "anomalyTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyCapability"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyRuleRow"
+            }
+          },
+          "detectionNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostParameterInput": {
+        "required": [
+          "componentCode",
+          "currency",
+          "destinationCountryCode",
+          "unitAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "componentCode": {
+            "minLength": 1,
+            "pattern": "CUSTOMS_CLEARANCE|LAST_MILE_RESERVE",
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{2}",
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LandedCostParameterRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "componentCode": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LandedCostComputeInput": {
+        "type": "object",
+        "properties": {
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceShipmentCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LandedCostComputed": {
+        "type": "object",
+        "properties": {
+          "statementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostStatementRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostStatementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "allocationMethod": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LandedCostBasis": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "includedComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComponentRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceDocumentCode": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "included": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxDutyAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxOtherAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxBearer": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "allocationMethod": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/LandedCostBasis"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostLineRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentRow"
+            }
+          }
+        }
+      },
+      "LandedCostComponentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostParameterPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostParameterRow"
+            }
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComparison": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComparisonRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComparisonRow": {
+        "type": "object",
+        "properties": {
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "statementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completeStatementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "minUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LandedCostCapabilities": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "$ref": "#/components/schemas/LandedCostBasis"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentCapability"
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostGap"
+            }
+          },
+          "allocationMethods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComponentCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RateInput": {
+        "required": [
+          "baseCurrency",
+          "effectiveDate",
+          "quoteCurrency",
+          "rate",
+          "sourceCode"
+        ],
+        "type": "object",
+        "properties": {
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "sourceCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "RateView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "entryMode": {
+            "type": "string"
+          },
+          "entryModeLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "acquiredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "display": {
+            "type": "string"
+          },
+          "inverseRate": {
+            "type": "number"
+          },
+          "inverseDisplay": {
+            "type": "string"
+          },
+          "inverseDerived": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RateSourceUpdate": {
+        "required": [
+          "enabled",
+          "kind",
+          "name",
+          "priority",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endpoint": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RateSourceView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "kindBasis": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "rateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RateSourceInput": {
+        "required": [
+          "code",
+          "kind",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Za-z0-9_]{2,32}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endpoint": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "FetchRequest": {
+        "required": [
+          "baseCurrency",
+          "effectiveDate",
+          "quoteCurrency",
+          "sourceCode"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "FetchResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "httpStatus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rowsFetched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rowsSaved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RateView"
+            }
+          },
+          "failureStatus": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RateListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RateView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FunctionalCurrencyPanel": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionalCurrencyRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "FunctionalCurrencyRow": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "rates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RateView"
+            }
+          }
+        }
+      },
+      "FetchLogRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "quoteCurrency": {
+            "type": "string"
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "httpStatus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rowsFetched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rowsSaved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RateCapabilities": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RateSourceView"
+            }
+          },
+          "directionRule": {
+            "type": "string"
+          },
+          "uniquenessRule": {
+            "type": "string"
+          },
+          "inverseRule": {
+            "type": "string"
+          },
+          "entryModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "functionalCurrencyNote": {
+            "type": "string"
+          },
+          "fetchContractNote": {
+            "type": "string"
           }
         }
       }

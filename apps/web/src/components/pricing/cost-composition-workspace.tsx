@@ -47,6 +47,7 @@ import type {
   CostRow,
   ProfileInput,
 } from './cost-composition-model';
+import { LandedCostWorkspace } from './landed-cost-workspace';
 
 /**
  * 5.2.1.1 成本构成工作区。
@@ -927,6 +928,14 @@ export function CostCompositionWorkspace() {
           </SectionCard>
         </>
       ) : null}
+
+      {/* ============================================================ 兄弟分区：5.2.1.2 到岸成本 */}
+      {/*
+        5.2.1.2 到岸成本是**同一个 L3 路由**下的另一个分区，它有自己的端点命名空间
+        （catalog/landed-costs）与自己的口径（单据级、货到目标仓可售），
+        所以这里渲染它自己的区块，而不是把两个口径合并成一个「总成本」数字。
+      */}
+      <LandedCostWorkspace />
 
       {/* ============================================================ 兄弟分区 */}
       <SectionCard
