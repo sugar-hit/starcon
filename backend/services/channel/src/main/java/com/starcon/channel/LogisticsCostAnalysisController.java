@@ -92,7 +92,7 @@ public class LogisticsCostAnalysisController {
    * 而不是给一个 0（0 会被读成「这项成本不要钱」）。
    */
   @GetMapping("/capabilities")
-  public CostCapabilities capabilities(
+  public LogisticsCostCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "channel.operation.read", a -> service.capabilities());
   }

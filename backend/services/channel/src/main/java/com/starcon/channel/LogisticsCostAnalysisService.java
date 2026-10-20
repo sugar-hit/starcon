@@ -104,7 +104,7 @@ public class LogisticsCostAnalysisService {
    * 「这个分量今天有没有数」要能在界面上如实显示，还要能指出**缺了是谁的活**，
    * 写死在代码里就做不到。
    */
-  public CostCapabilities capabilities() {
+  public LogisticsCostCapabilities capabilities() {
     ensureComponents();
     List<CostComponentCapability> components = readComponents();
 
@@ -184,7 +184,7 @@ public class LogisticsCostAnalysisService {
                 "本模块的口径（分摊规则版本 + 结账时点）被下游引用时，"
                     + "**同一 SKU 今天 30% 明天 25%** 必须能由这两个字段解释清楚"));
 
-    return new CostCapabilities(
+    return new LogisticsCostCapabilities(
         components,
         dimensions,
         "成本口径：尾程按运单签发时刻归集；头程按**分摊规则版本 + 结账时点（cost_as_of）**归集；"
