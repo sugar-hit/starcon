@@ -261,3 +261,80 @@ Failing row contains (..., TRACK, 1, COMPLETED, null, null, 1,
 但**不能写负数**，否则会被 `_check4` 拒绝）。
 若选「同源」路线（`started_at` 也由 DB 写），则 `FulfillmentRequestService` 的
 `OffsetDateTime.now()` 传参路径要改，且 `elapsed_seconds` 的计算基准同步从 JVM 切到 DB。
+
+### §六之三：批次 33 复现并**放大了量级** —— 同族病，一次炸掉 3 个既有模块（2026-10-20）
+
+批次 33 的 L2（第一次，08:07–08:54）**后端 trade 红**：`Tests run: 1494, Failures: 1, Errors: 31`。
+**31 个错误**（批次 32 只有 1 个）⇒ 不是同一条 flake 复现，是**同一族病在更大的时钟偏差下同时命中 3 个既有模块**。
+
+| 失败测试类 | 归属模块 | 违的约束 | 错误数 |
+| --- | --- | --- | --- |
+| `FulfillmentRequestIntegrationTest` | 9.3.3.1 履约请求 | `fulfillment_request_step_check3` | 1 failure + 11 errors |
+| `FulfillmentMonitorIntegrationTest` | 9.3.3.2 履约流程监控 | `fulfillment_request_reservation_check5` | 18 errors |
+| `OrderConsolidationIntegrationTest` | 9.3.1.2 合单 | `order_consolidation_timestamps_ordered` | 2 errors |
+
+**本批 4 个新模块的测试在同一轮里全绿**（channel 24+3+26+4=57、trade 33+9+30+5=77）⇒ **不是本批回归**。
+
+#### 根因：宿主机（JVM）时钟与 Docker 内 PG 时钟的**漂移**，这次达到数百毫秒
+
+失败行直接量出了偏差（`FulfillmentRequestIntegrationTest`）：
+
+```
+requested_at  = 2026-10-20 08:28:01.659602+08   ← 应用/JVM 写
+acknowledged_at = 2026-10-20 08:28:01.117591+08 ← PG clock_timestamp() 写
+⇒ DB 时钟比 JVM 时钟慢约 542ms
+```
+
+同一时刻在合单表上也看到同方向的偏差（`confirmed_at` 由 PG 写、落到了 `decided_at` 之前）。
+
+**该漂移是瞬时的**：08:28 偏差约 560ms，08:57 复测已回到 **[-52ms, +78ms]** 区间（PG 容器与宿主 `clock_timestamp()` 对比）。
+批次 32 那次只有 1.006ms 的偏差 —— 同一个窗口，只是这回窗口宽了几百倍。
+
+#### 隔离复跑：7 个类 **162 例全绿**（`BUILD SUCCESS`）
+
+```
+./mvnw -pl services/trade -am test \
+  -Dtest='FulfillmentMonitorIntegrationTest,FulfillmentRequestIntegrationTest,OrderConsolidationIntegrationTest,\
+AddressPaymentCheckIntegrationTest,AddressPaymentCheckTenancyIntegrationTest,\
+OrderPendingReviewIntegrationTest,OrderPendingReviewTenancyIntegrationTest' \
+  -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+```
+⇒ 三个「红」的类单独跑**全绿**（含本批两个新模块）⇒ **确证是环境/时钟诱发的既有脆弱点，不是 batch-33 的代码回归**。
+
+#### 受影响面已精确定位（不必再全仓 grep）
+
+全服务扫了所有「比较两个时间戳」的 CHECK（约 40 条），按**两侧写入方**分类后，**真正跨时钟域的只有 4 张表、7 条约束**，全在既有模块：
+
+| 服务 | 迁移 | 表 | **DB 时钟写**的列 | **JVM 写**的列 | CHECK 条数 |
+| --- | --- | --- | --- | --- | --- |
+| trade | V152 | `fulfillment_request` | `completed_at` / `cancelled_at` / `blocked_at`（`clock_timestamp()`） | `requested_at` | 3 |
+| trade | V152 | `fulfillment_request_reservation` | `acknowledged_at` / `released_at`（`clock_timestamp()`） | `requested_at` | 2 |
+| trade | V152 | `fulfillment_request_step` | `finished_at`（`clock_timestamp()`） | `started_at` | 1 |
+| trade | V116 | `fulfillment_warehouse_allocation_decision` | `confirmed_at`（`now()`） | `decided_at` | 1 |
+
+**已确认是同源、不会翻负的**（不必动）：
+
+- 所有 `CHECK(updated_at>=created_at)` —— 两侧都是 PG 的 `now()`；
+- `CHECK(totals_computed_at>=created_at)`（V150 / V153）—— `totals_computed_at = now()`、`created_at DEFAULT now()`；
+- `CHECK(finished_at>=started_at)`（trade V147 出库回传、catalog V36 重复候选）与
+  `CHECK(finished_at>=requested_at)`（channel V200 刊登任务）—— 两侧都由应用写，同一个 JVM 时钟。
+
+#### 建议修法（派 worker 做，不属任何批次车道）
+
+1. **主修（收敛时钟域）**：凡是要与 DB 写的列做先后比较的**起始时间戳，一律改由 DB 写**。
+   - 最小改法：应用侧把 `OffsetDateTime.now()` 换成 `select now()` 的结果再绑 `?::timestamptz`；
+   - 或函数侧：起始列也用 `clock_timestamp()`（同一函数内取，同源）。
+   - ⚠️ 修 V152 时注意 `clock_timestamp()` 与 `now()` 的差别：`now()` 是**事务开始**时间，
+     同一事务内多行会相同；`clock_timestamp()` 是**实际**时间。选哪个要按语义定，不要混。
+2. **兜底（约束容忍）**：`CHECK(finished_at IS NULL OR finished_at >= started_at - interval '1 second')`
+   之类。**容差要按实测偏差定**（这次量到 542ms，历史上 1ms），1 秒是合理下限但不是万无一失。
+   这条**只是掩盖**，不能替代 ①。
+3. **回归防护**：加一个**跨时钟域**的集成测试 —— 故意让应用侧时间戳比 DB 时钟偏 1 秒，
+   断言约束不翻负（或断言两者同源）。否则修完还会以别的形式复发。
+4. **流水线侧**（调度者/工具链，不属业务代码）：
+   - L2 **开工前**量一次宿主机 vs PG 容器 `clock_timestamp()` 的偏差并记进日志，
+     偏差超阈值（例如 100ms）时**先不要开跑**（等 VM 时钟回同步或重启 Docker Desktop VM）；
+   - 这类失败**不要**当成「代码回归」去二分 —— 先隔离复跑，见 §六之三。
+
+> 批次 33 的 push 建立在**时钟对齐后的整批 L2 重跑全绿**之上，不是首次全量绿。
+> 已在 `docs/sessions/2026-10/2026-10-20-batch-33-four-lane-delivery.md` 如实记录。
