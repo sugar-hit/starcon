@@ -1,9 +1,9 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 2 轮未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 3 轮未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
 - 优先级: **P0** —— 这是「main → 集成头同步」任务的**长期阻塞点**，每一轮 main 前进都会撞同一堵墙
-- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
+- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0415-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
 
 ---
 
@@ -12,7 +12,7 @@
 「main → 集成头同步」任务每轮做的是：`fetch` → `merge-base --is-ancestor origin/main integration/module-dev`
 → 有新提交就 `git merge --no-ff origin/main` → 预检 → push 集成头。
 
-**连续 2 轮（2026-10-21 01:15、03:15）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
+**连续 3 轮（2026-10-21 01:15、03:15、04:15）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
 （`Integration/module dev (#11)`）是 GitHub **squash 合并**的产物 —— **单父提交**，
 父提交是 `1bb270a0`（batch-28 tip）。
 
@@ -39,23 +39,29 @@ $ git merge-base integration/module-dev origin/main
 batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** ⇒ 两边都是「各自新增」
 ⇒ 触发 **add/add** 冲突。
 
-**② main 侧零新交付，且落后集成头 10 个模块**
+**② main 侧零新交付，且落后集成头 16 个模块**
 
 按 L4 模块 ID 逐行比对台账（465 行，模块集合完全相同）：
 
-| 项     | main 快照 | 集成头  |
-| ------ | --------- | ------- |
-| 已交付 | **242**   | **252** |
-| 进行中 | 0         | 0       |
-| 未开发 | 223       | 213     |
-| 完成率 | 52.0%     | 54.2%   |
+| 项     | main 快照 | 集成头 `39edfe12` |
+| ------ | --------- | ----------------- |
+| 已交付 | **242**   | **258**           |
+| 进行中 | 0         | 0                 |
+| 未开发 | 223       | 207               |
+| 完成率 | 52.0%     | 55.5%             |
 
-状态不同的 10 个模块（5.2.1.2 到岸成本 / 5.2.1.3 成本分摊 / 5.2.2.1 汇率查询 /
-5.2.2.2 汇率快照 / 5.2.3.1 平台费用 / 5.3.1.1 利润测算器 / 5.5.2.1 异常告警 /
-10.7.1.3 弃置与销毁 / 15.2.2.1 Request a Review / 15.2.2.2 索评规则），
+状态不同的 16 个模块（5.2.1.2 到岸成本 / 5.2.1.3 成本分摊 / 5.2.2.1 汇率查询 /
+5.2.2.2 汇率快照 / 5.2.3.1 平台费用 / 5.2.3.2 物流与头程费用 / 5.3.1.1 利润测算器 /
+5.3.1.2 批量测算 / 5.3.2.1 定价模板 / 5.5.2.1 异常告警 / 6.1.2.1 档口与货源池 /
+6.2.1.1 缺货与断货风险 / 6.3.2.2 到货与逾期 / 10.7.1.3 弃置与销毁 /
+15.2.2.1 Request a Review / 15.2.2.2 索评规则），
 **方向全部一致：main 未开发、集成头已交付**。
 
 ⇒ **main 没有任何一个模块是集成头没有的。** 本任务想同步的内容，集成头已经有了（且更新）。
+
+⚠️ **这个数字会随集成头继续前进而变大**（03:15 轮是 10 个，04:15 轮是 16 个 ——
+差值正是 batch-43 六车道里的 5.2.3.2 / 5.3.1.2 / 5.3.2.1 / 6.1.2.1 / 6.2.1.1 / 6.3.2.2）。
+**main 侧不前进 ⇒ 差距只增不减。** 这本身就是「squash 快照已经过时」的最好证据。
 
 **③ 冲突面上，main 那一侧是过期快照**
 
@@ -74,7 +80,13 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
 
 ### 影响
 
-- 「main → 集成头同步」任务**连续 2 轮产出「冲突未并入」**，每轮耗时 40–45 分钟（含等闸）。
+- 「main → 集成头同步」任务**连续 3 轮产出「冲突未并入」**，每轮耗时 27–45 分钟（含等闸）。
+- 2026-10-21 04:15 轮补一条**更硬的证据**：`origin/main` 的树（`06607694b31c6fdfe354ed4783c22d4a0e0b8c20`）
+  与集成头自己的祖先提交 `d22bc1e1`（batch-37）**逐字节相同** ⇒ 这次 merge 在内容上是**空转**，
+  冲突纯粹是 squash 抹掉血缘导致 merge-base 被拉回 `1bb270a0` 的副作用。
+  同一轮还补齐了台账口径：main 快照 **242 已交付 / 0 进行中 / 223 未开发**（52.0%），
+  集成头 `39edfe12` **258 / 0 / 207**（55.5%）⇒ main **落后 16 个模块**，
+  且**没有任何一个模块是 main 领先**（模块集合两边完全相同，各 465 个）。
 - 那个 406 files / 262390 insertions 的 diffstat 是 **squash 把 85 个 commit 压成一颗造成的行数重放**，
   不是真有 26 万行新代码 —— **不要按这个数字判断工作量**。
 - `merge-union` 驱动能自动合上的部分（契约 `packages/api-contracts/**` + 台账 `module-progress.md`）
