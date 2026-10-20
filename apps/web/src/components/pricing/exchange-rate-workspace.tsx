@@ -39,6 +39,7 @@ import {
   validateRateInput,
   validateSourceInput,
 } from './exchange-rate-model';
+import { ExchangeRateSnapshotWorkspace } from './exchange-rate-snapshot-workspace';
 import type {
   FetchLogRow,
   FetchResult,
@@ -847,6 +848,9 @@ export function ExchangeRateWorkspace() {
           </div>
         )}
       </SectionCard>
+
+      {/* 5.2.2.2 汇率快照：与本模块共用 L3 路由，各占一个独立分区 */}
+      <ExchangeRateSnapshotWorkspace />
 
       {/* 分区：与 5.2.2.2 共用 L3 路由 */}
       <SectionCard
