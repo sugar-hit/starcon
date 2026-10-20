@@ -13,6 +13,7 @@ import {
   StatCard,
 } from '@starcon/ui';
 
+import { CostAllocationSection } from './cost-allocation-section';
 import {
   ADJUSTABLE_COMPONENTS,
   COST_SECTIONS,
@@ -927,6 +928,9 @@ export function CostCompositionWorkspace() {
           </SectionCard>
         </>
       ) : null}
+
+      {/* ============================================================ 5.2.1.3 成本分摊分区 */}
+      <CostAllocationSection />
 
       {/* ============================================================ 兄弟分区 */}
       <SectionCard

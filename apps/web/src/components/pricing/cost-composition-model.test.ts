@@ -330,13 +330,18 @@ describe('分区块约定（给兄弟模块的扩展位）', () => {
     expect(composition?.title).toBe('成本构成');
   });
 
-  it('5.2.1.2 与 5.2.1.3 显式标为未交付并写明为什么', () => {
-    for (const moduleId of ['5.2.1.2', '5.2.1.3']) {
-      const section = COST_SECTIONS.find((s) => s.moduleId === moduleId);
-      expect(section, `${moduleId} 必须在分区表里`).toBeTruthy();
-      expect(section?.delivered).toBe(false);
-      expect(section?.summary).toContain('未交付');
-    }
+  it('5.2.1.2 仍未交付且写明为什么；5.2.1.3 已交付', () => {
+    const landed = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.2');
+    expect(landed, '5.2.1.2 必须在分区表里').toBeTruthy();
+    expect(landed?.delivered).toBe(false);
+    expect(landed?.summary).toContain('未交付');
+
+    // 🔴 5.2.1.3 成本分摊已交付：分区表里**不能**再写「未交付」——
+    // 一个已交付的分区标成未交付，页面上就会画一个空框冒充没做完。
+    const allocation = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.3');
+    expect(allocation, '5.2.1.3 必须在分区表里').toBeTruthy();
+    expect(allocation?.delivered).toBe(true);
+    expect(allocation?.summary).not.toContain('未交付');
   });
 });
 
