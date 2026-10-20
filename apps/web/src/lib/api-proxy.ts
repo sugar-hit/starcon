@@ -149,6 +149,46 @@ const services: readonly {
       /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
   },
   {
+    // 5.5.1.1 价格历史（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
+    // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-history                          —— 🔴 **刻意不放行裸路径**：后端没有
+    //     「GET /catalog/price-history」这个端点（集合读是 /changes 与 /timeline），
+    //     放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //   price-history/capabilities             能力声明（价格 / 销量 / 利润三个维度的真值与缺口）
+    //   price-history/changes                  价格变更时间轴（GET）+ 登记价格变更（POST）
+    //   price-history/changes/{id}              单条变更详情（GET）
+    //   price-history/timeline                 一个 listing（SKU × 店铺）的时间轴（GET）
+    //   price-history/comparison               「降价到底有没有用」的价格 + 利润 + 销量对比（GET）
+    //   price-history/sales                    一段区间的销量事实（GET；上游未接线 ⇒ 503）
+    //   price-history/reasons                  变更原因字典（GET）+ 保存原因（POST）
+    //
+    // 🔴 `capabilities` / `changes` / `timeline` / `comparison` / `sales` / `reasons`
+    //   的首字母都不落在 [0-9a-f] 里，所以字面量子路径不会被 uuid 分支提前吃掉；
+    //   uuid 分支只出现在 `changes/` 下面，且**只接一段 uuid** ——
+    //   不接的动作（不存在的后端端点）一律 404。
+    //
+    // 🔴 token 与既有条目**不撞**：既有 catalog 元素的首 token 是 products / attributes /
+    //   brands / parties / categories / category-mappings / records / media / skus /
+    //   unit-groups / unit-conversion / spec-axis / variant-combination / …
+    //   `sku-cost-compositions`（5.2.1.1）与 `price-anomaly-alerts`（5.5.2.1）等。
+    //   本条目的首 token `price-history` 与它们**首 token 全不相同**；
+    //   且既有正则都是**锚定**的（`/^token(...)?$/`），所以两者互不遮蔽。
+    //
+    // 🔴 刻意**不放行**：price-history/changes/{id}/**改写**类动作 ——
+    //   变更事实是**不可变事实**（只授 SELECT / INSERT，没有 UPDATE / DELETE 端点），
+    //   改价要改就**再登记一条**，不在原地改写已经发生过的历史。
+    //   放行一个不存在的写动作只会让界面以为已交付。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-history(?:\/capabilities|\/changes(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/timeline|\/comparison|\/sales|\/reasons)$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',

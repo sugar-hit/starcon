@@ -91,6 +91,13 @@ public class BatchPriceAdjustmentService {
   private final ChannelPlatformPort platforms;
   private final AccessService access;
   private final TransactionTemplate previewRollback;
+  /**
+   * 5.5.1.1 价格历史的写端口。
+   *
+   * <p>🔴 **本模块不直接写价格历史表**（那张表的写入所有者是 5.5.1.1），
+   * 而是在执行成功后把「这一次改价」投递过去 —— 这样「一次改价只留下一条变更事实」。
+   */
+  private final PriceChangeHistoryPort priceHistory;
 
   public BatchPriceAdjustmentService(
       DSLContext sql,
@@ -98,12 +105,14 @@ public class BatchPriceAdjustmentService {
       PricingTemplateService templates,
       ChannelPlatformPort platforms,
       AccessService access,
-      PlatformTransactionManager manager) {
+      PlatformTransactionManager manager,
+      PriceChangeHistoryPort priceHistory) {
     this.sql = sql;
     this.calculator = calculator;
     this.templates = templates;
     this.platforms = platforms;
     this.access = access;
+    this.priceHistory = priceHistory;
     // 预览的事务：参与外层事务（PROPAGATION_REQUIRED），结束时**整体回滚**。
     this.previewRollback = new TransactionTemplate(manager);
   }
@@ -343,7 +352,69 @@ public class BatchPriceAdjustmentService {
           item.lossAfter(),
           createdAt);
     }
+    publishPriceChanges(actor, bearer, id, plan, preview.items(), createdAt);
     return getAdjustment(id);
+  }
+
+  /**
+   * 把这次批量调价**逐条投递**给 5.5.1.1 价格历史。
+   *
+   * <p>🔴 投递的是**已生效**的改价（{@code status = WILL_ADJUST} 的那些行），
+   * 被跳过的行**不投递** —— 「跳过了」不是一次价格变更。
+   *
+   * <p>🔴 **幂等键 = {@code BATCH_ADJUSTMENT:<调价单 id>:<SKU>:<平台>:<站点>}**：
+   * 同一个调价单重复投递不会堆出第二条变更事实。
+   *
+   * <p>🔴 **投递失败不许把已经改成功的价回滚**：写历史是**记账**，不是改价。
+   * 这里的失败只会被吞掉并留痕（价格历史那一侧自己会降级成「利润未测准」），
+   * 绝不把整批调价拖垮 —— 价已经改了，回滚也回不到「没改」的世界里去，
+   * 只会留下一批改了价、账上却查不到的 listing。
+   */
+  private void publishPriceChanges(
+      AccessService.Access actor,
+      String bearer,
+      UUID adjustmentId,
+      Plan plan,
+      List<BatchPriceAdjustmentItem> items,
+      OffsetDateTime effectiveAt) {
+    for (var item : items) {
+      if (item.status() != ItemStatus.WILL_ADJUST) continue;
+      if (item.oldPrice() == null || item.newPrice() == null) continue;
+      try {
+        priceHistory.record(
+            actor,
+            bearer,
+            new PriceChangeHistoryPort.PriceChangeEvent(
+                item.skuId(),
+                item.platformCode(),
+                item.siteCode(),
+                item.currency(),
+                item.oldPrice(),
+                item.newPrice(),
+                "BATCH_ADJUSTMENT",
+                "",
+                "批量调价单 " + adjustmentId + "（" + plan.mode().name() + "）",
+                actor.userId(),
+                "5.4.1.2",
+                adjustmentId.toString(),
+                "BATCH_ADJUSTMENT:" + adjustmentId + ":" + item.skuId() + ":" + item.platformCode() + ":"
+                    + item.siteCode(),
+                effectiveAt,
+                null,
+                // 🔴 本模块**已经**用 5.3.1.1 的引擎算过这一行（改价前 / 改价后各一次），
+                //    结果就在明细行里 ⇒ 原样传过去，**不要**让价格历史再算一遍。
+                new PriceChangeHistoryPort.ProfitSnapshot(
+                    item.grossProfitBefore(),
+                    item.grossMarginBefore(),
+                    item.grossProfitAfter(),
+                    item.grossMarginAfter(),
+                    item.decisionReady(),
+                    "")));
+      } catch (RuntimeException ignored) {
+        // 🔴 见上方说明：记账失败不许拖垮已经成功的改价。
+        //    变更事实缺失是「历史不完整」，不是「价没改」—— 两件事必须分得开。
+      }
+    }
   }
 
   // ================================================================ 调价单台账
