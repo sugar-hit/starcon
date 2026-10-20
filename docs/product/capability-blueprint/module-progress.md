@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **207** |
 | 完成率 | 55.5% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 19 | 0 | 59 | 78 |
 | **D7** | 13 | 0 | 142 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 1 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -219,7 +202,7 @@
 | 5.3.1.1 | 利润测算器 | /pricing/calculator | D6 | 已交付 | catalog V227 profit_calculator_scenario/profit_calculator_logistics_tier（tenant_id NOT NULL + FORCE RLS + **零外键、用触发器做引用校验**，避开 batch-37 的 TRUNCATE 坑）+ 6 个端点 /catalog/profit-calculator/**（jOOQ 显式 SQL）+ /pricing/calculator 真实工作区（能力声明 + 测算输入 + 利润瀑布图 + 关键数字 + 缺口与口径 + 测算方案台账，三态齐全）+ 利润拆解引擎（ProfitCalculatorRules，纯 BigDecimal：金额 4 位、费率/毛利率 6 位，HALF_UP）。**🔴 蓝图加粗句「这是定价决策的核心工具，必须显式列出每一项扣减并允许展开查看来源，不能只给一个毛利率数字」落成三层硬约束**：① **每一项扣减都有一行**（瀑布图 9 行 = 售价 + 7 项扣减 + 毛利），缺项**也在**行里，显示「未交付 / 该扣减未计入」并写明归谁管、缺了会怎样、怎么补 —— 把它从瀑布图里删掉就等于假装它不存在；② **每一行都能展开看来源**（哪张表 / 哪个上游模块 / 什么口径 / 什么生效时间 / 追溯说明），成本类分项的来源直接复用 5.2.1.1 成本构成的同一份口径串（**不存在两套算法**）；③ **反向测算与正向走同一个方程**（ProfitCalculatorRules.solvePrice：售价 =（固定费 + 物流 + 已知成本）÷（1 − 平台费率 − 目标毛利率）），保本价是「毛利 = 0」的同一次调用，目标毛利价只换右端的毛利率，**不存在第二套近似公式**（集成测试断言：反解出的售价代回正向公式，毛利率恰好等于目标值）。**🔴 决策就绪闸落在服务层而不是页面**：上游写的是「5.2 全部」，而 5.2 卷内**只有 5.2.1.1 已交付**（5.2.1.2 在途、5.2.1.3 / 5.2.2.1 并行未并入、5.2.2.2 / 5.2.3.2 未开发、5.2.3.1 并行未并入）⇒ 缺平台费用（5.2.3.1，佣金通常占售价 8%~15%）与物流成本（5.2.3.2，每单几美元量级）时毛利率是**系统性虚高**的，所以**扣减不全时 grossProfit / grossMarginRate / breakEvenPrice / targetMarginPrice / breakEvenVolume 一律是 null**（不是 0、不是估算值），只给 `revenueLeftForMissingDeductions`（售价减掉已计入扣减后还剩多少可用于覆盖缺失扣减，**语义刻意不跟毛利混**）。这条闸必须在服务层：下游 5.3.2.1 模板与 5.4 调价会**程序化**消费本模块的输出，页面上的一句提示拦不住一个自动改价的规则。**手工假设机制**（蓝图输入句本就把「费用规则、汇率快照」列为输入）：上游规则模块未交付时，平台费率 / 平台固定费 / 物流单价 / 汇率 / 月度固定成本可由人填，**但**在响应里标 `MANUAL_ASSUMPTION` + 点名 ownerModule（5.2.3.1 / 5.2.3.2 / 5.2.2.1）+ 能力声明里对应扣减项 `available` 仍然是 **false**，且 `decisionBasis` 标成 `COMPLETE_FROM_MANUAL_ASSUMPTIONS`（区别于 `COMPLETE_FROM_RULES`）—— 手工假设**不冒充**系统口径。**跨币种绝不相加**：售价币种 ≠ 成本币种时**必须**给汇率（方向显式：1 成本币种 = X 售价币种，5.2.2.1 的加粗句），不给就**拒绝测算**（400），绝不按 1:1 折算。**不建任何假装上游已交付的表**：零个平台费用规则表（5.2.3.1 的写入所有权）、零个汇率表、零个物流计费规则表、零个 landed cost 表、零个分摊规则表。**物流阶梯**（蓝图输入句「数量（用于阶梯与运费）」）：段序升序、每段「覆盖到第几单 + 每单位运费」、最后一段必须无上限（否则超出阶梯的数量没有运费定义 ⇒ 给 null 而不是拿前几段的平均值糊过去）；盈亏平衡销量按阶梯**分段精确求解**（段内单位贡献是常数，累加到转正为止），不是固定成本 ÷ 某个平均运费。成本口径取 5.2.1.1 的**单位成本构成**（🔴 不是 5.2.1.2 到岸成本口径，海外仓与自发货的口径差异等它落地后由它接管），头程当前是**按数量**摊的（🔴 5.2.1.3 成本分摊未交付，不是按重量/体积/金额规则摊的），关税是**本服务口径**不是 12 财务核算结果（finance 服务不存在）。**测算方案**（蓝图输出句「参数可分享为方案」）：参数 + 手工假设 + 物流阶梯 + **成本窗口**（采购成本由窗口内的到货事实派生，不记下来则方案在别的一天复算会得到不同的采购成本）一起落库，同租户可复算；方案是**租户内**的 —— 定价参数（成本、费率、汇率）跨租户可见是越权不是协作。目标店铺来自 2.1.1.1 平台目录（**跨服务只读走 HTTP 端口**，照抄 CostBasisPort + CostBasisConfiguration 的写法，透传调用方 Authorization 头，租户由 channel 从成员关系解析；上游不可达 ⇒ 站点列表 503 而不是空列表）。测试 `ProfitCalculatorRulesTest` **15 例**（每一项扣减都参与算术 / 少扣一项 ⇒ 不给数字 / 部分取到 ⇒ 不算完整 / 反解售价代回正向公式毛利率恰好等于目标值 / 保本价代回正向公式毛利恰好为 0 / 目标毛利率加费率 ≥ 100% ⇒ 方程无解 / 阶梯加权平均 / 阶梯未覆盖到测算数量 ⇒ 不给平均运费 / 盈亏平衡销量（固定成本、阶梯分段、单位贡献不为正三种）/ 金额 4 位费率 6 位 HALF_UP 精度 / 平台费含费率与固定费时保本价分子含固定费）+ `ProfitCalculatorIntegrationTest` **12 例**（Testcontainers 真实 PostgreSQL 16，连接池压到 1；**缺项时 grossProfit / grossMarginRate / breakEvenPrice / targetMarginPrice / breakEvenVolume 全为 null** + 瀑布图 9 行且缺项行写明「未交付」+ 缺口清单点名归谁管 + 每一行都能展开看来源（采购成本指到 vendor_delivery_record、平台费用标 MANUAL_ASSUMPTION）/ 手工假设补齐后数字回来但 decisionBasis = COMPLETE_FROM_MANUAL_ASSUMPTIONS / 反向与正向同一套结构 / 跨币种无汇率 ⇒ 400 且拒绝 1:1 折算、给了汇率则成本按方向换算 / **多租户三断言**（两租户互不可见：列表/明细/直查；伪造 `X-Tenant-Id` 头无效：读写两侧都验且伪造头下的写入仍落在调用者自己名下；连接池归还后不串租户：单连接 A→B 交替 5 轮）/ 方案落库后复算出同一个结果 + 物流阶梯最后一段必须无上限 / 平台目录不可达 ⇒ 503 而不是空列表 + 跨服务调用透传调用方 Authorization 头 / 只有读权限时写端点 403 / 能力声明逐项标 available=false + ownerModule + impact）+ `profit-calculator-model.test.ts` **18 例**（**null 绝不渲染成 0.00 / 0%**（取不到 ⇒「未计入」、毛利率 null ⇒「不可信（成本不完整）」、兜底文案不补币种）+ 缺项与已用手工假设补上的缺口分得开 + 瀑布图缺项行也在 + 「剩余可覆盖缺失扣减的金额」标签写明不是毛利 + 跨币种无汇率拒绝提交 + 目标毛利率是小数口径 + 阶梯最后一段必须无上限）+ `profit-calculator-allowlist.test.ts` **5 例**（**放行方向从自己生成的 OpenAPI 契约反向抽 path 再逐条断言** + 写动作真转发到 8082 且伪造租户头不被转发 + **拒绝方向**断言 `batch`（5.3.1.2 未交付）/`templates`（5.3.2.1 未交付）/`skus/{uuid}`/`scenarios/export`/`scenarios/{uuid}/lines` 仍然 404 + **不误伤兄弟车道分支**（含 5.2.1.1 成本构成））。api-proxy 白名单**外科式最小追加**（**新增一条** `profit-calculator` 元素，追加在数组末尾，既有条目一字未动）。契约由 codegen 重生成（`--spec-dir` 用本 worktree 内六份 spec，**catalog 纯新增 15 个 DTO 与 6 条路径，其余 5 个服务的契约与 contracts/*.ts 逐字节不变**，无跨服务同名 DTO 冲突）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/catalog -am test -Dtest='ProfitCalculator*'` **27 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过（本车道零告警）、`pnpm vitest run apps/web/src/components/pricing` **43 例全绿**、**全量 allowlist 回归 107 文件 630 例全绿**（确认白名单没挤掉兄弟车道路径）。**下游缺口**：5.2.3.1 平台费用、5.2.3.2 物流与头程费用、5.2.2.1 汇率查询、5.2.2.2 汇率快照、5.2.1.2 到岸成本、5.2.1.3 成本分摊均未交付，capabilities 逐项 available=false 并写明 ownerModule 与 impact。 |
 | 5.3.1.2 | 批量测算 | /pricing/calculator | D6 | 已交付 | catalog V230 `batch_calculation_run`（批次：范围 + 参数 + 口径）/ `batch_calculation_result`（逐 SKU 利润表 + 异常标记）——tenant_id NOT NULL + ENABLE/FORCE RLS isolation + 结果表 data_scope 跟随 sku + **零外键、用触发器做引用校验**（避开 batch-37 的 TRUNCATE 坑）+ 7 个端点 /catalog/batch-calculations/**（jOOQ 显式 SQL：capabilities / sites / POST runs / GET runs / GET runs/{id} / GET runs/{id}/results / GET runs/{id}/export）+ /pricing/calculator **批量测算分区**（batch-calculation-section.tsx，与 5.3.1.1 共用路由、**不重写兄弟模块骨架**，只在既有 workspace 里追加一个分区渲染点）；**🔴 复用 5.3.1.1 的测算引擎**（ProfitCalculatorService.calculate 跑 N 次，每次换一个 SKU 与它的售价）—— 金额 4 位小数、费率 6 位小数、HALF_UP 与 5.3.1.1 **逐字相同**，**不重写第二套算术**（下游 5.4.1.2 批量调价会拿这些数字直接改价，两套口径必然改错价）；**🔴 售价来源**：5.1 价目表未交付 ⇒ 本仓唯一的真实售价事实是 5.5.2.1 的**价格观测台账**（price_anomaly_observation，取该 SKU 在该店铺**最新一条**观测：优先 internal_price、退到 platform_price，来源与观测时刻逐行落库，因为台账只追加，「最新一条」是一个时间点而不是「当前价」），**取不到就整行跳过**（SKIPPED_NO_PRICE：售价/毛利额/毛利率全 null、两个标记全 false）—— **绝不用 0 顶**（0 会被算成亏损品，那是凭空造出来的清库存依据）；**🔴 异常标记互斥**：亏损品（毛利额 < 0）与低毛利品（还没亏但毛利率低于阈值）分开计，「问题品总数」不重复计数；成本不完整（decisionReady=false）时**不给毛利率数字**（沿用 5.3.1.1 的决策就绪闸）且**不标**低毛利品 —— 那是「没测准」不是「毛利低」；**汇总读时聚合不落库**（落库会与结果表漂移，且做不到随当前可见范围变化）；**真筛选 + 真分页**全部在 DB 层（毛利率 < X、售价 < Y、异常标记、状态、关键字、排序），**导出与列表共用同一套筛选**（CSV 原样透传：RFC 4180 转义 + Excel 公式注入切断，单次上限 2 万行**明确报错**不静默截断）；一次批量测算最多 200 个 SKU（每个 SKU 的成本构成要跨服务读 warehouse），超限**明确报错**让人缩小范围，**不静默截断**（截断了运营会以为全测过了）；测试 BatchCalculationIntegrationTest.java（13 例，真实 PG16 Testcontainers + 强制 RLS、连接池固定 1 条连接：利润表逐项断言与 5.3.1.1 单次测算**逐字一致**、亏损/低毛利互斥、无价格观测被跳过而非拿 0 顶、平台在售价可作来源、取最新一条观测、范围按分类/品牌精确匹配、真筛选与真分页、导出与列表同筛选、CSV 公式注入切断、HTTP 端点通、**上游不可达整批失败且不留半截批次**、只读角色不能发起测算、timestamptz 写回零漂移）+ BatchCalculationTenancyIntegrationTest.java（3 例：两租户批次与结果互不可见且**按主键直查对方行读到零行**（每个零行都配一条同样写法的正对照读到 1 行，防假绿）、伪造 X-Tenant-Id 头**读到的内容与不带头时逐字段相同**且写入仍落在调用者名下、连接池压到 1 时 5 轮交替读写不串租户）+ BatchCalculationRulesTest.java（13 例纯规则）+ batch-calculation-model.test.ts（前端纯函数 + 分区描述符同源断言）+ batch-calculation-allowlist.test.ts（api-proxy 白名单双向断言，含兄弟车道条目未被挤掉）；契约 packages/api-contracts 由 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi 重新生成（+6 path / +7 DTO，纯新增无删改）；api-proxy 白名单**纯增量**新增 batch-calculations 一个分支（字面量子路径 capabilities/sites/runs 排在 uuid 段之前判别，**刻意不放行裸路径** batch-calculations —— 放行后端不存在的映射比 404 更糟）；**未在范围内**：撤销批次、批量重算、结果行级手工调价（5.4.1.2 批量调价的职责）、跨店铺比价（5.4 定价监控卷） |
 | 5.3.2.1 | 定价模板 | — | D6 | 已交付 | 迁移 `backend/services/catalog/src/main/resources/db/migration/V231__pricing_template.sql`（pricing_template 模板 / pricing_template_adjustment 调整项 / pricing_template_scope 适用对象 / pricing_template_application 应用留痕 四表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT catalog_app/starcon_app；**零外键**，引用校验一律用触发器 guard_pricing_template_adjustment / _scope / _application（避开 batch-37 的 TRUNCATE 坑）；金额 numeric(19,4)、费率 numeric(9,6)、数量 numeric(19,6)、时间 timestamptz 全程 BigDecimal 零浮点）· 端点 8 个挂 `/catalog/pricing-templates`：GET /capabilities（能力声明：基准方法 / 调整项 / 适用对象 / 商品阶段四张词表 + 七条口径说明）、GET /directory（内部分类 + 品牌目录）、GET /sites（目标店铺，来自 2.1.1.1 平台目录，跨服务只读走 HTTP 端口且**上游不可达 ⇒ 503** 不返回空列表）、GET /templates（台账：真分页 + 关键词 / 商品阶段 / 基准方法 / 适用对象筛选）、POST /templates（新建）、GET /templates/{uuid}（详情）、PUT /templates/{uuid}（修改，**乐观锁**版本对不上 ⇒ 409；调整项与适用对象**整体替换**：同事务删+插，要么全换要么全不换）、DELETE /templates/{uuid}、POST /templates/{uuid}/apply（一键应用生成**建议价**）、GET /applications（应用留痕，真分页）· **🔴 建议价必须来自 5.3.1.1 的真实测算，不是本模块编的数字**（上游同服务内的 ProfitCalculatorService，是 5.3.1.1 的能力实现）：固定毛利走 5.3.1.1 的 TARGET_MARGIN 求解（售价 =（固定费 + 物流 + 已知成本）÷（1 − 平台费率 − 目标毛利率）= 21 ÷ 0.6 = 35）；成本加成的基数取 5.3.1.1 瀑布图里的**单位成本合计**（5 项成本分项 + 物流每单位 = 16 + 5 = 21，平台费是售价的比例、**不进加成基数**），加成 30% ⇒ 27.3；竞品跟随 = 人工登记的竞品价 ×（1 + 跟随率），毛利再由 5.3.1.1 复核（95 → 毛利 59.75）；最后统一用建议价再跑一次 5.3.1.1 的 PRICE 方向拿**真实**毛利率（不是自己算一遍）· **🔴 决策就绪闸落在服务层**：5.3.1.1 扣减不全时（缺平台费率 5.2.3.1 / 物流单价 5.2.3.2）本模块**拒绝给建议价 ⇒ 409**，并把 5.3.1.1 的缺口清单原样带回（点名归谁管、缺了会怎样）—— 绝不给一个虚高的价，因为下游 5.4.1.1 调价单会拿它直接改价 · **两类调整项各有专属列 + DB CHECK 钉死互斥**：按站点差异化（site_code + delta_rate，**加在基准率上**而不是乘在价格上：三个基准方法的基准率含义不同，只有加法能让同一套站点规则在三种基准下保持同一语义）、按库存周转调整（days_cover_threshold + discount_rate，**乘在建议价上**而不是加在基准率上：滞销处理的是「这个价太高卖不动」）；**🔴 库存周转的输入（当前可售天数）由人填**（上游 7 库存 / 09 订单没给本服务可读端点 ⇒ 显式的手工假设，ownerModule 写明），模板配了这条规则而没填可售天数 ⇒ **400 拒绝**，不按「不打折」糊过去（静默跳过一条策略等于让模板语义失效）· **🔴 竞品跟随的「若允许」**：本仓**没有**竞品价模块 ⇒ 竞品价只能人工登记，**不建**任何竞品价表来假装上游已交付；没登记竞品价就保存模板 ⇒ 400 · **新品与老品用不同模板**：模板带 product_stage（NEW / EXISTING），商品阶段由 **3.1.1.3 的 SPU 生命周期状态机**判定（未上架 = 新品；全仓没有「首次上架时间」这个事实，编一个出来就是假数据），阶段不符 ⇒ 409 不静默套用 · **适用对象（分类 / 品牌 / 店铺）**：三类各用 scope_type + scope_ref（+ SHOP 专用的 platform_code），分类/品牌取 catalog 本地编码、店铺取 2.1.1.1 站点码（跨服务不建 FK）；不配适用对象 = 适用于全租户（显式语义）；应用时商品必须命中其中一条，否则 409（模板是「给谁定的价」）· **模板是「怎么算」，价目表是「算完是多少」**：本模块只落模板 + 一次应用留痕，**不建价目表**（5.1.1.2 的写入所有权）、**不改生效价**（5.4.1.1 的写入所有权）—— 产出的永远是建议价（集成测试断言：应用后 SKU 行的 version / updated_at 一个字节都没动）· 权限沿用商品主数据域（读 catalog.spu.read / 写 catalog.spu.update，不新造权限词表）；租户只来自已认证成员关系（identity），**不信任 X-Tenant-Id 头** · 页面 `/pricing/templates`（pricing-template-workspace.tsx + 纯函数 pricing-template-model.ts，能力声明常驻顶部 + 模板台账 + 模板表单（基准/调整项/适用对象/口径假设）+ 一键应用面板（建议价 + 命中与未命中的调整项 + 5.3.1.1 的利润拆解依据）+ 应用留痕，加载态/错误态/空态三态齐全；**建议价那一栏永远带「建议价」字样**，后端拒绝给价时显示「不给建议价（成本不完整）」而不是 0）· 测试 `PricingTemplateRulesTest` **18 例**（成本加成 / 竞品跟随 / 站点差异化 / 库存周转的算术口径 + 缺项不给价 + 精度）+ `PricingTemplateIntegrationTest` **15 例**（Testcontainers 真实 PostgreSQL 16，连接池压到 1；**固定毛利建议价 = 5.3.1.1 解出来的 35.0000** / 成本加成建议价 = 21 × 1.30 = 27.3000 且复核毛利 2.2050 / 竞品跟随建议价 = 100 × 0.95 = 95.0000 / **成本不完整 ⇒ 409 且理由点名「平台费用」** / 站点差异化只命中目标站点（US ⇒ 0.30 ⇒ 38.1818，DE ⇒ 不命中 ⇒ 35.0000）/ 库存周转超阈值打折（120 天 ⇒ 31.5000，30 天 ⇒ 不打折）/ **没填可售天数 ⇒ 400** / 新品老品阶段不符 ⇒ 409 / 适用对象不匹配 ⇒ 409 / 跨币种无汇率 ⇒ 400 且拒绝 1:1 折算 / 乐观锁版本不符 ⇒ 409 / 只读身份写端点 403 / 应用留痕存在且 SKU 行未被改动）+ `PricingTemplateTenancyIntegrationTest` **4 例**（**多租户三断言**：两租户互不可见（列表/明细/直查/调整项/适用对象/应用留痕）、伪造 X-Tenant-Id 头无效（读写两侧都验且伪造头下的写入仍落在调用者自己名下）、连接池归还后不串租户（单连接 A→B→A→B 交替 5 轮）））+ `pricing-template-model.test.ts` **32 例**（**null 绝不渲染成 0**（金额/毛利率/数量）+ **建议价 ≠ 生效价**（统计卡标题写明、拒绝给价时显示「不给建议价（成本不完整）」而不是 0）+ 基准率口径随基准方法走（同一个 0.25 在三种基准下三种含义）+ 真缺与已用手工假设补上的缺口分得开 + 表单校验（竞品价必填 / 跨币种无汇率拒绝 / 库存周转没填可售天数拒绝提交））+ `pricing-template-allowlist.test.ts` **5 例**（放行方向从自己生成的 OpenAPI 契约反向抽 path 再逐条断言 + 写动作真转发到 8082 且伪造租户头不被转发 + **拒绝方向**断言裸路径 / rules（5.3.2.2 未交付）/ prices（价目表不归本模块）/ execute 仍然 404 + **不误伤兄弟车道分支**（含 5.2.3.1 平台费用与 5.3.1.1 利润测算器））· api-proxy 白名单**外科式最小追加**（**新增一条** pricing-templates 元素，插在「5.2.3.1 平台费用」之后、「5.3.1.1 利润测算器」之前，既有 84 条元素一字未动；元素数自检 108 → **109**，diff 46 行新增 / **0 删除**）· 契约由 codegen 重生成（catalog 纯新增 17 个 DTO 与 7 条路径；**🔴 修掉一个真实的契约冲突**：本模块的调整项入参原本叫 AdjustmentInput，与 5.2.1.1 成本构成的同名 DTO 撞名 ⇒ 契约里成本构成的 AdjustmentInput 会被静默顶掉 ⇒ 改名 TemplateAdjustmentInput 后两边各自活着）· 验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/catalog -am test -Dtest='PricingTemplate*'` **37 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过（本车道零告警）、`pnpm vitest run apps/web/src/app/api` **113 文件 660 例全绿**（确认白名单没挤掉兄弟车道路径）· **下游缺口**：5.2.3.1 平台费用、5.2.3.2 物流与头程费用、5.2.2.1 汇率查询、5.2.2.2 汇率快照尚未接入 5.3.1.1 的测算路径 ⇒ 模板上的平台费率 / 物流单价 / 汇率只能作为**手工假设**登记；7 库存 / 09 订单无可读端点 ⇒ 可售天数人工填；上游无竞品价模块 ⇒ 竞品价人工登记；三项都在能力声明里逐条写明 ownerModule 与 impact。 |
-| 5.3.2.2 | 价格规则 | — | D6 | 未开发 | — |
+| 5.3.2.2 | 价格规则 | /pricing/rules | D6 | 已交付 | 迁移 `backend/services/catalog/src/main/resources/db/migration/V236__pricing_rules.sql`（pricing_rule 规则 / pricing_rule_scope 作用范围 / pricing_rule_hit 命中记录 / pricing_rule_suggestion 建议调价 四表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + 命中记录与建议调价 data_scope 跟随 sku + GRANT catalog_app/starcon_app；**零外键**，引用校验一律用触发器 guard_pricing_rule_scope / _hit / _suggestion（避开 batch-37 的 TRUNCATE 坑）；金额 numeric(19,4)、费率 numeric(9,6)、数量 numeric(19,6)、时间 timestamptz + `?::timestamptz` 全程 BigDecimal 零浮点；**触发条件与动作各用专属列 + CHECK 互斥**（五类触发条件各一列、调价幅度只对降价/涨价存在、作用范围四类各一列））· 端点 11 个挂 `/catalog/pricing-rules`：GET /capabilities（能力声明：触发条件 / 动作 / 作用范围 / 状态四张词表 + 上游真实交付状态）、GET /directory（作用范围目录：内部分类 + 品牌）、GET /rules（真分页 + 关键词 / 触发条件 / 动作 / 作用范围筛选）、GET /rules/{id}、POST /rules、PUT /rules/{id}（乐观锁，版本对不上 409）、DELETE /rules/{id}、POST /evaluate（跑一次评估 → 命中记录 + 建议调价列表）、GET /hits（真分页 + 规则 / SKU / 是否命中筛选）、GET /suggestions（真分页 + 规则 / SKU / 状态 / 是否需人工确认筛选）、POST /suggestions/{id}/decide（人工确认 / 驳回）· 页面 `/pricing/rules`（pricing-rule-workspace.tsx + 纯函数 pricing-rule-model.ts 与 24 例单测）：能力声明常驻顶部、规则台账（真分页 + 三维筛选）、规则表单（条件 + 动作 + 优先级 + 生效时段 + 作用范围 + 自动放行阈值）、评估面板、命中记录（含未命中的判定留痕）、建议调价列表 + 人工确认 / 驳回，加载态 / 错误态 / 空态三态齐全· **🔴 蓝图加粗句「自动调价必须先"建议"再"执行"，高风险规则（降价超过 X%）需人工确认」落成服务层的四道闸**：① 本模块**只产出建议调价**，建议表里永远是建议价，**不改价**（改价是 5.4.1.1 调价单的写入所有权；价目表 5.1.1.2 未交付、本仓无 price_list 表 ⇒ 当前价只读 5.5.2.1 的价格观测台账 price_anomaly_observation）；② 建议状态机 PENDING_CONFIRMATION / READY / CONFIRMED / REJECTED，「执行」= 放行给下游，已放行 / 已确认 / 已驳回的建议**不可改判**（只追加事实，改判历史等于把留痕洗掉），驳回必须写原因；③ 自动放行只在「降价幅度 ≤ 规则上的 max_auto_price_drop_rate **且** 5.3.1.1 复核得了毛利（decision_ready）**且** 是价格动作」三者同时成立时发生 —— 降价超阈值、成本不完整、暂停促销 / 下架三类一律进人工确认；④ 毛利只能来自 5.3.1.1 的真实测算（不重写任何扣减公式），成本不完整 ⇒ 毛利率为 null（不是 0）且该建议不自动放行· **五类触发条件各有真实数据来源，取不到就不判定（记未命中留痕 + 写明原因，不当成 0）**：库存低于阈值 → 7 库存的 warehouse 授权端点（catalog 既有 InventoryAvailabilityPort）；库龄超期 → **新建** catalog→warehouse 的 InventoryAgingPort（仿 CostBasisPort + CostBasisConfiguration 的 Http / Unwired 双实现 + `@Value("${WAREHOUSE_URL:}")` 装配，透传调用方 Authorization 头、租户由 warehouse 从成员关系解析；显式请求 NORMAL / SLOW_MOVING / OBSOLETE 三档全量，因为本规则的阈值可能比 warehouse 的滞销线更短）；成本上涨 → 5.2.1.1 的 sku_cost_revision 版本历史（两版必须是**完整快照**，部分成本算出来的涨幅是假的）；竞品降价 → 5.5.2.1 价格观测台账的相邻两次 platform_price 观测降幅（🔴 本仓**没有竞品价采集模块**，所以用「平台在售价的下降幅度」作可测口径，并在能力声明里写明它**不是竞品价**、ownerModule 指向未交付的竞品价模块）；毛利低于下限 → 5.3.1.1 在当前价下的真实毛利率（成本不完整 ⇒ **不判定**，不是判定成「没低于下限」）· **优先级语义**：数字小者优先（与本仓既有约定一致），同一 SKU 上**先命中者优先** —— 只有优先级最高的命中规则产出建议调价，其余命中记录标 superseded 并点名覆盖者；生效时段 effective_from（含）~ effective_to（不含，空 = 长期有效），评估只跑 enabled 且落在时段内、币种与本次评估一致的规则· 测试 `PricingRuleRulesTest` **20 例**（五类阈值的判定方向 + **取不到数返回 null（不判定）而不是 false** + 建议价算术（降价 / 涨价 / 非价格动作 / 取不到当前价 / 幅度 ≥ 1）+ 变动幅度带符号 + 风险闸三个条件（降价超阈值 / 成本不完整 / 非价格动作）+ 生效时段左闭右开 + 金额 4 位费率 6 位 HALF_UP）+ `PricingRuleIntegrationTest` **12 例**（Testcontainers 真实 PostgreSQL 16，连接池压到 1；规则落库且**生效时段带 +08:00 时刻写回零漂移**、作用范围落库与检索、乐观锁 409 / 库存低于阈值命中并产出建议价（95 = 100 × (1 − 5%)，毛利 59.75 来自 5.3.1.1 对建议价的复核）/ 降价超阈值 ⇒ 需人工确认 ⇒ 确认后不可改判、驳回必须写原因 / **优先级先命中者优先**（两条规则都命中，只有一条产出建议，另一条标 superseded）/ 成本上涨需要两版完整快照（一版 ⇒ 不判定）/ 库龄超期命中与库龄取不到 ⇒ 不判定 / 毛利低于下限命中（负毛利如实落库）/ **取不到当前价 ⇒ 留痕但不产出建议价** / 未命中也留痕 / **评估不改价**（价格观测台账一行不动）/ 端点与权限（只读角色评估 ⇒ 403））+ `PricingRuleTenancyIntegrationTest` **4 例**（**多租户三断言**：两租户互不可见 —— 规则 / 作用范围 / 命中记录 / 建议调价（列表、明细、直查都验）；伪造 `X-Tenant-Id` 头无效 —— 伪造头下写入仍落在调用者自己名下、带伪造头读别人的规则 ⇒ 404；连接池归还后不串租户 —— 单连接 A→B 交替 5 轮，每轮只看到当前租户的数据）+ `pricing-rule-model.test.ts` **24 例**（**null 绝不渲染成 0.00 / 0%** + 取不到当前价 ⇒「不产出建议价」而不是 0 + 变动幅度只报降幅绝对值 + 高风险文案常显 + 成本不完整即便降幅很小也不自动放行 + 未命中 / 被覆盖两种留痕文案分得开 + 五类触发条件阈值文案 + 切换触发条件 / 动作会清空不适用的列 + 评估必须有目标店铺与目标平台（当前价按平台 + 站点登记）+ 跨币种必须给汇率）+ `pricing-rule-allowlist.test.ts` **5 例**（**放行方向从自己生成的 OpenAPI 契约反向抽 path 再逐条断言** + 写动作真转发到 8082 且伪造租户头不被转发 + **拒绝方向**断言裸路径 / `rules/{uuid}/execute`（🔴 本模块不改价）/ `rules/{uuid}/prices`（不建价目表）/ `suggestions/{uuid}/apply`（高风险必须先经 decide）/ `hits/export` 仍然 404 + **不误伤兄弟车道分支**（含 5.3.2.1 定价模板）+ 字面量子路径不被 uuid 分支吃掉）· api-proxy 白名单**外科式最小追加**（**新增一条** `pricing-rules` 元素，插在「5.3.2.1 定价模板」元素**之前**，既有条目一字未动；正则根路径字面量 `pricing-rules`，字面量子路径（capabilities / directory / evaluate / hits / rules / suggestions）排在 {uuid} 段之前，id 段用完整 UUID 形状 `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`）。契约由 codegen 重生成（`--spec-dir` 用本 worktree 内六份 spec，**catalog 纯新增 8 条路径与 18 个 DTO，0 条路径删除、0 个既有 DTO 改动**；本模块的模型类型全部带 `PricingRule` 前缀，以免与既有模块的 `RuleInput` / `ScopeView` / `CategoryOption` / `BrandOption` / `CapabilityItem` **同名顶掉对方的契约类型**）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/catalog -am test -Dtest='PricingRule*'` **36 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 3/3 通过（本车道零告警）、`pnpm vitest run apps/web/src/components/pricing/pricing-rule-model.test.ts apps/web/src/app/api/catalog/pricing-rule-allowlist.test.ts` **29 例全绿**、**全量 allowlist 回归 `pnpm vitest run apps/web/src/app/api/trade` 47 文件 249 例全绿** + `apps/web/src/app/api/catalog` 与 `apps/web/src/components/pricing` 24 文件 337 例全绿。**下游缺口**：5.4.1.1 调价单未交付 ⇒ 本模块的建议调价只到「放行」为止，实际改价与平台回写由 5.4 承接；5.1.1.2 价目表未交付 ⇒ 当前价只能取 5.5.2.1 的价格观测台账；竞品价采集模块未交付 ⇒ 「竞品降价」以平台在售价降幅作可测口径（已在能力声明写明）；7 库存与 7.6.1.1 库龄经 warehouse 授权端点**只读**取数（跨服务无 SQL / 无 FK / 无副本） |
 | 5.4.1.1 | 调价单 | /pricing/adjust | D6 | 未开发 | — |
 | 5.4.1.2 | 批量调价 | /pricing/adjust | D6 | 未开发 | — |
 | 5.4.2.1 | 平台价格同步 | — | D6 | 未开发 | — |
@@ -557,3 +540,30 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 252 |
+| **未开发** | **213** |
+| 完成率 | 54.2% |
+| **D6** | 13 | 0 | 65 | 78 |
+| 05 | 定价与价目系统 | D6 | 8 | 19 |
+| 06 | 采购与供应系统 | D6 | 4 | 26 |
+| 已交付 | 242 |
+| **未开发** | **223** |
+| 完成率 | 52.0% |
+| **D5** | 51 | 0 | 1 | 52 |
+| **D6** | 6 | 0 | 72 | 78 |
+| **D7** | 11 | 0 | 144 | 155 |
+| 05 | 定价与价目系统 | D6 | 1 | 19 |
+| 10 | 物流与头程系统 | D5 / D7 | 25 | 27 |
+| 15 | 客户与客服系统 | D7 | 1 | 24 |
+| 已交付 | 247 |
+| 进行中 | 3 |
+| **未开发** | **215** |
+| 完成率 | 53.1% |
+| **D6** | 9 | 3 | 66 | 78 |
+| **D7** | 12 | 0 | 143 | 155 |
+| 05 | 定价与价目系统 | D6 | 4 | 19 |
+| 15 | 客户与客服系统 | D7 | 2 | 24 |
+| 已交付 | 250 |
+| 完成率 | 53.8% |
+| **D6** | 12 | 0 | 66 | 78 |
+| 05 | 定价与价目系统 | D6 | 7 | 19 |
