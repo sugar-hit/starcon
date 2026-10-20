@@ -26517,6 +26517,423 @@
           }
         }
       }
+    },
+    "/catalog/landed-costs/parameters": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostParameterPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "put_catalog_landed_costs_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LandedCostParameterInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostParameterRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "computedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "computedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "post_catalog_landed_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LandedCostComputeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComputed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}/recompute": {
+      "post": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "post_catalog_landed_costs_statementId_recompute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComputed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_statementId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/{statementId}/components": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_statementId_components",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "statementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComponentPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/comparisons": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_comparisons",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/landed-costs/capabilities": {
+      "get": {
+        "tags": [
+          "landed-cost-controller"
+        ],
+        "operationId": "get_catalog_landed_costs_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandedCostCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -36618,9 +37035,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -51035,6 +51452,681 @@
         "properties": {
           "deleted": {
             "type": "boolean"
+          }
+        }
+      },
+      "LandedCostParameterInput": {
+        "required": [
+          "componentCode",
+          "currency",
+          "destinationCountryCode",
+          "unitAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "componentCode": {
+            "minLength": 1,
+            "pattern": "CUSTOMS_CLEARANCE|LAST_MILE_RESERVE",
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{2}",
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Za-z]{3}",
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LandedCostParameterRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "componentCode": {
+            "type": "string"
+          },
+          "componentLabel": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LandedCostComputeInput": {
+        "type": "object",
+        "properties": {
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceShipmentCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LandedCostComputed": {
+        "type": "object",
+        "properties": {
+          "statementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostStatementRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostStatementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "allocationMethod": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LandedCostBasis": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "includedComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComponentRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceDocumentCode": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "included": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxDutyAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxOtherAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "taxBearer": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementCode": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costBasis": {
+            "type": "string"
+          },
+          "allocationMethod": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "computeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/LandedCostBasis"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostLineRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "includedComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentRow"
+            }
+          }
+        }
+      },
+      "LandedCostComponentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostParameterPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostParameterRow"
+            }
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComparison": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComparisonRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComparisonRow": {
+        "type": "object",
+        "properties": {
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "statementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completeStatementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "minUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxUnitLandedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LandedCostCapabilities": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "$ref": "#/components/schemas/LandedCostBasis"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostComponentCapability"
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LandedCostGap"
+            }
+          },
+          "allocationMethods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostComponentCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LandedCostGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }

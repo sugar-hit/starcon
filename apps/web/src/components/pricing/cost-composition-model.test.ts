@@ -330,13 +330,22 @@ describe('分区块约定（给兄弟模块的扩展位）', () => {
     expect(composition?.title).toBe('成本构成');
   });
 
-  it('5.2.1.2 与 5.2.1.3 显式标为未交付并写明为什么', () => {
-    for (const moduleId of ['5.2.1.2', '5.2.1.3']) {
-      const section = COST_SECTIONS.find((s) => s.moduleId === moduleId);
-      expect(section, `${moduleId} 必须在分区表里`).toBeTruthy();
-      expect(section?.delivered).toBe(false);
-      expect(section?.summary).toContain('未交付');
-    }
+  it('5.2.1.2 到岸成本已交付，并写明它与本模块不是同一个口径', () => {
+    const landed = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.2');
+    expect(landed, '5.2.1.2 必须在分区表里').toBeTruthy();
+    expect(landed?.delivered).toBe(true);
+    expect(landed?.title).toBe('到岸成本');
+    // 🔴 口径必须写在分区摘要里：两个分区共用 /pricing/cost 路由，
+    // 不点明「单据级 vs SKU 级」，运营会把两个数当成同一个数。
+    expect(landed?.summary).toContain('单据级');
+    expect(landed?.summary).toContain('仓储费');
+  });
+
+  it('5.2.1.3 成本分摊仍显式标为未交付并写明为什么', () => {
+    const section = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.3');
+    expect(section, '5.2.1.3 必须在分区表里').toBeTruthy();
+    expect(section?.delivered).toBe(false);
+    expect(section?.summary).toContain('未交付');
   });
 });
 

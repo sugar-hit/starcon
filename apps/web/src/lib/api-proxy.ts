@@ -391,6 +391,31 @@ const services: readonly {
       /^sku-cost-compositions(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|revisions))?)?$/,
   },
   {
+    // 5.2.1.2 到岸成本：「货到目标仓可售」的总成本（单据级口径）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   landed-costs                          到岸成本台账（集合读；筛选/分页在服务端）
+    //   landed-costs/capabilities             能力声明（六个分量的来源 + 成本口径）
+    //   landed-costs/comparisons              不同目的地的成本对比（按 skuId 查）
+    //   landed-costs/parameters               租户参数（清关费 / 尾程预备）：读 + 保存（PUT）
+    //   landed-costs/{id}                     到岸成本单明细（GET）
+    //   landed-costs/{id}/components          逐项分量（GET，分页）
+    //   landed-costs/{id}/recompute           按来源发运单重算（POST）
+    //   landed-costs                          计算一张到岸成本单（POST）
+    //
+    // 🔴 `capabilities` / `comparisons` / `parameters` 三个字面量子路径必须排在
+    // uuid 分支**之前**判别，否则它们会被当成「id=capabilities 的那张单」拼出去
+    // （这是本仓反复踩过的坑）。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `landed-costs`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^landed-costs(?:\/(?:capabilities|comparisons|parameters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:components|recompute))?)?$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
