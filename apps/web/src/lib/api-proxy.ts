@@ -1749,6 +1749,57 @@ const services: readonly {
       /^listing\-bulk\-collects(?:\/capabilities|\/plugin\-reports|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/run|\/results)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 4.4.1.3 采集箱（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.2 `listing-bulk-collects` 那一条**之后** ——
+    // 与本批另外三条车道的锚点（`order-intercept` / `fulfillment/consolidation` /
+    // `listing-keyword-rankings` 之后）互不重叠，git 能干净求并。
+    //
+    // 🔴 为什么用 `listing-collect-box` 这个**独立前缀**而不是 `listing-collects/box`：
+    //   4.4.1.1 的 `listing-collects` 元素刻意**没有**放行 `/box`（那是本模块的职责），
+    //   若把采集箱挂在它下面，就必须去改别人已交付的那一条元素 —— 那是别人的成果。
+    //   采集箱本来就不是「一次链接采集」的一种状态，是**一批草稿的暂存区**，
+    //   独立前缀更贴切（与 4.4.2.1 `listing-claims`、4.5.2.1 `listing-hijackers` 同一手法）。
+    //
+    // 🔴 首 token 与既有每一条都不同（既有：`listing-collects` / `listing-bulk-collects` /
+    //   `listing-keyword-rankings` / `listing-hijackers` / `listing-claims` /
+    //   `listing-compliance-precheck` / `listing-performance`），而白名单里的正则都是
+    //   **锚定**的（`/^token(...)?$/`）⇒ 首 token 不同 ⇒ 互不覆盖、互不吃掉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   listing-collect-box/capabilities               能力声明（未交付段 available=false + ownerModule）
+    //   listing-collect-box/items                      采集箱条目（GET，真分页 + 筛选）/ 收录（POST）
+    //   listing-collect-box/items/{uuid}               单个条目详情（GET）
+    //   listing-collect-box/items/claim                批量认领（POST）
+    //   listing-collect-box/items/tags                 批量打标（POST）
+    //   listing-collect-box/items/remove               批量删除 / 移出采集箱（POST）
+    //   listing-collect-box/groups                     分组统计（GET）
+    //   listing-collect-box/candidates                 还没进箱的采集草稿（GET，真分页）
+    //   listing-collect-box/tags                       标签词表（GET / POST）/ 删标签（DELETE /{uuid}）
+    //   listing-collect-box/rules                      认领规则（GET / POST）/ 删规则（DELETE /{uuid}）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / groups / candidates / claim / tags / remove）
+    //    必须排在 uuid 段**之前**判别，否则会被 uuid 段吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`：
+    //    后者把 `c`、`e`、`f` 这类**单字符**也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-collect-box/undeclared-action`      —— 不存在的动作
+    //   * `listing-collect-box/items/{uuid}/claim`      —— 认领是**批量**动作，勾选后一次提交
+    //   * `listing-collect-box/items/{uuid}/tags`       —— 打标同样是批量动作
+    //   * `listing-collect-box/items/{uuid}/remove`     —— 同上
+    //   * `listing-collect-box/items/{uuid}/draft`      —— 草稿内容随条目详情一起返回，不单开一条
+    //   * `listing-collect-box/claim`                   —— 认领走集合入口（/items/claim），不单开一条
+    //   * `listing-collect-box/box`                     —— 本模块自己的前缀，不该再套一层
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-collect\-box(?:\/capabilities|\/groups|\/candidates|\/tags(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/items(?:\/claim|\/tags|\/remove|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
+  },
+  {
     // 4.3.2.2 平台状态回流（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
