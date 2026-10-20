@@ -305,11 +305,12 @@ export const COST_SECTIONS: readonly CostSection[] = [
     title: '到岸成本',
     moduleId: '5.2.1.2',
     moduleName: '到岸成本',
-    delivered: false,
+    delivered: true,
     summary:
       '货到目标仓可售的总成本（采购价 + 国际头程 + 关税 + 清关 + 目的地操作费 + 尾程预备）。' +
-      '🔴 5.2.1.2 **未交付**：它与本模块共用 /pricing/cost 路由，但它是**单据级**口径，' +
-      '与本模块的 SKU 级单位成本不合并 —— 定价时必须选对口径。',
+      '🔴 它与本模块共用 /pricing/cost 路由，但它是**单据级**口径（一批货），' +
+      '与本模块的 SKU 级单位成本不合并 —— 定价时必须选对口径；' +
+      '到岸成本**不含仓储费与尾程派送费实际值**（那是仓库成本口径）。',
   },
   {
     id: 'allocation',
