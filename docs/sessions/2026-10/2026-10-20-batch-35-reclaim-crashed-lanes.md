@@ -375,3 +375,75 @@ api-proxy.ts 最终形态：相对集成头 **88 insertions / 0 deletions**
   （10.6.1.1 上一轮已报「Controller 已写，正在跑集成测试」），
   **要么等它们落地再跑 L2，要么等它们空闲**；
 - 10.3.1.1 与 10.7.1.1 的**逐模块技术说明**在 L2 绿后一起写进 `batch-35` 说明文件。
+
+## 十四、✅ 补记四（12:52）：**5.2.1.1 已 land**（第三个 worker）+ 三车道并入预探
+
+5.2.1.1 成本构成的**第三个 worker**（12:29 那次崩溃后重派的）跑完并 `land` 成功：
+`c218dbda` feat(catalog) → `6ba35172` test(catalog) → `6e3b5e7e` feat(web) →
+`33667346` chore(contracts) → `fa68e115` docs，5 个 atomic commit，工作区干净。
+
+⇒ **本批已有 3 条 ready 车道**（10.3.1.1 / 10.7.1.1 / 5.2.1.1），1 条在跑（10.6.1.1）。
+
+| 件 | 落地位置 |
+| --- | --- |
+| 迁移 | `V215__sku_cost_composition.sql` — `sku_cost_profile` / `sku_cost_adjustment` / `sku_cost_revision`，`tenant_id NOT NULL` + `ENABLE/FORCE RLS` + isolation/data_scope 双策略 |
+| 端点 | `/catalog/sku-cost-compositions/**` — 7 个（能力声明/列表/明细/保存/追加调整/作废/历史） |
+| 页面 | `apps/web/src/app/pricing/cost/page.tsx` + `apps/web/src/components/pricing/cost-composition-{model.ts,cost-composition-workspace.tsx}` |
+| 测试 | `SkuCostCompositionRulesTest` 9 例 + `SkuCostCompositionIntegrationTest` 16 例 = **25 例 0 失败** |
+
+### 它接手时基线也是红的 —— 4 个真 bug，且两个直接打在蓝图加粗句上
+
+1. **`CostBasisPort` 累加器 NPE** —— `new BigDecimal[2]` 的元素是 `null`，`acc[0].add()` 在**第一张单据上就炸**
+   ⇒ 头程与关税分项永远取不到（上一轮修的分页截断漏洞正好把它掩盖住了）；
+2. **🔴 快照窗口只有 1 天**（明细页是回溯 90 天）⇒ 历史里 `purchase_cost` 恒为 `null`、
+   `snapshot_complete` 恒 false ⇒ **「同一 SKU 今天显示毛利 30% 明天 25% 无法解释」这条蓝图加粗句
+   在历史里根本不可见** —— 成本法反例查不出来；
+3. `UPDATE ... SET effective_from=?` 缺 `?::timestamptz` ⇒ 保存构成整条 500（INSERT 侧有转换才没暴露）；
+4. **乐观锁没校验客户端回传的 version** ⇒ 过期客户端能静默覆盖别人的成本。
+
+另补：调整原因/作废理由的**服务层校验**（返回 400 而不是撞 DB CHECK 拿 500）。
+
+### 「成本法」与「采购成本来源」的落地
+
+- **成本法**：`sku_cost_profile.cost_method` 枚举（`MOVING_AVERAGE` / `FIFO` / `LOT`，**只增不改**，
+  且会进历史快照 `sku_cost_revision.cost_method`）+ `SkuCostCompositionRules` 三法加权
+  （`BigDecimal`、scale 4、`HALF_UP` 钉死），**列表/明细/历史三处共用同一份实现**；
+  历史留痕 = 每次变更 append 一条 `sku_cost_revision`（当时成本法/币种/五个分项当时值/合计/生效时间/原因），
+  **无 UPDATE 端点**；页面明示位置 = `/pricing/cost` 顶部「成本口径（必看）」块 + 明细头部。
+- **采购成本来源**：四类来源在页面上**分开标**（实际到货金额 / 供应商报价（未成交）/ 头程发运单 / 关税估算单 /
+  人工参数 / 手工调整）。采购成本 = `vendor_delivery_record`（V137）**实际到货金额**按成本法加权 ——
+  **不是** 6.3 采购单成交价（未开发）；`supplier_quote` 只作只读参考**单列、永不计入合计**。
+  取不到时包装成本显示「未维护」、上游不可达显示「取不到」+ 503，**绝不显示 0.00**。
+
+### 静态预检复扫 V215 最终形态
+
+| 项 | 结果 |
+| --- | --- |
+| `ADD COLUMN` 无 DEFAULT / `SET NOT NULL` / 新增 `CHECK` | **0 / 0 / 0** ✅ |
+| ALTER 既有表 | **0** —— 只建 3 张新表 ✅ |
+| **跨服务外键** | **0** ✅ —— 没有一个 FK 指向 warehouse/trade/channel/identity，模块边界纪律守住 |
+| 成本法枚举 | profile 与 revision 两处都钉死三值白名单 ✅（成本法会进历史快照） |
+
+### 🔴 三车道顺序并入预探：**无冲突**
+
+5.2.1.1 也改了 `apps/web/src/lib/api-proxy.ts`（`catalog/` 前缀）⇒ 再次用一次性 probe worktree
+实测真实顺序并入（**不碰集成头**，事后已删除）：
+
+```
+merge 10.3.1.1 → 冲突 0
+merge 10.7.1.1 → 冲突 0
+merge 5.2.1.1  → 冲突 0
+api-proxy.ts 最终形态：相对集成头 **115 insertions / 0 deletions**
+  三条车道的条目都在（logistics-tracking 18 处、return-dispositions 17 处、sku-cost-compositions 8 处）
+```
+
+⇒ 三车道同批改共享白名单，**实测仍不撞**。但这再次说明上一节那条结论：
+**api-proxy.ts 不受 `contract-union` 保护，并入干净与否只能靠实测，不能靠结构保证。**
+
+### 下一轮 tick 的实际入口（再更新）
+
+- `merge-ready` 将会拿到 **3 条**（10.3.1.1 / 10.7.1.1 / 5.2.1.1）⇒
+  **L2 的验证对象是「3 条车道并入后的集成头」**；
+- **L2 不得与在途 10.6.1.1 的 L1 并发跑** —— 它上一轮已报「后端 22 例绿、前端 22 例绿、
+  typecheck/lint 绿、契约已重生成、台账与会话日志已写，正在跑 channel 全量回归」，**离落地只差最后一步**；
+- 三条车道的**逐模块技术说明**在 L2 绿后一起写进 `batch-35` 说明文件。
