@@ -8923,6 +8923,161 @@
         }
       }
     },
+    "/trade/order-pending-review/queue/{orderId}/evaluate": {
+      "post": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "post_trade_order_pending_review_queue_orderId_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/batches": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "post_trade_order_pending_review_batches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchReceipt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/order-intercept/sku-costs": {
       "get": {
         "tags": [
@@ -22988,6 +23143,239 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderReviewRuleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/summary": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/queue": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_queue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queueStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewDecision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "riskEvaluated",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/queue/{orderId}": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_queue_orderId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/capabilities": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingReviewCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/order-pending-review/batches/{batchId}": {
+      "get": {
+        "tags": [
+          "order-pending-review-controller"
+        ],
+        "operationId": "get_trade_order_pending_review_batches_batchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchReceipt"
                 }
               }
             }
@@ -40856,6 +41244,213 @@
           }
         },
         "description": "命中链一行（未命中的规则也在内）"
+      },
+      "EvaluateInput": {
+        "type": "object",
+        "properties": {
+          "evaluatedAt": {
+            "type": "string",
+            "description": "判定时刻（timestamptz）；不给 = 服务器当前时刻",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "试算请求"
+      },
+      "BatchDecisionInput": {
+        "required": [
+          "action",
+          "idempotencyKey",
+          "orderIds"
+        ],
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "幂等键：同一租户内唯一；重复提交同一个键只生效一次"
+          },
+          "action": {
+            "type": "string",
+            "description": "批量动作：APPROVE 通过 / REJECT 驳回 / SUSPEND 挂起",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "orderIds": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "description": "订单 id 列表（1..100 条，同一批内不许重复）",
+            "items": {
+              "type": "string",
+              "description": "订单 id 列表（1..100 条，同一批内不许重复）",
+              "format": "uuid"
+            }
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号；action=APPROVE 时必填",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本；action=APPROVE 时必填",
+            "format": "int64",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "理由；action=REJECT / SUSPEND 时必填",
+            "nullable": true
+          }
+        },
+        "description": "批量审单请求"
+      },
+      "BatchItemResult": {
+        "type": "object",
+        "properties": {
+          "seqNo": {
+            "type": "integer",
+            "description": "请求内的序号（从 1 开始）",
+            "format": "int32"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号；查不到时为 null",
+            "nullable": true
+          },
+          "outcome": {
+            "type": "string",
+            "description": "这一条的结论",
+            "enum": [
+              "APPROVED",
+              "REJECTED",
+              "SUSPENDED",
+              "SKIPPED"
+            ]
+          },
+          "outcomeLabel": {
+            "type": "string",
+            "description": "这一条的结论中文"
+          },
+          "reason": {
+            "type": "string",
+            "description": "为什么是这个结论"
+          }
+        },
+        "description": "批量审单的逐条结果"
+      },
+      "BatchReceipt": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "批次动作中文"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求了几条",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "description": "本批实际通过了几条",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "本批实际驳回了几条",
+            "format": "int32"
+          },
+          "suspendedCount": {
+            "type": "integer",
+            "description": "本批实际挂起了几条",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "本批跳过了几条",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "description": "批次理由"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "是否已完成"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "完成时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "description": "操作人（已认证成员）",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "description": "逐条结果（按请求下标）",
+            "items": {
+              "$ref": "#/components/schemas/BatchItemResult"
+            }
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "本次是否为幂等回放（true = 之前已经处理过，没有再次改状态）"
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "批量审单回执"
       },
       "InterceptSkuCostInput": {
         "required": [
@@ -61474,6 +62069,729 @@
           }
         },
         "description": "买家画像分页"
+      },
+      "PendingReviewSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "队列里的订单总数（已提交且未终结）",
+            "format": "int64"
+          },
+          "pending": {
+            "type": "integer",
+            "description": "待审（没有任何结论）",
+            "format": "int64"
+          },
+          "suspended": {
+            "type": "integer",
+            "description": "已挂起（仍在队列里等人）",
+            "format": "int64"
+          },
+          "approved": {
+            "type": "integer",
+            "description": "已通过",
+            "format": "int64"
+          },
+          "rejected": {
+            "type": "integer",
+            "description": "已驳回",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "description": "已超时（等得最久的一批）",
+            "format": "int64"
+          },
+          "unevaluated": {
+            "type": "integer",
+            "description": "还没有风险评估的订单数",
+            "format": "int64"
+          },
+          "highRisk": {
+            "type": "integer",
+            "description": "风险分 ≥ 60 的订单数",
+            "format": "int64"
+          },
+          "at": {
+            "type": "string",
+            "description": "概览基准时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "待审队列概览（不受列表筛选与分页影响）"
+      },
+      "PendingReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的行",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "筛选后的总行数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 开始）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          },
+          "sortNote": {
+            "type": "string",
+            "description": "本批的排序键说明（风险分 → 时效分）"
+          }
+        },
+        "description": "待审队列分页"
+      },
+      "PendingReviewRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "平台/外部单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "grandTotal": {
+            "type": "number",
+            "description": "订单总额（numeric(19,4)）"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻（进队列的时刻）",
+            "format": "date-time"
+          },
+          "waitingHours": {
+            "type": "number",
+            "description": "已等候小时数（numeric，秒→小时的整数除法）"
+          },
+          "timelinessScore": {
+            "type": "number",
+            "description": "时效分 0..100（DB 函数现算）"
+          },
+          "timelinessState": {
+            "type": "string",
+            "description": "时效状态"
+          },
+          "timelinessStateLabel": {
+            "type": "string",
+            "description": "时效状态中文"
+          },
+          "queueStatus": {
+            "type": "string",
+            "description": "队列状态"
+          },
+          "queueStatusLabel": {
+            "type": "string",
+            "description": "队列状态中文"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "结论时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "结论理由",
+            "nullable": true
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "结论依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "结论依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "string",
+            "description": "产生该结论的批次 id",
+            "format": "uuid",
+            "nullable": true
+          },
+          "riskScore": {
+            "type": "number",
+            "description": "风险分 0..100；null = 没评估过，不是 0",
+            "nullable": true
+          },
+          "riskRecommendedAction": {
+            "type": "string",
+            "description": "风控建议动作（RELEASE / MANUAL_REVIEW / HOLD_SHIPMENT）",
+            "nullable": true
+          },
+          "riskManualReviewRequired": {
+            "type": "boolean",
+            "description": "风控是否要求人工复核",
+            "nullable": true
+          },
+          "riskEvaluationStatus": {
+            "type": "string",
+            "description": "风控评估状态（SCORED / INSUFFICIENT_SIGNALS）",
+            "nullable": true
+          },
+          "reviewDecision": {
+            "type": "string",
+            "description": "审单判定结论（AUTO_APPROVE / MANUAL_REVIEW）；null = 没判定过",
+            "nullable": true
+          },
+          "reviewMode": {
+            "type": "string",
+            "description": "判定的模式（RECORDED 生效判定 / DRY_RUN 试跑）；null = 没判定过",
+            "nullable": true
+          },
+          "reviewDecisionReason": {
+            "type": "string",
+            "description": "审单判定的一句话结论",
+            "nullable": true
+          },
+          "winningRuleCode": {
+            "type": "string",
+            "description": "决定结论的规则编号",
+            "nullable": true
+          },
+          "winningRuleName": {
+            "type": "string",
+            "description": "决定结论的规则名称",
+            "nullable": true
+          },
+          "matchedRuleCount": {
+            "type": "integer",
+            "description": "命中的规则条数",
+            "format": "int32"
+          },
+          "forcedRuleCount": {
+            "type": "integer",
+            "description": "强制转人工的规则条数",
+            "format": "int32"
+          },
+          "hitRuleCodes": {
+            "type": "array",
+            "description": "命中的规则编号（可回溯到具体规则）",
+            "items": {
+              "type": "string",
+              "description": "命中的规则编号（可回溯到具体规则）"
+            }
+          },
+          "addressAnomalyCodes": {
+            "type": "array",
+            "description": "命中的地址异常码",
+            "items": {
+              "type": "string",
+              "description": "命中的地址异常码"
+            }
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人姓名",
+            "nullable": true
+          },
+          "shippingCountry": {
+            "type": "string",
+            "description": "收货国家",
+            "nullable": true
+          }
+        },
+        "description": "待审队列的一行"
+      },
+      "OrderSnapshot": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "订单 id",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "description": "我方单号"
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "description": "平台/外部单号"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "订单来源"
+          },
+          "manualKind": {
+            "type": "string",
+            "description": "手工单子类；平台单为空串"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "币种"
+          },
+          "subtotalAmount": {
+            "type": "number",
+            "description": "小计"
+          },
+          "discountAmount": {
+            "type": "number",
+            "description": "折扣额"
+          },
+          "taxAmount": {
+            "type": "number",
+            "description": "税费"
+          },
+          "shippingAmount": {
+            "type": "number",
+            "description": "运费"
+          },
+          "otherAmount": {
+            "type": "number",
+            "description": "其他费用"
+          },
+          "grandTotal": {
+            "type": "number",
+            "description": "总额"
+          },
+          "submittedAt": {
+            "type": "string",
+            "description": "提交时刻",
+            "format": "date-time"
+          },
+          "documentStatus": {
+            "type": "string",
+            "description": "单据状态（DRAFT / SUBMITTED）"
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "收件人姓名"
+          },
+          "recipientPhone": {
+            "type": "string",
+            "description": "收件人电话"
+          },
+          "recipientEmail": {
+            "type": "string",
+            "description": "收件人邮箱"
+          },
+          "shippingCountry": {
+            "type": "string",
+            "description": "收货国家"
+          },
+          "shippingCity": {
+            "type": "string",
+            "description": "收货城市"
+          },
+          "shippingPostcode": {
+            "type": "string",
+            "description": "收货邮编"
+          },
+          "shippingAddressLine1": {
+            "type": "string",
+            "description": "收货地址行"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "订单行数",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number",
+            "description": "订单件数（numeric(19,6)）"
+          }
+        },
+        "description": "订单快照（审单要看的那些事实）"
+      },
+      "PendingReviewBatchRef": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "批次创建时刻",
+            "format": "date-time"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "这一单在该批次里的结论"
+          },
+          "reason": {
+            "type": "string",
+            "description": "这一单在该批次里的理由"
+          }
+        },
+        "description": "这一单最近几次批量审单的结果"
+      },
+      "PendingReviewDetail": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "$ref": "#/components/schemas/PendingReviewRow"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OrderSnapshot"
+          },
+          "queueCase": {
+            "$ref": "#/components/schemas/QueueCaseInfo"
+          },
+          "riskAssessment": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "riskComponents": {
+            "type": "array",
+            "description": "风控五个维度的明细（恒 5 行；没评估过时为空表）",
+            "items": {
+              "$ref": "#/components/schemas/RiskComponent"
+            }
+          },
+          "reviewDecision": {
+            "$ref": "#/components/schemas/ReviewDecision"
+          },
+          "hits": {
+            "type": "array",
+            "description": "命中链（逐条件到订单字段与实际值）；没判定过时为空表",
+            "items": {
+              "$ref": "#/components/schemas/RuleHit"
+            }
+          },
+          "recentBatches": {
+            "type": "array",
+            "description": "这一单最近几次批量审单的结果",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewBatchRef"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "待审队列的单条详情"
+      },
+      "QueueCaseInfo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "结论状态"
+          },
+          "statusLabel": {
+            "type": "string",
+            "description": "结论中文"
+          },
+          "enqueuedAt": {
+            "type": "string",
+            "description": "入队时刻",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "结论时刻",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedByMembershipId": {
+            "type": "string",
+            "description": "结论人（已认证成员）",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decisionReason": {
+            "type": "string",
+            "description": "结论理由"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "evaluationId": {
+            "type": "string",
+            "description": "依据的判定留痕 id",
+            "format": "uuid",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "string",
+            "description": "产生该结论的批次 id",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "description": "这一单当前的审单结论",
+        "nullable": true
+      },
+      "ApprovableRule": {
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编号"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "version": {
+            "type": "integer",
+            "description": "规则版本（批量通过要连版本一起带）",
+            "format": "int64"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "生效起",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "description": "生效止；null = 长期有效",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "description": "为什么这条能当依据"
+          }
+        },
+        "description": "可作为批量通过依据的规则"
+      },
+      "PendingReviewCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "上游数据源逐项可用性",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewDimension"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "description": "下游模块逐项交付状态",
+            "items": {
+              "$ref": "#/components/schemas/PendingReviewDownstream"
+            }
+          },
+          "activeRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的审单规则条数",
+            "format": "int32"
+          },
+          "autoApproveRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的「自动通过」规则条数",
+            "format": "int32"
+          },
+          "forcedManualRuleCount": {
+            "type": "integer",
+            "description": "本租户此刻生效中的「强制转人工」规则条数",
+            "format": "int32"
+          },
+          "approvableRules": {
+            "type": "array",
+            "description": "**可作为批量通过依据**的规则清单（编号 + 版本）。批量通过必须从这里挑一条 —— 没有规则就没有「明确的规则」",
+            "items": {
+              "$ref": "#/components/schemas/ApprovableRule"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "读这一页必须知道的事"
+          }
+        },
+        "description": "9.2.1.1 待审队列的能力与上下游可用性"
+      },
+      "PendingReviewDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "能力码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "是否已接通"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "note": {
+            "type": "string",
+            "description": "缺口说明；已接通时为空串"
+          }
+        },
+        "description": "待审队列的一项能力/上游数据源"
+      },
+      "PendingReviewDownstream": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "模块号"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属服务"
+          },
+          "delivered": {
+            "type": "boolean",
+            "description": "是否已交付"
+          },
+          "note": {
+            "type": "string",
+            "description": "交接说明"
+          }
+        },
+        "description": "下游模块的交付状态"
+      },
+      "BatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的行",
+            "items": {
+              "$ref": "#/components/schemas/BatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总行数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 开始）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页行数",
+            "format": "int32"
+          }
+        },
+        "description": "批量审单回执分页"
+      },
+      "BatchRow": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "description": "批次 id",
+            "format": "uuid"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "action": {
+            "type": "string",
+            "description": "批次动作",
+            "enum": [
+              "APPROVE",
+              "REJECT",
+              "SUSPEND"
+            ]
+          },
+          "actionLabel": {
+            "type": "string",
+            "description": "批次动作中文"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "依据的规则编号",
+            "nullable": true
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "description": "依据的规则版本",
+            "format": "int64",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "integer",
+            "description": "请求了几条",
+            "format": "int32"
+          },
+          "approvedCount": {
+            "type": "integer",
+            "description": "实际通过几条",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "实际驳回几条",
+            "format": "int32"
+          },
+          "suspendedCount": {
+            "type": "integer",
+            "description": "实际挂起几条",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过几条",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "description": "批次理由"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "是否已完成"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "批量审单回执列表的一行"
       },
       "InterceptSkuCostPage": {
         "type": "object",

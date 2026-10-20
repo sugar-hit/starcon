@@ -2789,6 +2789,58 @@ const services: readonly {
       /^order\-intercept\/(?:capabilities|overview|policy|restrictions|sku\-costs|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disposition)?)?)$/,
   },
   {
+    // 9.2.1.1 待审队列（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 9.2.1.3 `order-intercept` 那一条**之后**：
+    // 与并行车道（4.4.1.3 → listing-bulk-collects、9.2.2.1 → fulfillment/consolidation、
+    // 4.5.2.2 → listing-keyword-rankings）的插入点两两相隔 ≥ 74 行，
+    // 默认 3 行上下文窗口不会互相覆盖，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ **首 token 为什么是 `order-pending-review`**：
+    //   本仓既有白名单的正则**全部锚定**（`/^token(...)?$/`），所以只要**首 token 不同**就互不吃。
+    //   逐条核对过本仓全部 46 条 pattern 的首 token：
+    //     `order-review`（9.2.1.2 审单规则，形状是 `order-review/...`）—— 不同；
+    //     `order-intercept`（9.2.1.3 异常拦截）—— 不同；
+    //     `orders`（9.2.2.2 风控校验，形状是 `orders/risk-validation/...`）—— 不同；
+    //     `platform-orders`（9.1.2.1 平台订单同步）—— 不同；
+    //     `fulfillment`（9.3.x 履约）、`aftersales`（11.x 售后）、`sales-orders`（9.1.x 订单）……
+    //     —— 首 token 全部不同。
+    //   ⇒ `order-pending-review` 与既有任何一条都不撞车；
+    //   而它**读起来也不会被误认**成 `order-review`（审单规则）——
+    //   「排队等人审」与「配规则」是两件事，权限与日志都该分得开。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                     能力与上下游可用性 + **可作为批量通过依据的规则清单**
+    //   summary                          队列概览（待审 / 已挂起 / 已通过 / 已驳回 / 已超时 / 未评估 / 高风险）
+    //   queue                            待审列表（GET，真分页 + 真筛选 + DB 层真排序）
+    //   queue/{uuid}                     单条详情（订单事实 + 风险五维 + 完整命中链 + 批次历史）
+    //   queue/{uuid}/evaluate            按当前生效规则试算（POST，标 DRY_RUN 不冒充结论）
+    //   batches                          批量回执列表（GET，真分页 + 真搜索）
+    //   batches                          POST 批量通过 / 驳回 / 挂起（**必须带幂等键**）
+    //   batches/{uuid}                   批量回执详情（含逐条结果）
+    // 判别顺序：字面量子路径（capabilities / summary / queue / batches）排在 {uuid} 分支之前，
+    // 否则会被 uuid 分支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `order-pending-review` —— 后端没有对应映射
+    //   * `order-pending-review/bulk-approve` / `order-pending-review/decisions` ——
+    //     批量动作只有一个入口：`POST /batches`（带幂等键）。放行一个「一键全过」形状
+    //     就是在接口层给蓝图加粗句「批量通过必须基于明确的规则，而不是默认全过」开后门
+    //   * `order-pending-review/queue/{uuid}/auto-approve` / `/bulk` / `/status` ——
+    //     改审单结论的唯一入口是批量端点；单条「改状态」的裸端点不存在
+    //   * `order-pending-review/queue/{uuid}/evaluate/extra` —— 多一层就 404
+    //   * `order-pending-review/batches/{uuid}/items` —— 逐条结果在 `batches/{uuid}` 里，
+    //     不另开一个形状
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-pending\-review\/(?:capabilities|summary|queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluate)?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
