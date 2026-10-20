@@ -447,3 +447,87 @@ api-proxy.ts 最终形态：相对集成头 **115 insertions / 0 deletions**
 - **L2 不得与在途 10.6.1.1 的 L1 并发跑** —— 它上一轮已报「后端 22 例绿、前端 22 例绿、
   typecheck/lint 绿、契约已重生成、台账与会话日志已写，正在跑 channel 全量回归」，**离落地只差最后一步**；
 - 三条车道的**逐模块技术说明**在 L2 绿后一起写进 `batch-35` 说明文件。
+
+## 十五、✅ 补记五（13:04–13:09）：**10.6.1.1 已 land** + 🚨 挖出一个 `lane.mjs` 真缺陷
+
+10.6.1.1 成本分析的 worker 在 13:04:31 跑完并 `land` 成功：
+`e7a7cd83` feat(logistics) —— 「全口径物流成本报表 + 头程分摊明细」。
+
+| 件 | 落地位置 |
+| --- | --- |
+| 迁移 | `V213__logistics_cost_analysis.sql` — 5 表 + 6 个护栏触发器 + RLS + GRANT，纯新建、零 ALTER 既有表 |
+| 端点 | `/channel/logistics-cost-analysis/**` — 10 条（capabilities/overview/by-channel/over-cost-orders/allocation-rules/allocations/…/parameters/…） |
+| 页面 | `/logistics/analytics` → `app/logistics/analytics/page.tsx` + `components/logistics/logistics-cost-analysis-{model,workspace}.ts(x)` |
+| 测试 | `LogisticsCostAnalysisIntegrationTest` 22 例（真实 PG16 + Testcontainers）＋ 前端 model 17 例 ＋ allowlist 5 例 |
+
+**验证**：L0 compile exit 0 ｜ typecheck 3/3 ｜ lint 3/3 ｜ **L1 22 例 0 失败** ｜
+api-proxy 回归 99 文件 589 例 ｜ **channel 全量回归 959 例 0 失败**（验证 V213 迁移无副作用）｜
+PG 容器：verify 期间同时存活 1 个，跑完归零（已被 ryuk 回收）。
+
+### 它接手时基线是「迁移根本跑不起来」
+
+上一 worker 的 V213 里有 **4 处 PL/pgSQL `RAISE …, USING ERRCODE=` 语法错误**
+⇒ 迁移直接语法错，**整个模块无法落库**；另有触发器变量名与列名同名导致
+`column reference "rule_code" is ambiguous`；两个 Port 的 `ObjectMapper` **缺 `JavaTimeModule`**
+（`OffsetDateTime` 反序列化直接炸）；`TRADE_URL` 默认端口写成 8082（那是 catalog 的端口，trade 是 8085）。
+服务层还踩了蓝图加粗句正中间的那个坑：**未登记运费的票会造出 0 元币种行** —— 把缺项当 0，
+正是「物流成本常被低估」的成因。worker 把它改成：合计永远带 `includedComponents`/`missingComponents`，
+**一个分量都没读到时合计是 `null` 而不是 0**，`coverage.complete` **恒为 false**，
+这份报表从不自称全口径。仓储费本仓无任何计费事实（8 仓储作业未交付）⇒ 显式标「暂无数据 + 归属模块」。
+
+### 🚨 挖出一个 `lane.mjs` 真缺陷：`plan` 用陈旧快照回写，**静默撤销并发发生的 land**
+
+10.6.1.1 的 `land` **返回 `{"ok": true}`，但落地标记根本没进 `lanes.json`** ——
+13:08 读状态时它仍是 `state=running / headSha=null`，而同批另外 3 条都是 `merged`。
+**13:00 tick 的 `merge-ready` 因此只并入了 3 条，把 10.6.1.1 漏掉了。**
+
+根因（精确时序）：
+
+| 时刻 | 事件 | 对 `lanes.json` 的影响 |
+| --- | --- | --- |
+| 13:02:14 | 13:00 tick 的 `plan` **读取**状态 | 内存快照里 10.6.1.1 = `running`（worker 还没落地） |
+| 13:03:44 | worker **commit** `e7a7cd83` | — |
+| 13:03:46–13:03:59 | plan 建 4 个 worktree（每条跑一次 `pnpm install`，各约 4–5 秒） | — |
+| ~13:03:5x | worker 调 `land` → 读、改成 `ready`、**写盘成功** | 文件此刻**确实是** `ready` ✅ |
+| **13:03:59** | plan 跑完循环，**用 13:02:14 的陈旧快照回写整个文件** | 💥 **`ready` 被静默还原成 `running`** |
+
+`plan` 的 `readState()` 与 `writeState()` **隔着整个 plan 的执行时间**（本轮 105 秒），
+而它是「读整份 → 改 → 写整份」。**写盘比 `land` 晚 1–15 秒，但写的是旧内容，于是把新内容覆盖掉了。**
+
+**为什么严重**：
+1. **完全静默** —— `land` 返回 `ok: true`、无日志、退出码 0，没有任何地方报错；
+2. **命中窗口随 batch 规模增长** —— 车道越多、`pnpm install` 越慢，窗口越宽；
+3. **不止 `land`，`heartbeat` 同样会被吞** —— 心跳被覆盖 ⇒ 活着的车道被判失联 ⇒ 被回收重派 ⇒
+   **双 writer 写同一个 worktree**（这正是 `lane.mjs` 里 2026-10-07 那段注释描述的老坑的**另一条触发路径**）；
+4. **可量化** —— 不补回的话，10.6.1.1 要到 **14:19 之后**才会被回收重派，重派后还要再跑一遍 L0/L1。
+
+**本轮怎么止血**：确认三道闸都过（worktree dirty=0、HEAD `e7a7cd83` ≠ 基线 `969a983`、分支正确）后，
+在集成头重跑 `land --lane 10.6.1.1` → 标记恢复 `ready`。
+此时 13:00 tick 的 `plan` 已跑完、不再有并发写入，且 `gc` 不写 `lanes.json`、`merge-ready` 也不会再跑 ⇒ 安全。
+
+⚠️ **本轮没有改 `lane.mjs`** —— 13:00 tick 正在集成头上跑 L2，改 `lane.mjs` 会让工作区变脏；
+而 13:00 tick 的 commit 只 `git add` 说明文件与台账、**不会带上 `lane.mjs`**，
+改动会留成脏文件 ⇒ **14:00 tick 的 `merge-ready` 会在「主工作区不干净，拒绝切分支」处直接退出**，
+整批并入被堵死。⇒ 缺陷留给下一轮**专门**修。
+
+完整根因分析、三个候选修法（推荐：`plan` 写盘前重新读一次状态、只叠加自己新建的车道）、
+以及必须补的并发集成测试，写在
+[`docs/backlog/2026-10-20-lane-plan-stale-state-clobbers-land.md`](../../backlog/2026-10-20-lane-plan-stale-state-clobbers-land.md)。
+
+### 🔴 顺带发现：13:00 tick 的 `plan` **又漏了 `--session`**
+
+13:00 tick 新建的 4 条车道（10.3.1.2 / 10.3.2.2 / 10.6.2.1 / 10.7.1.2）`sessionId` **全是 `null`** ——
+batch-35 明确写过「`plan` 必须继续带 `--session`」，13:00 tick 没照做。
+`laneIsUnclaimed` 的判据是「`sessionId` 为空 **且** 距上次心跳 > 60 分钟」，
+`sessionId` 为空时**活着的车道也会在 60 分钟后被误判成孤儿**并被重复重派。
+⇒ backlog 里建议把 `--session` 做成 `plan` 的默认行为（从已有状态继承），而不是靠每个 tick 记得手工传。
+
+### 下一轮 tick 的实际入口（最终）
+
+- `merge-ready` 将会拿到 **4 条**（10.3.1.1 / 10.7.1.1 / 5.2.1.1 / 10.6.1.1）⇒
+  **L2 的验证对象是「4 条车道并入后的集成头」** —— 本批 4 条全部交付；
+- 13:00 tick 已经在跑 L2（3 条版本），14:00 tick 会再跑一次（4 条版本）；
+  **L2 不得与在途 4 条新车道的 L1 并发跑** —— 等它们落地或空闲；
+- **先修 `lane.mjs` 的 plan 写盘缺陷**（或至少确认 14:00 tick 不会踩到同一个坑：
+  14:00 tick 的 `plan` 若在 4 条新车道的 `land` 落盘窗口内跑，同样会吞掉标记）；
+- 4 条车道的**逐模块技术说明**在 L2 绿后一起写进 `batch-35` 说明文件。
