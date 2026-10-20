@@ -1054,6 +1054,50 @@ const services: readonly {
       /^rate\-comparison(?:\/(?:capabilities|compare|comparisons|ratings|shop\-priorities)|\/comparisons\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 10.7.1.2 退运回国（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有的 `rate-comparison/`（10.1.2.2）、`label-templates`（10.2.2.2）、`freight/`
+    // （10.1.2.1）、`logistics-transit-limits/`（10.1.1.3）、`logistics-channels/`
+    // （10.1.1.2）**一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段
+    // 超长单行正则，往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会
+    // 自愈。插入锚点固定在本文件里 `rate-comparison/`（10.1.2.2）那条**之后**、
+    // `14.1.2.2 广告类型差异` 那条**之前** —— 四个车道的插入点两两被既有条目隔开。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-shipbacks/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   return-shipbacks/overview                全量概览（不受筛选与分页影响）
+    //   return-shipbacks/candidates              待退运清单（只取 10.7.1.1 决策为「退运回国」的处置单）
+    //   return-shipbacks/consignments            退运单集合读（GET，真分页 + 筛选）/ 建退运单（POST，**合单**）
+    //   return-shipbacks/consignments/{uuid}     退运单详情（GET，含明细行 / 报关 / 成本 / 分摊 / 收货 / 分录）
+    //   return-shipbacks/consignments/{uuid}/lines     往既有退运单加一行（继续凑单，POST）
+    //   return-shipbacks/consignments/{uuid}/customs   登记报关资料（POST）
+    //   return-shipbacks/consignments/{uuid}/costs     登记成本并**立刻分摊**（POST）
+    //   return-shipbacks/consignments/{uuid}/allocations 成本分摊明细（GET，逐行权重 / 比例 / 尾差）
+    //   return-shipbacks/consignments/{uuid}/confirm   确认退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/dispatch  发出退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/arrival   登记回国收货（POST）
+    //   return-shipbacks/consignments/{uuid}/entries   登记重新入库 / 报废分录（POST）
+    //   return-shipbacks/consignments/{uuid}/close     关闭退运单（POST）
+    //   return-shipbacks/consignments/{uuid}/cancel    取消退运单（POST）
+    //   return-shipbacks/events                 留痕集合读（GET，真分页 + 筛选）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / overview / candidates /
+    // consignments / events）排在 uuid 分支之前，否则会被 uuid 分支提前吃掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    // `[0-9a-f-]+`：后者把单字符 `e` 当合法 id，症状是有人 GET .../consignments/e 会打到后端。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-shipbacks` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `return-shipbacks/consignments/{uuid}/repatriation` —— 退运单本身就是退运，
+    //     没有「再退运一次」的子资源
+    //   * `return-shipbacks/consignments/{uuid}/costs/{uuid}` —— 成本没有独立删除端点
+    //     （成本只追加、错单靠退运单取消来纠正）
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-shipbacks(?:\/(?:capabilities|overview|candidates|consignments|events)|\/consignments\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|customs|costs|allocations|confirm|dispatch|arrival|entries|close|cancel))?)$/,
+  },
+  {
     // 14.1.2.2 广告类型差异（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
     // 既有的 `rate-comparison/`（10.1.2.2）、`label-templates`（10.2.2.2）、`freight/`
     // （10.1.2.1）、`logistics-transit-limits/`（10.1.1.3）、`logistics-channels/`
