@@ -3762,6 +3762,70 @@ const services: readonly {
     pattern:
       /^compliance-precheck(?:\/capabilities|\/drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:check|precheck))?|\/reports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
+  {
+    // 10.7.1.3 弃置与销毁（channel 服务，卷 10「物流与货运」的 L3 锚点 10.7.1）。
+    //
+    // 蓝图：「管理弃置与销毁：无销售价值/品牌方要求/法规不允许再销售的退货，处理销毁、
+    // 留存销毁凭证/照片/重量记录，满足平台与品牌方的销毁证明要求；销毁数量可作为品牌方索赔依据。
+    // 输入：待销毁清单；销毁方式（压碎/焚烧/专业销毁）；凭证要求。
+    // 输出：销毁单 + 凭证 + 数量/重量记录；索赔依据（→ 6.1.2.3 / 11.2.3.3）。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 channel 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 16.2.2.1 的 `compliance-precheck` 元素
+    // 之后、`];` 之前），与另外三条车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `return-disposals` 这个独立前缀：
+    //   * 既有 `return-dispositions` 是 **10.7.1.1 退货接收与处置决策**（决定去哪儿），
+    //     `return-shipbacks` 是 **10.7.1.2 退运回国**（真的把货凑成一批运回国），
+    //     本模块是 **10.7.1.3 弃置与销毁**（真的把货毁掉并**留证**）—— 三个模块
+    //     不共用表、不共用端点、不共用页面，语义上必须分得开。
+    //   * 既有两条正则都是**锚定**的（`/^return\-dispositions(...)$/`、`/^return\-shipbacks(...)$/`），
+    //     首 token 不同就**不会互相吃掉**：`return-disposals` 与 `return-dispositions` 差一个尾字母。
+    //   * `return-quality`（11.2.3.1 质检）与 `return-receipts`（11.2.2.1 退货入库）在 **trade** 服务，
+    //     命名空间本就不同；`refunds` / `supplier-claims` 更是无关。
+    //   * 已用脚本逐条核对本文件里**全部 73 条**既有正则：`return-disposals/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-disposals/capabilities              能力声明（凭证闸 / 枚举词表 / 未交付下游逐条写明 ownerModule）
+    //   return-disposals/overview                  全量概览（不受筛选与分页影响）
+    //   return-disposals/candidates                待销毁清单（只取 10.7.1.1 判为「弃置销毁」的处置单）
+    //   return-disposals/policies                  凭证要求集合读（GET，真分页 + 筛选）/ 登记（POST）
+    //   return-disposals/policies/{uuid}/revoke    撤销凭证要求（POST，必须写理由）
+    //   return-disposals/orders                    销毁单集合读（GET，真分页 + 筛选）/ 建销毁单（POST）
+    //   return-disposals/orders/{uuid}             销毁单详情（GET，含凭证 / 费用 / 索赔依据 / 留痕）
+    //   return-disposals/orders/{uuid}/schedule    排期（POST，**凭证要求在这一刻冻结**）
+    //   return-disposals/orders/{uuid}/evidence    登记一类凭证（POST）
+    //   return-disposals/orders/{uuid}/costs       记一笔销毁费用（POST）
+    //   return-disposals/orders/{uuid}/claim-basis 生成索赔依据（POST）
+    //   return-disposals/orders/{uuid}/dispose     执行销毁（POST，🔴 凭证不齐直接 422）
+    //   return-disposals/orders/{uuid}/cancel      取消销毁单（POST，必须写理由）
+    //   return-disposals/claim-bases/{uuid}/submit 提交下游索赔（POST，回填下游单号）
+    //   return-disposals/claim-bases/{uuid}/reject 下游驳回（POST，必须写理由）
+    //   return-disposals/events                    留痕集合读（GET，真分页 + 筛选）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / overview / candidates / policies / events）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `return-disposals` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-disposals` —— 本模块没有裸路径资源。
+    //   * `return-disposals/orders/{uuid}/costs/{uuid}` —— 费用没有独立删除端点。
+    //   * `return-disposals/orders/{uuid}/repatriation` —— 「退运回国」是 10.7.1.2 的主权。
+    //   * `return-disposals/policies/{uuid}` —— 凭证要求**按主体定位**（品牌 / 平台 / 租户默认），
+    //     没有「按 id 取单条」这个端点。
+    //   * `return-disposals/claim-bases/{uuid}` —— 索赔依据挂在销毁单下，按销毁单寻址。
+    //   * `return-disposals/claim-bases/{uuid}/delete` —— 依据不可删（删了就等于没索赔过）。
+    //   * `return-disposals/orders/{uuid}/delete` —— 销毁单不可删（不可删是状态机的一部分）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
+  },
 ];
 
 function resolve(path: string) {
