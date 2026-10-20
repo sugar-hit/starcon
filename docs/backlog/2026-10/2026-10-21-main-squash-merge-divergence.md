@@ -1,9 +1,9 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 3 轮未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 4 轮未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
 - 优先级: **P0** —— 这是「main → 集成头同步」任务的**长期阻塞点**，每一轮 main 前进都会撞同一堵墙
-- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0415-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
+- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0415-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0515-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
 
 ---
 
@@ -12,7 +12,7 @@
 「main → 集成头同步」任务每轮做的是：`fetch` → `merge-base --is-ancestor origin/main integration/module-dev`
 → 有新提交就 `git merge --no-ff origin/main` → 预检 → push 集成头。
 
-**连续 3 轮（2026-10-21 01:15、03:15、04:15）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
+**连续 4 轮（2026-10-21 01:15、03:15、04:15、05:15）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
 （`Integration/module dev (#11)`）是 GitHub **squash 合并**的产物 —— **单父提交**，
 父提交是 `1bb270a0`（batch-28 tip）。
 
@@ -80,13 +80,25 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
 
 ### 影响
 
-- 「main → 集成头同步」任务**连续 3 轮产出「冲突未并入」**，每轮耗时 27–45 分钟（含等闸）。
+- 「main → 集成头同步」任务**连续 4 轮产出「冲突未并入」**。
+  前三轮每轮耗时 27–45 分钟（含等闸）；**2026-10-21 05:15 轮闸是空的、第 1 次尝试就拿到，等闸 0 分钟**，
+  ⇒ **闸不是瓶颈，唯一瓶颈是 main 的 tip 是 squash**。
 - 2026-10-21 04:15 轮补一条**更硬的证据**：`origin/main` 的树（`06607694b31c6fdfe354ed4783c22d4a0e0b8c20`）
   与集成头自己的祖先提交 `d22bc1e1`（batch-37）**逐字节相同** ⇒ 这次 merge 在内容上是**空转**，
   冲突纯粹是 squash 抹掉血缘导致 merge-base 被拉回 `1bb270a0` 的副作用。
   同一轮还补齐了台账口径：main 快照 **242 已交付 / 0 进行中 / 223 未开发**（52.0%），
   集成头 `39edfe12` **258 / 0 / 207**（55.5%）⇒ main **落后 16 个模块**，
   且**没有任何一个模块是 main 领先**（模块集合两边完全相同，各 465 个）。
+- 2026-10-21 05:15 轮**独立重验**了上面那条「逐字节相同」（不采信历史会话日志，直接跑
+  `git rev-parse origin/main^{tree}` vs `git rev-parse d22bc1e1^{tree}` + `merge-base --is-ancestor`），
+  结论不变 ⇒ **main 不可能领先于集成头的任何一行代码**。
+  同轮还把冲突类型**拆到底**（用 `git cat-file -e` 核对 6 个文件在 merge-base 上是否存在）：
+  **5 个 add/add + 1 个 content**，而不是笼统的「6 文件冲突」。
+  另补一条「main 侧独有文本」的完整分布口径：共 **15 个文件**，
+  其中 **8 个**由 `merge-union` 自动求并、**3 个**由 git 三方合并干净合上
+  （`apps/web/src/app/api/crm/[...path]/route.ts`、`FulfillmentRequestService.java`、
+  `FulfillmentRequestIntegrationTest.java`）、**4 个**构成冲突、**2 个**是集成头严格超集。
+  ⇒ **main 侧的独有文本全部落在已重构/已收口的旧写法上，没有一处是 main 侧的新模块交付。**
 - 那个 406 files / 262390 insertions 的 diffstat 是 **squash 把 85 个 commit 压成一颗造成的行数重放**，
   不是真有 26 万行新代码 —— **不要按这个数字判断工作量**。
 - `merge-union` 驱动能自动合上的部分（契约 `packages/api-contracts/**` + 台账 `module-progress.md`）
@@ -102,8 +114,12 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
 - [ ] **（次选）人工决定 main 的基线**：把 main 重置到集成头，或接受 squash 作为新基线
       （后者需要配套一条「main 是集成头快照」的读取约定，否则台账会持续倒退）。
 - [ ] **（若坚持并入）开一条 fix 车道解这 6 个冲突**，方向「以集成头为准 + 逐行核对 main 那
-      2–17 行独有文本是否需要保留」。**不要用 `git checkout --ours/--theirs` 批量覆盖**：
+      2–18 行独有文本是否需要保留」。**不要用 `git checkout --ours/--theirs` 批量覆盖**：
       第 1/2/3/6 个文件 main 侧确有独有文本。解完**必须重跑 L2**（这批内容从未经过 L1/L2）。
+      （2026-10-21 05:15 轮补充：这 6 个文件里 **5 个是 add/add** —— 它们在 merge-base `1bb270a0` 上
+      **根本不存在**，是集成头在 batch-28 之后新增的；第 5 个 `api-proxy.ts` 是 content 冲突。
+      另有 **15 个文件**含 main 独有文本，其中 **8 个**由 `merge-union` 求并、**3 个**由 git 三方合并
+      干净合上、**4 个**即上述冲突文件、**2 个**是集成头严格超集。）
 - [ ] **（顺带）给同步任务补「回合被截断也要 `gate release`」的收尾保障**：
       2026-10-21 02:15 那个同步任务回合在 02:47:10 被截断，**既没写会话日志也没 release 闸**
       ⇒ 闸泄漏 70 分钟，白挡了 03:00 轮与 03:15 轮两次同步。
