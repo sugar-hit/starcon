@@ -3664,6 +3664,68 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 15.2.2.1 Request a Review（索评）（crm 服务，卷 15 的 L3 锚点 15.2.2）。
+    //
+    // 蓝图：「按规则向已签收订单的买家发起索评（平台允许范围内），控制频次避免打扰，
+    // 支持按店铺/时间/物流状态批量执行。输出：索评任务 + 发送记录 + 评价回收统计。
+    // 关系：上游 = 10.3.2.2 签收；下游 = 15.2.1.1 评价。**索评频次必须受限**。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那条是 15.4.2.1 客服知识库（`knowledge/...`），单行超长正则，
+    // 并进去会让本车道与并行车道的插入点被隔开，git 判冲突。
+    // 插入锚点固定在 **crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前**，
+    // 与本批另外三条车道的锚点（catalog 两条、channel 一条）互不重叠。
+    //
+    // 🔴 为什么用 `review-requests` 这个独立前缀（已逐条核对既有全部 token）：
+    //   * 既有 crm 分支的 token 是 `knowledge`（15.4.2.1 知识库）；
+    //     `review-due` 是 knowledge **内部**的子形状（`knowledge/review-due`），不是独立 token。
+    //   * 既有别的服务的 token：`orders` · `order-review`（9.2.1.2 trade）·
+    //     `refunds` · `rma-authorizations` · `return-receipts` · `return-quality` …
+    //   * 既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //     `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //     的元素才有机会吃到 `crm/review-requests/...`。
+    //     而本文件里 prefix='crm/' 的元素只有知识库那一条，它的正则 `^knowledge\/...$`
+    //     **不可能**匹配 `review-requests/...` ⇒ 两条互不吃掉，首 token 不同即可。
+    //   * 刻意**不**复用 `order-review`（trade 的订单审核）：那是另一个服务、
+    //     另一个模块（9.2.1.2），共用会让「索评」与「订单审核」在白名单上混成一个形状。
+    //
+    // 形状逐条列出：
+    //   review-requests                          索评任务集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   review-requests/capabilities             能力声明（逐维 available + ownerModule + impact）
+    //   review-requests/frequency-policy         频次硬上限（GET 读 / PUT 配置）
+    //   review-requests/shops                    店铺目录（来自上游 channel 的真实清单）
+    //   review-requests/candidates               已签收候选单（上游 10.3.2.2 确认单清单）
+    //   review-requests/batch                    批量执行（POST，逐条给结论与原因）
+    //   review-requests/recovery-stats           评价回收统计（GET）
+    //   review-requests/{uuid}                   单条索评任务详情（GET）
+    //   review-requests/{uuid}/send-records      登记触达（POST）
+    //   review-requests/{uuid}/recoveries        登记评价回收（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / frequency-policy / shops / candidates /
+    // batch / recovery-stats）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `review-requests/{uuid}/replies` / `/tags` / `/appeals` ——
+    //     评价回复（15.2.1.2）、差评处理（15.2.1.3）都**未交付**，
+    //     本模块只落**评价回收桶**，不放行这些形状等于让界面以为能回复买家。
+    //   * `review-requests/{uuid}/delete` —— 索评请求是频次计数的凭据，不可删。
+    //   * `review-requests/{uuid}/cancel` —— 后端没有这个映射（状态机里 CANCELLED 暂无入口）。
+    //   * `review-requests/rules` —— 索评规则配置归 **15.2.2.2**（未交付），
+    //     本模块的规则是**一次请求自带的快照** + 一份租户级频次硬上限。
+    //   * `review-requests/{uuid}/send-records/{sendId}` ——
+    //     发送记录按请求读，不按单条记录寻址（后端没有这个映射）。
+    //   * 任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删 / 不能乱改」的防线在服务端与 DB，不在这里。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
