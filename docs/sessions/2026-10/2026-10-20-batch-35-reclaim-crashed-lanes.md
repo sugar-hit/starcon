@@ -252,3 +252,56 @@ V214 的 7 张表是**两段策略** —— 6 张走 isolation + data_scope，
 
 ⚠️ **本补记同样不改变 L2 的结论**：4 条车道一条都没落地，集成头代码零变更，
 推上远端的仍是 batch-33 已 L2 全绿的那份代码。
+
+## 十二、✅ 补记二（12:36）：**10.3.1.1 已 land** —— 回收路径产出了真实交付
+
+10.3.1.1 轨迹查询的 worker 在 12:36 **跑完并 `land` 成功**，成为本批第一条 ready 车道：
+
+```
+land → {"ok": true, "lane": "10.3.1.1", "head": "de7e98d", "branch": "feat/10-3-1-1"}
+commit → bfaa3255 feat(channel) + de7e98d8 docs
+```
+
+⇒ **本轮「等宽限期 → 脚本自身回收 → 原位重派」这条路走通了**：一条被崩掉的僵尸车道，
+靠续写前一 worker 的半成品，**在 22 分钟内产出了一条完整的 ready 车道**（继承 8 个文件 → 补完测试、
+前端、契约、台账、会话日志 → L0+L1 全绿 → commit → land）。这直接回答了本轮开头那个问题：
+**回收机制不是「把车道的坑填回去」，是真能出交付。**
+
+### 它接手时的基线：17 例 / 1 失败 / 10 报错 —— 三个真根因
+
+| 根因 | 性质 | 修法 |
+| --- | --- | --- |
+| `push` 的 INSERT 占位符错位（18 个 `?` 只传 17 个绑定，`?::jsonb` 挪到了 `registered_by_membership_id` 上） | **真 bug**，卡死承运商推送这条唯一真实写入口 | 重排绑定参数 |
+| 4 处 `timestamptz` 列漏写 `?::timestamptz` | **真 bug**（AGENTS.md 明令的静默 −28800s 陷阱） | 补 cast |
+| 测试把 `"DE"` 传给了 `nodeType` 位置，且断言写 2 票而夹具实际 3 票 | 测试写错 + 缺一个筛选维度 | 补 `destinationCountry` 筛选维度并改计数 |
+
+外加**补完上一 worker 只声明了从未使用的 `actorB`** —— 三条多租户断言原封未写，
+按同仓 10.1.1.3 的 tenancy 模式补齐（两租户互不可见 / 伪造 tenant header 无效 / 池归还后不串租户）。
+
+### 两个值得下一轮知道的判断
+
+1. **`TrackingEventRow` 与 warehouse 撞名** —— codegen 以「跨服务同名 DTO：字段级覆盖」中止。
+   worker 改名 `CarrierTrackingEventRow`，理由是同名会让 warehouse 独有的 `fromStage/toStage`
+   被本模块字段**悄悄顶掉且编译期不报错**。⇒ **下一批若有模块也叫 `TrackingEventRow`，直接改自己那个，不要接受覆盖。**
+2. **契约 codegen 会重写全部 6 个服务的文件**（springdoc 注册顺序变化导致路径重排，
+   实测对 channel/trade 均为**纯重排、零内容变化**）。worker 只提交 channel 的两份、其余 5 个还原，
+   与上一条车道提交（`367f0147`）形状一致。⇒ **多车道同时改契约时，并入大概率撞 diff，
+   但只要是纯重排就不是内容冲突** —— 下一轮 merge 时别把它当回归。
+
+### 落地后的静态预检复扫（V212 最终形态）
+
+| 项 | 结果 |
+| --- | --- |
+| `ADD COLUMN` 无 DEFAULT / `SET NOT NULL` / 新增 `CHECK` | **0 / 0 / 0** ✅ |
+| ALTER 既有表 | **0** —— 只建 4 张新表，跨车道破坏面为零 ✅ |
+| FK 动作 | 4 处全 `ON DELETE RESTRICT`（worker 把 `CASCADE` 改掉了：撞 append-only 触发器本就是死代码） |
+| 去重硬约束 | `UNIQUE (tenant_id, carrier_code, carrier_event_id)` ✅ 蓝图加粗句落在 DB 层 |
+| RLS | 4 张表全 `ENABLE + FORCE` + `isolation` policy ✅ |
+
+### 下一轮 tick 的实际入口
+
+- `merge-ready` 将会拿到 **10.3.1.1 这 1 条**（其余 3 条仍在跑）⇒
+  **L2 的验证对象是「1 条车道并入后的集成头」**，不是 4 条；
+- L2 仍**不得**与在途车道的 L1 并发跑 —— 10.6.1.1 / 10.7.1.1 / 5.2.1.1 的 L1 在跑，
+  **要么等它们落地再跑 L2，要么等它们空闲**；
+- 10.3.1.1 的**逐模块技术说明**在 L2 绿后写进 `batch-35` 说明文件（与另外三条一起）。
