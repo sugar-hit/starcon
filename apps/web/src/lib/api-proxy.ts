@@ -3826,6 +3826,37 @@ const services: readonly {
     pattern:
       /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
   },
+  {
+    // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   exchange-rates                                 汇率台账（集合读）+ 手工录入（POST）
+    //   exchange-rates/capabilities                    能力声明（方向 / 唯一性 / 反向 / 下游状态）
+    //   exchange-rates/latest                          某币种对最新的一条汇率（asOf 查询）
+    //   exchange-rates/functional-currencies           各币种对各本位币的汇率（读 identity 的法人本位币）
+    //   exchange-rates/sources                         来源配置列表（GET）+ 新建来源（POST）
+    //   exchange-rates/sources/initialize              初始化内置来源（POST，幂等）
+    //   exchange-rates/sources/{code}                  修改来源配置（PUT；按**来源代码**寻址，不是 uuid）
+    //   exchange-rates/fetch                           外部拉取（POST）
+    //   exchange-rates/fetch-log                       拉取日志（只读）
+    //   exchange-rates/{id}                            汇率详情（GET）+ 更正（PUT）
+    //
+    // 🔴 `capabilities` / `latest` / `sources` / `fetch` 等字面量段排在 uuid 分支**之前**判别：
+    //     字面量先判，两类不会互相吃掉。
+    // 🔴 `sources/{code}` 的 code 是**来源代码**（如 BANK_OF_CHINA），不是 uuid ——
+    //     所以这一段用字符集而不是 {uuid} 段。
+    //
+    // 刻意**不**放行：5.2.2.2 汇率快照尚未交付（它上游是本模块）——
+    // 放行后端不存在的路径比 404 更糟，界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `exchange-rates`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^exchange\-rates(?:\/(?:capabilities|latest|functional\-currencies|sources(?:\/initialize|\/[A-Za-z0-9_]{2,32})?|fetch|fetch\-log)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
 ];
 
 function resolve(path: string) {
