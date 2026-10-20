@@ -6,30 +6,37 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 243 |
-| 进行中 | 0 |
-| **未开发** | **222** |
-| 完成率 | 52.3% |
+| 已交付 | 247 |
+| 进行中 | 3 |
+| **未开发** | **215** |
+| 完成率 | 53.1% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 36 | 0 | 4 | 40 |
 | **D4** | 58 | 0 | 2 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
-| **D6** | 6 | 0 | 72 | 78 |
-| **D7** | 11 | 0 | 144 | 155 |
+| **D6** | 9 | 3 | 66 | 78 |
+| **D7** | 12 | 0 | 143 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 26 | 26 |
-| 05 | 定价与价目系统 | D6 | 1 | 19 |
+| 05 | 定价与价目系统 | D6 | 4 | 19 |
 | 06 | 采购与供应系统 | D6 | 4 | 26 |
 | 07 | 库存核算系统 | D3 | 28 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
@@ -39,26 +46,34 @@
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
-| 15 | 客户与客服系统 | D7 | 1 | 24 |
+| 15 | 客户与客服系统 | D7 | 2 | 24 |
 | 16 | 合规与风控系统 | D7 | 1 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -194,12 +211,12 @@
 | 5.1.2.1 | 优先级与冲突检测 | — | D6 | 未开发 | — |
 | 5.2.1.1 | 成本构成 | /pricing/cost | D6 | 已交付 | catalog V215 sku_cost_profile/sku_cost_adjustment/sku_cost_revision（tenant_id NOT NULL + RLS）+ 7 个端点 /catalog/sku-cost-compositions/**（jOOQ 显式 SQL）+ /pricing/cost 成本构成段（成本法 + 生效时间 + 分项来源明示）+ 成本法加权引擎（SkuCostCompositionRules，三法 BigDecimal + 4 位 HALF_UP） |
 | 5.2.1.2 | 到岸成本 | /pricing/cost | D6 | 已交付 | catalog V223 `landed_cost_statement`/`landed_cost_line`/`landed_cost_component`/`landed_cost_parameter`（tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT，**纯新建四张表、零 ALTER 任何既有表、零个 FOREIGN KEY**，跨车道 DDL 回归面 = 0；引用校验走触发器而不是外键，避免 batch-37 的 TRUNCATE 事故）+ 8 个端点 `/catalog/landed-costs/**`（jOOQ 显式 SQL）+ `/pricing/cost` 的「到岸成本」分区（口径声明 + 台账 + 明细 + 参数 + 计算）。**🔴 生死线「到岸成本与仓库成本是两个口径」落成三处**：① 表结构里 `cost_basis` 是**只有一个取值的闭集**（`LANDED_TO_TARGET_WAREHOUSE`，写进仓库成本口径在 DB 层就被拒），`excluded_components` 固定写明不算的 `STORAGE_FEE` 与 `LAST_MILE_DELIVERY_FEE`；② 每一份响应都带 `basis`（算了哪六项 + 明确不算哪两项）；③ 前端把它固定显示在页面顶部。**🔴 六个分量逐项落成可审阅事实**：`landed_cost_component` **每行恒 6 行**（缺项也落行，标 `available=false` + `owner_module` + `impact`），每一项带 `source_document_code`（头程发运单号 / 关税估算单号 / 到货单号），DB 级 CHECK 钉死「`available=false ⇒ amount IS NULL`」「`included=true ⇒ amount NOT NULL`」—— **用 0 填关税会让到岸成本系统性低估**，而页面上看不出任何异常。**合计由延迟约束触发器在提交时核对「严格等于计入分量之和」**（行合计、单合计、覆盖度计数三者都核），`unit_landed_cost` 用 GENERATED ALWAYS AS 写不进去也漂不了；一个分量都没算出来时合计是 **NULL（算不出来）而不是 0**。**上游全是跨服务只读**：国际头程取 warehouse `first_mile_shipment`（运费+保险+操作费）、关税取 `duty_tax_estimate`（经报关单关联），链路 发运单 → 报关单 → 关税估算；服务层经**授权 HTTP 端口**取数并**透传调用方自己的 Authorization 头**，租户由 warehouse 从成员关系解析，**本服务不发明 X-Tenant-Id**；**上游整体读不到 ⇒ 503 报「读不到」**，绝不返回空集合冒充「没有这笔成本」。采购价复用 catalog 同库 `vendor_delivery_record` 的**实际到货金额**（6.3 采购单未交付时的替代口径，移动加权）。**清关费与尾程预备是租户参数**（全仓没有任何清关费事实；尾程预备是**定价预留**，与尾程派送费实际值不是一回事），按目的国+币种维护、未维护即缺口。**承担方由贸易条款决定而不是 risk_bearer**（风险转移点 ≠ 费用承担方：DAP 下运费仍是卖方付的，用 risk_bearer 判会把国际头程整笔剔掉），关税按上游 `duty_bearer`。测试 `LandedCostIntegrationTest` **16 例**（Testcontainers 真实 PostgreSQL 16、连接池压到 1；含六分量逐项可追来源单号、**缺口不是 0**、合计为空而不是 0、关税与增值税分列、承担方决定是否计入、**租户隔离三断言**（两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）、上游不可达 503、timestamptz 往返断言写回值）+ `LandedCostRulesTest` **7 例**（最大余数法逐字守恒）。前端 `landed-cost-model.ts` / `landed-cost-workspace.tsx` + `landed-cost-allowlist.test.ts`（真跑 proxy 断言放行/拒绝双向）。契约由 codegen 重生成（`--spec-dir` 用本 worktree 内六份 spec，**catalog 纯新增 7 条路径与 17 个 schema，其余 5 个服务的契约逐字节不变**）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/catalog -am test -Dtest='LandedCost*'` **23 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过、`pnpm vitest run apps/web/src/components/pricing apps/web/src/app/api` **108 文件 663 例全绿**。**下游缺口**：5.2.1.3 成本分摊未交付（分摊规则表，本模块只按数量比例摊批次级成本并写明 `allocation_method='QUANTITY_PROPORTIONAL'`）；16.3.1.1 税率表未交付（税率由租户在 10.5.1.3 维护）、6.3 采购单未交付（用实际到货金额替代）、8 仓储作业与 10.6.1.1 成本分析的口径**不在本模块**。 |
-| 5.2.1.3 | 成本分摊 | /pricing/cost | D6 | 未开发 | — |
+| 5.2.1.3 | 成本分摊 | /pricing/cost | D6 | 进行中 | 阻塞：并入冲突（apps/web/src/lib/api-proxy.ts + cost-composition-model.test.ts + cost-composition-workspace.tsx）。成果已写完并落盘在 feat/5-2-1-3 分支（迁移 V224 + 后端 + 契约 + 页面 + 48 例测试），修复车道已派发把三条分支的 api-proxy.ts 解成逐字相同的 108 元素版本。**下一轮 merge-ready 会干净并入**，本行随之改回「已交付」。 |
 | 5.2.2.1 | 汇率查询 | /pricing/rates | D6 | 已交付 | catalog `V225__exchange_rate.sql` **纯新建、零 ALTER 既有表**：三张表 `exchange_rate_source`（租户级来源配置：code/name/kind(手工 |
 | 5.2.2.2 | 汇率快照 | /pricing/rates | D6 | 未开发 | — |
-| 5.2.3.1 | 平台费用 | /pricing/fees | D6 | 未开发 | — |
+| 5.2.3.1 | 平台费用 | /pricing/fees | D6 | 进行中 | 阻塞：并入冲突（apps/web/src/lib/api-proxy.ts）。成果已写完并落盘在 feat/5-2-3-1 分支（迁移 V226 + 后端 + 契约 + 页面 + 测试），修复车道已派发。**下一轮 merge-ready 会干净并入**，本行随之改回「已交付」。 |
 | 5.2.3.2 | 物流与头程费用 | /pricing/fees | D6 | 未开发 | — |
-| 5.3.1.1 | 利润测算器 | /pricing/calculator | D6 | 未开发 | — |
+| 5.3.1.1 | 利润测算器 | /pricing/calculator | D6 | 进行中 | 阻塞：并入冲突（apps/web/src/lib/api-proxy.ts）。成果已写完并落盘在 feat/5-3-1-1 分支（迁移 V227 + 后端 + 契约 + 页面 + 测试），修复车道已派发。**下一轮 merge-ready 会干净并入**，本行随之改回「已交付」。 |
 | 5.3.1.2 | 批量测算 | /pricing/calculator | D6 | 未开发 | — |
 | 5.3.2.1 | 定价模板 | — | D6 | 未开发 | — |
 | 5.3.2.2 | 价格规则 | — | D6 | 未开发 | — |
@@ -448,7 +465,7 @@
 | 15.2.1.1 | 评价列表 | — | D7 | 未开发 | — |
 | 15.2.1.2 | 评价回复 | — | D7 | 未开发 | — |
 | 15.2.1.3 | 差评处理 | — | D7 | 未开发 | — |
-| 15.2.2.1 | Request a Review | — | D7 | 已交付 | 迁移 crm `V220__crm_review_request.sql`（**归属 crm**：卷 15 客户与客服，本批预分配版本号 V220），四张新表 `crm_review_frequency_policy`（租户级频次硬上限）/ `crm_review_request`（索评任务 = 索评请求，**REJECTED 也是它的一种状态**：被频次规则挡住的请求照样落库留痕）/ `crm_review_send_record`（发送记录）/ `crm_review_recovery`（评价回收桶），全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS + GRANT crm_app，**纯新建、零 ALTER 任何既有表**；**序列单独授权**（`GRANT USAGE, SELECT ON SEQUENCE crm_review_request_no_seq TO crm_app` —— `GRANT ... ON ALL TABLES` 不覆盖序列，漏授权会变成建单即报权限不足）。**🔴 外键纪律**：本迁移**不给任何既有表建外键**，本表之间也**一律用触发器做引用校验**（`guard_crm_review_send_record_target` / `guard_crm_review_recovery_target`，与同批 V219 同一手法）—— batch-37 有车道给既有表建 FK 打破了同服务既有测试的 TRUNCATE，本车道刻意避开，**既有测试一行未改**。**🔴 加粗句「索评频次必须受限」的物理落点 = 三层**：① 租户级硬上限表，每个值在 DB 层另有天花板（每买家上限 ≤10 次/窗口、每订单上限 ≤5 次、窗口 ≤365 天、冷却与时点下限 ≤8760 小时）——「把上限调到 999」这条路本身被 CHECK 堵死；② 触发器 `guard_crm_review_request_frequency`（BEFORE INSERT OR UPDATE）在**数据库层**判定每订单上限 / 每买家上限 / 冷却窗口三项，并强制「本次规则快照**只能比硬上限更严**」；③ 服务端用**同一判据**预检一遍并给**可分类的原因码**（`PER_ORDER_LIMIT` / `PER_BUYER_LIMIT` / `COOLDOWN_ACTIVE`）——**超限的请求被拒绝并留下原因**（status=REJECTED + reject_code + reject_reason，列表里筛得到），**REJECTED / CANCELLED 不占额度**（只有 SCHEDULED / SENT 占用），改个时点重试不会被自己挡住。身份列（上游引用 / 订单号 / 买家 / 店铺 / 签收时刻 / 规则快照）由 `guard_crm_review_request_identity` 钉死建后不可改 —— 改它会让「这个买家被索评过几次」这个频次计数在历史上出现两个答案。**跨服务纪律**：上游 10.3.2.2 揽收与签收确认**本批刚交付**（channel，V217）但**不同服务** ⇒ 本服务**一条 SQL 都不碰对方的库**，只经 `SignoffDeliveredOrderPort` 走**授权 HTTP API** 读（`GET /channel/logistics-pickup-signoff/cases?status=DELIVERED` 取已签收订单集合 + `GET /channel/logistics-pickup-signoff/cases/{id}` 取单件签收事实 + `GET /channel/shops` 取真实店铺清单），本库**只存上游的逻辑引用 + 快照**（upstream_case_id / case_no / waybill / carrier / delivered_at），**不建跨库 FK**；上游读不到一律 **503**（绝不返回空集合冒充「没有已签收订单」）。**上游确认单不带店铺维度也不带买家维度 ⇒ 显式标 available=false，不造数据源**：`candidate_shop_attribution`（候选单归属哪家店铺不可从上游核实，ownerModule=10.3.2.2）、`buyer_identity`（本仓**没有买家档案**，15.3.1.1 未交付；买家标识由运营按店铺提供，**只作频次去重键**，与 trade V135「买家联系方式归 15 / 客户档案所有」同一纪律，ownerModule=15.3.1.1）、`platform_review_api`（平台侧索评接口**未接入**，ownerModule=2；发送记录**只允许 MANUAL_HANDOFF**，服务端拒绝 `PLATFORM_API` —— 一个「返回成功回执」的假通道会让「买家已经被索评过」在数据上看起来发生过，而过度索评的代价正是买家投诉与平台处罚）。**下游 15.2.1.1 评价未交付 ⇒ 只落本服务内的评价回收桶**（收到的评价原文 + 关联到索评请求 + 星级 + 有图有视频），`review_sync` 维度 available=false（ownerModule=15.2.1.1），**不假装**已交付评价管理（无回复 / 无申诉 / 无标签）；**15.2.2.2 索评规则未交付 ⇒ 不建「索评策略配置表」**，本模块的规则是**一次请求自带的快照**，租户级频次硬上限是**兜底闸门**（15.2.2.2 落地后也改不动那份硬天花板）。**禁浮点**：小时数一律 `numeric(19,6)` + BigDecimal，时间一律 `timestamptz` + OffsetDateTime + `?::timestamptz`；PG 没有 `numeric * interval` 运算符，折算统一走 `((hours*3600)::bigint * interval '1 second')`。端点 `/crm/review-requests/**` 共 12 个：capabilities / frequency-policy（GET 读 · PUT 配）/ shops / candidates / （集合 GET + POST 新建）/ {uuid}（详情）/ batch / {uuid}/send-records / {uuid}/recoveries / recovery-stats；**刻意没有 DELETE**（索评请求是频次计数的凭据）与**没有 rules**（索评规则配置归 15.2.2.2）。页面 `/crm/review-requests`（能力声明逐维显形 / 频次硬上限面板 / 单条发起 / 批量执行逐条给结论与原因 / 索评任务列表（**被频次规则拒绝是独立状态**）/ 详情（发送记录 + 回收桶）/ 评价回收统计，**分母为 0 时回收率报「不计算」而不是 0%**）。`apps/web/src/lib/api-proxy.ts` **新增一条独立 `services[]` 元素**（锚点：crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前；同批多车道共享该文件，故走「新加一条元素」这条路），既有条目一字未动；**token 选 `review-requests`**（已逐条核对既有全部 token：既有 crm 那一支是 `knowledge`，`review-due` 是 knowledge 内部的子形状、不是独立 token；既有别的服务有 `orders` / `order-review`（9.2.1.2 trade）/` refunds` / `rma-authorizations` / `return-receipts` / `return-quality`；既有正则**都是锚定的**且 `resolve()` 先按 `path.startsWith(service.prefix)` 收窄服务 ⇒ 只有 prefix='crm/' 的元素才可能吃到本路径，而既有 crm 元素的正则 `^knowledge/...$` **不可能**匹配 `review-requests/...` ⇒ **首 token 不同即可，两条互不吃掉**；刻意**不**复用 `order-review`，那是另一个服务的另一个模块）。**刻意不放行**后端不存在的形状：`{uuid}/replies|tags|appeals`（15.2.1.2 / 15.2.1.3 未交付）、`rules`（15.2.2.2 未交付）、`{uuid}/send-records/{sendId}`、`{uuid}/cancel`、`{uuid}/delete`。测试：后端 **26 例全绿**（`ReviewRequestIntegrationTest` 22 + `ReviewRequestTenancyIntegrationTest` 3 + 迁移断言 1，Testcontainers PostgreSQL 16，**真跑 RLS 隔离断言**：两租户互不可见 / 伪造 tenant header 无效且行落在会话租户名下 / 连接池归还后不串租户），前端模型 8 例 + api-proxy 允许清单 8 例 + **全量 allowlist 回归 624 例**全绿，`pnpm typecheck` 3/3 通过。 |
+| 15.2.2.1 | Request a Review | — | D7 | 已交付 | 迁移 crm `V220__crm_review_request.sql`（**归属 crm**：卷 15 客户与客服，本批预分配版本号 V220），四张新表 `crm_review_frequency_policy`（租户级频次硬上限）/ `crm_review_request`（索评任务 = 索评请求，**REJECTED 也是它的一种状态**：被频次规则挡住的请求照样落库留痕）/ `crm_review_send_record`（发送记录）/ `crm_review_recovery`（评价回收桶），全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS + GRANT crm_app，**纯新建、零 ALTER 任何既有表**；**序列单独授权**（`GRANT USAGE, SELECT ON SEQUENCE crm_review_request_no_seq TO crm_app` —— `GRANT ... ON ALL TABLES` 不覆盖序列，漏授权会变成建单即报权限不足）。**🔴 外键纪律**：本迁移**不给任何既有表建外键**，本表之间也**一律用触发器做引用校验**（`guard_crm_review_send_record_target` / `guard_crm_review_recovery_target`，与同批 V219 同一手法）—— batch-37 有车道给既有表建 FK 打破了同服务既有测试的 TRUNCATE，本车道刻意避开，**既有测试一行未改**。**🔴 加粗句「索评频次必须受限」的物理落点 = 三层**：① 租户级硬上限表，每个值在 DB 层另有天花板（每买家上限 ≤10 次/窗口、每订单上限 ≤5 次、窗口 ≤365 天、冷却与时点下限 ≤8760 小时）——「把上限调到 999」这条路本身被 CHECK 堵死；② 触发器 `guard_crm_review_request_frequency`（BEFORE INSERT OR UPDATE）在**数据库层**判定每订单上限 / 每买家上限 / 冷却窗口三项，并强制「本次规则快照**只能比硬上限更严**」；③ 服务端用**同一判据**预检一遍并给**可分类的原因码**（`PER_ORDER_LIMIT` / `PER_BUYER_LIMIT` / `COOLDOWN_ACTIVE`）——**超限的请求被拒绝并留下原因**（status=REJECTED + reject_code + reject_reason，列表里筛得到），**REJECTED / CANCELLED 不占额度**（只有 SCHEDULED / SENT 占用），改个时点重试不会被自己挡住。身份列（上游引用 / 订单号 / 买家 / 店铺 / 签收时刻 / 规则快照）由 `guard_crm_review_request_identity` 钉死建后不可改 —— 改它会让「这个买家被索评过几次」这个频次计数在历史上出现两个答案。**跨服务纪律**：上游 10.3.2.2 揽收与签收确认**本批刚交付**（channel，V217）但**不同服务** ⇒ 本服务**一条 SQL 都不碰对方的库**，只经 `SignoffDeliveredOrderPort` 走**授权 HTTP API** 读（`GET /channel/logistics-pickup-signoff/cases?status=DELIVERED` 取已签收订单集合 + `GET /channel/logistics-pickup-signoff/cases/{id}` 取单件签收事实 + `GET /channel/shops` 取真实店铺清单），本库**只存上游的逻辑引用 + 快照**（upstream_case_id / case_no / waybill / carrier / delivered_at），**不建跨库 FK**；上游读不到一律 **503**（绝不返回空集合冒充「没有已签收订单」）。**上游确认单不带店铺维度也不带买家维度 ⇒ 显式标 available=false，不造数据源**：`candidate_shop_attribution`（候选单归属哪家店铺不可从上游核实，ownerModule=10.3.2.2）、`buyer_identity`（本仓**没有买家档案**，15.3.1.1 未交付；买家标识由运营按店铺提供，**只作频次去重键**，与 trade V135「买家联系方式归 15 / 客户档案所有」同一纪律，ownerModule=15.3.1.1）、`platform_review_api`（平台侧索评接口**未接入**，ownerModule=2；发送记录**只允许 MANUAL_HANDOFF**，服务端拒绝 `PLATFORM_API` —— 一个「返回成功回执」的假通道会让「买家已经被索评过」在数据上看起来发生过，而过度索评的代价正是买家投诉与平台处罚）。**下游 15.2.1.1 评价未交付 ⇒ 只落本服务内的评价回收桶**（收到的评价原文 + 关联到索评请求 + 星级 + 有图有视频），`review_sync` 维度 available=false（ownerModule=15.2.1.1），**不假装**已交付评价管理（无回复 / 无申诉 / 无标签）；**15.2.2.2 索评规则未交付 ⇒ 不建「索评策略配置表」**，本模块的规则是**一次请求自带的快照**，租户级频次硬上限是**兜底闸门**（15.2.2.2 落地后也改不动那份硬天花板）。**禁浮点**：小时数一律 `numeric(19,6)` + BigDecimal，时间一律 `timestamptz` + OffsetDateTime + `?::timestamptz`；PG 没有 `numeric * interval` 运算符，折算统一走 `((hours*3600)::bigint * interval '1 second')`。端点 `/crm/review-requests/**` 共 12 个：capabilities / frequency-policy（GET 读 · PUT 配）/ shops / candidates / （集合 GET + POST 新建）/ {uuid}（详情）/ batch / {uuid}/send-records / {uuid}/recoveries / recovery-stats；**刻意没有 DELETE**（索评请求是频次计数的凭据）与**没有 rules**（索评规则配置归 15.2.2.2）。页面 `/crm/review-requests`（能力声明逐维显形 / 频次硬上限面板 / 单条发起 / 批量执行逐条给结论与原因 / 索评任务列表（**被频次规则拒绝是独立状态**）/ 详情（发送记录 + 回收桶）/ 评价回收统计，**分母为 0 时回收率报「不计算」而不是 0%**）。`apps/web/src/lib/api-proxy.ts` **新增一条独立 `services[]` 元素**（锚点：crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前；同批多车道共享该文件，故走「新加一条元素」这条路），既有条目一字未动；**token 选 `review-requests`**（已逐条核对既有全部 token：既有 crm 那一支是 `knowledge`，`review-due` 是 knowledge 内部的子形状、不是独立 token；既有别的服务有 `orders` / `order-review`（9.2.1.2 trade）/` refunds` / `rma-authorizations` / `return-receipts` / `return-quality`；既有正则**都是锚定的**且 `resolve()` 先按 `path.startsWith(service.prefix)` 收窄服务 ⇒ 只有 prefix='crm/' 的元素才可能吃到本路径，而既有 crm 元素的正则 `^knowledge/...$` **不可能**匹配 `review-requests/...` ⇒ **首 token 不同即可，两条互不吃掉**；刻意**不**复用 `order-review`，那是另一个服务的另一个模块）。**刻意不放行**后端不存在的形状：`{uuid}/replies |
 | 15.2.2.2 | 索评规则 | — | D7 | 未开发 | — |
 | 15.3.1.1 | 客户列表 | — | D7 | 未开发 | — |
 | 15.3.1.2 | 客户详情 | — | D7 | 未开发 | — |
@@ -540,13 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 242 |
-| **未开发** | **223** |
-| 完成率 | 52.0% |
-| **D5** | 51 | 0 | 1 | 52 |
-| 10 | 物流与头程系统 | D5 / D7 | 25 | 27 |
-| **D6** | 7 | 0 | 71 | 78 |
-| 05 | 定价与价目系统 | D6 | 2 | 19 |
-| 已交付 | 244 |
-| **未开发** | **221** |
-| 完成率 | 52.5% |
