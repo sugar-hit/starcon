@@ -6,74 +6,59 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 247 |
-| 进行中 | 3 |
-| **未开发** | **215** |
-| 完成率 | 53.1% |
-
+| 已交付 | 242 |
+| 进行中 | 0 |
+| **未开发** | **223** |
+| 完成率 | 52.0% |
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 36 | 0 | 4 | 40 |
 | **D4** | 58 | 0 | 2 | 60 |
-| **D5** | 52 | 0 | 0 | 52 |
-| **D6** | 9 | 3 | 66 | 78 |
-| **D7** | 12 | 0 | 143 | 155 |
-
+| **D5** | 51 | 0 | 1 | 52 |
+| **D6** | 6 | 0 | 72 | 78 |
+| **D7** | 11 | 0 | 144 | 155 |
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 26 | 26 |
-| 05 | 定价与价目系统 | D6 | 4 | 19 |
+| 05 | 定价与价目系统 | D6 | 1 | 19 |
 | 06 | 采购与供应系统 | D6 | 4 | 26 |
 | 07 | 库存核算系统 | D3 | 28 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 21 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 27 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 26 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 25 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 17 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
-| 15 | 客户与客服系统 | D7 | 2 | 24 |
+| 15 | 客户与客服系统 | D7 | 1 | 24 |
 | 16 | 合规与风控系统 | D7 | 1 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -211,7 +194,7 @@
 | 5.1.2.1 | 优先级与冲突检测 | — | D6 | 未开发 | — |
 | 5.2.1.1 | 成本构成 | /pricing/cost | D6 | 已交付 | catalog V215 sku_cost_profile/sku_cost_adjustment/sku_cost_revision（tenant_id NOT NULL + RLS）+ 7 个端点 /catalog/sku-cost-compositions/**（jOOQ 显式 SQL）+ /pricing/cost 成本构成段（成本法 + 生效时间 + 分项来源明示）+ 成本法加权引擎（SkuCostCompositionRules，三法 BigDecimal + 4 位 HALF_UP） |
 | 5.2.1.2 | 到岸成本 | /pricing/cost | D6 | 已交付 | catalog V223 `landed_cost_statement`/`landed_cost_line`/`landed_cost_component`/`landed_cost_parameter`（tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT，**纯新建四张表、零 ALTER 任何既有表、零个 FOREIGN KEY**，跨车道 DDL 回归面 = 0；引用校验走触发器而不是外键，避免 batch-37 的 TRUNCATE 事故）+ 8 个端点 `/catalog/landed-costs/**`（jOOQ 显式 SQL）+ `/pricing/cost` 的「到岸成本」分区（口径声明 + 台账 + 明细 + 参数 + 计算）。**🔴 生死线「到岸成本与仓库成本是两个口径」落成三处**：① 表结构里 `cost_basis` 是**只有一个取值的闭集**（`LANDED_TO_TARGET_WAREHOUSE`，写进仓库成本口径在 DB 层就被拒），`excluded_components` 固定写明不算的 `STORAGE_FEE` 与 `LAST_MILE_DELIVERY_FEE`；② 每一份响应都带 `basis`（算了哪六项 + 明确不算哪两项）；③ 前端把它固定显示在页面顶部。**🔴 六个分量逐项落成可审阅事实**：`landed_cost_component` **每行恒 6 行**（缺项也落行，标 `available=false` + `owner_module` + `impact`），每一项带 `source_document_code`（头程发运单号 / 关税估算单号 / 到货单号），DB 级 CHECK 钉死「`available=false ⇒ amount IS NULL`」「`included=true ⇒ amount NOT NULL`」—— **用 0 填关税会让到岸成本系统性低估**，而页面上看不出任何异常。**合计由延迟约束触发器在提交时核对「严格等于计入分量之和」**（行合计、单合计、覆盖度计数三者都核），`unit_landed_cost` 用 GENERATED ALWAYS AS 写不进去也漂不了；一个分量都没算出来时合计是 **NULL（算不出来）而不是 0**。**上游全是跨服务只读**：国际头程取 warehouse `first_mile_shipment`（运费+保险+操作费）、关税取 `duty_tax_estimate`（经报关单关联），链路 发运单 → 报关单 → 关税估算；服务层经**授权 HTTP 端口**取数并**透传调用方自己的 Authorization 头**，租户由 warehouse 从成员关系解析，**本服务不发明 X-Tenant-Id**；**上游整体读不到 ⇒ 503 报「读不到」**，绝不返回空集合冒充「没有这笔成本」。采购价复用 catalog 同库 `vendor_delivery_record` 的**实际到货金额**（6.3 采购单未交付时的替代口径，移动加权）。**清关费与尾程预备是租户参数**（全仓没有任何清关费事实；尾程预备是**定价预留**，与尾程派送费实际值不是一回事），按目的国+币种维护、未维护即缺口。**承担方由贸易条款决定而不是 risk_bearer**（风险转移点 ≠ 费用承担方：DAP 下运费仍是卖方付的，用 risk_bearer 判会把国际头程整笔剔掉），关税按上游 `duty_bearer`。测试 `LandedCostIntegrationTest` **16 例**（Testcontainers 真实 PostgreSQL 16、连接池压到 1；含六分量逐项可追来源单号、**缺口不是 0**、合计为空而不是 0、关税与增值税分列、承担方决定是否计入、**租户隔离三断言**（两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）、上游不可达 503、timestamptz 往返断言写回值）+ `LandedCostRulesTest` **7 例**（最大余数法逐字守恒）。前端 `landed-cost-model.ts` / `landed-cost-workspace.tsx` + `landed-cost-allowlist.test.ts`（真跑 proxy 断言放行/拒绝双向）。契约由 codegen 重生成（`--spec-dir` 用本 worktree 内六份 spec，**catalog 纯新增 7 条路径与 17 个 schema，其余 5 个服务的契约逐字节不变**）。验证 `./mvnw -q compile` 退出 0、`./mvnw -pl services/catalog -am test -Dtest='LandedCost*'` **23 例 0 失败 0 错误**、`pnpm typecheck` 3/3 通过、`pnpm lint` 通过、`pnpm vitest run apps/web/src/components/pricing apps/web/src/app/api` **108 文件 663 例全绿**。**下游缺口**：5.2.1.3 成本分摊未交付（分摊规则表，本模块只按数量比例摊批次级成本并写明 `allocation_method='QUANTITY_PROPORTIONAL'`）；16.3.1.1 税率表未交付（税率由租户在 10.5.1.3 维护）、6.3 采购单未交付（用实际到货金额替代）、8 仓储作业与 10.6.1.1 成本分析的口径**不在本模块**。 |
-| 5.2.1.3 | 成本分摊 | /pricing/cost | D6 | 进行中 | 阻塞：并入冲突（apps/web/src/lib/api-proxy.ts + cost-composition-model.test.ts + cost-composition-workspace.tsx）。成果已写完并落盘在 feat/5-2-1-3 分支（迁移 V224 + 后端 + 契约 + 页面 + 48 例测试），修复车道已派发把三条分支的 api-proxy.ts 解成逐字相同的 108 元素版本。**下一轮 merge-ready 会干净并入**，本行随之改回「已交付」。 |
+| 5.2.1.3 | 成本分摊 | /pricing/cost | D6 | 已交付 | catalog V224 `cost_allocation`（分摊单：来源/当前版本指针）+ `cost_allocation_revision`（**只追加**的版本快照：规则/货件成本总额/生效时间/变更原因）+ `cost_allocation_revision_line`（**只追加**的逐 SKU 明细：数量/毛重/体积/货值基数 + 计算分摊额 + 人工微调额与原因）——三张表全部 `tenant_id NOT NULL` + ENABLE/FORCE RLS isolation + RESTRICTIVE data_scope（跟随父对象可见），**零个 FOREIGN KEY**（引用校验一律用触发器：版本→分摊单、明细→版本、当前指针→版本、明细的 SKU 必须在本租户存在），**外加一道延迟约束触发器**：事务提交时校验「逐行分摊额之和**严格等于**货件成本总额」——分摊是拆分不是缩水。端点 8 条 `/catalog/cost-allocations/**`（jOOQ 显式 SQL）：capabilities / sources（可分摊货件候选）/ 集合读+POST 新建 / {uuid} 明细 / {uuid}/revisions（历史读 + POST 应用重算追加新版本）/ {uuid}/revisions/{no} 单版快照 / {uuid}/recalculate（**试算，不落库**）/ {uuid}/diffs（两版差异对比）。**🔴 加粗句「分摊规则变更会导致历史利润变化，因此调整必须留历史版本，不能就地覆盖」**：换规则/改总额/人工微调一律**追加一个新版本**，旧版本的逐行明细原样留着，**没有 UPDATE 端点**；**合计一律不落表**，查询时 SUM 逐行现算（避免副本与明细对不上）。**分摊算术**：四条规则（WEIGHT/VOLUME/AMOUNT/QUANTITY）**真的参与算术** —— 同一批货换规则给出不同逐行金额；用**最大余数法**（总额换算成 0.0001 为单位的整数，逐行向下取整后按小数部分从大到小补回）保证 Σ分摊额**逐分等于**总额，且并列时按 SKU id 排序 ⇒ 结果可复现（差异对比里没有随机噪声）。**🔴 基数取不到 ≠ 分摊到 0**：取不到的行**不参与分母**并明确标「基数不可得」+ 写明原因；所有行都取不到时**拒绝分摊**（409），不摊出一张全 0 的单。**🔴 人工微调必须带原因**（DB CHECK 兜底），微调**故意**造成「逐行最终额之和 ≠ 货件成本总额」的差额，该差额在页面与响应里**显式显示**（人工决定的结果，不是错误）。**🔴 跨服务只读**：可分摊的货件 = warehouse 的头程发运单（first_mile_shipment，V80 —— **一张发运单里多个 SKU 就是「混合成本的货件」**），经**授权 HTTP 端点**读取（转发调用方自己的 Authorization bearer，**绝不发明 X-Tenant-Id**、绝不跨库 SQL / FK / 共享视图；本库不存发运单副本），上游读不到一律 **503 报「读不到」**，**绝不返回空集合冒充「没有可分摊的货件」**。**🔴 12 财务（finance 服务）在本仓不存在** ⇒ 蓝图里的 12 landed_cost_allocation 没有来源 ⇒ 分摊单与明细**由本服务自持**（能力声明里标为「本服务口径，不是 12 财务的核算结果」，与 12 财务的最终对账留待 finance 落地后经授权 API / event 衔接）；另提供 MANUAL 人工货件来源（同库自持事实）。**四种基数的取数口径**（页面上逐行写明「这一行的重量到底是哪来的」）：数量 = 货件行数量（上游口径，发运行没有计量单位字段故不折算）；毛重 = 货件行申报毛重（千克→克），为 0 时回落 catalog 的 SKU 包装毛重；体积 = 货件行申报体积（立方米→立方厘米），为 0 时回落 SKU 包装外形尺寸换算；货值 = 货件行申报货值，为 0 时回落 5.2.1.1 `sku_cost_revision.purchase_cost`×数量（**币种必须与本单一致，不折算** —— 本仓没有汇率表，汇率是 12 财务的资产）。金额全部 `BigDecimal` ↔ `numeric(19,4)`、数量 `numeric(19,6)`、**禁浮点**；时间列 `timestamptz` + `?::timestamptz` + `OffsetDateTime` 绑定（不偏 −28800s）。权限沿用商品主数据域：读 `catalog.spu.read` / 写 `catalog.spu.update`（**不新造权限词表**，identity 零改动）；租户只来自已认证成员关系，**不读 X-Tenant-Id 头**。**契约**：codegen 产物（`packages/api-contracts/src/catalog.openapi.json` + `contracts/catalog.ts`）**纯增量** —— 19 个新 DTO（`PricingCostAllocation*` 前缀，避开 5.2.1.1 的 `AdjustmentInput`/`RevisionRow` 与 channel 10.6.1.1 的 `CostAllocation*` 家族，**不发生同名覆盖**）+ 8 条新 path，既有 schema 与 path **0 改动**。**api-proxy 白名单新增一条独立 `services[]` 元素**（锚在数组**最末尾**，既有条目一字未动），用脚本逐条核对本文件里**全部 77 条**既有正则：`cost-allocations/**` **零命中**（既有分支不会先把它吃掉）。页面 `/pricing/cost` 的「成本分摊」分区（`cost-allocation-section.tsx` + `cost-allocation-model.ts`，**独立文件**，不重写 5.2.1.1 的页面骨架；共享的 `cost-composition-model.ts` 只把 5.2.1.3 那条分区由「未交付」改为「已交付」，`cost-composition-workspace.tsx` 只加一行 import + 一处渲染）：能力声明（四条规则 / 两种来源 / 四个基数口径 / 版本纪律）+ 可分摊货件选择 + 新建分摊单 + 台账（筛选/分页）+ 明细（逐行基数与来源、计算分摊额、人工微调、最终分摊额）+ 差额提示 + 与上一版的差异 + **试算重算（不落库）与应用重算（追加新版本）两个分开的动作** + 逐行人工微调（原因必填）+ 版本历史，加载态 / 空态 / 错误态齐备；**null 不渲染成 0**（基数不可得显示「基数不可得，未参与分摊」）。**测试**：`CostAllocationRulesTest` **8 例**（逐行之和严格等于总额 / 换规则给出不同逐行金额 / 体积口径 / 基数不可得不参与分母 / 全部不可得时拒绝分摊 / 两次计算结果完全一致 / 人工微调语义 / 差异对比）+ `CostAllocationIntegrationTest` **14 例**真实 PostgreSQL 16 + Testcontainers 全绿 —— **逐行之和严格等于总额**（断言从库里读回的逐行金额之和）、**换规则追加新版本而旧版本原样留着**、试算不落库、**人工微调必须带原因且差额看得见**、**多租户三断言**（两租户互不可见 / 伪造 X-Tenant-Id 无效 / 连接池压到 1 交替 A→B 五轮不串）、**生效时间按时刻写回不被时区偏移**（断言写回值，基准取自 DB 自己的 now()）、**上游不可达 ⇒ 503** 而不是把货件当成「没有」、跨服务 Authorization 头透传、基数不可得的行不参与分母、全部不可得时拒绝分摊且不留下半张单、人工货件自持 + 重算、写端点要权限（403）。前端：`cost-allocation-model.test.ts` **21 例** + `cost-allocation-allowlist.test.ts` **5 例**（契约里每个真实 path 都放行 / 写动作真的转发且不转发伪造租户头 / 不该存在的形状仍然 404 / 兄弟车道路径未被挤掉 / 字面量子路径不会被 uuid 分支吃掉）+ **全量 allowlist 回归 630 例绿**。**已知缺口（如实记录）**：**12 财务（finance 服务）不存在**，本模块的分摊明细是**本服务自持口径**（能力声明里写明），与 12 财务的最终对账留待 finance 落地后经授权 API / event 衔接；**5.2.1.1 成本构成的「头程分摊」分项当前仍按自己的口径（上游发运单按行数量摊）派生** —— 本模块**不改**它的代码（改它是 5.2.1.1 的写入范围），两者对齐需要另一条车道；**5.2.1.2 到岸成本未交付**，与本模块共用 /pricing/cost 路由但端点各自独立；**货件行数量是上游口径**（发运行没有计量单位字段，因此不做单位折算，逐 SKU 单位成本的下游换算由 5.2.1.1 负责）。 |
 | 5.2.2.1 | 汇率查询 | /pricing/rates | D6 | 已交付 | catalog `V225__exchange_rate.sql` **纯新建、零 ALTER 既有表**：三张表 `exchange_rate_source`（租户级来源配置：code/name/kind(手工 |
 | 5.2.2.2 | 汇率快照 | /pricing/rates | D6 | 未开发 | — |
 | 5.2.3.1 | 平台费用 | /pricing/fees | D6 | 进行中 | 阻塞：并入冲突（apps/web/src/lib/api-proxy.ts）。成果已写完并落盘在 feat/5-2-3-1 分支（迁移 V226 + 后端 + 契约 + 页面 + 测试），修复车道已派发。**下一轮 merge-ready 会干净并入**，本行随之改回「已交付」。 |
@@ -557,3 +540,13 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 247 |
+| 进行中 | 3 |
+| **未开发** | **215** |
+| 完成率 | 53.1% |
+| **D5** | 52 | 0 | 0 | 52 |
+| **D6** | 9 | 3 | 66 | 78 |
+| **D7** | 12 | 0 | 143 | 155 |
+| 05 | 定价与价目系统 | D6 | 4 | 19 |
+| 10 | 物流与头程系统 | D5 / D7 | 26 | 27 |
+| 15 | 客户与客服系统 | D7 | 2 | 24 |

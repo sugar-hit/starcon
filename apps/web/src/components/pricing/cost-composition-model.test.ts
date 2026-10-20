@@ -339,13 +339,16 @@ describe('分区块约定（给兄弟模块的扩展位）', () => {
     // 不点明「单据级 vs SKU 级」，运营会把两个数当成同一个数。
     expect(landed?.summary).toContain('单据级');
     expect(landed?.summary).toContain('仓储费');
+    // 🔴 已交付的分区不得再写「未交付」——
+    // 一个已交付的分区标成未交付，页面上就会画一个空框冒充没做完。
+    expect(landed?.summary).not.toContain('未交付');
   });
 
-  it('5.2.1.3 成本分摊仍显式标为未交付并写明为什么', () => {
-    const section = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.3');
-    expect(section, '5.2.1.3 必须在分区表里').toBeTruthy();
-    expect(section?.delivered).toBe(false);
-    expect(section?.summary).toContain('未交付');
+  it('5.2.1.3 成本分摊已交付，不再标成未交付', () => {
+    const allocation = COST_SECTIONS.find((s) => s.moduleId === '5.2.1.3');
+    expect(allocation, '5.2.1.3 必须在分区表里').toBeTruthy();
+    expect(allocation?.delivered).toBe(true);
+    expect(allocation?.summary).not.toContain('未交付');
   });
 });
 

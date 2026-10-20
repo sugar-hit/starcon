@@ -11947,354 +11947,6 @@
         }
       }
     },
-    "/catalog/price-anomaly-alerts/rules": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_rules",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AnomalyRuleRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "post_catalog_price_anomaly_alerts_rules",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnomalyRuleInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AnomalyRuleRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/observations": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_observations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "siteCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "currency",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "priceChangeSource",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "windowFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "windowTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ObservationListPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "post_catalog_price_anomaly_alerts_observations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ObservationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ObservationSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/events/{eventId}/resolve": {
-      "post": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_resolve",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventStatusSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/events/{eventId}/acknowledge": {
-      "post": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_acknowledge",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventStatusSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/detect": {
-      "post": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "post_catalog_price_anomaly_alerts_detect",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "windowFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "windowTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DetectionRun"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/catalog/physical-safety/skus/{skuId}/channel-verdict": {
       "post": {
         "tags": [
@@ -15812,6 +15464,267 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CustomsProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "basisRule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "post_catalog_cost_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingCostAllocationCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/{allocationId}/revisions": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_allocationId_revisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PricingCostAllocationRevisionRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "post_catalog_cost_allocations_allocationId_revisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingCostAllocationRecalculateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/{allocationId}/recalculate": {
+      "post": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "post_catalog_cost_allocations_allocationId_recalculate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingCostAllocationRecalculateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationPreview"
                 }
               }
             }
@@ -21301,265 +21214,6 @@
         }
       }
     },
-    "/catalog/price-anomaly-alerts/notifications": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_notifications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "anomalyType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "severity",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationListPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/events": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_events",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "anomalyType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "severity",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "siteCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "windowFrom",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "windowTo",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventListPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/events/{eventId}": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_events_eventId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/price-anomaly-alerts/capabilities": {
-      "get": {
-        "tags": [
-          "price-anomaly-controller"
-        ],
-        "operationId": "get_catalog_price_anomaly_alerts_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceAnomalyCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/catalog/physical-safety/profiles": {
       "get": {
         "tags": [
@@ -24483,6 +24137,215 @@
         }
       }
     },
+    "/catalog/cost-allocations/{allocationId}": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_allocationId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/{allocationId}/revisions/{revisionNo}": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_allocationId_revisions_revisionNo",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "revisionNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationRevisionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/{allocationId}/diffs": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_allocationId_diffs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationDiff"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/sources": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_sources",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationSourceCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/cost-allocations/capabilities": {
+      "get": {
+        "tags": [
+          "cost-allocation-controller"
+        ],
+        "operationId": "get_catalog_cost_allocations_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingCostAllocationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/components": {
       "get": {
         "tags": [
@@ -26511,6 +26374,613 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/rules": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnomalyRuleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnomalyRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/observations": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceChangeSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservationListPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}/resolve": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStatusSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}/acknowledge": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_events_eventId_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStatusSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/detect": {
+      "post": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "post_catalog_price_anomaly_alerts_detect",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectionRun"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/notifications": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_notifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "anomalyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "anomalyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "windowFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "windowTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/events/{eventId}": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_events_eventId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-anomaly-alerts/capabilities": {
+      "get": {
+        "tags": [
+          "price-anomaly-controller"
+        ],
+        "operationId": "get_catalog_price_anomaly_alerts_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAnomalyCapabilities"
                 }
               }
             }
@@ -36150,316 +36620,6 @@
           }
         }
       },
-      "AnomalyRuleInput": {
-        "required": [
-          "anomalyType",
-          "name",
-          "severity"
-        ],
-        "type": "object",
-        "properties": {
-          "anomalyType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "ratioThreshold": {
-            "type": "number",
-            "nullable": true
-          },
-          "minDurationDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "severity": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AnomalyRuleRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "anomalyType": {
-            "type": "string"
-          },
-          "anomalyTypeLabel": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "ratioThreshold": {
-            "type": "number",
-            "nullable": true
-          },
-          "minDurationDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "severity": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "overridden": {
-            "type": "boolean"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ObservationInput": {
-        "required": [
-          "currency",
-          "observedAt",
-          "platformCode",
-          "priceChangeSource",
-          "siteCode",
-          "skuId",
-          "source"
-        ],
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "siteCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "currency": {
-            "minLength": 1,
-            "pattern": "[A-Z]{3}",
-            "type": "string"
-          },
-          "internalPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceChangeSource": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "source": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "comparisonCurrency": {
-            "pattern": "[A-Z]{3}",
-            "type": "string",
-            "nullable": true
-          },
-          "fxRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "fxRateDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "fxRateSource": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "observedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ObservationSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "siteCode": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "EventStatusSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DetectionRun": {
-        "type": "object",
-        "properties": {
-          "windowFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "windowTo": {
-            "type": "string",
-            "format": "date"
-          },
-          "observationsScanned": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "eventsOpened": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "eventsUpdated": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "eventsResolved": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "notificationsRaised": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "typeSummary": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DetectionTypeSummary"
-            }
-          },
-          "uncomparablePairs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UncomparablePair"
-            }
-          },
-          "truncated": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DetectionTypeSummary": {
-        "type": "object",
-        "properties": {
-          "anomalyType": {
-            "type": "string"
-          },
-          "anomalyTypeLabel": {
-            "type": "string"
-          },
-          "evaluated": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "detected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "UncomparablePair": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "siteCode": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "relatedPlatformCode": {
-            "type": "string"
-          },
-          "relatedSiteCode": {
-            "type": "string"
-          },
-          "relatedCurrency": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
       "ChannelVerdictInput": {
         "required": [
           "allowBattery",
@@ -38362,6 +38522,367 @@
             "minLength": 0,
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PricingCostAllocationAdjustmentInput": {
+        "required": [
+          "amount",
+          "reason",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "PricingCostAllocationCreateInput": {
+        "required": [
+          "basisRule",
+          "changeReason",
+          "effectiveFrom",
+          "sourceRef",
+          "sourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceLabel": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "basisRule": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changeReason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationManualLineInput"
+            }
+          },
+          "adjustments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationAdjustmentInput"
+            }
+          }
+        }
+      },
+      "PricingCostAllocationManualLineInput": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "weightGrams": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "amountBasis": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "PricingCostAllocationSaved": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisRule": {
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "finalTotal": {
+            "type": "number"
+          },
+          "variance": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PricingCostAllocationRecalculateInput": {
+        "type": "object",
+        "properties": {
+          "basisRule": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "changeReason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "adjustments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationAdjustmentInput"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationManualLineInput"
+            }
+          }
+        }
+      },
+      "PricingCostAllocationDiff": {
+        "type": "object",
+        "properties": {
+          "ruleChanged": {
+            "type": "boolean"
+          },
+          "beforeRule": {
+            "type": "string"
+          },
+          "afterRule": {
+            "type": "string"
+          },
+          "beforeTotal": {
+            "type": "number"
+          },
+          "afterTotal": {
+            "type": "number"
+          },
+          "totalDelta": {
+            "type": "number"
+          },
+          "changedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationDiffRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationDiffRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "change": {
+            "type": "string"
+          },
+          "beforeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "afterAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "delta": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationLineRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "weightGrams": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "amountBasis": {
+            "type": "number",
+            "nullable": true
+          },
+          "basisValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "basisAvailable": {
+            "type": "boolean"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "allocatedAmount": {
+            "type": "number"
+          },
+          "adjustmentAmount": {
+            "type": "number"
+          },
+          "adjustmentReason": {
+            "type": "string"
+          },
+          "finalAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PricingCostAllocationPreview": {
+        "type": "object",
+        "properties": {
+          "basisRule": {
+            "type": "string"
+          },
+          "basisRuleLabel": {
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationLineRow"
+            }
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "adjustmentTotal": {
+            "type": "number"
+          },
+          "finalTotal": {
+            "type": "number"
+          },
+          "variance": {
+            "type": "number"
+          },
+          "diff": {
+            "$ref": "#/components/schemas/PricingCostAllocationDiff"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -44829,440 +45350,6 @@
           }
         }
       },
-      "ObservationListPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ObservationRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ObservationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "siteCode": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "internalPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceChangeSource": {
-            "type": "string"
-          },
-          "priceChangeSourceLabel": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "sourceLabel": {
-            "type": "string"
-          },
-          "comparisonCurrency": {
-            "type": "string",
-            "nullable": true
-          },
-          "fxRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "fxRateDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "fxRateSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "observedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "NotificationListPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NotificationRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "NotificationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "eventId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "anomalyType": {
-            "type": "string"
-          },
-          "anomalyTypeLabel": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "severityLabel": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "channel": {
-            "type": "string"
-          },
-          "recipientScope": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "delivered": {
-            "type": "boolean"
-          },
-          "deliveredAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "EventListPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EventRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "EventRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "anomalyType": {
-            "type": "string"
-          },
-          "anomalyTypeLabel": {
-            "type": "string"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "siteCode": {
-            "type": "string"
-          },
-          "relatedPlatformCode": {
-            "type": "string"
-          },
-          "relatedSiteCode": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "subjectKind": {
-            "type": "string"
-          },
-          "subjectPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "referencePrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "gapAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "gapRatio": {
-            "type": "number",
-            "nullable": true
-          },
-          "costLine": {
-            "type": "number",
-            "nullable": true
-          },
-          "costCurrency": {
-            "type": "string"
-          },
-          "costComplete": {
-            "type": "boolean"
-          },
-          "costSnapshotAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "firstSeenAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastSeenAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "durationDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "severityLabel": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "ruleId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "fingerprint": {
-            "type": "string"
-          },
-          "evidence": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "EventDetail": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "$ref": "#/components/schemas/EventRow"
-          },
-          "notifications": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NotificationRow"
-            }
-          },
-          "observations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ObservationRow"
-            }
-          },
-          "basis": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AnomalyCapability": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "detectedBy": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "thresholdNote": {
-            "type": "string"
-          },
-          "basis": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "InputCapability": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "impact": {
-            "type": "string"
-          },
-          "basis": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PriceAnomalyCapabilities": {
-        "type": "object",
-        "properties": {
-          "inputs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InputCapability"
-            }
-          },
-          "anomalyTypes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AnomalyCapability"
-            }
-          },
-          "rules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AnomalyRuleRow"
-            }
-          },
-          "detectionNote": {
-            "type": "string"
-          },
-          "upstreamNote": {
-            "type": "string"
-          },
-          "downstreamNote": {
-            "type": "string"
-          },
-          "sourceNote": {
-            "type": "string"
-          },
-          "actionsNote": {
-            "type": "string"
-          }
-        }
-      },
       "PhysicalSafetyPage": {
         "type": "object",
         "properties": {
@@ -49571,6 +49658,343 @@
           }
         }
       },
+      "PricingCostAllocationListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationRow": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "basisRule": {
+            "type": "string",
+            "nullable": true
+          },
+          "basisRuleLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "revisionNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "revisionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "adjustmentTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "finalTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "variance": {
+            "type": "number",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PricingCostAllocationDetail": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "currentRevision": {
+            "$ref": "#/components/schemas/PricingCostAllocationRevisionRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationLineRow"
+            }
+          },
+          "lastDiff": {
+            "$ref": "#/components/schemas/PricingCostAllocationDiff"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationRevisionRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationRevisionRow": {
+        "type": "object",
+        "properties": {
+          "revisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revisionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisRule": {
+            "type": "string"
+          },
+          "basisRuleLabel": {
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eligibleLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basisTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "adjustmentTotal": {
+            "type": "number"
+          },
+          "finalTotal": {
+            "type": "number"
+          },
+          "variance": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changeReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PricingCostAllocationRevisionDetail": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "$ref": "#/components/schemas/PricingCostAllocationRevisionRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationLineRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationSourceCandidate": {
+        "type": "object",
+        "properties": {
+          "sourceRef": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "alreadyAllocated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PricingCostAllocationSourceCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationSourceCandidate"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PricingCostAllocationCapabilities": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationRuleOption"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingCostAllocationSourceOption"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "historyNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationRuleOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          }
+        }
+      },
+      "PricingCostAllocationSourceOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          }
+        }
+      },
       "BundleComponentPage": {
         "type": "object",
         "properties": {
@@ -52045,6 +52469,750 @@
         "properties": {
           "deleted": {
             "type": "boolean"
+          }
+        }
+      },
+      "AnomalyRuleInput": {
+        "required": [
+          "anomalyType",
+          "name",
+          "severity"
+        ],
+        "type": "object",
+        "properties": {
+          "anomalyType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratioThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "minDurationDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AnomalyRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratioThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "minDurationDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "overridden": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ObservationInput": {
+        "required": [
+          "currency",
+          "observedAt",
+          "platformCode",
+          "priceChangeSource",
+          "siteCode",
+          "skuId",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "siteCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "internalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceChangeSource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "comparisonCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRateDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "fxRateSource": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ObservationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EventStatusSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DetectionRun": {
+        "type": "object",
+        "properties": {
+          "windowFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "observationsScanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsOpened": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "eventsResolved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notificationsRaised": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeSummary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectionTypeSummary"
+            }
+          },
+          "uncomparablePairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UncomparablePair"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DetectionTypeSummary": {
+        "type": "object",
+        "properties": {
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "evaluated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "UncomparablePair": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "relatedPlatformCode": {
+            "type": "string"
+          },
+          "relatedSiteCode": {
+            "type": "string"
+          },
+          "relatedCurrency": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ObservationListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObservationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ObservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "internalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceChangeSource": {
+            "type": "string"
+          },
+          "priceChangeSourceLabel": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "comparisonCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRateDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "fxRateSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "recipientScope": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventListPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "anomalyType": {
+            "type": "string"
+          },
+          "anomalyTypeLabel": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "relatedPlatformCode": {
+            "type": "string"
+          },
+          "relatedSiteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "subjectKind": {
+            "type": "string"
+          },
+          "subjectPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "gapAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "gapRatio": {
+            "type": "number",
+            "nullable": true
+          },
+          "costLine": {
+            "type": "number",
+            "nullable": true
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "costComplete": {
+            "type": "boolean"
+          },
+          "costSnapshotAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventDetail": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventRow"
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRow"
+            }
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObservationRow"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AnomalyCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "detectedBy": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "thresholdNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InputCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PriceAnomalyCapabilities": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InputCapability"
+            }
+          },
+          "anomalyTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyCapability"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnomalyRuleRow"
+            }
+          },
+          "detectionNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "actionsNote": {
+            "type": "string"
           }
         }
       },

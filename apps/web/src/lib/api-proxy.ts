@@ -3988,6 +3988,121 @@ const services: readonly {
     pattern:
       /^exchange\-rates(?:\/(?:capabilities|latest|functional\-currencies|sources(?:\/initialize|\/[A-Za-z0-9_]{2,32})?|fetch|fetch\-log)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
+  {
+    // 5.2.1.3 成本分摊（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.1）。
+    //
+    // 蓝图：「把混合成本的货件（一次采购多个 SKU 共用头程）按重量/体积/金额/数量规则分摊到各 SKU，
+    // 支持人工微调并留痕。……**分摊规则变更会导致历史利润变化**，因此调整必须留历史版本，不能就地覆盖。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与并行车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `cost-allocations` 这个独立前缀：
+    //   * 既有 catalog 分支的 alternation 里没有 `cost-allocations`（用脚本逐条核对了本文件里
+    //     **全部 77 条**既有正则：`cost-allocations/**` **零命中**，既有分支不会先把它吃掉）。
+    //   * channel 服务的 `CostAllocation*` DTO 家族（10.6.1.1 物流成本分析）是**服务端类型名**，
+    //     与这里的**浏览器侧路径**是两回事；本模块的端点挂在 catalog 的命名空间下，
+    //     前缀互不重叠（`catalog/` vs `channel/`）。
+    //   * 5.2.1.1 的 `sku-cost-compositions`（成本构成）与 5.2.1.2 的到岸成本各自独立，
+    //     本前缀与它们不共用首 token。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   cost-allocations                              分摊单台账（GET，筛选/分页在服务端）+ 新建分摊单（POST）
+    //   cost-allocations/capabilities                 能力声明（四条规则 / 两种来源 / 四个基数的口径）
+    //   cost-allocations/sources                      可分摊的货件候选（头程发运单，GET）
+    //   cost-allocations/{uuid}                       分摊单明细（GET）
+    //   cost-allocations/{uuid}/revisions             版本历史（GET）+ 应用重算追加新版本（POST）
+    //   cost-allocations/{uuid}/revisions/{no}        某一个版本的快照明细（GET）
+    //   cost-allocations/{uuid}/recalculate           试算重算（POST，**不落库**）
+    //   cost-allocations/{uuid}/diffs                 两版之间的差异对比（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sources）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，而 `capabilities` 的首字母 `c` 落在 [0-9a-f] 里，
+    //    顺序反了会被 uuid 支吃掉半截（这是本仓反复踩过的坑）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 版本号段用 `\d+`（不是 UUID）：它是 int。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `cost-allocations/{uuid}/lines` —— 明细行随明细与版本一起读，没有独立端点。
+    //   * `cost-allocations/{uuid}/delete` —— 历史不可变，分摊单不可删（删了就等于没版本历史）。
+    //   * `cost-allocations/batch` —— 没有批量分摊。
+    //   * 5.2.1.1 的 `sku-cost-compositions/{uuid}/allocations` —— 那条分支**刻意不放行**：
+    //     成本构成不提供「就地分摊」的入口（分摊是 5.2.1.3 自己的资源）。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^cost\-allocations(?:\/(?:capabilities|sources)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revisions(?:\/[0-9]+)?|recalculate|diffs))?)?$/,
+  },
+  {
+    // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
+    //
+    // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、
+    // 罚款类型，用于利润测算的扣项。」输出「费用规则；测算时的费用项」，
+    // 并加粗「**规则参数用于事前测算，实际费用来自 12 的结算对账**——两者差额要在利润报表中
+    // 显性展示为『费用差异』，否则测算永远不准却不知道为什么」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `platform-fees` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `platform-fees`；
+    //     已用脚本逐条核对本文件里**全部 77 条**既有正则：`platform-fees/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.2.3.2 物流与头程费用与本模块共用页面路由 /pricing/fees，但**不共用端点**：
+    //     本车道只交付 5.2.3.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-fees/capabilities        能力声明（逐维度写明取不到没有 / 归谁管）
+    //   platform-fees/directory           平台 / 站点目录（上游 2 平台目录，channel 授权只读）
+    //   platform-fees/rules               规则集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   platform-fees/rules/{uuid}        规则详情（GET）/ 修改（PUT，乐观锁）
+    //   platform-fees/rules/{uuid}/tiers  整体替换阶梯（PUT）
+    //   platform-fees/estimate            费用测算（GET，逐项费用 + 合计完整性）
+    //   platform-fees/actuals             实际费用集合读（GET）/ 登记（POST）
+    //   platform-fees/actuals/{uuid}/void 作废实际费用（POST，必须写理由）
+    //   platform-fees/variance            费用差异对照（GET，实际 vs 按规则测算）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / estimate / variance /
+    //    actuals / rules）排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `platform-fees` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-fees` —— 本模块没有裸路径资源。
+    //   * `platform-fees/rules/{uuid}/delete` —— 费率规则不可删（要停用请把 enabled 置 false 并设生效终点）。
+    //   * `platform-fees/actuals/{uuid}` —— 实际费用没有「按 id 取单条」这个端点，也不可就地改写
+    //     （只追加 + 作废留理由）。
+    //   * `platform-fees/actuals/{uuid}/update` —— 同上，改金额等于让历史事实可回溯修改。
+    //   * `platform-fees/logistics` —— 🔴 5.2.3.2 物流与头程费用**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
+  },
+  {
+    // 5.3.1.1 利润测算器：利润拆解（售价 → 每一项扣减 → 毛利）+ 测算方案。
+    // 形状逐个列出：
+    //   capabilities —— 能力声明（逐项标注上游真实交付状态与归谁管），字面量子路径；
+    //   sites —— 目标店铺（站点）列表，来自 2.1.1.1 平台目录，字面量子路径；
+    //   calculate —— 一次测算（POST），字面量子路径；
+    //   scenarios —— 方案集合（GET 列表 / POST 新建），字面量子路径；
+    //   scenarios/{uuid} —— 单个方案（GET 详情 / DELETE 删除）。
+    // `capabilities` 与 `calculate` 的首字母都落在 [0-9a-f] 里，但它们是**字面量**分支，
+    // 而 uuid 只出现在 `scenarios/` 之下 ⇒ 两者不会互相吃掉。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^profit-calculator(?:\/(?:capabilities|sites|calculate)|\/scenarios(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
+  },
 ];
 
 function resolve(path: string) {
