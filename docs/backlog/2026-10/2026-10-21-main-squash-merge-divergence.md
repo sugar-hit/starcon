@@ -1,9 +1,9 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 5 轮未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 6 轮未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
 - 优先级: **P0** —— 这是「main → 集成头同步」任务的**长期阻塞点**，每一轮 main 前进都会撞同一堵墙
-- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0415-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0515-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0643-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
+- 关联: `tools/module-progress/SYNC-MAIN.md` · `docs/sessions/2026-10/2026-10-21-0115-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0315-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0415-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0515-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0643-main-sync-conflict-squash-divergence.md` · `docs/sessions/2026-10/2026-10-21-0740-main-sync-conflict-squash-divergence.md` · `docs/backlog/2026-10-2026-10-21-api-proxy-shared-file-merge-conflict.md`
 
 ---
 
@@ -12,7 +12,7 @@
 「main → 集成头同步」任务每轮做的是：`fetch` → `merge-base --is-ancestor origin/main integration/module-dev`
 → 有新提交就 `git merge --no-ff origin/main` → 预检 → push 集成头。
 
-**连续 5 轮（2026-10-21 01:15、03:15、04:15、05:15、06:43）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
+**连续 6 轮（2026-10-21 01:15、03:15、04:15、05:15、06:43、07:40）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
 （`Integration/module dev (#11)`）是 GitHub **squash 合并**的产物 —— **单父提交**，
 父提交是 `1bb270a0`（batch-28 tip）。
 
@@ -81,10 +81,12 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
 
 ### 影响
 
-- 「main → 集成头同步」任务**连续 5 轮产出「冲突未并入」**。
-  各轮等闸时长：45 / 40 / 27 / **0** / **26** 分钟 ⇒ **闸不是瓶颈，唯一瓶颈是 main 的 tip 是 squash**。
+- 「main → 集成头同步」任务**连续 6 轮产出「冲突未并入」**。
+  各轮等闸时长：45 / 40 / 27 / **0** / **26** / **25 分 49 秒** ⇒ **闸不是瓶颈，唯一瓶颈是 main 的 tip 是 squash**。
   05:15 轮闸是空的、第 1 次尝试就拿到；06:43 轮闸被**上一轮流水线的后端 L2（`mvnw verify`）**持有，
-  按协议用密集竞态 `gate acquire`（1 秒一次）等到第 1568 次命中（26 分 08 秒）。
+  按协议用密集竞态 `gate acquire`（1 秒一次）等到第 1568 次命中（26 分 08 秒）；
+  **07:40 轮同样是后端 L2 持闸**（`mvnw verify` 从 `warehouse` 推进到 `trade`），
+  第 **1421** 次尝试命中（**25 分 49 秒**，owner pid 26606）。
 - 2026-10-21 04:15 轮补一条**更硬的证据**：`origin/main` 的树（`06607694b31c6fdfe354ed4783c22d4a0e0b8c20`）
   与集成头自己的祖先提交 `d22bc1e1`（batch-37）**逐字节相同** ⇒ 这次 merge 在内容上是**空转**，
   冲突纯粹是 squash 抹掉血缘导致 merge-base 被拉回 `1bb270a0` 的副作用。
@@ -109,6 +111,18 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
   也与前轮一致 ⇒ **这个冲突面已经稳定，不随集成头前进而变化**。
   另记录一条实操口径：`ageSeconds` 中途掉到 23 又升回，**不是换人而是同一 tick 的 keepalive 续期**
   （`dispatch.gate/` 里多出 `keepalive-*` 文件、`owner` pid 不变）⇒ 判活只能看 `stale` 字段。
+- 2026-10-21 07:40 轮**第 4 次独立重验**「origin/main 的树 == 集成头祖先 `d22bc1e1` 的树」
+  （不采信历史会话日志）：在集成头**全部历史提交**里逐一比对树哈希，唯一命中者仍是 `d22bc1e1`；
+  同一轮独立核验 squash 结构（`git log -1 --format='parents=[%P]' d28188d6` ⇒ **只有一个父提交**）
+  与 merge-base 回退（`1bb270a0`）。
+  冲突面**第 6 次复现且完全一致**：**6 个文件、5 个 add/add + 1 个 content**；
+  「main 侧独有文本」的 15 个文件分布（8 求并 / 3 干净合上 / 4 冲突 / 2 严格超集）也与前轮一致
+  ⇒ **这个冲突面已经稳定，不随集成头前进而变化**。
+  同轮把台账口径从「读总览表」升级为**逐模块 ID + 状态 join**（465 行 vs 465 行）：
+  状态不同 **24** 个（比 06:43 轮的 20 个多出的 4 个正是 batch-46 的
+  5.4.1.1 调价单 / 5.5.1.1 价格历史 / 6.2.1.3 采购计划 / 10.4.2.2 备货预报），
+  且 **main 领先（main 已交付、集成头未交付）的模块数 = 0**
+  ⇒ **main 在 465 个模块里没有任何一个是集成头没有的**，差距只增不减。
 - 那个 406 files / 262390 insertions 的 diffstat 是 **squash 把 85 个 commit 压成一颗造成的行数重放**，
   不是真有 26 万行新代码 —— **不要按这个数字判断工作量**。
 - `merge-union` 驱动能自动合上的部分（契约 `packages/api-contracts/**` + 台账 `module-progress.md`）
@@ -134,6 +148,16 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
       2026-10-21 02:15 那个同步任务回合在 02:47:10 被截断，**既没写会话日志也没 release 闸**
       ⇒ 闸泄漏 70 分钟，白挡了 03:00 轮与 03:15 轮两次同步。
       建议协议第 6 步加兜底，或由调度器在回合异常结束时统一 release。
+- [ ] **（07:40 轮新增）禁止并发开多个 `gate acquire` 竞态循环 —— 否则 release 瞬间闸被抢回来**：
+      2026-10-21 07:40 轮等闸时，第一个密集竞态循环在第 1421 次尝试命中并拿到闸，
+      但**在它命中之前又启动了第二个竞态循环**（因长时间无输出、误以为首个循环已被工具超时杀掉）。
+      两个循环并发跑同一个 `gate acquire` ⇒ 只要本轮 `gate release`，
+      **第二个循环会在同一秒把闸抢回来并持有到 TTL（4200s）**，而它的持闸进程随即退出
+      ⇒ 等价于**闸泄漏 70 分钟**，白挡下一轮流水线。
+      本轮在 release 前用 `task_stop` 停掉第二个循环才避免（acquire 1 次 / release 1 次，配平）。
+      ⇒ 建议：竞态循环**只允许存在一个**；重跑竞态前先确认旧的已退出；
+      收尾 `gate release` **之前**必须确认没有存活的竞态循环。
+      （与上一条的「回合被截断不 release」是**两种不同的闸泄漏向量**，兜底要一起做。）
 
 ---
 
