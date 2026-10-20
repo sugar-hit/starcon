@@ -105,6 +105,50 @@ const services: readonly {
       /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?||approval-records(?:\/(?:statistics|capabilities|export|by-actor\/[0-9a-f-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?|approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|my-approvals(?:\/(?:capabilities|batch|[0-9a-f-]+(?:\/(?:decide|transfer))?))?|approval-instances|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?|legal-entities\/(?:[0-9a-f-]+\/(?:accounting-books|ledger-books|default-book)|references)|accounting-books(?:\/[0-9a-f-]+(?:\/fact-assignments(?:\/[0-9a-f-]+)?)?)?)$/,
   },
   {
+    // 5.5.2.1 异常告警（**本条目是新增一条 services[] 元素**，不是往既有 catalog 分支的
+    // alternation 里并**）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然判冲突
+    // （结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 `catalog/` SKU 列表那条元素**之前** —— 那样本车道与其他三条车道的
+    // 插入点被隔开，git 能干净求并。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   price-anomaly-alerts                          —— 🔴 **刻意不放行裸路径**：后端没有
+    //     「GET /catalog/price-anomaly-alerts」这个端点（集合读是 /events 与 /observations），
+    //     放行后端不存在的路径比 404 更糟 —— 界面会以为功能已交付。
+    //   price-anomaly-alerts/capabilities             能力声明（四个输入的真值 + 四类异常口径）
+    //   price-anomaly-alerts/observations             价格观测台账（GET）+ 登记观测（POST）
+    //   price-anomaly-alerts/events                   异常清单（GET）
+    //   price-anomaly-alerts/events/{id}              异常详情（GET）
+    //   price-anomaly-alerts/events/{id}/acknowledge  确认异常（POST）
+    //   price-anomaly-alerts/events/{id}/resolve      消解异常（POST）
+    //   price-anomaly-alerts/rules                   判定规则（GET）+ 保存规则（POST）
+    //   price-anomaly-alerts/notifications           预警通知（集合读）
+    //   price-anomaly-alerts/detect                  运行检测（POST）
+    //
+    // 🔴 `capabilities` / `observations` / `events` / `rules` / `notifications` / `detect`
+    //   的首字母都不落在 [0-9a-f] 里，所以字面量子路径不会被 uuid 分支提前吃掉；
+    //   uuid 分支只出现在 `events/` 下面，且**只接 acknowledge / resolve 两个动作**
+    //   —— 不接的动作（不存在的后端端点）一律 404。
+    //
+    // 🔴 token 与既有条目**不撞**：既有 catalog 元素的首 token 是 products / attributes /
+    //   brands / parties / categories / category-mappings / records / media / skus /
+    //   unit-groups / unit-conversion / spec-axis / variant-combination / … 以及
+    //   `sku-cost-compositions`（5.2.1.1 成本构成）；channel 元素的首 token 是 listings /
+    //   listing-details / listing-performance / listing-changes / listing-bulk-migrations 等。
+    //   本条目的首 token `price-anomaly-alerts` 与它们**首 token 全不相同**；
+    //   且既有正则都是**锚定**的（`/^token(...)?$/`），所以两者互不遮蔽。
+    //
+    // 🔴 刻意**不放行**：5.5.1.1 价格历史（**未交付**）—— 它与本模块同属 L3「5.5 价格监控」，
+    //   但端点命名空间不同，放行后端不存在的路径比 404 更糟。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^price-anomaly-alerts(?:\/capabilities|\/observations|\/events(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|\/rules|\/notifications|\/detect)$/,
+  },
+  {
     prefix: 'catalog/',
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
@@ -345,6 +389,31 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8082',
     pattern:
       /^sku-cost-compositions(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjustments(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|revisions))?)?$/,
+  },
+  {
+    // 5.2.1.2 到岸成本：「货到目标仓可售」的总成本（单据级口径）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   landed-costs                          到岸成本台账（集合读；筛选/分页在服务端）
+    //   landed-costs/capabilities             能力声明（六个分量的来源 + 成本口径）
+    //   landed-costs/comparisons              不同目的地的成本对比（按 skuId 查）
+    //   landed-costs/parameters               租户参数（清关费 / 尾程预备）：读 + 保存（PUT）
+    //   landed-costs/{id}                     到岸成本单明细（GET）
+    //   landed-costs/{id}/components          逐项分量（GET，分页）
+    //   landed-costs/{id}/recompute           按来源发运单重算（POST）
+    //   landed-costs                          计算一张到岸成本单（POST）
+    //
+    // 🔴 `capabilities` / `comparisons` / `parameters` 三个字面量子路径必须排在
+    // uuid 分支**之前**判别，否则它们会被当成「id=capabilities 的那张单」拼出去
+    // （这是本仓反复踩过的坑）。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `landed-costs`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^landed-costs(?:\/(?:capabilities|comparisons|parameters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:components|recompute))?)?$/,
   },
   {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
@@ -3664,6 +3733,68 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 15.2.2.1 Request a Review（索评）（crm 服务，卷 15 的 L3 锚点 15.2.2）。
+    //
+    // 蓝图：「按规则向已签收订单的买家发起索评（平台允许范围内），控制频次避免打扰，
+    // 支持按店铺/时间/物流状态批量执行。输出：索评任务 + 发送记录 + 评价回收统计。
+    // 关系：上游 = 10.3.2.2 签收；下游 = 15.2.1.1 评价。**索评频次必须受限**。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有 crm 那条是 15.4.2.1 客服知识库（`knowledge/...`），单行超长正则，
+    // 并进去会让本车道与并行车道的插入点被隔开，git 判冲突。
+    // 插入锚点固定在 **crm/ 知识库那条之后、warehouse/ 7.8.2.2 那条之前**，
+    // 与本批另外三条车道的锚点（catalog 两条、channel 一条）互不重叠。
+    //
+    // 🔴 为什么用 `review-requests` 这个独立前缀（已逐条核对既有全部 token）：
+    //   * 既有 crm 分支的 token 是 `knowledge`（15.4.2.1 知识库）；
+    //     `review-due` 是 knowledge **内部**的子形状（`knowledge/review-due`），不是独立 token。
+    //   * 既有别的服务的 token：`orders` · `order-review`（9.2.1.2 trade）·
+    //     `refunds` · `rma-authorizations` · `return-receipts` · `return-quality` …
+    //   * 既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //     `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //     的元素才有机会吃到 `crm/review-requests/...`。
+    //     而本文件里 prefix='crm/' 的元素只有知识库那一条，它的正则 `^knowledge\/...$`
+    //     **不可能**匹配 `review-requests/...` ⇒ 两条互不吃掉，首 token 不同即可。
+    //   * 刻意**不**复用 `order-review`（trade 的订单审核）：那是另一个服务、
+    //     另一个模块（9.2.1.2），共用会让「索评」与「订单审核」在白名单上混成一个形状。
+    //
+    // 形状逐条列出：
+    //   review-requests                          索评任务集合读（GET，真分页 + 真筛选）/ 新建（POST）
+    //   review-requests/capabilities             能力声明（逐维 available + ownerModule + impact）
+    //   review-requests/frequency-policy         频次硬上限（GET 读 / PUT 配置）
+    //   review-requests/shops                    店铺目录（来自上游 channel 的真实清单）
+    //   review-requests/candidates               已签收候选单（上游 10.3.2.2 确认单清单）
+    //   review-requests/batch                    批量执行（POST，逐条给结论与原因）
+    //   review-requests/recovery-stats           评价回收统计（GET）
+    //   review-requests/{uuid}                   单条索评任务详情（GET）
+    //   review-requests/{uuid}/send-records      登记触达（POST）
+    //   review-requests/{uuid}/recoveries        登记评价回收（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / frequency-policy / shops / candidates /
+    // batch / recovery-stats）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `review-requests/{uuid}/replies` / `/tags` / `/appeals` ——
+    //     评价回复（15.2.1.2）、差评处理（15.2.1.3）都**未交付**，
+    //     本模块只落**评价回收桶**，不放行这些形状等于让界面以为能回复买家。
+    //   * `review-requests/{uuid}/delete` —— 索评请求是频次计数的凭据，不可删。
+    //   * `review-requests/{uuid}/cancel` —— 后端没有这个映射（状态机里 CANCELLED 暂无入口）。
+    //   * `review-requests/rules` —— 索评规则配置归 **15.2.2.2**（未交付），
+    //     本模块的规则是**一次请求自带的快照** + 一份租户级频次硬上限。
+    //   * `review-requests/{uuid}/send-records/{sendId}` ——
+    //     发送记录按请求读，不按单条记录寻址（后端没有这个映射）。
+    //   * 任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删 / 不能乱改」的防线在服务端与 DB，不在这里。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
@@ -3825,6 +3956,136 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8083',
     pattern:
       /^return\-disposals(?:\/(?:capabilities|overview|candidates|events)|\/policies(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke)?|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:schedule|evidence|costs|claim-basis|dispose|cancel))?)?|\/claim-bases\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|reject))$/,
+  },
+  {
+    // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   exchange-rates                                 汇率台账（集合读）+ 手工录入（POST）
+    //   exchange-rates/capabilities                    能力声明（方向 / 唯一性 / 反向 / 下游状态）
+    //   exchange-rates/latest                          某币种对最新的一条汇率（asOf 查询）
+    //   exchange-rates/functional-currencies           各币种对各本位币的汇率（读 identity 的法人本位币）
+    //   exchange-rates/sources                         来源配置列表（GET）+ 新建来源（POST）
+    //   exchange-rates/sources/initialize              初始化内置来源（POST，幂等）
+    //   exchange-rates/sources/{code}                  修改来源配置（PUT；按**来源代码**寻址，不是 uuid）
+    //   exchange-rates/fetch                           外部拉取（POST）
+    //   exchange-rates/fetch-log                       拉取日志（只读）
+    //   exchange-rates/{id}                            汇率详情（GET）+ 更正（PUT）
+    //
+    // 🔴 `capabilities` / `latest` / `sources` / `fetch` 等字面量段排在 uuid 分支**之前**判别：
+    //     字面量先判，两类不会互相吃掉。
+    // 🔴 `sources/{code}` 的 code 是**来源代码**（如 BANK_OF_CHINA），不是 uuid ——
+    //     所以这一段用字符集而不是 {uuid} 段。
+    //
+    // 刻意**不**放行：5.2.2.2 汇率快照尚未交付（它上游是本模块）——
+    // 放行后端不存在的路径比 404 更糟，界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `exchange-rates`，
+    // 所以本元素既不会被它遮蔽，也不会遮蔽它。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^exchange\-rates(?:\/(?:capabilities|latest|functional\-currencies|sources(?:\/initialize|\/[A-Za-z0-9_]{2,32})?|fetch|fetch\-log)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
+    // 5.2.1.3 成本分摊（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.1）。
+    //
+    // 蓝图：「把混合成本的货件（一次采购多个 SKU 共用头程）按重量/体积/金额/数量规则分摊到各 SKU，
+    // 支持人工微调并留痕。……**分摊规则变更会导致历史利润变化**，因此调整必须留历史版本，不能就地覆盖。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 分支的超长 alternation 里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与并行车道的插入点互不重叠。
+    //
+    // 🔴 为什么用 `cost-allocations` 这个独立前缀：
+    //   * 既有 catalog 分支的 alternation 里没有 `cost-allocations`（用脚本逐条核对了本文件里
+    //     **全部 77 条**既有正则：`cost-allocations/**` **零命中**，既有分支不会先把它吃掉）。
+    //   * channel 服务的 `CostAllocation*` DTO 家族（10.6.1.1 物流成本分析）是**服务端类型名**，
+    //     与这里的**浏览器侧路径**是两回事；本模块的端点挂在 catalog 的命名空间下，
+    //     前缀互不重叠（`catalog/` vs `channel/`）。
+    //   * 5.2.1.1 的 `sku-cost-compositions`（成本构成）与 5.2.1.2 的到岸成本各自独立，
+    //     本前缀与它们不共用首 token。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   cost-allocations                              分摊单台账（GET，筛选/分页在服务端）+ 新建分摊单（POST）
+    //   cost-allocations/capabilities                 能力声明（四条规则 / 两种来源 / 四个基数的口径）
+    //   cost-allocations/sources                      可分摊的货件候选（头程发运单，GET）
+    //   cost-allocations/{uuid}                       分摊单明细（GET）
+    //   cost-allocations/{uuid}/revisions             版本历史（GET）+ 应用重算追加新版本（POST）
+    //   cost-allocations/{uuid}/revisions/{no}        某一个版本的快照明细（GET）
+    //   cost-allocations/{uuid}/recalculate           试算重算（POST，**不落库**）
+    //   cost-allocations/{uuid}/diffs                 两版之间的差异对比（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sources）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，而 `capabilities` 的首字母 `c` 落在 [0-9a-f] 里，
+    //    顺序反了会被 uuid 支吃掉半截（这是本仓反复踩过的坑）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 版本号段用 `\d+`（不是 UUID）：它是 int。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `cost-allocations/{uuid}/lines` —— 明细行随明细与版本一起读，没有独立端点。
+    //   * `cost-allocations/{uuid}/delete` —— 历史不可变，分摊单不可删（删了就等于没版本历史）。
+    //   * `cost-allocations/batch` —— 没有批量分摊。
+    //   * 5.2.1.1 的 `sku-cost-compositions/{uuid}/allocations` —— 那条分支**刻意不放行**：
+    //     成本构成不提供「就地分摊」的入口（分摊是 5.2.1.3 自己的资源）。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^cost\-allocations(?:\/(?:capabilities|sources)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revisions(?:\/[0-9]+)?|recalculate|diffs))?)?$/,
+  },
+  {
+    // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
+    //
+    // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、
+    // 罚款类型，用于利润测算的扣项。」输出「费用规则；测算时的费用项」，
+    // 并加粗「**规则参数用于事前测算，实际费用来自 12 的结算对账**——两者差额要在利润报表中
+    // 显性展示为『费用差异』，否则测算永远不准却不知道为什么」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 10.7.1.3 的 `return-disposals` 元素之后、
+    // `];` 之前），与另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `platform-fees` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `platform-fees`；
+    //     已用脚本逐条核对本文件里**全部 77 条**既有正则：`platform-fees/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.2.3.2 物流与头程费用与本模块共用页面路由 /pricing/fees，但**不共用端点**：
+    //     本车道只交付 5.2.3.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   platform-fees/capabilities        能力声明（逐维度写明取不到没有 / 归谁管）
+    //   platform-fees/directory           平台 / 站点目录（上游 2 平台目录，channel 授权只读）
+    //   platform-fees/rules               规则集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   platform-fees/rules/{uuid}        规则详情（GET）/ 修改（PUT，乐观锁）
+    //   platform-fees/rules/{uuid}/tiers  整体替换阶梯（PUT）
+    //   platform-fees/estimate            费用测算（GET，逐项费用 + 合计完整性）
+    //   platform-fees/actuals             实际费用集合读（GET）/ 登记（POST）
+    //   platform-fees/actuals/{uuid}/void 作废实际费用（POST，必须写理由）
+    //   platform-fees/variance            费用差异对照（GET，实际 vs 按规则测算）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / estimate / variance /
+    //    actuals / rules）排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `platform-fees` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `platform-fees` —— 本模块没有裸路径资源。
+    //   * `platform-fees/rules/{uuid}/delete` —— 费率规则不可删（要停用请把 enabled 置 false 并设生效终点）。
+    //   * `platform-fees/actuals/{uuid}` —— 实际费用没有「按 id 取单条」这个端点，也不可就地改写
+    //     （只追加 + 作废留理由）。
+    //   * `platform-fees/actuals/{uuid}/update` —— 同上，改金额等于让历史事实可回溯修改。
+    //   * `platform-fees/logistics` —— 🔴 5.2.3.2 物流与头程费用**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
   },
   {
     // 5.3.1.1 利润测算器：利润拆解（售价 → 每一项扣减 → 毛利）+ 测算方案。
