@@ -3663,6 +3663,59 @@ const services: readonly {
       /^order\-address\-payment\-check\/(?:capabilities|overview|policy|embargo\-rules|country\-rules|payment\-rules|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/latest)$/,
   },
   {
+    // 6.2.1.2 补货建议（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.1）。
+    //
+    // 蓝图：「计算建议补货量：目标库存覆盖天数 × 日均销量 −（可用 + 在途），并结合 MOQ、
+    // 箱规、采购起订额做取整修正，给出建议供应商与到货时间。」输出「补货建议
+    // （建议量、取整说明、预计到货日、预计费用）；支持接受/调整/忽略」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在既有 `order-address-payment-check`（9.2.2.1）那条**之后**、
+    // `fulfillment/split`（9.3.1.1 拆单）那条**之前** —— 与同批另外三条车道的插入点
+    // 两两不重叠，git 能干净求并。既有条目一字未动。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `replenishment-suggestions` 这个独立前缀：
+    //   * 既有 trade 分支是**一条**覆盖全服务的长 alternation，里面没有 `replenishment-suggestions`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`replenishment-suggestions/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.2.1.1 断货风险的既有 trade 路由（`stockout-risk/**`）**不是本模块的**，
+    //     本条目不放行它，也不改它。
+    //   * 6.2.1.3 采购计划与 6.2.2.1 采购申请**都不是本模块的**，不代它们开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   replenishment-suggestions/capabilities            能力与上下游可用性（含「头程时效未交付」）
+    //   replenishment-suggestions/coverage-policies       覆盖天数目标配置（GET 真分页 / POST 登记）
+    //   replenishment-suggestions/order-policies          采购起订额 / 生产周期配置（GET 真分页 / POST 登记）
+    //   replenishment-suggestions/batches                 计算批次（GET 真分页 / POST 发起计算）
+    //   replenishment-suggestions/suggestions             建议清单（GET，真分页 + 真筛选）
+    //   replenishment-suggestions/suggestions/{uuid}      建议详情（GET：结论 + 计算过程 + 处置留痕）
+    //   replenishment-suggestions/suggestions/{uuid}/decision  处置（POST：接受 / 调整 / 忽略）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / coverage-policies / order-policies / batches /
+    //    suggestions）排在 {uuid} 段之前** —— alternation 是首个命中即返回，
+    //    顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `decision` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `replenishment-suggestions`
+    //    就是凭空多出一条 GET（后端没有这个映射）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `replenishment-suggestions` —— 后端没有对应映射。
+    //   * `replenishment-suggestions/suggestions/{uuid}/recompute` —— 重算是一次**新的批次**，
+    //     不是对一条已落库建议的改写（计算结论不可改写是 DB 层的不变量）。
+    //   * `replenishment-suggestions/plans/**` —— 6.2.1.3 采购计划**未交付**，本模块不代它开形状。
+    //   * `replenishment-suggestions/purchase-requests/**` —— 6.2.2.1 采购申请**未交付**，
+    //     本模块只产出建议与处置留痕，不代它建申请单。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^replenishment\-suggestions\/(?:capabilities|coverage\-policies|order\-policies|batches|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/decision)?)?)$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
