@@ -59,6 +59,7 @@ import type {
   PlatformDirectory,
   PlatformFeeCapabilities,
 } from './platform-fee-model';
+import { LogisticsFreightWorkspace } from './logistics-freight-workspace';
 
 /**
  * 5.2.3.1 平台费用工作区。
@@ -1233,6 +1234,9 @@ export function PlatformFeeWorkspace() {
           <p className="text-copy-12 text-muted-foreground">{variance?.note ?? ''}</p>
         </div>
       </SectionCard>
+
+      {/* 5.2.3.2 物流与头程费用：与本模块共用 L3 路由，各占一个独立分区 */}
+      <LogisticsFreightWorkspace />
 
       {/* ============================================================ 分区 */}
       <SectionCard title="同一 L3 下的兄弟模块">
