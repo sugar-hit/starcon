@@ -3716,6 +3716,62 @@ const services: readonly {
       /^replenishment\-suggestions\/(?:capabilities|coverage\-policies|order\-policies|batches|suggestions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/decision)?)?)$/,
   },
   {
+    // 6.2.1.3 采购计划（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.1）。
+    //
+    // 蓝图：「按周期（月/季）、按店铺大促节奏、按仓库制定采购计划，把补货建议汇总成计划行，
+    // 支持调整、锁定、导出给采购员。」输出「采购计划（计划行：SKU、数量、目标仓、期望到货日、
+    // 优先级）」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 既有条目**一字未动**（含 6.2.1.2 为 6.2.2.1 预留的那段 `purchase-requests` 说明）。
+    //
+    // 插入锚点固定在既有 `replenishment-suggestions`（6.2.1.2，本模块的直接上游）元素**之后** ——
+    // 与同批另外三条车道的插入点互不重叠，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `purchase-plans` 这个独立前缀：
+    //   * 既有 trade 分支是**一条**覆盖全服务的长 alternation，里面没有 `purchase-plans`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`purchase-plans/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.2.1.2 的 `replenishment-suggestions/**` 与 6.2.2.1 采购申请**都不是本模块的**，
+    //     本条目既不改它也不代它开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   purchase-plans                          计划清单（GET，真分页 + 真筛选 + 真排序）/ 建计划（POST）
+    //   purchase-plans/capabilities             能力与上下游可用性（含「锁库端口是否接线」）
+    //   purchase-plans/options                  建计划参照项（目标仓 / 法人 / 大促）
+    //   purchase-plans/summary                  汇总视图（**日常一段、大促一段**，两段不相加）
+    //   purchase-plans/campaigns                大促日历列表（GET 真分页）/ 登记档期（POST）
+    //   purchase-plans/campaigns/{uuid}         更新档期（PUT）/ 删除档期（DELETE）
+    //   purchase-plans/lock-policies            锁库策略列表（GET 真分页）/ 登记策略（POST）
+    //   purchase-plans/{uuid}                   计划详情（GET：头 + 计划行）
+    //   purchase-plans/{uuid}/confirm           确认计划（POST：草稿 → 已确认）
+    //   purchase-plans/{uuid}/aggregate         从补货建议汇总成计划行（POST）
+    //   purchase-plans/{uuid}/lines             计划行清单（GET，真分页 + 真筛选）
+    //   purchase-plans/{uuid}/lines/{uuid}      计划行详情（GET：行 + 调整留痕 + 锁定留痕）
+    //   purchase-plans/{uuid}/lines/{uuid}/adjust  调整计划行（POST，数量 / 到货日 / 优先级 / 目标仓）
+    //   purchase-plans/{uuid}/lines/{uuid}/lock    锁定计划行（POST，走 warehouse 的库存预占）
+    //   purchase-plans/{uuid}/export            导出 CSV 给采购员（GET，text/csv 原样透传）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / campaigns / lock-policies）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `adjust` / `lock` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-plans/{uuid}/delete` —— 采购计划是业务凭据（行调整 / 锁定留痕都指向它），
+    //     本模块不提供删除计划；删的是**大促档期**（`campaigns/{uuid}`），且被计划引用时删不掉。
+    //   * `purchase-plans/purchase-requests/**` —— 6.2.2.1 采购申请**未交付**，
+    //     本模块只产出计划行，不代它建申请单、不代它走审批。
+    //   * `purchase-plans/lock-policies/{uuid}` —— 锁库策略走版本化 upsert，没有按 id 单独读/改。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-plans(?:\/(?:capabilities|options|summary|campaigns(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|lock\-policies|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:aggregate|confirm|export|lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjust|lock))?)?))?))?$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
