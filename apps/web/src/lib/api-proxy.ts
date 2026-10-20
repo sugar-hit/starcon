@@ -4182,6 +4182,52 @@ const services: readonly {
       /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
   },
   {
+    // 5.3.2.1 定价模板（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
+    //
+    // 蓝图：「沉淀定价策略模板：成本加成、固定毛利、竞品跟随（若允许）、按站点差异化、
+    // 按库存周转调整，新品与老品用不同模板。」输入「模板定义（基准 + 调整项）；适用对象
+    // （分类/品牌/店铺）」，输出「模板记录；一键应用到商品生成建议价」，
+    // 并加粗「**模板是"怎么算"，价目表是"算完是多少"**」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.2.3.1 平台费用」元素之后、「5.3.1.1 利润测算器」元素之前，
+    // 与另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `pricing-templates` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `pricing-templates`；
+    //     已用脚本逐条核对本文件里**全部 84 条**既有正则：`pricing-templates/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.3.2.2 价格规则与本模块共用 L3 锚点，但**不共用端点**：
+    //     本车道只交付 5.3.2.1，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pricing-templates/capabilities          能力声明（基准 / 调整项 / 适用对象 / 商品阶段）
+    //   pricing-templates/directory             适用对象目录（内部分类 + 品牌）
+    //   pricing-templates/sites                 目标店铺（站点）列表，来自 2.1.1.1 平台目录
+    //   pricing-templates/templates             模板集合读（GET，真分页 + 筛选）/ 新建（POST）
+    //   pricing-templates/templates/{uuid}      模板详情（GET）/ 修改（PUT，乐观锁）/ 删除（DELETE）
+    //   pricing-templates/templates/{uuid}/apply 一键应用生成建议价（POST）
+    //   pricing-templates/applications         应用留痕（GET，真分页）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / directory / sites / applications / templates）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `templates` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `pricing-templates` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `pricing-templates` —— 本模块没有裸路径资源。
+    //   * `pricing-templates/templates/{uuid}/prices` —— 本模块**不建价目表**（5.1.1.2 的写入所有权），
+    //     也不改生效价（5.4.1.1 调价单的写入所有权）：本模块只产出**建议价**。
+    //   * `pricing-templates/rules` —— 5.3.2.2 价格规则**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^pricing\-templates(?:\/(?:capabilities|directory|sites|applications)|\/templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/apply)?)?)$/,
+  },
+  {
     // 5.3.1.1 利润测算器：利润拆解（售价 → 每一项扣减 → 毛利）+ 测算方案。
     // 形状逐个列出：
     //   capabilities —— 能力声明（逐项标注上游真实交付状态与归谁管），字面量子路径；
