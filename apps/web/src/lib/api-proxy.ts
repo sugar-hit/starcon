@@ -1944,6 +1944,57 @@ const services: readonly {
       /^listing\-keyword\-rankings(?:\/capabilities|\/filter\-options|\/crawls|\/report|\/alerts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/history|\/trend)?)?$/,
   },
   {
+    // 4.5.2.2 上新与变更监控（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `listing-keyword-rankings`（4.5.1.2 关键词排名）那一条**之后** ——
+    // 与本批另外三条车道的锚点（`listing-bulk-collects` / `order-intercept` /
+    // `fulfillment/consolidation`）两两相隔 ≥ 74 行，默认 3 行上下文窗口不会互相覆盖。
+    //
+    // 🔴 为什么用 `listing-changes` 这个独立前缀：
+    //   * 4.1.1.1 交付时把 `/channel/listings/{uuid}/...` 登记成「不放行」，
+    //     在同一棵路径树上开子资源要同时改别人已交付的白名单与拒绝清单；
+    //   * 而且「竞品变更监控」是**对外部目标的观测**（目标身份 = 平台 + ASIN，
+    //     与自有商品模型零引用关系），口径、限流与权限都与「listing 本身」不同。
+    //
+    // 🔴 前缀不与既有任何 `listing-*` token 撞车：既有 token 全是
+    //     `listing-collects` / `listing-bulk-collects` / `listing-keyword-rankings` /
+    //     `listing-hijackers` / `listing-claims` / `listing-compliance-precheck` /
+    //     `listing-performance` / `listing-lifecycles` / `listing-mappings` /
+    //     `listing-migrations` / `listing-publish` / `listing-publish-tasks` /
+    //     `listing-status-events` / `listing-content-writeback` / `listing-details` /
+    //     `listing-editor` / `listing-templates`。
+    //     既有正则**都是锚定的**（`/^token(...)?$`），所以只要**首 token 不同**即可；
+    //     `listing-changes` 与上述任何一条的首 token 都不同（`changes` ≠ `collects` /
+    //     `hijackers` / `claims` / `performance` / …），既不会被既有分支吃掉，
+    //     也不会吃掉既有分支。
+    //
+    //   listing-changes/capabilities              能力声明（02 抓取调度器 / 13 分析 / 1 工作台
+    //                                             未交付 ⇒ available=false + ownerModule）
+    //   listing-changes/filter-options            筛选面板选项（平台 / 站点 / 枚举取值域）
+    //   listing-changes/watches                   监控对象列表（GET 真分页 + 真筛选）/ 新建（POST）
+    //   listing-changes/watches/{uuid}            改抓取频率与机会阈值（PUT）/ 删除（DELETE）
+    //   listing-changes/crawls                    接收抓取任务结果（POST，批次级幂等）/ 批次列表（GET）
+    //   listing-changes/events                    变更事件流（GET 真分页 + 真筛选）
+    //   listing-changes/opportunities             市场机会列表（GET 真分页）
+    //   listing-changes/opportunities/{uuid}/acknowledge  标记机会已阅（PUT）
+    //   listing-changes/watches/{uuid}/history    观测历史（GET 真分页，历史对比的事实源）
+    //   listing-changes/watches/{uuid}/comparison 历史对比（GET，服务端 SQL 聚合 + 现算比率）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `listing-changes/undeclared-action`   —— 本模块**确定没有**的动作
+    //   * `listing-changes/{uuid}/crawls`        —— 抓取走集合入口，不按监控对象寻址
+    //   * `listing-changes/{uuid}/events`        —— 事件是集合查询，不按监控对象寻址
+    //   * `listing-changes/{uuid}/opportunities` —— 机会是集合查询，不按监控对象寻址
+    //   * `listing-changes/{uuid}/prices|stocks` —— 🔴 那是 05 定价 / 07 库存两条独立通道
+    //   * `listing-changes/actions/undercut`     —— 🔴 本模块**不提供**抢占 / 调价动作
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^listing\-changes(?:\/capabilities|\/filter\-options|\/crawls|\/events|\/opportunities(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/acknowledge)?|\/watches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:history|comparison))?)?)?$/,
+  },
+  {
     // 4.4.2.2 批量搬迁（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
