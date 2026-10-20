@@ -29356,6 +29356,394 @@
           }
         }
       }
+    },
+    "/catalog/batch-calculations/runs": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "post_catalog_batch_calculations_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-calculations/sites": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_sites",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-calculations/runs/{id}": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_runs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-calculations/runs/{id}/results": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_runs_id_results",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "marginBelow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "priceBelow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "flag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResultPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-calculations/runs/{id}/export": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_runs_id_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "marginBelow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "priceBelow",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "flag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-calculations/capabilities": {
+      "get": {
+        "tags": [
+          "batch-calculation-controller"
+        ],
+        "operationId": "get_catalog_batch_calculations_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchCalculationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -41326,9 +41714,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -57879,6 +58267,416 @@
         "properties": {
           "deleted": {
             "type": "boolean"
+          }
+        }
+      },
+      "BatchCalculationRequest": {
+        "required": [
+          "currency",
+          "platformCode",
+          "siteCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "siteCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "costCurrency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "fxRate": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "lowMarginThreshold": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BatchRunDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "scopeCategory": {
+            "type": "string"
+          },
+          "scopeBrand": {
+            "type": "string"
+          },
+          "priceSource": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "lowMarginThreshold": {
+            "type": "number"
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/BatchSummary"
+          }
+        }
+      },
+      "BatchSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "calculated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedNoPrice": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notReady": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "loss": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lowMargin": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "problem": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgGrossMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalUnitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalGrossProfit": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "BatchRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchRunDetail"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BatchResultPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchResultRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BatchResultRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CALCULATED",
+              "SKIPPED_NO_PRICE"
+            ]
+          },
+          "skipReason": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "knownCostTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalDeductions": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossProfit": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "breakEvenPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "decisionBasis": {
+            "type": "string"
+          },
+          "decisionReady": {
+            "type": "boolean"
+          },
+          "loss": {
+            "type": "boolean"
+          },
+          "lowMargin": {
+            "type": "boolean"
+          },
+          "blockingGaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BatchCalculationCapabilities": {
+        "type": "object",
+        "properties": {
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteOption"
+            }
+          },
+          "priceSourceNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "decisionGateNote": {
+            "type": "string"
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "flagNote": {
+            "type": "string"
+          },
+          "filterNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "skipNote": {
+            "type": "string"
+          },
+          "limitNote": {
+            "type": "string"
+          },
+          "precisionNote": {
+            "type": "string"
           }
         }
       }

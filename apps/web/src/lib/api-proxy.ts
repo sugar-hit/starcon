@@ -4197,6 +4197,29 @@ const services: readonly {
     pattern:
       /^profit-calculator(?:\/(?:capabilities|sites|calculate)|\/scenarios(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?$/,
   },
+  {
+    // 5.3.1.2 批量测算：对一批 SKU 批量跑利润测算（利润表 + 亏损品/低毛利品标记 + 筛选 + 导出）。
+    // 形状逐个列出：
+    //   capabilities —— 能力声明（售价来源 / 上游真实交付状态 / 跳过规则），字面量子路径；
+    //   sites —— 目标店铺（站点）列表，来自 2.1.1.1 平台目录，字面量子路径；
+    //   runs —— 批次集合读（GET 列表）/ 新建批次（POST 发起批量测算），字面量子路径；
+    //   runs/{uuid} —— 单个批次（GET 详情）；
+    //   runs/{uuid}/results —— 结果表（GET，真分页 + 真筛选）；
+    //   runs/{uuid}/export —— 结果表 CSV 导出（GET，与列表共用同一套筛选）。
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sites / runs）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ `capabilities` 与 `sites` 的首字母落在 [0-9a-f] 里，但它们是**字面量**分支，
+    //    而 uuid 只出现在 `runs/` 之下 ⇒ 两者不会互相吃掉。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ **刻意不放行裸路径** `batch-calculations`：本模块没有裸集合读，
+    //    放行它就是凭空多出一条 GET。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^batch-calculations(?:\/(?:capabilities|sites)|\/(?:runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:results|export))?)?))$/,
+  },
 ];
 
 function resolve(path: string) {

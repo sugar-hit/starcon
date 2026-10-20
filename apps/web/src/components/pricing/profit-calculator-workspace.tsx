@@ -40,6 +40,7 @@ import {
   validateRequest,
   waterfallRows,
 } from './profit-calculator-model';
+import { BatchCalculationSection } from './batch-calculation-section';
 import type {
   CalculateRequest,
   ProfitCalculation,
@@ -784,6 +785,10 @@ export function ProfitCalculatorWorkspace() {
           />
         )}
       </SectionCard>
+
+      {/* ============================================================ 5.3.1.2 批量测算分区 */}
+      {/* 兄弟模块的后续内容在这里加一块 —— 不重写本页骨架。 */}
+      <BatchCalculationSection />
     </div>
   );
 }
