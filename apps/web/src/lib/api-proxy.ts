@@ -4437,6 +4437,52 @@ const services: readonly {
     pattern:
       /^batch-calculations(?:\/(?:capabilities|sites)|\/(?:runs(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:results|export))?)?))$/,
   },
+  {
+    // 5.4.1.2 批量调价（catalog 服务，卷 05 定价与价目的 L3 锚点 5.4.1）。
+    //
+    // 蓝图：「**职责**：对选中的一批 listing 统一改价（固定金额/百分比/按模板），支持预览影响范围
+    // （涉及多少店铺、多少商品、预计利润变化）。**输入**：目标集合；调价参数；预览确认。
+    // **输出**：批量调价单 + 影响预览报告。**关系**：上游 = 5.3.1.2、4.1.1.1；下游 = 5.4.2.1。
+    // **必须先看预览再执行**，预览要包含"改完后预计亏损的商品数"这类反向指标。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.3.1.2 批量测算」元素之后、数组结尾的 `];` 之前（数组最末尾），
+    // 与同批另外三条车道的插入点互不重叠。既有条目一字未动。
+    //
+    // 🔴 为什么用 `batch-price-adjustments` 这个独立前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `batch-price-adjustments`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`batch-price-adjustments/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.4.1.1 调价单与本模块共用 L3 锚点 5.4.1，但**不共用端点**：
+    //     本车道只交付 5.4.1.2，不代未交付的兄弟模块开形状。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   batch-price-adjustments              集合读（GET 调价单台账）/ 执行批量调价（POST，带预览令牌）
+    //   batch-price-adjustments/capabilities 能力声明（listing 的定义 / 当前价来源 / 预览闸 / 反向指标 / 舍入）
+    //   batch-price-adjustments/sites        目标店铺（站点）列表，来自 2.1.1.1 平台目录
+    //   batch-price-adjustments/preview      影响预览（POST，**无副作用**：后端在注定回滚的事务里跑它）
+    //   batch-price-adjustments/{uuid}       单张调价单（GET 详情）
+    //   batch-price-adjustments/{uuid}/items 明细（GET，真分页 + 真筛选）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / sites / preview）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**带 `?`**：本模块**有**裸集合路径（GET 列表 / POST 执行），所以裸路径要放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `batch-price-adjustments/{uuid}/items/export` —— 本模块**不导出 CSV**（蓝图的输出是
+    //     「调价单 + 影响预览报告」，不是导出件）；放行它只会让界面以为有下载按钮。
+    //   * `batch-price-adjustments/{uuid}/sync` —— 5.4.2.1 平台价格同步**未交付**，
+    //     本模块不代它开形状（那会把「已回写平台」这个动作凭空放出来）。
+    //   * `batch-price-adjustments/rules` —— 5.3.2.2 价格规则**未交付**，本模块不代它开形状。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^batch-price-adjustments(?:\/(?:capabilities|sites|preview)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/items)?)?$/,
+  },
 ];
 
 function resolve(path: string) {
