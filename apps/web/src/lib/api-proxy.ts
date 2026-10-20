@@ -4132,6 +4132,62 @@ const services: readonly {
       /^cost\-allocations(?:\/(?:capabilities|sources)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revisions(?:\/[0-9]+)?|recalculate|diffs))?)?$/,
   },
   {
+    // 5.2.3.2 物流与头程费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
+    //
+    // 蓝图：「维护物流渠道的计费规则（按重量 / 体积 / 件数、燃油附加、旺季附加、偏远附加）
+    // 与头程费用结构，用于测算运费占成本比。」输入「渠道计费规则 / 附加费参数 /
+    // 头程运输方式费用」，输出「费用规则集 + 测算输入」，
+    // 上游 = 10 物流与头程（**卷级引用**），下游 = 5.3.1.1 测算。
+    //
+    // 本条目是**新增一条 services[] 元素**，既有条目一字未动（插入锚点固定在
+    // 5.2.1.3 成本分摊之后、5.2.3.1 平台费用之前，与另外几条车道的插入点互不重叠）。
+    //
+    // 🔴 为什么用 `logistics-freight` 这个独立顶级前缀：
+    //   * 既有 catalog 分支是**一条**覆盖全服务的长 alternation，里面没有 `logistics-freight`；
+    //     已用脚本逐条核对本文件里**全部 110 条**既有正则：`logistics-freight/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 5.2.3.1 平台费用与本模块共用页面路由 /pricing/fees，但**不共用端点**：
+    //     本车道只交付 5.2.3.2，不代兄弟模块开形状，也不挂在 `platform-fees/` 之下。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   logistics-freight/capabilities                     能力声明（逐维度写明取不到没有 / 归谁管）
+    //   logistics-freight/rules                            渠道计费规则集合读（GET）/ 新建（POST）
+    //   logistics-freight/rules/{uuid}                     规则详情（GET，含阶梯）
+    //   logistics-freight/rules/{uuid}/supersede           新增一个版本并取代旧版本（POST，不可变优先）
+    //   logistics-freight/rules/{uuid}/disable             停用一条规则版本（POST，必须写理由）
+    //   logistics-freight/surcharges                       附加费集合读（GET）/ 登记（POST）
+    //   logistics-freight/surcharges/{uuid}/disable        停用一条附加费（POST，必须写理由）
+    //   logistics-freight/head-freight/structures          头程费用结构集合读（GET）/ 新建（POST）
+    //   logistics-freight/head-freight/structures/{uuid}    头程费用结构明细（GET，含成本项）
+    //   logistics-freight/head-freight/structures/{uuid}/disable  停用一条头程结构（POST）
+    //   logistics-freight/head-freight/estimate           头程费测算（GET，逐项成本拆解）
+    //   logistics-freight/estimate                         渠道运费测算（GET，逐步拆解）
+    //   logistics-freight/actuals                          实际运费集合读（GET）/ 登记（POST）
+    //   logistics-freight/actuals/{uuid}/void              作废一条实际运费（POST，必须写理由）
+    //   logistics-freight/variance                         运费差异对照（GET，实际 vs 按规则测算）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / estimate / variance / actuals / rules /
+    //    surcharges）排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `logistics-freight` 就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `logistics-freight` —— 本模块没有裸路径资源。
+    //   * `logistics-freight/rules/{uuid}/delete` —— 规则不可删（要停用请走 /disable）。
+    //   * `logistics-freight/rules/{uuid}/tiers` —— 阶梯随规则整体写入，没有独立的替换端点
+    //     （不可变优先：改档位 = 新增一个版本）。
+    //   * `logistics-freight/actuals/{uuid}` —— 实际运费没有「按 id 取单条」这个端点，也不可就地改写
+    //     （只追加 + 作废留理由）。
+    //   * `logistics-freight/surcharges/{uuid}` —— 同上。
+    //   * `logistics-freight/head-freight/structures/{uuid}/update` —— 同上。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^logistics-freight(?:\/capabilities|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:supersede|disable))?)?|\/surcharges(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/disable)?|\/head-freight(?:\/estimate|\/structures(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/disable)?)?))$/,
+  },
+  {
     // 5.2.3.1 平台费用（catalog 服务，卷 05 定价与价目的 L3 锚点 5.2.3）。
     //
     // 蓝图：「维护平台侧费用的计算规则：佣金比例或阶梯、订阅费分摊、Referral Fee、交易费、

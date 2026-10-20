@@ -204,12 +204,17 @@ describe('5.2.3.1 平台费用前端模型', () => {
     expect(varianceText(unknown)).toContain('算不出来');
   });
 
-  it('页面分区里 5.2.3.2 显式标成未交付', () => {
+  it('页面分区里两个兄弟模块都标成已交付，且各写各的职责', () => {
+    // 断言「该分区 delivered 为 true」+「该分区写出了自己的职责」，
+    // **不**断言任何关于交付状态的字面量文案：兄弟模块一旦交付那个字面量就会消失，
+    // 写死会让别的车道一交付就红。
     const logistics = PLATFORM_FEE_SECTIONS.find((s) => s.moduleId === '5.2.3.2');
-    expect(logistics?.delivered).toBe(false);
-    expect(logistics?.summary).toContain('未交付');
+    expect(logistics?.delivered).toBe(true);
+    expect(logistics?.summary).toContain('运费');
+
     const platform = PLATFORM_FEE_SECTIONS.find((s) => s.moduleId === '5.2.3.1');
     expect(platform?.delivered).toBe(true);
+    expect(platform?.summary).toContain('平台');
   });
 
   it('默认筛选是空条件 + 第一页', () => {
