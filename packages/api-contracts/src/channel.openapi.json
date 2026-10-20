@@ -25057,7 +25057,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -27495,7 +27495,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
