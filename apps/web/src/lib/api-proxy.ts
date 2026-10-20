@@ -3700,6 +3700,67 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的拆单列表接口」可用。
   },
   {
+    // 6.1.2.3 供应商资质：资质档案（营业执照 / 质检报告 / 认证证书 / 授权书）+ 有效期
+    // + 审核状态机 + 即将过期提醒 + **阻断判定**（04 刊登与发货链路消费的那一份）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 catalog / trade 长正则里并 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「9.3.1.1 拆单」元素之后、「9.6.1.3 代发履约跟踪」元素之前，
+    // 与另外三条车道的插入点互不重叠。既有条目**一字未动**。
+    //
+    // 🔴 为什么用 `supplier-qualifications` 这个独立前缀：
+    //   * 既有分支是覆盖全服务的**一条超长 alternation**，里面没有 `supplier-qualifications`；
+    //     已用脚本逐条核对本文件里**全部既有正则**：`supplier-qualifications/**` **零命中**
+    //     （既有分支不会先把它吃掉）。
+    //   * 6.1.2.2 同款货源推荐与本模块共用 L3 锚点，但**不共用端点**：
+    //     本车道只交付 6.1.2.3，不代未交付的兄弟模块开形状。
+    //   * catalog 侧那条长正则里已有 `supply/vendors/.../qualifications` 形状
+    //     （那是 6.1.1.x 供应商档案模块的端点，**一个字都不动**）：
+    //     本模块的端点走 **trade 服务 + `supplier-qualifications` 根路径**，两者不冲突。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   supplier-qualifications/capabilities                     能力声明（词表 / 上下游 gap / 阻断口径）
+    //   supplier-qualifications/options                          词表选项（类型 / 审核状态 / 到期状态 / 排序）
+    //   supplier-qualifications/overview                         概览（即将过期与已过期分成两个数）
+    //   supplier-qualifications/policy        GET / PUT           提醒窗口（天）+ 必备资质类型
+    //   supplier-qualifications/qualifications GET / POST        资质列表（真分页 + 筛选）/ 登记资质
+    //   supplier-qualifications/qualifications/{uuid} GET / PUT  资质详情（+ 文件 + 审核留痕）/ 修改
+    //   supplier-qualifications/qualifications/{uuid}/review     审核流转（状态机；POST）
+    //   supplier-qualifications/qualifications/{uuid}/documents  上传资质文件（POST）
+    //   supplier-qualifications/reminders     GET                过期提醒清单（真分页；即将过期 / 已过期分列）
+    //   supplier-qualifications/reminders/scan POST              生成 / 刷新提醒（幂等）
+    //   supplier-qualifications/reminders/{uuid} PUT             处理提醒（确认 / 关闭）
+    //   supplier-qualifications/suppliers    GET                供应商候选（catalog 只读）
+    //   supplier-qualifications/brands      GET                品牌候选（03 品牌只读）
+    //   supplier-qualifications/suppliers/{uuid}/blocking-decision       供应商维度阻断判定
+    //   supplier-qualifications/suppliers/{uuid}/brands/{uuid}/blocking-decision 品牌维度阻断判定
+    //   supplier-qualifications/skus/{uuid}/blocking-decision             商品维度阻断判定
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / overview / policy /
+    //    qualifications / reminders / suppliers / brands）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    //    `reminders/scan` 排在 `reminders/{uuid}` 之前同理（虽然 scan 也不是 UUID 形状）。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `scan`、`review` 这种非 UUID 形状也当成 id 放行。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `supplier-qualifications`
+    //    就是凭空多出一条 GET。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `supplier-qualifications` —— 本模块没有裸路径资源。
+    //   * `supplier-qualifications/qualifications/{uuid}/documents/{docId}` / `DELETE` ——
+    //     资质文件**只追加**（续期是再上传一份，不是覆盖），没有删除形状。
+    //   * `supplier-qualifications/qualifications/{uuid}/delete` —— 资质档案不提供删除：
+    //     审核留痕与「当时交的是什么」是凭据，删行等于抹掉事实。
+    //   * `supplier-qualifications/reminders/{uuid}/delete` —— 提醒走状态流转，不走删除。
+    //   * 任何 `supplier-qualifications/**` 之外的 6.1.2.x 形状（6.1.2.2 同款货源推荐
+    //     **未交付**，本模块不代它开形状）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^supplier\-qualifications(?:\/(?:capabilities|options|overview|policy|qualifications|reminders|suppliers|brands)|\/qualifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:review|documents))?|\/reminders\/scan|\/reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/suppliers\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/brands\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?\/blocking\-decision|\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/blocking\-decision)$/,
+  },
+  {
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
