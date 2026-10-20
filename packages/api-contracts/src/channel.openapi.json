@@ -21313,6 +21313,618 @@
           }
         }
       }
+    },
+    "/channel/logistics-cost-analysis/parameters": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsCostParameterPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "post_channel_logistics_cost_analysis_parameters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogisticsCostParameterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsCostParameterRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/allocations": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "post_channel_logistics_cost_analysis_allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostAllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/allocations/{id}/lock": {
+      "post": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "post_channel_logistics_cost_analysis_allocations_id_lock",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostAllocationLockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/allocation-rules": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_allocation_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "post_channel_logistics_cost_analysis_allocation_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostAllocationRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/overview": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/over-cost-orders": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_over_cost_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "multiplier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostOverCostOrderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/by-channel": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_by_channel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostChannelComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/allocations/{id}": {
+      "get": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "get_channel_logistics_cost_analysis_allocations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostAllocationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-cost-analysis/parameters/{id}": {
+      "delete": {
+        "tags": [
+          "logistics-cost-analysis-controller"
+        ],
+        "operationId": "delete_channel_logistics_cost_analysis_parameters_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -52240,6 +52852,1042 @@
           },
           "boundaryNote": {
             "type": "string"
+          }
+        }
+      },
+      "LogisticsCostParameterRequest": {
+        "required": [
+          "amountPerWaybill",
+          "component",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "component": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "amountPerWaybill": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsCostParameterRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "component": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amountPerWaybill": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CostAllocationRequest": {
+        "required": [
+          "costAsOf",
+          "ruleId",
+          "sourceShipmentId"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costAsOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CostAllocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocationBasis": {
+            "type": "string"
+          },
+          "allocationBasisLabel": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "sourceTransportMode": {
+            "type": "string"
+          },
+          "sourceCarrierName": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "sourceTotalAmount": {
+            "type": "number"
+          },
+          "allocatedTotalAmount": {
+            "type": "number"
+          },
+          "basisTotal": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "costAsOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lockedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supersededByRuleVersion": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CostAllocationLockRequest": {
+        "type": "object",
+        "properties": {
+          "costAsOf": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CostAllocationRuleRequest": {
+        "required": [
+          "allocationBasis",
+          "effectiveFrom",
+          "ruleCode",
+          "ruleName"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "allocationBasis": {
+            "type": "string",
+            "enum": [
+              "BY_QUANTITY",
+              "BY_WEIGHT",
+              "BY_DECLARED_VALUE",
+              "EQUAL"
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "activate": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CostAllocationRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocationBasis": {
+            "type": "string"
+          },
+          "allocationBasisLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LogisticsCostParameterPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsCostParameterRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostComponentAmount": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "byCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyTotal"
+            }
+          },
+          "estimatedByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyTotal"
+            }
+          },
+          "currencyCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CostCoverage": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostCurrencyRow": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "lastMileFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "firstMileAllocation": {
+            "type": "number",
+            "nullable": true
+          },
+          "dutyAndTax": {
+            "type": "number",
+            "nullable": true
+          },
+          "packaging": {
+            "type": "number",
+            "nullable": true
+          },
+          "subtotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "lastMileShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "firstMileShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "dutyAndTaxShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "includedComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingComponents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostOverview": {
+        "type": "object",
+        "properties": {
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostComponentAmount"
+            }
+          },
+          "currencyRows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyRow"
+            }
+          },
+          "unitMetrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostUnitMetric"
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CostCoverage"
+          },
+          "scannedWaybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostUnitMetric": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "totalFreightAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "registeredWaybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notRegisteredWaybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "perOrderFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "perKgFreight": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "CostCurrencyThreshold": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "averageUnitFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdUnitFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "evaluatedWaybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overCostWaybills": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostOverCostOrderPage": {
+        "type": "object",
+        "properties": {
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "thresholdMultiplier": {
+            "type": "number"
+          },
+          "thresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyThreshold"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostOverCostOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostOverCostOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "outboundOrderNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightAmount": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "averageUnitFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "thresholdUnitFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "excessAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "excessReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CostCapabilities": {
+        "type": "object",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostComponentCapability"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCapabilityDimension"
+            }
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CostComponentCapability": {
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "CostChannelComparison": {
+        "type": "object",
+        "properties": {
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostChannelRow"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CostChannelSummary"
+          },
+          "scannedWaybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostChannelCurrencyMetric": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "waybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "perOrderFreight": {
+            "type": "number",
+            "nullable": true
+          },
+          "perKgFreight": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "CostChannelRow": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierChannel": {
+            "type": "string"
+          },
+          "carrierChannelLabel": {
+            "type": "string"
+          },
+          "waybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightRegistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightNotRegistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostChannelCurrencyMetric"
+            }
+          }
+        }
+      },
+      "CostChannelSummary": {
+        "type": "object",
+        "properties": {
+          "carrierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "waybills": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightRegistered": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freightNotRegistered": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CostAllocationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostAllocationRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "computedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supersededCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocatedByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostCurrencyTotal"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CostAllocationDetail": {
+        "type": "object",
+        "properties": {
+          "allocation": {
+            "$ref": "#/components/schemas/CostAllocationRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostAllocationLineRow"
+            }
+          }
+        }
+      },
+      "CostAllocationLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "basisValue": {
+            "type": "number"
+          },
+          "basisUnit": {
+            "type": "string"
+          },
+          "ratio": {
+            "type": "number",
+            "nullable": true
+          },
+          "allocatedAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "CostAllocationRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostAllocationRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }

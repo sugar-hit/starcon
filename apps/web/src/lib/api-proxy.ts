@@ -1125,6 +1125,46 @@ const services: readonly {
       /^label\-templates(?:\/(?:capabilities|overview|binding|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|preview|renders))?))?$/,
   },
   {
+    // 10.6.1.1 成本分析（channel 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 10.2.2.2 `label-templates` 那条**之后**、2.5.2.1
+    // `writeback-batches` 那条**之前**：与本批另外三条车道的插入点被既有条目隔开，
+    // git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-cost-analysis/capabilities        能力声明（五个分量的来源 / 可得性）
+    //   logistics-cost-analysis/overview            成本报表（逐币种合计 + 覆盖说明）
+    //   logistics-cost-analysis/by-channel          各渠道成本对比
+    //   logistics-cost-analysis/over-cost-orders    超成本订单清单（真分页）
+    //   logistics-cost-analysis/allocation-rules    分摊规则版本列表 / POST 新建版本
+    //   logistics-cost-analysis/allocations         分摊单列表 / POST 发起分摊
+    //   logistics-cost-analysis/allocations/{uuid}  分摊单详情（头 + 逐行明细）
+    //   logistics-cost-analysis/allocations/{uuid}/lock  结账（锁定后不可再改）
+    //   logistics-cost-analysis/parameters          成本参数列表 / POST 维护 / DELETE {uuid}
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / by-channel /
+    //    over-cost-orders / allocation-rules / allocations / parameters）排在 uuid 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `p`（parameters 的首字母）当 id 吃掉，`.../parameters/p` 会被凭空放行。
+    // ⚠️ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`（那实际是 `(^a)|b|(c$)`）。
+    // ⚠️ **裸路径不放行**：后端没有 `GET /channel/logistics-cost-analysis` 这个映射，
+    //    放行它只会把「这里没有这个接口」从代理层的 404 推迟到后端的 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-cost-analysis/allocations/{uuid}/lines` —— 逐行明细随详情一起返回
+    //   * `logistics-cost-analysis/allocations/{uuid}/supersede` —— 取代是重算分摊的自然结果，
+    //     不另开一个动作端点（那会让「谁取代了谁」有两个入口）
+    //   * `logistics-cost-analysis/report` —— 报表就是 overview，不开别名
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-cost\-analysis\/(?:capabilities|overview|by\-channel|over\-cost\-orders|allocation\-rules|parameters(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|allocations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/lock)?)?)$/,
+  },
+  {
     // 2.5.2.1 常用回写操作（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
     // 既有的 `label-templates`（10.2.2.2）、`ad-type-diffs`（14.1.2.2）、`rate-comparison`
     // （10.1.2.2）、`logistics-channels`（10.1.1.2）等**一字未动、也不重排** —— 本文件是
