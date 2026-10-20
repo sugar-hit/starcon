@@ -912,6 +912,47 @@ const services: readonly {
       /^logistics\-transit\-limits(?:\/(?:capabilities|overview|precheck|estimate|transit-rules|size-limits|markings|(?:transit-rules|size-limits|markings)\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 10.7.1.1 退货接收与处置决策（**本条目是新增一条 services[] 元素**，不是往既有
+    // channel 分支的 alternation 里并）。插入锚点固定在本文件里
+    // `logistics-transit-limits/`（10.1.1.3）那条**之后**、`freight/`（10.1.2.1）
+    // 那条**之前** —— 两条既有条目把本车道的插入点夹在中间，与其他车道两两被隔开，
+    // git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   return-dispositions/capabilities            能力声明（未交付段 available=false + ownerModule）
+    //   return-dispositions/overview                全量概览（不受筛选与分页影响）
+    //   return-dispositions/registrations           接收登记集合读（GET，真分页 + 筛选）/ 登记（POST）
+    //   return-dispositions/registrations/{uuid}    接收登记详情（GET，含决策与留痕）
+    //   return-dispositions/restrictions            再销售限制集合读（GET）/ 登记（POST）
+    //   return-dispositions/restrictions/{uuid}/revoke 撤销再销售限制（POST）
+    //   return-dispositions/eligibility             🔴 可行性判定（GET，只读无副作用）
+    //   return-dispositions/decisions               处置决策集合读（GET）/ 记录决策（POST）
+    //   return-dispositions/decisions/{uuid}        处置决策详情（GET）
+    //   return-dispositions/orders                  处置单集合读（GET）/ 下发处置单（POST）
+    //   return-dispositions/orders/{uuid}           处置单详情（GET，含成本明细与库存指令）
+    //   return-dispositions/orders/{uuid}/costs     追加处置成本（POST）
+    //   return-dispositions/orders/{uuid}/cancel    撤销处置单（POST）
+    //   return-dispositions/events                  留痕集合读（GET，真分页 + 筛选）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / overview / registrations /
+    // restrictions / eligibility / decisions / orders / events）排在 uuid 分支之前。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是
+    // `[0-9a-f-]+`：后者把单字符 `e` 当合法 id，症状是有人 GET .../orders/e 会打到后端。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `return-dispositions` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `return-dispositions/decisions/{uuid}/consume` —— 决策只能被下发处置单消费，
+    //     没有独立消费端点
+    //   * `return-dispositions/orders/{uuid}/instructions` —— 库存状态变更指令是**只出
+    //     不消费**的事实，消费方 7.4.1.1 调整单管理未交付，放行它只会让人以为本页
+    //     能确认指令已被 7 库存执行
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^return\-dispositions(?:\/(?:capabilities|overview|registrations|restrictions|eligibility|decisions|orders|events)|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/restrictions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke|\/decisions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/costs|\/cancel)?)$/,
+  },
+  {
     // 10.1.2.1 运费计算器（**本条目是新增一条 services[] 元素**，与 10.1.1.2 渠道配置
     // 那条并列，**不改也不重排**它）。同批多车道共享这一个文件，而每个服务在
     // services[] 里是**一段超长单行正则**：两条车道都往同一服务的 alternation 里并分支，

@@ -20441,6 +20441,878 @@
           }
         }
       }
+    },
+    "/channel/return-dispositions/restrictions": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_restrictions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "subjectType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_restrictions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRestrictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/restrictions/{id}/revoke": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_restrictions_id_revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRestrictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/registrations": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_registrations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dispositionState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_registrations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterReceivingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dispositionMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueDispositionOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}/costs": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders_id_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionCostRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDispositionOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/decisions": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_decisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dispositionMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_decisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideDispositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/registrations/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_registrations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/overview": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/events": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "registrationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/eligibility": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_eligibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "registrationId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionEligibility"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/decisions/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_decisions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/capabilities": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -23926,7 +24798,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -26328,7 +27200,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -28766,7 +29638,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -29109,9 +29981,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -50252,6 +51124,1122 @@
           "note": {
             "type": "string",
             "description": "🔴 说明：删到一条不剩时整套不可售"
+          }
+        }
+      },
+      "SaveRestrictionRequest": {
+        "type": "object",
+        "properties": {
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "restrictionBasis": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnResaleRestrictionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "restrictionBasis": {
+            "type": "string"
+          },
+          "restrictionBasisLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RevokeRestrictionRequest": {
+        "type": "object",
+        "properties": {
+          "revokeReason": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterReceivingRequest": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseType": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "brandCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnReceivingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "warehouseType": {
+            "type": "string"
+          },
+          "warehouseTypeLabel": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseCountry": {
+            "type": "string"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registeredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dispositionState": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionMethodLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "activeRestrictionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "IssueDispositionOrderRequest": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "costs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReturnCostDraft"
+            }
+          }
+        }
+      },
+      "ReturnCostDraft": {
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "vendorRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ReturnDispositionOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "dispositionMethodLabel": {
+            "type": "string"
+          },
+          "disposedQty": {
+            "type": "number"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "totalCostAmount": {
+            "type": "number"
+          },
+          "costItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "issuedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RecordCostRequest": {
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "vendorRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnDispositionCostRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "costTypeLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "vendorRef": {
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CancelDispositionOrderRequest": {
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DecideDispositionRequest": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "decidedQty": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnDispositionDecisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionNo": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "dispositionMethodLabel": {
+            "type": "string"
+          },
+          "decidedQty": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "qualityVerdict": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "qualitySalvageEstimate": {
+            "type": "number",
+            "nullable": true
+          },
+          "qualitySalvageCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "resaleRestricted": {
+            "type": "boolean"
+          },
+          "resaleRestrictionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "consumedByOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnResaleRestrictionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnReceivingPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnReceivingRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dispositionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnReceivingDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnReceivingRow"
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "CurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnDispositionOverview": {
+        "type": "object",
+        "properties": {
+          "registrationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingDecisionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issuedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resaleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repatriationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discardCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "restrictedRegistrationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "costTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotal"
+            }
+          },
+          "salvageTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotal"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionOrderDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+          },
+          "costs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionCostRow"
+            }
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/ReturnInventoryInstructionRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "ReturnInventoryInstructionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "instructionType": {
+            "type": "string"
+          },
+          "instructionTypeLabel": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetInventoryStateLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "instructionStatus": {
+            "type": "string"
+          },
+          "consumerModule": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedBy": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "nullable": true
+      },
+      "ReturnDispositionEventPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnDispositionEligibility": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "qualityVerdict": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "qualityNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "resaleRestricted": {
+            "type": "boolean"
+          },
+          "resaleRestrictionNote": {
+            "type": "string"
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnMethodEligibility"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnMethodEligibility": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "methodLabel": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "blockingReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionDecisionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionDecisionDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "CapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapabilityDimension"
+            }
+          },
+          "dispositionMethods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warehouseTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "costTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionSubjectTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionBases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
           }
         }
       }

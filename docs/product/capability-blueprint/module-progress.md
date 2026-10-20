@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **231** |
 | 完成率 | 50.3% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 44 | 0 | 8 | 52 |
 | **D6** | 5 | 0 | 73 | 78 |
 | **D7** | 11 | 0 | 144 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 1 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -355,7 +338,7 @@
 | 10.5.2.1 | 贸易单证 | — | D7 | 已交付 | 迁移 warehouse `V91__warehouse_trade_documents.sql`（trade_document_rule 目的地国家单证要求（目的国 × 单证类型 × 必备程度 MANDATORY/CONDITIONAL/OPTIONAL × 有效期，**要求是数据不是代码常量**）+ trade_document_template 单证模板（**版本链** supersedes_template_id，空模板体被拒——空模板生成出来的单证等于没备证）+ trade_certification_status 认证状态登记（**16 合规尚未交付的替代来源**，每行带 certification_source TENANT_MAINTAINED/MODULE_16 + source_reference 如实标注）+ trade_origin_preference_rule FTA 优惠规则（RCEP/CO/FTA + PSR + **substantive_change_criterion 人读条件口径** + requires_business_confirmation）+ trade_document_set 单证包头 + trade_document 单证本体（内容快照 + 版本链 supersedes_document_id + FTA 字段与确认痕迹）+ trade_document_check 完整性校验结论（**append-only**）+ trade_document_reminder 缺失提醒（可处理工作项，处理必须写说明）+ trade_document_event 事件时间线，九张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **「实质性改变」系统不下结论**（蓝图加粗句是硬边界）：本模块**不存在任何自动判定逻辑**，「CONFIRMED」的语义明确是「有人留痕确认过」而非「系统判定法律上成立」；落法是四件事且每件都落库 —— ① 规则表存**条件描述**（人读口径，不做成可执行表达式，否则等于让运营在无评审的情况下定义报关规则）+ requires_business_confirmation 默认 true；② 只校验**流程**事实（有没有 confirmed_at/confirmed_by、确认依据是否非空），不校验法律事实；③ 留档（单证上落 substantive_change_status/note/business_confirmed_at/by/preference_rule_version 并进事件时间线）；④ **把待确认项显式标出来**：DB 触发器 guard_trade_3_preference 钉死「主张优惠但没业务确认 → 不许进 APPROVED/SUBMITTED/ACKNOWLEDGED」，同时写一条 reminder_type='UNCONFIRMED_SUBSTANTIVE_CHANGE' + severity='BLOCKER' · **「待业务确认」刻意不是「通过」**：CheckResult 枚举单列 PENDING_BUSINESS_CONFIRMATION（没有 NOT_CHECKED 混入「查过但没过」），DB CHECK 钉死 result<>'PASS' OR (missing_count=0 AND pending_business_count=0)，前端 checkPassed() 只认 PASS、substantiveChangeBlocking() 只认 PENDING_BUSINESS_CONFIRMATION —— 这样界面不会许诺「优惠已通过」这种还没人拍板的结论 · **有条件必备（CONDITIONAL）的条件是人口径，系统不执行**：缺失时只报 WARNING 级提醒请人判断（items 里标 CONDITIONAL_REVIEW_REQUIRED），**不自动判成必备或可省** · **「没配规则」= 校验不通过**，不是「没有要求就算通过」：没有定义要求就无法断言齐不齐，故此场景 required 与 missing 同时 +1（同时满足 satisfied+missing<=required 的 DB CHECK）· **来源判据用状态机不用时间戳**：`submitted_at` 一旦打上就永不消失（被退回的单也留着），用它判「是否已报关」会把退回草稿的单错判成已报关，所以 createSet 拒绝 DRAFT/PENDING_REVIEW/REJECTED/CANCELLED 的报关单 · **单证内容快照不被报关明细改写**：单证生成时把行明细抄进 content jsonb 并锁版本链，上游报关明细后续变更不会回改已出的单证 · **金额 numeric(19,4) + 数量 numeric(19,6)**，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致；建包金额从报关单快照按 HALF_UP 到分，测试同时断言 Java 侧 2000.01 与读回 2000.0100）· 时间字段一律 timestamptz + `?::timestamptz` 绑 OffsetDateTime（**禁 Timestamp.valueOf(LocalDateTime…)**，会静默偏 −28800s），测试断言往返零漂移 · DEFERRABLE 约束触发器里**不使用 NEW**、回表读当前行（照抄 V85 guard_customs_rate_snapshot 写法；另 UPDATE SET col=(select … 引用本表) 因目标列在子查询不可见会报 column does not exist，故 refreshTotals 改成先 SELECT 算好再 UPDATE）· 提交两道闸：guard_trade_2_submit_gate 要求「最近一次校验 PASS 且无未处理 BLOCKER 提醒」，优惠确认是第一道；校验重跑时把上一轮不再报的提醒**显式自动结清**（带说明与处理人），否则历史阻断会永久挡住已补齐的单证包 · 上游 10.5.1.1 报关单（V85）与 10.5.1.3 关税（V90）**只读** + 建在复合唯一键上的外键，本迁移**不 ALTER 任何既有表**，跨车道回归面 = 0 · 端点挂在 /warehouse/trade-documents（与 customs-declarations / duty-taxes / first-mile-shipments 同级，**不进 inventory/**）：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.6.1.1 | 成本分析 | — | D5 | 未开发 | — |
 | 10.6.2.1 | 时效分析 | — | D5 | 未开发 | — |
-| 10.7.1.1 | 退货接收与处置决策 | — | D5 | 未开发 | — |
+| 10.7.1.1 | 退货接收与处置决策 | — | D5 | 已交付 | channel V214 `V214__return_receiving_disposition.sql` 七张表（return_receiving_registration 接收登记 · return_resale_restriction 再销售限制 · return_disposition_decision 处置决策 · return_disposition_order 处置单 · return_disposition_cost 成本明细 · return_inventory_change_instruction 库存状态变更指令 · return_disposition_event 留痕；全部 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + RESTRICTIVE data_scope + GRANT channel_app）。**🔴 蓝图加粗句「默认按『可再售』处理会高估回收价值，转卖/弃置决策必须显式」钉成五道结构闸**：①列上**不写 DEFAULT**（`disposition_method varchar(24) NOT NULL CHECK(... IN ('RESALE','RETURN_TO_COUNTRY','DISCARD'))`），少给一列 ⇒ DB 直接 not-null violation（23502），不会悄悄落成「转销售」；②**决策与处置单两段分离**——去向先落在决策上（谁/何时/凭什么），处置单只能引用一条决策，触发器 guard_return_disposition_order_decision 钉死「去向逐字相同 + 数量相同 + 决策只能被消费一次」，于是「这张单为什么是转销售」永远有一条可审的决策可追；③**决策终态冻结**（guard_return_disposition_decision_final：被消费或被取代后不许改去向/数量/依据/判定时刻）；④**转销售另有两道服务端否决**，判定结论冻结在决策行上（quality_verdict / quality_inspection_id / resale_restricted / resale_restriction_note）：上游 11.2.3.1 质检结论必须 RESALABLE（**上游还没给质检结论 ⇒ 同样拒**，没有证据不等于能再卖），且本租户不得命中任何品牌方/平台政策的再销售限制；DB 侧再钉一道 CHECK（判了转销售就必须带 RESALABLE 结论与 inspection id，且 resale_restricted=false）；⑤**拿不准落到人工决策**：没有决策的接收登记是 PENDING_DECISION（页面文案「待人工决策」），不是「转销售」。**上游真值全在 trade**（11.2.2.1 实收 V172 / 11.2.3.1 质检 V179），本模块**零跨服务 SQL、零跨库 FK、零共享视图**：只经 ReturnReceiptQueryPort 读 trade 的授权 HTTP API（转发**调用方自己的** bearer，**绝不自己传租户号、绝不发明 X-Tenant-Id 头**；连接超时 3s / 读超时 10s 且有上限；上游不可达 ⇒ 503 写「读不到」，**绝不返回空集合冒充「上游没有退货」**；上游正常返回但没有该行 ⇒ 判「尚未判定」⇒ 禁止转销售 —— 「读不到」与「没有」是两件事）。**下游缺口按仓库先例显式声明、不读写不存在的服务**：12 财务（**finance 服务不存在**）⇒ 处置成本与残值以本服务自有事实落地（成本合计**不落表**、查询时 SUM 现算；成本明细币种必须与处置单成本币种**逐字相同**，残值币种可不同；**不做任何汇率换算**，跨币种绝不相加）；7 库存 7.4.1.1 调整单管理**未交付** ⇒ 库存状态变更指令**只出事实不消费**（instruction_status 恒 PENDING、consumer_module 恒 7.4.1.1，且 REVOKE UPDATE/DELETE ON return_inventory_change_instruction —— 「在本模块里把它标成已消费」既没有代码路径也没有 SQL 权限）；10.7.1.2 退运回国 / 10.7.1.3 弃置销毁未交付 ⇒ 本模块只出「这批货决定退运/销毁」这个**决策**，能力声明里 available=false + ownerModule 写明。**端点 14 个**（/channel/return-dispositions）：GET /capabilities、GET /overview、GET+POST /registrations、GET /registrations/{id}、GET+POST /restrictions、POST /restrictions/{id}/revoke、**GET /eligibility（只读无副作用，三去向各自 allowed + blockingReasons）**、GET+POST /decisions、GET /decisions/{id}、GET+POST /orders、GET /orders/{id}、POST /orders/{id}/costs、POST /orders/{id}/cancel、GET /events；权限码**复用** identity 已有的 channel.operation.*（不改 identity 服务，跨车道回归面 = 0）。**页面 /logistics/returns**（apps/web/src/app/logistics/returns/：page.tsx + returns-model.ts + returns-model.test.ts + returns-workspace.tsx）：真实工作区而非占位页 —— 接收登记（本地仓/海外仓/平台仓）、可行性判定、处置决策、处置单与成本明细、再销售限制、留痕，加载态/空态/错误态三态齐全；**处置方式下拉框第一项是空值占位、页面从不预选也不高亮「可再售」**，「能不能转销售」由服务端 eligibility 给、页面只把 blockingReasons 原样显示（不在浏览器里自己比对规则）。**测试**：`ReturnDispositionIntegrationTest` 26 例 + `ReturnDispositionTenancyIntegrationTest` 3 例 = **29 例全绿**（Testcontainers 真实 PG16）：含两条硬反例（**直接 INSERT 不给 disposition_method ⇒ 23502 not-null**；**判成转销售但没有 RESALABLE 质检结论 ⇒ 23514 CHECK**）、质检非 RESALABLE / 根本没有质检结论 / 命中 SKU 或 BRAND 限制三类转销售否决、绕过服务层直接写 SQL 下发处置单也被触发器拒、成本混币种被拒、撤销后不能再记成本而**已产出的指令不撤回**、timestamptz 往返**断言写回值**、上游 5xx ⇒ 503（不是空集合）、以及**租户隔离三断言**（两租户互不可见 / 伪造 X-Tenant-Id 头无效 / 连接池压到 1 的 A→B→A 三轮不串租户，七张表逐张断言 FORCE RLS）。**前端** returns-model.test.ts 15 例（处置方式初值必须是空串而非 RESALE、未选即拒、显式选才成请求体、依据为空/数量非法被拒、服务端结论才决定能否选、待人工决策 ≠ 转销售、金额不做汇率换算）+ return-disposition-allowlist.test.ts 5 例（真跑 proxy 断言 14 条真实 path 全放行 + 兄弟车道 10.1.1.3 / 10.1.2.1 的路径未被挤掉 + 不该存在的形状仍 404）。**api-proxy 白名单**新增**一条独立 services[] 元素**（prefix: 'channel/'，锚点固定在 10.1.1.3 的 logistics-transit-limits 那条**之后**、10.1.2.1 的 freight 那条**之前**），既有条目一字未动、不重排、不格式化整文件。**契约**由 backend/target/openapi 的真实 SpringDoc 快照经 tools/codegen/catalog-contracts.py 重新生成（channel 纯增量：+14 path / +29 schema / 0 改动 / 0 删除），**未手改**。**接手修正**：上一 worker 遗留代码里修了两个真 bug —— cancelOrder 的 UPDATE 有 5 个占位符却只绑了 4 个参数（撤销处置单必炸）、registrations 的 count 查询漏了 lateral join（带 dispositionState 筛选时 SQL 语法错、计数与列表口径也会漂移）。 |
 | 10.7.1.2 | 退运回国 | — | D5 | 未开发 | — |
 | 10.7.1.3 | 弃置与销毁 | — | D5 | 未开发 | — |
 | 11.1.1.1 | 售后单列表 | — | D4 | 已交付 | 迁移 V156__trade_aftersales_case_list.sql（**零 ALTER 既有表、零外键**，跨车道 DDL 回归面 = 0）：aftersales_case（五种类型 RETURN_REFUND/REFUND_ONLY/EXCHANGE/REISSUE/REPAIR 七态；金额 numeric(19,4)、数量 numeric(19,6)、reply_due_at/resolve_due_at 两个真列 + **effective_due_at 由 BEFORE 触发器维护**并建索引；CHECK 钉死「终态 ⇔ resolved_at」与「两个时限至少给一个」）/ aftersales_owner_assignment（**租户可维护的责任人登记**：强制 owner_source 枚举 TENANT_MAINTAINED / MODULE_15_SERVICE_STAFF 与 captured_at **采集时刻**，append-only，不伪造 L4 模块号）/ aftersales_case_note（批量备注，强制带 batch_id 可追回哪一次批量）/ aftersales_authorization（**授权类型与售后类型一一对应**由触发器 guard_aftersales_authorization_kind 钉死；授权额 ≤ 申请额；换货/补发/维修**不许带金额**）/ aftersales_service_ticket（转工单，UNIQUE(tenant_id,case_id) 一单只转一次，owner_module='11.4.2.1' 显式标注归属）。五表 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + GRANT；四张留痕表 REVOKE UPDATE/DELETE（append-only）；aftersales_case 的 UPDATE 做成**列级白名单**（只授 status/resolved_at/updated_at）。**蓝图加粗句「平台时效倒计时必须显眼」四层落点**：(1) reply/resolve 两个时限是**真列**、effective_due_at 是触发器维护的**可索引真列**；(2) 时效状态由 **IMMUTABLE 函数** aftersales_timeliness_state(due_at,done_at,at) 现算（OVERDUE/DUE_SOON≤24h/ON_TRACK/RESOLVED/NO_DEADLINE），能进 WHERE 与 ORDER BY，**筛选与排序全在 DB 层**；(3) **参考时刻整页共用一个**（at 在 list() 开头取一次，WHERE/行/汇总三处复用），否则会「筛了临期、第一条不临期」；(4) 判定真身**只有 DB 函数一处**，Java 与前端都刻意不重算 —— 两处实现必然漂移，而超时直接关系账号绩效与资金冻结。端点 6 个 /trade/aftersales：capabilities、filters、cases(GET 列表)、cases(POST 登记)、cases/bulk(POST 批量)；**刻意不提供 cases/{uuid}**（11.1.1.2 详情未交付，列表行不带任何指向它的链接）。**批量三件全部可用**（授权 / 备注 / 转工单），各自落在本服务内的真实表，**不假装已对接 11.1.1.3 / 11.4.2.1**；单次上限 100；**逐条结果回报**（与请求 caseIds **同序同长**，含成败、结果码、人话原因、产物引用）；逐条失败来自**写库前的真实预校验**（DB 里的状态/类型/金额/已有工单号/请求内重复项），不是 catch 到什么都标 failed —— 写阶段意外异常整批回滚返回 5xx，不伪装成部分成功；结果按**请求下标**返回而非按 caseId 归并（重复 ID 时归并会让第 1 条的成功顶到第 2 个位置）。**金额区间是闭区间**（两端都取），口径由响应 amountRangeSemantics 原样报出。**上游实查结论（与调度口径一致，已复核集成头 a052a025）**：sales_order（V99）**无 shop_code 列**、order_source 的 CHECK 已含五个平台来源；卷 15 的 24 个 L4 里**只交付 1 个**（15.4.1.1，在 backend/services/crm 独立库 starcon_crm）、卷 2 平台消息在 channel 服务**无任何相关表**；二者都是别的服务独立库，禁止跨服务 SQL ⇒ **责任人**落成租户可维护的登记表（正式接口到位后同步器按同一形状写入，**表结构与查询都不用改**），**平台消息无落表方案**（是对话流不是可维护信号）如实报 crossServiceReadAvailable=false；店铺维度当前**只到平台级**（order_source），platformShopCode 恒为 null 并报 available=false，**刻意不建恒为空的 shop 列**（空列会被读成「这家店没有售后单」）。下游 11.1.1.2 / 11.1.1.3 / 11.2 / 11.3 / 11.4.2.1 **全部未交付**，capabilities 逐条报 *Delivered=false 与归属模块；登记入口 POST /cases 显式标注是 11.1.1.3 未交付期间的入口（只做单据落库 + 平台时限登记，**不含**受理判定四件事），intakeDelivered=false。前端 /aftersales：**替换掉既有的 DomainPlaceholder 占位页**为真实工作区 page.tsx + components/aftersales/{model,workspace}.tsx（能力与缺口 / 多维筛选 / 时效四档视觉徽标 + 倒计时人话 / 批量三件 + 逐条结果面板 / 列表 / 分页，加载·空·错误三态齐全；超时的**整行染色**且超时数是顶部第一张卡；未知时效状态回落「无平台时限」而**不回落「正常」**——后者会掩盖一次超时）。api-proxy **新增一条独立 services[] 元素**（未碰既有 trade 分支的超长单行 alternation，多车道并入零冲突）。测试 34 条（AfterSalesCaseIntegrationTest 29 + AfterSalesCaseTenancyIntegrationTest 5，Testcontainers 真实 PG16、连接池压到 1）含：五种类型逐个登记与列出、**+08:00 非 UTC 偏移夹具写入后断言写回的是同一绝对时刻**（API 与直查库各断言一次）、effective_due_at 取更紧的那个、时效五态分得开且**恰好到期判 DUE_SOON**（判 OVERDUE 用严格小于）、边界处 ±1000 纳秒（24h 闭区间 / 早 1 微秒即超时）、**已结案行 remainingSeconds 必须是 null 而不是 0**、**闭区间 min==max==某张单的金额时它自己必须在结果里**、多维筛选叠加、真分页三页不重不漏、汇总与分页无关、金额按币种分开、SELF 范围真生效、批量 4 条混合断言逐条成败与原因、重复 ID 按请求顺序逐条回报、超额授权 / 非金额类型带金额 / 拒绝带金额 / 已结案 / 重复转工单（附已有工单号）逐条失败、空备注是**请求级 400**（整批共用字段，报 N 条相同失败原因无价值）、批量上限 100 → 400、**绕过服务层直写时 DB 触发器仍挡住类型不匹配的授权**（并用对照组证明该插入语句本身没写坏）、终态必须带 resolved_at、effective_due_at 运行角色**真的改不动**（列级白名单收紧后 has_column_privilege=false）、四张留痕表 UPDATE/DELETE 皆 false、时效函数 provolatile='i'。**三断言实跑在真实业务表上**（两租户互不可见含按主键直查与买家诉求原文、伪造 X-Tenant-Id 无效且行仍落在会话租户名下、伪造头批量改别人的单逐条 NOT_FOUND、连接池固定 1 条时 5 轮交替不串租户且金额汇总各自独立），外加事务外读零行。前端 25 条（model 22 + allowlist 双向断言 3：模型源码反向抽取真实调用点逐条断言放行、POST 真转发到 8085、**刻意不放行的 cases/{uuid} 等形状仍 404**）。**过程中被测试逼出来的三个真实缺陷（已修）**：(1) **列级 REVOKE 在表级 GRANT 之后是空操作** —— PG 里表级 UPDATE 蕴含每列 UPDATE，`REVOKE UPDATE(effective_due_at)` 后 has_column_privilege 仍为 true，必须先收回表级 UPDATE 再逐列授回（V150 合计列疑似同样没收紧，未在本车道改）；(2) 序列必须单独 `GRANT USAGE`，漏了会以 BadSqlGrammarException→409 挂掉而文案说的是「数据冲突」，与根因无关；(3) `Timestamp.valueOf` 的静默 −28800s 偏移必须靠 +08:00 夹具断言写回时刻才测得出来。 **【恢复车道 2026-10-17 15:19-15:30 复核并入】**：并入 integration/module-dev（4225d99b 之后共 8 个提交）时 api-proxy.ts 冲突已解 —— git 的对齐启发式把 11.1.1.1 与 9.2.1.3 的元素吸成了**同一个** `{...}` 槽（注释与正则被配成一对），只删冲突标记会得到「语法合法但只活下来一半白名单」的文件（漏登记路径在浏览器静默 404 而 CI 全绿）；按三方拼接重建为**两个并列 services[] 元素**，前缀互不相交（aftersales 与 order-intercept），两侧前缀都在 resolve() 里活着（两条 allowlist 真跑 proxy 断言 HTTP 状态码，7 例全绿）；esbuild 以 TypeScript 解析通过且全文花括号深度归零。契约按合并后代码重新生成（trade 用实跑 OpenApiContractTest 导出的 spec，其余五服务本次合并未改动）：merge-union 的行级兜底并集内容一条没少也没重（632 条声明 = Aftersales* 16 + Intercept* 20），但不符合 render_types 的 sorted() 规范序（Intercept* 整块被顶到 IssueInput 之后），重生成后 diff 为纯重排（排序后逐行集合相同；openapi 的 paths / schema 名集合 / schema 结构 / servers 全等）。**L0**：backend ./mvnw -q compile exit 0；TURBO_FORCE=true pnpm typecheck 3 successful 且 **Cached: 0 cached, 3 total**（三个包均 cache bypass，绿不是别的 worktree 的缓存）。**L1**：`./mvnw -pl services/trade -am test` 共 **869 tests / 0 failures / 0 errors / 0 skipped**（34 个测试类；本车道 AftersalesCaseIntegrationTest 29 + AftersalesCaseTenancyIntegrationTest 5，9.2.1.3 侧 OrderIntercept 38 + 5；Flyway 实跑 30 条迁移到 v156，V153 与 V156 共存）；前端 25 例（model 22 + allowlist 双向断言 3）全绿。多租户三条断言实跑在真实业务表上（断言1 两租户互不可见 / 断言2 伪造租户上下文无效 / 断言3 连接池归还后不串租户，另加五表 RLS 与运行角色读写、无租户上下文零行）。 |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 235 |
+| **未开发** | **230** |
+| 完成率 | 50.5% |
+| **D5** | 45 | 0 | 7 | 52 |
+| 10 | 物流与头程系统 | D5 / D7 | 19 | 27 |
