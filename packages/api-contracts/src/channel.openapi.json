@@ -22766,6 +22766,866 @@
           }
         }
       }
+    },
+    "/channel/logistics-pickup-signoff/sla-rules": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_sla_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffSlaRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_sla_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffSlaRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffSlaRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/reminders/{id}/resolve": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_reminders_id_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffReminderActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffReminderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/reminders/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_reminders_id_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffReminderActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffReminderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/reconcile": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_reconcile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffReconcileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffReconcileResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/notifications/{id}/consume": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_notifications_id_consume",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffNotificationConsumeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffNotificationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/cases/{id}/attest": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_cases_id_attest",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffAttestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/cases/sync": {
+      "post": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "post_channel_logistics_pickup_signoff_cases_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickupSignoffSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/reminders": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_reminders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reminderKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batchNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffReminderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/overview": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/notifications": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_notifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "notificationKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "downstreamStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batchNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffNotificationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/events": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "eventKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batchNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/cases": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pickupState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deliveryState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batchNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gapCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "exceptionOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "HANDOVER_AT_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffCasePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/cases/{id}": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_cases_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupSignoffCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-pickup-signoff/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-pickup-signoff-controller"
+        ],
+        "operationId": "get_channel_logistics_pickup_signoff_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsPickupSignoffCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -55723,6 +56583,970 @@
             "items": {
               "$ref": "#/components/schemas/DownstreamTaskRow"
             }
+          }
+        }
+      },
+      "PickupSignoffSlaRuleInput": {
+        "required": [
+          "carrierCode",
+          "pickupSlaHours"
+        ],
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "minLength": 1,
+            "pattern": "^.{1,64}$",
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupSlaHours": {
+            "minimum": 0.000001,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "reminderLeadHours": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "reviewInviteDelayHours": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "afterSalesWindowHours": {
+            "minimum": 0.000001,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          },
+          "note": {
+            "pattern": "^.{0,600}$",
+            "type": "string"
+          }
+        }
+      },
+      "PickupSignoffSlaRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "pickupSlaHours": {
+            "type": "number"
+          },
+          "reminderLeadHours": {
+            "type": "number"
+          },
+          "reviewInviteDelayHours": {
+            "type": "number"
+          },
+          "afterSalesWindowHours": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupSignoffReminderActionInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "PickupSignoffReminderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "reminderKind": {
+            "type": "string"
+          },
+          "reminderKindLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "assignedToMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupSignoffReconcileInput": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "pattern": "^.{0,64}$",
+            "type": "string"
+          },
+          "batchNo": {
+            "pattern": "^.{0,32}$",
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffReconcileResult": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pickupConfirmed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryConfirmed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueDetected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dueSoonDetected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remindersCreated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notificationsCreated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exceptionsMarked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "voided": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PickupSignoffNotificationConsumeInput": {
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "minLength": 1,
+            "pattern": "CONSUMED|FAILED",
+            "type": "string"
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "PickupSignoffNotificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "notificationKind": {
+            "type": "string"
+          },
+          "notificationKindLabel": {
+            "type": "string"
+          },
+          "downstreamModule": {
+            "type": "string"
+          },
+          "downstreamStatus": {
+            "type": "string"
+          },
+          "downstreamStatusLabel": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "consumedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consumedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupSignoffAttestInput": {
+        "required": [
+          "evidenceRef",
+          "kind",
+          "occurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "minLength": 1,
+            "pattern": "PICKUP|DELIVERY",
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidenceRef": {
+            "minLength": 1,
+            "pattern": "^.{1,128}$",
+            "type": "string"
+          },
+          "note": {
+            "pattern": "^.{0,400}$",
+            "type": "string"
+          }
+        }
+      },
+      "PickupSignoffCaseDetail": {
+        "type": "object",
+        "properties": {
+          "signoffCase": {
+            "$ref": "#/components/schemas/PickupSignoffCaseRow"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffEventRow"
+            }
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffReminderRow"
+            }
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffNotificationRow"
+            }
+          },
+          "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PickupSignoffCaseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "sourceManifestItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceBatchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceBatchNo": {
+            "type": "string"
+          },
+          "sourceBatchStatus": {
+            "type": "string"
+          },
+          "sourceSubjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectMatchCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelRef": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "destinationCountry": {
+            "type": "string"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slaRuleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupSlaHours": {
+            "type": "number"
+          },
+          "reminderLeadHours": {
+            "type": "number"
+          },
+          "pickupDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickupState": {
+            "type": "string"
+          },
+          "pickupStateLabel": {
+            "type": "string"
+          },
+          "pickupConfirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickupEvidenceSource": {
+            "type": "string"
+          },
+          "pickupEvidenceRef": {
+            "type": "string"
+          },
+          "deliveryState": {
+            "type": "string"
+          },
+          "deliveryStateLabel": {
+            "type": "string"
+          },
+          "deliveryConfirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryEvidenceSource": {
+            "type": "string"
+          },
+          "deliveryEvidenceRef": {
+            "type": "string"
+          },
+          "exceptionFlag": {
+            "type": "boolean"
+          },
+          "exceptionCode": {
+            "type": "string"
+          },
+          "exceptionNote": {
+            "type": "string"
+          },
+          "exceptionAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overdueHours": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "gapCode": {
+            "type": "string"
+          },
+          "gapLabel": {
+            "type": "string"
+          },
+          "gapReason": {
+            "type": "string"
+          },
+          "lastReconciledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupSignoffEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "eventKindLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "carrierEventId": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupSignoffSyncInput": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "pattern": "^.{0,64}$",
+            "type": "string"
+          },
+          "batchNo": {
+            "pattern": "^.{0,32}$",
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffSyncResult": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PickupSignoffSlaRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffSlaRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffReminderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffReminderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffCarrierBucket": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PickupSignoffStatusBucket": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PickupSignoffSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingPickupCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickedUpCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "voidCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exceptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noWaybillCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "subjectMissingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "subjectAmbiguousCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slaUnconfiguredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reminderPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notificationReadyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notificationPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byCarrier": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffCarrierBucket"
+            }
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffStatusBucket"
+            }
+          }
+        }
+      },
+      "PickupSignoffNotificationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffNotificationRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PickupSignoffCasePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupSignoffCaseRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PickupSignoffSummary"
+          }
+        }
+      },
+      "LogisticsPickupSignoffCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsPickupSignoffCapabilityDimension"
+            }
+          },
+          "caseStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pickupStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deliveryStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reminderKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reminderStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notificationKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notificationStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gapCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsPickupSignoffCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       }

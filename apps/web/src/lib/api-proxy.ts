@@ -989,6 +989,50 @@ const services: readonly {
       /^logistics\-transit\-limits(?:\/(?:capabilities|overview|precheck|estimate|transit-rules|size-limits|markings|(?:transit-rules|size-limits|markings)\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}))?$/,
   },
   {
+    // 10.3.2.2 揽收与签收确认（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.1.1.3 `logistics-transit-limits` 那条**之后**、10.7.1.1
+    // `return-dispositions` 那条**之前** —— 与另外三条车道（10.3.1.2 / 10.6.2.1 / 10.7.1.2）
+    // 的锚点互不重叠，git 能干净求并。既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-pickup-signoff/capabilities        能力声明（未交付段 available=false + ownerModule）
+    //   logistics-pickup-signoff/overview            全量概览（不受筛选与分页影响）
+    //   logistics-pickup-signoff/cases               确认单清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/cases/sync          从交运批次同步确认单（POST，幂等投影）
+    //   logistics-pickup-signoff/cases/{uuid}        确认单详情（GET，含时间线 / 提醒 / 待通知）
+    //   logistics-pickup-signoff/cases/{uuid}/attest 人工确认揽收 / 签收（POST）
+    //   logistics-pickup-signoff/reconcile           巡检（POST）：推进状态 + 判超时 + 生成提醒
+    //   logistics-pickup-signoff/reminders           提醒任务清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/reminders/{uuid}/acknowledge 认领提醒（POST）
+    //   logistics-pickup-signoff/reminders/{uuid}/resolve    处置提醒（POST）
+    //   logistics-pickup-signoff/notifications       下游待通知清单（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/notifications/{uuid}/consume 登记下游消费结果（POST）
+    //   logistics-pickup-signoff/events              确认事件流（GET，真分页 + 筛选）
+    //   logistics-pickup-signoff/sla-rules           时限规则清单（GET）/ 登记或改（POST）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `logistics-pickup-signoff` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `logistics-pickup-signoff/cases/{uuid}/events` —— 确认时间线就在详情里，没有第二个形状
+    //   * `logistics-pickup-signoff/cases/{uuid}/reminders` —— 提醒按确认单聚合在详情里
+    //   * `logistics-pickup-signoff/sla-rules/{uuid}` —— 规则按承运商 + 渠道定位，不按 id
+    //   * `logistics-pickup-signoff/notifications/{uuid}/retry`
+    //     —— 下游消费由下游自己重试，本模块只登记结果
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处），不是 `[0-9a-f-]+`：
+    //    后者把单字符 `e` 当合法 id，症状是有人 GET .../cases/e 会打到后端。
+    // ⚠️ 字面量子路径（capabilities / overview / cases / reconcile / reminders /
+    //    notifications / events / sla-rules）**排在 uuid 段之前**判别：写反的话
+    //    `cases` 里的 `c`、`events` 里的 `e` 落在 [0-9a-f] 里会被 uuid 分支提前吃掉。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-pickup\-signoff(?:\/(?:capabilities|overview|cases|reconcile|reminders|notifications|events|sla-rules)|\/cases\/(?:sync|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})(?:\/attest)?|\/reminders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:acknowledge|resolve)|\/notifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/consume)$/,
+  },
+  {
     // 10.7.1.1 退货接收与处置决策（**本条目是新增一条 services[] 元素**，不是往既有
     // channel 分支的 alternation 里并）。插入锚点固定在本文件里
     // `logistics-transit-limits/`（10.1.1.3）那条**之后**、`freight/`（10.1.2.1）
