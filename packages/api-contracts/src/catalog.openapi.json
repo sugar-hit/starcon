@@ -28676,6 +28676,271 @@
           }
         }
       }
+    },
+    "/catalog/profit-calculator/scenarios": {
+      "get": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "get_catalog_profit_calculator_scenarios",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "post_catalog_profit_calculator_scenarios",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/profit-calculator/calculate": {
+      "post": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "post_catalog_profit_calculator_calculate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitCalculation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/profit-calculator/sites": {
+      "get": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "get_catalog_profit_calculator_sites",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/profit-calculator/scenarios/{id}": {
+      "get": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "get_catalog_profit_calculator_scenarios_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "delete_catalog_profit_calculator_scenarios_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/catalog/profit-calculator/capabilities": {
+      "get": {
+        "tags": [
+          "profit-calculator-controller"
+        ],
+        "operationId": "get_catalog_profit_calculator_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfitCalculatorCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -56022,6 +56287,668 @@
           }
         },
         "description": "本页实际费用"
+      },
+      "CalculateRequest": {
+        "required": [
+          "currency",
+          "mode",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "currency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "costCurrency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "PRICE",
+              "TARGET_MARGIN"
+            ]
+          },
+          "inputPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "targetMarginRate": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "fxRate": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsTiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierInput"
+            }
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TierInput": {
+        "required": [
+          "perUnitCost"
+        ],
+        "type": "object",
+        "properties": {
+          "upToQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "perUnitCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "BlockingGap": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "remedy": {
+            "type": "string"
+          },
+          "manualAssumptionAccepted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeductionSource": {
+        "type": "object",
+        "properties": {
+          "ownerModule": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "table": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "trace": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceDetail"
+            }
+          }
+        }
+      },
+      "FxView": {
+        "type": "object",
+        "properties": {
+          "costCurrency": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number",
+            "nullable": true
+          },
+          "direction": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsBand": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fromQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "upToQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "units": {
+            "type": "number"
+          },
+          "perUnitCost": {
+            "type": "number"
+          },
+          "bandTotal": {
+            "type": "number"
+          }
+        }
+      },
+      "ProfitCalculation": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "siteCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "PRICE",
+              "TARGET_MARGIN"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string",
+            "enum": [
+              "COMPLETE_FROM_RULES",
+              "COMPLETE_FROM_MANUAL_ASSUMPTIONS",
+              "INCOMPLETE"
+            ]
+          },
+          "decisionReady": {
+            "type": "boolean"
+          },
+          "blockingGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockingGap"
+            }
+          },
+          "fx": {
+            "$ref": "#/components/schemas/FxView"
+          },
+          "waterfall": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaterfallLine"
+            }
+          },
+          "revenue": {
+            "type": "number",
+            "nullable": true
+          },
+          "knownDeductionTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "revenueLeftForMissingDeductions": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossProfit": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "breakEvenPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetMarginPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "breakEvenVolume": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitContribution": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsBands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsBand"
+            }
+          },
+          "costMethod": {
+            "type": "string"
+          },
+          "costEffectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grossProfitSuppressedReason": {
+            "type": "string"
+          },
+          "breakEvenPriceNote": {
+            "type": "string"
+          },
+          "targetMarginPriceNote": {
+            "type": "string"
+          },
+          "breakEvenVolumeNote": {
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "ScenarioDetail": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ScenarioSummary"
+          },
+          "request": {
+            "$ref": "#/components/schemas/CalculateRequest"
+          },
+          "logisticsTiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierInput"
+            }
+          },
+          "platformFeeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "type": "number",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "calculation": {
+            "$ref": "#/components/schemas/ProfitCalculation"
+          }
+        }
+      },
+      "ScenarioSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "siteCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "PRICE",
+              "TARGET_MARGIN"
+            ]
+          },
+          "inputPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetMarginRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string",
+            "enum": [
+              "COMPLETE_FROM_RULES",
+              "COMPLETE_FROM_MANUAL_ASSUMPTIONS",
+              "INCOMPLETE"
+            ]
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SourceDetail": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "WaterfallLine": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "deduction": {
+            "type": "boolean"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/DeductionSource"
+          }
+        }
+      },
+      "SiteOption": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "defaultCurrency": {
+            "type": "string"
+          },
+          "vatRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ScenarioPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioSummary"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DeductionCapability": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ProfitCalculatorCapabilities": {
+        "type": "object",
+        "properties": {
+          "deductions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeductionCapability"
+            }
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteOption"
+            }
+          },
+          "fxNote": {
+            "type": "string"
+          },
+          "decisionGateNote": {
+            "type": "string"
+          },
+          "costBasisNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "modeNote": {
+            "type": "string"
+          },
+          "actionNote": {
+            "type": "string"
+          }
+        }
       }
     }
   }
