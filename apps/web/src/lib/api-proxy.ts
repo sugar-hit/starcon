@@ -3348,6 +3348,49 @@ const services: readonly {
       /^order\-pending\-review\/(?:capabilities|summary|queue(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/evaluate)?)?|batches(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
   },
   {
+    // 6.1.2.1 档口与货源池（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 9.2.1.1 `order-pending-review` 那条**之后**、9.2.2.2 `orders/risk-validation`
+    // 那条**之前**：与并行车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力声明（快照语义 + 各平台是否已接线 + 未交付的下游）
+    //   options                               词表（平台 / 采集方式 / 状态 / 排序键）
+    //   overview                              概览（不受筛选与分页影响）
+    //   suppliers                             供应商候选（catalog 授权只读，跨服务只经 API）
+    //   stalls                                档口列表（GET，真分页 + 真筛选）
+    //   stalls                                POST 登记档口
+    //   stalls/{uuid}                         档口详情（GET）/ 修改（PUT）
+    //   stalls/{uuid}/sync                    触发一次主动抓取（POST；失败带原因，不返回编造的货源）
+    //   stalls/{uuid}/collections             插件推送一次采集结果（POST）
+    //   items                                 货源条目列表（GET，真分页 + 真筛选 + 真排序）
+    //   items/{uuid}                          货源条目详情（GET，含全部快照版本 = 价格历史）
+    //   items/{uuid}/favorite                 收藏 / 取消收藏（POST / DELETE）
+    //   items/{uuid}/sku-links                建立货源与内部 SKU 的关联（POST）
+    //   items/{uuid}/sku-links/{linkId}       解除货源与内部 SKU 的关联（DELETE）
+    //   sku/{uuid}/sources                    某内部 SKU 的货源关联视图 + 比价（GET）
+    //   collector-endpoint/{platform}         采集接入登记（GET 读 / PUT 写；只存凭证引用）
+    // 判别顺序：字面量子路径（capabilities / options / overview / suppliers / stalls / items）
+    // 排在 {uuid} 分支之前，否则会被 uuid 分支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+` ——
+    //    后者会把 `suppliers` / `collector-endpoint` 这类非 UUID 形状也当成 id 放行。
+    // ⚠️ platform 段用 `[A-Z0-9_]+`：它是平台词表（ALIBABA_1688 / YIWU_GOU），不是任意文本。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `sources` —— 后端没有「一条不存在的汇总列表接口」
+    //   * `sources/items/{uuid}/snapshots` —— 快照版本随详情一起返回，没有独立端点
+    //   * `sources/items/{uuid}/update` —— 货源快照是外部观测，改它等于篡改事实
+    //   * `sources/stalls/{uuid}/items` —— 货源条目随档口详情一起返回
+    //   * `sources/sku/{uuid}/compare` —— 比价就在 `sku/{uuid}/sources` 里
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^sources(?:\/(?:capabilities|options|overview|suppliers)|\/stalls(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:sync|collections))?)?|\/items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:favorite|sku-links(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))?)?|\/sku\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/sources|\/collector-endpoint\/[A-Z0-9_]+)$/,
+  },
+  {
     // 9.2.2.2 风控校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
