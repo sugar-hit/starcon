@@ -149,7 +149,7 @@ public final class LogisticsCostAnalysisModels {
    * @param basisNote 成本口径总述：分摊用哪种规则、成本按什么时点结
    * @param financeNote 12 财务未交付的如实说明
    */
-  public record CostCapabilities(
+  public record LogisticsCostCapabilities(
       List<CostComponentCapability> components,
       List<CostCapabilityDimension> dimensions,
       String basisNote,

@@ -481,7 +481,7 @@ class LogisticsCostAnalysisIntegrationTest {
     seedWaybill("Bearer tenant-a", "WB-1", "DHL", "DHL-DE", "DE", new BigDecimal("100.0000"),
         "USD", new BigDecimal("10.000000"));
 
-    CostCapabilities capabilities = as(actorA, "channel.operation.read", () -> costs.capabilities());
+    LogisticsCostCapabilities capabilities = as(actorA, "channel.operation.read", () -> costs.capabilities());
 
     CostComponentCapability storage =
         capabilities.components().stream()
