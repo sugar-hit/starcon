@@ -305,3 +305,73 @@ commit → bfaa3255 feat(channel) + de7e98d8 docs
 - L2 仍**不得**与在途车道的 L1 并发跑 —— 10.6.1.1 / 10.7.1.1 / 5.2.1.1 的 L1 在跑，
   **要么等它们落地再跑 L2，要么等它们空闲**；
 - 10.3.1.1 的**逐模块技术说明**在 L2 绿后写进 `batch-35` 说明文件（与另外三条一起）。
+
+## 十三、✅ 补记三（12:40）：**10.7.1.1 也已 land** + 🔴 两条车道并入冲突预探
+
+10.7.1.1 退货接收与处置决策的 worker 在 12:40 跑完并 `land` 成功
+（`22a55b38` backend → `0b4e0188` 契约 → `9dde2289` 前端 → `d3b45462` 台账+日志，4 个 atomic commit）。
+⇒ **本批已有 2 条 ready 车道**（10.3.1.1 / 10.7.1.1），另 2 条在跑。
+
+| 件 | 落地位置 |
+| --- | --- |
+| 迁移 | `V214__return_receiving_disposition.sql` — 7 表 + 9 触发器 + RLS + GRANT/REVOKE |
+| 端点 | `/channel/return-dispositions/**` — 14 个 |
+| 页面 | `apps/web/src/app/logistics/returns/`（page + model + model.test + workspace） |
+| 测试 | `ReturnDispositionIntegrationTest` 26 例 + `ReturnDispositionTenancyIntegrationTest` 3 例 = **29 例 0 失败** |
+| 验证 | L0 compile exit 0 ｜ typecheck 3/3 ｜ lint 3/3 ｜ 前端 2 文件 20 例绿 ｜ **api-proxy 回归 45 文件 238 例 → 扩到 105 文件 634 例全绿** |
+
+**它接手时基线也是红的**（与 10.3.1.1 同款）：上一 worker 的 `cancelOrder` UPDATE 有 **5 个占位符只绑 4 个参数**
+（取消任何处置单必然失败）、`registrations()` 计数 SQL **漏了 lateral join**（`dispositionState` 筛选直接语法错）。
+两处都是**编译期看不见、运行期才炸**的真 bug。worker 还从零补了全部测试、前端、api-proxy、契约、台账。
+
+### 「处置方式必须显式」的落地：五道结构闸（不是一句提示语）
+
+1. **列上不写 DEFAULT** —— 三张表的 `disposition_method` 都是 `varchar(24) NOT NULL CHECK(... IN ('RESALE','RETURN_TO_COUNTRY','DISCARD'))`，
+   少传一个 `dispositionMethod` ⇒ **23502 not-null violation**，不是悄悄落成「转销售」；
+2. **决策 ↔ 处置单两段分离** —— 处置方式落在决策上（谁/何时/依据），触发器钉死方法一致、数量一致、只能消费一次；
+3. **决策终局性** —— 已消费或被取代 ⇒ 方法/数量/依据/时间戳不可变；
+4. **可再售否决 ×2 并冻结到决策行** —— 上游结论必须 `RESALABLE`（**完全没有结论也判拒**）且无生效中的品牌/平台限制；
+5. **拿不准 ⇒ 显式落 `PENDING_DECISION`（待人工决策）**，绝不默认成可再售。
+
+静态预检复扫 V214 最终形态：`ADD COLUMN` 无 DEFAULT / `SET NOT NULL` / 新增 `CHECK` **全为 0**，
+**零 ALTER 既有表**（只建 7 张新表，跨车道破坏面为零），
+`DEFAULT 'RESALE'` 全文件**只出现 1 次 —— 在第 24 行的注释里**，那段注释正是解释「写一个
+`DEFAULT 'RESALE'` 就正好是蓝图点名禁止的那种默认」。
+
+### 🔴 两条车道并入冲突预探：**已证无冲突，但发现一个结构性盲区**
+
+`.gitattributes` 给并行车道注册了 `contract-union` 合并驱动器的路径**只有三类**：
+`packages/api-contracts/src/**/*.ts`、`packages/api-contracts/src/*.openapi.json`、
+`docs/product/capability-blueprint/module-progress.md`。
+
+⚠️ **共享白名单文件 `apps/web/src/lib/api-proxy.ts` 不在其中** —— 它走**普通文本合并**。
+而本批 **10.3.1.1 与 10.7.1.1 两条车道都改了它**，且插入锚点**相邻**：
+
+| 车道 | 插入位置 |
+| --- | --- |
+| 10.3.1.1 | 10.1.1.2 渠道配置（`logistics-channels`）之后、10.1.1.3（`logistics-transit-limits`）之前 |
+| 10.7.1.1 | 10.1.1.3（`logistics-transit-limits`）之后、10.1.2.1（`freight`）之前 |
+
+⇒ 相邻 hunk 有可能撞上。**本轮用一次性 probe worktree 实测了真实的顺序并入**
+（`git merge --no-ff` 逐条并，**不碰集成头**，事后已删除 probe worktree）：
+
+```
+merge 10.3.1.1 → Automatic merge went well，冲突 0
+merge 10.7.1.1 → Automatic merge went well，冲突 0
+api-proxy.ts 最终形态：相对集成头 **88 insertions / 0 deletions**
+  两条车道的条目都在（logistics-tracking 18 处、return-dispositions 17 处引用）
+台账：merge-union 按模块 ID 折叠 465 行同 ID 记录（设计行为）
+```
+
+⇒ **并入是干净的，但这是「测出来的」，不是「结构保证的」。**
+**下一轮及以后：凡是多车道同批改 `api-proxy.ts`，并入前都该做一次同样的 probe**，
+否则撞冲突会让 `merge-ready` 退出码 2、整批白等一轮（协议明写：不要自己强行解冲突）。
+
+### 下一轮 tick 的实际入口（更新）
+
+- `merge-ready` 将会拿到 **2 条**（10.3.1.1 / 10.7.1.1）⇒
+  **L2 的验证对象是「2 条车道并入后的集成头」**（不是 1 条，也不是 4 条）；
+- **L2 仍不得与在途车道的 L1 并发跑** —— 10.6.1.1 / 5.2.1.1 的 L1 在跑
+  （10.6.1.1 上一轮已报「Controller 已写，正在跑集成测试」），
+  **要么等它们落地再跑 L2，要么等它们空闲**；
+- 10.3.1.1 与 10.7.1.1 的**逐模块技术说明**在 L2 绿后一起写进 `batch-35` 说明文件。
