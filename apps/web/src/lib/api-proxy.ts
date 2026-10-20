@@ -3051,6 +3051,47 @@ const services: readonly {
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
   {
+    // 9.2.2.1 地址与支付校验（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `fulfillment/consolidation`（9.3.1.2 合单）那条**之后**：
+    // 与其余车道（4.4.1.3 / 9.2.1.1 / 4.5.2.2）的插入点两两相隔 ≥ 74 行，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // ⚠️ 首 token 是 `order-address-payment-check`，与既有 `order-review`（9.2.1.2）、
+    //   `order-intercept`（9.2.1.3）、`orders`（含 orders/risk-validation）、
+    //   `fulfillment`、`aftersales`、`platform-orders`（9.1.2.1）**首 token 全都不同**，
+    //   而既有正则都是锚定的（`/^token(...)?$/`），所以新前缀不会与任何一条抢路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                          能力与上下游可用性（**明说保险策略未交付**）
+    //   overview                              全量概览（不受筛选与分页影响）
+    //   policy / policy                       校验策略（GET 读 + PUT upsert）
+    //   embargo-rules                         禁运国家清单（GET 真分页 / POST 登记）
+    //   country-rules                         国别地址格式规则（GET 真分页 / POST 登记）
+    //   payment-rules                         支付状态一致性规则（GET 真分页 / POST 登记）
+    //   checks                                校验结果列表（GET 真分页 + 风险等级/可投递性筛选）
+    //   checks                                POST 落一次校验
+    //   {uuid}                                校验详情（GET，头 + 七行明细）
+    //   orders/{uuid}/latest                  某订单最近一次校验（**9.2.1.3 异常拦截的读路径**）
+    // 判别顺序：字面量子路径（capabilities / overview / policy / embargo-rules /
+    // country-rules / payment-rules / checks）排在 {uuid} 分支之前，
+    // 否则会被 uuid 分支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `order-address-payment-check/undeclared-action` —— **本模块确定没有**的动作
+    //   * `order-address-payment-check/checks/{uuid}/auto-release` —— 本模块**不**改写已落库的结论
+    //   * `order-address-payment-check/checks/{uuid}/insurance-quote` —— 保险策略未交付
+    //   * `order-address-payment-check/orders/{uuid}` —— 裸路径，没有对应映射
+    //   * 裸路径 `order-address-payment-check` —— 后端没有对应映射
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^order\-address\-payment\-check\/(?:capabilities|overview|policy|embargo\-rules|country\-rules|payment\-rules|checks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/latest)$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
