@@ -331,6 +331,23 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['登记规则与信号', '触发评估', '人工复核'],
   },
   {
+    href: '/orders/address-payment-check',
+    implemented: true,
+    domain: 'orders',
+    label: '地址与支付校验',
+    description:
+      '校验买家地址可投递性（国家/邮编/街道格式）、禁运国家清单、支付状态一致性，输出校验结果与风险等级。',
+    fields: [
+      '订单号',
+      '校验结果',
+      '风险等级',
+      '命中项',
+      '禁运清单',
+      '支付一致性',
+    ],
+    workflow: ['登记禁运清单与国别规则', '跑一次校验', '读结论交异常拦截'],
+  },
+  {
     href: '/orders/fulfillment',
     implemented: true,
     domain: 'orders',
