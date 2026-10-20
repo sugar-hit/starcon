@@ -3795,6 +3795,70 @@ const services: readonly {
       /^review-requests(?:\/(?:capabilities|frequency-policy|shops|candidates|recovery-stats|batch)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:send-records|recoveries))?)?$/,
   },
   {
+    // 15.2.2.2 索评规则（crm 服务，卷 15 的 L3 锚点 15.2.2 的第二个子模块）。
+    //
+    // 蓝图：「配置索评策略：按店铺、按物流方式（自发货/平台仓）设置不同延后时间，避开节假日，
+    // 支持 A/B 测试不同话术。输入：规则配置；话术模板。输出：生效策略 + 效果对比。
+    // 关系：上游 = 15.2.2.1；下游 = 15.1.1.2 发送。」
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 crm 分支的 alternation 里并 ——
+    // 既有两条 crm 分支分别是 `^knowledge\/...$`（15.4.2.1 客服知识库）与
+    // `^review-requests...$`（15.2.2.1 索评），首 token 都与 `review-rules` 不同，
+    // 两条互不吃掉。插入锚点固定在 **15.2.2.1 那条之后、warehouse 7.8.2.2 那条之前**，
+    // 与本批另外三条车道的锚点互不重叠。
+    //
+    // 🔴 为什么用 `review-rules` 这个独立前缀（已逐条核对既有全部 token）：
+    //   * 既有 crm 分支的 token 是 `knowledge` 与 `review-requests`；
+    //     `review-due` 是 knowledge **内部**的子形状（`knowledge/review-due`），不是独立 token。
+    //   * 既有别的服务的 token：`orders` · `order-review`（9.2.1.2 trade）·
+    //     `refunds` · `rma-authorizations` · `return-receipts` · `return-quality` …
+    //   * 既有正则都是**锚定**的（`^token(...)?$`），而本文件的 `resolve()` 先按
+    //     `path.startsWith(service.prefix)` 收窄服务、再判别正则 ⇒ 只有 prefix='crm/'
+    //     的元素才有机会吃到 `crm/review-rules/...`。
+    //     而 prefix='crm/' 的另两条元素正则是 `^knowledge\/...$` 与 `^review-requests...$`，
+    //     **不可能**匹配 `review-rules/...` ⇒ 首 token 不同即可。
+    //   * 刻意**不**复用 `review-requests/rules`（15.2.2.1 那条里写在拒绝清单上的形状）：
+    //     本模块是**独立命名空间**，不往兄弟模块的路径树上挂。
+    //
+    // 形状逐条列出：
+    //   review-rules                       索评规则集合（GET 真分页真筛选 / POST 新建）
+    //   review-rules/{uuid}                单条规则（GET 详情 / PUT 更新 / DELETE 删除）
+    //   review-rules/capabilities          能力声明（逐维 available + ownerModule + impact）
+    //   review-rules/shops                 店铺目录（来自上游 channel 的真实清单）
+    //   review-rules/effective             生效策略解析（GET）
+    //   review-rules/effect-comparison     效果对比（GET）
+    //   review-rules/candidates            可被应用策略的索评请求（上游 15.2.2.1，GET）
+    //   review-rules/templates             话术模板集合（GET / POST）
+    //   review-rules/templates/{uuid}      单个话术模板（GET / PUT / DELETE）
+    //   review-rules/holidays              节假日集合（GET / POST）
+    //   review-rules/holidays/{uuid}       单个节假日（GET / PUT / DELETE）
+    //   review-rules/assignments          生效策略落地记录（GET）/ 应用策略（POST）
+    //   review-rules/assignments/{uuid}   单条落地记录（GET）
+    //
+    // 判别顺序：**字面量子路径（capabilities / shops / effective / effect-comparison /
+    // candidates / templates / holidays / assignments）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `review-rules/capabilities/{uuid}` / `/shops/{uuid}` / `/effective/{uuid}` /
+    //     `/effect-comparison/{uuid}` / `/candidates/{uuid}` ——
+    //     这五个是聚合查询与目录，**不按 id 寻址**，所以那段后缀是**必需**的
+    //     （写成可选会让裸的 `capabilities/{uuid}` 一起通过）。
+    //   * `review-rules/{uuid}/variants` —— 后端没有「按规则 id 取变体」这个映射。
+    //   * `review-rules/effective/{uuid}` —— 生效策略**不按规则 id 寻址**。
+    //   * 任何 PUT / DELETE 形状之外的第三层子路径 —— 后端只有上面列出的那些。
+    //   * DELETE 本身是**放行**的：规则 / 模板 / 节假日都是**配置**（不是凭据），
+    //     删了就是删了；而「已被生效策略落地引用过的删不掉」这条防线在服务端与 DB，
+    //     不在白名单里（白名单是**按路径登记、不区分方法**的）。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^review-rules(?:\/(?:capabilities|shops|effective|effect-comparison|candidates)|\/(?:templates|holidays|assignments)(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 7.8.2.2 缺货与饥饿预警（warehouse 服务，7.8.2 的第二个 L3 锚点）。
     //
     // 蓝图：「识别因分摊/优先级导致的店铺"饥饿"（长期分不到货、影响绩效），以及真正的全网缺货，
