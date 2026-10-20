@@ -128,9 +128,10 @@ it('未交付 / 不该存在的形状仍然 404（放行它们比 404 更糟）'
     `channel/logistics-tracking/events/${ID}`,
     // 逐票结果在任务详情里
     `channel/logistics-tracking/pull-tasks/${ID}/items`,
-    // 异常**处置**归 10.3.1.2（未交付），本页只标记异常节点
-    'channel/logistics-tracking/exceptions',
-    'channel/logistics-tracking/dispositions',
+    // ⚠️ `exceptions` / `dispositions` 原先在本清单里（当时 10.3.1.2 未交付，
+    //    本页只标记异常节点）。10.3.1.2 **已交付** —— 那两个前缀归它，
+    //    由 10.3.1.2 自己的白名单条目放行（logistics-exception-allowlist.test.ts
+    //    钉住），所以这里**不再**断言它们 404。
     // 字面量子路径落到 uuid 分支上（b/c/f/e 都可能出现在 [0-9a-f] 里）
     'channel/logistics-tracking/b',
     'channel/logistics-tracking/bf',
