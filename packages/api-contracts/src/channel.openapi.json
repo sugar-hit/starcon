@@ -23626,6 +23626,582 @@
           }
         }
       }
+    },
+    "/channel/logistics-timeliness/reports/score-snapshots": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_reports_score_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessScoreSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "post_channel_logistics_timeliness_reports_score_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelinessSnapshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessScoreSnapshotResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/subjects": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_subjects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessSubjectPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/reports/scores": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_reports_scores",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessScorePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/reports/monthly": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_reports_monthly",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessMonthlyReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/reports/matrix": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_reports_matrix",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "OVERDUE_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessMatrixPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/reports/anomalies": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_reports_anomalies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelinessAnomalyReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/overview": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsTimelinessOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/logistics-timeliness/capabilities": {
+      "get": {
+        "tags": [
+          "logistics-timeliness-controller"
+        ],
+        "operationId": "get_channel_logistics_timeliness_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogisticsTimelinessCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -57528,6 +58104,919 @@
         }
       },
       "LogisticsPickupSignoffCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSnapshotRequest": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$",
+            "type": "string"
+          },
+          "to": {
+            "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$",
+            "type": "string"
+          },
+          "minSampleThreshold": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessScoreSnapshotResult": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "computed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "written": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "insufficient": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "removed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minSampleThreshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "TimelinessWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSubjectPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessSubjectRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessSubjectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "serviceLevel": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promisedEtaAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transitHours": {
+            "type": "number"
+          },
+          "deviationHours": {
+            "type": "number"
+          },
+          "timelinessStatus": {
+            "type": "string"
+          },
+          "timelinessStatusLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessScorePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessScoreRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessScoreRow": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "shippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scoreGrade": {
+            "type": "string"
+          },
+          "sampleSufficient": {
+            "type": "boolean"
+          },
+          "minSampleThreshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotComputedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessScoreSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessScoreSnapshotRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TimelinessScoreSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noPromiseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "stddevTransitHours": {
+            "type": "number"
+          },
+          "p90TransitHours": {
+            "type": "number"
+          },
+          "maxOverdueHours": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scoreGrade": {
+            "type": "string"
+          },
+          "sampleSufficient": {
+            "type": "boolean"
+          },
+          "minSampleThreshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelinessMonthlyReport": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessMonthlyRow"
+            }
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/TimelinessTotals"
+          },
+          "peakMonthCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessMonthlyRow": {
+        "type": "object",
+        "properties": {
+          "monthKey": {
+            "type": "string"
+          },
+          "shippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noPromiseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "stddevTransitHours": {
+            "type": "number"
+          },
+          "p90TransitHours": {
+            "type": "number"
+          },
+          "vsBaselineTransitHours": {
+            "type": "number"
+          },
+          "peakMonth": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimelinessTotals": {
+        "type": "object",
+        "properties": {
+          "shippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noPromiseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "stddevTransitHours": {
+            "type": "number"
+          },
+          "p90TransitHours": {
+            "type": "number"
+          },
+          "maxOverdueHours": {
+            "type": "number"
+          }
+        }
+      },
+      "TimelinessMatrixPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessMatrixRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TimelinessTotals"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessMatrixRow": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "shippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comparableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "noPromiseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "returnedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryRate": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "stddevTransitHours": {
+            "type": "number"
+          },
+          "p90TransitHours": {
+            "type": "number"
+          },
+          "maxOverdueHours": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scoreGrade": {
+            "type": "string"
+          },
+          "sampleSufficient": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimelinessAnomalyCell": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "channelName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overdueRate": {
+            "type": "number"
+          },
+          "avgTransitHours": {
+            "type": "number"
+          },
+          "avgDeviationHours": {
+            "type": "number"
+          },
+          "maxOverdueHours": {
+            "type": "number"
+          },
+          "contributionRate": {
+            "type": "number"
+          },
+          "cumulativeRate": {
+            "type": "number"
+          },
+          "inPareto": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimelinessAnomalyGroup": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "share": {
+            "type": "number"
+          }
+        }
+      },
+      "TimelinessAnomalyReport": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessAnomalyCell"
+            }
+          },
+          "byChannel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessAnomalyGroup"
+            }
+          },
+          "byCountry": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessAnomalyGroup"
+            }
+          },
+          "totalOverdue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "topOneShare": {
+            "type": "number"
+          },
+          "topThreeShare": {
+            "type": "number"
+          },
+          "paretoThreshold": {
+            "type": "number"
+          },
+          "paretoCellCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paretoOverdueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsTimelinessOverview": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/TimelinessWindow"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TimelinessTotals"
+          },
+          "channelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cellCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unattributedShippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unclassifiedShippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeWindowSubjectCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "worstCellChannelCode": {
+            "type": "string"
+          },
+          "worstCellCountryCode": {
+            "type": "string"
+          },
+          "worstCellOverdueRate": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LogisticsTimelinessCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinessCapabilityDimension"
+            }
+          },
+          "timelinessStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scoreGrades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultMinSampleThreshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowTimeZone": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TimelinessCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {

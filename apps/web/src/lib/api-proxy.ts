@@ -1074,6 +1074,49 @@ const services: readonly {
       /^return\-dispositions(?:\/(?:capabilities|overview|registrations|restrictions|eligibility|decisions|orders|events)|\/registrations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/restrictions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/revoke|\/decisions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/orders\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/costs|\/cancel)?)$/,
   },
   {
+    // 10.6.2.1 时效分析（**本条目是新增一条 services[] 元素**，不是往既有 channel
+    // 分支的 alternation 里并）。同批多车道共享这一个文件，而每个服务在 services[] 里
+    // 是**一段超长单行正则**：只要两条车道都往同一服务的 alternation 里并分支，git 必然
+    // 判冲突（结构性的，retry 永远不会自愈）。所以本车道走「新加一条元素」这条路。
+    //
+    // 插入锚点固定在 10.7.1.1 `return-dispositions` 那条**之后**、10.1.2.1 `freight/`
+    // 那条**之前** —— 与另外三条车道的锚点两两被既有条目隔开，git 能干净求并。
+    // 既有条目一律**一字未动、不重排、不格式化整文件**。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   logistics-timeliness/capabilities            能力声明（未交付段 available=false）
+    //   logistics-timeliness/overview                全量概览（不受筛选与分页影响）
+    //   logistics-timeliness/reports/matrix          🔴 渠道 × 国家交叉报表（GET，真分页 + 筛选）
+    //   logistics-timeliness/reports/monthly         月度趋势 / 旺季变化（GET）
+    //   logistics-timeliness/reports/anomalies       异常集中分析（GET，帕累托）
+    //   logistics-timeliness/reports/scores          渠道时效评分（GET，实时计算）
+    //   logistics-timeliness/reports/score-snapshots  评分台账（GET，真分页）/ 重算落库（POST）
+    //   logistics-timeliness/subjects                逐票时效明细（GET，真分页 + 筛选）
+    //
+    // ⚠️ **裸路径 `logistics-timeliness` 不放行**：后端这一组端点**没有**裸集合读
+    // （本模块是报表模块，一切入口都带子路径），契约里也不存在
+    // `/channel/logistics-timeliness` 这一条。多放一段会让一个**还不存在**的路径
+    // 看起来像已交付 —— 界面点下去得到 404，而后端其实从来就没实现它。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / overview / reports / subjects）
+    // **排在各自的子路径之前**。
+    //
+    // ⚠️ **本条目一段 uuid 都没有**：本模块的端点全是「集合读 + 明细读」，
+    // 没有一条是按 uuid 定位单个资源（明细是「窗口 + 筛选 + 分页」，
+    // 不是 `logistics-timeliness/subjects/{uuid}`）。所以这里**没有** uuid 段，
+    // 也就没有「单字符 e 被当 uuid 放行」那类坑 —— 少一段正则胜过写一段防错。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `logistics-timeliness/subjects/{uuid}` —— 明细按窗口 + 筛选 + 分页取，没有单票形状
+    //   * `logistics-timeliness/reports/{anything}` —— reports 下只有上面列出的五个子路径
+    //   * `logistics-timeliness/snapshots` —— 评分台账的路径是 reports/score-snapshots
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^logistics\-timeliness\/(?:capabilities|overview|subjects|reports\/(?:matrix|monthly|anomalies|scores|score\-snapshots))$/,
+  },
+  {
     // 10.1.2.1 运费计算器（**本条目是新增一条 services[] 元素**，与 10.1.1.2 渠道配置
     // 那条并列，**不改也不重排**它）。同批多车道共享这一个文件，而每个服务在
     // services[] 里是**一段超长单行正则**：两条车道都往同一服务的 alternation 里并分支，
