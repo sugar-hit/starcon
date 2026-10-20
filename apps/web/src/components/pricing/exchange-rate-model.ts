@@ -348,7 +348,8 @@ export function validateSourceInput(input: {
 /**
  * 5.2 的汇率分区 —— 两个兄弟模块共用 L3 路由 {@code /pricing/rates}。
  *
- * <p>未交付的分区**显式标成未交付**，不画空白框冒充已交付。
+ * <p>未交付的分区**显式标成未交付**，不画空白框冒充已交付；
+ * 已交付的分区**显式标成已交付**，不与未交付混在一起让人猜。
  */
 export const RATE_SECTIONS: readonly {
   id: string;
@@ -367,8 +368,8 @@ export const RATE_SECTIONS: readonly {
     title: '汇率快照',
     description:
       '在单据/定价生效时冻结所用汇率（原价、汇率、舍入方式、目标币金额），保证历史利润可复算。' +
-      '**尚未交付**：它的上游是本模块，当前本模块只产出汇率事实，不假装快照已存在。',
-    delivered: false,
+      '快照只追加、不允许改写：今天汇率变了，历史利润的数字不会跟着变。',
+    delivered: true,
   },
 ];
 

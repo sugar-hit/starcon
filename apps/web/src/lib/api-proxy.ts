@@ -3989,6 +3989,36 @@ const services: readonly {
       /^exchange\-rates(?:\/(?:capabilities|latest|functional\-currencies|sources(?:\/initialize|\/[A-Za-z0-9_]{2,32})?|fetch|fetch\-log)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 5.2.2.2 汇率快照（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.2）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   exchange-rate-snapshots                      快照台账（集合读）+ 冻结快照（POST）
+    //   exchange-rate-snapshots/capabilities         能力声明（冻结 / 方向 / 舍入规则）
+    //   exchange-rate-snapshots/replay               复算（POST，纯计算不写库）
+    //   exchange-rate-snapshots/rounding-rules       舍入规则配置（GET）+ 新建（POST）
+    //   exchange-rate-snapshots/rounding-rules/initialize  初始化内置舍入规则（POST，幂等）
+    //   exchange-rate-snapshots/rounding-rules/{code} 修改舍入规则（PUT；按**规则代码**寻址，不是 uuid）
+    //   exchange-rate-snapshots/{id}                 快照详情（GET）
+    //
+    // 🔴 `capabilities` / `replay` / `rounding-rules` 等字面量段排在 uuid 分支**之前**判别：
+    //     字面量先判，两类不会互相吃掉。
+    // 🔴 `rounding-rules/{code}` 的 code 是**规则代码**（如 JPY / DEFAULT），不是 uuid ——
+    //     所以这一段用字符集而不是 {uuid} 段。
+    //
+    // 刻意**不**放行：本模块**没有** UPDATE / DELETE 端点（快照是只追加的冻结事实），
+    // 也没有「导出」「批量冻结」这类不存在的形状 ——
+    // 放行后端不存在的路径比 404 更糟，界面会以为功能已交付。
+    //
+    // 与既有分支不重叠：既有 `catalog/` 长正则里没有 `exchange-rate-snapshots`，
+    // 而本条目的首 token `exchange-rate-snapshots` 与兄弟模块的 `exchange-rates` 也是两个 token，
+    // 两者不会互相吃掉。
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^exchange\-rate\-snapshots(?:\/(?:capabilities|replay|rounding\-rules(?:\/initialize|\/[A-Za-z0-9_]{2,32})?)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 5.2.1.3 成本分摊（catalog 服务，卷 05「定价与价目」的 L3 锚点 5.2.1）。
     //
     // 蓝图：「把混合成本的货件（一次采购多个 SKU 共用头程）按重量/体积/金额/数量规则分摊到各 SKU，

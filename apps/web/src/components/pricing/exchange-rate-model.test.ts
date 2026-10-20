@@ -192,12 +192,21 @@ describe('来源配置校验', () => {
 });
 
 describe('分区', () => {
-  it('汇率查询已交付，汇率快照如实标成未交付', () => {
+  it('汇率查询与汇率快照都已交付，且各写各的职责', () => {
     const delivered = RATE_SECTIONS.filter((s) => s.delivered).map((s) => s.id);
-    expect(delivered).toEqual(['5.2.2.1']);
+    expect(delivered).toEqual(['5.2.2.1', '5.2.2.2']);
+
+    const rate = RATE_SECTIONS.find((s) => s.id === '5.2.2.1');
+    expect(rate?.delivered).toBe(true);
+    expect(rate?.title).toBe('汇率查询');
+
+    // 断言「该分区 delivered 为 true」+「该分区写出了自己的职责」，
+    // **不**断言任何关于交付状态的字面量文案：兄弟模块一旦交付那个字面量就会消失，
+    // 写死会让别的车道一交付就红。
     const snapshot = RATE_SECTIONS.find((s) => s.id === '5.2.2.2');
-    expect(snapshot?.delivered).toBe(false);
-    expect(snapshot?.description).toContain('尚未交付');
+    expect(snapshot?.delivered).toBe(true);
+    expect(snapshot?.title).toBe('汇率快照');
+    expect(snapshot?.description).toContain('冻结');
   });
 
   it('默认筛选是空的', () => {
