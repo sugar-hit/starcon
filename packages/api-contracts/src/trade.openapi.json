@@ -31807,6 +31807,665 @@
           }
         }
       }
+    },
+    "/trade/purchase-arrivals": {
+      "get": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "get_trade_purchase_arrivals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "inTransitOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "promisedBefore",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/sync-in-transit": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_sync_in_transit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/ship": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_ship",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalShip"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/payable-confirmations/{confirmationId}/reject": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_payable_confirmations_confirmationId_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "confirmationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalPayableReject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/payable-confirmations/{confirmationId}/confirm": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_payable_confirmations_confirmationId_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "confirmationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalPayableConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/dispositions/{dispositionId}/resolve": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_dispositions_dispositionId_resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "dispositionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalDispositionResolve"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/cancel": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalCancel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}/arrivals": {
+      "post": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "post_trade_purchase_arrivals_id_arrivals",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseArrivalArrival"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/{id}": {
+      "get": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "get_trade_purchase_arrivals_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/overdue-board": {
+      "get": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "get_trade_purchase_arrivals_overdue_board",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "minOverdueDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalAlertBoard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-arrivals/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-arrival-controller"
+        ],
+        "operationId": "get_trade_purchase_arrivals_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseArrivalCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -79708,6 +80367,852 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalCreate": {
+        "type": "object",
+        "properties": {
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceDocType": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "receivableQty": {
+            "type": "number",
+            "description": "可收数量（NUMERIC(19,6)）"
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "单价快照（应付部分确认的依据）"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "description": "承诺到货日（跟单 / 采购单带来的输入事实）",
+            "format": "date"
+          },
+          "promiseSource": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "needsBody": {
+            "type": "boolean"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseArrivalDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/PurchaseArrivalRow"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalReceiptRow"
+            }
+          },
+          "payableConfirmations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalPayableRow"
+            }
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalDispositionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalEventRow"
+            }
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalAction"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "本次逾期判定的时刻（DB 时钟）",
+            "format": "date-time"
+          },
+          "overdueRuleNote": {
+            "type": "string",
+            "description": "逾期判定口径"
+          },
+          "dispositionRuleNote": {
+            "type": "string",
+            "description": "处置建议的推导规则说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游可用性（8 仓储 / 10 物流 / 6.3.1.x 采购单 / 6.3.2.1 跟单 / 12 财务）"
+          }
+        }
+      },
+      "PurchaseArrivalDispositionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "actionTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "basisFacts": {
+            "type": "string",
+            "description": "依据里的数字（jsonb 原文）"
+          },
+          "dispositionStatus": {
+            "type": "string"
+          },
+          "dispositionStatusLabel": {
+            "type": "string"
+          },
+          "resolveNote": {
+            "type": "string"
+          },
+          "resolvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseArrivalEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "occurredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseArrivalPayableRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confirmationNo": {
+            "type": "string"
+          },
+          "confirmationStatus": {
+            "type": "string"
+          },
+          "confirmationStatusLabel": {
+            "type": "string"
+          },
+          "confirmationAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "arrivedQty": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "effectiveAmount": {
+            "type": "number",
+            "description": "已生效金额：财务确认之前恒为 0"
+          },
+          "financeReference": {
+            "type": "string"
+          },
+          "confirmedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rejectedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rejectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseArrivalReceiptRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "arrivalSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "arrivalType": {
+            "type": "string"
+          },
+          "arrivalTypeLabel": {
+            "type": "string"
+          },
+          "arrivedQty": {
+            "type": "number"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warehouseReceiptCode": {
+            "type": "string"
+          },
+          "warehouseReceiptReceivedQty": {
+            "type": "number"
+          },
+          "warehouseReceiptSyncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "recordedBy": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PurchaseArrivalRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceDocType": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "receivableQty": {
+            "type": "number"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "outstandingQty": {
+            "type": "number"
+          },
+          "receivedRatio": {
+            "type": "number",
+            "description": "已收比例（0~1，界面自己乘 100 显示百分比）"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "promiseSource": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "是否逾期（在途恒为 false）"
+          },
+          "overdueDays": {
+            "type": "integer",
+            "description": "逾期天数（在途恒为 0）",
+            "format": "int32"
+          },
+          "daysUntilPromise": {
+            "type": "integer",
+            "description": "距承诺到货日的天数，负数=已过承诺日",
+            "format": "int32"
+          },
+          "inTransitDwellDays": {
+            "type": "integer",
+            "description": "在途滞留天数（来自 10.4.1.2 快照，未同步为 0）",
+            "format": "int32"
+          },
+          "inTransitShipmentCode": {
+            "type": "string"
+          },
+          "inTransitWaybillNo": {
+            "type": "string"
+          },
+          "inTransitEta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inTransitSyncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "arrivalCount": {
+            "type": "integer",
+            "description": "到货次数",
+            "format": "int64"
+          },
+          "pendingPayableAmount": {
+            "type": "number"
+          },
+          "confirmedPayableAmount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseArrivalShip": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipmentCode": {
+            "type": "string"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "description": "新的承诺到货日（跟单改了交期就填这里）",
+            "format": "date",
+            "nullable": true
+          },
+          "promiseSource": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalPayableReject": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalPayableConfirm": {
+        "type": "object",
+        "properties": {
+          "financeReference": {
+            "type": "string",
+            "description": "财务单据号（应付单号）"
+          }
+        }
+      },
+      "PurchaseArrivalDispositionResolve": {
+        "type": "object",
+        "properties": {
+          "dispositionStatus": {
+            "type": "string",
+            "description": "ADOPTED 或 DISMISSED"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalCancel": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalArrival": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "arrivedQty": {
+            "type": "number",
+            "description": "本次到货数量"
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warehouseReceiptCode": {
+            "type": "string",
+            "description": "8.2.1.1 收货单号（可选；给了就去 warehouse 授权核对）",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PurchaseArrivalSummary"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "本次逾期判定的时刻（DB 时钟），逾期天数按它算",
+            "format": "date-time"
+          },
+          "overdueRuleNote": {
+            "type": "string",
+            "description": "逾期判定口径（界面不自造解释）"
+          },
+          "quantityNote": {
+            "type": "string",
+            "description": "数量口径说明"
+          },
+          "sortNote": {
+            "type": "string",
+            "description": "排序白名单说明"
+          }
+        }
+      },
+      "PurchaseArrivalSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingShipment": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partiallyReceived": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fullyReceived": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueOutstandingQty": {
+            "type": "number",
+            "description": "逾期单缺口合计"
+          },
+          "pendingPayableAmount": {
+            "type": "number",
+            "description": "待财务确认的应付金额合计"
+          },
+          "confirmedPayableAmount": {
+            "type": "number",
+            "description": "财务已确认的应付金额合计"
+          }
+        }
+      },
+      "PurchaseArrivalAlertBoard": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalAlertRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PurchaseArrivalAlertSummary"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleNote": {
+            "type": "string",
+            "description": "逾期与在途滞留两个口径的说明"
+          },
+          "dispositionRuleNote": {
+            "type": "string",
+            "description": "处置建议的推导规则说明"
+          }
+        }
+      },
+      "PurchaseArrivalAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string"
+          },
+          "alertTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "overdueDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inTransitDwellDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receivableQty": {
+            "type": "number"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "outstandingQty": {
+            "type": "number"
+          },
+          "gapRatio": {
+            "type": "number",
+            "description": "缺口比例（0~1）"
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalDispositionRow"
+            }
+          }
+        }
+      },
+      "PurchaseArrivalAlertSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitStalledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warnCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueOutstandingQty": {
+            "type": "number"
+          },
+          "maxOverdueDays": {
+            "type": "integer",
+            "description": "最大逾期天数",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseArrivalCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseArrivalCapabilitySection"
+            }
+          },
+          "stateMachineNote": {
+            "type": "string"
+          },
+          "overdueRuleNote": {
+            "type": "string"
+          },
+          "quantityRuleNote": {
+            "type": "string"
+          },
+          "dispositionRuleNote": {
+            "type": "string"
+          },
+          "payableRuleNote": {
+            "type": "string"
+          },
+          "upstreamBoundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseArrivalCapabilitySection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string",
+            "description": "未交付时这个能力归属哪个模块号",
+            "nullable": true
+          },
+          "blockedReason": {
+            "type": "string",
+            "description": "不可用的原因（available=false 时非空）",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

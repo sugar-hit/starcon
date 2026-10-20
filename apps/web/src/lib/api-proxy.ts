@@ -3551,6 +3551,48 @@ const services: readonly {
       /^fulfillment\/requests(?:\/(?:capabilities|resumable|scan-timeouts|timeouts|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:advance|block|retry|cancel|complete|reservation(?:\/ack)?|outbound-order(?:\/ack)?|work-orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status)?))?))?$/,
   },
   {
+    // 6.3.2.2 到货与逾期（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
+    // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `fulfillment/requests`（9.3.3.1 履约请求）那条**之后**、
+    // `fulfillment/consolidation`（9.3.1.2 合单）那条**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 首段 `purchase-arrivals` 是**独立字面量**：与既有 trade 分支的 `order-review`、
+    //    `platform-orders`、`fulfillment/...`、`processing/...`、`aftersales/...`、
+    //    `refunds/...`、`supplier-claims/...` 互不吃，所以本条放在哪个位置都不会误伤它们。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                              能力声明（状态机口径 / 逾期两个口径 / 未交付上游）
+    //   overdue-board                              逾期预警看板（逾期未到 + 在途滞留两类）
+    //   （裸路径）                                 到货跟踪列表（GET 真分页 + 多维筛选）
+    //   {uuid}                                    跟踪详情（头 + 流水 + 应付确认 + 建议 + 留痕）
+    //   {uuid}/ship                               标记已发货（在途）
+    //   {uuid}/arrivals                           登记到货（部分 / 全部由后端按缺口判定）
+    //   {uuid}/cancel                             取消跟踪单
+    //   {uuid}/sync-in-transit                    同步 10.4.1.2 在途状态快照
+    //   {uuid}/dispositions/{uuid}/resolve        处置建议采纳 / 忽略
+    //   {uuid}/payable-confirmations/{uuid}/confirm 财务确认应付部分确认
+    //   {uuid}/payable-confirmations/{uuid}/reject  财务驳回应付部分确认
+    // 判别顺序：字面量子路径（capabilities / overdue-board）排在 {uuid} 分支**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-arrivals/{uuid}/received-qty` —— **没有**这个写形状：
+    //     已收数量由 DB 从到货流水重算（V235 守卫①），后端刻意不提供直接改数量的入口。
+    //   * `purchase-arrivals/{uuid}/payable-confirmations` —— 没有「直接置为已确认」的旁路；
+    //     应付部分确认只能经 confirm / reject 两个动作。
+    //   * `purchase-arrivals/{uuid}/dispositions` —— 处置建议是派生结果，不提供手写建议的入口。
+    //   * `purchase-arrivals/{uuid}/overdue` —— 逾期判定由承诺到货日推出，不提供手工标逾期的入口。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-arrivals(?:\/(?:capabilities|overdue\-board)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:ship|arrivals|cancel|sync\-in\-transit|dispositions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|payable\-confirmations\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject)))?)?$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
