@@ -3428,6 +3428,36 @@ const services: readonly {
       /^fulfillment\/monitor\/(?:capabilities|scan|thresholds|todos(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/action)?|events|cases(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:verify|disposition|close|todos|disposition\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/status|release\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/ack))?)?)$/,
   },
   {
+    // 6.2.1.1 缺货与断货风险（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有那条 trade/ 分支（9.3.3.2 履约流程监控）**之后**、
+    // 9.3.3.1 履约请求那条**之前** —— 与另外三条并行车道的插入点被既有条目隔开，
+    // git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的第二条不会误吃前一条的路径。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                        能力与上下游可用性（含「日均销量由本服务登记」
+    //                                        「店铺名称属 channel 不复制」这类必须显式报出的事实）
+    //   velocities                          销售速度登记列表（GET）/ 登记（POST）
+    //   snapshots                           快照列表（GET）/ 计算一次风险清单（POST）
+    //   items                               断货风险清单（GET）
+    //   items/{uuid}                        风险行详情（GET）：涉及店铺 + 逐项计算过程
+    //
+    // 判别顺序：**字面量子路径必须排在 {uuid} 分支之前**，否则它们的 id 段会被 uuid 分支吃掉半截。
+    // ⚠ id 段用**完整 UUID 形状**（照抄本文件里其余 20 处的同一写法），不是 `[0-9a-f-]+`。
+    // ⚠ 外层 `^` / `$` 包住完整分组，不写成 `^a|b|c$`。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 stockout-risk —— 后端没有对应映射，放行只会拿到 404。
+    //   * `stockout-risk/items/{uuid}/...` 的任何子段 —— 后端只有单条详情，没有子资源。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^stockout\-risk\/(?:capabilities|velocities|snapshots|items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)$/,
+  },
+  {
     // 9.3.3.1 履约请求（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
