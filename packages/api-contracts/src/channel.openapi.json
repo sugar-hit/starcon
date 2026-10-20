@@ -601,6 +601,140 @@
         }
       }
     },
+    "/channel/listing-changes/watches/{watchId}": {
+      "put": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "put_channel_listing_changes_watches_watchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveListingChangeWatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeWatchRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "delete_channel_listing_changes_watches_watchId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeWatchDeleteResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/opportunities/{opportunityId}/acknowledge": {
+      "put": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "put_channel_listing_changes_opportunities_opportunityId_acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcknowledgeListingChangeOpportunityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeOpportunityRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/connections/{id}/credential": {
       "put": {
         "tags": [
@@ -2250,6 +2384,585 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/restrictions": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_restrictions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "subjectType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_restrictions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRestrictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/restrictions/{id}/revoke": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_restrictions_id_revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRestrictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/registrations": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_registrations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dispositionState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_registrations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterReceivingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dispositionMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueDispositionOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}/costs": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders_id_costs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCostRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionCostRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDispositionOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/decisions": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_decisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dispositionMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "post_channel_return_dispositions_decisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideDispositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+                }
+              }
+            }
           }
         }
       }
@@ -8109,6 +8822,226 @@
         }
       }
     },
+    "/channel/listing-changes/watches": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_watches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeWatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "post_channel_listing_changes_watches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveListingChangeWatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeWatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/crawls": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_crawls",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeCrawlPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "post_channel_listing_changes_crawls",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestListingChangeCrawlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeCrawlResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-bulk-edit/templates": {
       "get": {
         "tags": [
@@ -11379,6 +12312,299 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SyncCursorView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/registrations/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_registrations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceivingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/overview": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/orders/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_orders_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/events": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "registrationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/eligibility": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_eligibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "registrationId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionEligibility"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/decisions/{id}": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_decisions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionDecisionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/return-dispositions/capabilities": {
+      "get": {
+        "tags": [
+          "return-disposition-controller"
+        ],
+        "operationId": "get_channel_return_dispositions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnDispositionCapabilities"
                 }
               }
             }
@@ -17045,6 +18271,388 @@
         }
       }
     },
+    "/channel/listing-changes/watches/{watchId}/history": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_watches_watchId_history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/watches/{watchId}/comparison": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_watches_watchId_comparison",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/opportunities": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_opportunities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "opportunityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeOpportunityPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/filter-options": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_filter_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/events": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "watchId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "changeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/listing-changes/capabilities": {
+      "get": {
+        "tags": [
+          "listing-change-controller"
+        ],
+        "operationId": "get_channel_listing_changes_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingChangeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/listing-bulk-edit/scope-check": {
       "get": {
         "tags": [
@@ -19178,742 +20786,6 @@
           }
         }
       }
-    },
-    "/channel/listing-changes/watches/{watchId}": {
-      "put": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "put_channel_listing_changes_watches_watchId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveListingChangeWatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeWatchRow"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "delete_channel_listing_changes_watches_watchId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeWatchDeleteResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/opportunities/{opportunityId}/acknowledge": {
-      "put": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "put_channel_listing_changes_opportunities_opportunityId_acknowledge",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "opportunityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcknowledgeListingChangeOpportunityRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeOpportunityRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/watches": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_watches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "platformCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "targetKind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeWatchPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "post_channel_listing_changes_watches",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveListingChangeWatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeWatchRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/crawls": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_crawls",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeCrawlPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "post_channel_listing_changes_crawls",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IngestListingChangeCrawlRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeCrawlResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/watches/{watchId}/history": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_watches_watchId_history",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeSnapshotPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/watches/{watchId}/comparison": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_watches_watchId_comparison",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeComparison"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/opportunities": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_opportunities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "opportunityType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "severity",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeOpportunityPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/filter-options": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_filter_options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeFilterOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/events": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_events",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "watchId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "changeType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "direction",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeEventPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/listing-changes/capabilities": {
-      "get": {
-        "tags": [
-          "listing-change-controller"
-        ],
-        "operationId": "get_channel_listing_changes_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingChangeCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -20764,6 +21636,297 @@
             "type": "string",
             "description": "更新时刻",
             "format": "date-time"
+          }
+        }
+      },
+      "SaveListingChangeWatchRequest": {
+        "required": [
+          "externalItemId",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 平台编码（目标在哪个平台上被观察）"
+          },
+          "marketplaceCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "description": "站点编码（可空；站点码只在平台内唯一）"
+          },
+          "externalItemId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）—— 目标身份的一半"
+          },
+          "targetKind": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 目标性质：COMPETITOR 竞品 / OWN_ASIN 自有 ASIN（不给 = COMPETITOR）"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "目标标题（平台侧原文，仅供展示）"
+          },
+          "brand": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "目标品牌（平台侧原文，仅供展示）"
+          },
+          "crawlIntervalMinutes": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 抓取频率（分钟；蓝图输入项。不给 = 720）",
+            "format": "int32"
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED（不给 = ACTIVE）"
+          },
+          "outOfStockOpportunity": {
+            "type": "boolean",
+            "description": "🔴 竞品断货 ⇒ 市场机会（不给 = 开启）"
+          },
+          "listedOpportunity": {
+            "type": "boolean",
+            "description": "🔴 上新 / 重新上架 ⇒ 市场机会（不给 = 关闭）"
+          },
+          "priceIncreaseRatioThreshold": {
+            "type": "number",
+            "description": "🔴 涨价幅度阈值（比例；**不给 = 不判定**这一条）"
+          },
+          "rankWorsenThreshold": {
+            "type": "integer",
+            "description": "🔴 排名名次数字变大超过该位数 ⇒ 市场机会（**不给 = 不判定**这一条）",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          }
+        }
+      },
+      "ListingChangeWatchRow": {
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 平台编码"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "description": "站点编码（无站点时为空串）"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "targetKind": {
+            "type": "string",
+            "description": "🔴 目标性质：COMPETITOR / OWN_ASIN"
+          },
+          "title": {
+            "type": "string",
+            "description": "目标标题"
+          },
+          "brand": {
+            "type": "string",
+            "description": "目标品牌"
+          },
+          "crawlIntervalMinutes": {
+            "type": "integer",
+            "description": "🔴 抓取频率（分钟）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "outOfStockOpportunity": {
+            "type": "boolean",
+            "description": "断货 ⇒ 机会（配置）"
+          },
+          "listedOpportunity": {
+            "type": "boolean",
+            "description": "上新 ⇒ 机会（配置）"
+          },
+          "priceIncreaseRatioThreshold": {
+            "type": "number",
+            "description": "🔴 涨价幅度阈值（null = 该维度不判定）"
+          },
+          "rankWorsenThreshold": {
+            "type": "integer",
+            "description": "🔴 排名变差阈值（null = 该维度不判定）",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "description": "观测快照条数",
+            "format": "int64"
+          },
+          "eventCount": {
+            "type": "integer",
+            "description": "变更事件条数",
+            "format": "int64"
+          },
+          "opportunityCount": {
+            "type": "integer",
+            "description": "市场机会条数",
+            "format": "int64"
+          },
+          "openOpportunityCount": {
+            "type": "integer",
+            "description": "未处理的市场机会条数",
+            "format": "int64"
+          },
+          "lastListingStatus": {
+            "type": "string",
+            "description": "🔴 最近一次**已知**上下架状态（null = 从未观测到）"
+          },
+          "lastPrice": {
+            "type": "number",
+            "description": "🔴 最近一次**已知**价格（null = 从未观测到；不是 0）"
+          },
+          "lastRankPosition": {
+            "type": "integer",
+            "description": "🔴 最近一次**已知**排名（null = 从未观测到；不是 0）",
+            "format": "int32"
+          },
+          "lastReviewCount": {
+            "type": "number",
+            "description": "🔴 最近一次**已知**评论数（null = 从未观测到）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "lastObservedAt": {
+            "type": "string",
+            "description": "🔴 最近一次观测时刻（null = 从未观测到）",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AcknowledgeListingChangeOpportunityRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          }
+        }
+      },
+      "ListingChangeOpportunityRow": {
+        "type": "object",
+        "properties": {
+          "opportunityId": {
+            "type": "string",
+            "description": "机会 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "触发这次机会的变更事件 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "目标标题"
+          },
+          "opportunityType": {
+            "type": "string",
+            "description": "🔴 机会类型"
+          },
+          "severity": {
+            "type": "string",
+            "description": "严重度：HIGH / MEDIUM / LOW"
+          },
+          "observedPrice": {
+            "type": "number",
+            "description": "🔴 判定时刻的价格快照"
+          },
+          "observedRank": {
+            "type": "integer",
+            "description": "🔴 判定时刻的排名快照",
+            "format": "int32"
+          },
+          "observedReviewCount": {
+            "type": "number",
+            "description": "🔴 判定时刻的评论数快照"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "status": {
+            "type": "string",
+            "description": "🔴 状态：OPEN 未处理 / ACKNOWLEDGED 已阅（**内部状态，不代表已采取动作**）"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 判定依据"
+          },
+          "detectedAt": {
+            "type": "string",
+            "description": "🔴 判定时刻",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "description": "已阅时刻（null = 未阅）",
+            "format": "date-time"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
           }
         }
       },
@@ -21922,6 +23085,583 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "SaveRestrictionRequest": {
+        "type": "object",
+        "properties": {
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "restrictionBasis": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnResaleRestrictionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectTypeLabel": {
+            "type": "string"
+          },
+          "subjectRef": {
+            "type": "string"
+          },
+          "restrictionBasis": {
+            "type": "string"
+          },
+          "restrictionBasisLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokeReason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RevokeRestrictionRequest": {
+        "type": "object",
+        "properties": {
+          "revokeReason": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterReceivingRequest": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseType": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "brandCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnReceivingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "warehouseType": {
+            "type": "string"
+          },
+          "warehouseTypeLabel": {
+            "type": "string"
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseCountry": {
+            "type": "string"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registeredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dispositionState": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionMethodLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "activeRestrictionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "IssueDispositionOrderRequest": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "costs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReturnCostDraft"
+            }
+          }
+        }
+      },
+      "ReturnCostDraft": {
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "vendorRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ReturnDispositionOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "dispositionMethodLabel": {
+            "type": "string"
+          },
+          "disposedQty": {
+            "type": "number"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "salvageCurrency": {
+            "type": "string"
+          },
+          "salvageAmount": {
+            "type": "number"
+          },
+          "totalCostAmount": {
+            "type": "number"
+          },
+          "costItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "issuedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RecordCostRequest": {
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "vendorRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnDispositionCostRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "costTypeLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "vendorRef": {
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CancelDispositionOrderRequest": {
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DecideDispositionRequest": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "decidedQty": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnDispositionDecisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionNo": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNo": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "brandCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "dispositionMethodLabel": {
+            "type": "string"
+          },
+          "decidedQty": {
+            "type": "number"
+          },
+          "decisionBasis": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "qualityVerdict": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "qualitySalvageEstimate": {
+            "type": "number",
+            "nullable": true
+          },
+          "qualitySalvageCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "resaleRestricted": {
+            "type": "boolean"
+          },
+          "resaleRestrictionNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "consumedByOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -23108,7 +24848,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -25057,7 +26797,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -27495,7 +29235,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -27838,9 +29578,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -30881,6 +32621,205 @@
             "items": {
               "$ref": "#/components/schemas/ListingClaimFieldRow"
             }
+          }
+        }
+      },
+      "IngestListingChangeCrawlRequest": {
+        "required": [
+          "accuracyWindowMinutes",
+          "crawledAt",
+          "idempotencyKey",
+          "observations",
+          "watchId"
+        ],
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "🔴 监控对象 id（这一批盯的是哪个目标）",
+            "format": "uuid"
+          },
+          "source": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源：PLATFORM / SCRAPE / API（不给 = PLATFORM）"
+          },
+          "ingestChannel": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API（不给 = API）"
+          },
+          "crawledAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻（这一批是什么时候跑的）",
+            "format": "date-time"
+          },
+          "accuracyWindowMinutes": {
+            "maximum": 525600,
+            "minimum": 0,
+            "type": "integer",
+            "description": "🔴 可能存在的不准确窗口（分钟）",
+            "format": "int32"
+          },
+          "idempotencyKey": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 幂等键（租户内唯一；重复投递整批不再落库）"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注（进留痕）"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "抓取方给的原文结构（原样存）"
+            },
+            "description": "抓取方给的原文结构（原样存）"
+          },
+          "observations": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "description": "🔴 本批的观测（每条带自己的观测时刻）",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeObservationInput"
+            }
+          }
+        }
+      },
+      "ListingChangeObservationInput": {
+        "required": [
+          "observedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "observedAt": {
+            "type": "string",
+            "description": "🔴 观测时刻（这次看到这些值是什么时候）",
+            "format": "date-time"
+          },
+          "listingStatus": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 上下架状态：LISTED / OUT_OF_STOCK / DELISTED / UNKNOWN（不给 = UNKNOWN）"
+          },
+          "price": {
+            "type": "number",
+            "description": "🔴 观测价格（null = 平台没报，不是 0）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（ISO 4217 三字母）"
+          },
+          "rankPosition": {
+            "type": "integer",
+            "description": "🔴 排名（名次；null = 平台没报，不是 0。名次数字越小越好）",
+            "format": "int32"
+          },
+          "rankBasis": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 排名口径：BSR / CATEGORY / KEYWORD（不给 = BSR）"
+          },
+          "rankBasisKey": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "排名口径的键（关键词原文 / 类目路径；BSR 时可空）"
+          },
+          "reviewCount": {
+            "type": "number",
+            "description": "🔴 评论数（null = 平台没报，不是 0）"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "抓取方给的原文结构（原样存，不解释不加工）"
+            },
+            "description": "抓取方给的原文结构（原样存，不解释不加工）"
+          }
+        },
+        "description": "🔴 本批的观测（每条带自己的观测时刻）"
+      },
+      "ListingChangeCrawlResult": {
+        "type": "object",
+        "properties": {
+          "crawlId": {
+            "type": "string",
+            "description": "抓取批次 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "抓取状态：RECEIVED / APPLIED / PARTIAL"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "description": "本批收到的观测条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "实际落库的条数（**重复投递时是原批次落库条数** —— 本次未落库，看 replayed）",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "被跳过的条数",
+            "format": "int32"
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "🔴 是否为重复投递（本次未落库）"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "skipped": {
+            "type": "array",
+            "description": "🔴 逐条跳过原因（不静默丢弃）",
+            "items": {
+              "type": "string",
+              "description": "🔴 逐条跳过原因（不静默丢弃）"
+            }
+          },
+          "crawledAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻",
+            "format": "date-time"
+          },
+          "accuracyWindowMinutes": {
+            "type": "integer",
+            "description": "🔴 可能存在的不准确窗口（分钟）",
+            "format": "int32"
+          },
+          "eventCount": {
+            "type": "integer",
+            "description": "本批产生的变更事件条数",
+            "format": "int32"
+          },
+          "opportunityCount": {
+            "type": "integer",
+            "description": "本批产生的市场机会条数",
+            "format": "int32"
           }
         }
       },
@@ -35406,6 +37345,545 @@
           "lastSyncAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ReturnResaleRestrictionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnResaleRestrictionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnReceivingPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnReceivingRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dispositionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "registrationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnReceivingDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnReceivingRow"
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "CurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnDispositionOverview": {
+        "type": "object",
+        "properties": {
+          "registrationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingDecisionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issuedOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resaleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repatriationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discardCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "restrictedRegistrationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "costTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotal"
+            }
+          },
+          "salvageTotals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyTotal"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionOrderDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnDispositionOrderRow"
+          },
+          "costs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionCostRow"
+            }
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/ReturnInventoryInstructionRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "ReturnInventoryInstructionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionMethod": {
+            "type": "string"
+          },
+          "instructionType": {
+            "type": "string"
+          },
+          "instructionTypeLabel": {
+            "type": "string"
+          },
+          "targetInventoryState": {
+            "type": "string"
+          },
+          "targetInventoryStateLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "number"
+          },
+          "instructionStatus": {
+            "type": "string"
+          },
+          "consumerModule": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedBy": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "nullable": true
+      },
+      "ReturnDispositionEventPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnDispositionEligibility": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "receivedQty": {
+            "type": "number"
+          },
+          "qualityVerdict": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityVerdictAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "qualityNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "resaleRestricted": {
+            "type": "boolean"
+          },
+          "resaleRestrictionNote": {
+            "type": "string"
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnMethodEligibility"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "upstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnMethodEligibility": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "methodLabel": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "blockingReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionDecisionPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "decisionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionDecisionDetail": {
+        "type": "object",
+        "properties": {
+          "head": {
+            "$ref": "#/components/schemas/ReturnDispositionDecisionRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnDispositionEventRow"
+            }
+          }
+        }
+      },
+      "CapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnDispositionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapabilityDimension"
+            }
+          },
+          "dispositionMethods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warehouseTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "costTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionSubjectTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restrictionBases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisionNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "financeNote": {
+            "type": "string"
+          },
+          "inventoryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
           }
         }
       },
@@ -44404,6 +46882,954 @@
         },
         "description": "逐维度能力声明；未交付段 available=false"
       },
+      "ListingChangeWatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeWatchRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangeSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeSnapshotRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangeSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "snapshotId": {
+            "type": "string",
+            "description": "快照 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "🔴 观测时刻",
+            "format": "date-time"
+          },
+          "accuracyWindowMinutes": {
+            "type": "integer",
+            "description": "🔴 可能存在的不准确窗口（分钟）",
+            "format": "int32"
+          },
+          "listingStatus": {
+            "type": "string",
+            "description": "🔴 上下架状态：LISTED / OUT_OF_STOCK / DELISTED / UNKNOWN"
+          },
+          "price": {
+            "type": "number",
+            "description": "🔴 观测价格（null = 平台没报，不是 0）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "rankPosition": {
+            "type": "integer",
+            "description": "🔴 排名（名次；null = 平台没报，不是 0）",
+            "format": "int32"
+          },
+          "rankBasis": {
+            "type": "string",
+            "description": "🔴 排名口径：BSR / CATEGORY / KEYWORD"
+          },
+          "rankBasisKey": {
+            "type": "string",
+            "description": "排名口径的键"
+          },
+          "reviewCount": {
+            "type": "number",
+            "description": "🔴 评论数（null = 平台没报，不是 0）"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源"
+          },
+          "ingestChannel": {
+            "type": "string",
+            "description": "进来的通道"
+          },
+          "revision": {
+            "type": "integer",
+            "description": "覆盖次数",
+            "format": "int32"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingChangeComparison": {
+        "type": "object",
+        "properties": {
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "🔴 平台编码"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "description": "站点编码（无站点时为空串）"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "targetKind": {
+            "type": "string",
+            "description": "🔴 目标性质：COMPETITOR / OWN_ASIN"
+          },
+          "title": {
+            "type": "string",
+            "description": "目标标题"
+          },
+          "from": {
+            "type": "string",
+            "description": "区间起（含，yyyy-MM-dd）"
+          },
+          "to": {
+            "type": "string",
+            "description": "区间止（含，yyyy-MM-dd）"
+          },
+          "sampleCount": {
+            "type": "integer",
+            "description": "区间内观测样本数",
+            "format": "int64"
+          },
+          "eventCount": {
+            "type": "integer",
+            "description": "区间内变更事件条数",
+            "format": "int64"
+          },
+          "opportunityCount": {
+            "type": "integer",
+            "description": "区间内市场机会条数",
+            "format": "int64"
+          },
+          "price": {
+            "$ref": "#/components/schemas/ListingChangePriceComparison"
+          },
+          "rank": {
+            "$ref": "#/components/schemas/ListingChangeRankComparison"
+          },
+          "reviewCount": {
+            "$ref": "#/components/schemas/ListingChangeReviewComparison"
+          },
+          "listingStatus": {
+            "$ref": "#/components/schemas/ListingChangeStatusComparison"
+          },
+          "hasData": {
+            "type": "boolean",
+            "description": "区间内是否有观测数据"
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "空态原因（没有数据时写明）"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangePriceComparison": {
+        "type": "object",
+        "properties": {
+          "firstPrice": {
+            "type": "number",
+            "description": "区间内第一个已知价格（null = 没有样本）"
+          },
+          "lastPrice": {
+            "type": "number",
+            "description": "区间内最后一个已知价格（null = 没有样本）"
+          },
+          "minPrice": {
+            "type": "number",
+            "description": "区间内最低价"
+          },
+          "maxPrice": {
+            "type": "number",
+            "description": "区间内最高价"
+          },
+          "avgPrice": {
+            "type": "number",
+            "description": "区间内平均价"
+          },
+          "changeAmount": {
+            "type": "number",
+            "description": "🔴 价格变化量（末 − 首；无首值时 null）"
+          },
+          "changeRatio": {
+            "type": "number",
+            "description": "🔴 价格变化比例（现算；**分母为 0 时是 null**，不是 0）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "sampleCount": {
+            "type": "integer",
+            "description": "有价格的样本数",
+            "format": "int64"
+          }
+        },
+        "description": "价格维度对比"
+      },
+      "ListingChangeRankComparison": {
+        "type": "object",
+        "properties": {
+          "firstRank": {
+            "type": "integer",
+            "description": "区间内第一个已知排名（null = 没有样本）",
+            "format": "int32"
+          },
+          "lastRank": {
+            "type": "integer",
+            "description": "区间内最后一个已知排名（null = 没有样本）",
+            "format": "int32"
+          },
+          "bestRank": {
+            "type": "integer",
+            "description": "区间内最好排名（名次最小）",
+            "format": "int32"
+          },
+          "worstRank": {
+            "type": "integer",
+            "description": "区间内最差排名（名次最大）",
+            "format": "int32"
+          },
+          "changeAmount": {
+            "type": "integer",
+            "description": "🔴 排名变化（末 − 首；名次变大 = 竞品变差）",
+            "format": "int32"
+          },
+          "rankBasis": {
+            "type": "string",
+            "description": "排名口径：BSR / CATEGORY / KEYWORD"
+          },
+          "sampleCount": {
+            "type": "integer",
+            "description": "有排名的样本数",
+            "format": "int64"
+          }
+        },
+        "description": "排名维度对比"
+      },
+      "ListingChangeReviewComparison": {
+        "type": "object",
+        "properties": {
+          "firstCount": {
+            "type": "number",
+            "description": "区间内第一个已知评论数（null = 没有样本）"
+          },
+          "lastCount": {
+            "type": "number",
+            "description": "区间内最后一个已知评论数（null = 没有样本）"
+          },
+          "changeAmount": {
+            "type": "number",
+            "description": "🔴 评论数变化（末 − 首）"
+          },
+          "sampleCount": {
+            "type": "integer",
+            "description": "有评论数的样本数",
+            "format": "int64"
+          }
+        },
+        "description": "评论数维度对比"
+      },
+      "ListingChangeStatusComparison": {
+        "type": "object",
+        "properties": {
+          "currentStatus": {
+            "type": "string",
+            "description": "区间内最后一个已知上下架状态（null = 没有样本）"
+          },
+          "listedCount": {
+            "type": "integer",
+            "description": "在售样本数",
+            "format": "int64"
+          },
+          "outOfStockCount": {
+            "type": "integer",
+            "description": "断货样本数",
+            "format": "int64"
+          },
+          "delistedCount": {
+            "type": "integer",
+            "description": "已下架样本数",
+            "format": "int64"
+          },
+          "transitionCount": {
+            "type": "integer",
+            "description": "🔴 上下架迁移次数（变更事件条数）",
+            "format": "int64"
+          },
+          "sampleCount": {
+            "type": "integer",
+            "description": "有上下架状态的样本数",
+            "format": "int64"
+          }
+        },
+        "description": "上下架维度对比"
+      },
+      "ListingChangeOpportunityPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeOpportunityRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "description": "未处理的机会条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangeFilterOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台列表",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangePlatformOption"
+            }
+          },
+          "marketplaces": {
+            "type": "array",
+            "description": "站点列表",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeMarketplaceOption"
+            }
+          },
+          "targetKinds": {
+            "type": "array",
+            "description": "目标性质取值域",
+            "items": {
+              "type": "string",
+              "description": "目标性质取值域"
+            }
+          },
+          "listingStatuses": {
+            "type": "array",
+            "description": "上下架状态取值域",
+            "items": {
+              "type": "string",
+              "description": "上下架状态取值域"
+            }
+          },
+          "changeTypes": {
+            "type": "array",
+            "description": "变化维度取值域",
+            "items": {
+              "type": "string",
+              "description": "变化维度取值域"
+            }
+          },
+          "directions": {
+            "type": "array",
+            "description": "变化方向取值域",
+            "items": {
+              "type": "string",
+              "description": "变化方向取值域"
+            }
+          },
+          "opportunityTypes": {
+            "type": "array",
+            "description": "市场机会类型取值域",
+            "items": {
+              "type": "string",
+              "description": "市场机会类型取值域"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "严重度取值域",
+            "items": {
+              "type": "string",
+              "description": "严重度取值域"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "watchStatuses": {
+            "type": "array",
+            "description": "监控对象状态取值域",
+            "items": {
+              "type": "string",
+              "description": "监控对象状态取值域"
+            }
+          },
+          "opportunityStatuses": {
+            "type": "array",
+            "description": "市场机会状态取值域",
+            "items": {
+              "type": "string",
+              "description": "市场机会状态取值域"
+            }
+          },
+          "rankBases": {
+            "type": "array",
+            "description": "排名口径取值域",
+            "items": {
+              "type": "string",
+              "description": "排名口径取值域"
+            }
+          }
+        }
+      },
+      "ListingChangeMarketplaceOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "站点编码（只在平台内唯一）"
+          },
+          "name": {
+            "type": "string",
+            "description": "站点名称"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "所属平台编码"
+          }
+        },
+        "description": "站点列表"
+      },
+      "ListingChangePlatformOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台列表"
+      },
+      "ListingChangeEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeEventRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "watchCount": {
+            "type": "integer",
+            "description": "监控对象总数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangeEventRow": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "description": "事件 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "snapshotId": {
+            "type": "string",
+            "description": "触发这次变化的观测 id",
+            "format": "uuid"
+          },
+          "previousSnapshotId": {
+            "type": "string",
+            "description": "比较基准的观测 id（null = 首次观测，没有基准）",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "title": {
+            "type": "string",
+            "description": "目标标题"
+          },
+          "changeType": {
+            "type": "string",
+            "description": "🔴 变化维度：LISTING_STATUS / PRICE / RANK / REVIEW_COUNT"
+          },
+          "direction": {
+            "type": "string",
+            "description": "🔴 方向：INCREASED / DECREASED / CHANGED（只说方向，不含好坏）"
+          },
+          "previousValue": {
+            "type": "number",
+            "description": "🔴 旧值（数值维度；null = 平台没报 / 首次观测）"
+          },
+          "currentValue": {
+            "type": "number",
+            "description": "🔴 新值（数值维度）"
+          },
+          "previousState": {
+            "type": "string",
+            "description": "🔴 旧状态（上下架维度）"
+          },
+          "currentState": {
+            "type": "string",
+            "description": "🔴 新状态（上下架维度）"
+          },
+          "priceChangeAmount": {
+            "type": "number",
+            "description": "🔴 价格变化量（现算；无基准时 null）"
+          },
+          "priceChangeRatio": {
+            "type": "number",
+            "description": "🔴 价格变化比例（现算；**分母为 0 时是 null**，不是 0）"
+          },
+          "rankChange": {
+            "type": "integer",
+            "description": "🔴 排名变化（现算：本次名次 − 上次名次；名次变大 = 竞品变差）",
+            "format": "int32"
+          },
+          "reviewCountChange": {
+            "type": "number",
+            "description": "🔴 评论数变化（现算）"
+          },
+          "observedPrice": {
+            "type": "number",
+            "description": "🔴 判定时刻的价格快照"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "detectedAt": {
+            "type": "string",
+            "description": "🔴 判定时刻",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "description": "🔴 判定依据"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingChangeCrawlPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页数据",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeCrawlRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码（从 0 起）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的总条数",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注"
+          }
+        }
+      },
+      "ListingChangeCrawlRow": {
+        "type": "object",
+        "properties": {
+          "crawlId": {
+            "type": "string",
+            "description": "抓取批次 id",
+            "format": "uuid"
+          },
+          "watchId": {
+            "type": "string",
+            "description": "监控对象 id",
+            "format": "uuid"
+          },
+          "externalItemId": {
+            "type": "string",
+            "description": "🔴 平台商品 ID 原文（ASIN）"
+          },
+          "source": {
+            "type": "string",
+            "description": "来源：PLATFORM / SCRAPE / API"
+          },
+          "ingestChannel": {
+            "type": "string",
+            "description": "进来的通道：WEBHOOK / POLL / API"
+          },
+          "crawledAt": {
+            "type": "string",
+            "description": "🔴 抓取时刻",
+            "format": "date-time"
+          },
+          "accuracyWindowMinutes": {
+            "type": "integer",
+            "description": "🔴 可能存在的不准确窗口（分钟）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "抓取状态：RECEIVED / APPLIED / PARTIAL"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "description": "收到的观测条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "落库的观测条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过的观测条数",
+            "format": "int32"
+          },
+          "eventCount": {
+            "type": "integer",
+            "description": "产生的变更事件条数",
+            "format": "int32"
+          },
+          "opportunityCount": {
+            "type": "integer",
+            "description": "产生的市场机会条数",
+            "format": "int32"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "幂等键"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "receivedAt": {
+            "type": "string",
+            "description": "入库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "本页数据"
+      },
+      "ListingChangeCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/ListingChangeCapabilityDimension"
+            }
+          },
+          "targetKinds": {
+            "type": "array",
+            "description": "目标性质取值域",
+            "items": {
+              "type": "string",
+              "description": "目标性质取值域"
+            }
+          },
+          "listingStatuses": {
+            "type": "array",
+            "description": "上下架状态取值域",
+            "items": {
+              "type": "string",
+              "description": "上下架状态取值域"
+            }
+          },
+          "changeTypes": {
+            "type": "array",
+            "description": "变化维度取值域",
+            "items": {
+              "type": "string",
+              "description": "变化维度取值域"
+            }
+          },
+          "directions": {
+            "type": "array",
+            "description": "变化方向取值域",
+            "items": {
+              "type": "string",
+              "description": "变化方向取值域"
+            }
+          },
+          "opportunityTypes": {
+            "type": "array",
+            "description": "市场机会类型取值域",
+            "items": {
+              "type": "string",
+              "description": "市场机会类型取值域"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "description": "严重度取值域",
+            "items": {
+              "type": "string",
+              "description": "严重度取值域"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "description": "来源取值域",
+            "items": {
+              "type": "string",
+              "description": "来源取值域"
+            }
+          },
+          "ingestChannels": {
+            "type": "array",
+            "description": "进来的通道",
+            "items": {
+              "type": "string",
+              "description": "进来的通道"
+            }
+          },
+          "watchStatuses": {
+            "type": "array",
+            "description": "监控对象状态取值域",
+            "items": {
+              "type": "string",
+              "description": "监控对象状态取值域"
+            }
+          },
+          "opportunityStatuses": {
+            "type": "array",
+            "description": "市场机会状态取值域",
+            "items": {
+              "type": "string",
+              "description": "市场机会状态取值域"
+            }
+          },
+          "rankBases": {
+            "type": "array",
+            "description": "排名口径取值域",
+            "items": {
+              "type": "string",
+              "description": "排名口径取值域"
+            }
+          },
+          "ruleDefinitions": {
+            "type": "string",
+            "description": "🔴 判定规则口径（服务端算，前端原样显示）"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "🔴 数据来源标识（参考数据）"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "🔴 数据来源标注（仅供参考，不构成市场结论）"
+          },
+          "actionsNote": {
+            "type": "string",
+            "description": "🔴 动作声明（本模块不提供抢占/调价等动作）"
+          },
+          "relationNote": {
+            "type": "string",
+            "description": "上游 / 下游说明"
+          }
+        }
+      },
+      "ListingChangeCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
       "BulkEditCapabilities": {
         "type": "object",
         "properties": {
@@ -47378,1473 +50804,6 @@
           }
         }
       },
-      "ListingBundleComponentDetail": {
-        "type": "object",
-        "properties": {
-          "removedId": {
-            "type": "string",
-            "description": "已删除的组件行 id",
-            "format": "uuid"
-          },
-          "bindingId": {
-            "type": "string",
-            "description": "绑定 id",
-            "format": "uuid"
-          },
-          "componentsBeforeRemoval": {
-            "type": "array",
-            "description": "🔴 删除前的组件清单（让界面立刻看出删到哪一步了）",
-            "items": {
-              "$ref": "#/components/schemas/ListingBundleComponentRow"
-            }
-          },
-          "binding": {
-            "$ref": "#/components/schemas/ListingBundleBindingRow"
-          },
-          "note": {
-            "type": "string",
-            "description": "🔴 说明：删到一条不剩时整套不可售"
-          }
-        }
-      },
-      "SaveListingChangeWatchRequest": {
-        "required": [
-          "externalItemId",
-          "platformCode"
-        ],
-        "type": "object",
-        "properties": {
-          "platformCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 平台编码（目标在哪个平台上被观察）"
-          },
-          "marketplaceCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "description": "站点编码（可空；站点码只在平台内唯一）"
-          },
-          "externalItemId": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）—— 目标身份的一半"
-          },
-          "targetKind": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 目标性质：COMPETITOR 竞品 / OWN_ASIN 自有 ASIN（不给 = COMPETITOR）"
-          },
-          "title": {
-            "maxLength": 300,
-            "minLength": 0,
-            "type": "string",
-            "description": "目标标题（平台侧原文，仅供展示）"
-          },
-          "brand": {
-            "maxLength": 120,
-            "minLength": 0,
-            "type": "string",
-            "description": "目标品牌（平台侧原文，仅供展示）"
-          },
-          "crawlIntervalMinutes": {
-            "maximum": 100000,
-            "minimum": 1,
-            "type": "integer",
-            "description": "🔴 抓取频率（分钟；蓝图输入项。不给 = 720）",
-            "format": "int32"
-          },
-          "status": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "状态：ACTIVE / PAUSED（不给 = ACTIVE）"
-          },
-          "outOfStockOpportunity": {
-            "type": "boolean",
-            "description": "🔴 竞品断货 ⇒ 市场机会（不给 = 开启）"
-          },
-          "listedOpportunity": {
-            "type": "boolean",
-            "description": "🔴 上新 / 重新上架 ⇒ 市场机会（不给 = 关闭）"
-          },
-          "priceIncreaseRatioThreshold": {
-            "type": "number",
-            "description": "🔴 涨价幅度阈值（比例；**不给 = 不判定**这一条）"
-          },
-          "rankWorsenThreshold": {
-            "type": "integer",
-            "description": "🔴 排名名次数字变大超过该位数 ⇒ 市场机会（**不给 = 不判定**这一条）",
-            "format": "int32"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "备注（进留痕）"
-          }
-        }
-      },
-      "ListingChangeWatchRow": {
-        "type": "object",
-        "properties": {
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "🔴 平台编码"
-          },
-          "marketplaceCode": {
-            "type": "string",
-            "description": "站点编码（无站点时为空串）"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "targetKind": {
-            "type": "string",
-            "description": "🔴 目标性质：COMPETITOR / OWN_ASIN"
-          },
-          "title": {
-            "type": "string",
-            "description": "目标标题"
-          },
-          "brand": {
-            "type": "string",
-            "description": "目标品牌"
-          },
-          "crawlIntervalMinutes": {
-            "type": "integer",
-            "description": "🔴 抓取频率（分钟）",
-            "format": "int32"
-          },
-          "status": {
-            "type": "string",
-            "description": "状态：ACTIVE / PAUSED"
-          },
-          "outOfStockOpportunity": {
-            "type": "boolean",
-            "description": "断货 ⇒ 机会（配置）"
-          },
-          "listedOpportunity": {
-            "type": "boolean",
-            "description": "上新 ⇒ 机会（配置）"
-          },
-          "priceIncreaseRatioThreshold": {
-            "type": "number",
-            "description": "🔴 涨价幅度阈值（null = 该维度不判定）"
-          },
-          "rankWorsenThreshold": {
-            "type": "integer",
-            "description": "🔴 排名变差阈值（null = 该维度不判定）",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string",
-            "description": "备注"
-          },
-          "snapshotCount": {
-            "type": "integer",
-            "description": "观测快照条数",
-            "format": "int64"
-          },
-          "eventCount": {
-            "type": "integer",
-            "description": "变更事件条数",
-            "format": "int64"
-          },
-          "opportunityCount": {
-            "type": "integer",
-            "description": "市场机会条数",
-            "format": "int64"
-          },
-          "openOpportunityCount": {
-            "type": "integer",
-            "description": "未处理的市场机会条数",
-            "format": "int64"
-          },
-          "lastListingStatus": {
-            "type": "string",
-            "description": "🔴 最近一次**已知**上下架状态（null = 从未观测到）"
-          },
-          "lastPrice": {
-            "type": "number",
-            "description": "🔴 最近一次**已知**价格（null = 从未观测到；不是 0）"
-          },
-          "lastRankPosition": {
-            "type": "integer",
-            "description": "🔴 最近一次**已知**排名（null = 从未观测到；不是 0）",
-            "format": "int32"
-          },
-          "lastReviewCount": {
-            "type": "number",
-            "description": "🔴 最近一次**已知**评论数（null = 从未观测到）"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种"
-          },
-          "lastObservedAt": {
-            "type": "string",
-            "description": "🔴 最近一次观测时刻（null = 从未观测到）",
-            "format": "date-time"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "创建时刻",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "description": "更新时刻",
-            "format": "date-time"
-          }
-        }
-      },
-      "AcknowledgeListingChangeOpportunityRequest": {
-        "type": "object",
-        "properties": {
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "备注（进留痕）"
-          }
-        }
-      },
-      "ListingChangeOpportunityRow": {
-        "type": "object",
-        "properties": {
-          "opportunityId": {
-            "type": "string",
-            "description": "机会 id",
-            "format": "uuid"
-          },
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "eventId": {
-            "type": "string",
-            "description": "触发这次机会的变更事件 id",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "title": {
-            "type": "string",
-            "description": "目标标题"
-          },
-          "opportunityType": {
-            "type": "string",
-            "description": "🔴 机会类型"
-          },
-          "severity": {
-            "type": "string",
-            "description": "严重度：HIGH / MEDIUM / LOW"
-          },
-          "observedPrice": {
-            "type": "number",
-            "description": "🔴 判定时刻的价格快照"
-          },
-          "observedRank": {
-            "type": "integer",
-            "description": "🔴 判定时刻的排名快照",
-            "format": "int32"
-          },
-          "observedReviewCount": {
-            "type": "number",
-            "description": "🔴 判定时刻的评论数快照"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种"
-          },
-          "status": {
-            "type": "string",
-            "description": "🔴 状态：OPEN 未处理 / ACKNOWLEDGED 已阅（**内部状态，不代表已采取动作**）"
-          },
-          "reason": {
-            "type": "string",
-            "description": "🔴 判定依据"
-          },
-          "detectedAt": {
-            "type": "string",
-            "description": "🔴 判定时刻",
-            "format": "date-time"
-          },
-          "acknowledgedAt": {
-            "type": "string",
-            "description": "已阅时刻（null = 未阅）",
-            "format": "date-time"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "IngestListingChangeCrawlRequest": {
-        "required": [
-          "accuracyWindowMinutes",
-          "crawledAt",
-          "idempotencyKey",
-          "observations",
-          "watchId"
-        ],
-        "type": "object",
-        "properties": {
-          "watchId": {
-            "type": "string",
-            "description": "🔴 监控对象 id（这一批盯的是哪个目标）",
-            "format": "uuid"
-          },
-          "source": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "来源：PLATFORM / SCRAPE / API（不给 = PLATFORM）"
-          },
-          "ingestChannel": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "进来的通道：WEBHOOK / POLL / API（不给 = API）"
-          },
-          "crawledAt": {
-            "type": "string",
-            "description": "🔴 抓取时刻（这一批是什么时候跑的）",
-            "format": "date-time"
-          },
-          "accuracyWindowMinutes": {
-            "maximum": 525600,
-            "minimum": 0,
-            "type": "integer",
-            "description": "🔴 可能存在的不准确窗口（分钟）",
-            "format": "int32"
-          },
-          "idempotencyKey": {
-            "maxLength": 160,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 幂等键（租户内唯一；重复投递整批不再落库）"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "备注（进留痕）"
-          },
-          "detail": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "description": "抓取方给的原文结构（原样存）"
-            },
-            "description": "抓取方给的原文结构（原样存）"
-          },
-          "observations": {
-            "maxItems": 500,
-            "minItems": 0,
-            "type": "array",
-            "description": "🔴 本批的观测（每条带自己的观测时刻）",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeObservationInput"
-            }
-          }
-        }
-      },
-      "ListingChangeObservationInput": {
-        "required": [
-          "observedAt"
-        ],
-        "type": "object",
-        "properties": {
-          "observedAt": {
-            "type": "string",
-            "description": "🔴 观测时刻（这次看到这些值是什么时候）",
-            "format": "date-time"
-          },
-          "listingStatus": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 上下架状态：LISTED / OUT_OF_STOCK / DELISTED / UNKNOWN（不给 = UNKNOWN）"
-          },
-          "price": {
-            "type": "number",
-            "description": "🔴 观测价格（null = 平台没报，不是 0）"
-          },
-          "currency": {
-            "maxLength": 3,
-            "minLength": 0,
-            "type": "string",
-            "description": "币种（ISO 4217 三字母）"
-          },
-          "rankPosition": {
-            "type": "integer",
-            "description": "🔴 排名（名次；null = 平台没报，不是 0。名次数字越小越好）",
-            "format": "int32"
-          },
-          "rankBasis": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "description": "🔴 排名口径：BSR / CATEGORY / KEYWORD（不给 = BSR）"
-          },
-          "rankBasisKey": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "description": "排名口径的键（关键词原文 / 类目路径；BSR 时可空）"
-          },
-          "reviewCount": {
-            "type": "number",
-            "description": "🔴 评论数（null = 平台没报，不是 0）"
-          },
-          "detail": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "description": "抓取方给的原文结构（原样存，不解释不加工）"
-            },
-            "description": "抓取方给的原文结构（原样存，不解释不加工）"
-          }
-        },
-        "description": "🔴 本批的观测（每条带自己的观测时刻）"
-      },
-      "ListingChangeCrawlResult": {
-        "type": "object",
-        "properties": {
-          "crawlId": {
-            "type": "string",
-            "description": "抓取批次 id",
-            "format": "uuid"
-          },
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string",
-            "description": "抓取状态：RECEIVED / APPLIED / PARTIAL"
-          },
-          "receivedCount": {
-            "type": "integer",
-            "description": "本批收到的观测条数",
-            "format": "int32"
-          },
-          "appliedCount": {
-            "type": "integer",
-            "description": "实际落库的条数（**重复投递时是原批次落库条数** —— 本次未落库，看 replayed）",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "description": "被跳过的条数",
-            "format": "int32"
-          },
-          "replayed": {
-            "type": "boolean",
-            "description": "🔴 是否为重复投递（本次未落库）"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "description": "幂等键"
-          },
-          "skipped": {
-            "type": "array",
-            "description": "🔴 逐条跳过原因（不静默丢弃）",
-            "items": {
-              "type": "string",
-              "description": "🔴 逐条跳过原因（不静默丢弃）"
-            }
-          },
-          "crawledAt": {
-            "type": "string",
-            "description": "🔴 抓取时刻",
-            "format": "date-time"
-          },
-          "accuracyWindowMinutes": {
-            "type": "integer",
-            "description": "🔴 可能存在的不准确窗口（分钟）",
-            "format": "int32"
-          },
-          "eventCount": {
-            "type": "integer",
-            "description": "本批产生的变更事件条数",
-            "format": "int32"
-          },
-          "opportunityCount": {
-            "type": "integer",
-            "description": "本批产生的市场机会条数",
-            "format": "int32"
-          }
-        }
-      },
-      "ListingChangeWatchPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "本页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeWatchRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码（从 0 起）",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合条件的总条数",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangeSnapshotPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "本页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeSnapshotRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码（从 0 起）",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合条件的总条数",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangeSnapshotRow": {
-        "type": "object",
-        "properties": {
-          "snapshotId": {
-            "type": "string",
-            "description": "快照 id",
-            "format": "uuid"
-          },
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "observedAt": {
-            "type": "string",
-            "description": "🔴 观测时刻",
-            "format": "date-time"
-          },
-          "accuracyWindowMinutes": {
-            "type": "integer",
-            "description": "🔴 可能存在的不准确窗口（分钟）",
-            "format": "int32"
-          },
-          "listingStatus": {
-            "type": "string",
-            "description": "🔴 上下架状态：LISTED / OUT_OF_STOCK / DELISTED / UNKNOWN"
-          },
-          "price": {
-            "type": "number",
-            "description": "🔴 观测价格（null = 平台没报，不是 0）"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种"
-          },
-          "rankPosition": {
-            "type": "integer",
-            "description": "🔴 排名（名次；null = 平台没报，不是 0）",
-            "format": "int32"
-          },
-          "rankBasis": {
-            "type": "string",
-            "description": "🔴 排名口径：BSR / CATEGORY / KEYWORD"
-          },
-          "rankBasisKey": {
-            "type": "string",
-            "description": "排名口径的键"
-          },
-          "reviewCount": {
-            "type": "number",
-            "description": "🔴 评论数（null = 平台没报，不是 0）"
-          },
-          "source": {
-            "type": "string",
-            "description": "来源"
-          },
-          "ingestChannel": {
-            "type": "string",
-            "description": "进来的通道"
-          },
-          "revision": {
-            "type": "integer",
-            "description": "覆盖次数",
-            "format": "int32"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        },
-        "description": "本页数据"
-      },
-      "ListingChangeComparison": {
-        "type": "object",
-        "properties": {
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "🔴 平台编码"
-          },
-          "marketplaceCode": {
-            "type": "string",
-            "description": "站点编码（无站点时为空串）"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "targetKind": {
-            "type": "string",
-            "description": "🔴 目标性质：COMPETITOR / OWN_ASIN"
-          },
-          "title": {
-            "type": "string",
-            "description": "目标标题"
-          },
-          "from": {
-            "type": "string",
-            "description": "区间起（含，yyyy-MM-dd）"
-          },
-          "to": {
-            "type": "string",
-            "description": "区间止（含，yyyy-MM-dd）"
-          },
-          "sampleCount": {
-            "type": "integer",
-            "description": "区间内观测样本数",
-            "format": "int64"
-          },
-          "eventCount": {
-            "type": "integer",
-            "description": "区间内变更事件条数",
-            "format": "int64"
-          },
-          "opportunityCount": {
-            "type": "integer",
-            "description": "区间内市场机会条数",
-            "format": "int64"
-          },
-          "price": {
-            "$ref": "#/components/schemas/ListingChangePriceComparison"
-          },
-          "rank": {
-            "$ref": "#/components/schemas/ListingChangeRankComparison"
-          },
-          "reviewCount": {
-            "$ref": "#/components/schemas/ListingChangeReviewComparison"
-          },
-          "listingStatus": {
-            "$ref": "#/components/schemas/ListingChangeStatusComparison"
-          },
-          "hasData": {
-            "type": "boolean",
-            "description": "区间内是否有观测数据"
-          },
-          "emptyReason": {
-            "type": "string",
-            "description": "空态原因（没有数据时写明）"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangePriceComparison": {
-        "type": "object",
-        "properties": {
-          "firstPrice": {
-            "type": "number",
-            "description": "区间内第一个已知价格（null = 没有样本）"
-          },
-          "lastPrice": {
-            "type": "number",
-            "description": "区间内最后一个已知价格（null = 没有样本）"
-          },
-          "minPrice": {
-            "type": "number",
-            "description": "区间内最低价"
-          },
-          "maxPrice": {
-            "type": "number",
-            "description": "区间内最高价"
-          },
-          "avgPrice": {
-            "type": "number",
-            "description": "区间内平均价"
-          },
-          "changeAmount": {
-            "type": "number",
-            "description": "🔴 价格变化量（末 − 首；无首值时 null）"
-          },
-          "changeRatio": {
-            "type": "number",
-            "description": "🔴 价格变化比例（现算；**分母为 0 时是 null**，不是 0）"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种"
-          },
-          "sampleCount": {
-            "type": "integer",
-            "description": "有价格的样本数",
-            "format": "int64"
-          }
-        },
-        "description": "价格维度对比"
-      },
-      "ListingChangeRankComparison": {
-        "type": "object",
-        "properties": {
-          "firstRank": {
-            "type": "integer",
-            "description": "区间内第一个已知排名（null = 没有样本）",
-            "format": "int32"
-          },
-          "lastRank": {
-            "type": "integer",
-            "description": "区间内最后一个已知排名（null = 没有样本）",
-            "format": "int32"
-          },
-          "bestRank": {
-            "type": "integer",
-            "description": "区间内最好排名（名次最小）",
-            "format": "int32"
-          },
-          "worstRank": {
-            "type": "integer",
-            "description": "区间内最差排名（名次最大）",
-            "format": "int32"
-          },
-          "changeAmount": {
-            "type": "integer",
-            "description": "🔴 排名变化（末 − 首；名次变大 = 竞品变差）",
-            "format": "int32"
-          },
-          "rankBasis": {
-            "type": "string",
-            "description": "排名口径：BSR / CATEGORY / KEYWORD"
-          },
-          "sampleCount": {
-            "type": "integer",
-            "description": "有排名的样本数",
-            "format": "int64"
-          }
-        },
-        "description": "排名维度对比"
-      },
-      "ListingChangeReviewComparison": {
-        "type": "object",
-        "properties": {
-          "firstCount": {
-            "type": "number",
-            "description": "区间内第一个已知评论数（null = 没有样本）"
-          },
-          "lastCount": {
-            "type": "number",
-            "description": "区间内最后一个已知评论数（null = 没有样本）"
-          },
-          "changeAmount": {
-            "type": "number",
-            "description": "🔴 评论数变化（末 − 首）"
-          },
-          "sampleCount": {
-            "type": "integer",
-            "description": "有评论数的样本数",
-            "format": "int64"
-          }
-        },
-        "description": "评论数维度对比"
-      },
-      "ListingChangeStatusComparison": {
-        "type": "object",
-        "properties": {
-          "currentStatus": {
-            "type": "string",
-            "description": "区间内最后一个已知上下架状态（null = 没有样本）"
-          },
-          "listedCount": {
-            "type": "integer",
-            "description": "在售样本数",
-            "format": "int64"
-          },
-          "outOfStockCount": {
-            "type": "integer",
-            "description": "断货样本数",
-            "format": "int64"
-          },
-          "delistedCount": {
-            "type": "integer",
-            "description": "已下架样本数",
-            "format": "int64"
-          },
-          "transitionCount": {
-            "type": "integer",
-            "description": "🔴 上下架迁移次数（变更事件条数）",
-            "format": "int64"
-          },
-          "sampleCount": {
-            "type": "integer",
-            "description": "有上下架状态的样本数",
-            "format": "int64"
-          }
-        },
-        "description": "上下架维度对比"
-      },
-      "ListingChangeOpportunityPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "本页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeOpportunityRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码（从 0 起）",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合条件的总条数",
-            "format": "int64"
-          },
-          "openCount": {
-            "type": "integer",
-            "description": "未处理的机会条数",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangeFilterOptions": {
-        "type": "object",
-        "properties": {
-          "platforms": {
-            "type": "array",
-            "description": "平台列表",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangePlatformOption"
-            }
-          },
-          "marketplaces": {
-            "type": "array",
-            "description": "站点列表",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeMarketplaceOption"
-            }
-          },
-          "targetKinds": {
-            "type": "array",
-            "description": "目标性质取值域",
-            "items": {
-              "type": "string",
-              "description": "目标性质取值域"
-            }
-          },
-          "listingStatuses": {
-            "type": "array",
-            "description": "上下架状态取值域",
-            "items": {
-              "type": "string",
-              "description": "上下架状态取值域"
-            }
-          },
-          "changeTypes": {
-            "type": "array",
-            "description": "变化维度取值域",
-            "items": {
-              "type": "string",
-              "description": "变化维度取值域"
-            }
-          },
-          "directions": {
-            "type": "array",
-            "description": "变化方向取值域",
-            "items": {
-              "type": "string",
-              "description": "变化方向取值域"
-            }
-          },
-          "opportunityTypes": {
-            "type": "array",
-            "description": "市场机会类型取值域",
-            "items": {
-              "type": "string",
-              "description": "市场机会类型取值域"
-            }
-          },
-          "severities": {
-            "type": "array",
-            "description": "严重度取值域",
-            "items": {
-              "type": "string",
-              "description": "严重度取值域"
-            }
-          },
-          "sources": {
-            "type": "array",
-            "description": "来源取值域",
-            "items": {
-              "type": "string",
-              "description": "来源取值域"
-            }
-          },
-          "watchStatuses": {
-            "type": "array",
-            "description": "监控对象状态取值域",
-            "items": {
-              "type": "string",
-              "description": "监控对象状态取值域"
-            }
-          },
-          "opportunityStatuses": {
-            "type": "array",
-            "description": "市场机会状态取值域",
-            "items": {
-              "type": "string",
-              "description": "市场机会状态取值域"
-            }
-          },
-          "rankBases": {
-            "type": "array",
-            "description": "排名口径取值域",
-            "items": {
-              "type": "string",
-              "description": "排名口径取值域"
-            }
-          }
-        }
-      },
-      "ListingChangeMarketplaceOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": "站点编码（只在平台内唯一）"
-          },
-          "name": {
-            "type": "string",
-            "description": "站点名称"
-          },
-          "platformCode": {
-            "type": "string",
-            "description": "所属平台编码"
-          }
-        },
-        "description": "站点列表"
-      },
-      "ListingChangePlatformOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": "平台编码"
-          },
-          "name": {
-            "type": "string",
-            "description": "平台名称"
-          }
-        },
-        "description": "平台列表"
-      },
-      "ListingChangeEventPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "本页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeEventRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码（从 0 起）",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合条件的总条数",
-            "format": "int64"
-          },
-          "watchCount": {
-            "type": "integer",
-            "description": "监控对象总数",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangeEventRow": {
-        "type": "object",
-        "properties": {
-          "eventId": {
-            "type": "string",
-            "description": "事件 id",
-            "format": "uuid"
-          },
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "snapshotId": {
-            "type": "string",
-            "description": "触发这次变化的观测 id",
-            "format": "uuid"
-          },
-          "previousSnapshotId": {
-            "type": "string",
-            "description": "比较基准的观测 id（null = 首次观测，没有基准）",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "title": {
-            "type": "string",
-            "description": "目标标题"
-          },
-          "changeType": {
-            "type": "string",
-            "description": "🔴 变化维度：LISTING_STATUS / PRICE / RANK / REVIEW_COUNT"
-          },
-          "direction": {
-            "type": "string",
-            "description": "🔴 方向：INCREASED / DECREASED / CHANGED（只说方向，不含好坏）"
-          },
-          "previousValue": {
-            "type": "number",
-            "description": "🔴 旧值（数值维度；null = 平台没报 / 首次观测）"
-          },
-          "currentValue": {
-            "type": "number",
-            "description": "🔴 新值（数值维度）"
-          },
-          "previousState": {
-            "type": "string",
-            "description": "🔴 旧状态（上下架维度）"
-          },
-          "currentState": {
-            "type": "string",
-            "description": "🔴 新状态（上下架维度）"
-          },
-          "priceChangeAmount": {
-            "type": "number",
-            "description": "🔴 价格变化量（现算；无基准时 null）"
-          },
-          "priceChangeRatio": {
-            "type": "number",
-            "description": "🔴 价格变化比例（现算；**分母为 0 时是 null**，不是 0）"
-          },
-          "rankChange": {
-            "type": "integer",
-            "description": "🔴 排名变化（现算：本次名次 − 上次名次；名次变大 = 竞品变差）",
-            "format": "int32"
-          },
-          "reviewCountChange": {
-            "type": "number",
-            "description": "🔴 评论数变化（现算）"
-          },
-          "observedPrice": {
-            "type": "number",
-            "description": "🔴 判定时刻的价格快照"
-          },
-          "currency": {
-            "type": "string",
-            "description": "币种"
-          },
-          "detectedAt": {
-            "type": "string",
-            "description": "🔴 判定时刻",
-            "format": "date-time"
-          },
-          "reason": {
-            "type": "string",
-            "description": "🔴 判定依据"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        },
-        "description": "本页数据"
-      },
-      "ListingChangeCrawlPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "本页数据",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeCrawlRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "description": "页码（从 0 起）",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "description": "每页条数",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "description": "符合条件的总条数",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注"
-          }
-        }
-      },
-      "ListingChangeCrawlRow": {
-        "type": "object",
-        "properties": {
-          "crawlId": {
-            "type": "string",
-            "description": "抓取批次 id",
-            "format": "uuid"
-          },
-          "watchId": {
-            "type": "string",
-            "description": "监控对象 id",
-            "format": "uuid"
-          },
-          "externalItemId": {
-            "type": "string",
-            "description": "🔴 平台商品 ID 原文（ASIN）"
-          },
-          "source": {
-            "type": "string",
-            "description": "来源：PLATFORM / SCRAPE / API"
-          },
-          "ingestChannel": {
-            "type": "string",
-            "description": "进来的通道：WEBHOOK / POLL / API"
-          },
-          "crawledAt": {
-            "type": "string",
-            "description": "🔴 抓取时刻",
-            "format": "date-time"
-          },
-          "accuracyWindowMinutes": {
-            "type": "integer",
-            "description": "🔴 可能存在的不准确窗口（分钟）",
-            "format": "int32"
-          },
-          "status": {
-            "type": "string",
-            "description": "抓取状态：RECEIVED / APPLIED / PARTIAL"
-          },
-          "receivedCount": {
-            "type": "integer",
-            "description": "收到的观测条数",
-            "format": "int32"
-          },
-          "appliedCount": {
-            "type": "integer",
-            "description": "落库的观测条数",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "description": "跳过的观测条数",
-            "format": "int32"
-          },
-          "eventCount": {
-            "type": "integer",
-            "description": "产生的变更事件条数",
-            "format": "int32"
-          },
-          "opportunityCount": {
-            "type": "integer",
-            "description": "产生的市场机会条数",
-            "format": "int32"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "description": "幂等键"
-          },
-          "note": {
-            "type": "string",
-            "description": "备注"
-          },
-          "receivedAt": {
-            "type": "string",
-            "description": "入库时刻",
-            "format": "date-time"
-          }
-        },
-        "description": "本页数据"
-      },
-      "ListingChangeCapabilities": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "description": "逐维度能力声明；未交付段 available=false",
-            "items": {
-              "$ref": "#/components/schemas/ListingChangeCapabilityDimension"
-            }
-          },
-          "targetKinds": {
-            "type": "array",
-            "description": "目标性质取值域",
-            "items": {
-              "type": "string",
-              "description": "目标性质取值域"
-            }
-          },
-          "listingStatuses": {
-            "type": "array",
-            "description": "上下架状态取值域",
-            "items": {
-              "type": "string",
-              "description": "上下架状态取值域"
-            }
-          },
-          "changeTypes": {
-            "type": "array",
-            "description": "变化维度取值域",
-            "items": {
-              "type": "string",
-              "description": "变化维度取值域"
-            }
-          },
-          "directions": {
-            "type": "array",
-            "description": "变化方向取值域",
-            "items": {
-              "type": "string",
-              "description": "变化方向取值域"
-            }
-          },
-          "opportunityTypes": {
-            "type": "array",
-            "description": "市场机会类型取值域",
-            "items": {
-              "type": "string",
-              "description": "市场机会类型取值域"
-            }
-          },
-          "severities": {
-            "type": "array",
-            "description": "严重度取值域",
-            "items": {
-              "type": "string",
-              "description": "严重度取值域"
-            }
-          },
-          "sources": {
-            "type": "array",
-            "description": "来源取值域",
-            "items": {
-              "type": "string",
-              "description": "来源取值域"
-            }
-          },
-          "ingestChannels": {
-            "type": "array",
-            "description": "进来的通道",
-            "items": {
-              "type": "string",
-              "description": "进来的通道"
-            }
-          },
-          "watchStatuses": {
-            "type": "array",
-            "description": "监控对象状态取值域",
-            "items": {
-              "type": "string",
-              "description": "监控对象状态取值域"
-            }
-          },
-          "opportunityStatuses": {
-            "type": "array",
-            "description": "市场机会状态取值域",
-            "items": {
-              "type": "string",
-              "description": "市场机会状态取值域"
-            }
-          },
-          "rankBases": {
-            "type": "array",
-            "description": "排名口径取值域",
-            "items": {
-              "type": "string",
-              "description": "排名口径取值域"
-            }
-          },
-          "ruleDefinitions": {
-            "type": "string",
-            "description": "🔴 判定规则口径（服务端算，前端原样显示）"
-          },
-          "dataSource": {
-            "type": "string",
-            "description": "🔴 数据来源标识（参考数据）"
-          },
-          "sourceNote": {
-            "type": "string",
-            "description": "🔴 数据来源标注（仅供参考，不构成市场结论）"
-          },
-          "actionsNote": {
-            "type": "string",
-            "description": "🔴 动作声明（本模块不提供抢占/调价等动作）"
-          },
-          "relationNote": {
-            "type": "string",
-            "description": "上游 / 下游说明"
-          }
-        }
-      },
-      "ListingChangeCapabilityDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string",
-            "description": "维度键"
-          },
-          "description": {
-            "type": "string",
-            "description": "维度说明"
-          },
-          "available": {
-            "type": "boolean",
-            "description": "本模块是否已交付"
-          },
-          "source": {
-            "type": "string",
-            "description": "数据来源（表 / 上游模块）"
-          },
-          "ownerModule": {
-            "type": "string",
-            "description": "未交付段的责任模块"
-          },
-          "impact": {
-            "type": "string",
-            "description": "不交付的影响"
-          }
-        },
-        "description": "逐维度能力声明；未交付段 available=false"
-      },
       "ListingChangeWatchDeleteResult": {
         "type": "object",
         "properties": {
@@ -48876,6 +50835,35 @@
             "type": "integer",
             "description": "一并删掉的市场机会条数",
             "format": "int32"
+          }
+        }
+      },
+      "ListingBundleComponentDetail": {
+        "type": "object",
+        "properties": {
+          "removedId": {
+            "type": "string",
+            "description": "已删除的组件行 id",
+            "format": "uuid"
+          },
+          "bindingId": {
+            "type": "string",
+            "description": "绑定 id",
+            "format": "uuid"
+          },
+          "componentsBeforeRemoval": {
+            "type": "array",
+            "description": "🔴 删除前的组件清单（让界面立刻看出删到哪一步了）",
+            "items": {
+              "$ref": "#/components/schemas/ListingBundleComponentRow"
+            }
+          },
+          "binding": {
+            "$ref": "#/components/schemas/ListingBundleBindingRow"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
       }
