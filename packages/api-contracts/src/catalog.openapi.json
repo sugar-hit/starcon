@@ -13469,6 +13469,382 @@
         }
       }
     },
+    "/catalog/price-adjustments": {
+      "get": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_price_adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceAdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/{id}/submit": {
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceAdjustmentExpectedVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/{id}/reject": {
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments_id_reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceAdjustmentRejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/{id}/execute": {
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments_id_execute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceAdjustmentExpectedVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/{id}/approval/refresh": {
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments_id_approval_refresh",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/writebacks/{id}/ack": {
+      "post": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_price_adjustments_writebacks_id_ack",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceAdjustmentWritebackAckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentWriteback"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/platform-fees/rules": {
       "get": {
         "tags": [
@@ -20964,6 +21340,135 @@
         }
       }
     },
+    "/catalog/batch-price-adjustments": {
+      "get": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_batch_price_adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_batch_price_adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchPriceAdjustmentExecuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-price-adjustments/preview": {
+      "post": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "post_catalog_batch_price_adjustments_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchPriceAdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/batch-calculations/runs": {
       "get": {
         "tags": [
@@ -25442,6 +25947,223 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PriceAnomalyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/{id}": {
+      "get": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_price_adjustments_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/writebacks": {
+      "get": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_price_adjustments_writebacks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentWritebackPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/current-price": {
+      "get": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_price_adjustments_current_price",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentCurrentPrice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/price-adjustments/capabilities": {
+      "get": {
+        "tags": [
+          "price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_price_adjustments_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceAdjustmentCapabilities"
                 }
               }
             }
@@ -30967,6 +31689,201 @@
         }
       }
     },
+    "/catalog/batch-price-adjustments/{id}": {
+      "get": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_batch_price_adjustments_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-price-adjustments/{id}/items": {
+      "get": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_batch_price_adjustments_id_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loss",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentItemPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-price-adjustments/sites": {
+      "get": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_batch_price_adjustments_sites",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/batch-price-adjustments/capabilities": {
+      "get": {
+        "tags": [
+          "batch-price-adjustment-controller"
+        ],
+        "operationId": "get_catalog_batch_price_adjustments_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPriceAdjustmentCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/batch-calculations/sites": {
       "get": {
         "tags": [
@@ -31944,330 +32861,6 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments": {
-      "get": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "get_catalog_batch_price_adjustments",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "post_catalog_batch_price_adjustments",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BatchPriceAdjustmentExecuteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments/preview": {
-      "post": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "post_catalog_batch_price_adjustments_preview",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BatchPriceAdjustmentRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentPreview"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments/{id}": {
-      "get": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "get_catalog_batch_price_adjustments_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments/{id}/items": {
-      "get": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "get_catalog_batch_price_adjustments_id_items",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "loss",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentItemPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments/sites": {
-      "get": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "get_catalog_batch_price_adjustments_sites",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SiteOption"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/batch-price-adjustments/capabilities": {
-      "get": {
-        "tags": [
-          "batch-price-adjustment-controller"
-        ],
-        "operationId": "get_catalog_batch_price_adjustments_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchPriceAdjustmentCapabilities"
                 }
               }
             }
@@ -43786,6 +44379,558 @@
           }
         }
       },
+      "PriceAdjustmentRequest": {
+        "required": [
+          "currency",
+          "newPrice",
+          "platformCode",
+          "reason",
+          "siteCode",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "siteCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "costCurrency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "newPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "oldPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PriceAdjustmentDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "EXECUTED",
+              "REJECTED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "oldPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "newPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceDelta": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceSource": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PRICE_OBSERVATION",
+              "BATCH_ADJUSTMENT"
+            ]
+          },
+          "priceSourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grossProfitBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossProfitAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "decisionReady": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lossBefore": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lossAfter": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "approvalRequired": {
+            "type": "boolean"
+          },
+          "approvalDecision": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "approvalRuleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalFlowId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "approvalFlowName": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalReason": {
+            "type": "string"
+          },
+          "approvalInstanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "approvalInstanceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalSubmittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "approvalDecidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "approvalDecidedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "approvalSyncError": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "executedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rejectedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rejectReason": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceAdjustmentOrderItem"
+            }
+          }
+        }
+      },
+      "PriceAdjustmentOrderItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "oldPrice": {
+            "type": "number"
+          },
+          "newPrice": {
+            "type": "number"
+          },
+          "priceDelta": {
+            "type": "number"
+          },
+          "priceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceSource": {
+            "type": "string",
+            "enum": [
+              "PRICE_OBSERVATION",
+              "BATCH_ADJUSTMENT"
+            ]
+          },
+          "priceSourceLabel": {
+            "type": "string"
+          },
+          "priceObservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "grossProfitBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossProfitAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "decisionReady": {
+            "type": "boolean"
+          },
+          "lossBefore": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lossAfter": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "PriceAdjustmentExpectedVersionRequest": {
+        "required": [
+          "expectedVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PriceAdjustmentRejectRequest": {
+        "required": [
+          "expectedVersion",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PriceAdjustmentWritebackAckRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PriceAdjustmentWriteback": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expectedPrice": {
+            "type": "number"
+          },
+          "previousPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ackNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "FeeActualInput": {
         "required": [
           "amount",
@@ -46139,9 +47284,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -48217,6 +49362,538 @@
             }
           },
           "calculationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "BatchPriceAdjustmentExecuteRequest": {
+        "required": [
+          "previewToken",
+          "request"
+        ],
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/BatchPriceAdjustmentRequest"
+          },
+          "previewToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "BatchPriceAdjustmentRequest": {
+        "required": [
+          "adjustMode",
+          "currency",
+          "shops"
+        ],
+        "type": "object",
+        "properties": {
+          "adjustMode": {
+            "type": "string",
+            "enum": [
+              "FIXED_AMOUNT",
+              "PERCENT",
+              "TEMPLATE"
+            ]
+          },
+          "adjustAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "adjustRate": {
+            "maximum": 9.999999,
+            "exclusiveMaximum": false,
+            "minimum": -0.999999,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "currency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "costCurrency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string"
+          },
+          "fxRate": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShopRef"
+            }
+          },
+          "skuIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "category": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeRate": {
+            "maximum": 0.999999,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "daysOfCover": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "competitorReferencePrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "competitorCurrency": {
+            "pattern": "^[A-Za-z]{3}$",
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ShopRef": {
+        "required": [
+          "platformCode",
+          "siteCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "siteCode": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "BatchPriceAdjustmentDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjustMode": {
+            "type": "string",
+            "enum": [
+              "FIXED_AMOUNT",
+              "PERCENT",
+              "TEMPLATE"
+            ]
+          },
+          "adjustModeLabel": {
+            "type": "string"
+          },
+          "adjustAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "adjustRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "templateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "scopeCategory": {
+            "type": "string"
+          },
+          "scopeBrand": {
+            "type": "string"
+          },
+          "scopeSkuIds": {
+            "type": "string"
+          },
+          "scopeShops": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "platformFeeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFeeFixed": {
+            "type": "number",
+            "nullable": true
+          },
+          "logisticsCostPerUnit": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyFixedCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "costWindowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "costWindowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "listingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "willAdjustCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossBeforeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossAfterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossAfterSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "profitBeforeTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "profitAfterTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "profitDeltaTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgMarginBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgMarginAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "previewToken": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BatchPriceAdjustmentItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjustmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "WILL_ADJUST",
+              "SKIPPED"
+            ]
+          },
+          "skipReason": {
+            "type": "string"
+          },
+          "oldPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "newPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceDelta": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grossProfitBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossProfitAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossMarginAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "decisionReady": {
+            "type": "boolean"
+          },
+          "lossBefore": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lossAfter": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "BatchPriceAdjustmentPreview": {
+        "type": "object",
+        "properties": {
+          "previewToken": {
+            "type": "string"
+          },
+          "adjustMode": {
+            "type": "string",
+            "enum": [
+              "FIXED_AMOUNT",
+              "PERCENT",
+              "TEMPLATE"
+            ]
+          },
+          "adjustModeLabel": {
+            "type": "string"
+          },
+          "adjustAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "adjustRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "templateCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "templateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "costCurrency": {
+            "type": "string"
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "listingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "willAdjustCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossBeforeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossAfterCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lossAfterSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "profitBeforeTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "profitAfterTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "profitDeltaTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgMarginBefore": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgMarginAfter": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchPriceAdjustmentItem"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -54896,6 +56573,128 @@
             "type": "string"
           },
           "actionsNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PriceAdjustmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceAdjustmentDetail"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PriceAdjustmentWritebackPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceAdjustmentWriteback"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PriceAdjustmentCurrentPrice": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "siteCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PRICE_OBSERVATION",
+              "BATCH_ADJUSTMENT"
+            ]
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "PriceAdjustmentCapabilities": {
+        "type": "object",
+        "properties": {
+          "listingDefinitionNote": {
+            "type": "string"
+          },
+          "priceSourceNote": {
+            "type": "string"
+          },
+          "approvalNote": {
+            "type": "string"
+          },
+          "approvalSyncNote": {
+            "type": "string"
+          },
+          "stateMachineNote": {
+            "type": "string"
+          },
+          "versionNote": {
+            "type": "string"
+          },
+          "profitNote": {
+            "type": "string"
+          },
+          "roundingNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "permissionNote": {
             "type": "string"
           }
         }
@@ -64056,6 +65855,93 @@
           }
         }
       },
+      "BatchPriceAdjustmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BatchPriceAdjustmentItemPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchPriceAdjustmentItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BatchPriceAdjustmentCapabilities": {
+        "type": "object",
+        "properties": {
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteOption"
+            }
+          },
+          "listingDefinitionNote": {
+            "type": "string"
+          },
+          "priceSourceNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          },
+          "previewGateNote": {
+            "type": "string"
+          },
+          "reverseMetricNote": {
+            "type": "string"
+          },
+          "roundingNote": {
+            "type": "string"
+          },
+          "skipNote": {
+            "type": "string"
+          },
+          "limitNote": {
+            "type": "string"
+          },
+          "permissionNote": {
+            "type": "string"
+          }
+        }
+      },
       "BatchRunPage": {
         "type": "object",
         "properties": {
@@ -64580,625 +66466,6 @@
         "properties": {
           "deleted": {
             "type": "boolean"
-          }
-        }
-      },
-      "BatchPriceAdjustmentExecuteRequest": {
-        "required": [
-          "previewToken",
-          "request"
-        ],
-        "type": "object",
-        "properties": {
-          "request": {
-            "$ref": "#/components/schemas/BatchPriceAdjustmentRequest"
-          },
-          "previewToken": {
-            "minLength": 1,
-            "type": "string"
-          }
-        }
-      },
-      "BatchPriceAdjustmentRequest": {
-        "required": [
-          "adjustMode",
-          "currency",
-          "shops"
-        ],
-        "type": "object",
-        "properties": {
-          "adjustMode": {
-            "type": "string",
-            "enum": [
-              "FIXED_AMOUNT",
-              "PERCENT",
-              "TEMPLATE"
-            ]
-          },
-          "adjustAmount": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "adjustRate": {
-            "maximum": 9.999999,
-            "exclusiveMaximum": false,
-            "minimum": -0.999999,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "currency": {
-            "pattern": "^[A-Za-z]{3}$",
-            "type": "string"
-          },
-          "costCurrency": {
-            "pattern": "^[A-Za-z]{3}$",
-            "type": "string"
-          },
-          "fxRate": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "shops": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ShopRef"
-            }
-          },
-          "skuIds": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "format": "uuid",
-              "nullable": true
-            }
-          },
-          "category": {
-            "type": "string"
-          },
-          "brand": {
-            "type": "string"
-          },
-          "quantity": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "platformFeeRate": {
-            "maximum": 0.999999,
-            "exclusiveMaximum": false,
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "platformFeeFixed": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "logisticsCostPerUnit": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "monthlyFixedCost": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "costWindowFrom": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "costWindowTo": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "daysOfCover": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "competitorReferencePrice": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "competitorCurrency": {
-            "pattern": "^[A-Za-z]{3}$",
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ShopRef": {
-        "required": [
-          "platformCode",
-          "siteCode"
-        ],
-        "type": "object",
-        "properties": {
-          "platformCode": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "siteCode": {
-            "minLength": 1,
-            "type": "string"
-          }
-        }
-      },
-      "BatchPriceAdjustmentDetail": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "adjustMode": {
-            "type": "string",
-            "enum": [
-              "FIXED_AMOUNT",
-              "PERCENT",
-              "TEMPLATE"
-            ]
-          },
-          "adjustModeLabel": {
-            "type": "string"
-          },
-          "adjustAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "adjustRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "templateCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "templateName": {
-            "type": "string",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string"
-          },
-          "costCurrency": {
-            "type": "string"
-          },
-          "fxRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "scopeCategory": {
-            "type": "string"
-          },
-          "scopeBrand": {
-            "type": "string"
-          },
-          "scopeSkuIds": {
-            "type": "string"
-          },
-          "scopeShops": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "platformFeeRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformFeeFixed": {
-            "type": "number",
-            "nullable": true
-          },
-          "logisticsCostPerUnit": {
-            "type": "number",
-            "nullable": true
-          },
-          "monthlyFixedCost": {
-            "type": "number",
-            "nullable": true
-          },
-          "costWindowFrom": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "costWindowTo": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "shopCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "listingCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "willAdjustCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossBeforeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossAfterCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossAfterSkuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "profitBeforeTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "profitAfterTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "profitDeltaTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "avgMarginBefore": {
-            "type": "number",
-            "nullable": true
-          },
-          "avgMarginAfter": {
-            "type": "number",
-            "nullable": true
-          },
-          "previewToken": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "createdBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "BatchPriceAdjustmentItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "adjustmentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "siteCode": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "WILL_ADJUST",
-              "SKIPPED"
-            ]
-          },
-          "skipReason": {
-            "type": "string"
-          },
-          "oldPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "newPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceDelta": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "priceObservedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "grossProfitBefore": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossMarginBefore": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossProfitAfter": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossMarginAfter": {
-            "type": "number",
-            "nullable": true
-          },
-          "decisionReady": {
-            "type": "boolean"
-          },
-          "lossBefore": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "lossAfter": {
-            "type": "boolean",
-            "nullable": true
-          }
-        }
-      },
-      "BatchPriceAdjustmentPreview": {
-        "type": "object",
-        "properties": {
-          "previewToken": {
-            "type": "string"
-          },
-          "adjustMode": {
-            "type": "string",
-            "enum": [
-              "FIXED_AMOUNT",
-              "PERCENT",
-              "TEMPLATE"
-            ]
-          },
-          "adjustModeLabel": {
-            "type": "string"
-          },
-          "adjustAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "adjustRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "templateCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "templateName": {
-            "type": "string",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string"
-          },
-          "costCurrency": {
-            "type": "string"
-          },
-          "fxRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "shopCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "shops": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "listingCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "willAdjustCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossBeforeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossAfterCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lossAfterSkuCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "profitBeforeTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "profitAfterTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "profitDeltaTotal": {
-            "type": "number",
-            "nullable": true
-          },
-          "avgMarginBefore": {
-            "type": "number",
-            "nullable": true
-          },
-          "avgMarginAfter": {
-            "type": "number",
-            "nullable": true
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BatchPriceAdjustmentItem"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BatchPriceAdjustmentPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BatchPriceAdjustmentDetail"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "BatchPriceAdjustmentItemPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BatchPriceAdjustmentItem"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "BatchPriceAdjustmentCapabilities": {
-        "type": "object",
-        "properties": {
-          "sites": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SiteOption"
-            }
-          },
-          "listingDefinitionNote": {
-            "type": "string"
-          },
-          "priceSourceNote": {
-            "type": "string"
-          },
-          "upstreamNote": {
-            "type": "string"
-          },
-          "downstreamNote": {
-            "type": "string"
-          },
-          "previewGateNote": {
-            "type": "string"
-          },
-          "reverseMetricNote": {
-            "type": "string"
-          },
-          "roundingNote": {
-            "type": "string"
-          },
-          "skipNote": {
-            "type": "string"
-          },
-          "limitNote": {
-            "type": "string"
-          },
-          "permissionNote": {
-            "type": "string"
           }
         }
       }
