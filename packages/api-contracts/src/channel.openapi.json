@@ -42598,6 +42598,669 @@
           }
         }
       }
+    },
+    "/channel/attributions/sync": {
+      "post": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "post_channel_attributions_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfluencerAttributionSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionSyncResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/run": {
+      "post": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "post_channel_attributions_run",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfluencerAttributionRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionRunResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/rules": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "post_channel_attributions_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInfluencerAttributionRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/records/{id}/accrual": {
+      "post": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "post_channel_attributions_records_id_accrual",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfluencerAttributionAccrualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/sync-status": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_sync_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionSyncStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/rules/current": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_rules_current",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/report": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "followerTier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAttributedGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAttributedGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ATTRIBUTED_GMV_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionReportPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/records": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_records",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "influencerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ruleCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accrualStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAttributedGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAttributedGmv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ATTRIBUTED_GMV_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/records/{id}": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_records_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/options": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/attributions/capabilities": {
+      "get": {
+        "tags": [
+          "influencer-attribution-controller"
+        ],
+        "operationId": "get_channel_attributions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluencerAttributionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -102350,6 +103013,1261 @@
         }
       },
       "InfluencerOutreachCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "InfluencerAttributionSyncRequest": {
+        "required": [
+          "platformCode",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          }
+        }
+      },
+      "InfluencerAttributionSyncResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "description": "结论"
+          },
+          "synced": {
+            "type": "integer",
+            "description": "同步条数",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "description": "跳过条数",
+            "format": "int32"
+          }
+        }
+      },
+      "InfluencerAttributionRunRequest": {
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "只归因某个达人（留空 = 全部）",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "只归因某个活动（留空 = 全部）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "只归因某个店铺（留空 = 全部）"
+          },
+          "from": {
+            "type": "string",
+            "description": "合作开始时刻下界（留空 = 不限）",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "description": "合作开始时刻上界（留空 = 不限）",
+            "format": "date-time"
+          }
+        }
+      },
+      "InfluencerAttributionRunResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "是否成功"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "本批次使用的规则编码"
+          },
+          "attributionModel": {
+            "type": "string",
+            "description": "本批次使用的归因模型"
+          },
+          "processed": {
+            "type": "integer",
+            "description": "处理的合作记录数",
+            "format": "int32"
+          },
+          "created": {
+            "type": "integer",
+            "description": "新建的归因记录数",
+            "format": "int32"
+          },
+          "refreshed": {
+            "type": "integer",
+            "description": "刷新的归因记录数",
+            "format": "int32"
+          },
+          "skippedOutOfWindow": {
+            "type": "integer",
+            "description": "🔴 跳过：已出归因窗口（不允许新增归因）",
+            "format": "int32"
+          },
+          "skippedNoEffectData": {
+            "type": "integer",
+            "description": "🔴 跳过：合作记录没有效果数据（GMV / 订单量都没录）",
+            "format": "int32"
+          },
+          "skippedNoSplitBasis": {
+            "type": "integer",
+            "description": "🔴 跳过：分摊基准不可用（如粉丝数合计为 0）",
+            "format": "int32"
+          },
+          "ratingRecomputed": {
+            "type": "integer",
+            "description": "触发的评级重算次数（评级口径归 14.5.1.1）",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "description": "结论说明"
+          }
+        }
+      },
+      "SaveInfluencerAttributionRuleRequest": {
+        "required": [
+          "attributionModel",
+          "attributionWindowDays",
+          "commissionBasis",
+          "refundTreatment",
+          "ruleCode"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则编码"
+          },
+          "attributionModel": {
+            "minLength": 1,
+            "type": "string",
+            "description": "归因模型"
+          },
+          "poolWeightBasis": {
+            "type": "string",
+            "description": "分摊权重基准"
+          },
+          "attributionWindowDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "description": "归因窗口（天）",
+            "format": "int32"
+          },
+          "refundTreatment": {
+            "minLength": 1,
+            "type": "string",
+            "description": "退款口径"
+          },
+          "commissionBasis": {
+            "minLength": 1,
+            "type": "string",
+            "description": "佣金计提口径"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例（0 ~ 1）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "InfluencerAttributionRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码"
+          },
+          "attributionModel": {
+            "type": "string",
+            "description": "归因模型"
+          },
+          "poolWeightBasis": {
+            "type": "string",
+            "description": "分摊权重基准"
+          },
+          "attributionWindowDays": {
+            "type": "integer",
+            "description": "归因窗口（天）",
+            "format": "int32"
+          },
+          "refundTreatment": {
+            "type": "string",
+            "description": "退款口径"
+          },
+          "commissionBasis": {
+            "type": "string",
+            "description": "佣金计提口径"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例（0 ~ 1；null = 用合作记录里的佣金）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "InfluencerAttributionAccrualRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态：ACCRUED / REVERSED / PENDING"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注（会写进留痕）"
+          }
+        }
+      },
+      "InfluencerAttributionCooperationSource": {
+        "type": "object",
+        "properties": {
+          "cooperationId": {
+            "type": "string",
+            "description": "合作记录 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名称"
+          },
+          "status": {
+            "type": "string",
+            "description": "合作状态"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "合作开始时刻",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "description": "合作结束时刻",
+            "format": "date-time"
+          },
+          "gmv": {
+            "type": "string",
+            "description": "合作 GMV（null = 还没录）"
+          },
+          "orderCount": {
+            "type": "string",
+            "description": "合作订单量（null = 还没录）"
+          },
+          "commission": {
+            "type": "string",
+            "description": "合作佣金（null = 还没录）"
+          },
+          "refundRate": {
+            "type": "string",
+            "description": "合作退款率（null = 还没录）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          }
+        },
+        "description": "源：合作记录"
+      },
+      "InfluencerAttributionDetail": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "$ref": "#/components/schemas/InfluencerAttributionRow"
+          },
+          "influencer": {
+            "$ref": "#/components/schemas/InfluencerAttributionInfluencerSummary"
+          },
+          "source": {
+            "$ref": "#/components/schemas/InfluencerAttributionCooperationSource"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/InfluencerAttributionRuleSnapshot"
+          },
+          "caliberNote": {
+            "type": "string",
+            "description": "🔴 三口径说明"
+          },
+          "commissionNote": {
+            "type": "string",
+            "description": "🔴 佣金成本口径说明"
+          },
+          "profitIntegration": {
+            "$ref": "#/components/schemas/InfluencerAttributionProfitIntegration"
+          }
+        }
+      },
+      "InfluencerAttributionInfluencerSummary": {
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "handle": {
+            "type": "string",
+            "description": "达人账号名"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数",
+            "format": "int64"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "profileGmv": {
+            "type": "string",
+            "description": "🔴 口径一：档案 GMV（14.5.1.1 入库值；null = 还没录）"
+          },
+          "profileGmvCurrency": {
+            "type": "string",
+            "description": "🔴 档案 GMV 币种"
+          },
+          "cooperationGmvTotal": {
+            "type": "string",
+            "description": "🔴 口径二：合作历史合计 GMV（本地按合作行求和；null = 还没录）"
+          },
+          "cooperationOrderTotal": {
+            "type": "string",
+            "description": "🔴 合作历史合计订单量"
+          },
+          "cooperationCommissionTotal": {
+            "type": "string",
+            "description": "🔴 合作历史合计佣金"
+          },
+          "attributedGmvTotal": {
+            "type": "string",
+            "description": "🔴 口径三：归因 GMV（本模块；null = 还没归因）"
+          },
+          "attributedOrderTotal": {
+            "type": "string",
+            "description": "🔴 归因订单量合计"
+          },
+          "commissionTotal": {
+            "type": "string",
+            "description": "🔴 归因佣金成本合计"
+          },
+          "effectiveOrderTotal": {
+            "type": "string",
+            "description": "🔴 有效订单量合计"
+          },
+          "roi": {
+            "type": "string",
+            "description": "🔴 归因 ROI（归因 GMV ÷ 佣金成本；null = 佣金未录或为 0）"
+          },
+          "followerConversionRate": {
+            "type": "string",
+            "description": "🔴 有效粉丝转化率（0 ~ 1）"
+          },
+          "ratingScore": {
+            "type": "string",
+            "description": "评级分数（14.5.1.1 口径；null = 暂无评分）"
+          },
+          "ratingTierCode": {
+            "type": "string",
+            "description": "评级档位编码"
+          },
+          "ratingTierName": {
+            "type": "string",
+            "description": "评级档位名称"
+          }
+        },
+        "description": "达人与三个口径"
+      },
+      "InfluencerAttributionProfitIntegration": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "佣金成本是否已进利润表（本模块恒为 false：13.4 未交付）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "责任模块"
+          },
+          "note": {
+            "type": "string",
+            "description": "未对接的影响与当前替代口径"
+          }
+        },
+        "description": "🔴 利润侧对接状态"
+      },
+      "InfluencerAttributionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "归因记录 id",
+            "format": "uuid"
+          },
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "influencerName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "influencerHandle": {
+            "type": "string",
+            "description": "达人账号名"
+          },
+          "influencerCategory": {
+            "type": "string",
+            "description": "达人类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数",
+            "format": "int64"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级"
+          },
+          "cooperationId": {
+            "type": "string",
+            "description": "合作记录 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名称"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "归因规则编码"
+          },
+          "attributionModel": {
+            "type": "string",
+            "description": "🔴 规则快照：归因模型"
+          },
+          "poolWeightBasis": {
+            "type": "string",
+            "description": "🔴 规则快照：分摊权重基准"
+          },
+          "attributionWindowDays": {
+            "type": "integer",
+            "description": "🔴 规则快照：归因窗口（天）",
+            "format": "int32"
+          },
+          "refundTreatment": {
+            "type": "string",
+            "description": "🔴 规则快照：退款口径"
+          },
+          "commissionBasis": {
+            "type": "string",
+            "description": "🔴 规则快照：佣金计提口径"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "🔴 规则快照：佣金比例"
+          },
+          "attributionWeight": {
+            "type": "string",
+            "description": "🔴 归因权重（0 ~ 1）"
+          },
+          "sourceGmv": {
+            "type": "string",
+            "description": "🔴 源快照：合作 GMV（null = 还没录）"
+          },
+          "sourceOrderCount": {
+            "type": "string",
+            "description": "🔴 源快照：合作订单量（null = 还没录）"
+          },
+          "sourceCommission": {
+            "type": "string",
+            "description": "🔴 源快照：合作佣金（null = 还没录）"
+          },
+          "sourceRefundRate": {
+            "type": "string",
+            "description": "🔴 源快照：合作退款率（null = 还没录）"
+          },
+          "sourceCurrency": {
+            "type": "string",
+            "description": "🔴 源快照：币种"
+          },
+          "attributionBaseGmv": {
+            "type": "string",
+            "description": "🔴 归因基数：GMV（合作全额归因 = 自身值；活动池分摊 = 池子合计）"
+          },
+          "attributionBaseOrderCount": {
+            "type": "string",
+            "description": "🔴 归因基数：订单量"
+          },
+          "attributionBaseRefundRate": {
+            "type": "string",
+            "description": "🔴 归因基数：退款率（0 ~ 1）"
+          },
+          "attributedGmv": {
+            "type": "string",
+            "description": "🔴 归因 GMV（第三口径；null = 还没录）"
+          },
+          "attributedOrderCount": {
+            "type": "string",
+            "description": "🔴 归因订单量（null = 还没录）"
+          },
+          "attributedRefundRate": {
+            "type": "string",
+            "description": "🔴 归因退款率（null = 还没录）"
+          },
+          "attributedRefundAmount": {
+            "type": "string",
+            "description": "🔴 归因退款额（null = 还没录）"
+          },
+          "effectiveOrderCount": {
+            "type": "string",
+            "description": "🔴 有效订单量（扣退款后）"
+          },
+          "followerConversionRate": {
+            "type": "string",
+            "description": "🔴 有效粉丝转化率（0 ~ 1；null = 粉丝数未录）"
+          },
+          "followerCountSnapshot": {
+            "type": "integer",
+            "description": "粉丝数快照（归因时刻）",
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "commissionAmount": {
+            "type": "string",
+            "description": "🔴 佣金成本金额（null = 还没录；**本服务内留痕，未进利润表**）"
+          },
+          "commissionBasisAmount": {
+            "type": "string",
+            "description": "🔴 佣金计提基数"
+          },
+          "commissionVariance": {
+            "type": "string",
+            "description": "🔴 佣金差额（重算值 − 已计提值）"
+          },
+          "accrualStatus": {
+            "type": "string",
+            "description": "🔴 计提状态：PENDING / ACCRUED / REVERSED"
+          },
+          "accruedAt": {
+            "type": "string",
+            "description": "🔴 计提时刻",
+            "format": "date-time"
+          },
+          "accrualNote": {
+            "type": "string",
+            "description": "🔴 计提备注"
+          },
+          "attributedAt": {
+            "type": "string",
+            "description": "归因时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "归因记录"
+      },
+      "InfluencerAttributionRuleSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码"
+          },
+          "attributionModel": {
+            "type": "string",
+            "description": "归因模型"
+          },
+          "poolWeightBasis": {
+            "type": "string",
+            "description": "分摊权重基准"
+          },
+          "attributionWindowDays": {
+            "type": "integer",
+            "description": "归因窗口（天）",
+            "format": "int32"
+          },
+          "refundTreatment": {
+            "type": "string",
+            "description": "退款口径"
+          },
+          "commissionBasis": {
+            "type": "string",
+            "description": "佣金计提口径"
+          },
+          "commissionRate": {
+            "type": "string",
+            "description": "佣金比例"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "归因用的规则快照"
+      },
+      "InfluencerAttributionPlatformSyncAvailability": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "带货数据同步是否已接入"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态码：NOT_INTEGRATED / AVAILABLE"
+          },
+          "reason": {
+            "type": "string",
+            "description": "人能读的原因"
+          },
+          "registeredCount": {
+            "type": "integer",
+            "description": "本租户在该平台已有的归因记录数",
+            "format": "int32"
+          }
+        },
+        "description": "逐平台接入情况"
+      },
+      "InfluencerAttributionSyncStatus": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "逐平台接入情况",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionPlatformSyncAvailability"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 平台同步能力说明"
+          }
+        }
+      },
+      "InfluencerAttributionRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "规则列表",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionRuleRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页（0 基）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "ruleNote": {
+            "type": "string",
+            "description": "🔴 归因规则口径说明"
+          }
+        }
+      },
+      "InfluencerAttributionReportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "达人效果报表（真分页）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionReportRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页（0 基）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/InfluencerAttributionReportSummary"
+          },
+          "caliberNote": {
+            "type": "string",
+            "description": "🔴 三口径说明"
+          },
+          "ruleNote": {
+            "type": "string",
+            "description": "🔴 归因规则口径说明"
+          },
+          "commissionNote": {
+            "type": "string",
+            "description": "🔴 佣金成本口径说明"
+          },
+          "profitIntegration": {
+            "$ref": "#/components/schemas/InfluencerAttributionProfitIntegration"
+          }
+        }
+      },
+      "InfluencerAttributionReportRow": {
+        "type": "object",
+        "properties": {
+          "influencerId": {
+            "type": "string",
+            "description": "达人 id",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "达人名称"
+          },
+          "handle": {
+            "type": "string",
+            "description": "达人账号名"
+          },
+          "category": {
+            "type": "string",
+            "description": "类目"
+          },
+          "followerCount": {
+            "type": "integer",
+            "description": "粉丝数",
+            "format": "int64"
+          },
+          "followerTier": {
+            "type": "string",
+            "description": "粉丝层级"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "profileGmv": {
+            "type": "string",
+            "description": "🔴 口径一：档案 GMV（null = 还没录）"
+          },
+          "profileGmvCurrency": {
+            "type": "string",
+            "description": "档案 GMV 币种"
+          },
+          "cooperationGmvTotal": {
+            "type": "string",
+            "description": "🔴 口径二：合作历史合计 GMV（null = 还没录）"
+          },
+          "cooperationOrderTotal": {
+            "type": "string",
+            "description": "🔴 合作历史合计订单量"
+          },
+          "cooperationCommissionTotal": {
+            "type": "string",
+            "description": "🔴 合作历史合计佣金"
+          },
+          "attributedGmvTotal": {
+            "type": "string",
+            "description": "🔴 口径三：归因 GMV（null = 还没归因）"
+          },
+          "attributedOrderTotal": {
+            "type": "string",
+            "description": "🔴 归因订单量"
+          },
+          "attributedRefundRate": {
+            "type": "string",
+            "description": "🔴 归因退款率（加权）"
+          },
+          "commissionTotal": {
+            "type": "string",
+            "description": "🔴 佣金成本合计（null = 还没录）"
+          },
+          "commissionAccruedTotal": {
+            "type": "string",
+            "description": "🔴 已计提佣金合计"
+          },
+          "commissionPendingTotal": {
+            "type": "string",
+            "description": "🔴 待计提佣金合计"
+          },
+          "effectiveOrderTotal": {
+            "type": "string",
+            "description": "🔴 有效订单量（扣退款）"
+          },
+          "followerConversionRate": {
+            "type": "string",
+            "description": "🔴 有效粉丝转化率（0 ~ 1）"
+          },
+          "roi": {
+            "type": "string",
+            "description": "🔴 归因 ROI（归因 GMV ÷ 佣金成本；null = 佣金未录或为 0）"
+          },
+          "netGmvAfterCommission": {
+            "type": "string",
+            "description": "🔴 扣佣金后净额（**只扣佣金，不含样品 / 履约 / 平台费**）"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "归因记录数",
+            "format": "int64"
+          },
+          "ratingScore": {
+            "type": "string",
+            "description": "评级分数（14.5.1.1 口径；null = 暂无评分）"
+          },
+          "ratingTierCode": {
+            "type": "string",
+            "description": "评级档位编码"
+          },
+          "ratingTierName": {
+            "type": "string",
+            "description": "评级档位名称"
+          }
+        },
+        "description": "达人效果报表（真分页）"
+      },
+      "InfluencerAttributionReportSummary": {
+        "type": "object",
+        "properties": {
+          "influencerCount": {
+            "type": "integer",
+            "description": "有归因记录的达人数",
+            "format": "int32"
+          },
+          "attributionCount": {
+            "type": "integer",
+            "description": "归因记录数",
+            "format": "int64"
+          },
+          "attributedGmvTotal": {
+            "type": "string",
+            "description": "🔴 归因 GMV 合计"
+          },
+          "commissionTotal": {
+            "type": "string",
+            "description": "🔴 佣金成本合计（null = 还没录）"
+          },
+          "commissionAccruedTotal": {
+            "type": "string",
+            "description": "🔴 已计提佣金合计"
+          },
+          "commissionPendingTotal": {
+            "type": "string",
+            "description": "🔴 待计提佣金合计"
+          },
+          "roi": {
+            "type": "string",
+            "description": "🔴 整体 ROI（归因 GMV ÷ 佣金成本；null = 佣金未录或为 0）"
+          },
+          "effectiveOrderTotal": {
+            "type": "string",
+            "description": "🔴 有效订单量合计"
+          },
+          "followerConversionRate": {
+            "type": "string",
+            "description": "🔴 整体有效粉丝转化率"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "本报表使用的归因规则编码"
+          },
+          "attributionModel": {
+            "type": "string",
+            "description": "本报表使用的归因模型"
+          },
+          "profitIntegration": {
+            "$ref": "#/components/schemas/InfluencerAttributionProfitIntegration"
+          }
+        },
+        "description": "汇总"
+      },
+      "InfluencerAttributionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "归因记录列表",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "当前页（0 基）",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "caliberNote": {
+            "type": "string",
+            "description": "🔴 三口径说明"
+          },
+          "commissionNote": {
+            "type": "string",
+            "description": "🔴 佣金成本口径说明"
+          }
+        }
+      },
+      "InfluencerAttributionOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "计提状态选项"
+      },
+      "InfluencerAttributionOptions": {
+        "type": "object",
+        "properties": {
+          "attributionModels": {
+            "type": "array",
+            "description": "归因模型选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionOption"
+            }
+          },
+          "poolWeightBases": {
+            "type": "array",
+            "description": "分摊权重基准选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionOption"
+            }
+          },
+          "refundTreatments": {
+            "type": "array",
+            "description": "退款口径选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionOption"
+            }
+          },
+          "commissionBases": {
+            "type": "array",
+            "description": "佣金计提口径选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionOption"
+            }
+          },
+          "accrualStatuses": {
+            "type": "array",
+            "description": "计提状态选项",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionPlatformOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "平台编码（租户内可用的）"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种（归因里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "币种（归因里出现过的）"
+            }
+          },
+          "caliberNote": {
+            "type": "string",
+            "description": "🔴 三口径说明"
+          },
+          "commissionNote": {
+            "type": "string",
+            "description": "🔴 佣金成本口径说明"
+          }
+        }
+      },
+      "InfluencerAttributionPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "InfluencerAttributionCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/InfluencerAttributionCapabilityDimension"
+            }
+          },
+          "profitIntegration": {
+            "$ref": "#/components/schemas/InfluencerAttributionProfitIntegration"
+          },
+          "attributionModels": {
+            "type": "array",
+            "description": "归因模型取值",
+            "items": {
+              "type": "string",
+              "description": "归因模型取值"
+            }
+          },
+          "poolWeightBases": {
+            "type": "array",
+            "description": "分摊权重基准取值",
+            "items": {
+              "type": "string",
+              "description": "分摊权重基准取值"
+            }
+          },
+          "refundTreatments": {
+            "type": "array",
+            "description": "退款口径取值",
+            "items": {
+              "type": "string",
+              "description": "退款口径取值"
+            }
+          },
+          "commissionBases": {
+            "type": "array",
+            "description": "佣金计提口径取值",
+            "items": {
+              "type": "string",
+              "description": "佣金计提口径取值"
+            }
+          },
+          "accrualStatuses": {
+            "type": "array",
+            "description": "计提状态取值",
+            "items": {
+              "type": "string",
+              "description": "计提状态取值"
+            }
+          },
+          "caliberNote": {
+            "type": "string",
+            "description": "🔴 三口径说明"
+          },
+          "ruleNote": {
+            "type": "string",
+            "description": "🔴 归因规则口径说明"
+          },
+          "commissionNote": {
+            "type": "string",
+            "description": "🔴 佣金成本口径说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台同步能力说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "InfluencerAttributionCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {
