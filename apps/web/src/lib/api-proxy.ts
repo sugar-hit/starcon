@@ -2470,6 +2470,58 @@ const services: readonly {
     pattern: /^listing\-collects(?:\/capabilities|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 14.1.3.2 投放定位（channel 服务）。本条目是**新增一条独立的 services[] 元素**，
+    // 既有条目**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，
+    // 每条服务规则是一段超长单行正则，往同一条 alternation 里并分支会让多车道同时并入时
+    // git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // 插入锚点固定在 4.4.1.1 `listing-collects` 那条**元素之后**（锚点字面量：
+    // `pattern: /^listing\-collects...$/,`）—— 与本批其它三条车道的插入点互不重叠，
+    // git 能干净求并。
+    //
+    // ---- 首 token「ad-targetings」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-targetings` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-campaign-details` / `ad-keywords` / `ad-groups` /
+    //   `ad-reports` / `ad-rules` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-targetings                    定位设置集合读（GET，真分页 + 真筛选 + 真排序）/ 新建（POST）
+    //   ad-targetings/capabilities       能力声明（未交付段 available=false + ownerModule）
+    //   ad-targetings/options            筛选项下拉 + 建议门槛与系数护栏
+    //   ad-targetings/summary            定位设置汇总（条数；不做跨币种金额相加）
+    //   ad-targetings/effects            🔴 定位效果对比表（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   ad-targetings/suggestions        🔴 调整建议（GET，带依据数值与口径）
+    //   ad-targetings/daypart-profile    🔴 时段画像（GET，供下游 14.2.1.2 分时策略复用）
+    //   ad-targetings/interpret          🔴 解读平台原文定位串（POST，预览 / 落库）
+    //   ad-targetings/metrics            🔴 定位维度效果数据同步（POST，真实写入口）
+    //   ad-targetings/{uuid}             定位设置详情（GET）/ 改（PATCH）/ 归档（DELETE）
+    //   ad-targetings/{uuid}/operations  定位操作留痕（GET，真分页）
+    //   ad-targetings/{uuid}/narrow      🔴 收窄投放（POST，带证据门槛）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options / summary / effects / suggestions /
+    //   daypart-profile / interpret / metrics）必须排在 uuid 段**之前**判别，
+    //   否则它们会被当成「id=capabilities 的那个 UUID」拼出去（这是本仓反复踩过的坑）。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （**不是** `[0-9a-f-]+` —— 后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `ad-targetings/{uuid}/metrics`      —— 效果数据是**批量**入口，不按设置下钻
+    //   * `ad-targetings/{uuid}/suggestions` —— 建议按维度聚合，不按单条设置出建议
+    //   * `ad-targetings/{uuid}/interpret`    —— 解读是**活动 / 组**级的，不是单条设置
+    //   * `ad-targetings/{uuid}/daypart-profile` —— 时段画像是集合级的
+    //   * `ad-targetings/{uuid}/bid` / `/bid-factor` —— 🔴 改竞价归 14.2.1.1（尚未交付），
+    //     本模块只给**出价系数建议**与**系数记录**，放行它会让界面以为能改价
+    //   * `ad-targetings/export`             —— 本模块没有导出入口
+    //   * `ad-targetings/batch`              —— 本模块没有批量动作入口
+    //   * `ad-targetings/writeback`          —— 🔴 平台回写队列未交付，放行它会让人以为能回写平台
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-targetings(?:\/(?:capabilities|options|summary|effects|suggestions|daypart\-profile|interpret|metrics)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:operations|narrow))?)?$/,
+  },
+  {
     // 4.4.1.2 批量/插件采集（channel 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 channel 分支的超长 alternation 里并分支 —— 那一支是单行超长正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
