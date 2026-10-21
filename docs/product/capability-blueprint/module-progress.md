@@ -6,15 +6,19 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 297 |
+| 已交付 | 301 |
 | 进行中 | 0 |
-| **未开发** | **168** |
-| 完成率 | 63.9% |
+| **未开发** | **164** |
+| 完成率 | 64.7% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -22,9 +26,12 @@
 | **D4** | 59 | 0 | 1 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 43 | 0 | 35 | 78 |
-| **D7** | 23 | 0 | 132 | 155 |
+| **D7** | 27 | 0 | 128 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -38,27 +45,35 @@
 | 11 | 售后与退货系统 | D4 / D7 | 21 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
-| 14 | 广告与增长系统 | D7 | 4 | 22 |
+| 14 | 广告与增长系统 | D7 | 8 | 22 |
 | 15 | 客户与客服系统 | D7 | 3 | 24 |
 | 16 | 合规与风控系统 | D7 | 4 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -419,7 +436,7 @@
 | 13.6.1.2 | 看板搭建 | — | D7 | 未开发 | — |
 | 13.6.2.1 | 导出与订阅 | — | D7 | 未开发 | — |
 | 14.1.1.1 | 活动列表 | — | D7 | 已交付 | 迁移 channel `V273__ad_campaigns.sql`（**归属 channel**：L2 表 14 广告与增长 → channel）。**纯新建、零 ALTER 任何既有表**：只被 V1 `platform`（全局平台码表）、V1 `shop`（复合 FK 带 tenant_id ⇒ 跨租户挂载物理上不可能）、V146 `ad_type_profile`（**已交付的上游 14.1.2.2**，复合 FK）**只读**引用；14.1.1.2 / 14.1.1.3 / 14.2.2.1 / 14.2.2.2 **均未交付**，本模块不引用它们的任何表（14.2.2.2 规则引擎改为**调用本模块的读取形状**）。四张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + **data_scope（RESTRICTIVE）按店铺 owner/部门收敛**（蓝图的输入「用户数据范围」，与 V171 listing / V203 listing_performance 同构）+ GRANT（`starcon_app` 零权限）：`ad_campaign`（活动主表：平台 + 店铺 + 平台侧 id + **名称/状态/日预算/币种 + 🔴 原始类型标记 `platform_ad_type` + 归一后内部类型 `internal_ad_type` + 归一口径来源 `ad_type_mapping_source`（三列**由触发器从 14.1.2.2 的档案复制**，服务层写什么都不作数）+ 🔴 `pending_platform_writeback` / `local_changed_at`（平台回写队列未交付 ⇒ 本地改动必须显式标「还没回写平台」）+ 🔴 `data_as_of` / `last_synced_at`（数据截至时刻））· `ad_campaign_daily_metric`（**每日**明细：曝光/点击/订单 `NUMERIC(19,6)`、消耗/销售额 `NUMERIC(19,4)`，**ACOS/ROAS/CTR 是 GENERATED 列**，分母为 0 给 NULL（不可比）而不是 0 —— 存每日而不是累计是因为蓝图的输入有「日期」筛选、且 14.3.1.1 报表要按天出图）· `ad_campaign_sync_run`（**数据截至时间的唯一来源**：status SUCCESS/PARTIAL/FAILED，**失败的同步 `data_as_of` 为空 = 不推进水位**且必须带 message，CHECK 钉死「失败必有原因」）· `ad_campaign_operation_log`（批量操作审计：**APPLIED / REJECTED / SKIPPED 三种结果都留痕**，被拒的那几条也要能复盘）。**🔴 蓝图加粗句「广告数据同步是本系统的地基」的物理落点**：平台同步器尚未交付 ⇒ 本模块**自带真实写入口** `POST /imports`（同步运行 + 活动 + 每日指标全部落 PostgreSQL 16，**没有一行假数据**），并把「数据截至 X 时间」做成库里的事实；「**没有投放**」与「**还没同步到数据**」在库上就是两种不同状态，服务层据此回 `emptyReason` 三值枚举：`NO_SYNCED_DATA`（从没成功同步过 ⇒ 只知道「还没同步到数据」，**不能**说「本租户没有投放」）/ `NO_CAMPAIGNS`（同步成功过、这个平台+店铺范围内确实一条活动都没有）/ `FILTERED_EMPTY`（范围里有活动、被状态/类型/关键词/日期筛掉了）。**🔴 ACOS/ROAS 口径写在返回值里**（`metricDefinitionNote` 随汇总返回，界面表头直接显示）：ACOS = 消耗/销售额、ROAS = 销售额/消耗，**汇总先汇总再相除**（总消耗/总销售额）**而不是各活动比率的平均**（后者是数学错误：两条 ACOS 100% 的活动平均成 50% 会让人以为整体在盈亏线上）。**🔴 批量护栏**（蓝图 14 章关键约束「AI/规则自动调整必须有上限保护」）：单活动单次调整上限 5000、一次批量总额上限 20000、单活动预算上限 100000、单次最多 200 条 ⇒ 逐条 APPLIED / REJECTED / SKIPPED 返回 + 审计留痕；**只接受显式选中的 id**，「按筛选结果全选 + 变更预览 + 异步批量任务」属于 **14.1.1.3（未交付）**，capabilities 里三个维度显式 `available=false` + ownerModule + 影响，**不用空列表冒充已交付**。**🔴 归一类型与原始类型并存**：活动上三列由 trigger 从 `ad_type_profile` 复制，绕过服务层直接写 SQL 也改不掉（测试已钉）；`UNMAPPED` 是**显式合法值**（这类活动照样在列表里、照样带完整原始标记，只是不参与按内部类型的横向比较）；`PARTIAL_FIELD_COVERAGE` 是 14.1.2.2 **单条广告报文**粒度的状态，**不是活动级属性**，本模块不把它伪装成活动级状态。端点挂在 `/channel/ad-campaigns/**`（8 个）：GET /capabilities、GET /options、GET /campaigns（真分页 + 真筛选 + 真排序 + 汇总 + 数据截至 + 同步状态）、GET /campaigns/{uuid}、**GET /by-external（供 14.2.2.2 规则引擎取活动当前状态与预算/消耗的读取形状）**、POST /imports、POST /bulk-operations、GET /sync-runs。复用 identity 已有的 `channel.operation.*`，**identity 零改动**。前端 `/ads/campaigns`（数据截至横幅 + 逐范围同步状态与失败原因 → 筛选与排序 → 汇总（含 ACOS/ROAS 口径）→ 活动表（原始标记 → 归一类型成对显示）→ 勾选式批量操作 → 登记同步结果 → 同步运行历史 → 能力声明；加载态 / 错误态 / 三种空态齐全）。**api-proxy 白名单新增一条独立 `ad-campaigns/` 元素**（既有 `ad-type-diffs`、`rate-comparison` 等一字未动、也不重排；插入锚点夹在 `prefix: 'auth/'` **之前**；裸路径 `ad-campaigns` 刻意不放行，字面量子路径排在 `{uuid}` 段之前）。**测试**：`AdCampaignIntegrationTest` **16 例**（真实 PostgreSQL 16 + Testcontainers 全绿，含**租户隔离三断言**、🔴 失败同步不推进水位、🔴 绕过服务层改归一口径被触发器改回、🔴 本地未回写改动不被平台回读覆盖、🔴 ACOS 分母为 0 给空值、🔴 汇总先汇总再相除、🔴 批量单次/总额护栏逐条拒绝且被拒也留审计、timestamptz 往返断言**写回值**逐字相等）+ 前端 `ad-campaign-model.test.ts` **24 例** + `ad-campaign-allowlist.test.ts` **5 例**（**契约反查**：本模块真实 path 全部放行、14.1.1.3 未交付形状仍然 404、不误伤既有车道路由）。契约由 `catalog-contracts.py` **重新生成**（channel 纯新增 **8 path / 23 schema / 0 删除**）。**已知缺口（如实记录）**：平台广告 API 定时同步器与**平台回写队列**均未交付 ⇒ 广告新鲜度取决于谁来调 `POST /imports`、暂停/启用/调预算只落本地并标记「待回写平台」（界面显式标出，避免把「本地已暂停」当成「平台侧已暂停」）；14.1.1.2 活动详情、14.1.1.3 批量操作、14.2.2.1 预算分配、14.2.2.2 自动规则均未交付，capabilities 里对应维度**显式 available=false**。跨平台单位统一不在本模块（属 14.3.1.1 报表口径）；广告 ↔ 内部 SKU 归因属 14.1.2.1。 |
-| 14.1.1.2 | 活动详情 | — | D7 | 已交付 | 迁移 channel `V277__ad_campaign_details.sql`（**归属 channel**：L2 表 14 广告与增长 → channel；上游 V273 `ad_campaign` / V273 `ad_campaign_daily_metric`（**已交付的 14.1.1.1**）、V274 `ad_keyword`（**已交付的 14.1.3.1**，只读消费）、V171 `listing`（**已交付的 4.1.1.1**，同库同服务）**只读**引用）。**纯新建、零 ALTER 任何既有表**。五张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + **data_scope（RESTRICTIVE）按活动 → 店铺收敛**（与 V273 同构）+ GRANT（`starcon_app` 零权限）：`ad_campaign_group`（广告组：默认竞价 / 币种 / 组级日预算（**null = 继承活动预算，不是 0**）/ 定向原文 / 状态 / **结构截至时刻**）· `ad_campaign_group_product`（投放商品：广告组 → `listing` 的投放关系，复合 FK 带 tenant_id ⇒ 跨租户挂载物理上不可能；**投放商品必须属于活动所在店铺**）· `ad_campaign_creative`（创意：IMAGE / VIDEO / CAROUSEL / TEXT，可挂组下也可活动级）· `ad_campaign_group_bid_log`（改竞价审计：**APPLIED / REJECTED / SKIPPED 三种结果都留痕**，被拒的也要能复盘）· `ad_campaign_structure_copy`（复制结构审计：源活动 → 目标活动 + 复制条数，**`keyword_count` 恒为 0**（CHECK 钉死））。**🔴 蓝图职责句里八块子资源逐块落点**：基本设置 / 每日表现明细 = 复用上游 14.1.1.1 的 `AdCampaignRow` 与 `AdCampaignDailyMetricRow`（**不重写**，活动真相只有一份）· 预算与消耗曲线 = 本模块新算（逐日消耗 vs 当日预算 + **预算使用率**；**只画有每日指标的天** —— 没有指标行的一天是「没数据」不是「花了 0」；日预算为空 ⇒ 使用率**不可比**（null）而不是 0）· 广告组 / 投放商品 / 创意 = 本模块自己的表（**14.1.2.1 广告组管理未交付 ⇒ 结构必须在本模块有真的落点**，并自带 `POST /structure` 结构登记写入口，语义是**替换**：「平台已经下架了这个商品」要能删掉）· **关键词 = 读上游 14.1.3.1 已交付的 `ad_keyword`**（按 platform_id + shop_id + external_campaign_id 对齐，**本模块不建第二张关键词表** —— 同一个词在两处各有一份，改价就会改到不同的地方）· **平台侧修改历史 = 🔴 显式不可用**（上游**没有平台广告 API 同步器 ⇒ 没有同步源**；**不建**「平台改历史」表 —— 没有同步源的空表会被界面渲染成「没有改过」，比明说「拿不到」严重得多）：`changeHistory.available=false` + ownerModule + impact 做成**结构里的字段**，当前展示的是**本地**操作审计（`ad_campaign_operation_log`），两者在字段名与文案上分得开。**🔴 四个操作入口全部真做**：调预算 / 暂停 **复用上游 14.1.1.1 的 `bulk-operations`**（护栏、审计、「待回写平台」标记都在那边，不另起一套）· 改竞价 = 本模块自己的动作（广告组默认竞价，**单次上限 200 + 绝对上限 1000 + 单次最多 100 组**，超限**逐条拒绝**并留审计；同一次请求里同一个组重复出现 ⇒ 400）· **复制结构 = 蓝图加粗句「把跑得好的活动结构复制到新店铺/新 ASIN」**：结构副本**真的落库**（目标活动 + 广告组 + 投放商品 + 创意全部写进库），**同时明确标出「平台侧还没有这份结构」**（平台回写队列未交付 ⇒ 目标活动 `pending_platform_writeback=true` + 状态 `PAUSED`（复制出来不投放）+ 平台侧 id 落成 `LOCAL-COPY-{uuid}` **本地标记而不是像平台 id 的字符串**）；**关键词不复制**（平台侧还没建这个活动，关键词 id 无从分配 —— 往 14.1.3.1 的「平台原文」表里塞本地编的 id 比少复制一段严重得多）；**复制的是结构不是钱**（目标活动的预算与投放期不一起复制）；KEEP_PRODUCTS 跨店铺被拒（listing 属于店铺）/ TARGET_LISTING 的目标 listing 必须属于目标店铺 / 跨平台店铺被拒。端点挂在 `/channel/ad-campaign-details/**`（10 个）：GET /capabilities、GET /campaigns/{uuid}（全景）、GET /campaigns/{uuid}/groups|products|creatives|keywords|change-history、POST /campaigns/{uuid}/structure|bids|copy。复用 identity 已有的 `channel.operation.*`，**identity 零改动**。前端 `/ads/campaigns/[id]`（apps/web/src/app/ads/campaigns/[id]/page.tsx + components/ads/ad-campaign-detail.tsx + ad-campaign-detail-model.ts + ad-campaign-detail-model.test.ts + apps/web/src/app/api/channel/ad-campaign-detail-allowlist.test.ts）：真实工作区 —— 基本设置 → 预算与消耗曲线 → 每日表现明细 → 广告组 → 投放商品 → 创意 → 关键词（标注「来自 14.1.3.1」）→ **修改历史（显式标「平台侧改历史当前不可得」并把本地操作审计分开说）** → 操作入口（未交付段显式标出责任模块）→ 改竞价 → 复制结构；加载态 / 错误态 / 空态齐全。**api-proxy 白名单新增一条独立 `ad-campaign-details/` 元素**（既有 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一字未动、也不重排；插入锚点夹在 `compliance-precheck`（16.2.2.1）那条**之前**；**首 token `ad-campaign-details` 在既有 100+ 条正则里零命中**（已 grep 核对）；`campaigns` 后面**必须**跟 uuid 段；刻意不放行裸路径 / `campaigns` / `budget` / `platform-history` / `writeback` / `groups/{uuid}` / `copy/preview`）。**契约**由 `backend/target/openapi` 的真实 SpringDoc 快照经 `catalog-contracts.py` **重新生成**（channel **纯增量：+10 path / +29 schema / 0 删除 / 0 既有类型被改**；**未触碰 trade 契约** —— 集成头上 trade 契约存在**与本车道无关的既有漂移**，本车道刻意不越界改它，已 `git checkout` 复原）。**测试**：`AdCampaignDetailIntegrationTest` **17 例**（真实 PostgreSQL 16 + Testcontainers 全绿）含租户隔离**三断言**（两租户互不可见 / 伪造 X-Tenant-Id 头无效 / 连接池压到 1 的 A→B→A 三轮不串租户）、🔴 平台侧修改历史显式不可用且本地审计分得开、🔴 复制结构副本真落库 + 待回写 + 关键词恒 0 + 预算没跟着复制、🔴 改竞价三种结果都留审计、🔴 结构登记的替换语义（没出现的组真被删）、🔴 没有日预算时预算使用率不可比而不是 0、timestamptz 往返**断言写回值**逐字相等、跨租户与不存在返回**逐字相同**的 404、端点 400/401；前端 `ad-campaign-detail-model.test.ts` **23 例** + `ad-campaign-detail-allowlist.test.ts` **5 例**（**契约反查**：本模块真实 path 全部放行、未交付形状仍然 404、不误伤既有车道路由）。**已知缺口（如实记录）**：① 平台侧修改历史**无同步源**（capabilities `platform_change_history` 维度 available=false + ownerModule + 影响）—— 页面明确写「当前只展示本地操作审计」；② 平台回写队列未交付（`platform_writeback` 维度 available=false）—— 调预算 / 暂停 / 改竞价 / 复制结构**只落本地**并标「待回写平台」；③ 广告组的完整管理（定向设置 / 组级报表入口）归 **14.1.2.1**（未交付，本模块只给结构的读与「复制结构」这一个写动作）；④ 竞价策略（自动 / 动态 / 目标 ACOS）归 **14.2.1.1**（未交付）；⑤ 投放定位解读归 **14.1.3.2**（未交付，本模块只存平台原文）；⑥ 复制结构**不复制关键词**（需平台先创建活动分配关键词 id）；⑦ 可下钻的活动报表归 **14.3.1.1**（本模块只给活动自身的每日明细）。 |
+| 14.1.1.2 | 活动详情 | — | D7 | 已交付 | 迁移 channel `V277__ad_campaign_details.sql`（**归属 channel**：L2 表 14 广告与增长 → channel；上游 V273 `ad_campaign` / V273 `ad_campaign_daily_metric`（**已交付的 14.1.1.1**）、V274 `ad_keyword`（**已交付的 14.1.3.1**，只读消费）、V171 `listing`（**已交付的 4.1.1.1**，同库同服务）**只读**引用）。**纯新建、零 ALTER 任何既有表**。五张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + **data_scope（RESTRICTIVE）按活动 → 店铺收敛**（与 V273 同构）+ GRANT（`starcon_app` 零权限）：`ad_campaign_group`（广告组：默认竞价 / 币种 / 组级日预算（**null = 继承活动预算，不是 0**）/ 定向原文 / 状态 / **结构截至时刻**）· `ad_campaign_group_product`（投放商品：广告组 → `listing` 的投放关系，复合 FK 带 tenant_id ⇒ 跨租户挂载物理上不可能；**投放商品必须属于活动所在店铺**）· `ad_campaign_creative`（创意：IMAGE / VIDEO / CAROUSEL / TEXT，可挂组下也可活动级）· `ad_campaign_group_bid_log`（改竞价审计：**APPLIED / REJECTED / SKIPPED 三种结果都留痕**，被拒的也要能复盘）· `ad_campaign_structure_copy`（复制结构审计：源活动 → 目标活动 + 复制条数，**`keyword_count` 恒为 0**（CHECK 钉死））。**🔴 蓝图职责句里八块子资源逐块落点**：基本设置 / 每日表现明细 = 复用上游 14.1.1.1 的 `AdCampaignRow` 与 `AdCampaignDailyMetricRow`（**不重写**，活动真相只有一份）· 预算与消耗曲线 = 本模块新算（逐日消耗 vs 当日预算 + **预算使用率**；**只画有每日指标的天** —— 没有指标行的一天是「没数据」不是「花了 0」；日预算为空 ⇒ 使用率**不可比**（null）而不是 0）· 广告组 / 投放商品 / 创意 = 本模块自己的表（**14.1.2.1 广告组管理未交付 ⇒ 结构必须在本模块有真的落点**，并自带 `POST /structure` 结构登记写入口，语义是**替换**：「平台已经下架了这个商品」要能删掉）· **关键词 = 读上游 14.1.3.1 已交付的 `ad_keyword`**（按 platform_id + shop_id + external_campaign_id 对齐，**本模块不建第二张关键词表** —— 同一个词在两处各有一份，改价就会改到不同的地方）· **平台侧修改历史 = 🔴 显式不可用**（上游**没有平台广告 API 同步器 ⇒ 没有同步源**；**不建**「平台改历史」表 —— 没有同步源的空表会被界面渲染成「没有改过」，比明说「拿不到」严重得多）：`changeHistory.available=false` + ownerModule + impact 做成**结构里的字段**，当前展示的是**本地**操作审计（`ad_campaign_operation_log`），两者在字段名与文案上分得开。**🔴 四个操作入口全部真做**：调预算 / 暂停 **复用上游 14.1.1.1 的 `bulk-operations`**（护栏、审计、「待回写平台」标记都在那边，不另起一套）· 改竞价 = 本模块自己的动作（广告组默认竞价，**单次上限 200 + 绝对上限 1000 + 单次最多 100 组**，超限**逐条拒绝**并留审计；同一次请求里同一个组重复出现 ⇒ 400）· **复制结构 = 蓝图加粗句「把跑得好的活动结构复制到新店铺/新 ASIN」**：结构副本**真的落库**（目标活动 + 广告组 + 投放商品 + 创意全部写进库），**同时明确标出「平台侧还没有这份结构」**（平台回写队列未交付 ⇒ 目标活动 `pending_platform_writeback=true` + 状态 `PAUSED`（复制出来不投放）+ 平台侧 id 落成 `LOCAL-COPY-{uuid}` **本地标记而不是像平台 id 的字符串**）；**关键词不复制**（平台侧还没建这个活动，关键词 id 无从分配 —— 往 14.1.3.1 的「平台原文」表里塞本地编的 id 比少复制一段严重得多）；**复制的是结构不是钱**（目标活动的预算与投放期不一起复制）；KEEP_PRODUCTS 跨店铺被拒（listing 属于店铺）/ TARGET_LISTING 的目标 listing 必须属于目标店铺 / 跨平台店铺被拒。端点挂在 `/channel/ad-campaign-details/**`（10 个）：GET /capabilities、GET /campaigns/{uuid}（全景）、GET /campaigns/{uuid}/groups |
 | 14.1.1.3 | 批量操作 | — | D7 | 未开发 | — |
 | 14.1.2.1 | 广告组管理 | — | D7 | 未开发 | — |
 | 14.1.2.2 | 广告类型差异 | — | D7 | 已交付 | 迁移 channel `V146__ad_type_normalization.sql`（**归属 channel**：L2 表 14.1 广告与增长 → channel，且上游 2.1.2.1 平台枚举映射 `platform_enum_mapping` / `platform_enum_override` 两张表本就落在 channel 同库）。**纯新建、零 ALTER 任何既有表**：只被 V1 `platform` / V1 `shop`（复合 FK 带 tenant_id ⇒ 跨租户挂载物理上不可能）与 V1/V3 枚举映射**只读**引用，跨车道 DDL 回归面 = 0；下游 14.1.1.1 活动列表与 14.1.2.1 广告组管理**均未交付**（台账已确认），本模块不引用其任何表，数据以「归一后的广告数据」独立存在，等下游按 `external_ad_id` 对接。三张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT（`starcon_app` 零权限）：`ad_type_profile`（平台 × **原始类型标记** `platform_ad_type` → **归一后内部类型** `internal_ad_type` + 拍卖方式 `auction_model` + 投放目标 `objective` + 5 个能力位 + `mapping_source`）· `ad_type_field_spec`（特有字段定义：字段键 / 标签 / 数据类型 / 单位 / 候选值 / **`comparable` + `internal_representation`**）· `ad_type_payload`（归一后的广告数据：可比金额与数量 + **原始报文原文 `raw_payload jsonb`** + 保真审计三列）+ 4 个触发器 + 8 个索引。**🔴 蓝图加粗句「必须保留原始类型标记，不能丢信息」的物理落点 = 四条并存的存储**（不是一句注释）：① `platform_ad_type` **原样存、不折叠大小写与别名**（折叠了就答不出「平台 API 原文是什么」）；② `internal_ad_type` 与它**同表并存**，归一只**多一列**、不改原列；③ `raw_payload` **原文照抄**，归一错了能回到原文重来；④ `normalized_field_keys` / `raw_only_field_keys` **由 DB 触发器从原文现场派生** —— **保真率不许虚报也不许隐瞒**：`normalized_field_keys ⊄ raw_payload` 的键**直接拒**（否则「声称归一了一个根本不存在的字段」会把覆盖率刷成 100%），`raw_only_field_keys` 由触发器**覆盖写入**（服务层谎报保真状态在这一刻被改写回来）。**🔴 加粗句前半段「归一化让跨平台广告可比」的落点**：`ComparableTypeSummary` 按 `internal_ad_type` 横向聚合，但**每个类型旁必带 `PlatformTypeMarker`（平台 + 原始标记 + 该平台下的广告条数）** —— 只留平台就把「平台上怎么叫」丢了；归一只多一列，可追溯性不减。**🔴 照抄上游 2.1.2.1 的加粗句「映射缺失必须显式报未映射，不能默认落到某个兜底状态」**：内部类型枚举**显式包含 `UNMAPPED`**，带它的行 `mapping_status` 恒为 `UNMAPPED_TYPE` 且**不参与任何可比聚合**，但在可比视图的 `unmappedTypes` 里**带完整原始标记单列**（从表里删掉会让人以为「它不存在」）；「没有可比口径」与「没有这种广告」是相反的两件事。**归一口径的真相在 2.1.2.1、不在请求里**：`GET /resolve` 走两层（`platform_enum_override` 租户覆盖 > `platform_enum_mapping` 平台默认 > 未映射），登记档案时服务端拿解析结果与声明的 `internalAdType` / `mappingSource` **逐项比对，不符即拒**；trigger (a) 再核一层 —— **声称 PLATFORM_DEFAULT / TENANT_OVERRIDE 却在那张表里查无此行，写入被 DB 拒**（绕服务层直接写 SQL 同样被拒）。`ctr` / `cpc` / `cvr` / `acos` 是 **GENERATED ALWAYS AS … STORED** 生成列（服务层写不进去），**分母为 0 给 NULL（不可比）而不是 0**（「可比但真的是零」与「压根算不出来」在界面上必须分开）。**金额一律 NUMERIC(19,4)+BigDecimal、数量与比率一律 NUMERIC(19,6)，无 float/double 一列**；时间列 `timestamptz` 且 values 位置写 `?::timestamptz`（jOOQ 3.19 会把 OffsetDateTime 绑成 varchar，PG 直接拒 —— 本车道实测踩到并已修）。**🔴 另两处写死的不变量**：① trigger (b) 把 `platform_ad_type` / `internal_ad_type` **从档案复制到 payload**，服务层无法把一条 SB 报成自动广告；② trigger (d) 禁止就地改原始报文与来源（报表已按这些值快照过，改了再也复算不出来）。🔴 **本车道修掉一个自己引入的真 bug**：`guard_ad_type_payload_fidelity` 原先读 `NEW.internal_ad_type`，而 PostgreSQL **按触发器名字母序触发**（fidelity 排在 identity 之前），实测让一条 `SPONSORED_DISPLAY` 的广告被算成 `UNMAPPED_TYPE`；改成**自己从档案查 `internal_ad_type`**，与触发器顺序彻底解耦，改名也不改语义。端点挂在 `/channel/ad-type-diffs/**`（9 个）：GET /capabilities、GET /resolve、GET+POST /profiles、GET /profiles/{uuid}（含特有字段定义与**未定义原始键**）、GET+POST /profiles/{uuid}/field-specs、GET+POST /payloads、GET /payloads/{uuid}（含**原始报文原文**与**服务端组装好的特有字段补充展示**）、GET /comparable、GET /fidelity。`ExtraFieldView` **在服务端把「原始值」与「归一后的内部落点」拼成同一条返回**，前端只渲染 —— 两端各拼一次就会出现两个版本。复用 identity 已有的 `channel.operation.*`，**identity 零改动**。前端 `/ads/ad-type-diff`（归一后的广告类型视图 → 保真概览「系统没有归一哪些字段」明账 → 广告类型档案登记（含**「按 2.1.2.1 解析」按钮，归一类型由解析带出、不可手填**）→ 特有字段定义 → 归一后的广告数据登记（原始报文原文 + 已归一键）→ 明细与详情；加载态 / 空态 / 错误态齐全；**空态区分三种「空」**：没有输入 / 只有未映射类型 / 有可比类型）。**api-proxy 白名单新增一条独立 `ad-type-diffs/` 元素**（既有 `rate-comparison/`、`label-templates/`、`freight/` 三条一字未动、也不重排 —— 插入锚点夹在 `rate-comparison/` 之后、`label-templates/` 之前以便干净合并），裸路径 `ad-type-diffs` 刻意不放行（末尾不带 `?`）。**测试**：`AdTypeDiffIntegrationTest` **21 例**（真实 PostgreSQL 16 + Testcontainers 全绿，含租户隔离三断言、触发器冒烟、timestamptz 往返断言**写回值**逐字相等）+ 前端 `ad-type-diff-model.test.ts` 28 例 + `ad-type-diff-allowlist.test.ts` 5 例。验证：channel 全量 **295 例零回归**（本模块 21）、前端 33 例绿、`pnpm typecheck` 三包绿、`pnpm lint` 绿、契约由 `catalog-contracts.py` **重新生成**（channel 纯新增 **9 path / 22 schema / 0 删除**）。**已知缺口（如实记录）**：14.1.1.1 活动列表、14.1.2.1 广告组管理、14.1.3.1 关键词管理均未交付，capabilities 里 `campaign_binding` / `campaign_owner` 两个维度**显式 available=false + ownerModule + 影响**，**不用空列表或 0 冒充「这一项没有数据」**；本模块**刻意不碰 listing / trade 表** —— 广告归因落不到内部 SKU 是 14.1.2.1 的事。跨平台单位统一（如多币种换算）**不在本模块**：字段单位只作标签展示，口径统一属 14.3.1.1 报表。 |
