@@ -690,6 +690,55 @@ const services: readonly {
     pattern: /^ad\-reports(?:\/(?:capabilities|options|rows|trend|exports|export))$/,
   },
   {
+    // 14.3.1.2 广告组与词报表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）、`ad-reports`（14.3.1.1）
+    // 等**一字未动、也不重排** —— 本文件是多车道共用的累积型白名单，每条服务规则是一段超长
+    // 单行正则，往同一条 alternation 里并分支会让多车道同时并入时 git 必然判冲突
+    // （结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `ad-reports` 那条元素的 `pattern:` 行**之后** ----
+    //   锚点行是本文件里唯一的字面量
+    //   `pattern: /^ad\-reports(?:\/(?:capabilities|options|rows|trend|exports|export))$/,`
+    //   同批其它车道（14.1.2.1 广告组管理 / 14.1.1.3 批量操作 / 14.4.1.1 促销列表）
+    //   各自锚在别的行上，git 能干净求并。
+    //
+    // ---- 首 token「ad-group-keyword-reports」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-group-keyword-reports`
+    //   这个串（既有的是 `ad-campaigns` / `ad-keywords` / `ad-reports` / `ad-rules` /
+    //   `ad-type-diffs` / `ad-diagnostics` 一类），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //   （`ad-group-reports` 与 `ad-keyword-reports` 同样零命中；本车道取最长的那个，
+    //   避免与 14.1.2.1 将来可能用的 `ad-groups` 撞车。）
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-group-keyword-reports/capabilities   能力声明（组级指标显式 available=false）
+    //   ad-group-keyword-reports/options        筛选项下拉 + 口径定义 + 缓存说明
+    //   ad-group-keyword-reports/rows           报表表（GET，真分页 + 真筛选 + 真排序 + 汇总）
+    //   ad-group-keyword-reports/exports        导出留痕（GET 列表 / POST 批量选中导出）
+    //   ad-group-keyword-reports/exports/{uuid} 单条导出留痕详情
+    //   ad-group-keyword-reports/exports/{uuid}/csv  导出 CSV（text/csv 由代理原样透传）
+    //
+    // 判别顺序：`exports` 排在 `{uuid}` 段之前 —— alternation 是首个命中即返回，
+    // 顺序反了会被通配支吃掉半截。`{uuid}` 段用**完整 UUID 形状**
+    // `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-group-keyword-reports` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-group-keyword-reports/rows/{id}` —— 报表是按维度聚合的，没有「单行报表详情」
+    //   * `ad-group-keyword-reports/export`（单数）—— 导出走 POST /exports + 按 id 下载 CSV
+    //   * `ad-group-keyword-reports/exports/{id}/preview` —— 没有「变更预览」这个形状
+    //   * `ad-group-keyword-reports/exports/{id}/metrics` —— 指标随报表一起返回
+    //   * `ad-group-keyword-reports/capabilities/{id}` —— 字面量子路径不接 id 段
+    //   * `ad-group-keyword-reports/rows/not-a-uuid` —— 任何非 UUID 尾段都不是真实端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-group-keyword-reports`。
+    pattern:
+      /^ad\-group\-keyword\-reports\/(?:capabilities|options|rows|exports(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/csv)?)?)$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。

@@ -35565,6 +35565,381 @@
           }
         }
       }
+    },
+    "/channel/ad-group-keyword-reports/exports": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportExportPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "post_channel_ad_group_keyword_reports_exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdGroupKeywordReportExportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportExportRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-group-keyword-reports/rows": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_rows",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "KEYWORD"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "TOTAL"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "externalCampaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keywordText",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-group-keyword-reports/options": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-group-keyword-reports/exports/{exportId}": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_exports_exportId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportExportRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-group-keyword-reports/exports/{exportId}/csv": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_exports_exportId_csv",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-group-keyword-reports/capabilities": {
+      "get": {
+        "tags": [
+          "ad-group-keyword-report-controller"
+        ],
+        "operationId": "get_channel_ad_group_keyword_reports_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdGroupKeywordReportCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -86221,6 +86596,882 @@
         }
       },
       "AdBulkCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdGroupKeywordReportExportRequest": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "报表维度：GROUP / KEYWORD / SEARCH_TERM / NEGATIVE_EFFECT"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "时间粒度：TOTAL / DAY / WEEK / MONTH"
+          },
+          "sort": {
+            "type": "string",
+            "description": "排序方式"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id 筛选（null = 没筛）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺筛选（null = 没筛）"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "归一后类型筛选（null = 没筛）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态筛选（null = 没筛；含义随维度而异）"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "外部活动 id 筛选（null = 没筛）"
+          },
+          "keywordText": {
+            "type": "string",
+            "description": "词文本筛选（null = 没筛）"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "统计起始日",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "统计截止日",
+            "format": "date"
+          },
+          "selectedKeys": {
+            "type": "array",
+            "description": "🔴 批量选中的维度主键（空数组 = 导出当前筛选的全部；维度主键的含义随维度而异）",
+            "items": {
+              "type": "string",
+              "description": "🔴 批量选中的维度主键（空数组 = 导出当前筛选的全部；维度主键的含义随维度而异）"
+            }
+          }
+        }
+      },
+      "AdGroupKeywordReportExportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "导出留痕 id",
+            "format": "uuid"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "报表维度"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "导出时用的时间粒度"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id 筛选（null = 没筛）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺筛选（null = 没筛）"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "归一后类型筛选（null = 没筛）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态筛选（null = 没筛）"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "外部活动 id 筛选（null = 没筛）"
+          },
+          "keywordText": {
+            "type": "string",
+            "description": "词文本筛选（null = 没筛）"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "统计起始日",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "统计截止日",
+            "format": "date"
+          },
+          "rowCount": {
+            "type": "integer",
+            "description": "导出的分组行数",
+            "format": "int32"
+          },
+          "selection": {
+            "type": "array",
+            "description": "🔴 批量选中的维度主键（空 = 当前筛选的全部）",
+            "items": {
+              "type": "string",
+              "description": "🔴 批量选中的维度主键（空 = 当前筛选的全部）"
+            }
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 这次导出对着哪个水位算出来的",
+            "format": "date-time"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 导出当时的口径定义"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdGroupKeywordReportCacheInfo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "🔴 缓存状态：HIT / MISS / STALE / BYPASS"
+          },
+          "cacheKey": {
+            "type": "string",
+            "description": "缓存键（查询指纹）"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 失效依据 1：算这份结果时的数据截至时刻",
+            "format": "date-time"
+          },
+          "sourceBatchKey": {
+            "type": "string",
+            "description": "🔴 失效依据 2：水位那一行来自哪一次同步批次"
+          },
+          "sourceWatermark": {
+            "type": "string",
+            "description": "🔴 失效依据 3：失效令牌（数据变了就变）"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "🔴 明确的过期时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 缓存口径说明"
+          }
+        },
+        "description": "🔴 缓存信息（命中状态 + 失效依据 + 过期时刻）"
+      },
+      "AdGroupKeywordReportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的分组总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "报表维度"
+          },
+          "granularity": {
+            "type": "string",
+            "description": "时间粒度：TOTAL / DAY / WEEK / MONTH"
+          },
+          "summaries": {
+            "type": "array",
+            "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportSummary"
+            }
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（该维度的水位）",
+            "format": "date-time"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的口径说明"
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义（表头渲染用）",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupReportMetricDefinition"
+            }
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / CPC 口径说明"
+          },
+          "negativeEffectNote": {
+            "type": "string",
+            "description": "🔴 否定效果评估口径说明"
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "🔴 空态原因：NO_SYNCED_DATA / NO_METRICS_IN_RANGE / FILTERED_EMPTY / null"
+          },
+          "emptyNote": {
+            "type": "string",
+            "description": "🔴 空态说明文案（三种空的解释各不相同）"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/AdGroupKeywordReportCacheInfo"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 本维度的补充说明"
+          }
+        }
+      },
+      "AdGroupKeywordReportRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "报表维度：GROUP / KEYWORD / SEARCH_TERM / NEGATIVE_EFFECT"
+          },
+          "dimensionKey": {
+            "type": "string",
+            "description": "维度主键（组 id / 词 id / 搜索词原文 / 否定记录 id）"
+          },
+          "dimensionLabel": {
+            "type": "string",
+            "description": "维度显示名"
+          },
+          "currency": {
+            "type": "string",
+            "description": "🔴 币种（本仓无汇率源，不同币种不合并）"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧活动 id"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "conversions": {
+            "type": "string",
+            "description": "转化合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率 = Σ转化 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = Σ花费 / Σ销售额（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = Σ销售额 / Σ花费（分母为 0 时为 null=不可比）"
+          },
+          "activeDays": {
+            "type": "integer",
+            "description": "🔴 有数据的天数（同一 (keyword_id, bucket_date) 唯一 ⇒ 不会重复计数）",
+            "format": "int64"
+          },
+          "periodStart": {
+            "type": "string",
+            "description": "🔴 时间桶起点（TOTAL 粒度为 null）",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "description": "🔴 时间桶终点（TOTAL 粒度为 null）",
+            "format": "date"
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "该行实际统计到的最早日期",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "该行实际统计到的最晚日期",
+            "format": "date"
+          },
+          "groupStatus": {
+            "type": "string",
+            "description": "组状态（GROUP 维度）"
+          },
+          "externalGroupId": {
+            "type": "string",
+            "description": "平台侧组 id（GROUP 维度）"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "所属活动名（GROUP 维度）"
+          },
+          "campaignStatus": {
+            "type": "string",
+            "description": "所属活动状态（GROUP 维度）"
+          },
+          "defaultBid": {
+            "type": "string",
+            "description": "组默认竞价（GROUP 维度；null = 平台侧没给）"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "组日预算（GROUP 维度；null = 继承活动预算）"
+          },
+          "bidCurrency": {
+            "type": "string",
+            "description": "竞价币种（GROUP 维度）"
+          },
+          "targetingType": {
+            "type": "string",
+            "description": "定向类型（平台原文，GROUP 维度）"
+          },
+          "productCount": {
+            "type": "integer",
+            "description": "该组投放的商品数（GROUP 维度）",
+            "format": "int64"
+          },
+          "keywordText": {
+            "type": "string",
+            "description": "关键词原文（KEYWORD 维度）"
+          },
+          "externalKeywordId": {
+            "type": "string",
+            "description": "平台侧关键词 id（KEYWORD 维度）"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "归一后广告类型（KEYWORD 维度）"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始平台类型标记（与归一类型并存，KEYWORD 维度）"
+          },
+          "keywordStatus": {
+            "type": "string",
+            "description": "词状态（KEYWORD 维度）"
+          },
+          "bid": {
+            "type": "string",
+            "description": "词当前竞价（KEYWORD 维度）"
+          },
+          "searchTerm": {
+            "type": "string",
+            "description": "搜索词原文（SEARCH_TERM 维度）"
+          },
+          "sourceKeywordCount": {
+            "type": "integer",
+            "description": "该搜索词出现在多少个投放词下（SEARCH_TERM 维度）",
+            "format": "int64"
+          },
+          "sourceCampaignCount": {
+            "type": "integer",
+            "description": "该搜索词出现在多少个活动下（SEARCH_TERM 维度）",
+            "format": "int64"
+          },
+          "negationText": {
+            "type": "string",
+            "description": "被否定的词原文（NEGATIVE_EFFECT 维度）"
+          },
+          "negationType": {
+            "type": "string",
+            "description": "否定类型：NEGATIVE_EXACT / NEGATIVE_PHRASE"
+          },
+          "negationStatus": {
+            "type": "string",
+            "description": "否定状态：DECIDED / PUSHED / REJECTED"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "description": "🔴 否定生效日（applied_at 的 UTC 日期；空 ⇒ 无法评估）",
+            "format": "date"
+          },
+          "evidenceFrom": {
+            "type": "string",
+            "description": "依据区间起（UTC 日）",
+            "format": "date"
+          },
+          "evidenceTo": {
+            "type": "string",
+            "description": "依据区间止（UTC 日）",
+            "format": "date"
+          },
+          "appliedAt": {
+            "type": "string",
+            "description": "平台回执时间",
+            "format": "date-time"
+          },
+          "evaluationOutcome": {
+            "type": "string",
+            "description": "🔴 评估结论：NO_DATA_AFTER / STILL_REPORTING / ZERO_SPEND_AFTER / NOT_EVALUABLE"
+          },
+          "evaluationNote": {
+            "type": "string",
+            "description": "🔴 评估结论的说明（写清为什么）"
+          },
+          "preImpressions": {
+            "type": "string",
+            "description": "否定前曝光（生效日及之前）"
+          },
+          "preClicks": {
+            "type": "string",
+            "description": "否定前点击（生效日及之前）"
+          },
+          "preConversions": {
+            "type": "string",
+            "description": "否定前转化（生效日及之前）"
+          },
+          "preSpend": {
+            "type": "string",
+            "description": "否定前花费（生效日及之前）"
+          },
+          "preSales": {
+            "type": "string",
+            "description": "否定前销售额（生效日及之前）"
+          },
+          "postImpressions": {
+            "type": "string",
+            "description": "否定后曝光（生效日之后）"
+          },
+          "postClicks": {
+            "type": "string",
+            "description": "否定后点击（生效日之后）"
+          },
+          "postConversions": {
+            "type": "string",
+            "description": "否定后转化（生效日之后）"
+          },
+          "postSpend": {
+            "type": "string",
+            "description": "否定后花费（生效日之后）"
+          },
+          "postSales": {
+            "type": "string",
+            "description": "否定后销售额（生效日之后）"
+          },
+          "postStillReporting": {
+            "type": "boolean",
+            "description": "🔴 否定后是否仍有数据（生效日之后仍有花费或点击）；null = 无法评估"
+          },
+          "zeroConversionWaste": {
+            "type": "boolean",
+            "description": "🔴 是否「高曝光零转化」（有曝光且零转化）—— 浪费的入口"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（该行数据截至什么时候）",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "🔴 该行的补充说明"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "AdGroupKeywordReportSummary": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "币种（GROUP 维度为空串）"
+          },
+          "rowCount": {
+            "type": "integer",
+            "description": "该币种下的分组行数",
+            "format": "int64"
+          },
+          "entityCount": {
+            "type": "integer",
+            "description": "实体数（组数 / 词数 / 搜索词数 / 否定记录数）",
+            "format": "int64"
+          },
+          "totalImpressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "totalClicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "totalConversions": {
+            "type": "string",
+            "description": "转化合计"
+          },
+          "totalSpend": {
+            "type": "string",
+            "description": "花费合计"
+          },
+          "totalSales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 CTR = Σ点击 / Σ曝光（分母为 0 时为 null=不可比）"
+          },
+          "cpc": {
+            "type": "string",
+            "description": "🔴 CPC = Σ花费 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "cvr": {
+            "type": "string",
+            "description": "🔴 转化率 = Σ转化 / Σ点击（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = Σ花费 / Σ销售额（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = Σ销售额 / Σ花费（分母为 0 时为 null=不可比）"
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "实际统计到的最早日期",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "实际统计到的最晚日期",
+            "format": "date"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 口径说明（ACOS / ROAS / CPC 的分子分母）"
+          }
+        },
+        "description": "🔴 筛选后全集的汇总（按币种拆开，不受分页影响）"
+      },
+      "AdGroupReportMetricDefinition": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "指标键"
+          },
+          "label": {
+            "type": "string",
+            "description": "指标显示名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "🔴 是否有分母可算（false = 当前不出数值，不是 0）"
+          },
+          "formula": {
+            "type": "string",
+            "description": "🔴 口径定义（写进表头的那句话）"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "description": "🔴 不可用的原因（available=false 时说明为什么没有数值）"
+          }
+        },
+        "description": "🔴 逐指标口径定义（表头渲染用）"
+      },
+      "AdGroupKeywordReportOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "显示名"
+          }
+        },
+        "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）"
+      },
+      "AdGroupKeywordReportOptions": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "报表维度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "granularities": {
+            "type": "array",
+            "description": "时间粒度下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "internalAdTypes": {
+            "type": "array",
+            "description": "归一后类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "状态下拉项（含义随维度而异，见 note）",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+            }
+          },
+          "sortsByDimension": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）",
+              "items": {
+                "$ref": "#/components/schemas/AdGroupKeywordReportOption"
+              }
+            },
+            "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）"
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupReportMetricDefinition"
+            }
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / CPC 口径说明"
+          },
+          "negativeEffectNote": {
+            "type": "string",
+            "description": "🔴 否定效果评估口径说明"
+          },
+          "rangeLimitNote": {
+            "type": "string",
+            "description": "🔴 时间范围与粒度的上限说明"
+          },
+          "cacheNote": {
+            "type": "string",
+            "description": "🔴 缓存说明"
+          },
+          "statusNote": {
+            "type": "string",
+            "description": "🔴 状态下拉项的含义说明"
+          }
+        }
+      },
+      "AdGroupKeywordReportExportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupKeywordReportExportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdGroupKeywordReportCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupReportCapabilityDimension"
+            }
+          },
+          "metricDefinitions": {
+            "type": "array",
+            "description": "🔴 逐指标口径定义（ACOS / ROAS / CPC 的定义写在这里）",
+            "items": {
+              "$ref": "#/components/schemas/AdGroupReportMetricDefinition"
+            }
+          },
+          "dimensions_": {
+            "type": "array",
+            "description": "报表维度取值",
+            "items": {
+              "type": "string",
+              "description": "报表维度取值"
+            }
+          },
+          "granularities": {
+            "type": "array",
+            "description": "时间粒度取值",
+            "items": {
+              "type": "string",
+              "description": "时间粒度取值"
+            }
+          },
+          "sortOptionsByDimension": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）",
+              "items": {
+                "type": "string",
+                "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）"
+              }
+            },
+            "description": "🔴 每个维度各自的排序方式（维度不同，白名单也不同）"
+          },
+          "emptyReasons": {
+            "type": "array",
+            "description": "空态原因取值",
+            "items": {
+              "type": "string",
+              "description": "空态原因取值"
+            }
+          },
+          "negativeEffectNote": {
+            "type": "string",
+            "description": "🔴 否定效果评估的口径说明（随报表一起返回）"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS / CPC 口径说明（随报表一起返回）"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的含义"
+          },
+          "cacheNote": {
+            "type": "string",
+            "description": "🔴 缓存的失效依据与过期口径"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdGroupReportCapabilityDimension": {
         "type": "object",
         "properties": {
           "dimension": {
