@@ -1,4 +1,4 @@
-# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 7 轮未并入）
+# `origin/main` 的 tip 是集成头的 squash —— main → 集成头同步结构性冲突（连续 8 轮未并入）
 
 - 创建: 2026-10-21
 - Owner: TBD（**发布侧**负责，见「待办内容」第 1 条）
@@ -12,7 +12,7 @@
 「main → 集成头同步」任务每轮做的是：`fetch` → `merge-base --is-ancestor origin/main integration/module-dev`
 → 有新提交就 `git merge --no-ff origin/main` → 预检 → push 集成头。
 
-**连续 7 轮（2026-10-21 01:15、03:15、04:15、05:15、06:43、07:40、11:27）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
+**连续 8 轮（2026-10-21 01:15、03:15、04:15、05:15、06:43、07:40、11:27、11:45）都在同一个地方停住**：`origin/main` 的 tip `d28188d6`
 （`Integration/module dev (#11)`）是 GitHub **squash 合并**的产物 —— **单父提交**，
 父提交是 `1bb270a0`（batch-28 tip）。
 
@@ -144,7 +144,7 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 
 ### 影响
 
-- 「main → 集成头同步」任务**连续 7 轮产出「冲突未并入」**。
+- 「main → 集成头同步」任务**连续 8 轮产出「冲突未并入」**。
   各轮等闸时长：45 / 40 / 27 / **0** / **26** / **25 分 49 秒** / **3 小时 23 分** ⇒ **闸不是瓶颈，唯一瓶颈是 main 的 tip 是 squash**。
   05:15 轮闸是空的、第 1 次尝试就拿到；06:43 轮闸被**上一轮流水线的后端 L2（`mvnw verify`）**持有，
   按协议用密集竞态 `gate acquire`（1 秒一次）等到第 1568 次命中（26 分 08 秒）；
@@ -248,6 +248,21 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
       父进程都是 MCode helper）。本轮用「**先等别人的竞态循环退出，再单线程竞态**」规避，
       但根治应在调度器层保证唯一性 —— 否则就是上面那条「release 后被秒抢 ⇒ 闸泄漏」。
 
+- [ ] **（11:45 轮新增）同步任务自身提交文档会制造下一个冲突文件**：
+      本轮第 3 个冲突文件 `docs/backlog/2026-10/2026-10-21-main-squash-merge-divergence.md`（add/add）
+      **正是 11:27 轮把这份 backlog 文档提交进集成头造成的** ——
+      main 侧也有一份 `d28188d6` 带来的 6 轮旧稿，两侧各自新增 ⇒ add/add。
+      ⇒ **每轮同步把「main 上已有同名文件」的文档提交进集成头，就等于给下一轮多加一个冲突面。**
+      ⇒ 建议：同步任务提交文档前先 `git cat-file -e origin/main:<path>` 查同名文件；
+      main 侧已存在的文档（如本文件）**只在集成头改、不往 main 推**，或先与 main 侧对齐再提交。
+- [ ] **（11:45 轮新增）`ec225641` 也是 squash —— 11:27 轮的「真实提交」措辞不成立**：
+      独立核验 `git log -1 --format='parents=[%P]' ec225641` ⇒ **`parents=[d28188d6]`，单父提交**
+      ⇒ 它与 `d28188d6` **同为 squash**，**不是**「真实 merge」。
+      （11:27 轮写「2 个父提交（真实 merge）」、11:27 轮自己的更正 `053ee1f0` 写「真实提交，1 个父提交」，
+      **两处措辞都自相矛盾**；本轮据实更正。）
+      ⇒ 这解释了为什么 merge-base 仍停在 `1bb270a0`：main 上**两颗**提交都是 squash，
+      **合并路径依然只能靠发布侧改用真提交**才能根治。
+
 ---
 
 ## 影响面
@@ -255,13 +270,14 @@ parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 - **只影响「main → 集成头同步」这一个任务**（`tools/module-progress/SYNC-MAIN.md`）的推进节奏，
   **不影响**流水线的并入 / L2（集成头自身照常演进，batch-39~42 均正常交付）。
 - **不动任何业务代码**：本条待办是**发布流程 / 仓库拓扑**问题，不是代码问题。
-- 涉及文件（**11:27 轮的冲突面，2 个**）：
+- 涉及文件（**11:45 轮的冲突面，3 个**）：
   - `apps/web/src/lib/api-proxy.ts`（content 冲突；main 侧独有 **0 行**，ours 严格超集；**同时**是共享白名单累积文件，见
     `docs/backlog/2026-10/2026-10-21-api-proxy-shared-file-merge-conflict.md`）
-  - `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java`（add/add；main 侧独有 **27 行**，是**修复前的 JVM 墙钟写法**；ours 侧是显式 UTC + 同锚点 + 可执行不变量的跨时钟域修复 ⇒ 取 theirs 会**回退修复**）
-  - （前 6 轮的旧冲突面，6 个，随 `ec225641` 真实提交上 main 后已自然消解：
+  - `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java`（add/add；main 侧独有 **28 行**，是**修复前的 JVM 墙钟写法** `OffsetDateTime.now().minusDays(10)`；ours 侧是 5.5.1.1 修复后的 `a1At/a2At` **DB 时钟锚定**写法（`dayStart` / `atOffset(ZoneOffset.UTC)`）⇒ 取 theirs 会**回退修复**）
+  - `docs/backlog/2026-10/2026-10-21-main-squash-merge-divergence.md`（add/add；**本文件自身** —— ours 是 7 轮版本 267 行，theirs 是 6 轮版本 178 行 ⇒ 纯文档版本差）
+  - （前 6 轮的旧冲突面，6 个，随 `ec225641` 上 main 后已自然消解：
     `cost-composition-page.test.ts` / `cost-composition-model.test.ts` / `cost-composition-model.ts` /
     `cost-composition-workspace.tsx` / `api-proxy.ts` / `ListingPublishJobIntegrationTest.java`）
 - 根提交：`d28188d6`（`Integration/module dev (#11)`，2026-10-20 20:39:44 +0800，**squash**）
-  ＋ `ec225641`（`feat: 到岸成本、成本分摊等 24 项能力交付`，**真实提交**，1 个父提交 = `d28188d6`）
+  ＋ `ec225641`（`feat: 到岸成本、成本分摊等 24 项能力交付`，**同样是 squash**，1 个父提交 = `d28188d6`）
 - merge-base：`1bb270a0`（被老 squash 拉回）
