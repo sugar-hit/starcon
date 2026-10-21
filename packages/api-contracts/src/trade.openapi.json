@@ -48886,6 +48886,548 @@
           }
         }
       }
+    },
+    "/trade/return-analysis/snapshots": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "snapshotNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "post_trade_return_analysis_snapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAnalysisSnapshotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/basis": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_basis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisBasisPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "post_trade_return_analysis_basis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAnalysisBasisCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisBasisRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/basis/{id}/supersede": {
+      "post": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "post_trade_return_analysis_basis_id_supersede",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnAnalysisBasisSupersede"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisBasisRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/trend": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnTrendReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/overview": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/capabilities": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnalysisCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/breakdown": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_breakdown",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnBreakdownReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/return-analysis/anomalies": {
+      "get": {
+        "tags": [
+          "return-analytics-controller"
+        ],
+        "operationId": "get_trade_return_analysis_anomalies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnAnomalyReport"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -117836,6 +118378,1131 @@
           "landsIn": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ReturnAnalysisSnapshotRequest": {
+        "required": [
+          "currency",
+          "dimension"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "起始日（含），null 表示不限",
+            "format": "date",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "description": "截止日（**含当天**），null 表示不限",
+            "format": "date",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种（三字母大写），null 表示该窗口内出现过的全部币种"
+          },
+          "dimension": {
+            "type": "string",
+            "description": "维度 SHOP/SKU/CATEGORY/REASON/BATCH"
+          }
+        }
+      },
+      "ReturnAnalysisSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnalysisSnapshotRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReturnAnalysisSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "snapshotNo": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "returnAmount": {
+            "type": "number"
+          },
+          "salesAmount": {
+            "type": "number"
+          },
+          "returnRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "rejectionRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "refundCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "refundTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgRefundAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgResolutionHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "anomalyCode": {
+            "type": "string"
+          },
+          "anomalyNote": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReturnAnalysisBasisCreate": {
+        "required": [
+          "basisName",
+          "batchAlertMinQty",
+          "batchAlertMultiplier",
+          "currency",
+          "effectiveFrom",
+          "includeRefundOnly",
+          "rateAlertMinSalesShare",
+          "rateAlertMultiplier",
+          "reasonAlertMinCases",
+          "reasonAlertShare",
+          "rejectionAlertGapPp",
+          "rejectionAlertMinCases",
+          "trendAlertGapPp"
+        ],
+        "type": "object",
+        "properties": {
+          "basisName": {
+            "type": "string",
+            "description": "口径名（租户自己起的名字）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "口径适用的币种（三字母大写）"
+          },
+          "includeRefundOnly": {
+            "type": "boolean",
+            "description": "分子是否含「仅退款」类售后单（默认 false）"
+          },
+          "rateAlertMultiplier": {
+            "type": "number",
+            "description": "退货率异常倍数（维度率 ≥ 总体率 × 本值）"
+          },
+          "rateAlertMinSalesShare": {
+            "type": "number",
+            "description": "退货率异常的最小销售额占比（0.01 = 总体销售额的 1%）"
+          },
+          "rejectionAlertGapPp": {
+            "type": "number",
+            "description": "拒退率异常的百分点差"
+          },
+          "rejectionAlertMinCases": {
+            "type": "integer",
+            "description": "拒退率异常的最小已决定单数",
+            "format": "int64"
+          },
+          "batchAlertMultiplier": {
+            "type": "number",
+            "description": "批次件数异常倍数"
+          },
+          "batchAlertMinQty": {
+            "type": "number",
+            "description": "批次件数异常的最小件数"
+          },
+          "reasonAlertShare": {
+            "type": "number",
+            "description": "原因集中异常的最小占比（0.6 = 60%）"
+          },
+          "reasonAlertMinCases": {
+            "type": "integer",
+            "description": "原因集中异常的最小案件数",
+            "format": "int64"
+          },
+          "trendAlertGapPp": {
+            "type": "number",
+            "description": "趋势恶化异常的百分点差"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "口径生效日（报表窗口完全早于这一天时用默认口径）",
+            "format": "date"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "口径说明（这些阈值是怎么定的）"
+          }
+        }
+      },
+      "ReturnAnalysisBasisRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "basisNo": {
+            "type": "string"
+          },
+          "basisName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "includeRefundOnly": {
+            "type": "boolean"
+          },
+          "rateAlertMultiplier": {
+            "type": "number"
+          },
+          "rateAlertMinSalesShare": {
+            "type": "number"
+          },
+          "rejectionAlertGapPp": {
+            "type": "number"
+          },
+          "rejectionAlertMinCases": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "batchAlertMultiplier": {
+            "type": "number"
+          },
+          "batchAlertMinQty": {
+            "type": "number"
+          },
+          "reasonAlertShare": {
+            "type": "number"
+          },
+          "reasonAlertMinCases": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trendAlertGapPp": {
+            "type": "number"
+          },
+          "basisStatus": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "sourceNote": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supersededBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supersedeReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnAnalysisBasisSupersede": {
+        "required": [
+          "basisName",
+          "batchAlertMinQty",
+          "batchAlertMultiplier",
+          "currency",
+          "effectiveFrom",
+          "includeRefundOnly",
+          "rateAlertMinSalesShare",
+          "rateAlertMultiplier",
+          "reasonAlertMinCases",
+          "reasonAlertShare",
+          "rejectionAlertGapPp",
+          "rejectionAlertMinCases",
+          "supersedeReason",
+          "trendAlertGapPp",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "basisName": {
+            "type": "string",
+            "description": "新口径名（租户自己起的名字）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "新口径适用的币种（三字母大写，须与老口径同币种）"
+          },
+          "includeRefundOnly": {
+            "type": "boolean",
+            "description": "分子是否含「仅退款」类售后单"
+          },
+          "rateAlertMultiplier": {
+            "type": "number",
+            "description": "退货率异常倍数"
+          },
+          "rateAlertMinSalesShare": {
+            "type": "number",
+            "description": "退货率异常的最小销售额占比"
+          },
+          "rejectionAlertGapPp": {
+            "type": "number",
+            "description": "拒退率异常的百分点差"
+          },
+          "rejectionAlertMinCases": {
+            "type": "integer",
+            "description": "拒退率异常的最小已决定单数",
+            "format": "int64"
+          },
+          "batchAlertMultiplier": {
+            "type": "number",
+            "description": "批次件数异常倍数"
+          },
+          "batchAlertMinQty": {
+            "type": "number",
+            "description": "批次件数异常的最小件数"
+          },
+          "reasonAlertShare": {
+            "type": "number",
+            "description": "原因集中异常的最小占比"
+          },
+          "reasonAlertMinCases": {
+            "type": "integer",
+            "description": "原因集中异常的最小案件数",
+            "format": "int64"
+          },
+          "trendAlertGapPp": {
+            "type": "number",
+            "description": "趋势恶化异常的百分点差"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "description": "新口径生效日",
+            "format": "date"
+          },
+          "sourceNote": {
+            "type": "string",
+            "description": "新口径说明"
+          },
+          "supersedeReason": {
+            "type": "string",
+            "description": "换版理由（必填）"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本号",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnTrendPoint": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "bucketStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "returnAmount": {
+            "type": "number"
+          },
+          "salesAmount": {
+            "type": "number"
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "该桶的退货率（比值，标度 4；分母为 0 时为 null）",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnTrendReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string"
+          },
+          "granularity": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnTrendPoint"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnalysisOverview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string"
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnCurrencySummary"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/ReturnAnalysisTotals"
+          },
+          "rejection": {
+            "$ref": "#/components/schemas/ReturnRejectionSummary"
+          },
+          "processing": {
+            "$ref": "#/components/schemas/ReturnProcessingSummary"
+          },
+          "reasonDistribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnReasonSlice"
+            }
+          },
+          "attributionDistribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAttributionSlice"
+            }
+          },
+          "attributedCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attributionCoverage": {
+            "type": "number",
+            "description": "归因覆盖率（百分比）；期内没有售后单时为 null",
+            "nullable": true
+          },
+          "thresholds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnomalyThresholds"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnalysisTotals": {
+        "type": "object",
+        "properties": {
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "salesOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReturnAnomalyThresholds": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "rateMultiplier": {
+            "type": "number"
+          },
+          "rateMinSalesShare": {
+            "type": "number"
+          },
+          "rejectionGapPp": {
+            "type": "number"
+          },
+          "rejectionMinCases": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "batchMultiplier": {
+            "type": "number"
+          },
+          "batchMinQty": {
+            "type": "number"
+          },
+          "reasonShare": {
+            "type": "number"
+          },
+          "reasonMinCases": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trendGapPp": {
+            "type": "number"
+          }
+        }
+      },
+      "ReturnAttributionSlice": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "rootKind": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "primaryCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "weightSum": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number"
+          }
+        }
+      },
+      "ReturnCurrencySummary": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "caliberSource": {
+            "type": "string"
+          },
+          "basisNo": {
+            "type": "string"
+          },
+          "basisName": {
+            "type": "string"
+          },
+          "includeRefundOnly": {
+            "type": "boolean"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "returnAmount": {
+            "type": "number"
+          },
+          "salesOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salesAmount": {
+            "type": "number"
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "退货率（比值，标度 4；分母为 0 时为 null）",
+            "nullable": true
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectionRate": {
+            "type": "number",
+            "description": "拒退率（比值，标度 4）",
+            "nullable": true
+          },
+          "refundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "refundTotal": {
+            "type": "number"
+          },
+          "avgRefundAmount": {
+            "type": "number",
+            "description": "平均退款金额；没有成功退款时为 null",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnProcessingSummary": {
+        "type": "object",
+        "properties": {
+          "avgCaseResolutionHours": {
+            "type": "number",
+            "description": "售后单结案平均时长（小时）；无样本时为 null",
+            "nullable": true
+          },
+          "maxCaseResolutionHours": {
+            "type": "number",
+            "description": "售后单结案最长时长（小时）；无样本时为 null",
+            "nullable": true
+          },
+          "caseSampleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgRmaApprovalHours": {
+            "type": "number",
+            "description": "退货授权平均审批时长（小时）；无样本时为 null",
+            "nullable": true
+          },
+          "rmaSampleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgReceiptHours": {
+            "type": "number",
+            "description": "买家回寄平均时长（小时）；无样本时为 null",
+            "nullable": true
+          },
+          "receiptSampleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgRefundHours": {
+            "type": "number",
+            "description": "退款出结果平均时长（小时）；无样本时为 null",
+            "nullable": true
+          },
+          "refundSampleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnReasonSlice": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "returnAmount": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number"
+          }
+        }
+      },
+      "ReturnRejectionSummary": {
+        "type": "object",
+        "properties": {
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partiallyAuthorizedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorizedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectionRate": {
+            "type": "number",
+            "description": "拒退率（比值，标度 4）",
+            "nullable": true
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "authorizedQty": {
+            "type": "number"
+          },
+          "unapprovedQtyRate": {
+            "type": "number",
+            "description": "件数口径的未授权占比（比值，标度 4）",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnalysisAction": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnAnalysisCapabilities": {
+        "type": "object",
+        "properties": {
+          "dataSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnalysisSection"
+            }
+          },
+          "relatedModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnalysisRelatedModule"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnalysisAction"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caliberNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "rejectionNote": {
+            "type": "string"
+          },
+          "processingNote": {
+            "type": "string"
+          },
+          "batchNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnalysisRelatedModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "ownerSystem": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnAnalysisSection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "moduleId": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnBreakdownReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnBreakdownRow"
+            }
+          },
+          "totalReturnAmount": {
+            "type": "number",
+            "description": "退货金额合计；**本期出现多个币种时为 null**（跨币种不可合计）",
+            "nullable": true
+          },
+          "totalSalesAmount": {
+            "type": "number",
+            "description": "销售额合计；**本期出现多个币种时为 null**（跨币种不可合计）",
+            "nullable": true
+          },
+          "totalReturnRate": {
+            "type": "number",
+            "description": "总体退货率（比值，标度 4）；批次维度无金额口径、跨币种时为 null",
+            "nullable": true
+          },
+          "totalCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lineAmountCoverage": {
+            "type": "number",
+            "description": "行级金额覆盖率（百分比）；只有 SKU 与类目维度有",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnBreakdownRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "caliber": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "returnQty": {
+            "type": "number"
+          },
+          "returnAmount": {
+            "type": "number",
+            "description": "退货金额；批次维度不报金额（为 null）",
+            "nullable": true
+          },
+          "salesOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salesAmount": {
+            "type": "number",
+            "description": "同期销售额；批次维度没有销售额分母（为 null）",
+            "nullable": true
+          },
+          "returnRate": {
+            "type": "number",
+            "description": "退货率（比值，标度 4；分母为 0 时为 null）",
+            "nullable": true
+          },
+          "receivedQty": {
+            "type": "number",
+            "description": "实收件数（只有批次维度有）",
+            "nullable": true
+          },
+          "salesQty": {
+            "type": "number",
+            "description": "关联 SKU 同期销量件数（只有批次维度有）",
+            "nullable": true
+          },
+          "linkedSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnalysisBasisPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnalysisBasisRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReturnAnomalyReport": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowNote": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ReturnAnomalyThresholds"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAnomalyRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAnomalyRow": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionKey": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "metricValue": {
+            "type": "number"
+          },
+          "baselineValue": {
+            "type": "number"
+          },
+          "delta": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }
