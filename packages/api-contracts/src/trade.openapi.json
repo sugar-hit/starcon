@@ -42774,6 +42774,565 @@
           }
         }
       }
+    },
+    "/trade/purchase-followups": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "purchaseOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "followupType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "occurredFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "occurredTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupRecordPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "post_trade_purchase_followups",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseFollowupRecordInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupRecordRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-followups/changes": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups_changes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "purchaseOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "changedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "changedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupChangePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "post_trade_purchase_followups_changes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseFollowupChangeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupChangeRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-followups/timeline": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups_timeline",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "purchaseOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "occurredFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "occurredTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupTimelinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-followups/stats": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups_stats",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyOverdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "onlyDelayed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupDeliveryStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-followups/delivery": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups_delivery",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyOverdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "onlyDelayed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupDeliveryPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-followups/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-followup-controller"
+        ],
+        "operationId": "get_trade_purchase_followups_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseFollowupCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -104399,6 +104958,630 @@
           },
           "boundaryNote": {
             "type": "string"
+          }
+        }
+      },
+      "PurchaseFollowupRecordInput": {
+        "required": [
+          "channel",
+          "content",
+          "followupType",
+          "occurredAt",
+          "purchaseOrderNo"
+        ],
+        "type": "object",
+        "properties": {
+          "purchaseOrderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "followupType": {
+            "type": "string",
+            "enum": [
+              "URGING",
+              "CONFIRM",
+              "EXCEPTION",
+              "OTHER"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "PHONE",
+              "EMAIL",
+              "IM",
+              "WECHAT",
+              "PLATFORM",
+              "OTHER"
+            ]
+          },
+          "content": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierReply": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextFollowupAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseFollowupRecordRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "followupNo": {
+            "type": "string"
+          },
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "followupType": {
+            "type": "string",
+            "enum": [
+              "URGING",
+              "CONFIRM",
+              "EXCEPTION",
+              "OTHER"
+            ]
+          },
+          "followupTypeLabel": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "PHONE",
+              "EMAIL",
+              "IM",
+              "WECHAT",
+              "PLATFORM",
+              "OTHER"
+            ]
+          },
+          "channelLabel": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "supplierReply": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextFollowupAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseFollowupChangeInput": {
+        "required": [
+          "fromPromisedDate",
+          "purchaseOrderNo",
+          "reason",
+          "toPromisedDate"
+        ],
+        "type": "object",
+        "properties": {
+          "purchaseOrderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromPromisedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "toPromisedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseFollowupChangeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "changeNo": {
+            "type": "string"
+          },
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "fromPromisedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "toPromisedDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "changedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "followupPromiseDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "documentPromiseDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promiseDiverged": {
+            "type": "boolean"
+          },
+          "writeback": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupWritebackRow"
+            }
+          }
+        }
+      },
+      "PurchaseFollowupWritebackRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "targetEndpoint": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "deliveryInputApplied": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "resultRef": {
+            "type": "string"
+          },
+          "resultSummary": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "attemptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseFollowupRecordPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupRecordRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseFollowupTimelineEntry": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "fromPromisedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "toPromisedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PurchaseFollowupTimelinePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupTimelineEntry"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseFollowupDeliveryStats": {
+        "type": "object",
+        "properties": {
+          "arrivedOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageDelayDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "onTimeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "pendingOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overduePendingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageOverdueDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "changedOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveLeadTimeDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "promiseBasis": {
+            "type": "string"
+          },
+          "delayBasis": {
+            "type": "string"
+          },
+          "ratingWriteback": {
+            "$ref": "#/components/schemas/PurchaseFollowupRatingWriteback"
+          }
+        }
+      },
+      "PurchaseFollowupRatingWriteback": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseFollowupDeliveryPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupDeliveryRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseFollowupDeliveryRow": {
+        "type": "object",
+        "properties": {
+          "purchaseOrderNo": {
+            "type": "string"
+          },
+          "purchaseOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "documentPromiseDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "followupPromiseDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promiseDiverged": {
+            "type": "boolean"
+          },
+          "arrivalStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "arrivedAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "delayDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overdueDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "followupCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastFollowupAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseFollowupChangePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupChangeRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseFollowupCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseFollowupCapability"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PurchaseFollowupCapability": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
