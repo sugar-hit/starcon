@@ -591,6 +591,54 @@ const services: readonly {
       /^ad\-keywords(?:\/(?:capabilities|filter\-options|metrics|search\-terms|negative\-suggestions|negatives|bulk\-actions|report|frequency)|\/negatives\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result|\/bulk\-actions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
   },
   {
+    // 14.3.1.1 活动报表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-campaigns`（14.1.1.1）、`ad-keywords`（14.1.3.1）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'warehouse/'` 那条**元素之前**（仓库那条的注释块很长，
+    //   它的 `prefix` 在文件 850 行附近，元素本体从 656 行开始）----
+    //   同批其它车道的插入点分别是「`sku-cost-compositions` 那条之前」与「`compliance-precheck`
+    //   那条之前」，与本处相距 150 行以上，git 能干净求并。
+    //
+    // ---- 首 token「ad-reports」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-reports` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-type-diffs` 一类），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-reports/capabilities          能力声明（TACOS / 跨币种统一显式 available=false）
+    //   ad-reports/options               筛选项下拉 + 三个口径的定义 + 时间跨度上限说明
+    //   ad-reports/rows                  报表表（GET，真分页 + 真筛选 + 真排序 + 汇总 + 口径说明）
+    //   ad-reports/trend                 趋势图（GET，按日/周/月分桶，按币种拆成多条线）
+    //   ad-reports/export                导出 CSV（GET + query；text/csv 由代理原样透传）
+    //   ad-reports/exports               导出留痕历史（GET，真分页）
+    //
+    // ⚠️ **本模块的六个形状都没有 id 段**，所以这里**不写 uuid 段**（写了反而会把
+    //   `capabilities` 这类字面量子路径当成 id 放行）。将来若新增按 id 的形状，
+    //   必须用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //   （不是 `[0-9a-f-]+`），并把字面量子路径排在 `{uuid}` 段**之前** ——
+    //   alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-reports` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-reports/rows/{id}` —— 报表是按维度聚合的，没有「单行报表详情」这个形状
+    //   * `ad-reports/tacos` —— TACOS 没有分母（总销售额口径 13.4 未接入），
+    //     放行它会让界面以为「TACOS 这一列有数」
+    //   * `ad-reports/export/{id}` —— 导出是**集合级**（按当前筛选整体导出），没有单条导出
+    //   * `ad-reports/keywords` / `ad-reports/products` —— 关键词级与商品级报表分别归
+    //     14.3.1.2 与 14.3.1.3，放行它们等于让界面以为那两个模块已交付
+    //   * `ad-reports/capabilities/{id}` —— 字面量子路径不接 id 段
+    //   * `ad-reports/rows/not-a-uuid` —— 本模块没有 id 段，任何带尾段的形状都不是真实端点
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-reports`。
+    // `exports` 排在 `export` 之前：alternation 是首个命中即返回，
+    // 虽然带 `$` 时回溯也能匹配，但显式排序免得后人读错。
+    pattern: /^ad\-reports(?:\/(?:capabilities|options|rows|trend|exports|export))$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
