@@ -239,6 +239,26 @@ L2 全量验证时机器上有 **43 个 Testcontainers PG 容器**在跑、load 
 
 修复车道：`fix/9-1-1-3-rule-effective-window`（worktree `.worktrees/9.1.1.3-fix`，基线 `1755c23b`，`migrationVersion=none`，无迁移）。
 
+**修复车道的验证（全部真实输出）**：
+
+| 项 | 结果 |
+| --- | --- |
+| 目标类 | `Tests run: 41, Failures: 0, Errors: 0` · BUILD SUCCESS（**比原来多 1 例** = 新增的不变量用例） |
+| 变异测试 | 种子改成「DB 时钟 **+ 1 小时**」（尚未生效的规则）⇒ `Tests run: 41, Failures: 4, Errors: 3` · BUILD FAILURE —— 红的正是**原来那 6 例**（同样用例名、同样报错文本）**＋ 新增的不变量用例** = 7 例红；改回「DB 时钟 − 1 分钟」⇒ 41/41 绿 |
+| 时钟域无关性 | `TZ=UTC` / `TZ=Asia/Shanghai` / `TZ=America/New_York` **各** 41/41 绿 |
+| 回归 | `./mvnw -pl services/trade -am test` ⇒ `Tests run: 1769, Failures: 0, Errors: 0`（94 个测试类）· BUILD SUCCESS ⇒ 没有别的类被带红 |
+| 编译 | `./mvnw -pl services/trade -am compile` EXIT=0；提交后 `git status --short` 为空 |
+
+**改法细节**（唯一被改的源文件 `OrderChangeCancelIntegrationTest.java`）：
+种子 `effective_from` 改成**由 DB 自己算**的 `(now() - interval '1 minute')`（同一时钟域 + 1 分钟余量，贴合「刚登记的规则就是已生效的」语义）；
+`createRule`/`updateRule` 的 `effectiveFrom` 显式给 DB 时钟值（**服务层 default 是 JVM 墙钟**，且 `updateRule` 会用它**覆写** `effective_from`）；
+新增 1 例可执行不变量（种下去的 `effective_from` ≤ 查询时刻 DB `now()`、且与 DB `now()` 间隔 ≥ 30 秒 ⇒ 改回 JVM 墙钟必红；外加按服务端同一套 WHERE 能命中刚种下的规则）。
+**原有 40 例断言一条未削弱、未删除、未放宽。**
+
+**⚠️ 未在范围内（生产侧同类写入口仍在）**：`OrderChangeCancelService.createRule` / `updateRule` 在 `effectiveFrom == null` 时仍用
+**JVM 墙钟**写 `effective_from`，而窗口判定在 DB `now()` 上 ⇒ **真实 API 调用**建出的规则同样存在「刚登记被判成还没生效」的窗口。
+本轮明令只改测试，故只把测试侧显式值钉到 DB 时钟；生产侧这条默认值**建议下一轮单独派车道**收口到 DB 时钟（或注入 `Clock`），**零迁移**。
+
 ---
 
 ## 16.4.2.1 品牌授权：已落地但**本轮不并入**
