@@ -49428,6 +49428,506 @@
           }
         }
       }
+    },
+    "/trade/source-alternatives/policy": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativePolicy"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "put_trade_source_alternatives_policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceAlternativePolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativePolicy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/runs": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "post_trade_source_alternatives_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceAlternativeCreateRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/candidates/{candidateId}/purchase-request": {
+      "post": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "post_trade_source_alternatives_candidates_candidateId_purchase_request",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceAlternativePurchaseRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativePurchaseRequestResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/candidates/{candidateId}/decision": {
+      "post": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "post_trade_source_alternatives_candidates_candidateId_decision",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceAlternativeDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeDecisionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/targets": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_targets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeTargetOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/skus/{skuId}/candidates": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_skus_skuId_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SourceAlternativeCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/runs/{runId}": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_runs_runId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/overview": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/options": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/source-alternatives/capabilities": {
+      "get": {
+        "tags": [
+          "source-alternative-controller"
+        ],
+        "operationId": "get_trade_source_alternatives_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAlternativeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -119502,6 +120002,725 @@
             "type": "number"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativePolicyInput": {
+        "required": [
+          "confirmedMatchMinConfidence",
+          "historyWeight",
+          "leadTimeWeight",
+          "maxCandidates",
+          "priceWeight",
+          "ratingWeight",
+          "requireManualConfirmation",
+          "weakMatchMinConfidence"
+        ],
+        "type": "object",
+        "properties": {
+          "weakMatchMinConfidence": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "confirmedMatchMinConfidence": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "requireManualConfirmation": {
+            "type": "boolean"
+          },
+          "maxCandidates": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "priceWeight": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "ratingWeight": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "historyWeight": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "leadTimeWeight": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "SourceAlternativePolicy": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "weakMatchMinConfidence": {
+            "type": "number"
+          },
+          "confirmedMatchMinConfidence": {
+            "type": "number"
+          },
+          "requireManualConfirmation": {
+            "type": "boolean"
+          },
+          "maxCandidates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priceWeight": {
+            "type": "number"
+          },
+          "ratingWeight": {
+            "type": "number"
+          },
+          "historyWeight": {
+            "type": "number"
+          },
+          "leadTimeWeight": {
+            "type": "number"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SourceAlternativeCreateRunInput": {
+        "required": [
+          "reason",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "minLength": 1,
+            "pattern": "STOCKOUT|QUALITY",
+            "type": "string"
+          },
+          "requiredQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SourceAlternativeCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stallId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stallName": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "platformItemId": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "spec": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "priceMin": {
+            "type": "number"
+          },
+          "priceMax": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "moq": {
+            "type": "number"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "onSale": {
+            "type": "boolean"
+          },
+          "matchType": {
+            "type": "string"
+          },
+          "matchTypeLabel": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "requiresManualConfirmation": {
+            "type": "boolean"
+          },
+          "historyOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "historyQuantity": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "number"
+          },
+          "ratingObjectiveScore": {
+            "type": "number"
+          },
+          "ratingFinalScore": {
+            "type": "number"
+          },
+          "ratingGrade": {
+            "type": "string"
+          },
+          "ratingManuallyAdjusted": {
+            "type": "boolean"
+          },
+          "ratingPeriodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "ratingPeriodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "priceRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lowestPrice": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "number"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "purchaseRequestNo": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeDecisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionType": {
+            "type": "string"
+          },
+          "decisionTypeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "purchaseRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purchaseRequestNo": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SourceAlternativePriceComparison": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "lowestPrice": {
+            "type": "number"
+          },
+          "highestPrice": {
+            "type": "number"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SourceAlternativeRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/SourceAlternativeRunRow"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeCandidateRow"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeDecisionRow"
+            }
+          },
+          "priceComparison": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativePriceComparison"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonLabel": {
+            "type": "string"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "referenceImageUrl": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SourceAlternativePurchaseRequestInput": {
+        "required": [
+          "legalEntityId",
+          "quantity",
+          "targetWarehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SourceAlternativePurchaseRequestResult": {
+        "type": "object",
+        "properties": {
+          "purchaseRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purchaseRequestNo": {
+            "type": "string"
+          },
+          "purchaseRequestStatus": {
+            "type": "string"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeDecisionInput": {
+        "required": [
+          "decisionType"
+        ],
+        "type": "object",
+        "properties": {
+          "decisionType": {
+            "minLength": 1,
+            "pattern": "CONFIRMED|REJECTED",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SourceAlternativeLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeTargetOptions": {
+        "type": "object",
+        "properties": {
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeWarehouseOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeLegalEntityOption"
+            }
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "unavailableNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SourceAlternativeOverview": {
+        "type": "object",
+        "properties": {
+          "runCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openRunCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedCandidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "weakCandidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requestCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastRunAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceAlternativeOptions": {
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeOption"
+            }
+          },
+          "matchTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeOption"
+            }
+          },
+          "decisionTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeOption"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SourceAlternativeCapabilities": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceAlternativeCapability"
+            }
+          },
+          "matchTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SourceAlternativeCapability": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerService": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
             "type": "string"
           }
         }

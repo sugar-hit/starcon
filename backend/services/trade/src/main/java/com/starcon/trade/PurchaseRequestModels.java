@@ -429,4 +429,44 @@ public final class PurchaseRequestModels {
    */
   public record PurchaseRequestApprovalResult(
       PurchaseRequestRow request, boolean failed, int errorStatus, String message) {}
+
+  // ================================================================ 从「建议」建单（行由调用方直接给）
+
+  /**
+   * 从「建议」建申请单，但**申请行由调用方直接给**。
+   *
+   * <p>为什么要有这一条：{@code source_type='SUGGESTION'} 原本只服务 6.2.1.2 的补货建议
+   * （行来自 {@code replenishment_suggestion}）。6.1.2.2 同款货源推荐的候选**不是**补货建议 ——
+   * 它的行来自货源快照，两者的来源形状不同，但**同属「由系统建议、运营确认」这一类**，
+   * 所以用同一个 {@code source_type}，并把来源批次（{@code sourceBatchId}）与来源说明（{@code note}）带上。
+   *
+   * <p>⚠️ **写入口只有本模块**（purchase_request / purchase_request_line 的写入所有者），
+   * 别的模块要建单必须走这里 —— 一张表只有一个写入所有者。
+   */
+  public record PurchaseRequestSuggestionInput(
+      @Schema(nullable = true) UUID sourceBatchId,
+      @NotNull UUID targetWarehouseId,
+      @NotNull UUID legalEntityId,
+      @Schema(nullable = true) @Size(min = 3, max = 3) String currencyCode,
+      @NotNull List<@Valid PurchaseRequestSuggestionLineInput> lines,
+      @Schema(nullable = true) @Size(max = 1000) String note) {}
+
+  /**
+   * 一行「建议」建出来的申请行。
+   *
+   * @param unitPrice 预估单价。为空 = **不填**（快照价只是参考，实际下单金额以后续采购单为准）
+   * @param supplierId 供应商（catalog 的 party；跨服务 ⇒ 只存外部引用 id + 展示快照）。可为空。
+   */
+  public record PurchaseRequestSuggestionLineInput(
+      @NotNull UUID skuId,
+      @NotBlank @Size(max = 64) String skuCode,
+      @Schema(nullable = true) @Size(max = 200) String skuName,
+      @NotNull @DecimalMin(value = "0", inclusive = false) BigDecimal requestedQuantity,
+      @Schema(nullable = true) @DecimalMin(value = "0", inclusive = true) BigDecimal unitPrice,
+      @Schema(nullable = true) LocalDate requestedArrivalDate,
+      @Schema(nullable = true) @Pattern(regexp = "CRITICAL|HIGH|NORMAL|LOW") String priority,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      @Schema(nullable = true) UUID supplierId,
+      @Schema(nullable = true) @Size(max = 64) String supplierCode,
+      @Schema(nullable = true) @Size(max = 200) String supplierName) {}
 }
