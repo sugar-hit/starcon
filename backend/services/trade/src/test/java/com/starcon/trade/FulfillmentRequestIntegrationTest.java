@@ -8,9 +8,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -985,7 +989,8 @@ class FulfillmentRequestIntegrationTest {
   void 流程状态落库后能被重新读取_模拟进程重启() throws Exception {
     // 蓝图加粗句：流程状态必须持久化，不能只放内存。
     // 这里新建一个 service 实例（等价于重启后新建的 bean），只靠 DB 里的状态继续。
-    var freshService = new FulfillmentRequestService(sql);
+    // 时钟用系统默认 —— 与容器里那个 bean 同一个语义（重启后拿到的也是它）。
+    var freshService = new FulfillmentRequestService(sql, Clock.systemDefaultZone());
     var reserved = toReserved(create("RST1"));
     var seen =
         access.run(
@@ -1319,8 +1324,166 @@ class FulfillmentRequestIntegrationTest {
         .isFalse();
   }
 
-  // ================================================================ 5. 多租户三断言
+  // ================================================================ 5. 跨时钟域回归（V211）
 
+  /**
+   * 时钟倒挂：<b>JVM 时钟比 DB 时钟快 5 秒</b>时，一次<b>完全合法</b>的「履约步完成」
+   * 必须写得进去，且写回的值自洽。
+   *
+   * <p><b>旧实现为什么会被 DB 随机拒掉</b>：{@code fulfillment_request_step} 上有表级约束
+   * {@code CHECK (finished_at IS NULL OR finished_at >= started_at)}，而旧实现里
+   * {@code started_at} 取 <b>JVM 墙钟</b>、{@code finished_at} 取 <b>DB 时钟</b> ——
+   * 同一行的两个字段分属两个时钟源，JVM 快几十微秒就违约。
+   * 生产后果不是「测试红」，是<b>履约流程卡在 RUNNING</b>。
+   *
+   * <p><b>本用例怎么做到确定性</b>：不靠运气撞那几十微秒的窗口，而是把 JVM 时钟
+   * （注入的 {@link Clock}）整体前移 5 秒，<b>把「JVM 比 DB 快」这个前提钉死</b>，
+   * 再走真实写路径（建单 → 发起预占 → 回执完成）。
+   * 修好之后：{@code started_at} 落在 <b>DB 时钟</b>上，JVM 那 5 秒的领先<b>渗不进去</b>，
+   * 完成写得进去，且 {@code finished_at >= started_at}、{@code elapsed_seconds} 与两者自洽。
+   *
+   * <p>为什么不能直接「显式写一个比 DB 时钟未来几十毫秒的 started_at 再去完成」：
+   * 修好之后这一对时间戳<b>都由 DB 写</b>，手工写坏的那一行就是<b>真的坏行</b>，
+   * 完成它理应被拒 —— 那正是下面 {@code 结束早于开始的行仍然被拒} 那个用例在守的东西。
+   * 跨时钟域这个缺陷要验的是「环境里 JVM 与 DB 快慢不同时，写入仍然成立」。
+   */
+  @Test
+  void 时钟倒挂_履约步完成仍然写得进去且耗时自洽() throws Exception {
+    // JVM 时钟整体前移 5 秒 = 生产上击穿约束的那个条件（JVM 比 DB 快），
+    // 用注入的 Clock 钉死，不靠运气撞几十微秒的窗口。
+    var shifted = Clock.offset(Clock.systemUTC(), Duration.ofSeconds(5));
+    var fast = new FulfillmentRequestService(sql, shifted);
+
+    var created = asA(() -> fast.create(input("CLOCK1"), user));
+
+    // 前提钉死：此刻 JVM 时钟确实比 DB 时钟快 ~5 秒（否则这个用例什么都没验到）。
+    var jvmNow = OffsetDateTime.ofInstant(shifted.instant(), ZoneId.systemDefault());
+    var dbBefore = dbNow();
+    assertThat(jvmNow)
+        .as("JVM 时钟必须真的比 DB 时钟快，否则这个用例验不到任何东西")
+        .isAfter(dbBefore.plusSeconds(4));
+    // 建单回执里的时刻是**库里写下的**那一份 —— 它也必须落在 DB 时钟上。
+    assertThat(Math.abs(Duration.between(created.requestedAt(), dbBefore).getSeconds()))
+        .as("requested_at 必须取 DB 时钟")
+        .isLessThan(2);
+
+    // 推进到「预占中」并发起预占指令 —— 这一步会写下 RUNNING 的流程步骤行。
+    asA(
+        () ->
+            fast.advance(
+                created.requestId(),
+                new FulfillmentRequestStatusInput(
+                    FulfillmentRequestStatus.RESERVING,
+                    FulfillmentStepKind.RESERVE,
+                    created.processVersion(),
+                    3600),
+                user));
+    asA(() -> fast.requestReservation(created.requestId(), new FulfillmentRequestReservationInput(null), user));
+
+    var running = stepRow(created.requestId(), FulfillmentStepKind.RESERVE);
+    assertThat(running.status()).isEqualTo("RUNNING");
+    assertThat(Math.abs(Duration.between(running.startedAt(), dbNow()).getSeconds()))
+        .as("started_at 必须取 DB 时钟")
+        .isLessThan(2);
+    assertThat(running.startedAt())
+        .as("JVM 快 5 秒的那个时刻不许渗进 started_at")
+        .isBefore(jvmNow.minusSeconds(3));
+
+    // 完成这一步（warehouse 回执）—— 修复前这一句会被表级约束拒掉。
+    asA(
+        () ->
+            fast.acknowledgeReservation(
+                created.requestId(),
+                new FulfillmentRequestReservationAckInput(
+                    FulfillmentReservationStatus.LOCKED,
+                    "RSV-CLOCK1",
+                    new BigDecimal("50.000000"),
+                    ""),
+                user));
+
+    // ↓ 断言的是**写回库里的值**（直查库，不看内存对象）。
+    var done = stepRow(created.requestId(), FulfillmentStepKind.RESERVE);
+    assertThat(done.status()).isEqualTo("COMPLETED");
+    assertThat(done.finishedAt()).as("完成时刻不能早于开始时刻").isAfterOrEqualTo(done.startedAt());
+    assertThat(done.elapsed()).as("耗时不能是负数").isNotNegative();
+    assertThat(done.elapsed())
+        .as("耗时必须与写回的两个时间戳自洽")
+        .isEqualByComparingTo(expectedElapsed(done.startedAt(), done.finishedAt()));
+    assertThat(Math.abs(Duration.between(done.finishedAt(), dbNow()).getSeconds()))
+        .as("finished_at 必须取 DB 时钟")
+        .isLessThan(2);
+  }
+
+  /**
+   * 「结束早于开始」的行仍然被拒 —— 证明那条 CHECK <b>没有被放宽</b>。
+   *
+   * <p>修这个缺陷<b>不是</b>把约束松掉：约束防的是「结束早于开始」这个<b>真</b>错误，
+   * 松掉它等于把真 bug 放进来。这里直接往留痕表塞一条这样的行，DB 必须拒。
+   */
+  @Test
+  void 结束早于开始的行仍然被拒_约束没有被放宽() throws Exception {
+    var created = create("CHK1");
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        sql.execute(
+                            "insert into fulfillment_request_step (id, tenant_id, request_id,"
+                                + " step_kind, attempt, status, work_order_count, started_at,"
+                                + " finished_at, elapsed_seconds)"
+                                + " values (?,?,?,'TRACK',9,'COMPLETED',0,"
+                                + " clock_timestamp() + interval '1 hour', clock_timestamp(),0.000)",
+                            UUID.randomUUID(),
+                            actorA.tenantId(),
+                            created.requestId())))
+        .as("结束早于开始的流程步骤行必须被表级约束拒掉")
+        .hasMessageContaining("fulfillment_request_step");
+
+    // 约束的原文也钉住：它必须仍然是 finished_at >= started_at。
+    var defs =
+        asA(
+            () ->
+                sql.fetch(
+                    "select pg_get_constraintdef(oid) d from pg_constraint"
+                        + " where conrelid = 'fulfillment_request_step'::regclass and contype = 'c'"));
+    assertThat(defs.map(r -> r.get("d", String.class)))
+        .as("CHECK (finished_at >= started_at) 必须原样还在")
+        .anyMatch(d -> d.contains("finished_at") && d.contains("started_at") && d.contains(">="));
+  }
+
+  /** DB 自己的时钟：判「这一行的时间戳落在哪个时钟域上」用它，不拿 JVM 墙钟比。 */
+  OffsetDateTime dbNow() {
+    return asA(() -> sql.fetchOne("select clock_timestamp() as ts").get("ts", OffsetDateTime.class));
+  }
+
+  /** 流程步骤行的**写回值**（直查库，不经过 DTO 映射）。 */
+  record StepRow(String status, OffsetDateTime startedAt, OffsetDateTime finishedAt, BigDecimal elapsed) {}
+
+  StepRow stepRow(UUID requestId, FulfillmentStepKind kind) {
+    var r =
+        asA(
+            () ->
+                sql.fetchOne(
+                    "select status, started_at, finished_at, elapsed_seconds"
+                        + " from fulfillment_request_step"
+                        + " where request_id = ? and step_kind = ? and attempt = 1",
+                    requestId,
+                    kind.name()));
+    assertThat(r).as("流程步骤行必须存在").isNotNull();
+    return new StepRow(
+        r.get("status", String.class),
+        r.get("started_at", OffsetDateTime.class),
+        r.get("finished_at", OffsetDateTime.class),
+        r.get("elapsed_seconds", BigDecimal.class));
+  }
+
+  /** 由两个时间戳算出应有的耗时（与 DB 的 round(...,3) 同一种算法：毫秒三位、half-up）。 */
+  static BigDecimal expectedElapsed(OffsetDateTime started, OffsetDateTime finished) {
+    return BigDecimal.valueOf(Duration.between(started, finished).toNanos())
+        .divide(BigDecimal.valueOf(1_000_000_000L), 3, RoundingMode.HALF_UP);
+  }
+
+  // ================================================================ 6. 多租户三断言
   @Test
   void 断言1_两租户互不可见() throws Exception {
     var mine = create("ISOA1");

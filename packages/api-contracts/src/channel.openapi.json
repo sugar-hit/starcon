@@ -11,6 +11,49 @@
     }
   ],
   "paths": {
+    "/channel/stock-forecasts/{id}/lines": {
+      "put": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "put_channel_stock_forecasts_id_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceForecastLinesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/channel/shops/{id}": {
       "get": {
         "tags": [
@@ -2192,6 +2235,632 @@
           "sync-controller"
         ],
         "operationId": "post_channel_sync_cursors_id_pause",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateForecastRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/validate": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_validate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/submit": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/shipment-task/retry": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_shipment_task_retry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/shipment-task/dispatch": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_shipment_task_dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/shipment-reports": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id_shipment_reports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShipmentReportRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_shipment_reports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShipmentReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/receipts": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForecastReceiptRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_receipts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/cancel": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/specs": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_specs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForecastSpecRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_specs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateForecastSpecRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/specs/{id}/retire": {
+      "post": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "post_channel_stock_forecasts_specs_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -15148,6 +15817,254 @@
         }
       }
     },
+    "/channel/stock-forecasts/{id}": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/spec-check": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id_spec_check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/shipment-task": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id_shipment_task",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/{id}/availability": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_id_availability",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastAvailabilityPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/capabilities": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/stock-forecasts/accounts": {
+      "get": {
+        "tags": [
+          "stock-forecast-controller"
+        ],
+        "operationId": "get_channel_stock_forecasts_accounts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/return-shipbacks/overview": {
       "get": {
         "tags": [
@@ -25892,6 +26809,68 @@
   },
   "components": {
     "schemas": {
+      "ForecastLineInput": {
+        "required": [
+          "quantity",
+          "skuCode"
+        ],
+        "type": "object",
+        "properties": {
+          "skuCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 1e-06,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "boxType": {
+            "type": "string"
+          },
+          "cartonCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "palletCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "labelFormat": {
+            "type": "string"
+          },
+          "cartonLabelRef": {
+            "type": "string"
+          },
+          "unitWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReplaceForecastLinesRequest": {
+        "required": [
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastLineInput"
+            }
+          }
+        }
+      },
       "ShopInput": {
         "required": [
           "code",
@@ -28154,6 +29133,255 @@
         "properties": {
           "cursorValue": {
             "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "CreateForecastRequest": {
+        "required": [
+          "accountId",
+          "expectedArrivalAt",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "expectedArrivalAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "lines": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastLineInput"
+            }
+          }
+        }
+      },
+      "SpecCheckResult": {
+        "type": "object",
+        "properties": {
+          "passed": {
+            "type": "boolean"
+          },
+          "violations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecViolation"
+            }
+          },
+          "specId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "specVersion": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SpecViolation": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string"
+          },
+          "ruleLabel": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string",
+            "nullable": true
+          },
+          "actual": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ShipmentTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "forecastId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "attempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformShipmentId": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateShipmentReportRequest": {
+        "required": [
+          "externalShipmentRef",
+          "reportedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "externalShipmentRef": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateReceiptRequest": {
+        "required": [
+          "receiptType",
+          "receivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "receiptType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "receiptRef": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "rejectedReason": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateForecastSpecRequest": {
+        "required": [
+          "accountId"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allowedBoxTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxUnitsPerCarton": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "maxWeightPerCartonKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxSkusPerCarton": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "requiresFnskuLabel": {
+            "type": "boolean"
+          },
+          "requiresCartonLabel": {
+            "type": "boolean"
+          },
+          "allowedLabelFormats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "palletRequired": {
+            "type": "boolean"
+          },
+          "maxCartonsPerPallet": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "maxPalletWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "mixedLoadingAllowed": {
+            "type": "boolean"
+          },
+          "minArrivalLeadDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -45797,6 +47025,470 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "ForecastPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ForecastSummary"
+          }
+        }
+      },
+      "ForecastRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "forecastNo": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "expectedArrivalAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformShipmentId": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ForecastSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "validated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submitted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipmentCreated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accepted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "ForecastDetail": {
+        "type": "object",
+        "properties": {
+          "forecast": {
+            "$ref": "#/components/schemas/ForecastRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastLineRow"
+            }
+          },
+          "spec": {
+            "$ref": "#/components/schemas/ForecastSpecRow"
+          },
+          "shipmentTask": {
+            "$ref": "#/components/schemas/ShipmentTaskRow"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastReceiptRow"
+            }
+          },
+          "specCheck": {
+            "$ref": "#/components/schemas/SpecCheckResult"
+          }
+        }
+      },
+      "ForecastLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "boxType": {
+            "type": "string"
+          },
+          "cartonCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "palletCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "labelFormat": {
+            "type": "string"
+          },
+          "cartonLabelRef": {
+            "type": "string"
+          },
+          "unitWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ForecastReceiptRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptType": {
+            "type": "string"
+          },
+          "receiptRef": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "rejectedReason": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ForecastSpecRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "allowedBoxTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maxUnitsPerCarton": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "maxWeightPerCartonKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxSkusPerCarton": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "requiresFnskuLabel": {
+            "type": "boolean"
+          },
+          "requiresCartonLabel": {
+            "type": "boolean"
+          },
+          "allowedLabelFormats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "palletRequired": {
+            "type": "boolean"
+          },
+          "maxCartonsPerPallet": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "maxPalletWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "mixedLoadingAllowed": {
+            "type": "boolean"
+          },
+          "minArrivalLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retiredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ShipmentReportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalShipmentRef": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ForecastAvailabilityLine": {
+        "type": "object",
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "sellable": {
+            "type": "number",
+            "nullable": true
+          },
+          "sellableKnown": {
+            "type": "boolean"
+          },
+          "inTransitQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "inTransitKnown": {
+            "type": "boolean"
+          },
+          "coverable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ForecastAvailabilityPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastAvailabilityLine"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ForecastCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastCapabilityDimension"
+            }
+          },
+          "boxTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "labelFormats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ForecastCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       },

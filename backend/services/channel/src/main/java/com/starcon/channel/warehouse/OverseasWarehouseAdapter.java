@@ -18,6 +18,10 @@ import java.util.UUID;
  *   <li>观测时点必须由适配器从服务商响应里带出来，不能用本地时钟冒充
  *   <li>凭据只从 {@link ConnectionSettings} 取引用，适配器内部若需解密由具体实现负责， 但**返回值里不允许出现凭据**
  * </ol>
+ *
+ * <p>10.4.2.2 备货预报**复用本接口**（新增 {@link #submitForecast}），不另起第二套适配器接口：
+ * 平台仓与第三方仓都是「海外仓/平台仓服务商」这同一类外部系统适配，
+ * 统一接口下每个 vendor 独立实现，将来接真实服务商只新增实现，上层一行不改。
  */
 public interface OverseasWarehouseAdapter {
 
@@ -39,12 +43,59 @@ public interface OverseasWarehouseAdapter {
   /** 一次库存拉取的结果。 */
   record StockSnapshot(List<StockLine> lines, Instant observedAt, String source) {}
 
+  // ------------------------------------------------------------------
+  // 10.4.2.2 备货预报：向平台仓 / 海外仓提交备货计划，创建平台货件
+  // ------------------------------------------------------------------
+
+  /** 预报单里的一行（SKU 与数量，外加箱型声明）。 */
+  record ForecastLine(String skuCode, BigDecimal quantity, String unit, String boxType) {}
+
+  /**
+   * 一份待提交的备货计划。
+   *
+   * <p>适配器**只负责与服务商侧打交道**：它拿到的是服务层已经校验过规格、冻结了
+   * 规格版本的那份计划，返回的是**服务商侧的受理回执**。落库仍然由服务层做
+   * （与「适配器只取数不落库」同一条纪律）。
+   */
+  record ForecastPlan(
+      UUID forecastId,
+      UUID accountId,
+      String forecastNo,
+      List<ForecastLine> lines,
+      Instant expectedArrivalAt) {}
+
+  /**
+   * 服务商侧的受理回执。
+   *
+   * @param platformShipmentId 平台货件编号（服务商侧生成/回报的那个编号）
+   * @param detail 服务商侧附带的说明
+   */
+  record ShipmentAck(String platformShipmentId, String detail, Instant acknowledgedAt) {}
+
   /**
    * 拉取某个仓账户的库存观测。
    *
    * @throws WarehouseProviderException 服务商侧不可用或返回无法解析的载荷
    */
   StockSnapshot fetchStock(ConnectionSettings settings);
+
+  /**
+   * 把一份备货计划提交给服务商侧，创建平台货件（10.4.2.2）。
+   *
+   * <p>默认实现 = <b>本适配器不支持预报提交</b>。这不是占位符，而是能力协商：
+   * 服务商目录里 {@code warehouse_provider.supports_forecast} 才是「能不能预报」的真值，
+   * 适配器不支持时应当抛 {@link WarehouseProviderException}，让上层把这条预报
+   * 如实标成「该服务商未开通预报提交能力」，而不是静默走一条假链路。
+   *
+   * <p>支持的实现（见 {@code warehouse.platform.PlatformShipmentWarehouseAdapter}）会去读
+   * 租户/通道登记的平台货件报送行，把真实存在的货件编号带回来 ——
+   * <b>绝不</b>打真实平台域名，也不返回凭空编造的编号。
+   *
+   * @throws WarehouseProviderException 服务商侧不可用、未开通该能力，或无法解析载荷
+   */
+  default ShipmentAck submitForecast(ConnectionSettings settings, ForecastPlan plan) {
+    throw new WarehouseProviderException("该服务商未开通预报提交能力", false);
+  }
 
   /** 服务商调用失败。区分「未授权」与「暂时不可用」：前者要人工处理，后者可重试。 */
   class WarehouseProviderException extends RuntimeException {
