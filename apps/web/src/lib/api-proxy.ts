@@ -3962,6 +3962,67 @@ const services: readonly {
       /^purchase\-plans(?:\/(?:capabilities|options|summary|campaigns(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|lock\-policies|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:aggregate|confirm|export|lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:adjust|lock))?)?))?))?$/,
   },
   {
+    // 6.6.1.1 开发立项（trade 服务，卷 06 采购与供应的 L3 锚点 6.6.1）。
+    //
+    // 蓝图：「管理新品开发立项：立项编号、品类、目标市场与平台、目标售价与毛利、开发负责人、
+    // 打样与量产时间计划、状态（评估/立项/开发中/打样/试产/量产/终止）。立项通过后可派生打样单与
+    // 试产单，并作为 SKU 建档的前置。」输出「开发单（立项记录 + 里程碑计划）；可转 SKU 建档的候选参数」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `purchase-plans`（6.2.1.3，同为卷 06）元素**之后**：
+    // 与「`prefix: 'trade/'` 之前」「services[] 最末尾」这两个常见锚点都隔开 ≥ 1500 行，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `development-projects` 这个独立前缀：
+    //   * 既有 trade 分支的 alternation 里没有 `development-projects`；
+    //     已逐条核对本文件里**全部既有正则**：`development-projects/**` **零命中**。
+    //   * 6.2.1.2 的 `replenishment-suggestions/**`、6.2.1.3 的 `purchase-plans/**`、
+    //     6.5.1.1 的 `purchase-reconciliations/**` 都不是本模块的。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   development-projects/capabilities            能力声明（成本来源 / 14 广告缺口 / 下游未交付）
+    //   development-projects/options                 下拉（状态 + 合法去向 / 里程碑类型 / 成本来源 / 交接单类型）
+    //   development-projects/summary                 按状态分组的概览
+    //   development-projects                         立项清单（GET，真分页 + 真筛选）/ 立项（POST）
+    //   development-projects/{uuid}                  立项详情（GET）/ 改立项（PUT，整体替换语义）
+    //   development-projects/{uuid}/transitions      推进状态（POST，状态机只认存在的边）
+    //   development-projects/{uuid}/milestones       里程碑计划（GET 真集合 / POST 登记）
+    //   development-projects/{uuid}/milestones/{uuid}  改里程碑（PUT）/ 删里程碑（DELETE）
+    //   development-projects/{uuid}/markets          目标市场与平台（GET 真集合 / POST 登记）
+    //   development-projects/{uuid}/markets/{uuid}   删目标市场与平台（DELETE）
+    //   development-projects/{uuid}/spec-candidates  规格候选（GET 真集合 / POST 登记）
+    //   development-projects/{uuid}/spec-candidates/{uuid} 删规格候选（DELETE）
+    //   development-projects/{uuid}/market-observations  手工录入的市场数据（GET 真集合 / POST 登记）
+    //   development-projects/{uuid}/cost-estimate    目标成本估算（GET 预览 / POST 应用）
+    //   development-projects/{uuid}/sku-candidate    可转 SKU 建档的候选参数（GET）
+    //   development-projects/{uuid}/handoffs         交接单（GET 真集合 / POST 产出）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary）排在 {uuid} 段之前** ——
+    //    alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //    `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `development-projects/{uuid}/delete` —— 立项是业务凭据（迁移事件与交接单都指向它），
+    //     后端不提供删除；删掉它就抹掉了「这个立项经历过什么」的证据。
+    //   * `development-projects/{uuid}/sampling-orders` / `/pilot-orders` ——
+    //     6.6.1.2 打样与 6.6.2.1 试产**未交付**，本模块只产**交接单**（`/handoffs`），
+    //     放行这两个路径会让界面以为打样单 / 试产单已经存在。
+    //   * `development-projects/{uuid}/skus` —— SKU 建档归 catalog（3.1.1.1），
+    //     本模块**只产候选参数**（`/sku-candidate`），不建 SKU。
+    //   * `development-projects/{uuid}/market-data` —— 系统侧市场数据（14 广告）**未交付**
+    //     （reporting 服务不在本仓），这里只有手工录入的 `/market-observations`。
+    //   * 任何 DELETE 裸集合形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^development\-projects(?:\/(?:capabilities|options|summary|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|milestones(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|markets(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|spec\-candidates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|market\-observations|cost\-estimate|sku\-candidate|handoffs))?))?$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
