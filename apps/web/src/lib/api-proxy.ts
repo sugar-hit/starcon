@@ -3836,6 +3836,47 @@ const services: readonly {
       /^purchase\-order\-editor(?:\/(?:capabilities|options|quote\-preview|from\-drafts)|\/orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/submit)?)?)$/,
   },
   {
+    // 6.3.2.1 跟单与交期（trade 服务，卷 06 采购与供应 / L3 6.3.2 采购跟踪的第一格）。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 `purchase-orders`（6.3.1.1 采购单列表）那条**之后**：
+    // 与本模块同属 L3 6.3 的就近邻居放在一起，且与另外三条车道的插入点被既有条目隔开，
+    // git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 首段 `purchase-followups` 是**独立字面量**：与既有 trade 分支的 `purchase-orders`
+    //    （6.3.1.1）、`purchase-arrivals`（6.3.2.2）、`purchase-requests`（6.2.2.1）、
+    //    `purchase-plans`（6.2.1.3）、`purchase-reconciliations`（6.5.1.1）、
+    //    `purchase-analytics`（6.5.2.1）首 token 全不相同，
+    //    且既有正则都是**锚定**的（`^token(...)?$`），所以谁也遮蔽不了谁。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   （裸路径）      跟单记录列表（GET，真分页 + 多维筛选）/ 登记跟单（POST）
+    //   capabilities    能力声明（哪些下游接上了、哪些没有）
+    //   changes         交期变更历史（GET，真分页）/ 登记交期变更（POST，触发回写）
+    //   timeline        跟单时间线（跟单记录 + 交期变更合并）
+    //   stats           延迟统计（平均延迟天数 / 准时率 / 已逾期）
+    //   delivery        逐单交付实况（真分页）
+    //
+    // ⚠️ **本条目没有 uuid 分支**：跟单与交期都是**集合级**的凭据流，
+    //   后端没有「按 id 取单条跟单记录 / 单条交期变更」这个映射 ——
+    //   放行一个后端不存在的形状比 404 更糟：界面会以为「详情页已经能用」。
+    //   正因为没有 uuid 分支，`capabilities` / `changes` / `timeline` / `stats` / `delivery`
+    //   这五个首字母落在 [0-9a-f] 里的（c / t / s / d）**不构成任何歧义** ——
+    //   它们是字面量分支，`purchase-followups/` 之后的**任何**其它内容一律 404。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-followups/{uuid}`            —— 没有单条详情端点
+    //   * `purchase-followups/{uuid}/writeback`  —— 回写留痕随交期变更一起返回
+    //   * `purchase-followups/{uuid}/delete`     —— 跟单与交期变更都是举证凭据，没有删除形状
+    //   * `purchase-followups/export`            —— 本模块不提供导出
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern: /^purchase\-followups(?:\/(?:capabilities|changes|timeline|stats|delivery))?$/,
+  },
+  {
     // 9.3.1.2 合单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
