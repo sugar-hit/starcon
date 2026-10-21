@@ -2576,6 +2576,59 @@ const services: readonly {
       /^listing\-publish\-tasks(?:\/capabilities|\/tasks(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:steps(?:\/(?:TEMPLATE|CONTENT|MAPPING|MEDIA|PRICE|STOCK|SUBMIT|RESULT)\/retry)?|retry))?)?)$/,
   },
   {
+    // 6.5.1.1 采购对账（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'`（9.2.1.2 审单规则）**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // ⚠️ 根路径用**独立字面量** `purchase-reconciliations`：与既有 trade 分支的
+    //    `order-review` / `order-intercept` / `purchase-plans` / `purchase-arrivals`
+    //    首段互不吃，所以本条放在哪个位置都不会误伤它们。
+    //    动手前已逐条核对本文件里**全部 100 条**既有正则对 `purchase-reconciliations`
+    //    的命中数 = **0**（含 /capabilities /options /{uuid} /{uuid}/lines 等 7 个探针形状）。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   capabilities                能力声明（基数来源 / 未接线事实 / 边界）
+    //   options                     下拉项（供应商 / 期间预设 / 币种 / 代扣代缴类型）
+    //   （裸路径）                   对账单列表（GET，真分页 + 汇总）+ 发起对账（POST）
+    //   {uuid}                      对账单详情（头 + 明细 + 差异 + 回执 + 留痕 + 基数口径）
+    //   {uuid}/lines                明细行列表（GET，真分页 + 按币种分桶）
+    //   {uuid}/deductions           登记代扣代缴费用（POST）
+    //   {uuid}/send                 发给供应商确认（POST）
+    //   {uuid}/confirmations        录入供应商确认回执（POST，逐行比对 → 逐条差异）
+    //   {uuid}/discrepancies        差异清单（GET，真分页）+ 追加差异（POST）
+    //   {uuid}/discrepancies/{uuid}/resolve  处理差异（挂起 / 解决）（POST）
+    //   {uuid}/reopen               重开对账（追加差异）（POST）
+    //   {uuid}/close                关闭对账单（POST）
+    //   {uuid}/export               导出 CSV（GET，text/csv）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `purchase-reconciliations/{uuid}/payable` / `/payments` / `/confirm-payable`
+    //     —— 蓝图加粗句「对账由采购发起、12 财务执行付款，避免采购擅自确认应付」：
+    //     12 财务服务当前**不存在**，采购侧**没有**确认应付的端点。
+    //   * `purchase-reconciliations/{uuid}/quality-deductions`
+    //     —— 6.4.2.1 质检单与本模块同批并行开发，此刻不存在 ⇒ 没有这个映射。
+    //   * `purchase-reconciliations/{uuid}/delete`
+    //     —— 对账单是要拿去和供应商对质的凭据，没有删除形状。
+    //   * `purchase-reconciliations/{uuid}/discrepancies/{uuid}/delete`
+    //     —— 差异只能挂起（HELD）或解决（RESOLVED），没有删除形状。
+    //   * `purchase-reconciliations/{uuid}/lines/{lineId}`
+    //     —— 明细行在 `{uuid}/lines` 里，没有按行 id 的独立映射。
+    //   * `purchase-reconciliations/import` / `/batch`
+    //     —— 后端没有批量导入 / 批量发起对账的端点。
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options）排在 {uuid} 段**之前**。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 100 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-reconciliations(?:\/capabilities|\/options|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/discrepancies\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|\/lines|\/deductions|\/send|\/confirmations|\/discrepancies|\/reopen|\/close|\/export)?)?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
