@@ -35207,6 +35207,364 @@
           }
         }
       }
+    },
+    "/channel/ad-bulk-operations/tasks": {
+      "get": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "get_channel_ad_bulk_operations_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "post_channel_ad_bulk_operations_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBulkOperationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkTaskSubmission"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-bulk-operations/preview": {
+      "post": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "post_channel_ad_bulk_operations_preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdBulkOperationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-bulk-operations/tasks/{id}": {
+      "get": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "get_channel_ad_bulk_operations_tasks_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-bulk-operations/selection": {
+      "get": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "get_channel_ad_bulk_operations_selection",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CAMPAIGN"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkSelection"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-bulk-operations/options": {
+      "get": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "get_channel_ad_bulk_operations_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-bulk-operations/capabilities": {
+      "get": {
+        "tags": [
+          "ad-bulk-operation-controller"
+        ],
+        "operationId": "get_channel_ad_bulk_operations_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBulkCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -35223,7 +35581,7 @@
             "type": "string"
           },
           "quantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -37633,7 +37991,7 @@
             "description": "🔴 归一后内部类型（不给 = 由 14.1.2.2 解析带出；给了必须与解析结果一致）"
           },
           "bid": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "🔴 关键词当前竞价（不给 = 0）"
@@ -42575,7 +42933,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -45009,7 +45367,7 @@
             "format": "uuid"
           },
           "pickupSlaHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -45024,7 +45382,7 @@
             "type": "number"
           },
           "afterSalesWindowHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -45648,7 +46006,7 @@
             "type": "string"
           },
           "amountPerWaybill": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -46488,7 +46846,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -48926,7 +49284,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -49269,9 +49627,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -57725,13 +58083,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -57931,13 +58289,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -85075,6 +85433,822 @@
             "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
+      },
+      "AdBulkOperationRequest": {
+        "required": [
+          "operation"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id（筛选用）",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码（筛选用）"
+          },
+          "status": {
+            "type": "string",
+            "description": "活动状态（筛选用）"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "归一后的内部广告类型（筛选用）"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "原始平台类型标记（筛选用）"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "名称 / 平台侧 id 关键词（筛选用）"
+          },
+          "campaignIds": {
+            "type": "array",
+            "description": "🔴 显式勾选的活动 id；给了它就不走筛选",
+            "items": {
+              "type": "string",
+              "description": "🔴 显式勾选的活动 id；给了它就不走筛选",
+              "format": "uuid"
+            }
+          },
+          "targetType": {
+            "type": "string",
+            "description": "🔴 调整落点：CAMPAIGN（默认）/ AD_GROUP（竞价）"
+          },
+          "operation": {
+            "minLength": 1,
+            "type": "string",
+            "description": "操作类型：ADJUST_BUDGET / SET_BUDGET / PAUSE / ENABLE / SET_END_AT / ADJUST_BID"
+          },
+          "budget": {
+            "type": "number",
+            "description": "SET_BUDGET 用：目标日预算"
+          },
+          "delta": {
+            "type": "number",
+            "description": "ADJUST_BUDGET 用：预算增减额（可正可负）"
+          },
+          "bid": {
+            "type": "number",
+            "description": "ADJUST_BID 用：目标竞价；给了它就是「设为」"
+          },
+          "bidDelta": {
+            "type": "number",
+            "description": "ADJUST_BID 用：竞价增减额（与 bid 二选一）"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "SET_END_AT 用：目标结束时刻",
+            "format": "date-time"
+          },
+          "clearEndAt": {
+            "type": "boolean",
+            "description": "SET_END_AT 用：清空结束时间（与 endAt 二选一）"
+          },
+          "reason": {
+            "type": "string",
+            "description": "操作理由（写进审计）"
+          }
+        }
+      },
+      "AdBulkTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string",
+            "description": "操作类型"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "调整落点"
+          },
+          "status": {
+            "type": "string",
+            "description": "🔴 任务状态：PENDING / RUNNING / DONE / PARTIAL / FAILED / REJECTED"
+          },
+          "targetCount": {
+            "type": "integer",
+            "description": "目标总条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "已生效条数",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "被拒条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过条数",
+            "format": "int32"
+          },
+          "totalBudgetDelta": {
+            "type": "string",
+            "description": "🔴 总预算净增量"
+          },
+          "totalBudgetDeltaAbs": {
+            "type": "string",
+            "description": "🔴 总预算绝对敞口"
+          },
+          "totalBidDelta": {
+            "type": "string",
+            "description": "🔴 总竞价净增量"
+          },
+          "totalBidDeltaAbs": {
+            "type": "string",
+            "description": "🔴 总竞价绝对敞口"
+          },
+          "selectionMode": {
+            "type": "string",
+            "description": "选择方式：FILTER（按筛选全选）/ EXPLICIT（显式勾选）"
+          },
+          "selectionSummary": {
+            "type": "string",
+            "description": "🔴 当时的选择条件（可读摘要，供复盘）"
+          },
+          "paramBudget": {
+            "type": "string",
+            "description": "目标日预算参数"
+          },
+          "paramDelta": {
+            "type": "string",
+            "description": "预算增减额参数"
+          },
+          "paramBid": {
+            "type": "string",
+            "description": "目标竞价参数"
+          },
+          "paramBidDelta": {
+            "type": "string",
+            "description": "竞价增减额参数"
+          },
+          "paramEndAt": {
+            "type": "string",
+            "description": "目标结束时刻参数",
+            "format": "date-time"
+          },
+          "paramClearEndAt": {
+            "type": "boolean",
+            "description": "是否清空结束时间"
+          },
+          "reason": {
+            "type": "string",
+            "description": "操作理由"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 整批被拒 / 执行失败时的原因"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始执行时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "任务"
+      },
+      "AdBulkTaskSubmission": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/AdBulkTaskRow"
+          },
+          "claimed": {
+            "type": "boolean",
+            "description": "🔴 任务是否已被执行器领取（true = 已在跑）"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBulkGuardrails": {
+        "type": "object",
+        "properties": {
+          "maxSingleBudgetDelta": {
+            "type": "string",
+            "description": "单个活动一次允许调整的预算上限（绝对值）"
+          },
+          "maxTotalBudgetDelta": {
+            "type": "string",
+            "description": "一次批量允许的总预算调整上限（绝对值，跨条目累加）"
+          },
+          "maxCampaignBudget": {
+            "type": "string",
+            "description": "单个活动的预算上限（调整后的结果值不得超过）"
+          },
+          "maxBid": {
+            "type": "string",
+            "description": "单个广告组允许的竞价上限（绝对值）"
+          },
+          "maxSingleBidDelta": {
+            "type": "string",
+            "description": "单个广告组一次允许调整的竞价上限（绝对值）"
+          },
+          "maxTotalBidDelta": {
+            "type": "string",
+            "description": "一次批量允许的总竞价调整上限（绝对值，跨条目累加）"
+          },
+          "maxCampaignsPerTask": {
+            "type": "integer",
+            "description": "一个批量任务最多允许的活动条数",
+            "format": "int32"
+          },
+          "maxGroupsPerTask": {
+            "type": "integer",
+            "description": "一个批量任务最多允许的广告组条数（竞价任务）",
+            "format": "int32"
+          },
+          "maxSelectablePerFilter": {
+            "type": "integer",
+            "description": "一次筛选最多允许解析出的条数（超过 ⇒ 整批拒绝，请缩小筛选范围）",
+            "format": "int32"
+          },
+          "maxPreviewItems": {
+            "type": "integer",
+            "description": "预览最多返回多少条明细（超出部分只给计数）",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "护栏说明"
+          }
+        },
+        "description": "🔴 本次生效的护栏上限"
+      },
+      "AdBulkPreview": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean",
+            "description": "🔴 是否允许整批执行（超上限 ⇒ 整批拒绝，不做部分执行）"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "description": "整批被拒的原因（allowed=false 时有内容）"
+          },
+          "operation": {
+            "type": "string",
+            "description": "操作类型"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "调整落点"
+          },
+          "targetCount": {
+            "type": "integer",
+            "description": "解析出的目标总条数",
+            "format": "int32"
+          },
+          "matchedCount": {
+            "type": "integer",
+            "description": "🔴 命中的总条数（解析阶段的硬上限判定用）",
+            "format": "int64"
+          },
+          "previewItemCount": {
+            "type": "integer",
+            "description": "预览明细条数",
+            "format": "int32"
+          },
+          "previewTruncated": {
+            "type": "boolean",
+            "description": "🔴 预览明细是否被截断（超出部分只给计数）"
+          },
+          "totalBudgetDelta": {
+            "type": "string",
+            "description": "🔴 总预算净增量（带方向）"
+          },
+          "totalBudgetDeltaAbs": {
+            "type": "string",
+            "description": "🔴 总预算绝对敞口（护栏按它判）"
+          },
+          "totalBidDelta": {
+            "type": "string",
+            "description": "🔴 总竞价净增量（带方向）"
+          },
+          "totalBidDeltaAbs": {
+            "type": "string",
+            "description": "🔴 总竞价绝对敞口（护栏按它判）"
+          },
+          "spendImpactEstimated": {
+            "type": "boolean",
+            "description": "🔴 是否给出了消耗预估（恒为 false：没有预估模型）"
+          },
+          "spendImpactNote": {
+            "type": "string",
+            "description": "🔴 消耗预估说明（为什么没有）"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBulkGuardrails"
+          },
+          "items": {
+            "type": "array",
+            "description": "🔴 逐条预演结果",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkPreviewItem"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBulkPreviewItem": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "调整落点：CAMPAIGN / AD_GROUP"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "广告组 id（AD_GROUP 时有值）",
+            "format": "uuid"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "广告组名"
+          },
+          "beforeStatus": {
+            "type": "string",
+            "description": "变更前状态"
+          },
+          "afterStatus": {
+            "type": "string",
+            "description": "变更后状态"
+          },
+          "beforeBudget": {
+            "type": "string",
+            "description": "变更前日预算"
+          },
+          "afterBudget": {
+            "type": "string",
+            "description": "变更后日预算"
+          },
+          "budgetDelta": {
+            "type": "string",
+            "description": "预算增量（带方向）"
+          },
+          "beforeBid": {
+            "type": "string",
+            "description": "变更前竞价"
+          },
+          "afterBid": {
+            "type": "string",
+            "description": "变更后竞价"
+          },
+          "bidDelta": {
+            "type": "string",
+            "description": "竞价增量（带方向）"
+          },
+          "beforeEndAt": {
+            "type": "string",
+            "description": "变更前结束时间",
+            "format": "date-time"
+          },
+          "afterEndAt": {
+            "type": "string",
+            "description": "变更后结束时间",
+            "format": "date-time"
+          },
+          "verdict": {
+            "type": "string",
+            "description": "预演结论：APPLY / SKIP / REJECT"
+          },
+          "message": {
+            "type": "string",
+            "description": "逐条说明（被拒时给出原因）"
+          }
+        },
+        "description": "🔴 逐条预演结果"
+      },
+      "AdBulkTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBulkTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/AdBulkTaskRow"
+          },
+          "items": {
+            "type": "array",
+            "description": "逐条执行结果（当前页）",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkTaskItemRow"
+            }
+          },
+          "itemTotal": {
+            "type": "integer",
+            "description": "任务项总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBulkTaskItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "任务项 id",
+            "format": "uuid"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "调整落点：CAMPAIGN / AD_GROUP"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "广告组 id（AD_GROUP 时有值）",
+            "format": "uuid"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "广告组名"
+          },
+          "beforeStatus": {
+            "type": "string",
+            "description": "变更前状态"
+          },
+          "afterStatus": {
+            "type": "string",
+            "description": "变更后状态"
+          },
+          "beforeBudget": {
+            "type": "string",
+            "description": "变更前日预算"
+          },
+          "afterBudget": {
+            "type": "string",
+            "description": "变更后日预算"
+          },
+          "beforeBid": {
+            "type": "string",
+            "description": "变更前竞价"
+          },
+          "afterBid": {
+            "type": "string",
+            "description": "变更后竞价"
+          },
+          "beforeEndAt": {
+            "type": "string",
+            "description": "变更前结束时间",
+            "format": "date-time"
+          },
+          "afterEndAt": {
+            "type": "string",
+            "description": "变更后结束时间",
+            "format": "date-time"
+          },
+          "result": {
+            "type": "string",
+            "description": "执行结果：PENDING / APPLIED / REJECTED / SKIPPED"
+          },
+          "message": {
+            "type": "string",
+            "description": "逐条结果说明（被拒时给出原因）"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、尚未回写平台（平台回写队列未交付）"
+          },
+          "executedAt": {
+            "type": "string",
+            "description": "执行时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "逐条执行结果（当前页）"
+      },
+      "AdBulkSelectedRow": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "调整落点：CAMPAIGN / AD_GROUP"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "status": {
+            "type": "string",
+            "description": "活动状态"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "活动日预算（null = 平台侧没有预算，不是 0）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "活动币种"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "活动结束时间",
+            "format": "date-time"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "广告组 id（AD_GROUP 时有值）",
+            "format": "uuid"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "广告组名"
+          },
+          "defaultBid": {
+            "type": "string",
+            "description": "广告组默认竞价（null = 平台侧没有给默认竞价）"
+          },
+          "bidCurrency": {
+            "type": "string",
+            "description": "竞价币种"
+          }
+        },
+        "description": "当前页的目标"
+      },
+      "AdBulkSelection": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页的目标",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkSelectedRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "筛选命中的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "下一页游标（为空表示没有下一页）"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "🔴 命中条数是否超过单次上限（超过 ⇒ 批量任务整批拒绝）"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "本次生效的单次上限",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBulkOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "选项值"
+          },
+          "label": {
+            "type": "string",
+            "description": "选项显示名"
+          }
+        },
+        "description": "操作类型下拉项"
+      },
+      "AdBulkOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkOption"
+            }
+          },
+          "internalAdTypes": {
+            "type": "array",
+            "description": "内部广告类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkOption"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "description": "操作类型下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkOption"
+            }
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBulkGuardrails"
+          },
+          "spendImpactNote": {
+            "type": "string",
+            "description": "🔴 竞价调整为什么没有消耗预估"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBulkCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdBulkCapabilityDimension"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "description": "操作类型取值",
+            "items": {
+              "type": "string",
+              "description": "操作类型取值"
+            }
+          },
+          "targetTypes": {
+            "type": "array",
+            "description": "调整落点：CAMPAIGN（活动）/ AD_GROUP（广告组）",
+            "items": {
+              "type": "string",
+              "description": "调整落点：CAMPAIGN（活动）/ AD_GROUP（广告组）"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "活动状态取值",
+            "items": {
+              "type": "string",
+              "description": "活动状态取值"
+            }
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBulkGuardrails"
+          },
+          "spendImpactNote": {
+            "type": "string",
+            "description": "🔴 竞价调整为什么没有消耗预估"
+          },
+          "writebackNote": {
+            "type": "string",
+            "description": "🔴 「本地已改、还没回写平台」的说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdBulkCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
