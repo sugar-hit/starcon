@@ -54,6 +54,10 @@ import org.springframework.web.server.ResponseStatusException;
  * 本模块实现的是「建单 + 提交待审 + 过账落分录」，批准这一步用**显式端点 + 必填理由 +
  * 提交人 ≠ 审批人 + DB 级状态机**的最小口径，**不实现审批人角色表**。
  *
+ * <p><b>行序 = 加行顺序</b>：调整单明细按 {@code line_no}（V261）排序，而不是按主键排序 ——
+ * 主键是随机 uuid(v4)，按它排序会让同一张单的明细行每次请求都可能换位置，
+ * 「审批人看到的第 1 行」就不再是操作员提交的第 1 行。
+ *
  * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里，
  * 后面全是普通绑定，cast 永远不在绑定序列末位。写入用 {@link OffsetDateTime} 绑定，
  * 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
@@ -311,7 +315,9 @@ public class InventoryAdjustmentService {
                 + " from inventory_adjustment_order_line l"
                 + " left join stock_bucket k on k.tenant_id = l.tenant_id and k.id = l.bucket_id"
                 + " left join inventory_adjustment_reason r on r.code = l.reason_code"
-                + " where l.tenant_id = ? and l.order_id = ? order by l.id",
+                // 行序 = **加行顺序**（V261 的 line_no），不是随机 UUID 的大小顺序：
+                // 主键是随机 uuid(v4)，按它排序会让同一张单的明细行每次请求都可能换位置。
+                + " where l.tenant_id = ? and l.order_id = ? order by l.line_no",
             tenant(),
             orderId);
     var attachments =
@@ -458,9 +464,13 @@ public class InventoryAdjustmentService {
         now);
 
     BigDecimal net = ZERO;
+    int lineNo = 0;
     for (var line : lines) {
       var resolved = resolveLine(line, reason);
-      insertLine(orderId, resolved, reason, now);
+      // 行号 = 加行顺序（同一张单内从 1 递增，V261）。
+      // 建单时这张单还没提交，别的会话看不到它 ⇒ 行号不可能撞（并发说明见 V261 第五节）。
+      lineNo++;
+      insertLine(orderId, resolved, reason, now, lineNo);
       net = net.add(resolved.qtyDelta());
     }
     for (var attachment : attachments) {
@@ -484,6 +494,11 @@ public class InventoryAdjustmentService {
   @Transactional
   public InventoryAdjustmentOrderDetail addLine(
       UUID orderId, InventoryAdjustmentLineInput input, UUID actorId) {
+    // 🔴 先锁住单头，再取行号、再判状态：
+    //   ① 并发加行必须排队 —— 否则两个事务会算出同一个 max(line_no)+1 ⇒ 撞 UNIQUE ⇒ 500；
+    //   ② 锁住之后单据状态不会再被别的事务改掉（提交/作废会等我们），
+    //      「这一行加在草稿上」这件事才是真的。
+    lockOrderHeader(orderId);
     var order = requireDraft(orderId, "加行");
     if (input == null) {
       throw bad("请求体不能为空");
@@ -493,7 +508,7 @@ public class InventoryAdjustmentService {
             ? reason(input.reasonCode())
             : reason(order.reasonCode());
     var resolved = resolveLine(input, reason);
-    insertLine(orderId, resolved, reason, OffsetDateTime.now());
+    insertLine(orderId, resolved, reason, OffsetDateTime.now(), nextLineNo(orderId));
     audit(
         orderId,
         "LINE_ADDED",
@@ -749,7 +764,9 @@ public class InventoryAdjustmentService {
                 + "k.version as current_version,k.on_hand,k.reserved"
                 + " from inventory_adjustment_order_line l"
                 + " left join stock_bucket k on k.tenant_id = l.tenant_id and k.id = l.bucket_id"
-                + " where l.tenant_id = ? and l.order_id = ? order by l.id",
+                // 行序 = 加行顺序（V261 的 line_no）：过账写分录的先后必须与单据上的行序一致，
+                // 不能让随机 UUID 决定「先记哪一行」。
+                + " where l.tenant_id = ? and l.order_id = ? order by l.line_no",
             tenant(),
             orderId);
     if (lines.isEmpty()) {
@@ -1146,13 +1163,18 @@ public class InventoryAdjustmentService {
         current);
   }
 
-  private void insertLine(UUID orderId, ResolvedLine line, InventoryAdjustmentReason reason, OffsetDateTime now) {
+  private void insertLine(
+      UUID orderId,
+      ResolvedLine line,
+      InventoryAdjustmentReason reason,
+      OffsetDateTime now,
+      int lineNo) {
     sql.execute(
         "insert into inventory_adjustment_order_line(id,tenant_id,order_id,bucket_id,balance_id,"
             + "legal_entity_id,sku_id,warehouse_id,location_id,lot_id,quality_status_id,"
             + "sku_code,sku_name,warehouse_code,location_code,lot_code,quality_status_code,"
-            + "qty_delta,reason_code,note,expected_version,created_at) "
-            + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
+            + "qty_delta,reason_code,note,expected_version,line_no,created_at) "
+            + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz)",
         UUID.randomUUID(),
         tenant(),
         orderId,
@@ -1174,7 +1196,42 @@ public class InventoryAdjustmentService {
         reason.name(),
         "",
         line.expectedVersion(),
+        lineNo,
         now);
+  }
+
+  /**
+   * 下一个行号：同一张单内 {@code max(line_no) + 1}。
+   *
+   * <p><b>调用方必须已经锁住单头</b>（{@link #lockOrderHeader}）⇒ 同一张单的并发加行排队
+   * ⇒ 两笔不会算出同一个行号。DB 层还有 {@code UNIQUE(tenant_id, order_id, line_no)} 兜底
+   * （V261）：绕过服务层直接 INSERT 也撞不动。
+   */
+  private int nextLineNo(UUID orderId) {
+    return sql.fetchOne(
+            "select coalesce(max(line_no), 0) + 1 as n from inventory_adjustment_order_line"
+                + " where tenant_id = ? and order_id = ?",
+            tenant(),
+            orderId)
+        .get("n", Integer.class);
+  }
+
+  /**
+   * 锁住调整单头（{@code FOR UPDATE}）。
+   *
+   * <p>加行前必须先锁：行号取自「单内已有多少行」，不锁住单头的话两个并发加行会算出
+   * 同一个 {@code max(line_no)+1}。顺带把「加行期间单据被别人提交/作废」这条竞态也关上了 ——
+   * 提交与作废都会去改这一行，锁住之后它们只能等我们加完这一行。
+   */
+  private void lockOrderHeader(UUID orderId) {
+    var row =
+        sql.fetchOne(
+            "select id from inventory_adjustment_order where tenant_id = ? and id = ? for update",
+            tenant(),
+            orderId);
+    if (row == null) {
+      throw notFound("调整单", orderId);
+    }
   }
 
   private void insertAttachment(
