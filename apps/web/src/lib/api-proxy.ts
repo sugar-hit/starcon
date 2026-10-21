@@ -20,6 +20,54 @@ const services: readonly {
   fallback: string;
 }[] = [
   {
+    // 6.1.1.3 供应商评级（trade 服务，卷 06「采购与供应」L3 6.1.1 供应商管理下的第三格）。
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 trade 那条巨型 alternation 里并分支 ——
+    //   那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点选在**数组最开头**（`auth/` 之前）----
+    //   同批其它车道的插入点是「`prefix: 'trade/'` 之前」或「数组末尾」；
+    //   开头这一段本仓**还没有车道用过**，落在这里的 diff 与它们的插入点不重叠，
+    //   并入时 git 不会判冲突。
+    //
+    // ---- 首 token「supplier-ratings」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `supplier-ratings` 这个串
+    //   （既有的是 `supplier-claims` / `supplier-qualifications` / `supplier-sources`），
+    //   所以首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   supplier-ratings/capabilities                  能力声明（五个维度各自的依据与下游归属）
+    //   supplier-ratings/options                       词表（周期 / 维度 / 等级 / 变动来源）
+    //   supplier-ratings/overview                      概览（等级分布、平均分、人工调整家数）
+    //   supplier-ratings/policy                        权重配置（GET 读 / PUT 改）
+    //   supplier-ratings/compute                       计算一个周期的评级（POST，写动作）
+    //   supplier-ratings/ratings                       评级列表（GET，真分页 + 真筛选 + 真排序）
+    //   supplier-ratings/ratings/{uuid}                单条评级详情（GET）
+    //   supplier-ratings/ratings/{uuid}/adjustment     人工加权分（POST，理由必填）
+    //   supplier-ratings/changes                       评级变动历史（GET，真分页）
+    //   supplier-ratings/priorities                    默认供应商优先级（GET，供 6.2.1.2 消费）
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   supplier-ratings                              —— 裸路径：后端没有「一条不存在的汇总列表接口」。
+    //   supplier-ratings/ratings/{uuid}/delete        —— 评级结果是事实，不提供删除。
+    //   supplier-ratings/ratings/{uuid}/recompute      —— 重算走 `POST /compute`（按周期），
+    //                                                    不按单条重算。
+    //   supplier-ratings/export                       —— 导出走 3.8.2.1 的统一通道，不另开一条。
+    //   supplier-ratings/ratings/not-a-uuid            —— 非 UUID 段不应被 uuid 分支吃掉。
+    //
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 字面量子路径（capabilities / options / overview / policy / compute / ratings / changes /
+    // priorities）排在 {uuid} 段之前判别 —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    // 根路径后的那一段**是必需的**（`supplier-ratings` 裸路径被拒）：
+    // 后端没有「一条不存在的汇总列表接口」，放行它会让界面以为可用。
+    pattern:
+      /^supplier\-ratings(?:\/(?:capabilities|options|overview|policy|compute|changes|priorities|ratings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/adjustment)?)?))$/,
+  },
+  {
     prefix: 'auth/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
