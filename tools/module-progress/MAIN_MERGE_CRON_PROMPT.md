@@ -258,7 +258,7 @@ gh pr list --base main --head chore/sync-module-dev --state open
 **例外 —— 这几种情况必须本地跑全量 L2**：
 
 - 冲突解法动到了**后端业务代码 / 迁移脚本**（不只是前端白名单和契约）。
-- `sync.mjs --check` 红了。
+- `sync.mjs --check` 红了**且是合并引入的**（按 5.4 判别；源分支本来就红的不算）。
 - 定向测试红了（先按 5.3 归因，不是直接归因回归）。
 
 ### 5.2 定向验证清单
@@ -299,6 +299,21 @@ cd backend && ./mvnw -pl services/<被改的服务> -am test -Dtest='<那个测�
 
 **不推 PR 分支。** 把卡点写进汇报：哪个测试、哪条断言、为什么、怎么复现。
 **不许**为了让 PR 能推而去改测试、放宽断言、或跳过用例。
+
+**`sync.mjs --check` 红了要分清两种情况**：
+
+| 情况                 | 判据                                                                  | 处理                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **合并引入的**       | 在**源分支**（`upstream/integration/module-dev`）上跑同一个检查是绿的 | 真缺陷 → 阻塞，报告                                                                                                                                                 |
+| **源分支本来就红的** | 源分支上也是红的                                                      | **不是本次合入的责任**。台账是 `sync.mjs` 的生成物，跑一次 `node tools/module-progress/sync.mjs` 重新生成即可（实测它只改汇总表与行内空白，不动交付状态），然后继续 |
+
+源分支基线的查法（只读，不碰工作区）：
+
+```bash
+git worktree add --detach .worktrees/sync-baseline upstream/integration/module-dev
+cd .worktrees/sync-baseline && node tools/module-progress/sync.mjs --check; cd ../..
+git worktree remove --force .worktrees/sync-baseline
+```
 
 ---
 
