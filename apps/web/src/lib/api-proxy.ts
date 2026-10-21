@@ -5725,6 +5725,57 @@ const services: readonly {
       /^brand-credentials\/(?:capabilities|overview|verifications|authorizations|credentials(?:\/verify-batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|verify|signatories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?)?|documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)$/,
   },
   {
+    // 14.4.1.1 促销列表（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有分支（`ad-budgets` / `ad-campaigns` / `ad-keywords` / `ad-rules` / `ad-reports` …）
+    // **一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会自愈。
+    //
+    // ---- 插入锚点选在 **5.2.2.1 汇率查询**（`prefix: 'catalog/'`）那条**之前** ----
+    //   本批其它三条车道（14.1.2.1 广告组管理 / 14.1.1.3 批量操作 / 14.3.1.2 广告组与词报表）
+    //   都是 **ads 域**的 `channel/` 元素，插入点会落在广告簇附近（`ad-budgets` 那条在第 544 行、
+    //   `ad-keywords` 那条在第 638 行附近）；本条落在 **5200 行开外的 catalog 区**，
+    //   彼此相距数千行 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-promotions」的零命中核对结论 ----
+    //   本文件既有 129 条 services[] 正则里**没有任何一条**含 `ad-promotions` 这个串
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-keywords` / `ad-rules` / `ad-reports` /
+    //   `ad-type-diffs` / `ad-campaign-details` / `ad-diagnostics` 一类），
+    //   且逐条用 `new RegExp(pat).test('ad-promotions…')` 实测过：既有 129 条对
+    //   `ad-promotions`、`ad-promotions/capabilities`、`ad-promotions/promotions`、
+    //   `ad-promotions/promotions/{uuid}`、`ad-promotions/promotions/{uuid}/status`、
+    //   `ad-promotions/guardrails` **全部零命中** ⇒ 首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-promotions/capabilities              能力声明（毛利 / 平台效果 / 平台回写 / 促销费用
+    //                                            四个维度 available=false + ownerModule + 影响）
+    //   ad-promotions/options                   下拉项（促销类型 / 状态 / 同步状态 / 规则 / 严重级别）
+    //   ad-promotions/promotions                促销列表（GET，真分页 + 真筛选）/ 登记促销（POST）
+    //   ad-promotions/promotions/{uuid}         促销详情（GET）/ 改促销定义（POST，替换语义）
+    //   ad-promotions/promotions/{uuid}/status  改本地状态（POST；排期 / 上线被拦截时 409）
+    //   ad-promotions/promotions/{uuid}/check   重跑拦截 / 预警检查（POST）
+    //   ad-promotions/guardrails                护栏规则（GET 读 / POST 登记或修改）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / guardrails / promotions）排在 {uuid} 段之前
+    // —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-promotions` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-promotions/effects` —— **平台效果维度未交付**（没有平台促销同步源 ⇒ 不建空的效果表）
+    //   * `ad-promotions/promotions/{uuid}/delete` —— 促销是事实，撤下走 status=CANCELLED
+    //   * `ad-promotions/promotions/{uuid}/expenses` —— **促销费用维度未交付**（12 财务不在本仓）
+    //   * 非 UUID 段 —— `ad-promotions/promotions/not-a-uuid` 必须 404
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-promotions`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-promotions(?:\/(?:capabilities|options|guardrails|promotions(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|check))?)?))$/,
+  },
+  {
     // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
