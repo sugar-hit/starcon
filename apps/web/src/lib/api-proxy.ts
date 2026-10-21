@@ -5306,6 +5306,52 @@ const services: readonly {
     pattern:
       /^price-sync\/(?:capabilities|diffs|sync|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|records(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/receipt)?)?)$/,
   },
+  {
+    // 8.2.2.2 待检处理（warehouse 服务，卷 08「仓储作业」的 L3 锚点 8.2.2）。
+    //
+    // 蓝图：「管理待检区库存：发起质检任务（6 质检单）、质检通过后转入可售、
+    // 质检不通过转残次/报废/退货。」「输出：质量状态变更分录；可售量更新。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 warehouse 那条巨型 alternation 里并分支 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 的**最末尾**（紧挨着 `];`），
+    // 与同批其它车道（catalog / trade / channel 组）的插入点互不重叠。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   pending-inspections/capabilities            能力声明（硬规则 / 上下游接入情况）
+    //   pending-inspections/stock                    待检库存清单（GET，真分页 / 真筛选）
+    //   pending-inspections/options                  下拉（仓库 / 质量状态 / 库位 / 质检模板）
+    //   pending-inspections                          处理单集合（GET 真分页 / POST 建单）
+    //   pending-inspections/{uuid}                   单据详情（GET：单头 + 分录 + 事件 + 可售量前后对照）
+    //   pending-inspections/{uuid}/request-inspection 发起质检任务（POST，走 trade 的 6.4.2.1）
+    //   pending-inspections/{uuid}/record-result      录入质检结果（POST，三量从质检单回读）
+    //   pending-inspections/{uuid}/dispose            处置决定（POST，本模块唯一动库存的动作）
+    //   pending-inspections/{uuid}/cancel             取消（POST）
+    //
+    // 判别顺序：**字面量子路径（capabilities / stock / options）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    // 两个动作段（{uuid}/xxx）挂在单段 {uuid} 组的可选后缀里，否则会被单段分支吃掉半截、
+    // 把动作名留在匹配之外。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   pending-inspections/{uuid}/entries   —— 分录在详情里，没有单独的读端点。
+    //   pending-inspections/{uuid}/approve    —— 本模块没有审批动作（审批属 8.5.x 与 17 卷）。
+    //   pending-inspections/summary          —— 汇总在列表响应里，没有单独的汇总端点。
+    //   pending-inspections/{uuid}/delete     —— 终态不可逆：处置完的凭据不能删（后端 405 + DB 守卫）。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    //
+    // 与既有分支不重叠：既有 warehouse 那条巨型正则的 alternation 里
+    // 没有 `pending-inspections`（`putaway-tasks` / `goods-receipts` 与它不是一回事），
+    // 所以 `pending-inspections/...` 不会先被既有分支吃掉。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^pending-inspections(?:\/(?:capabilities|stock|options|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:request-inspection|record-result|dispose|cancel))?))?$/,
+  },
 ];
 
 function resolve(path: string) {

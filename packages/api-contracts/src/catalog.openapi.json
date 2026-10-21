@@ -45451,13 +45451,13 @@
             "nullable": true
           },
           "minRatio": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "nullable": true
           },
           "maxRatio": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "nullable": true
@@ -49089,9 +49089,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
