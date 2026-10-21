@@ -4230,6 +4230,82 @@ const services: readonly {
       /^inventory\/stockout-alerts\/(?:capabilities|evaluate|starvations(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?|stockouts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:acknowledge|resolve))?)?)$/,
   },
   {
+    // 7.7.2.2 平台托管与全托管备货（warehouse 服务，卷 07「库存核算」的 L3 锚点 7.7.2）。
+    //
+    // 蓝图：「处理平台托管（全托管）下的"备货"语义：发给平台的货进入平台仓但**所有权与结算规则随模式变化**，
+    // 需与自有仓库存分账；支持备货单、平台仓收发对账、按件/按日结算口径标记。
+    // **全托管下"备货"不等于"自有库存"**，平台仓在库数是平台回执的观测值，不得并入自有库存余额；
+    // 结算按平台规则（可能按件或按日）而非我方发货确认。」
+    //
+    // ⚠️ 本条目是**新增一条独立的 services[] 元素**，不是往既有 warehouse 那条巨型 alternation 里并分支 ——
+    // 那一支是单行超长正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 services[] 里**最后一条 `prefix: 'warehouse/'` 元素之后**
+    // （7.8.2.2 的 `inventory/stockout-alerts` 元素之后），与同批其它车道（trade / channel / catalog 组）
+    // 的插入点互不重叠。
+    //
+    // 🔴 为什么用 `consignment-stock` 这个独立前缀：
+    //   7.7.1.2 寄售与代销已交付，它的命名空间是 `inventory/consignments`（复数，寄售协议/销售/结算/退货）。
+    //   本模块是**平台托管备货**（备货单 / 平台仓收发回执 / 平台结算回执），
+    //   与寄售**不是同一件事**：寄售的货主是第三方（ consignments 走 consignment_agreement），
+    //   平台托管的货主是平台本身、全托管下货权随货交给平台。
+    //   两个名字只差一个词，挨太近会让人把寄售协议与平台托管备货单当成同一件事，
+    //   所以本模块用 `consignment-stock` 单独占一段命名空间。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   consignment-stock/capabilities            能力声明（四口径定义 / 结算口径 / 分账声明 / 未接入环节）
+    //   consignment-stock/shops/{uuid}             店铺经营模式读出口（2.3.2.1，只读）
+    //   consignment-stock/forecast-preview         备货预报预填预览（10.4.2.2，只读）
+    //   consignment-stock/orders                   备货单集合（GET 真分页 / POST 建单）
+    //   consignment-stock/orders/{uuid}            单据详情（GET：头部 + 明细 + 台账 + 对账 + 审计）
+    //   consignment-stock/orders/{uuid}/lines      追加备货明细行（POST，仅草稿态）
+    //   consignment-stock/orders/{uuid}/ship       发货（POST，DRAFT → SHIPPED）
+    //   consignment-stock/orders/{uuid}/confirm-receipt  平台确认收货（POST）
+    //   consignment-stock/orders/{uuid}/receipts   平台仓收发回执（GET 列表 / POST 登记）
+    //   consignment-stock/orders/{uuid}/settlement-receipts  平台结算回执（GET 列表 / POST 登记）
+    //   consignment-stock/orders/{uuid}/ledger      托管备货台账（GET，四口径分列）
+    //   consignment-stock/orders/{uuid}/reconciliation  与自有库存的对账结果（GET）
+    //   consignment-stock/orders/{uuid}/settlement-basis  结算口径标记（GET，供 12.3.1 结算）
+    //   consignment-stock/orders/{uuid}/close       关闭备货单（POST）
+    //   consignment-stock/orders/{uuid}/cancel      作废备货单（POST）
+    //   consignment-stock/orders/{uuid}/audit       审计时间线（GET）
+    //
+    // 刻意**不放行**的形状：
+    //   consignment-stock/orders/{uuid}/delete      —— 后端没有删除端点（405）；
+    //     且平台回执 / 结算回执是 append-only 凭据，运行角色的 UPDATE / DELETE 已在 V244 里收回。
+    //   consignment-stock/orders/{uuid}/inventory   —— **把平台在库并进自有库存**这件事后端根本没有实现，
+    //     而且蓝图加粗句明令禁止；放行它只会让人以为「有办法把平台仓的数写进我方库存」。
+    //   consignment-stock/orders/{uuid}/settle      —— 12.3.1 结算未交付，且是**独立数据库**：
+    //     跨服务写账被模块边界纪律明令禁止。本模块只出「结算口径标记 + 未结量」给 12 读。
+    //   consignment-stock/orders/{uuid}/profit      —— 13.4.1.1 多模式利润未交付。
+    //   consignment-stock/orders/{uuid}/forecast    —— 10.4.2.2 备货预报在 **channel** 服务，
+    //     本服务只经只读端口取数，warehouse 不提供预报单写入端点。
+    //   consignment-stock/{任意其它字面量}          —— 拼错的子路径一律 404；
+    //     放行后端不存在的形状比 404 更糟：界面会以为功能已交付。
+    //
+    // 判别顺序：**字面量子路径（capabilities / forecast-preview / orders）排在 {uuid} 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是 `[0-9a-f-]+`）：
+    // 后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 与既有分支不重叠：既有 warehouse 那条巨型正则的 `inventory/` 分组里有 `consignments(...)`（复数）
+    // 与 `vmi(...)`，**没有** `consignment-stock` —— 两个前缀在第 12 个字符处分叉
+    // （`consignments` 的第 12 位是 `s`，`consignment-stock` 的是 `-`），
+    // 所以 `inventory/consignment-stock/...` 不会先被既有分支吃掉。
+    //
+    // 兄弟车道已交付的形状**未被挤掉**（回归基线，见
+    // apps/web/src/app/api/warehouse/consignment-stock-allowlist.test.ts 的最后一组断言）：
+    //   inventory/vmi/...            7.7.2.1 VMI 供应商管理库存
+    //   inventory/consignments/...   7.7.1.2 寄售与代销
+    //   inventory/stockout-alerts/... 7.8.2.2 缺货与饥饿预警
+    //   inventory/ownership/...      7.7.1.1 货主与所有权
+    //   inventory/allocation-*/...   7.8.x 多平台可售量分摊
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^inventory\/consignment-stock\/(?:capabilities|forecast-preview|shops\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|orders(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:lines|ship|confirm-receipt|close|cancel|receipts|settlement-receipts|ledger|reconciliation|settlement-basis|audit))?)?)$/,
+  },
+  {
     // 16.2.2.1 合规预检（channel 服务，卷 16「合规与风控」的 L3 锚点 16.2.2）。
     //
     // 蓝图：「发布前的合规体检：内容违规、认证缺失、尺寸规格不符、材质与描述不符、危险品与运输限制、
