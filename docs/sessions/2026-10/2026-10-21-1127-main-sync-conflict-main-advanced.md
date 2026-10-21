@@ -12,6 +12,13 @@ merge-base 被拉回 `1bb270a0`，每次 merge 都撞 6 个文件的 add/add + c
 但 **merge 仍然失败**（2 文件冲突）⇒ 本轮结果仍是「**冲突未并入**」，未 push。
 根因未消除：老的 squash `d28188d6` 仍在 main 的历史里，merge-base 依旧被拉回 `1bb270a0`。
 
+> ⚠️ 承重细节（2026-10-21 11:33 补测）：`ec225641` 的**父提交数是 1**，不是 2 ——
+> `git log -1 --format='%P' origin/main` ⇒ 只有 `d28188d6`；`git cat-file -p` 里 `parent` 行数 = 1。
+> 它是**单父的常规提交**，**不是双父 merge**。
+> 这正是 merge-base 仍被钉在 `1bb270a0` 的直接原因（若是双父 merge，merge-base 早前移了）。
+> ⇒ 「发布侧改推真实提交」这条根治路径**方向对、但要继续推**：剩下的 7 个落后模块
+> 若也以**常规提交**（而非 squash）推上去，merge-base 才可能自然前移。
+
 ## 决策 / 结论
 
 1. **冲突只报不解**（协议 SYNC-MAIN.md §0 硬规定）。本轮 `git merge --abort`，MERGE_HEAD 已清，工作区干净，
@@ -21,7 +28,7 @@ merge-base 被拉回 `1bb270a0`，每次 merge 都撞 6 个文件的 add/add + c
    | 冲突文件 | 类型 | base / ours / theirs 行数 | main 侧独有内容 |
    | --- | --- | --- | --- |
    | `apps/web/src/lib/api-proxy.ts` | content | 2634 / 5359 / 4967 | **0 行** ⇒ ours 是严格超集，main 侧无任何独有行 |
-   | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769 | **14 行**，是同一份 fixture 的**旧写法**（`base.plusDays(N)` vs 集成头的 `a1At/a2At`），语义等价、写法已过时 |
+   | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769 | **27 行**，是**修复前的 JVM 墙钟写法**（`LocalDate.now()` 默认时区 + `OffsetDateTime.now().minusDays(10)`）；集成头侧是 `fix/5-5-1-1-price-history-window` 车道刻意做的**跨时钟域修复**（`LocalDate.now(ZoneOffset.UTC)` 显式 UTC + 种子与查询窗口**同源于 `windowDay`** + 一条把旧写法钉死成必红的可执行不变量）⇒ **不是语义等价** |
 
    ⇒ 两个文件各 7 个冲突 hunk，但**没有一处是 main 侧的新交付**。
    这与前 6 轮的判断一致（main 侧独有文本全是「已被后续交付推翻的旧写法」），只是文件名单变了。
@@ -69,7 +76,10 @@ merge-base 被拉回 `1bb270a0`，每次 merge 都撞 6 个文件的 add/add + c
    剩余 7 个落后模块（5.4.2.1 / 6.2.2.1 / 6.4.2.1 / 6.5.1.1 / 6.5.2.1 / 7.7.2.2 / 16.2.2.2）应一并推上去。
 2. **（若坚持并入）开一条 fix 车道解这 2 个冲突**，方向已清楚：
    - `api-proxy.ts` —— ours 是严格超集，main 侧独有 0 行，**可以按 ours 收**，但仍需人工确认；
-   - `PriceHistoryIntegrationTest.java` —— main 侧 14 行是同一 fixture 的旧写法，**逐行核对后按 ours 收**。
+   - `PriceHistoryIntegrationTest.java` —— main 侧 27 行是**修复前的 JVM 墙钟写法**；
+     集成头侧是 `fix/5-5-1-1-price-history-window` 车道刻意做的跨时钟域修复
+     （显式 UTC + 种子与查询窗口同锚点 + 可执行不变量）⇒ **按 ours 收**；
+     ⚠️ **取 theirs 会把跨时钟域修复回退掉**（不是「写法过时但等价」）。
    解完**必须重跑 L2**（这批内容从未经过 L1/L2）。
 3. **（闸机制，仍然是 P0）`keepalive.sh` 会把死掉的持闸者的闸无限续命**：
    - 现象：持闸 tick 的**父会话被截断**后，`keepalive.sh` 作为 nohup 脱离进程继续每 10 分钟续期，

@@ -85,8 +85,14 @@ batch-28 之后集成头交付的模块，在 merge-base 上**根本不存在** 
 
 ```
 ec225641  feat: 到岸成本、成本分摊等 24 项能力交付
-parents:   2 个父提交（真实 merge）
+parents:   1 个父提交 = d28188d6（**常规提交，不是 merge**）
 ```
+
+> ⚠️ 2026-10-21 11:33 更正：本条原先写成「2 个父提交（真实 merge）」，**实测是 1 个父提交**
+> （`git log -1 --format='%P' origin/main` ⇒ 只有 `d28188d6`；`git cat-file -p` 里 `parent` 行数 = 1）。
+> 这个区别是**承重的**：正因为它是**单父的常规提交**（而不是双父 merge），
+> merge-base 才仍然被老 squash 钉在 `1bb270a0` ⇒ merge 仍然失败。
+> 若它真是双父 merge，merge-base 早就前移了。
 
 它把此前「main 未开发、集成头已交付」的那 24 个模块（5.2.1.2 / 5.2.1.3 / 5.2.2.1 / 5.2.2.2 / 5.2.3.1 / 5.2.3.2 /
 5.3.1.1 / 5.3.1.2 / 5.3.2.1 / 5.3.2.2 / 5.4.1.1 / 5.4.1.2 / 5.5.1.1 / 5.5.2.1 / 6.1.2.1 / 6.1.2.3 / 6.2.1.1 /
@@ -113,9 +119,28 @@ parents:   2 个父提交（真实 merge）
   | 冲突文件 | 类型 | base / ours / theirs 行数 | main 侧独有内容 |
   | --- | --- | --- | --- |
   | `apps/web/src/lib/api-proxy.ts` | content | 2634 / 5359 / 4967 | **0 行** ⇒ ours 严格超集 |
-  | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769 | **14 行**，同一 fixture 的**旧写法**（`base.plusDays(N)` vs 集成头 `a1At/a2At`），语义等价 |
+  | `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java` | add/add | 0 / 812 / 769 | **27 行**，**修复前的 JVM 墙钟写法**（见下方 ⚠️） |
 
   ⇒ 仍然**没有一处是 main 侧的新交付**；结论与前 6 轮一致，只是文件名单变了。
+
+> ⚠️ 2026-10-21 11:33 更正：本条原先把 `PriceHistoryIntegrationTest.java` 的 main 侧独有内容
+> 写成「**14 行**，同一 fixture 的旧写法（`base.plusDays(N)` vs 集成头 `a1At/a2At`），**语义等价**」。
+> **「语义等价」这个判断是错的**，实测（`git show <side>:…PriceHistoryIntegrationTest.java`）：
+>
+> | | main 侧 | 集成头侧 |
+> | --- | --- | --- |
+> | 窗口锚点 | `LocalDate.now()`（**JVM 默认时区**）+ `OffsetDateTime.now().minusDays(10)` | `LocalDate.now(ZoneOffset.UTC)`（**显式 UTC**） |
+> | 种子与查询窗口的关系 | 种子 `base` 与查询用的 `LocalDate.now().minusDays(9)` **各自取墙上时钟** | 种子 `a1At/a2At` 与查询窗口**同源于 `windowDay`** ⇒ 不可能跨日界 |
+> | 可执行不变量 | 无 | 有（`assertThat(a2At.toInstant()).isAfterOrEqualTo(windowFromBound).isBefore(windowToBound)`） |
+>
+> ⇒ 集成头侧是车道 `fix/5-5-1-1-price-history-window` **刻意做的跨时钟域修复**
+> （把窗口锚到显式 UTC 日、并写了一条把旧写法**钉死成必红**的不变量），
+> main 侧是**修复前**的墙钟写法。
+> ⇒ **「以集成头为准」不只是「不丢东西」，而是「取 main 那侧会把这个跨时钟域修复回退掉」** ——
+> 这正是跨时钟域第 1 例（见 `docs/sessions/2026-10/2026-10-21-price-history-clock-window-fix.md`）。
+>
+> 另更正行数：main 侧独有 **27 行**（`diff theirs ours` 统计），非 14 行。
+> 结论方向不变（**以集成头为准**），但**理由比原先写的更强**。
 
 ### 影响
 
@@ -188,9 +213,11 @@ parents:   2 个父提交（真实 merge）
       另有 **15 个文件**含 main 独有文本，其中 **8 个**由 `merge-union` 求并、**3 个**由 git 三方合并
       干净合上、**4 个**即上述冲突文件、**2 个**是集成头严格超集。）
       （2026-10-21 11:27 轮更新：**冲突面已换成 2 个文件**，`api-proxy.ts`（content，main 侧独有 **0 行**，
-      ours 严格超集）+ `PriceHistoryIntegrationTest.java`（add/add，main 侧独有 **14 行**，
-      是同一 fixture 的旧写法 `base.plusDays(N)` vs 集成头 `a1At/a2At`）。
-      ⇒ 方向已清楚：**两个都可按 ours 收**，但仍需人工逐行确认，且解完**必须重跑 L2**。）
+      ours 严格超集）+ `PriceHistoryIntegrationTest.java`（add/add，main 侧独有 **27 行**，
+      是**修复前的 JVM 墙钟写法**；集成头侧是 `fix/5-5-1-1-price-history-window` 车道
+      刻意做的**显式 UTC + 同锚点 + 可执行不变量**的跨时钟域修复 ⇒ **不是语义等价**）。
+      ⇒ 方向已清楚：**两个都可按 ours 收**（`api-proxy.ts` 是严格超集；`PriceHistory` 取 theirs
+      等于**回退跨时钟域修复**），但仍需人工逐行确认，且解完**必须重跑 L2**。）
 - [ ] **（顺带）给同步任务补「回合被截断也要 `gate release`」的收尾保障**：
       2026-10-21 02:15 那个同步任务回合在 02:47:10 被截断，**既没写会话日志也没 release 闸**
       ⇒ 闸泄漏 70 分钟，白挡了 03:00 轮与 03:15 轮两次同步。
@@ -231,10 +258,10 @@ parents:   2 个父提交（真实 merge）
 - 涉及文件（**11:27 轮的冲突面，2 个**）：
   - `apps/web/src/lib/api-proxy.ts`（content 冲突；main 侧独有 **0 行**，ours 严格超集；**同时**是共享白名单累积文件，见
     `docs/backlog/2026-10/2026-10-21-api-proxy-shared-file-merge-conflict.md`）
-  - `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java`（add/add；main 侧独有 **14 行**，是同一 fixture 的旧写法）
+  - `backend/services/catalog/src/test/java/com/starcon/catalog/PriceHistoryIntegrationTest.java`（add/add；main 侧独有 **27 行**，是**修复前的 JVM 墙钟写法**；ours 侧是显式 UTC + 同锚点 + 可执行不变量的跨时钟域修复 ⇒ 取 theirs 会**回退修复**）
   - （前 6 轮的旧冲突面，6 个，随 `ec225641` 真实提交上 main 后已自然消解：
     `cost-composition-page.test.ts` / `cost-composition-model.test.ts` / `cost-composition-model.ts` /
     `cost-composition-workspace.tsx` / `api-proxy.ts` / `ListingPublishJobIntegrationTest.java`）
 - 根提交：`d28188d6`（`Integration/module dev (#11)`，2026-10-20 20:39:44 +0800，**squash**）
-  ＋ `ec225641`（`feat: 到岸成本、成本分摊等 24 项能力交付`，**真实提交**，2 个父提交）
+  ＋ `ec225641`（`feat: 到岸成本、成本分摊等 24 项能力交付`，**真实提交**，1 个父提交 = `d28188d6`）
 - merge-base：`1bb270a0`（被老 squash 拉回）
