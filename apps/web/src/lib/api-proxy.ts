@@ -4690,6 +4690,56 @@ const services: readonly {
       /^product\-certifications(?:\/(?:capabilities|overview|types|policy|certifications|requirements|coverage|expiry-reminders|sku-candidates|category-candidates)|\/types\/[A-Za-z0-9_-]{1,32}|\/certifications\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|skus(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|categories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?|\/documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?|\/requirements\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/coverage\/skus\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/,
   },
   {
+    // 16.4.2.2 授权凭证：集中存储与核验授权凭证文件（真伪验证记录 / 文件版本 / 签署方信息 /
+    // 一键核验）。🔴 蓝图加粗句「凭证需保留原始文件与元数据，争议时是唯一证据」的落点。
+    //
+    // ⚠️ **本模块是独立一条 services[] 元素**，刻意**不**往既有 channel 长 alternation 里并分支：
+    //   那条正则由多车道共用，并进去必然 git 冲突，且取错一侧会静默删掉别人已交付的路由
+    //   （表现是页面 404，而 typecheck / lint / vitest / Playwright 全部全绿）。
+    //   插入锚点固定在「16.2.2.2 认证与资质那条元素之后」，既有条目一字未动。
+    //
+    // 🔴 根路径用 `brand-credentials`（**独立前缀**），与 16.4.2.1 的 `brand-authorizations`
+    //     不重叠（两字面量互不为前缀，不会互相吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   brand-credentials/capabilities                 能力声明（真伪怎么判 / 结论口径 / 边界）
+    //   brand-credentials/overview                     概览（凭证数 / 有效 / 临期 / 过期 / 撤销 / 核验三态）
+    //   brand-credentials/credentials                  凭证档案列表（真分页 + 真筛选）+ 登记（POST）
+    //   brand-credentials/credentials/{uuid}           凭证详情 + 修改（PUT）
+    //   brand-credentials/credentials/verify-batch     批量核验（POST，一次最多 50 个）
+    //   brand-credentials/credentials/{uuid}/revoke    撤销凭证（POST，必须写理由）
+    //   brand-credentials/credentials/{uuid}/verify    🔴 一键核验（POST）
+    //   brand-credentials/credentials/{uuid}/signatories            签署方清单（GET）+ 登记（POST）
+    //   brand-credentials/credentials/{uuid}/signatories/{uuid}    移除签署方（DELETE）
+    //   brand-credentials/credentials/{uuid}/documents              文件版本清单（GET）+ 上传（POST）
+    //   brand-credentials/documents/{uuid}             凭证文件元数据
+    //   brand-credentials/documents/{uuid}/file        凭证文件本体（二进制，**浏览器代理不透传**）
+    //   brand-credentials/verifications                核验记录历史（真分页）
+    //   brand-credentials/authorizations               上游 16.4.2.1 的授权档案候选（同库只读）
+    //
+    // ⚠️ `documents/{uuid}/file` 虽然放行，但**浏览器代理不原样透传二进制**（代理只透传
+    //    text/csv、text/vnd.zpl、text/html）：这条是给直连调用方（归档任务 / 争议取证）用的，
+    //    页面上的文件清单显示元数据与 sha256 摘要，不靠它下载。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `brand-credentials` —— 本模块没有裸路径资源（列表在 credentials 上）。
+    //   * `brand-credentials/credentials/{uuid}/delete` —— 合规台账**不做物理删除**，
+    //     撤销走 `revoke`；凭证是「争议时是唯一证据」的那份东西。
+    //   * `brand-credentials/credentials/{uuid}/restore` —— 撤销是终态，不提供「恢复」。
+    //   * `brand-credentials/verifications/{uuid}` —— 核验记录只有列表，没有单条详情端点。
+    //   * `brand-credentials/documents/{uuid}/delete` —— 文件版本**只追加**，没有删除。
+    //   * 非 UUID 段 —— `credentials/not-a-uuid` 必须 404，不能被宽松分支吃掉。
+    // ⚠️ 外层分组**不带 `?`**：本模块没有裸集合读，放行裸路径 `brand-credentials`
+    //    就是凭空多出一条资源（界面上会以为有一个「授权凭证」的裸列表端点）。
+    //    判别顺序上，字面量子路径（capabilities / overview / verifications / authorizations）
+    //    与 {uuid} 段互不吃；`credentials/verify-batch` 是字面量，排在 {uuid} 段之前判别。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^brand-credentials\/(?:capabilities|overview|verifications|authorizations|credentials(?:\/verify-batch|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:revoke|verify|signatories(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|documents))?)?|documents\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/file)?)$/,
+  },
+  {
     // 5.2.2.1 汇率查询：各币种对各本位币的汇率（方向 + 汇率 + 生效日 + 来源）、来源配置与外部拉取。
     //
     // 形状逐个列出（**只放行本模块真实实现的路径**）：
