@@ -294,10 +294,15 @@ CREATE TABLE brand_cred_verification (
   CHECK(document_version_no >= 0),
   -- 🔴 结论与标记必须自洽（应用层算错也在 DB 层被拒）
   --   通过 ⟺ 结论是 VERIFIED；PASS ⟺ 通过
-  CHECK(passed = (conclusion = 'VERIFIED')),
-  CHECK((severity = 'PASS') = passed),
+  CONSTRAINT brand_cred_verification_passed_consistent
+    CHECK(passed = (conclusion = 'VERIFIED')),
+  CONSTRAINT brand_cred_verification_severity_consistent
+    CHECK((severity = 'PASS') = passed),
   -- 🔴 没有原因的不通过不允许出现
-  CHECK(conclusion = 'VERIFIED' OR jsonb_array_length(reasons) > 0)
+  --    （约束**显式命名**：匿名 CHECK 的报错只会说 "violates check constraint
+  --     brand_cred_verification_check2"，读报错的人根本不知道是哪条口径被违反）
+  CONSTRAINT brand_cred_verification_reasons_required
+    CHECK(conclusion = 'VERIFIED' OR jsonb_array_length(reasons) > 0)
 );
 COMMENT ON TABLE brand_cred_verification IS
   '16.4.2.2 · 一次凭证核验的结论（追加式凭据，触发器钉住不可改写）。'

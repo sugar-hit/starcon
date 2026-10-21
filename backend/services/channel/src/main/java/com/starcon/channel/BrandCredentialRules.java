@@ -324,4 +324,67 @@ public final class BrandCredentialRules {
     }
     return value.isEmpty() ? "credential-file" : value;
   }
+
+  // ---------------------------------------------------------------- 文案
+
+  /** 凭证类型的人话。 */
+  public static String credentialTypeLabel(String type) {
+    return switch (type == null ? "" : type) {
+      case "BRAND_LICENSE" -> "品牌授权书";
+      case "DISTRIBUTOR_AGREEMENT" -> "经销协议";
+      case "TRADEMARK_CERTIFICATE" -> "商标注册证";
+      case "CERTIFICATE_OF_ORIGIN" -> "原产地证";
+      case "AUTHORIZATION_LETTER" -> "授权函";
+      case "OTHER" -> "其它凭证";
+      default -> type == null ? "" : type;
+    };
+  }
+
+  /** 状态的人话。 */
+  public static String statusLabel(String status) {
+    return "REVOKED".equals(status) ? "已撤销" : "有效";
+  }
+
+  /** 到期状态的人话。 */
+  public static String expiryStateLabel(String state) {
+    return switch (state == null ? "" : state) {
+      case "ACTIVE" -> "生效中";
+      case "EXPIRING" -> "即将到期";
+      case "EXPIRED" -> "已过期";
+      case "NOT_YET_EFFECTIVE" -> "尚未生效";
+      case "REVOKED" -> "已撤销";
+      default -> "";
+    };
+  }
+
+  /** 最近核验状态的人话。 */
+  public static String verificationStateLabel(String state) {
+    return switch (state == null ? "" : state) {
+      case "UNVERIFIED" -> "从未核验";
+      case "VERIFIED" -> "核验通过";
+      case "FAILED" -> "核验未通过";
+      default -> "";
+    };
+  }
+
+  /** 核验结论的人话。 */
+  public static String conclusionLabel(String conclusion) {
+    return switch (conclusion == null ? "" : conclusion) {
+      case "VERIFIED" -> "核验通过";
+      case "DIGEST_MISMATCH" -> "文件摘要对不上";
+      case "FILE_MISSING" -> "文件不在受管存储";
+      case "EXPIRED" -> "凭证已过期";
+      case "NOT_YET_EFFECTIVE" -> "凭证尚未生效";
+      case "SIGNATORY_INCOMPLETE" -> "没有登记签署方";
+      case "NO_DOCUMENT" -> "凭证还没有文件";
+      case "REVOKED" -> "凭证已被撤销";
+      default -> "";
+    };
+  }
+
+  /** 核验分级的人话。 */
+  public static String severityLabel(String severity) {
+    return "PASS".equals(severity) ? "通过" : "不通过";
+  }
+
 }
