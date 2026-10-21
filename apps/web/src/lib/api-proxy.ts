@@ -4195,6 +4195,78 @@ const services: readonly {
       /^development\-samples(?:\/(?:capabilities|options|summary|samples|media\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|samples(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|confirmations|shipments|media))?)?|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?))?))?$/,
   },
   {
+    // 6.6.2.1 试产单（trade 服务，卷 06 采购与供应的 L3 锚点 6.6.2）。
+    //
+    // 蓝图：「管理试产：小批量试产（数量、BOM 版本、组件需求、产线/加工厂、质检标准、
+    // 试产成本与良率），试产结果记录并对比量产目标，输出转量产建议。」
+    // 输出「试产单 + 组件领用需求（→ 7 库存）；良率与成本结果；转量产建议」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `development-samples`（6.6.1.2，同为 6.6 分区）元素**之后**、
+    // `9.3.1.1 拆单`元素**之前**；与本批另外三条车道（6.3.2.1 / 6.3.1.3 / 11.4.1.1）
+    // 的插入点被既有条目隔开，git 能干净求并。resolve() 是「按顺序逐条匹配、首个命中即返回」，
+    // 同前缀的第二条不会误吃前一条的路径。
+    //
+    // 🔴 为什么用 `trial-productions` 这个独立前缀：
+    //   * 已逐条核对本文件里**全部 109 条既有正则**（含 trade 的超长 alternation 分支）：
+    //     本模块的 18 个形状对它们的命中数 = **0**；
+    //   * 逐条核对过邻近首 token：`purchase-orders` / `purchase-order-editor` /
+    //     `purchase-plans` / `purchase-requests` / `replenishment-suggestions` /
+    //     `development-projects` / `development-samples` / `quality-inspections` /
+    //     `defective-dispositions` —— **零命中**（既有的 `order-review/.../trial`
+    //     首 token 是 `order-review`，与本模块互不相干）；
+    //   * `development-samples`（6.6.1.2）的正则**不会**吃掉 `trial-productions/**`
+    //     —— 两者是互不相同的前缀字面量。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   trial-productions/capabilities            能力声明（库存扣减 / 转量产建档 / 汇率三条缺口）
+    //   trial-productions/options                 下拉（状态与合法去向 / 需求状态 / 判定结果 / 成本类型 / 建议结论）
+    //   trial-productions/summary                 按状态分组的概览 + 按币种分组的成本与成本对比
+    //   trial-productions/bom-version-candidates catalog 的 BOM 版本候选（跨服务只读）
+    //   trial-productions                         试产单清单（GET）/ 新建试产单（POST）
+    //   trial-productions/{uuid}                  试产单详情（GET）/ 改试产单（PUT）
+    //   trial-productions/{uuid}/transitions      推进试产单状态（POST，状态机只认存在的边）
+    //   trial-productions/{uuid}/component-requirements       组件领用需求（GET）
+    //   trial-productions/{uuid}/component-requirements/{uuid}/submit   提交领用需求（POST）
+    //   trial-productions/{uuid}/component-requirements/{uuid}/release  记录加工单承接（POST）
+    //   trial-productions/{uuid}/inspection-items               质检标准项（GET / POST）
+    //   trial-productions/{uuid}/inspection-items/{uuid}        记录质检判定（PUT）
+    //   trial-productions/{uuid}/result                          试产结果（GET / POST，良率由后端推导）
+    //   trial-productions/{uuid}/cost                           试产成本（GET）
+    //   trial-productions/{uuid}/cost/lines                     追加成本明细行（POST）
+    //   trial-productions/{uuid}/cost/lines/{uuid}              删成本明细行（DELETE）
+    //   trial-productions/{uuid}/cost-comparison                试产成本 vs 量产目标成本（GET）
+    //   trial-productions/{uuid}/mass-production-recommendation 转量产建议（GET / POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / bom-version-candidates）
+    //    排在 {uuid} 段之前** —— alternation 是首个命中即返回，顺序反了会被 uuid 支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    //    `[0-9a-f-]+`）：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `trial-productions/{uuid}/delete` —— 试产单挂着组件需求、质检项、结果、成本与
+    //     全部留痕，后端**不提供删除**（删掉它就抹掉了「这个试产经历过什么」的证据）。
+    //   * `trial-productions/{uuid}/inventory-deductions` / `/stock` —— 蓝图加粗句
+    //     「**试产消耗真实组件库存，需走 8 加工单而非直接改库存**」：本模块**只产出组件领用需求**，
+    //     **不建库存扣减表**。放行这两个路径会让界面以为本模块在扣库存。
+    //   * `trial-productions/{uuid}/component-requirements/{uuid}/deduct` —— 同上：
+    //     **领用由 warehouse 侧 8.4.1 组装单承接**，本模块不提供「扣减」动作。
+    //   * `trial-productions/{uuid}/assembly-orders` —— 组装单是 **warehouse 独立库**里
+    //     8.4.1 的事实，本模块只存它的**逻辑引用 + 展示快照**，**不建组装单**。
+    //   * `trial-productions/{uuid}/mass-production-orders` —— 6.6.2.2 转量产与建档**未开发**；
+    //     本模块只产**建议事实**，放行它会让界面以为量产单已经存在。
+    //   * `trial-productions/{uuid}/skus` —— SKU 建档归 3.1.2.1 与 6.6.2.2，
+    //     本模块**不建 SKU**。
+    //   * 任何 DELETE 裸集合形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^trial\-productions(?:\/(?:capabilities|options|summary|bom\-version\-candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:transitions|component\-requirements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:submit|release))?)?|inspection\-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|result|cost(?:\/lines(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?)?|cost\-comparison|mass\-production\-recommendation))?))?$/,
+  },
+  {
     // 9.3.1.1 拆单（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

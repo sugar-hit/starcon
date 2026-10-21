@@ -44083,6 +44083,1082 @@
           }
         }
       }
+    },
+    "/trade/trial-productions/{id}": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "put_trade_trial_productions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/inspection-items/{itemId}": {
+      "put": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "put_trade_trial_productions_id_inspection_items_itemId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialInspectionJudgmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialInspectionItemRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bomVersionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/transitions": {
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_transitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/result": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_result",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialResultRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_result",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialResultInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialResultRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/mass-production-recommendation": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_mass_production_recommendation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialMassProductionRecommendationRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_mass_production_recommendation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialMassProductionRecommendationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialMassProductionRecommendationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/inspection-items": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_inspection_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialInspectionItemRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_inspection_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialInspectionItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialInspectionItemRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/cost/lines": {
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_cost_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialCostLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialCostView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/component-requirements/{requirementId}/submit": {
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_component_requirements_requirementId_submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requirementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialComponentRequirementRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/component-requirements/{requirementId}/release": {
+      "post": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "post_trade_trial_productions_id_component_requirements_requirementId_release",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requirementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionTrialRequirementReleaseInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialComponentRequirementRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/cost": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_cost",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialCostView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/cost-comparison": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_cost_comparison",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialCostComparisonRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/component-requirements": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_id_component_requirements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialComponentRequirementRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/summary": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/options": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/capabilities": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/bom-version-candidates": {
+      "get": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "get_trade_trial_productions_bom_version_candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionTrialBomVersionCandidateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/trial-productions/{id}/cost/lines/{lineId}": {
+      "delete": {
+        "tags": [
+          "production-trial-controller"
+        ],
+        "operationId": "delete_trade_trial_productions_id_cost_lines_lineId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionTrialCostView"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -107105,6 +108181,1315 @@
           },
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "ProductionTrialUpdateInput": {
+        "type": "object",
+        "properties": {
+          "productionLineCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "productionLineName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factoryCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factoryName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "qualityStandardCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "qualityStandardNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "plannedStartAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "plannedEndAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "purposeNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialComponentRequirementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "unitQuantity": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "requirementStatus": {
+            "type": "string"
+          },
+          "requirementStatusLabel": {
+            "type": "string"
+          },
+          "assemblyOrderRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assemblyOrderNo": {
+            "type": "string"
+          },
+          "inventoryDeducted": {
+            "type": "boolean"
+          },
+          "inventoryOwnerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductionTrialCostLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "costType": {
+            "type": "string"
+          },
+          "costTypeLabel": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductionTrialCostView": {
+        "type": "object",
+        "properties": {
+          "costId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "massTargetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "massTargetAvailable": {
+            "type": "boolean"
+          },
+          "massTargetNote": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialCostLineRow"
+            }
+          }
+        },
+        "nullable": true
+      },
+      "ProductionTrialInspectionItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "standardValue": {
+            "type": "string"
+          },
+          "inspectionMethod": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "criticalItem": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "judgment": {
+            "type": "string"
+          },
+          "judgmentLabel": {
+            "type": "string"
+          },
+          "measuredValue": {
+            "type": "string"
+          },
+          "judgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "judgedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductionTrialMassProductionRecommendationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "decisionLabel": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "conditionNote": {
+            "type": "string"
+          },
+          "minYieldThreshold": {
+            "type": "number"
+          },
+          "maxCostVarianceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedYieldRate": {
+            "type": "number"
+          },
+          "observedCostVarianceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedTrialCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedMassTargetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedCurrency": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "ProductionTrialOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/ProductionTrialOrderRow"
+          },
+          "componentRequirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialComponentRequirementRow"
+            }
+          },
+          "inspectionItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialInspectionItemRow"
+            }
+          },
+          "result": {
+            "$ref": "#/components/schemas/ProductionTrialResultRow"
+          },
+          "cost": {
+            "$ref": "#/components/schemas/ProductionTrialCostView"
+          },
+          "recommendation": {
+            "$ref": "#/components/schemas/ProductionTrialMassProductionRecommendationRow"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialTransitionRow"
+            }
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductionTrialOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialNo": {
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputSkuName": {
+            "type": "string"
+          },
+          "developmentSampleOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "developmentSampleOrderNo": {
+            "type": "string"
+          },
+          "targetQuantity": {
+            "type": "number"
+          },
+          "productionLineCode": {
+            "type": "string"
+          },
+          "productionLineName": {
+            "type": "string"
+          },
+          "factoryCode": {
+            "type": "string"
+          },
+          "factoryName": {
+            "type": "string"
+          },
+          "qualityStandardCode": {
+            "type": "string"
+          },
+          "qualityStandardNote": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "requesterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requesterName": {
+            "type": "string"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedStartAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "plannedEndAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "requirementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingRequirementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inspectionItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingInspectionItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasResult": {
+            "type": "boolean"
+          },
+          "yieldRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "trialCostTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "massTargetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "hasRecommendation": {
+            "type": "boolean"
+          },
+          "recommendationDecision": {
+            "type": "string",
+            "nullable": true
+          },
+          "recommendationDecisionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "purposeNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductionTrialResultRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "yieldRate": {
+            "type": "number"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recordedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "ProductionTrialTransitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trialOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "fromStatusLabel": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ProductionTrialInspectionJudgmentInput": {
+        "required": [
+          "judgment"
+        ],
+        "type": "object",
+        "properties": {
+          "judgment": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PASS",
+              "FAIL"
+            ]
+          },
+          "measuredValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialCreateInput": {
+        "required": [
+          "bomVersionId",
+          "currency",
+          "requestedAt",
+          "targetQuantity",
+          "trialNo"
+        ],
+        "type": "object",
+        "properties": {
+          "trialNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "productionLineCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "productionLineName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factoryCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "factoryName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "qualityStandardCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "qualityStandardNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "massTargetCost": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "requesterId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requesterName": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedStartAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "plannedEndAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "developmentSampleOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "developmentSampleOrderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "purposeNote": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "inspectionItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialInspectionItemInput"
+            }
+          }
+        }
+      },
+      "ProductionTrialInspectionItemInput": {
+        "required": [
+          "itemCode",
+          "itemName"
+        ],
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "itemName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "standardValue": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "inspectionMethod": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "criticalItem": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialTransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CLOSED",
+              "CANCELLED"
+            ]
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialResultInput": {
+        "required": [
+          "conclusion",
+          "outputQuantity",
+          "qualifiedQuantity",
+          "recordedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "outputQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "conclusion": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialMassProductionRecommendationInput": {
+        "required": [
+          "conditionNote",
+          "decision",
+          "minYieldThreshold",
+          "rationale"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "GO",
+              "NO_GO"
+            ]
+          },
+          "rationale": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "conditionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "minYieldThreshold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "maxCostVarianceRate": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ProductionTrialCostLineInput": {
+        "required": [
+          "amount",
+          "costType",
+          "description",
+          "incurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "costType": {
+            "type": "string",
+            "enum": [
+              "MATERIAL",
+              "PROCESSING",
+              "MOLD",
+              "INSPECTION",
+              "OVERHEAD"
+            ]
+          },
+          "amount": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "incurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductionTrialRequirementReleaseInput": {
+        "required": [
+          "assemblyOrderNo",
+          "assemblyOrderRefId"
+        ],
+        "type": "object",
+        "properties": {
+          "assemblyOrderRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyOrderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialOrderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProductionTrialCostComparisonRow": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "trialCostTotal": {
+            "type": "number",
+            "nullable": true
+          },
+          "massTargetCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "varianceAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "varianceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialCostCurrencyTotal": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "trialCostTotal": {
+            "type": "number"
+          },
+          "trialCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProductionTrialStatusCount": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProductionTrialSummary": {
+        "type": "object",
+        "properties": {
+          "totalTrials": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalRequirements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingRequirements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalInspectionItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingInspectionItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedTrials": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recommendationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialStatusCount"
+            }
+          },
+          "costByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialCostCurrencyTotal"
+            }
+          },
+          "costComparison": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialCostComparisonRow"
+            }
+          },
+          "recentTrials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialOrderRow"
+            }
+          }
+        }
+      },
+      "ProductionTrialCostTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialJudgmentOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialMassProductionDecisionOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialStatusOption"
+            }
+          },
+          "requirementStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialRequirementStatusOption"
+            }
+          },
+          "judgments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialJudgmentOption"
+            }
+          },
+          "costTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialCostTypeOption"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionTrialMassProductionDecisionOption"
+            }
+          }
+        }
+      },
+      "ProductionTrialRequirementStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "allowedTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductionTrialCapabilities": {
+        "type": "object",
+        "properties": {
+          "bomVersionAvailable": {
+            "type": "boolean"
+          },
+          "bomVersionSource": {
+            "type": "string"
+          },
+          "bomVersionNote": {
+            "type": "string"
+          },
+          "componentRequirementAvailable": {
+            "type": "boolean"
+          },
+          "componentRequirementSource": {
+            "type": "string"
+          },
+          "componentRequirementNote": {
+            "type": "string"
+          },
+          "inventoryDeductionAvailable": {
+            "type": "boolean"
+          },
+          "inventoryDeductionOwnerModule": {
+            "type": "string"
+          },
+          "inventoryDeductionNote": {
+            "type": "string"
+          },
+          "assemblyOrderHandoffAvailable": {
+            "type": "boolean"
+          },
+          "assemblyOrderHandoffOwnerModule": {
+            "type": "string"
+          },
+          "assemblyOrderHandoffNote": {
+            "type": "string"
+          },
+          "massProductionHandoffAvailable": {
+            "type": "boolean"
+          },
+          "massProductionHandoffOwnerModule": {
+            "type": "string"
+          },
+          "massProductionHandoffNote": {
+            "type": "string"
+          },
+          "sampleOrderReferenceAvailable": {
+            "type": "boolean"
+          },
+          "sampleOrderReferenceSource": {
+            "type": "string"
+          },
+          "sampleOrderReferenceNote": {
+            "type": "string"
+          },
+          "exchangeRateAvailable": {
+            "type": "boolean"
+          },
+          "exchangeRateOwnerModule": {
+            "type": "string"
+          },
+          "exchangeRateNote": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductionTrialBomVersionCandidateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputSkuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effective": {
+            "type": "boolean"
           }
         }
       }
