@@ -16764,6 +16764,88 @@
         }
       }
     },
+    "/channel/ad-campaigns/imports": {
+      "post": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "post_channel_ad_campaigns_imports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/bulk-operations": {
+      "post": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "post_channel_ad_campaigns_bulk_operations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkOperationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkOperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/writeback-batches/{id}": {
       "get": {
         "tags": [
@@ -29247,6 +29329,355 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AdTypeDiffCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/sync-runs": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_sync_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdSyncRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/options": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/capabilities": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/campaigns": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_campaigns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "internalAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformAdType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SPEND_DESC"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/campaigns/{id}": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_campaigns_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-campaigns/by-external": {
+      "get": {
+        "tags": [
+          "ad-campaign-controller"
+        ],
+        "operationId": "get_channel_ad_campaigns_by_external",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "externalCampaignId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaignExternalView"
                 }
               }
             }
@@ -50305,6 +50736,508 @@
           }
         }
       },
+      "ImportCampaign": {
+        "required": [
+          "adTypeProfileId",
+          "externalCampaignId",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "externalCampaignId": {
+            "minLength": 1,
+            "type": "string",
+            "description": "平台侧活动 id"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "adTypeProfileId": {
+            "type": "string",
+            "description": "🔴 广告类型档案 id（上游 14.1.2.2）；归一类型与原始标记由档案带下来，本模块不自行归一",
+            "format": "uuid"
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "dailyBudget": {
+            "type": "number",
+            "description": "日预算"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间",
+            "format": "date-time"
+          },
+          "metrics": {
+            "type": "array",
+            "description": "每日表现明细",
+            "items": {
+              "$ref": "#/components/schemas/ImportDailyMetric"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "活动列表"
+      },
+      "ImportDailyMetric": {
+        "required": [
+          "metricDate"
+        ],
+        "type": "object",
+        "properties": {
+          "metricDate": {
+            "type": "string",
+            "description": "自然日（平台当地日）",
+            "format": "date"
+          },
+          "impressions": {
+            "type": "number",
+            "description": "曝光量"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "点击量"
+          },
+          "orders": {
+            "type": "number",
+            "description": "订单量"
+          },
+          "spend": {
+            "type": "number",
+            "description": "消耗"
+          },
+          "sales": {
+            "type": "number",
+            "description": "销售额"
+          }
+        },
+        "description": "每日表现明细"
+      },
+      "ImportRequest": {
+        "required": [
+          "campaigns",
+          "platformId",
+          "shopCode",
+          "syncRun"
+        ],
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "syncRun": {
+            "$ref": "#/components/schemas/ImportSyncRun"
+          },
+          "campaigns": {
+            "minItems": 1,
+            "type": "array",
+            "description": "活动列表",
+            "items": {
+              "$ref": "#/components/schemas/ImportCampaign"
+            }
+          }
+        }
+      },
+      "ImportSyncRun": {
+        "required": [
+          "startedAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "同步状态：SUCCESS / PARTIAL / FAILED"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（FAILED 时必须为空：失败的同步不推进水位）",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "同步开始时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "同步结束时刻",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 失败原因（FAILED 时必填）"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源批次标识"
+          }
+        },
+        "description": "同步运行信息"
+      },
+      "AdCampaignRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧活动 id"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始平台类型标记：平台怎么叫就怎么存"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 归一后的内部类型；UNMAPPED 表示 2.1.2.1 两层都没给归一口径"
+          },
+          "adTypeMappingSource": {
+            "type": "string",
+            "description": "🔴 归一口径来源：PLATFORM_DEFAULT / TENANT_OVERRIDE / UNMAPPED"
+          },
+          "adTypeComparable": {
+            "type": "boolean",
+            "description": "🔴 是否参与跨平台类型比较（UNMAPPED 为 false，但活动照样存在）"
+          },
+          "status": {
+            "type": "string",
+            "description": "归一后的状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "日预算（null = 平台侧没有预算，不是 0）"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光合计（按当前筛选的日期区间）"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "orders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "spend": {
+            "type": "string",
+            "description": "消耗合计"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 点击率（派生列；分母为 0 时为 null=不可比，与 0 含义相反）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = 消耗 / 销售额（分母为 0 时为 null=不可比）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = 销售额 / 消耗（分母为 0 时为 null=不可比）"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间",
+            "format": "date-time"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、尚未回写平台（平台回写队列未交付）"
+          },
+          "localChangedAt": {
+            "type": "string",
+            "description": "最近一次本地改动时刻",
+            "format": "date-time"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 这条活动的数据截至时刻",
+            "format": "date-time"
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "description": "最近一次同步入库时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "登记后的活动（列表形态）"
+      },
+      "ImportResult": {
+        "type": "object",
+        "properties": {
+          "syncRunId": {
+            "type": "string",
+            "description": "同步运行 id"
+          },
+          "syncStatus": {
+            "type": "string",
+            "description": "同步状态"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻",
+            "format": "date-time"
+          },
+          "campaignCount": {
+            "type": "integer",
+            "description": "带回的活动条数",
+            "format": "int32"
+          },
+          "metricRowCount": {
+            "type": "integer",
+            "description": "带回的每日指标行数",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "description": "新建的活动条数",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "description": "更新的活动条数",
+            "format": "int32"
+          },
+          "campaigns": {
+            "type": "array",
+            "description": "登记后的活动（列表形态）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "BulkOperationRequest": {
+        "required": [
+          "campaignIds",
+          "operation"
+        ],
+        "type": "object",
+        "properties": {
+          "campaignIds": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "description": "🔴 显式选中的活动 id（不支持按筛选全选）",
+            "items": {
+              "type": "string",
+              "description": "🔴 显式选中的活动 id（不支持按筛选全选）",
+              "format": "uuid"
+            }
+          },
+          "operation": {
+            "minLength": 1,
+            "type": "string",
+            "description": "操作类型：PAUSE / ENABLE / SET_BUDGET / ADJUST_BUDGET"
+          },
+          "budget": {
+            "type": "number",
+            "description": "SET_BUDGET 用：目标日预算"
+          },
+          "delta": {
+            "type": "number",
+            "description": "ADJUST_BUDGET 用：预算增减额（可正可负）"
+          },
+          "reason": {
+            "type": "string",
+            "description": "操作理由（写进审计）"
+          }
+        }
+      },
+      "AdBudgetGuardrails": {
+        "type": "object",
+        "properties": {
+          "maxSingleBudgetDelta": {
+            "type": "string",
+            "description": "单个活动一次允许调整的预算上限（绝对值）"
+          },
+          "maxTotalBudgetDelta": {
+            "type": "string",
+            "description": "一次批量请求允许的总预算调整上限（绝对值）"
+          },
+          "maxCampaignBudget": {
+            "type": "string",
+            "description": "单个活动的预算上限（调预算后的结果值不得超过）"
+          },
+          "maxCampaignsPerRequest": {
+            "type": "integer",
+            "description": "一次批量请求最多允许的活动条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "护栏说明"
+          }
+        },
+        "description": "🔴 本次生效的护栏上限"
+      },
+      "BulkOperationItem": {
+        "type": "object",
+        "properties": {
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "result": {
+            "type": "string",
+            "description": "执行结果：APPLIED / REJECTED / SKIPPED"
+          },
+          "beforeStatus": {
+            "type": "string",
+            "description": "变更前状态"
+          },
+          "afterStatus": {
+            "type": "string",
+            "description": "变更后状态"
+          },
+          "beforeBudget": {
+            "type": "string",
+            "description": "变更前日预算"
+          },
+          "afterBudget": {
+            "type": "string",
+            "description": "变更后日预算"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 逐条结果说明（被拒时给出原因）"
+          }
+        },
+        "description": "🔴 逐条执行结果"
+      },
+      "BulkOperationResult": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "提交的活动条数",
+            "format": "int32"
+          },
+          "applied": {
+            "type": "integer",
+            "description": "已生效条数",
+            "format": "int32"
+          },
+          "rejected": {
+            "type": "integer",
+            "description": "被拒条数",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "description": "跳过条数（本来就已经是目标状态）",
+            "format": "int32"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBudgetGuardrails"
+          },
+          "items": {
+            "type": "array",
+            "description": "🔴 逐条执行结果",
+            "items": {
+              "$ref": "#/components/schemas/BulkOperationItem"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
       "WritebackTargetPage": {
         "type": "object",
         "properties": {
@@ -69788,6 +70721,656 @@
           "upstreamNote": {
             "type": "string",
             "description": "上游依赖说明"
+          }
+        }
+      },
+      "AdSyncRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdSyncRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdSyncRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "同步运行 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：SUCCESS / PARTIAL / FAILED"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（失败同步不推进水位）",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "campaignCount": {
+            "type": "integer",
+            "description": "带回的活动条数",
+            "format": "int32"
+          },
+          "metricRowCount": {
+            "type": "integer",
+            "description": "带回的每日指标行数",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 失败原因（FAILED 时必有内容）"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源批次标识"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "登记时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "AdCampaignOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "展示名"
+          }
+        },
+        "description": "排序方式下拉项"
+      },
+      "AdCampaignOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOption"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "description": "店铺下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOption"
+            }
+          },
+          "internalAdTypes": {
+            "type": "array",
+            "description": "内部广告类型下拉项（含显式的未映射）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOption"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "description": "排序方式下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOption"
+            }
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBudgetGuardrails"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "ACOS / ROAS 口径定义"
+          }
+        }
+      },
+      "AdCampaignCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "活动状态取值",
+            "items": {
+              "type": "string",
+              "description": "活动状态取值"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "description": "排序方式取值",
+            "items": {
+              "type": "string",
+              "description": "排序方式取值"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "description": "批量操作类型取值",
+            "items": {
+              "type": "string",
+              "description": "批量操作类型取值"
+            }
+          },
+          "emptyReasons": {
+            "type": "array",
+            "description": "空态原因取值",
+            "items": {
+              "type": "string",
+              "description": "空态原因取值"
+            }
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBudgetGuardrails"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS 口径定义（随汇总一起给界面，写进表头）"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的含义"
+          },
+          "unmappedNote": {
+            "type": "string",
+            "description": "🔴 未映射类型的语义（照抄 14.1.2.2 加粗句）"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游依赖说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdCampaignCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdCampaignPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AdCampaignSummary"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（成功同步的水位；从未同步成功过则为 null）",
+            "format": "date-time"
+          },
+          "dataAsOfNote": {
+            "type": "string",
+            "description": "🔴 「数据截至 X 时间」的口径说明"
+          },
+          "syncStates": {
+            "type": "array",
+            "description": "🔴 逐平台 + 店铺的同步状态与失败原因",
+            "items": {
+              "$ref": "#/components/schemas/AdSyncState"
+            }
+          },
+          "emptyReason": {
+            "type": "string",
+            "description": "🔴 空态原因：NO_SYNCED_DATA / NO_CAMPAIGNS / FILTERED_EMPTY / null"
+          },
+          "emptyNote": {
+            "type": "string",
+            "description": "🔴 空态说明文案（三种空的解释各不相同）"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 ACOS / ROAS 口径定义"
+          }
+        }
+      },
+      "AdCampaignSummary": {
+        "type": "object",
+        "properties": {
+          "campaignCount": {
+            "type": "integer",
+            "description": "符合筛选条件的活动条数",
+            "format": "int64"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "description": "其中投放中的条数",
+            "format": "int64"
+          },
+          "pausedCount": {
+            "type": "integer",
+            "description": "其中已暂停的条数",
+            "format": "int64"
+          },
+          "otherStatusCount": {
+            "type": "integer",
+            "description": "其他状态（已结束 / 归档 / 审核中 / 未知）的条数",
+            "format": "int64"
+          },
+          "totalBudget": {
+            "type": "string",
+            "description": "日预算合计"
+          },
+          "totalImpressions": {
+            "type": "string",
+            "description": "曝光合计"
+          },
+          "totalClicks": {
+            "type": "string",
+            "description": "点击合计"
+          },
+          "totalOrders": {
+            "type": "string",
+            "description": "订单合计"
+          },
+          "totalSpend": {
+            "type": "string",
+            "description": "消耗合计"
+          },
+          "totalSales": {
+            "type": "string",
+            "description": "销售额合计"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "🔴 汇总点击率（分母为 0 时为 null=不可比）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 汇总 ACOS = 总消耗 / 总销售额（分母为 0 时为 null）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 汇总 ROAS = 总销售额 / 总消耗（分母为 0 时为 null）"
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "实际统计到的最早日期",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "实际统计到的最晚日期",
+            "format": "date"
+          },
+          "metricDefinitionNote": {
+            "type": "string",
+            "description": "🔴 口径说明（ACOS / ROAS 的分子分母）"
+          }
+        },
+        "description": "🔴 筛选后全集的汇总（不受分页影响）"
+      },
+      "AdSyncState": {
+        "type": "object",
+        "properties": {
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "platformName": {
+            "type": "string",
+            "description": "平台名称"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "shopName": {
+            "type": "string",
+            "description": "店铺名称"
+          },
+          "status": {
+            "type": "string",
+            "description": "最近一次同步的状态：SUCCESS / PARTIAL / FAILED"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻（失败同步不推进水位，因此可能为 null）",
+            "format": "date-time"
+          },
+          "lastRunAt": {
+            "type": "string",
+            "description": "最近一次同步运行的时刻",
+            "format": "date-time"
+          },
+          "campaignCount": {
+            "type": "integer",
+            "description": "该范围下的活动条数",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 失败原因（FAILED 时必有内容）"
+          }
+        },
+        "description": "🔴 逐平台 + 店铺的同步状态与失败原因"
+      },
+      "AdCampaignDailyMetricRow": {
+        "type": "object",
+        "properties": {
+          "metricDate": {
+            "type": "string",
+            "description": "自然日（平台当地日）",
+            "format": "date"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "曝光量"
+          },
+          "clicks": {
+            "type": "string",
+            "description": "点击量"
+          },
+          "orders": {
+            "type": "string",
+            "description": "订单量"
+          },
+          "spend": {
+            "type": "string",
+            "description": "消耗"
+          },
+          "sales": {
+            "type": "string",
+            "description": "销售额"
+          },
+          "ctr": {
+            "type": "string",
+            "description": "点击率（分母为 0 时为 null）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "ACOS = 消耗 / 销售额（分母为 0 时为 null）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "ROAS = 销售额 / 消耗（分母为 0 时为 null）"
+          },
+          "syncedAt": {
+            "type": "string",
+            "description": "同步入库时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "每日表现明细（按日期倒序）"
+      },
+      "AdCampaignDetail": {
+        "type": "object",
+        "properties": {
+          "campaign": {
+            "$ref": "#/components/schemas/AdCampaignRow"
+          },
+          "dailyMetrics": {
+            "type": "array",
+            "description": "每日表现明细（按日期倒序）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignDailyMetricRow"
+            }
+          },
+          "operationLogs": {
+            "type": "array",
+            "description": "操作审计（按时刻倒序）",
+            "items": {
+              "$ref": "#/components/schemas/AdCampaignOperationLogRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdCampaignOperationLogRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "审计 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string",
+            "description": "操作类型"
+          },
+          "beforeStatus": {
+            "type": "string",
+            "description": "变更前状态"
+          },
+          "afterStatus": {
+            "type": "string",
+            "description": "变更后状态"
+          },
+          "beforeBudget": {
+            "type": "string",
+            "description": "变更前日预算"
+          },
+          "afterBudget": {
+            "type": "string",
+            "description": "变更后日预算"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "description": "操作理由"
+          },
+          "result": {
+            "type": "string",
+            "description": "执行结果：APPLIED / REJECTED / SKIPPED"
+          },
+          "message": {
+            "type": "string",
+            "description": "结果说明（被拒时给出原因）"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "发生时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "操作审计（按时刻倒序）"
+      },
+      "AdCampaignExternalView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "平台侧活动 id"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "platformAdType": {
+            "type": "string",
+            "description": "🔴 原始平台类型标记"
+          },
+          "internalAdType": {
+            "type": "string",
+            "description": "🔴 归一后的内部类型"
+          },
+          "status": {
+            "type": "string",
+            "description": "当前状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "dailyBudget": {
+            "type": "string",
+            "description": "当前日预算"
+          },
+          "spend": {
+            "type": "string",
+            "description": "累计消耗（全部日期）"
+          },
+          "sales": {
+            "type": "string",
+            "description": "累计销售额（全部日期）"
+          },
+          "orders": {
+            "type": "string",
+            "description": "累计订单（全部日期）"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = 消耗 / 销售额（分母为 0 时为 null）"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = 销售额 / 消耗（分母为 0 时为 null）"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时刻",
+            "format": "date-time"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、尚未回写平台"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
           }
         }
       },

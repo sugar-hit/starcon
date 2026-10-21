@@ -68,6 +68,51 @@ const services: readonly {
       /^supplier\-ratings(?:\/(?:capabilities|options|overview|policy|compute|changes|priorities|ratings(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/adjustment)?)?))$/,
   },
   {
+    // 14.1.1.1 广告活动列表（channel 服务）。纯**新增一条独立的 `services[]` 元素**，
+    // 既有的 `ad-type-diffs`（14.1.2.2）、`rate-comparison`（10.1.2.2）等**一字未动、也不重排** ——
+    // 本文件是多车道共用的累积型白名单，每条服务规则是一段超长单行正则，往同一条 alternation 里
+    // 并分支会让多车道同时并入时 git 必然判冲突（结构性，retry 不会自愈）。
+    //
+    // ---- 插入锚点固定在 `prefix: 'auth/'` 那条**之前** ----
+    //   同批其它车道的插入点分别是「第一个 `channel/` 之前」「中段 trade 区」「数组末尾」，
+    //   与本处相距 400 行以上，git 能干净求并。
+    //
+    // ---- 首 token「ad-campaigns」的零命中核对结论 ----
+    //   本文件既有 100+ 条 services[] 正则里**没有任何一条**含 `ad-campaigns` 这个串
+    //   （既有的是 `ad-type-diffs` / `campaign-*` 一类的其它命名），所以首 token 既是独立字面量，
+    //   也不会被既有分支的前缀吃掉。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-campaigns/capabilities          能力声明（未交付段 available=false + ownerModule）
+    //   ad-campaigns/options               筛选项下拉 + 批量操作护栏上限
+    //   ad-campaigns/campaigns             活动列表（GET，真分页 + 真筛选 + 真排序 + 汇总 + 数据截至时间）
+    //   ad-campaigns/campaigns/{uuid}      活动详情（GET，含每日明细与操作审计）
+    //   ad-campaigns/by-external           🔴 按平台侧 id 取活动当前状态与预算/消耗（GET，供 14.2.2.2 规则引擎调用）
+    //   ad-campaigns/imports               登记广告数据同步结果（POST，真实写入口）
+    //   ad-campaigns/bulk-operations       批量暂停 / 启用 / 调预算（POST，逐条返回执行结果）
+    //   ad-campaigns/sync-runs             同步运行历史（GET，数据截至时间的逐条依据）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / by-external / imports / bulk-operations /
+    // sync-runs / campaigns）排在 {uuid} 段之前 —— alternation 是首个命中即返回，顺序反了会被
+    // 通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-campaigns` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-campaigns/campaigns/{uuid}/metrics` —— 每日明细随详情一起返回，不单独开一条
+    //   * `ad-campaigns/campaigns/{uuid}/preview` —— 变更预览属于 14.1.1.3（未交付）
+    //   * `ad-campaigns/campaigns/select-all` —— 「按筛选结果全选」属于 14.1.1.3（未交付）
+    //   * `ad-campaigns/bulk-operations/tasks` —— 异步批量任务属于 14.1.1.3（未交付）
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-campaigns`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-campaigns(?:\/(?:capabilities|options|by\-external|imports|bulk\-operations|sync\-runs|campaigns(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?))$/,
+  },
+  {
     prefix: 'auth/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
