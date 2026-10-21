@@ -119,6 +119,77 @@ const services: readonly {
     pattern: /^(login|logout|session|memberships|switch)$/,
   },
   {
+    // 14.4.1.2 优惠券与秒杀（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有分支（`ad-promotions` / `ad-campaigns` / `ad-budgets` / `ad-keywords` …）**一字未动、
+    // 也不重排** —— 同批多车道共享这一个文件，往同一条 alternation 里并分支会让 git 必然判冲突
+    // 且 retry 永远不会自愈。
+    //
+    // ---- 插入锚点选在 `auth/`（login/logout/session/memberships/switch）那条**之后** ----
+    //   本批其它三条车道（14.1.3.2 / 14.4.2.1 / 14.5.1.1）各自锚在别的行上
+    //   （`listing-collects` / `aftersales/...` / `purchase-followups` 那行之后），
+    //   彼此相距很远 ⇒ git 能干净求并。
+    //
+    // ---- 首 token「ad-coupons」与「ad-flash-sales」的零命中核对结论 ----
+    //   本文件既有 **134** 条 services[] 正则里**没有任何一条**含 `ad-coupons` 或 `ad-flash-sales`
+    //   （既有的是 `ad-campaigns` / `ad-budgets` / `ad-keywords` / `ad-rules` / `ad-reports` /
+    //   `ad-type-diffs` / `ad-promotions` 一类），
+    //   且逐条用 `new RegExp(pat).test('…')` 实测过：既有 134 条对本模块的 19 个 shape
+    //   **全部零命中** ⇒ 首 token 既是独立字面量，也不会被既有分支的前缀吃掉。
+    //   `ad-promotions` 不匹配 `ad-coupons` / `ad-flash-sales`（14.4.1.1 兄弟模块不撞车）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   ad-coupons/capabilities                    能力声明（平台营销回写 / 客户主数据 /
+    //                                               买赠补贴成本三个维度 available=false）
+    //   ad-coupons/options                         下拉项（券类型 / 状态 / 同步状态 / 领取方式 / 渠道）
+    //   ad-coupons/coupons                         券列表（GET，真分页 + 真筛选）/ 登记券（POST）
+    //   ad-coupons/coupons/{uuid}                  券详情（GET）/ 改券规则（POST，替换语义）
+    //   ad-coupons/coupons/{uuid}/status           改本地状态（POST；上线 / 暂停 / 结束 / 停用）
+    //   ad-coupons/coupons/{uuid}/codes            批量生成券码（POST，真库存计数）/ 券码列表（GET）
+    //   ad-coupons/coupons/{uuid}/claims           领取 / 定向发放（POST，限领累计校验）
+    //   ad-coupons/coupons/{uuid}/redemptions      核销（POST，**必须绑定订单标识**）
+    //   ad-coupons/coupons/{uuid}/statistics        核销统计（GET，真聚合）
+    //   ad-coupons/coupons/{uuid}/channels         投放渠道与投放计划（GET 读 / POST 登记）
+    //   ad-flash-sales/capabilities                秒杀能力声明（平台营销回写 / 毛利两个维度 false）
+    //   ad-flash-sales/options                     秒杀下拉项
+    //   ad-flash-sales/flash-sales                 秒杀列表（GET）/ 登记秒杀（POST）
+    //   ad-flash-sales/flash-sales/{uuid}          秒杀详情（GET）/ 改秒杀（POST）
+    //   ad-flash-sales/flash-sales/{uuid}/status   改本地状态（POST）
+    //   ad-flash-sales/flash-sales/{uuid}/claims   领取秒杀（POST，库存真扣 + 按人限领）
+    //   ad-flash-sales/flash-sales/{uuid}/redemptions 核销秒杀（POST，绑定订单标识）
+    //   ad-flash-sales/flash-sales/{uuid}/statistics   秒杀统计（GET，真聚合）
+    //
+    // 判别顺序：字面量子路径（capabilities / options / coupons / flash-sales）排在 {uuid} 段之前
+    // —— alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-coupons` / `ad-flash-sales` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-coupons/coupons/{uuid}/delete` —— 券是事实，撤下走 status=CANCELLED
+    //   * `ad-coupons/coupons/{uuid}/platform-writeback` —— **平台营销接口未交付**，
+    //     放行它等于让界面以为「券已经回写到平台了」
+    //   * `ad-coupons/coupons/{uuid}/recipients` —— **15 客户未交付** ⇒ 定向发放只记收件人标识
+    //   * `ad-coupons/coupons/{uuid}/margins` —— 毛利不可用（成本价在 05 定价，跨服务不可读）
+    //   * 非 UUID 段 —— `ad-coupons/coupons/not-a-uuid` 必须 404
+    //
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //（不是 `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当成 id 放行）。
+    // 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-coupons`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-coupons(?:\/(?:capabilities|options|coupons(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|codes|claims|redemptions|statistics|channels))?)?))$/,
+  },
+  {
+    // 14.4.1.2 优惠券与秒杀 —— **秒杀**这一半（channel 服务）。
+    // 与上面 `ad-coupons` 那条**独立成条**，不并进同一条 alternation（同批多车道并入时
+    // git 才能干净求并）。形状与理由完全对齐优惠券那一条，注释不再重复。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-flash\-sales(?:\/(?:capabilities|options|flash\-sales(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|claims|redemptions|statistics))?)?))$/,
+  },
+  {
     prefix: 'identity/',
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',

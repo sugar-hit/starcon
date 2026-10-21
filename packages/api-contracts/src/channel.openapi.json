@@ -37270,6 +37270,1161 @@
           }
         }
       }
+    },
+    "/channel/ad-flash-sales/flash-sales": {
+      "get": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "get_channel_ad_flash_sales_flash_sales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "syncStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSalePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "post_channel_ad_flash_sales_flash_sales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFlashSaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/flash-sales/{id}": {
+      "get": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "get_channel_ad_flash_sales_flash_sales_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "post_channel_ad_flash_sales_flash_sales_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFlashSaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/flash-sales/{id}/status": {
+      "post": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "post_channel_ad_flash_sales_flash_sales_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeFlashSaleStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/flash-sales/{id}/redemptions": {
+      "post": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "post_channel_ad_flash_sales_flash_sales_id_redemptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedeemFlashSaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/flash-sales/{id}/claims": {
+      "post": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "post_channel_ad_flash_sales_flash_sales_id_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimFlashSaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_coupons",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "couponType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channelType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "syncStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCouponRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_coupons_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCouponRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/status": {
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeCouponStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/redemptions": {
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id_redemptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedeemCouponRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/codes": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_coupons_id_codes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponCodePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id_codes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateCouponCodesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponCodePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/claims": {
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id_claims",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimCouponRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/channels": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_coupons_id_channels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdCouponChannelRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "post_channel_ad_coupons_coupons_id_channels",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCouponChannelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponChannelRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/options": {
+      "get": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "get_channel_ad_flash_sales_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/flash-sales/{id}/statistics": {
+      "get": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "get_channel_ad_flash_sales_flash_sales_id_statistics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-flash-sales/capabilities": {
+      "get": {
+        "tags": [
+          "ad-flash-sale-controller"
+        ],
+        "operationId": "get_channel_ad_flash_sales_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdFlashSaleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/options": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/coupons/{id}/statistics": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_coupons_id_statistics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-coupons/capabilities": {
+      "get": {
+        "tags": [
+          "ad-coupon-controller"
+        ],
+        "operationId": "get_channel_ad_coupons_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCouponCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -37286,7 +38441,7 @@
             "type": "string"
           },
           "quantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39696,7 +40851,7 @@
             "description": "🔴 归一后内部类型（不给 = 由 14.1.2.2 解析带出；给了必须与解析结果一致）"
           },
           "bid": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "🔴 关键词当前竞价（不给 = 0）"
@@ -44638,7 +45793,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -47072,7 +48227,7 @@
             "format": "uuid"
           },
           "pickupSlaHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -47087,7 +48242,7 @@
             "type": "number"
           },
           "afterSalesWindowHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -47711,7 +48866,7 @@
             "type": "string"
           },
           "amountPerWaybill": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -48551,7 +49706,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -50989,7 +52144,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -51332,9 +52487,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -60776,13 +61931,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -60982,13 +62137,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -90989,6 +92144,1623 @@
             "description": "操作理由（写进留痕）"
           }
         }
+      },
+      "SaveFlashSaleRequest": {
+        "required": [
+          "channelType",
+          "endAt",
+          "flashPrice",
+          "listingId",
+          "platformId",
+          "saleCode",
+          "saleName",
+          "shopCode",
+          "startAt",
+          "totalStock"
+        ],
+        "type": "object",
+        "properties": {
+          "saleCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "秒杀编码（租户内唯一）"
+          },
+          "saleName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "秒杀名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id（秒杀商品）",
+            "format": "uuid"
+          },
+          "flashPrice": {
+            "type": "string",
+            "description": "🔴 秒杀价（快照）"
+          },
+          "originalPrice": {
+            "type": "string",
+            "description": "🔴 原价（快照；没登记 = 不可比，不是 0）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（3 位字母）"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间（必须晚于开始）",
+            "format": "date-time"
+          },
+          "totalStock": {
+            "type": "string",
+            "description": "🔴 秒杀库存"
+          },
+          "perUserLimit": {
+            "type": "string",
+            "description": "🔴 每人限领件数（null = 不限领）"
+          },
+          "channelType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 投放渠道：ON_SITE 站内 / OFF_SITE 站外 / SOCIAL 社媒"
+          },
+          "placement": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 投放位"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdFlashSaleClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "领取记录 id",
+            "format": "uuid"
+          },
+          "recipientKey": {
+            "type": "string",
+            "description": "领取人标识"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "领取件数"
+          },
+          "claimedAt": {
+            "type": "string",
+            "description": "领取时刻",
+            "format": "date-time"
+          },
+          "orderRef": {
+            "type": "string",
+            "description": "🔴 核销绑定的订单标识（未核销为空）"
+          },
+          "redeemedAt": {
+            "type": "string",
+            "description": "核销时刻",
+            "format": "date-time"
+          },
+          "redeemedAmount": {
+            "type": "string",
+            "description": "🔴 核销让利额（null = 不可比）"
+          },
+          "subsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本（null = 不可比）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：CLAIMED / REDEEMED / CANCELLED"
+          }
+        },
+        "description": "🔴 最近领取记录"
+      },
+      "AdFlashSaleDailyStat": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "日期",
+            "format": "date"
+          },
+          "redemptionCount": {
+            "type": "integer",
+            "description": "核销数",
+            "format": "int64"
+          },
+          "subsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本合计（null = 不可比）"
+          }
+        },
+        "description": "按日拆分（真聚合）"
+      },
+      "AdFlashSaleDetail": {
+        "type": "object",
+        "properties": {
+          "sale": {
+            "$ref": "#/components/schemas/AdFlashSaleRow"
+          },
+          "recentClaims": {
+            "type": "array",
+            "description": "🔴 最近领取记录",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleClaimRow"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/AdFlashSaleStatistics"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台营销回写说明"
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 秒杀价与原价口径说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdFlashSaleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "秒杀 id",
+            "format": "uuid"
+          },
+          "saleCode": {
+            "type": "string",
+            "description": "秒杀编码（租户内唯一）"
+          },
+          "saleName": {
+            "type": "string",
+            "description": "秒杀名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "listingId": {
+            "type": "string",
+            "description": "listing id（秒杀针对的商品）",
+            "format": "uuid"
+          },
+          "listingTitle": {
+            "type": "string",
+            "description": "商品标题"
+          },
+          "flashPrice": {
+            "type": "string",
+            "description": "🔴 秒杀价（快照）"
+          },
+          "originalPrice": {
+            "type": "string",
+            "description": "🔴 原价（快照；没登记 = 不可比，不是 0）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "开始时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "结束时间",
+            "format": "date-time"
+          },
+          "withinScheduleWindow": {
+            "type": "boolean",
+            "description": "🔴 当前是否落在秒杀时间窗内"
+          },
+          "status": {
+            "type": "string",
+            "description": "本地状态"
+          },
+          "totalStock": {
+            "type": "string",
+            "description": "🔴 秒杀库存"
+          },
+          "claimedQuantity": {
+            "type": "string",
+            "description": "🔴 已领取数量"
+          },
+          "redeemedQuantity": {
+            "type": "string",
+            "description": "🔴 已核销数量"
+          },
+          "remainingStock": {
+            "type": "string",
+            "description": "🔴 剩余库存（不可比时为 null）"
+          },
+          "perUserLimit": {
+            "type": "string",
+            "description": "🔴 每人限领件数（null = 不限领）"
+          },
+          "channelType": {
+            "type": "string",
+            "description": "🔴 投放渠道：ON_SITE / OFF_SITE / SOCIAL"
+          },
+          "placement": {
+            "type": "string",
+            "description": "🔴 投放位"
+          },
+          "platformSyncStatus": {
+            "type": "string",
+            "description": "🔴 平台同步状态"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、还没回写平台"
+          },
+          "localChangedAt": {
+            "type": "string",
+            "description": "🔴 本地最后一次变更时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "秒杀活动"
+      },
+      "AdFlashSaleStatistics": {
+        "type": "object",
+        "properties": {
+          "totalStock": {
+            "type": "string",
+            "description": "秒杀库存"
+          },
+          "claimedCount": {
+            "type": "integer",
+            "description": "已领取件数",
+            "format": "int64"
+          },
+          "redeemedCount": {
+            "type": "integer",
+            "description": "已核销件数",
+            "format": "int64"
+          },
+          "remainingStock": {
+            "type": "string",
+            "description": "🔴 剩余库存"
+          },
+          "redemptionRate": {
+            "type": "string",
+            "description": "🔴 核销率（没有领取时不可比 = null）"
+          },
+          "totalRedeemedAmount": {
+            "type": "string",
+            "description": "🔴 让利额合计"
+          },
+          "totalSubsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本合计"
+          },
+          "dailyTrend": {
+            "type": "array",
+            "description": "按日拆分（真聚合）",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleDailyStat"
+            }
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利维度说明"
+          }
+        },
+        "description": "🔴 统计（真聚合）"
+      },
+      "ChangeFlashSaleStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态：ACTIVE / PAUSED / ENDED / CANCELLED"
+          },
+          "reason": {
+            "type": "string",
+            "description": "理由（会写进留痕）"
+          }
+        }
+      },
+      "RedeemFlashSaleRequest": {
+        "required": [
+          "orderRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 订单标识（核销与订单绑定）"
+          },
+          "claimId": {
+            "type": "string",
+            "description": "领取记录 id（不填则取该收件人最近一条未核销的领取）",
+            "format": "uuid"
+          }
+        }
+      },
+      "ClaimFlashSaleRequest": {
+        "required": [
+          "recipientKey"
+        ],
+        "type": "object",
+        "properties": {
+          "recipientKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "领取人标识"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "领取件数"
+          }
+        }
+      },
+      "SaveCouponRequest": {
+        "required": [
+          "couponCode",
+          "couponName",
+          "couponType",
+          "platformId",
+          "shopCode"
+        ],
+        "type": "object",
+        "properties": {
+          "couponCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "券编码（租户内唯一）"
+          },
+          "couponName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "券名称"
+          },
+          "couponType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "券类型：DISCOUNT_CODE 折扣码 / FULL_REDUCTION 满减 / BOGO 买赠"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "挂着的促销 id（不挂促销留空）",
+            "format": "uuid"
+          },
+          "discountRate": {
+            "type": "string",
+            "description": "折扣率（0 < r <= 1；折扣码二选一）"
+          },
+          "discountValue": {
+            "type": "string",
+            "description": "面额 / 减免额（折扣码与满减用）"
+          },
+          "thresholdAmount": {
+            "type": "string",
+            "description": "满减门槛（满减必填）"
+          },
+          "maxDiscountAmount": {
+            "type": "string",
+            "description": "单笔让利封顶（null = 不封顶）"
+          },
+          "buyQuantity": {
+            "type": "string",
+            "description": "买赠：买 N"
+          },
+          "giftQuantity": {
+            "type": "string",
+            "description": "买赠：送 M"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种（3 位字母）"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "生效时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "失效时间（必须晚于生效时间）",
+            "format": "date-time"
+          },
+          "totalStock": {
+            "type": "string",
+            "description": "🔴 库存（可生成的券码总数）"
+          },
+          "perUserLimit": {
+            "type": "string",
+            "description": "🔴 每人限领张数（null = 不限领）"
+          },
+          "codePrefix": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 券码前缀"
+          },
+          "codeLength": {
+            "maximum": 32,
+            "minimum": 4,
+            "type": "integer",
+            "description": "🔴 券码随机段长度（4-32）",
+            "format": "int32"
+          },
+          "codeCharset": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 券码随机字符集"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdCouponChannelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "投放 id",
+            "format": "uuid"
+          },
+          "channelType": {
+            "type": "string",
+            "description": "🔴 渠道类型：ON_SITE 站内 / OFF_SITE 站外 / SOCIAL 社媒"
+          },
+          "placement": {
+            "type": "string",
+            "description": "投放位"
+          },
+          "planStartAt": {
+            "type": "string",
+            "description": "投放计划开始时间",
+            "format": "date-time"
+          },
+          "planEndAt": {
+            "type": "string",
+            "description": "投放计划结束时间",
+            "format": "date-time"
+          },
+          "plannedReach": {
+            "type": "string",
+            "description": "计划触达量（null = 未登记）"
+          },
+          "actualClaimCount": {
+            "type": "integer",
+            "description": "🔴 实际领取数（真聚合）",
+            "format": "int64"
+          },
+          "actualRedemptionCount": {
+            "type": "integer",
+            "description": "🔴 实际核销数（真聚合）",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "description": "投放状态"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 投放渠道与投放计划"
+      },
+      "AdCouponChannelStat": {
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "type": "string",
+            "description": "渠道类型"
+          },
+          "placement": {
+            "type": "string",
+            "description": "投放位（定向发放无投放位）"
+          },
+          "claimCount": {
+            "type": "integer",
+            "description": "领取数",
+            "format": "int64"
+          },
+          "redemptionCount": {
+            "type": "integer",
+            "description": "核销数",
+            "format": "int64"
+          },
+          "subsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本合计（null = 不可测算）"
+          }
+        },
+        "description": "按渠道拆分（真聚合）"
+      },
+      "AdCouponClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "领取记录 id",
+            "format": "uuid"
+          },
+          "claimKind": {
+            "type": "string",
+            "description": "领取方式：PULL / PUSH / CHANNEL"
+          },
+          "recipientKey": {
+            "type": "string",
+            "description": "领取人 / 收件人标识"
+          },
+          "channelType": {
+            "type": "string",
+            "description": "领取渠道：ON_SITE / OFF_SITE / SOCIAL / DIRECT"
+          },
+          "code": {
+            "type": "string",
+            "description": "券码"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "领取张数"
+          },
+          "claimedAt": {
+            "type": "string",
+            "description": "领取时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 最近领取记录"
+      },
+      "AdCouponDailyStat": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "日期",
+            "format": "date"
+          },
+          "redemptionCount": {
+            "type": "integer",
+            "description": "核销数",
+            "format": "int64"
+          },
+          "subsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本合计（null = 不可测算）"
+          }
+        },
+        "description": "按日拆分（真聚合）"
+      },
+      "AdCouponDetail": {
+        "type": "object",
+        "properties": {
+          "coupon": {
+            "$ref": "#/components/schemas/AdCouponRow"
+          },
+          "channels": {
+            "type": "array",
+            "description": "🔴 投放渠道与投放计划",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponChannelRow"
+            }
+          },
+          "recentClaims": {
+            "type": "array",
+            "description": "🔴 最近领取记录",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponClaimRow"
+            }
+          },
+          "recentRedemptions": {
+            "type": "array",
+            "description": "🔴 最近核销记录",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponRedemptionRow"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/AdCouponStatistics"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台营销回写说明"
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 门槛与面额口径说明"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdCouponRedemptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "核销记录 id",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string",
+            "description": "🔴 订单标识（核销与订单绑定）"
+          },
+          "code": {
+            "type": "string",
+            "description": "券码"
+          },
+          "orderAmount": {
+            "type": "string",
+            "description": "订单金额"
+          },
+          "redeemedAmount": {
+            "type": "string",
+            "description": "🔴 本次核销让利额"
+          },
+          "subsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本（null = 本地不可测算，如买赠）"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "redeemedAt": {
+            "type": "string",
+            "description": "核销时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 最近核销记录"
+      },
+      "AdCouponRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "券 id",
+            "format": "uuid"
+          },
+          "couponCode": {
+            "type": "string",
+            "description": "券编码（租户内唯一）"
+          },
+          "couponName": {
+            "type": "string",
+            "description": "券名称"
+          },
+          "couponType": {
+            "type": "string",
+            "description": "券类型：DISCOUNT_CODE / FULL_REDUCTION / BOGO"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "promotionId": {
+            "type": "string",
+            "description": "挂着的促销 id（不挂促销为空）",
+            "format": "uuid"
+          },
+          "discountRate": {
+            "type": "string",
+            "description": "🔴 折扣率（快照；折扣码才有）"
+          },
+          "discountValue": {
+            "type": "string",
+            "description": "🔴 面额 / 减免额（快照）"
+          },
+          "thresholdAmount": {
+            "type": "string",
+            "description": "🔴 满减门槛（快照）"
+          },
+          "maxDiscountAmount": {
+            "type": "string",
+            "description": "🔴 单笔让利封顶（null = 不封顶）"
+          },
+          "buyQuantity": {
+            "type": "string",
+            "description": "买赠：买 N"
+          },
+          "giftQuantity": {
+            "type": "string",
+            "description": "买赠：送 M"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "startAt": {
+            "type": "string",
+            "description": "生效时间",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "失效时间",
+            "format": "date-time"
+          },
+          "withinScheduleWindow": {
+            "type": "boolean",
+            "description": "🔴 当前是否落在生效时间窗内"
+          },
+          "status": {
+            "type": "string",
+            "description": "本地状态"
+          },
+          "totalStock": {
+            "type": "string",
+            "description": "🔴 库存（可生成的券码总数）"
+          },
+          "generatedCount": {
+            "type": "string",
+            "description": "🔴 已生成券码数"
+          },
+          "claimedCount": {
+            "type": "string",
+            "description": "🔴 已领取数"
+          },
+          "redeemedCount": {
+            "type": "string",
+            "description": "🔴 已核销数"
+          },
+          "claimableCount": {
+            "type": "string",
+            "description": "🔴 此刻可领的剩余额度（已生成但未被领取的券码数）"
+          },
+          "perUserLimit": {
+            "type": "string",
+            "description": "🔴 每人限领张数（null = 不限领）"
+          },
+          "platformSyncStatus": {
+            "type": "string",
+            "description": "🔴 平台同步状态：LOCAL_ONLY / PENDING_WRITEBACK / SYNCED / FAILED"
+          },
+          "pendingPlatformWriteback": {
+            "type": "boolean",
+            "description": "🔴 本地已改、还没回写平台"
+          },
+          "localChangedAt": {
+            "type": "string",
+            "description": "🔴 本地最后一次变更时刻",
+            "format": "date-time"
+          },
+          "channelCount": {
+            "type": "integer",
+            "description": "投放渠道条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "券"
+      },
+      "AdCouponStatistics": {
+        "type": "object",
+        "properties": {
+          "generatedCount": {
+            "type": "integer",
+            "description": "已生成券码数",
+            "format": "int64"
+          },
+          "claimedCount": {
+            "type": "integer",
+            "description": "已领取数",
+            "format": "int64"
+          },
+          "redeemedCount": {
+            "type": "integer",
+            "description": "已核销数",
+            "format": "int64"
+          },
+          "redemptionRate": {
+            "type": "string",
+            "description": "🔴 核销率（核销数 / 领取数；没有领取时不可比 = null）"
+          },
+          "totalSubsidyCost": {
+            "type": "string",
+            "description": "🔴 补贴成本合计（null = 一笔都不可测算）"
+          },
+          "totalRedeemedAmount": {
+            "type": "string",
+            "description": "🔴 让利额合计"
+          },
+          "unmeasurableRedemptions": {
+            "type": "integer",
+            "description": "🔴 补贴成本不可测算的核销笔数",
+            "format": "int64"
+          },
+          "channelBreakdown": {
+            "type": "array",
+            "description": "按渠道拆分（真聚合）",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponChannelStat"
+            }
+          },
+          "dailyTrend": {
+            "type": "array",
+            "description": "按日拆分（真聚合）",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponDailyStat"
+            }
+          },
+          "subsidyNote": {
+            "type": "string",
+            "description": "🔴 补贴成本口径说明"
+          }
+        },
+        "description": "🔴 核销统计（真聚合）"
+      },
+      "ChangeCouponStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "目标状态：ACTIVE / PAUSED / ENDED / CANCELLED"
+          },
+          "reason": {
+            "type": "string",
+            "description": "理由（会写进留痕）"
+          }
+        }
+      },
+      "RedeemCouponRequest": {
+        "required": [
+          "orderRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 订单标识（核销与订单绑定）"
+          },
+          "code": {
+            "type": "string",
+            "description": "券码（不填则取该领取人已领未核销的码）"
+          },
+          "orderAmount": {
+            "type": "string",
+            "description": "订单金额"
+          }
+        }
+      },
+      "GenerateCouponCodesRequest": {
+        "required": [
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "count": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "生成张数（1-1000）",
+            "format": "int32"
+          },
+          "codePrefix": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "description": "券码前缀（留空用券上的默认前缀）"
+          },
+          "codeLength": {
+            "maximum": 32,
+            "minimum": 4,
+            "type": "integer",
+            "description": "随机段长度（留空用券上的默认长度）",
+            "format": "int32"
+          },
+          "codeCharset": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "随机字符集（留空用券上的默认字符集）"
+          }
+        }
+      },
+      "AdCouponCodePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponCodeRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdCouponCodeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "券码 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "券码"
+          },
+          "status": {
+            "type": "string",
+            "description": "券码状态：GENERATED / CLAIMED / USED / EXPIRED / VOID"
+          },
+          "claimantKey": {
+            "type": "string",
+            "description": "领取人标识"
+          },
+          "claimedAt": {
+            "type": "string",
+            "description": "领取时刻",
+            "format": "date-time"
+          },
+          "usedAt": {
+            "type": "string",
+            "description": "核销时刻",
+            "format": "date-time"
+          },
+          "orderRef": {
+            "type": "string",
+            "description": "核销绑定的订单标识"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "ClaimCouponRequest": {
+        "required": [
+          "claimKind",
+          "recipientKey"
+        ],
+        "type": "object",
+        "properties": {
+          "claimKind": {
+            "minLength": 1,
+            "type": "string",
+            "description": "领取方式：PULL 用户主动领取 / PUSH 定向发放 / CHANNEL 渠道投放领取"
+          },
+          "recipientKey": {
+            "minLength": 1,
+            "type": "string",
+            "description": "领取人 / 收件人标识"
+          },
+          "channelType": {
+            "type": "string",
+            "description": "领取渠道：ON_SITE / OFF_SITE / SOCIAL / DIRECT"
+          },
+          "channelId": {
+            "type": "string",
+            "description": "投放渠道 id（渠道投放领取用）",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "领取张数"
+          }
+        }
+      },
+      "SaveCouponChannelRequest": {
+        "required": [
+          "channelType",
+          "placement"
+        ],
+        "type": "object",
+        "properties": {
+          "channelType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "渠道类型：ON_SITE 站内 / OFF_SITE 站外 / SOCIAL 社媒"
+          },
+          "placement": {
+            "minLength": 1,
+            "type": "string",
+            "description": "投放位"
+          },
+          "planStartAt": {
+            "type": "string",
+            "description": "投放计划开始时间",
+            "format": "date-time"
+          },
+          "planEndAt": {
+            "type": "string",
+            "description": "投放计划结束时间",
+            "format": "date-time"
+          },
+          "plannedReach": {
+            "type": "string",
+            "description": "计划触达量（null = 未登记）"
+          },
+          "status": {
+            "type": "string",
+            "description": "投放状态：PLANNED / RUNNING / PAUSED / FINISHED / CANCELLED"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdFlashSaleOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "投放渠道选项"
+      },
+      "AdFlashSaleOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "description": "本地状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleOption"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleOption"
+            }
+          },
+          "channelTypes": {
+            "type": "array",
+            "description": "投放渠道选项",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSalePlatformOption"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种（秒杀里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "币种（秒杀里出现过的）"
+            }
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 秒杀价与原价口径说明"
+          }
+        }
+      },
+      "AdFlashSalePlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "AdFlashSalePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdFlashSaleCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdFlashSaleCapabilityDimension"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "本地状态取值",
+            "items": {
+              "type": "string",
+              "description": "本地状态取值"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台同步状态取值"
+            }
+          },
+          "channelTypes": {
+            "type": "array",
+            "description": "投放渠道取值",
+            "items": {
+              "type": "string",
+              "description": "投放渠道取值"
+            }
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 秒杀价与原价的口径说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台营销回写当前不可用的说明"
+          },
+          "orderBindingNote": {
+            "type": "string",
+            "description": "🔴 核销与订单绑定的说明"
+          },
+          "marginNote": {
+            "type": "string",
+            "description": "🔴 毛利维度当前不可用的说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdFlashSaleCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
+      },
+      "AdCouponOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文说明"
+          }
+        },
+        "description": "投放渠道选项"
+      },
+      "AdCouponOptions": {
+        "type": "object",
+        "properties": {
+          "couponTypes": {
+            "type": "array",
+            "description": "券类型选项",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "本地状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponOption"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态选项",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponOption"
+            }
+          },
+          "claimKinds": {
+            "type": "array",
+            "description": "领取方式选项",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponOption"
+            }
+          },
+          "channelTypes": {
+            "type": "array",
+            "description": "投放渠道选项",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponOption"
+            }
+          },
+          "platforms": {
+            "type": "array",
+            "description": "平台下拉项（带 id）",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponPlatformOption"
+            }
+          },
+          "platformCodes": {
+            "type": "array",
+            "description": "平台编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "平台编码（租户内可用的）"
+            }
+          },
+          "shopCodes": {
+            "type": "array",
+            "description": "店铺编码（租户内可用的）",
+            "items": {
+              "type": "string",
+              "description": "店铺编码（租户内可用的）"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "币种（券里出现过的）",
+            "items": {
+              "type": "string",
+              "description": "币种（券里出现过的）"
+            }
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 门槛与面额口径说明"
+          }
+        }
+      },
+      "AdCouponPlatformOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "平台名称"
+          }
+        },
+        "description": "平台下拉项（带 id）"
+      },
+      "AdCouponPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdCouponCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdCouponCapabilityDimension"
+            }
+          },
+          "couponTypes": {
+            "type": "array",
+            "description": "券类型取值",
+            "items": {
+              "type": "string",
+              "description": "券类型取值"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "description": "本地状态取值",
+            "items": {
+              "type": "string",
+              "description": "本地状态取值"
+            }
+          },
+          "syncStatuses": {
+            "type": "array",
+            "description": "平台同步状态取值",
+            "items": {
+              "type": "string",
+              "description": "平台同步状态取值"
+            }
+          },
+          "claimKinds": {
+            "type": "array",
+            "description": "领取方式取值",
+            "items": {
+              "type": "string",
+              "description": "领取方式取值"
+            }
+          },
+          "channelTypes": {
+            "type": "array",
+            "description": "投放渠道取值",
+            "items": {
+              "type": "string",
+              "description": "投放渠道取值"
+            }
+          },
+          "pricingSnapshotNote": {
+            "type": "string",
+            "description": "🔴 门槛与面额的口径说明"
+          },
+          "syncNote": {
+            "type": "string",
+            "description": "🔴 平台营销回写当前不可用的说明"
+          },
+          "recipientNote": {
+            "type": "string",
+            "description": "🔴 定向发放当前不可用的说明"
+          },
+          "subsidyNote": {
+            "type": "string",
+            "description": "🔴 补贴成本不可测算的说明"
+          },
+          "orderBindingNote": {
+            "type": "string",
+            "description": "🔴 核销与订单绑定的说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与边界说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdCouponCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
