@@ -31201,6 +31201,1013 @@
           }
         }
       }
+    },
+    "/channel/ad-rules/runs": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/rules": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dryRun",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/rules/{id}/status": {
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_rules_id_status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/metrics": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_metrics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metricScope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "externalCampaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleMetricPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_metrics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveMetricRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleMetricRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/effects/evaluate": {
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_effects_evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EffectEvaluateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleEffectPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/dispatches/{id}/cancel": {
+      "post": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "post_channel_ad_rules_dispatches_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleDispatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/runs/{id}": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_runs_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/rules/{id}": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/rules/{id}/conditions": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_rules_id_conditions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdRuleConditionRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/metrics/{id}": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_metrics_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleMetricRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/hits": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_hits",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "matched",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "selected",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleHitPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/executions": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_executions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleExecutionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/executions/{id}": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_executions_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleExecutionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/effects": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_effects",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleEffectPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/dispatches": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_dispatches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dispatchStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleDispatchPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-rules/capabilities": {
+      "get": {
+        "tags": [
+          "ad-rule-controller"
+        ],
+        "operationId": "get_channel_ad_rules_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdRuleCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -74611,6 +75618,1653 @@
           }
         },
         "description": "本页数据"
+      },
+      "RunRequest": {
+        "required": [
+          "runMode"
+        ],
+        "type": "object",
+        "properties": {
+          "runMode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "🔴 运行口径：DRY_RUN 试运行 / APPLY 真实执行；规则的 dryRun=true 时**一律试运行**"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "只跑这一条规则；留空 = 跑全部启用的规则",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdRuleExecutionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "执行记录 id",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "hitId": {
+            "type": "string",
+            "description": "命中记录 id",
+            "format": "uuid"
+          },
+          "metricId": {
+            "type": "string",
+            "description": "指标 id",
+            "format": "uuid"
+          },
+          "actionType": {
+            "type": "string",
+            "description": "动作类型"
+          },
+          "adjustmentMode": {
+            "type": "string",
+            "description": "调整幅度口径"
+          },
+          "requestedValue": {
+            "type": "number",
+            "description": "请求的调整幅度"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "🔴 执行结论：DRY_RUN 试运行 / APPLIED 真实执行 / REJECTED 被闸门拒绝"
+          },
+          "rejectReason": {
+            "type": "string",
+            "description": "🔴 拒绝原因（为空表示未被拒绝）"
+          },
+          "rejectDetail": {
+            "type": "string",
+            "description": "🔴 拒绝详情"
+          },
+          "beforeValue": {
+            "type": "number",
+            "description": "调整前的值"
+          },
+          "afterValue": {
+            "type": "number",
+            "description": "🔴 调整后的值（试运行里是「本来会变成多少」）"
+          },
+          "appliedDelta": {
+            "type": "number",
+            "description": "🔴 实际调整幅度"
+          },
+          "beforeStatus": {
+            "type": "string",
+            "description": "🔴 启停动作的调整前状态（ENABLED / PAUSED / ENDED）"
+          },
+          "afterStatus": {
+            "type": "string",
+            "description": "🔴 启停动作的调整后状态"
+          },
+          "capCheck": {
+            "type": "string",
+            "description": "🔴 上限闸门结论"
+          },
+          "boundCheck": {
+            "type": "string",
+            "description": "🔴 上下限闸门结论"
+          },
+          "singleCapAmount": {
+            "type": "number",
+            "description": "单次调整金额上限"
+          },
+          "singleCapPercent": {
+            "type": "number",
+            "description": "单次调整比例上限"
+          },
+          "totalCapAmount": {
+            "type": "number",
+            "description": "窗口内累计金额上限"
+          },
+          "totalCapCount": {
+            "type": "integer",
+            "description": "窗口内累计次数上限",
+            "format": "int32"
+          },
+          "totalCapWindowHours": {
+            "type": "integer",
+            "description": "累计窗口长度（小时）",
+            "format": "int32"
+          },
+          "windowUsedAmount": {
+            "type": "number",
+            "description": "🔴 窗口内已用金额（判定时的实际用量，可复算）"
+          },
+          "windowUsedCount": {
+            "type": "integer",
+            "description": "🔴 窗口内已用次数",
+            "format": "int32"
+          },
+          "prioritySelectionNote": {
+            "type": "string",
+            "description": "🔴 优先级选中的说明"
+          },
+          "executedAt": {
+            "type": "string",
+            "description": "执行时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 本次的调整执行记录（试运行 / 真实执行 / 被拒绝都在）"
+      },
+      "AdRuleHitRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "命中记录 id",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "metricId": {
+            "type": "string",
+            "description": "指标 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "外部活动 id"
+          },
+          "externalKeywordId": {
+            "type": "string",
+            "description": "外部关键词 id"
+          },
+          "matched": {
+            "type": "boolean",
+            "description": "🔴 是否命中"
+          },
+          "selected": {
+            "type": "boolean",
+            "description": "🔴 是否被选中执行（同目标多条命中时按优先级取一条）"
+          },
+          "selectionNote": {
+            "type": "string",
+            "description": "🔴 选中 / 落选的原因说明"
+          },
+          "hitReason": {
+            "type": "string",
+            "description": "命中 / 未命中的原因说明（未命中时写清差在哪）"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "当时的优先级",
+            "format": "int32"
+          },
+          "spendSnapshot": {
+            "type": "number",
+            "description": "当时的花费快照"
+          },
+          "revenueSnapshot": {
+            "type": "number",
+            "description": "当时的归因销售额快照"
+          },
+          "conversionsSnapshot": {
+            "type": "number",
+            "description": "当时的转化数快照"
+          },
+          "clicksSnapshot": {
+            "type": "number",
+            "description": "当时的点击数快照"
+          },
+          "impressionsSnapshot": {
+            "type": "number",
+            "description": "当时的展示数快照"
+          },
+          "acosSnapshot": {
+            "type": "number",
+            "description": "🔴 当时的 ACOS 快照；null = 不可比"
+          },
+          "roasSnapshot": {
+            "type": "number",
+            "description": "🔴 当时的 ROAS 快照；null = 不可比"
+          },
+          "metricsAsOf": {
+            "type": "string",
+            "description": "🔴 指标的数据截至时间",
+            "format": "date-time"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "description": "评估时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 本次的命中记录（命中与未命中都在）"
+      },
+      "AdRuleRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/AdRuleRunRow"
+          },
+          "hits": {
+            "type": "array",
+            "description": "🔴 本次的命中记录（命中与未命中都在）",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleHitRow"
+            }
+          },
+          "executions": {
+            "type": "array",
+            "description": "🔴 本次的调整执行记录（试运行 / 真实执行 / 被拒绝都在）",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleExecutionRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdRuleRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "runMode": {
+            "type": "string",
+            "description": "🔴 运行口径：DRY_RUN / APPLY"
+          },
+          "triggerSource": {
+            "type": "string",
+            "description": "触发来源"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "evaluatedRules": {
+            "type": "integer",
+            "description": "评估的规则数",
+            "format": "int32"
+          },
+          "hitCount": {
+            "type": "integer",
+            "description": "命中条数",
+            "format": "int32"
+          },
+          "selectedCount": {
+            "type": "integer",
+            "description": "被选中执行的条数",
+            "format": "int32"
+          },
+          "executionCount": {
+            "type": "integer",
+            "description": "执行记录条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "真实执行条数",
+            "format": "int32"
+          },
+          "dryRunCount": {
+            "type": "integer",
+            "description": "试运行条数",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "被闸门拒绝条数",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "description": "结束时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "运行"
+      },
+      "SaveRuleConditionRequest": {
+        "required": [
+          "metric",
+          "operator"
+        ],
+        "type": "object",
+        "properties": {
+          "metric": {
+            "minLength": 1,
+            "type": "string",
+            "description": "指标口径"
+          },
+          "operator": {
+            "minLength": 1,
+            "type": "string",
+            "description": "比较符"
+          },
+          "thresholdValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "比率 / 计数阈值（ACOS / ROAS / CONVERSIONS / CLICKS / IMPRESSIONS 用）"
+          },
+          "thresholdAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "金额阈值（SPEND / REVENUE 用）"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          },
+          "position": {
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer",
+            "description": "求值顺序",
+            "format": "int32"
+          }
+        },
+        "description": "🔴 规则条件（AND 语义：全部成立才算命中；启用的规则至少一条）"
+      },
+      "SaveRuleRequest": {
+        "required": [
+          "actionType",
+          "adjustmentMode",
+          "adjustmentValue",
+          "conditions",
+          "platformId",
+          "ruleCode",
+          "ruleName",
+          "shopCode",
+          "singleAdjustCapAmount",
+          "status",
+          "targetType",
+          "totalCapAmount",
+          "totalCapCount",
+          "totalCapWindowHours"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id；留空表示新建",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "规则名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "targetType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "作用对象层级"
+          },
+          "externalCampaignId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 外部活动 id（外部引用）"
+          },
+          "externalKeywordId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 外部关键词 id（外部引用）"
+          },
+          "actionType": {
+            "minLength": 1,
+            "type": "string",
+            "description": "动作类型"
+          },
+          "adjustmentMode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "调整幅度口径"
+          },
+          "adjustmentValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "调整幅度"
+          },
+          "singleAdjustCapAmount": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 单次调整金额上限（必填，> 0）—— 没有上限的规则建不出来"
+          },
+          "singleAdjustCapPercent": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 单次调整比例上限（0 = 不启用；与金额上限取更严的）"
+          },
+          "totalCapAmount": {
+            "minimum": 0.0001,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "🔴 窗口内累计金额上限（必填，> 0）"
+          },
+          "totalCapCount": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 窗口内累计次数上限（必填，> 0）",
+            "format": "int32"
+          },
+          "totalCapWindowHours": {
+            "maximum": 8760,
+            "minimum": 1,
+            "type": "integer",
+            "description": "🔴 累计窗口长度（小时，必填，> 0）",
+            "format": "int32"
+          },
+          "minBudget": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "预算下限保护"
+          },
+          "maxBudget": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "预算上限保护"
+          },
+          "minBid": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "出价下限保护"
+          },
+          "maxBid": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "出价上限保护"
+          },
+          "priority": {
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer",
+            "description": "🔴 优先级：数字小 = 优先高",
+            "format": "int32"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 试运行开关（默认 true；新建规则一律先试运行）"
+          },
+          "evaluationWindowHours": {
+            "maximum": 8760,
+            "minimum": 1,
+            "type": "integer",
+            "description": "评估窗口长度（小时）",
+            "format": "int32"
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string",
+            "description": "状态：ACTIVE / PAUSED / ARCHIVED"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          },
+          "conditions": {
+            "minItems": 1,
+            "type": "array",
+            "description": "🔴 规则条件（AND 语义：全部成立才算命中；启用的规则至少一条）",
+            "items": {
+              "$ref": "#/components/schemas/SaveRuleConditionRequest"
+            }
+          }
+        }
+      },
+      "AdRuleConditionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "条件 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "所属规则 id",
+            "format": "uuid"
+          },
+          "metric": {
+            "type": "string",
+            "description": "指标口径"
+          },
+          "operator": {
+            "type": "string",
+            "description": "比较符"
+          },
+          "thresholdValue": {
+            "type": "number",
+            "description": "🔴 比率 / 计数阈值（ACOS / ROAS / CONVERSIONS / CLICKS / IMPRESSIONS）"
+          },
+          "thresholdAmount": {
+            "type": "number",
+            "description": "🔴 金额阈值（SPEND / REVENUE）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "position": {
+            "type": "integer",
+            "description": "求值顺序",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 规则条件（AND 语义：全部成立才算命中）"
+      },
+      "AdRuleDetail": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/AdRuleRow"
+          },
+          "conditions": {
+            "type": "array",
+            "description": "🔴 规则条件（AND 语义：全部成立才算命中）",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleConditionRow"
+            }
+          },
+          "lastRun": {
+            "$ref": "#/components/schemas/AdRuleLastRun"
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdRuleLastRun": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "description": "运行 id",
+            "format": "uuid"
+          },
+          "runMode": {
+            "type": "string",
+            "description": "运行口径"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "hitCount": {
+            "type": "integer",
+            "description": "命中条数",
+            "format": "int32"
+          },
+          "selectedCount": {
+            "type": "integer",
+            "description": "被选中执行的条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "真实执行条数",
+            "format": "int32"
+          },
+          "dryRunCount": {
+            "type": "integer",
+            "description": "试运行条数",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "被闸门拒绝条数",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "开始时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 该规则最近一次评估的结论（命中数 / 执行数 / 被拒数）"
+      },
+      "AdRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "作用对象层级"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "🔴 外部活动 id（外部引用，不假设 14.1.1.1 的表存在）"
+          },
+          "externalKeywordId": {
+            "type": "string",
+            "description": "🔴 外部关键词 id"
+          },
+          "actionType": {
+            "type": "string",
+            "description": "动作类型"
+          },
+          "adjustmentMode": {
+            "type": "string",
+            "description": "调整幅度口径"
+          },
+          "adjustmentValue": {
+            "type": "number",
+            "description": "调整幅度"
+          },
+          "singleAdjustCapAmount": {
+            "type": "number",
+            "description": "🔴 单次调整金额上限（必填，> 0）"
+          },
+          "singleAdjustCapPercent": {
+            "type": "number",
+            "description": "🔴 单次调整比例上限（0 = 不启用）"
+          },
+          "totalCapAmount": {
+            "type": "number",
+            "description": "🔴 窗口内累计金额上限（必填，> 0）"
+          },
+          "totalCapCount": {
+            "type": "integer",
+            "description": "🔴 窗口内累计次数上限（必填，> 0）",
+            "format": "int32"
+          },
+          "totalCapWindowHours": {
+            "type": "integer",
+            "description": "🔴 累计窗口长度（小时，必填，> 0）",
+            "format": "int32"
+          },
+          "minBudget": {
+            "type": "number",
+            "description": "预算下限保护"
+          },
+          "maxBudget": {
+            "type": "number",
+            "description": "预算上限保护"
+          },
+          "minBid": {
+            "type": "number",
+            "description": "出价下限保护"
+          },
+          "maxBid": {
+            "type": "number",
+            "description": "出价上限保护"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "🔴 优先级：数字小 = 优先高",
+            "format": "int32"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "🔴 试运行开关（默认 true）"
+          },
+          "evaluationWindowHours": {
+            "type": "integer",
+            "description": "评估窗口长度（小时）",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "conditionCount": {
+            "type": "integer",
+            "description": "条件条数",
+            "format": "int32"
+          },
+          "latestMetricsAsOf": {
+            "type": "string",
+            "description": "🔴 该目标上最新指标的数据截至时间；为空 = **没有数据**",
+            "format": "date-time"
+          },
+          "metricsStale": {
+            "type": "boolean",
+            "description": "🔴 指标是否已过期（最新指标早于评估窗口）；区分「没有数据」与「没同步到」"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "规则"
+      },
+      "SaveMetricRequest": {
+        "required": [
+          "deliveryStatus",
+          "externalCampaignId",
+          "metricScope",
+          "metricsAsOf",
+          "platformId",
+          "shopCode",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "指标 id；留空表示新建",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "metricScope": {
+            "minLength": 1,
+            "type": "string",
+            "description": "作用对象层级"
+          },
+          "externalCampaignId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 外部活动 id"
+          },
+          "externalKeywordId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "🔴 外部关键词 id（关键词级指标必填）"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "description": "币种"
+          },
+          "deliveryStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "当前投放状态"
+          },
+          "currentBudget": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "当前预算"
+          },
+          "currentBid": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "当前出价"
+          },
+          "impressions": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "展示量（计数）"
+          },
+          "clicks": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "点击量（计数）"
+          },
+          "conversions": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "转化量（计数）"
+          },
+          "spend": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "花费"
+          },
+          "attributedRevenue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "归因销售额"
+          },
+          "metricsAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时间（必填）—— 用来区分「没有数据」与「没同步到」",
+            "format": "date-time"
+          },
+          "windowStart": {
+            "type": "string",
+            "description": "统计窗口开始（ISO-8601 带时区）",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "description": "统计窗口结束（ISO-8601 带时区）",
+            "format": "date-time"
+          },
+          "sourceRef": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "来源凭据"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdRuleMetricRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "指标 id",
+            "format": "uuid"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "metricScope": {
+            "type": "string",
+            "description": "作用对象层级"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "🔴 外部活动 id"
+          },
+          "externalKeywordId": {
+            "type": "string",
+            "description": "🔴 外部关键词 id"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "deliveryStatus": {
+            "type": "string",
+            "description": "当前投放状态"
+          },
+          "currentBudget": {
+            "type": "number",
+            "description": "当前预算"
+          },
+          "currentBid": {
+            "type": "number",
+            "description": "当前出价"
+          },
+          "impressions": {
+            "type": "number",
+            "description": "展示量（计数）"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "点击量（计数）"
+          },
+          "conversions": {
+            "type": "number",
+            "description": "转化量（计数）"
+          },
+          "spend": {
+            "type": "number",
+            "description": "花费"
+          },
+          "attributedRevenue": {
+            "type": "number",
+            "description": "归因销售额"
+          },
+          "acos": {
+            "type": "number",
+            "description": "🔴 ACOS = 花费 / 归因销售额；null = 不可比（分母为 0 或销售额为空），与 0 含义相反"
+          },
+          "roas": {
+            "type": "number",
+            "description": "🔴 ROAS = 归因销售额 / 花费；null = 不可比，与 0 含义相反"
+          },
+          "metricsAsOf": {
+            "type": "string",
+            "description": "🔴 数据截至时间（必填）：区分「没有数据」与「没同步到」",
+            "format": "date-time"
+          },
+          "windowStart": {
+            "type": "string",
+            "description": "统计窗口开始",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "description": "统计窗口结束",
+            "format": "date-time"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "来源凭据"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "EffectEvaluateRequest": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "description": "只回溯这一条规则；留空 = 回溯全部待回溯的执行",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdRuleEffectPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleEffectRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "improvedCount": {
+            "type": "integer",
+            "description": "其中变好的条数",
+            "format": "int64"
+          },
+          "worsenedCount": {
+            "type": "integer",
+            "description": "其中变差的条数",
+            "format": "int64"
+          },
+          "insufficientCount": {
+            "type": "integer",
+            "description": "其中数据不足的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdRuleEffectRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "回溯 id",
+            "format": "uuid"
+          },
+          "executionId": {
+            "type": "string",
+            "description": "执行记录 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "metricId": {
+            "type": "string",
+            "description": "指标 id",
+            "format": "uuid"
+          },
+          "beforeAcos": {
+            "type": "number",
+            "description": "执行前的 ACOS；null = 不可比"
+          },
+          "afterAcos": {
+            "type": "number",
+            "description": "执行后的 ACOS；null = 不可比"
+          },
+          "acosDelta": {
+            "type": "number",
+            "description": "ACOS 变化（负数 = 变好）"
+          },
+          "beforeRoas": {
+            "type": "number",
+            "description": "执行前的 ROAS；null = 不可比"
+          },
+          "afterRoas": {
+            "type": "number",
+            "description": "执行后的 ROAS；null = 不可比"
+          },
+          "roasDelta": {
+            "type": "number",
+            "description": "ROAS 变化（正数 = 变好）"
+          },
+          "beforeSpend": {
+            "type": "number",
+            "description": "执行前的花费"
+          },
+          "afterSpend": {
+            "type": "number",
+            "description": "执行后的花费"
+          },
+          "beforeRevenue": {
+            "type": "number",
+            "description": "执行前的归因销售额"
+          },
+          "afterRevenue": {
+            "type": "number",
+            "description": "执行后的归因销售额"
+          },
+          "revenueDelta": {
+            "type": "number",
+            "description": "销售额变化"
+          },
+          "verdict": {
+            "type": "string",
+            "description": "🔴 回溯结论：IMPROVED / WORSENED / UNCHANGED / INSUFFICIENT_DATA"
+          },
+          "verdictNote": {
+            "type": "string",
+            "description": "结论说明"
+          },
+          "observedAt": {
+            "type": "string",
+            "description": "观测时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "当前页数据"
+      },
+      "CancelDispatchRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "撤销原因"
+          }
+        }
+      },
+      "AdRuleDispatchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "待下发动作 id",
+            "format": "uuid"
+          },
+          "executionId": {
+            "type": "string",
+            "description": "执行记录 id",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "platformId": {
+            "type": "string",
+            "description": "平台 id",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "description": "外部活动 id"
+          },
+          "externalKeywordId": {
+            "type": "string",
+            "description": "外部关键词 id"
+          },
+          "actionType": {
+            "type": "string",
+            "description": "动作类型"
+          },
+          "actionPayload": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "dispatchStatus": {
+            "type": "string",
+            "description": "🔴 下发状态：PENDING 待下发 / DISPATCHED 已下发 / FAILED 失败 / CANCELLED 已撤销"
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "description": "下发时刻",
+            "format": "date-time"
+          },
+          "dispatchRef": {
+            "type": "string",
+            "description": "下发凭据"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdRuleRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "dryRunCount": {
+            "type": "integer",
+            "description": "其中试运行中的条数",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "description": "其中启用的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdRuleMetricPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleMetricRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "latestMetricsAsOf": {
+            "type": "string",
+            "description": "🔴 全库最新的数据截至时间",
+            "format": "date-time"
+          }
+        }
+      },
+      "AdRuleHitPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleHitRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "matchedCount": {
+            "type": "integer",
+            "description": "其中命中的条数",
+            "format": "int64"
+          },
+          "selectedCount": {
+            "type": "integer",
+            "description": "其中被选中执行的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdRuleExecutionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleExecutionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "其中真实执行的条数",
+            "format": "int64"
+          },
+          "dryRunCount": {
+            "type": "integer",
+            "description": "其中试运行的条数",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "其中被闸门拒绝的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdRuleDispatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleDispatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数（不受分页影响）",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "description": "其中待下发的条数",
+            "format": "int64"
+          }
+        }
+      },
+      "AdRuleCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdRuleCapabilityDimension"
+            }
+          },
+          "actionTypes": {
+            "type": "array",
+            "description": "动作类型",
+            "items": {
+              "type": "string",
+              "description": "动作类型"
+            }
+          },
+          "adjustmentModes": {
+            "type": "array",
+            "description": "调整幅度口径：PERCENT 相对当前值 / ABSOLUTE 绝对值",
+            "items": {
+              "type": "string",
+              "description": "调整幅度口径：PERCENT 相对当前值 / ABSOLUTE 绝对值"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "description": "可参与条件的指标口径",
+            "items": {
+              "type": "string",
+              "description": "可参与条件的指标口径"
+            }
+          },
+          "operators": {
+            "type": "array",
+            "description": "比较符",
+            "items": {
+              "type": "string",
+              "description": "比较符"
+            }
+          },
+          "targetTypes": {
+            "type": "array",
+            "description": "作用对象层级",
+            "items": {
+              "type": "string",
+              "description": "作用对象层级"
+            }
+          },
+          "runModes": {
+            "type": "array",
+            "description": "运行口径：DRY_RUN 试运行 / APPLY 真实执行",
+            "items": {
+              "type": "string",
+              "description": "运行口径：DRY_RUN 试运行 / APPLY 真实执行"
+            }
+          },
+          "executionOutcomes": {
+            "type": "array",
+            "description": "执行结论：DRY_RUN / APPLIED / REJECTED",
+            "items": {
+              "type": "string",
+              "description": "执行结论：DRY_RUN / APPLIED / REJECTED"
+            }
+          },
+          "effectVerdicts": {
+            "type": "array",
+            "description": "回溯结论：IMPROVED / WORSENED / UNCHANGED / INSUFFICIENT_DATA",
+            "items": {
+              "type": "string",
+              "description": "回溯结论：IMPROVED / WORSENED / UNCHANGED / INSUFFICIENT_DATA"
+            }
+          },
+          "guardNote": {
+            "type": "string",
+            "description": "🔴 上限与闸门的口径说明"
+          },
+          "dryRunNote": {
+            "type": "string",
+            "description": "🔴 试运行的口径说明"
+          },
+          "priorityNote": {
+            "type": "string",
+            "description": "🔴 优先级的口径说明"
+          },
+          "dispatchNote": {
+            "type": "string",
+            "description": "🔴 下游平台下发的边界说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与数据截至时间的说明"
+          }
+        }
+      },
+      "AdRuleCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }

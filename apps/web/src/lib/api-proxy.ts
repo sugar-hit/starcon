@@ -6432,6 +6432,54 @@ const services: readonly {
     pattern:
       /^platform-disputes(?:\/(?:capabilities|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:evidence-items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|start-evidence|position|submit-evidence|resolve|withdraw|settlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))?))?$/,
   },
+  {
+    // 14.2.2.2 自动规则（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 本文件是**多车道共用的累积白名单**，既有条目（`ad-type-diffs/` 14.1.2.2、
+    // `label-templates/` 10.2.2.2、`rate-comparison/` 10.1.2.2、`freight/` 10.1.2.1、
+    // `platform-disputes/` 11.4.2.1 …）**一字未动、也不重排** —— 往既有那条超长单行
+    // alternation 里并分支会让 git 必然判冲突，且 retry 永远不会自愈。
+    //
+    // 插入锚点固定在**数组末尾**（最后一条 `platform-disputes` 元素之后、数组结尾的 `];` 之前）：
+    // 本批另外三条车道的插入点分别在「`auth/` 之前」「第一个 `channel/` 之前」「中段 trade 区」，
+    // 与本锚点相距 3000 行以上，git 能干净求并。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   ad-rules/capabilities                能力声明（未交付段 available=false + ownerModule + 影响）
+    //   ad-rules/rules                      规则集合读（GET，真分页 + 筛选）/ 登记规则（POST）
+    //   ad-rules/rules/{uuid}               规则详情（GET，含条件与最近一次评估结论）
+    //   ad-rules/rules/{uuid}/status        启用 / 停用规则（POST）
+    //   ad-rules/rules/{uuid}/conditions    规则条件集合读（GET）
+    //   ad-rules/metrics                    广告表现指标集合读（GET）/ 登记指标（POST）
+    //   ad-rules/metrics/{uuid}             指标详情（GET）
+    //   ad-rules/runs                       评估运行集合读（GET）/ 发起一次评估（POST）
+    //   ad-rules/runs/{uuid}                运行详情（GET，含本次命中与执行记录）
+    //   ad-rules/hits                       规则命中记录集合读（GET，真分页 + 筛选）
+    //   ad-rules/executions                 调整执行记录集合读（GET，真分页 + 筛选）
+    //   ad-rules/executions/{uuid}          执行记录详情（GET）
+    //   ad-rules/dispatches                 待下发动作集合读（GET，真分页 + 筛选）
+    //   ad-rules/dispatches/{uuid}/cancel   撤销待下发动作（POST）
+    //   ad-rules/effects                    效果回溯集合读（GET，真分页 + 筛选）
+    //   ad-rules/effects/evaluate          回溯一次（POST，把执行前后的指标变化算出来）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / rules / metrics / runs / hits /
+    // executions / dispatches / effects / evaluate）排在 {uuid} 段**之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`：后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-rules` —— 本模块没有裸集合读，一切入口都带子路径
+    //   * `ad-rules/dispatches/{uuid}/dispatch` —— **平台侧真实下发本模块不实现**，
+    //     放行一个不存在的下发入口等于让界面以为「平台会自动收下这次调价」
+    //   * `ad-rules/rules/{uuid}/delete` —— 规则是配置事实，撤下走 status=ARCHIVED
+    //   * `ad-rules/effects/{uuid}` —— 回溯记录随列表与回溯结果一起返回，没有单独的读端点
+    // ⚠️ 末尾**刻意不带 `?`**：带了就等于放行裸路径 `ad-rules`。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-rules(?:\/(?:capabilities|rules|metrics|runs|hits|executions|dispatches|effects(?:\/evaluate)?)|\/rules\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:status|conditions))?|\/metrics\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/runs\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/executions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/dispatches\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/cancel)$/,
+  },
 ];
 
 function resolve(path: string) {
