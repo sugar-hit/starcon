@@ -136,17 +136,125 @@
 
 **修法**：**只改测试，不改服务端的 UTC 日界语义** ——
 后者是已交付模块的确定性的 API 口径，改它等于改已交付契约；错的是测试的期望。
-把种子与查询窗口统一到**同一套显式 UTC 口径**（种子落在目标日的正午 UTC），
-使断言在任何墙上时刻都成立，并补一条**多时区全绿**的证明
-（UTC / Asia/Shanghai / America/New_York / Pacific/Kiritimati）。
 
-**归属**：模块 5.5.1.1（catalog），分支 `fix/5-5-1-1-price-history-window`，**无迁移**。
+具体改法（`PriceHistoryIntegrationTest.java`，**生产代码零改动、零迁移**）：
+
+| 位置 | 改法 |
+| --- | --- |
+| `:145-160` | 新增私有辅助 `changesInWindow(skuId, from, to)`，把窗口语义写进 javadoc |
+| `:370-393` | 种子重锚：`windowDay = LocalDate.now(ZoneOffset.UTC).minusDays(9)`；A1 = 该日前一天零点、A2 = 该日**正午 UTC**、A3 = 该日次日零点（= 窗口**排他上界**） |
+| `:400-406` | **新增 3 条可执行口径不变量**：A2 落在 `[from, to+1)` 内 / A1 在 from 之前 / A3 恰等于排他上界 |
+| `:441-458` | 窗口断言 **1 条 ⇒ 4 条**（窗口内恰好 1 条且逐字等于种进去的生效时刻；前一天窗口恰好 A1；次日窗口恰好 A3；空窗口命中 0 条） |
+| `:475-479` | 分页断言加到「页内容逐条为 A3/A2 与 A1」，两页 id 互不相交 |
+
+**断言强度只增不减**：窗口内 1 条 + 窗口外逐日逐条 + 空窗口 0 条 + 分页逐条内容 + 排序升倒序，
+按 SKU / 来源 / 店铺筛与非法排序报错全部原样保留。
+
+**双份证明**（都是实测）：
+
+1. **四时区全绿**（`TZ` 实测确实改变 JVM 默认时区，`America/New_York` 下 `LocalDate.now()` 甚至落到前一日，
+   这使四时区跑法成为**真的**时刻无关证明而不是摆设）：
+   ```
+   TZ=UTC                → Tests run: 22, Failures: 0, Errors: 0  BUILD SUCCESS  EXIT=0
+   TZ=Asia/Shanghai      → Tests run: 22, Failures: 0, Errors: 0  BUILD SUCCESS  EXIT=0
+   TZ=America/New_York   → Tests run: 22, Failures: 0, Errors: 0  BUILD SUCCESS  EXIT=0
+   TZ=Pacific/Kiritimati → Tests run: 22, Failures: 0, Errors: 0  BUILD SUCCESS  EXIT=0
+   ```
+2. **变异测试（证明断言不空转）**：把 A2 种子改回墙钟相对值 ⇒ 该用例**立即 FAIL**
+   （新的口径不变量先红），回滚后复跑绿。
+
+**同类断言审计**：审了本文件里全部 `LocalDate.now()` / `OffsetDateTime.now()` ——
+**只有这一处是「相对种子 + 相对窗口」的同类缺陷**，已修；
+其余（`:149/:172/:211/:256/:339/:478/:629/:668`）只作种子、查询不带时间窗口 ⇒ 期望值不随墙上时刻漂移；
+`:507-508`、`:764-765` 是销量端口的 503 断言（`UnwiredSalesFactPort` 无条件抛错）⇒ 非同类。
+
+**归属**：模块 5.5.1.1（catalog），分支 `fix/5-5-1-1-price-history-window`，**无迁移**，
+两个原子提交 `2c77cb38`（测试修复）+ `051ee2ff`（台账证据格 + 会话日志）。
+
+### ⚠️ 附带事故：车道误跑 `spotless:apply`，把整仓 146 个文件重排版
+
+修复车道在开工时跑过一次 `spotless:apply`，造成 **146 个文件被改**
+（145 个被 google-java-format 重排 javadoc，**含生产代码**）。
+调度者发现后 steer 回滚，最终交付态 `git status --short` = **空**，
+**零字节进入 commit**。
+
+补充事实（本轮新取证，写给 backlog）：本仓 `spotless` 配置（gjf 1.22.0 默认档）与
+**已提交的 145 个 Java 文件基线不一致** —— `spotless:apply` 会整仓重排，
+而 `spotless:check` 只报 `SkuCostCompositionRulesTest.java` 一个文件
+⇒ **检查与修复行为不一致**。这解释了为什么「跑一下格式化器」会造成这种规模的事故。
+已记入 `docs/backlog/2026-10-21-spotless-apply-mass-reformat-hazard.md`。
+
+---
+
+## L2 第二次全量验证（09:26 → 10:03）：后端红 6 例 ⇒ 又一处潜伏缺陷
+
+### 结果
+
+| 步骤 | 命令 | 结果 |
+| --- | --- | --- |
+| 后端 | `cd backend && ./mvnw verify` | **EXIT=1** —— trade 模块 `OrderChangeCancelIntegrationTest` 40 例中 **3 failures + 3 errors**；reactor 在 trade 中止（模块 8 未跑到） |
+| 类型 | `pnpm typecheck` | ✅ EXIT=0 |
+| Lint | `pnpm lint` | ✅ EXIT=0 |
+| 单测 | `pnpm test` | ✅ EXIT=0 |
+| 构建 | `pnpm --filter @starcon/web build` | ✅ EXIT=0 |
+| 台账 | `node tools/module-progress/sync.mjs --check` | ✅ EXIT=0（台账与蓝图一致） |
+
+**按协议：L2 未全绿 ⇒ 本轮不 push。**（第一次 L2 的红是 5.5.1.1 那处墙钟断言，已修；第二次的红是**另一处**潜伏缺陷，见下。）
+
+### 红灯在哪个用例
+
+`com.starcon.trade.OrderChangeCancelIntegrationTest`（模块 **9.1.1.3 订单变更与取消**，V119 迁移，**不在本批 7 条车道的范围内**）。
+
+6 个失败用例全部依赖同一个夹具：先往 `order_platform_change_rule` 插一条「减少数量」规则。报错统一是
+`400 没有登记「减少数量」的可变更规则` —— 服务层 `OrderChangeCancelService.evaluateRule` 判定「**查不到规则**」。
+
+该类 40 例里**只有 6 例用到规则夹具**，而失败的正好是这 6 例 ⇒ 规则夹具整体失效，不是某个用例的逻辑问题。
+
+### 归因链（五条，全部实测）
+
+1. **文件级零接触**：`git diff --name-only dd607c5b 1755c23b` 对 `OrderChangeCancel*` / `order_platform_change_rule` **零命中**。本批对 trade 的改动只有 V246/V249/V250/V251 四个**只建新表**的迁移 + 三个新模块的类；迁移里的 RLS/GRANT 循环作用于**各自新表的显式清单**，不碰既有表。
+2. **基线绿**：在合并前基线 `dd607c5b` 上单独跑该类 ⇒ `Tests run: 40, Failures: 0, Errors: 0`（BUILD SUCCESS，22 秒）。
+3. **HEAD 绿**：在 `1755c23b` 上单独跑该类 ⇒ 40/40 绿；跑**完整 trade 模块**（88+ 个测试类）⇒ 该类仍 40/40 绿。
+4. **DB 状态直查**：失败现场用超管连接查 `order_platform_change_rule` ⇒ **规则行确实存在**，且 `platform_code=AMAZON` / `shop_code=*` / `change_kind=QUANTITY_DECREASE` / `effective_to=NULL` **与查询条件逐项一致**；`pg_policies` 显示 `isolation` 策略正常、`relrowsecurity=t` `relforcerowsecurity=t` ⇒ 行**不是被 RLS 挡掉的**，是被 WHERE 里的 `now()` 窗口排除。
+5. **等价注入复现（决定性）**：把夹具种子的 `OffsetDateTime.now()` 改成 `OffsetDateTime.now().plusSeconds(1)`（**等价于「DB 时钟比宿主慢 1 秒」**）⇒ 单跑该类**复现出与 L2 一模一样的 6 例红**：同样 3 failures + 3 errors、同样 6 个用例名、同样 `没有登记「减少数量」` 报错文本。
+
+### 根因一句话
+
+**测试用 JVM 墙钟写规则的 `effective_from`，服务端用 DB 时钟 `now()`（= `transaction_timestamp()`）判定「规则是否在生效窗口内」** ——
+这是**跨时钟域**比较，只有「两个时钟恰好同步」才成立，而健康态余量只有**插入到查询之间的约 50ms**。
+
+L2 全量验证时机器上有 **43 个 Testcontainers PG 容器**在跑、load 约 5/10 核，Docker 虚拟机的时钟相对宿主滞后数百毫秒
+⇒ 刚种下的规则被判成「不在生效窗口内」⇒ 6 例红。**与本批车道无关，是潜伏缺陷**（与本 tick 5.5.1.1 那处同族：断言依赖墙上时钟）。
+
+> 健康态偏差实测（`extract(epoch from clock_timestamp())` 对宿主 `date +%s.%N`）：DB 侧在 ±20ms 内且略快 ⇒ 余量确实只有几十毫秒量级。
+
+### 修法（只改测试，不改生产代码、零迁移）
+
+与本 tick 5.5.1.1 的修法同族：
+
+- 把种子的 `effective_from` 锚到**同一个 DB 时钟**（在种规则的那个事务里 `select now()`，并留出余量），让「种下去的时刻」与「查询比较的时刻」落在**同一时钟域**；
+- **服务端的 `now()` 语义不动**：「规则按 DB 当前时刻是否生效」是已交付模块的 API 口径，改它等于改已交付契约；错的是测试把时刻写在了另一个时钟域；
+- 把「生效窗口判定本身有效」写成**可执行不变量**（断言种进去的 `effective_from` ≤ 查询时刻的 DB `now()`）⇒ 将来谁把种子改回 JVM 墙钟，断言立刻红；
+- **变异测试**：种子改成「DB 时钟 + 1 小时」（一条尚未生效的规则）⇒ 必须红；改回「DB 时钟 − 1 分钟」⇒ 必须绿 ⇒ 证明窗口判定没被改空转。
+
+修复车道：`fix/9-1-1-3-rule-effective-window`（worktree `.worktrees/9.1.1.3-fix`，基线 `1755c23b`，`migrationVersion=none`，无迁移）。
+
+---
+
+## 16.4.2.1 品牌授权：已落地但**本轮不并入**
+
+车道 `feat/16-4-2-1`（channel / V248 / head `02123ff1`，4 个原子提交，state=ready，工作区干净）在本 tick 末尾落地。
+**本轮刻意不并入**：并进去就要再跑一次全量 L2，而本 tick 已经因为两处潜伏缺陷各跑过一次；
+下一轮并入可与后续车道同批，摊薄 L2 成本。
+
+已做**非破坏性合并预检**：`git merge-tree --write-tree HEAD 02123ff1` ⇒ **零冲突**（exit 0），台账按模块 ID 求并集、契约纯增量。
+该车道的 api-proxy 插入块（52 行、0 删除）落在锚点 `// 15.2.2.1 Request a Review…` 之前，与本批 7 条车道的插入点两两间隔 ≥52 行。
 
 ---
 
 ## 涉及文件
 
-- 本批 3 条车道 + 1 条修复车道（以实际合并 diff 为准）
+- 本批 3 条车道 + 2 条修复车道（以实际合并 diff 为准）
 - `docs/product/capability-blueprint/module-progress.md` —— 交付台账（465 个 L4 模块）
 - `docs/sessions/2026-10/2026-10-21-batch-48-*.md` —— 本文件
 
@@ -158,3 +266,4 @@
 - `docs/sessions/2026-10/2026-10-21-purchase-reconciliation.md` —— 6.5.1.1 车道自写会话日志
 - `docs/sessions/2026-10/2026-10-21-purchase-analytics.md` —— 6.5.2.1 车道自写会话日志
 - `docs/sessions/2026-10/2026-10-21-price-history-clock-window-fix.md` —— 5.5.1.1 修复车道会话日志
+- `docs/sessions/2026-10/2026-10-21-order-change-rule-clock-domain-fix.md` —— 9.1.1.3 修复车道会话日志（规则生效窗口的跨时钟域缺陷）
