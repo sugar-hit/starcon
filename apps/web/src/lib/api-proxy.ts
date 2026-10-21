@@ -549,6 +549,48 @@ const services: readonly {
       /^landed-costs(?:\/(?:capabilities|comparisons|parameters)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:components|recompute))?)?$/,
   },
   {
+    // 14.1.3.1 关键词管理（channel 服务）。纯**增量**追加一条独立的 `channel/` 元素：
+    // 既有分支（`landed-costs` / `02 渠道与店铺` / `ad-type-diffs` / `listing-keyword-rankings` …）
+    // **一字未动、也不重排** —— 同批多车道共享这一个文件，每条服务规则是一段超长单行正则，
+    // 往同一条 alternation 里并分支会让 git 必然判冲突且 retry 永远不会自愈。
+    // 插入锚点固定在本文件里**第一条** `channel/` 元素**之前**（`02 渠道与店铺` 那条），
+    // 与本批其它车道（`auth/` 之前、中段 trade 区、数组末尾）的插入点相距 400 行以上。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   ad-keywords                               关键词集合读（GET，真分页 + 筛选）/ 登记（POST）
+    //   ad-keywords/capabilities                  能力声明（未交付段 available=false + ownerModule）
+    //   ad-keywords/filter-options                筛选面板选项（平台/店铺/外部活动/归一类型/币种）
+    //   ad-keywords/{uuid}                        关键词详情（GET）/ 改（PUT）/ 归档（DELETE）
+    //   ad-keywords/metrics                       🔴 关键词表现数据同步（POST，真实写入口）
+    //   ad-keywords/search-terms                  🔴 搜索词报告（POST 同步 / GET 报告）
+    //   ad-keywords/negative-suggestions          🔴 否定词建议（GET，带依据数值）
+    //   ad-keywords/negatives                     否定记录（GET 读 / POST 登记）
+    //   ad-keywords/negatives/{uuid}/result       平台回执登记（PUT）
+    //   ad-keywords/bulk-actions                  批量调价与否定（GET 读 / POST 执行）
+    //   ad-keywords/bulk-actions/{uuid}           批量任务详情（GET，含逐条执行结果）
+    //   ad-keywords/report                        关键词报表（GET，按币种分行）
+    //   ad-keywords/frequency                     词频与排名（GET，引用 4.5.1.2 口径）
+    //
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / filter-options / metrics /
+    // search-terms / negative-suggestions / negatives / bulk-actions / report / frequency）
+    // 排在 uuid 段**之前**判别，否则会被 uuid 分支提前吃掉半截。
+    // 末尾的 `?` 允许**裸路径** `ad-keywords`（集合读 + 登记，本模块真的有这两个动作）。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * 裸路径 `ad-keywords` 的 **PUT/DELETE** 之外的形状（后端只有集合读 + 登记）
+    //   * `ad-keywords/{uuid}/metrics` —— 指标是**批量**入口，不按关键词下钻
+    //   * `ad-keywords/{uuid}/negatives` —— 否定按自己的集合读筛选，不按关键词下钻
+    //   * `ad-keywords/targeting` —— 投放定位是 14.1.3.2（另一个未开发模块）
+    //   * `ad-keywords/bid-strategy` —— 竞价策略引擎是 14.2.1.1（另一个未开发模块）
+    // ⚠️ id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`
+    //    （**不是** `[0-9a-f-]+` —— 后者会把 `capabilities` 这种非 UUID 形状也当 id 放行）。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^ad\-keywords(?:\/(?:capabilities|filter\-options|metrics|search\-terms|negative\-suggestions|negatives|bulk\-actions|report|frequency)|\/negatives\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/result|\/bulk\-actions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?$/,
+  },
+  {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
     // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
     // platforms/{code}/enums 后面可选一段 id：租户映射覆盖按 id 删除。
