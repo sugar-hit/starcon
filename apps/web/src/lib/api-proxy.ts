@@ -2629,6 +2629,59 @@ const services: readonly {
       /^purchase\-reconciliations(?:\/capabilities|\/options|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/discrepancies\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/resolve|\/lines|\/deductions|\/send|\/confirmations|\/discrepancies|\/reopen|\/close|\/export)?)?$/,
   },
   {
+    // 6.2.2.2 需求合并与批量（trade 服务，卷 06 采购与供应的 L3 锚点 6.2.2）。
+    //
+    // 蓝图：「把多个 SKU 的需求合并成一张采购单（同一供应商），支持批量生成、批量修改数量与
+    // 供应商、批量打印。」输入「多行需求；供应商选择（相同供应商才能合并）」。
+    // 输出「合并后的采购单草稿；未合并行说明原因」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 分支的 alternation 里并分支 ——
+    // 那一支是一段超长单行正则，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在既有 `prefix: 'trade/'`（6.5.1.1 采购对账）那一条**之前**：
+    // 各车道的插入点被既有条目隔开，git 能干净求并。
+    // resolve() 是「按顺序逐条匹配、首个命中即返回」，同前缀的后一条不会误吃前一条的路径。
+    //
+    // 已用脚本逐条核对本文件里**全部既有正则**：`demand-merges/**` **零命中**
+    // （既有分支不会先把它吃掉）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   demand-merges                        合并批次清单（GET，真分页 + 真筛选 + 真排序）/ 新建合并（POST）
+    //   demand-merges/capabilities            能力声明（含「6.3.1.2 采购单未交付」与合并硬规则）
+    //   demand-merges/options                 供应商 / 目标仓 / 法人下拉（跨服务只读，上游不可达返 503）
+    //   demand-merges/print                   批量打印（POST）→ 每张草稿一张纸
+    //   demand-merges/{uuid}                  批次详情（草稿 + 行 + 行来源 + 未合并行 + 批量修改留痕）
+    //   demand-merges/{uuid}/drafts           草稿清单（GET，真分页 + 按供应商筛选）
+    //   demand-merges/{uuid}/drafts/{uuid}    草稿详情（草稿 + 行 + 行来源）
+    //   demand-merges/{uuid}/lines            草稿行清单（GET，真分页 + 真筛选）
+    //   demand-merges/{uuid}/unmerged         未合并行清单（GET，真分页 + 按原因码筛选）
+    //   demand-merges/{uuid}/quantity         批量改数量（POST，整体生效或整体拒绝）
+    //   demand-merges/{uuid}/supplier         批量改供应商（POST，搬行后重新校验分组）
+    //   demand-merges/{uuid}/finalize         定稿（POST，OPEN → FINALIZED，内容冻结）
+    //
+    // ⚠️ 判别顺序：字面量子路径（capabilities / options / print）排在 {uuid} 段**之前** ——
+    //    否则「capabilities」会被 uuid 分支吃掉半截。
+    // ⚠️ id 段用**完整 UUID 形状**（照抄本文件里其余 100 处的同一写法），
+    //    不是 `[0-9a-f-]+` —— 后者把 `c`、`e`、`f` 这类单字符也当成合法 id 放行。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   * `demand-merges/{uuid}/delete` —— 草稿是业务凭据（6.3.1.2 要读它去建真正的采购单），
+    //     后端**没有**删除端点，DB 层也不提供 DELETE。
+    //   * `demand-merges/{uuid}/convert` / `demand-merges/{uuid}/purchase-orders`
+    //     —— 6.3.1.2 采购单**未交付**：本模块只产出**采购单草稿**，
+    //     凭空放行「转采购单」会让界面显示「已下单」而其实没有。
+    //   * `demand-merges/{uuid}/approve` —— 审批结论由 17 组织（identity）裁定，
+    //     本模块没有本地批准端点。
+    //   * `demand-merges/{uuid}/export` —— 本模块只提供「批量打印」（POST /print），
+    //     没有 CSV 导出端点。
+    //   * `demand-merges/{uuid}/lines/{uuid}` —— 单行信息随详情与行清单一起返回，
+    //     没有「按 id 取单行」的映射。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^demand\-merges(?:\/(?:capabilities|options|print)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:drafts(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|lines|unmerged|quantity|supplier|finalize))?)?$/,
+  },
+  {
     // 9.2.1.2 审单规则（trade 服务）。本条目是**新增一条 services[] 元素**，不是往既有
     // trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。

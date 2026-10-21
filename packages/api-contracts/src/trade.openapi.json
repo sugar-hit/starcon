@@ -38144,6 +38144,676 @@
           }
         }
       }
+    },
+    "/trade/demand-merges": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "NEWEST"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeBatchPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandMergeCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/supplier": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_supplier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandBatchSupplierInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/quantity": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_quantity",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandBatchQuantityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/finalize": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_id_finalize",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/print": {
+      "post": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "post_trade_demand_merges_print",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseDemandPrintInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandPrintResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/unmerged": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_unmerged",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/lines": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeLinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/drafts": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_drafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDraftPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/{id}/drafts/{draftId}": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_id_drafts_draftId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeDraftDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/options": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/demand-merges/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-demand-merge-controller"
+        ],
+        "operationId": "get_trade_demand_merges_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseDemandMergeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -38804,7 +39474,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -43007,49 +43677,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -43074,7 +43744,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -43554,14 +44224,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100.0,
+            "maximum": 100,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -53728,7 +54398,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -54816,7 +55486,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -63963,7 +64633,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-08,
+            "minimum": 1e-8,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -64075,12 +64745,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -65885,9 +66555,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -93969,6 +94639,937 @@
             "type": "string"
           },
           "ticketOwner": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeCreateInput": {
+        "required": [
+          "currencyCode",
+          "legalEntityId",
+          "sourceRequestIds",
+          "targetWarehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceRequestIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "sourceLineIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "targetSupplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currencyCode": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseDemandBatchAdjustmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "field": {
+            "type": "string"
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "affectedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "adjustedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjustedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeBatchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unmergedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finalizedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseDemandMergeDetail": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+          },
+          "drafts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineSourceRow"
+            }
+          },
+          "unmerged": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedRow"
+            }
+          },
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandBatchAdjustmentRow"
+            }
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftNo": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "estimatedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "mergedQuantity": {
+            "type": "number"
+          },
+          "sourceQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "arrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "sourceRequestCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeLineSourceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuCode": {
+            "type": "string"
+          },
+          "sourceQuantity": {
+            "type": "number"
+          },
+          "mergedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandMergeUnmergedRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceRequestLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSkuCode": {
+            "type": "string"
+          },
+          "sourceSkuName": {
+            "type": "string"
+          },
+          "sourceQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceSupplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceSupplierName": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonCodeLabel": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchaseDemandBatchSupplierInput": {
+        "required": [
+          "lineIds",
+          "reason",
+          "supplierId"
+        ],
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandBatchQuantityInput": {
+        "required": [
+          "lineIds",
+          "mode",
+          "reason",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "mode": {
+            "minLength": 1,
+            "pattern": "SET|MULTIPLY",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintInput": {
+        "required": [
+          "draftIds"
+        ],
+        "type": "object",
+        "properties": {
+          "draftIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "PurchaseDemandPrintLine": {
+        "type": "object",
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "mergedQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "arrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintResult": {
+        "type": "object",
+        "properties": {
+          "printedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "sheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandPrintSheet"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandPrintSheet": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "draftNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandPrintLine"
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "textContent": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeBatchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeBatchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeUnmergedPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeUnmergedRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeLinePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseDemandMergeDraftDetail": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "$ref": "#/components/schemas/PurchaseDemandMergeDraftRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineRow"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLineSourceRow"
+            }
+          }
+        }
+      },
+      "PurchaseDemandMergeLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeOptions": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeSupplierOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeWarehouseOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseDemandMergeLegalEntityOption"
+            }
+          },
+          "supplierNote": {
+            "type": "string"
+          },
+          "warehouseNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeSupplierOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PurchaseDemandMergeWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseDemandMergeCapabilities": {
+        "type": "object",
+        "properties": {
+          "requestAvailable": {
+            "type": "boolean"
+          },
+          "requestOwnerModule": {
+            "type": "string"
+          },
+          "requestNote": {
+            "type": "string"
+          },
+          "supplierReferenceAvailable": {
+            "type": "boolean"
+          },
+          "supplierReferenceOwnerModule": {
+            "type": "string"
+          },
+          "supplierReferenceNote": {
+            "type": "string"
+          },
+          "warehouseReferenceAvailable": {
+            "type": "boolean"
+          },
+          "warehouseReferenceOwnerModule": {
+            "type": "string"
+          },
+          "warehouseReferenceNote": {
+            "type": "string"
+          },
+          "purchaseOrderDelivered": {
+            "type": "boolean"
+          },
+          "purchaseOrderOwnerModule": {
+            "type": "string"
+          },
+          "purchaseOrderNote": {
+            "type": "string"
+          },
+          "mergeRule": {
+            "type": "string"
+          },
+          "stateMachine": {
             "type": "string"
           },
           "note": {
