@@ -1268,6 +1268,226 @@
         }
       }
     },
+    "/channel/brand-credentials/credentials/{id}": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_credentials_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "put_channel_brand_credentials_credentials_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/authorizations/{id}": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_authorizations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "put_channel_brand_authorizations_authorizations_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandAuthorizationRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/authorizations/{id}/enabled": {
+      "put": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "put_channel_brand_authorizations_authorizations_id_enabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/writeback-targets": {
       "get": {
         "tags": [
@@ -15200,6 +15420,726 @@
         }
       }
     },
+    "/channel/brand-credentials/credentials": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_credentials",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expiryState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verificationState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "credentialType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorizationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/credentials/{id}/verify": {
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials_id_verify",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialVerificationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/credentials/{id}/signatories": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_credentials_id_signatories",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrandCredentialSignatoryRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials_id_signatories",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialSignatoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/credentials/{id}/revoke": {
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials_id_revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialRevokeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/credentials/{id}/documents": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_credentials_id_documents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrandCredentialDocumentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials_id_documents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialDocumentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDocumentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/credentials/verify-batch": {
+      "post": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "post_channel_brand_credentials_credentials_verify_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandCredentialVerificationBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialVerificationBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/publish-gate": {
+      "post": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "post_channel_brand_authorizations_publish_gate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandAuthorizationCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationPublishGate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/checks": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_checks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "brandId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCheckPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "post_channel_brand_authorizations_checks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandAuthorizationCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/authorizations": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_authorizations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "brandId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "post_channel_brand_authorizations_authorizations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandAuthorizationRegistrationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/backfills": {
       "get": {
         "tags": [
@@ -27366,6 +28306,523 @@
         }
       }
     },
+    "/channel/brand-credentials/verifications": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_verifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "credentialId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "conclusion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialVerificationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/overview": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/documents/{documentId}": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_documents_documentId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialDocumentRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/documents/{documentId}/file": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_documents_documentId_file",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/capabilities": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-credentials/authorizations": {
+      "get": {
+        "tags": [
+          "brand-credential-controller"
+        ],
+        "operationId": "get_channel_brand_credentials_authorizations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandCredentialAuthorizationOptionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/shops": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_shops",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrandAuthorizationShopOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/expiry-reminders": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_expiry_reminders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "withinDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationExpiryPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/capabilities": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/candidates/suppliers": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_candidates_suppliers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/candidates/qualifications": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_candidates_qualifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "brandId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/brand-authorizations/candidates/brands": {
+      "get": {
+        "tags": [
+          "brand-authorization-controller"
+        ],
+        "operationId": "get_channel_brand_authorizations_candidates_brands",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/backfills/{id}": {
       "get": {
         "tags": [
@@ -28118,98 +29575,12 @@
         }
       }
     },
-    "/channel/brand-authorizations/authorizations/{id}": {
-      "get": {
+    "/channel/brand-credentials/credentials/{id}/signatories/{signatoryId}": {
+      "delete": {
         "tags": [
-          "brand-authorization-controller"
+          "brand-credential-controller"
         ],
-        "operationId": "get_channel_brand_authorizations_authorizations_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "put_channel_brand_authorizations_authorizations_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BrandAuthorizationRegistrationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/authorizations/{id}/enabled": {
-      "put": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "put_channel_brand_authorizations_authorizations_id_enabled",
+        "operationId": "delete_channel_brand_credentials_credentials_id_signatories_signatoryId",
         "parameters": [
           {
             "name": "Authorization",
@@ -28229,455 +29600,9 @@
             }
           },
           {
-            "name": "enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/publish-gate": {
-      "post": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "post_channel_brand_authorizations_publish_gate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BrandAuthorizationCheckRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationPublishGate"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/checks": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_checks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "brandId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCheckPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "post_channel_brand_authorizations_checks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BrandAuthorizationCheckRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCheckResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/authorizations": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_authorizations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "brandId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "post_channel_brand_authorizations_authorizations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BrandAuthorizationRegistrationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/shops": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_shops",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BrandAuthorizationShopOption"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/expiry-reminders": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_expiry_reminders",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "withinDays",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationExpiryPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/capabilities": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/candidates/suppliers": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_candidates_suppliers",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
+            "name": "signatoryId",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -28689,85 +29614,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/candidates/qualifications": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_candidates_qualifications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "brandId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/brand-authorizations/candidates/brands": {
-      "get": {
-        "tags": [
-          "brand-authorization-controller"
-        ],
-        "operationId": "get_channel_brand_authorizations_candidates_brands",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BrandAuthorizationCandidatePage"
+                  "$ref": "#/components/schemas/BrandCredentialDetail"
                 }
               }
             }
@@ -28790,7 +29637,7 @@
             "type": "string"
           },
           "quantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -30580,6 +31427,571 @@
             "type": "string",
             "description": "更新时刻",
             "format": "date-time"
+          }
+        }
+      },
+      "BrandCredentialRegistrationInput": {
+        "required": [
+          "credentialNo",
+          "credentialType",
+          "grantor",
+          "validFrom",
+          "validUntil"
+        ],
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "grantor": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "credentialNo": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "credentialType": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string",
+            "nullable": true
+          },
+          "brandName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "validFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "validUntil": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialDetail": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/BrandCredentialRecord"
+          },
+          "signatories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialSignatoryRow"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialDocumentRow"
+            }
+          },
+          "verifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialVerificationRow"
+            }
+          }
+        }
+      },
+      "BrandCredentialDocumentRow": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "credentialId": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "uploadedBy": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandCredentialRecord": {
+        "type": "object",
+        "properties": {
+          "credentialId": {
+            "type": "string"
+          },
+          "authorizationId": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "credentialNo": {
+            "type": "string"
+          },
+          "credentialType": {
+            "type": "string"
+          },
+          "credentialTypeLabel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revokedReason": {
+            "type": "string"
+          },
+          "expiryState": {
+            "type": "string"
+          },
+          "expiryStateLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "documentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signatoryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "verificationState": {
+            "type": "string"
+          },
+          "verificationStateLabel": {
+            "type": "string"
+          },
+          "lastVerifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastConclusion": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandCredentialSignatoryRow": {
+        "type": "object",
+        "properties": {
+          "signatoryId": {
+            "type": "string"
+          },
+          "credentialId": {
+            "type": "string"
+          },
+          "signatoryName": {
+            "type": "string"
+          },
+          "signatoryTitle": {
+            "type": "string"
+          },
+          "signatoryOrg": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "identityVerified": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandCredentialVerificationReason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialVerificationRow": {
+        "type": "object",
+        "properties": {
+          "verificationId": {
+            "type": "string"
+          },
+          "credentialId": {
+            "type": "string"
+          },
+          "credentialNo": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "documentVersionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialVerificationReason"
+            }
+          },
+          "reasonCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "checkedBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandAuthorizationDocumentInput": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationRegistrationInput": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "licenseeName": {
+            "type": "string"
+          },
+          "licenseeType": {
+            "type": "string"
+          },
+          "qualificationId": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationScopeInput"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationDocumentInput"
+            }
+          }
+        }
+      },
+      "BrandAuthorizationScopeInput": {
+        "type": "object",
+        "properties": {
+          "scopeKind": {
+            "type": "string"
+          },
+          "scopeValue": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationDetail": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/BrandAuthorizationRecord"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationScopeLine"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationDocumentRow"
+            }
+          }
+        }
+      },
+      "BrandAuthorizationDocumentRow": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationRecord": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "licenseeName": {
+            "type": "string"
+          },
+          "licenseeType": {
+            "type": "string"
+          },
+          "qualificationId": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiryState": {
+            "type": "string"
+          },
+          "expiryStateLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scopeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "documentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationScopeLine": {
+        "type": "object",
+        "properties": {
+          "scopeKind": {
+            "type": "string"
+          },
+          "scopeValue": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
           }
         }
       },
@@ -35148,7 +36560,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -37582,7 +38994,7 @@
             "format": "uuid"
           },
           "pickupSlaHours": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -37597,7 +39009,7 @@
             "type": "number"
           },
           "afterSalesWindowHours": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -38221,7 +39633,7 @@
             "type": "string"
           },
           "amountPerWaybill": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -39061,7 +40473,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -41499,7 +42911,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 0.000001,
+            "minimum": 1e-06,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -41842,9 +43254,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -47708,6 +49120,309 @@
           }
         },
         "description": "绑定本身"
+      },
+      "BrandCredentialVerificationResult": {
+        "type": "object",
+        "properties": {
+          "verificationId": {
+            "type": "string"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/BrandCredentialRecord"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "documentVersionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialVerificationReason"
+            }
+          },
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "checkedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialSignatoryInput": {
+        "required": [
+          "signatoryName"
+        ],
+        "type": "object",
+        "properties": {
+          "signatoryName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signatoryTitle": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signatoryOrg": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "contact": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "identityVerified": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialRevokeInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialDocumentInput": {
+        "required": [
+          "contentBase64",
+          "fileName"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "contentType": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "contentBase64": {
+            "maxLength": 40000000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialVerificationBatchInput": {
+        "required": [
+          "credentialIds"
+        ],
+        "type": "object",
+        "properties": {
+          "credentialIds": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BrandCredentialVerificationBatchResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialVerificationResult"
+            }
+          },
+          "verifiedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BrandAuthorizationCheckRequest": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationPublishGate": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationReason"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationReason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "authorizationId": {
+            "type": "string"
+          },
+          "authorizationLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationCheckResult": {
+        "type": "object",
+        "properties": {
+          "checkId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inScope": {
+            "type": "boolean"
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "matchedAuthorizationId": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationReason"
+            }
+          },
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
       },
       "BackfillTaskInput": {
         "required": [
@@ -66812,6 +68527,535 @@
           }
         }
       },
+      "BrandCredentialVerificationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialVerificationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BrandCredentialOverview": {
+        "type": "object",
+        "properties": {
+          "credentialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiringCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "revokedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "verifiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unverifiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "documentCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BrandCredentialPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BrandCredentialCapabilities": {
+        "type": "object",
+        "properties": {
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialCapabilityGap"
+            }
+          },
+          "credentialTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conclusions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verificationStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expiryStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verificationSemantics": {
+            "type": "string"
+          },
+          "digestSemantics": {
+            "type": "string"
+          },
+          "appendOnlySemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialCapabilityGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandCredentialAuthorizationOption": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "licenseeName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandCredentialAuthorizationOptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandCredentialAuthorizationOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationShopOption": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "countryCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BrandAuthorizationExpiryPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationExpiryRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiringCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationExpiryRow": {
+        "type": "object",
+        "properties": {
+          "authorizationId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "grantor": {
+            "type": "string"
+          },
+          "licenseeName": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "expiryState": {
+            "type": "string"
+          },
+          "expiryStateLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "scopeSummary": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationCheckPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationCheckSummary"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BrandAuthorizationCheckSummary": {
+        "type": "object",
+        "properties": {
+          "checkId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inScope": {
+            "type": "boolean"
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "conclusionLabel": {
+            "type": "string"
+          },
+          "matchedAuthorizationId": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationReason"
+            }
+          },
+          "reasonCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BrandAuthorizationCapabilities": {
+        "type": "object",
+        "properties": {
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationCapabilityGap"
+            }
+          },
+          "scopeKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conclusions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expiryStates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verdictSemantics": {
+            "type": "string"
+          },
+          "unknownSemantics": {
+            "type": "string"
+          },
+          "blockingSemantics": {
+            "type": "string"
+          },
+          "expirySemantics": {
+            "type": "string"
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationCapabilityGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "impact": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationCandidate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationCandidate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandAuthorizationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandAuthorizationRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "BackfillTaskView": {
         "type": "object",
         "properties": {
@@ -67641,671 +69885,6 @@
           "note": {
             "type": "string",
             "description": "🔴 说明：删到一条不剩时整套不可售"
-          }
-        }
-      },
-      "BrandAuthorizationDocumentInput": {
-        "type": "object",
-        "properties": {
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "sizeBytes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "storageKey": {
-            "type": "string"
-          },
-          "uploadedAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationRegistrationInput": {
-        "type": "object",
-        "properties": {
-          "brandId": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "string"
-          },
-          "grantor": {
-            "type": "string"
-          },
-          "licenseeName": {
-            "type": "string"
-          },
-          "licenseeType": {
-            "type": "string"
-          },
-          "qualificationId": {
-            "type": "string"
-          },
-          "effectiveFrom": {
-            "type": "string"
-          },
-          "effectiveTo": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "scopes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationScopeInput"
-            }
-          },
-          "documents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationDocumentInput"
-            }
-          }
-        }
-      },
-      "BrandAuthorizationScopeInput": {
-        "type": "object",
-        "properties": {
-          "scopeKind": {
-            "type": "string"
-          },
-          "scopeValue": {
-            "type": "string"
-          },
-          "scopeLabel": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationDetail": {
-        "type": "object",
-        "properties": {
-          "record": {
-            "$ref": "#/components/schemas/BrandAuthorizationRecord"
-          },
-          "scopes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationScopeLine"
-            }
-          },
-          "documents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationDocumentRow"
-            }
-          }
-        }
-      },
-      "BrandAuthorizationDocumentRow": {
-        "type": "object",
-        "properties": {
-          "documentId": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "sizeBytes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "storageKey": {
-            "type": "string"
-          },
-          "uploadedAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationRecord": {
-        "type": "object",
-        "properties": {
-          "authorizationId": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "string"
-          },
-          "grantor": {
-            "type": "string"
-          },
-          "licenseeName": {
-            "type": "string"
-          },
-          "licenseeType": {
-            "type": "string"
-          },
-          "qualificationId": {
-            "type": "string"
-          },
-          "effectiveFrom": {
-            "type": "string"
-          },
-          "effectiveTo": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "ruleVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "expiryState": {
-            "type": "string"
-          },
-          "expiryStateLabel": {
-            "type": "string"
-          },
-          "daysToExpiry": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "scopeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "documentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationScopeLine": {
-        "type": "object",
-        "properties": {
-          "scopeKind": {
-            "type": "string"
-          },
-          "scopeValue": {
-            "type": "string"
-          },
-          "scopeLabel": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCheckRequest": {
-        "type": "object",
-        "properties": {
-          "brandId": {
-            "type": "string"
-          },
-          "shopId": {
-            "type": "string"
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "categoryId": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationPublishGate": {
-        "type": "object",
-        "properties": {
-          "allowed": {
-            "type": "boolean"
-          },
-          "blocking": {
-            "type": "boolean"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "conclusion": {
-            "type": "string"
-          },
-          "reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationReason"
-            }
-          },
-          "evaluatedAt": {
-            "type": "string"
-          },
-          "ruleVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "checkId": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationReason": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "authorizationId": {
-            "type": "string"
-          },
-          "authorizationLabel": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCheckResult": {
-        "type": "object",
-        "properties": {
-          "checkId": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "string"
-          },
-          "shopId": {
-            "type": "string"
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "categoryId": {
-            "type": "string"
-          },
-          "evaluatedAt": {
-            "type": "string"
-          },
-          "ruleVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inScope": {
-            "type": "boolean"
-          },
-          "blocking": {
-            "type": "boolean"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "conclusion": {
-            "type": "string"
-          },
-          "matchedAuthorizationId": {
-            "type": "string"
-          },
-          "reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationReason"
-            }
-          },
-          "snapshot": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "BrandAuthorizationShopOption": {
-        "type": "object",
-        "properties": {
-          "shopId": {
-            "type": "string"
-          },
-          "shopCode": {
-            "type": "string"
-          },
-          "shopName": {
-            "type": "string"
-          },
-          "platformCode": {
-            "type": "string"
-          },
-          "countryCodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "BrandAuthorizationExpiryPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationExpiryRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "expiringCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "expiredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationExpiryRow": {
-        "type": "object",
-        "properties": {
-          "authorizationId": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "string"
-          },
-          "grantor": {
-            "type": "string"
-          },
-          "licenseeName": {
-            "type": "string"
-          },
-          "effectiveTo": {
-            "type": "string"
-          },
-          "expiryState": {
-            "type": "string"
-          },
-          "expiryStateLabel": {
-            "type": "string"
-          },
-          "daysToExpiry": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "scopeSummary": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCheckPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationCheckSummary"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "BrandAuthorizationCheckSummary": {
-        "type": "object",
-        "properties": {
-          "checkId": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "string"
-          },
-          "shopId": {
-            "type": "string"
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "categoryId": {
-            "type": "string"
-          },
-          "evaluatedAt": {
-            "type": "string"
-          },
-          "ruleVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inScope": {
-            "type": "boolean"
-          },
-          "blocking": {
-            "type": "boolean"
-          },
-          "severity": {
-            "type": "string"
-          },
-          "severityLabel": {
-            "type": "string"
-          },
-          "conclusion": {
-            "type": "string"
-          },
-          "conclusionLabel": {
-            "type": "string"
-          },
-          "matchedAuthorizationId": {
-            "type": "string"
-          },
-          "reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationReason"
-            }
-          },
-          "reasonCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "BrandAuthorizationCapabilities": {
-        "type": "object",
-        "properties": {
-          "gaps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationCapabilityGap"
-            }
-          },
-          "scopeKinds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "conclusions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "severities": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "expiryStates": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "verdictSemantics": {
-            "type": "string"
-          },
-          "unknownSemantics": {
-            "type": "string"
-          },
-          "blockingSemantics": {
-            "type": "string"
-          },
-          "expirySemantics": {
-            "type": "string"
-          },
-          "boundaryNote": {
-            "type": "string"
-          },
-          "upstreamNote": {
-            "type": "string"
-          },
-          "downstreamNote": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCapabilityGap": {
-        "type": "object",
-        "properties": {
-          "moduleId": {
-            "type": "string"
-          },
-          "moduleName": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "impact": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCandidate": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationCandidatePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationCandidate"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BrandAuthorizationPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BrandAuthorizationRecord"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       }
