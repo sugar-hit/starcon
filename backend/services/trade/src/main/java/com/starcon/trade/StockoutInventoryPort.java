@@ -153,6 +153,32 @@ public class StockoutInventoryPort {
   }
 
   /**
+   * 读**单个 SKU** 的可用量（7.1.1.3 的 {@code ?skuId=} 过滤）。
+   *
+   * <p>6.3.1.2 采购单带出库存快照用：一次只问一个 SKU，
+   * 不必把整个租户的可用量清单翻完（那是 {@link #sellable(String)} 的用途）。
+   *
+   * @return 该 SKU 的可用量行；**没有这一行时返回 null**（= 仓库里没有这个 SKU 的库存账，
+   *     与「有账但可用量是 0」是两件事，前者是「没记录」，后者是「真的一件都没有」）
+   */
+  public SellableRow sellableForSku(UUID skuId, String bearer) {
+    SellablePage response =
+        fetch(
+            "/warehouse/inventory/sellable/skus?skuId=" + skuId + "&page=0&size=1",
+            bearer,
+            SellablePage.class);
+    if (response == null || response.rows() == null) {
+      throw unavailable("仓库服务没有返回可用量列表");
+    }
+    for (SellableRow row : response.rows()) {
+      if (row != null && skuId.equals(row.skuId())) {
+        return row;
+      }
+    }
+    return null;
+  }
+
+  /**
    * 读本租户**仍在途**的在途腿（翻完所有页）。
    *
    * <p>{@code kinds} 是要纳入的在途类型。默认纳入调拨 / 头程 / 采购三类：它们都是「往我方仓里补货」的路。

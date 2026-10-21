@@ -85,6 +85,54 @@ public class ReplenishmentCatalogPort {
   /** 有效报价解析结果。 */
   record QuoteResult(List<QuoteView> candidates, boolean ambiguous, String ambiguityProblem, String note) {}
 
+  // ================================================================
+  // 6.3.1.2 采购单创建与编辑新增的形状（**纯增量**：不动上面两个既有 record，
+  // 以免 6.2.1.2 断货建议的既有调用点与测试编译不过）。
+  // ================================================================
+
+  /** 一条有效报价（带出报价用；比 {@link QuoteView} 多有效期与选择状态）。 */
+  record EffectiveQuoteView(
+      UUID id,
+      UUID supplierId,
+      String supplierName,
+      String skuCode,
+      String skuName,
+      String currency,
+      String purchaseUnitCode,
+      BigDecimal moqQuantity,
+      int leadTimeDays,
+      int priority,
+      LocalDate validFrom,
+      LocalDate validTo,
+      List<EffectiveTierView> tiers,
+      String selectionState) {}
+
+  /** 一档阶梯价。 */
+  record EffectiveTierView(BigDecimal minQuantity, BigDecimal unitPrice) {}
+
+  /**
+   * catalog 的有效报价解析结果（逐字对齐 {@code SupplierQuoteEffectiveResult}）。
+   *
+   * @param selected 唯一可自动采用的那条；**歧义时为 null**（规则 R2：不替用户挑）
+   * @param selectedTier 命中的阶梯（数量落在哪一档就取哪一档；低于最低档为 null）
+   * @param candidates 全部有效报价候选（并列时逐条列出来，供人工选）
+   */
+  record EffectiveResult(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      UUID supplierId,
+      String supplierName,
+      LocalDate at,
+      EffectiveQuoteView selected,
+      EffectiveTierView selectedTier,
+      List<EffectiveQuoteView> candidates,
+      boolean ambiguous,
+      String ambiguityProblem,
+      List<String> warnings,
+      String note) {}
+
+
   /** 端口专用的 ObjectMapper：**忽略上游多出来的字段**。 */
   private static final ObjectMapper PORT_JSON =
       new ObjectMapper()
@@ -228,6 +276,189 @@ public class ReplenishmentCatalogPort {
             + "（3.6.2.1 报价与 3.1.2.4 单位换算，跨库视图与跨服务 SQL 均被 AGENTS.md 禁止），"
             + "本服务不会凭空生成一份报价或箱规出来算建议量");
   }
+
+  // ================================================================
+  // 6.3.1.2 采购单创建与编辑：带出报价（严格取价 / 非严格预览）
+  // ================================================================
+
+  /**
+   * 带出报价（<b>不严格</b>）：把该 SKU 在该供应商下的<b>全部</b>有效报价候选列出来，
+   * 歧义时如实标 {@code ambiguous=true} 并把并列的候选都留着，<b>不替用户挑</b>。
+   *
+   * <p>用于**建单表单的预览**：用户要看到「有哪几条价、为什么不能自动选」。
+   *
+   * @param supplierId 必填：**一张采购单只对一个供应商**，优先级只在供应商内部可比
+   */
+  public EffectiveResult effective(
+      UUID skuId, UUID supplierId, LocalDate at, BigDecimal quantity, String bearer) {
+    return fetchEffective("/catalog/supplier-quotes/effective", skuId, supplierId, at, quantity, bearer);
+  }
+
+  /**
+   * 严格取价（<b>歧义时 409</b>）。
+   *
+   * <p>用于**提交那一刻**：采购单不能带着一条「系统随便选的价」发出去，
+   * 而一个 200 + selected=null 很容易被前端误读成「没报价」——
+   * 症状是提示文案答非所问，真正的原因却是优先级并列。
+   * ⇒ 歧义就报错让用户去改优先级。
+   *
+   * <p>409 与 404 都**如实透出**：
+   * 409 = 有并列报价要人选；404 = 这个 SKU 该供应商现在没价可下（这是一个需要解决的阻断）。
+   */
+  public EffectiveResult resolve(
+      UUID skuId, UUID supplierId, LocalDate at, BigDecimal quantity, String bearer) {
+    return fetchEffective(
+        "/catalog/supplier-quotes/effective/resolve", skuId, supplierId, at, quantity, bearer);
+  }
+
+  private EffectiveResult fetchEffective(
+      String path,
+      UUID skuId,
+      UUID supplierId,
+      LocalDate at,
+      BigDecimal quantity,
+      String bearer) {
+    EffectiveResultView view;
+    try {
+      view =
+          client
+              .get()
+              .uri(
+                  uriBuilder -> {
+                    var b = uriBuilder.path(path).queryParam("skuId", skuId);
+                    if (supplierId != null) {
+                      b.queryParam("supplierId", supplierId);
+                    }
+                    if (at != null) {
+                      b.queryParam("at", at.toString());
+                    }
+                    if (quantity != null) {
+                      b.queryParam("quantity", quantity.toPlainString());
+                    }
+                    return b.build();
+                  })
+              .header("Authorization", bearer)
+              .retrieve()
+              .body(EffectiveResultView.class);
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "登录已失效，请重新登录");
+      }
+      if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+        throw new ResponseStatusException(
+            HttpStatus.FORBIDDEN, "当前身份无权读取供应商报价，采购单带不出价格");
+      }
+      if (e.getStatusCode() == HttpStatus.CONFLICT) {
+        // catalog 的歧义 409：**不吞掉** —— 「报错让用户选」必须发生在建单的那一刻。
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT, "供应商报价有歧义：同一优先级存在多条有效报价，请先在报价台账里定下优先级");
+      }
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        throw new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "该 SKU 在该供应商下现在没有有效报价，无法带出价格");
+      }
+      throw unavailable("商品主数据服务返回 " + e.getStatusCode().value());
+    } catch (RestClientException e) {
+      throw unavailable("商品主数据服务暂时不可达");
+    }
+    if (view == null || view.candidates() == null) {
+      throw unavailable("商品主数据服务没有返回有效报价列表");
+    }
+    return view.toResult();
+  }
+
+  // ---- catalog 侧的有效报价响应形状（只声明用到的字段） ----
+
+  record EffectiveResultView(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      UUID supplierId,
+      String supplierName,
+      LocalDate at,
+      EffectiveQuoteViewRaw selected,
+      EffectiveTierViewRaw selectedTier,
+      List<EffectiveQuoteViewRaw> candidates,
+      boolean ambiguous,
+      String ambiguityProblem,
+      List<String> warnings,
+      String note) {
+
+    EffectiveResult toResult() {
+      List<EffectiveQuoteView> list = new ArrayList<>();
+      if (candidates != null) {
+        for (EffectiveQuoteViewRaw raw : candidates) {
+          if (raw == null) {
+            continue;
+          }
+          list.add(raw.toView());
+        }
+      }
+      return new EffectiveResult(
+          skuId,
+          skuCode,
+          skuName,
+          supplierId,
+          supplierName,
+          at,
+          selected == null ? null : selected.toView(),
+          selectedTier == null
+              ? null
+              : new EffectiveTierView(selectedTier.minQuantity(), selectedTier.unitPrice()),
+          list,
+          ambiguous,
+          ambiguityProblem,
+          warnings == null ? List.of() : warnings,
+          note);
+    }
+  }
+
+  record EffectiveQuoteViewRaw(
+      UUID id,
+      UUID supplierId,
+      String supplierName,
+      String skuCode,
+      String skuName,
+      String currency,
+      String purchaseUnitCode,
+      BigDecimal moqQuantity,
+      int leadTimeDays,
+      int priority,
+      LocalDate validFrom,
+      LocalDate validTo,
+      List<EffectiveTierViewRaw> tiers,
+      String selectionState) {
+
+    EffectiveQuoteView toView() {
+      List<EffectiveTierView> tierList = new ArrayList<>();
+      if (tiers != null) {
+        for (EffectiveTierViewRaw tier : tiers) {
+          if (tier == null || tier.minQuantity() == null) {
+            continue;
+          }
+          tierList.add(new EffectiveTierView(tier.minQuantity(), tier.unitPrice()));
+        }
+      }
+      return new EffectiveQuoteView(
+          id,
+          supplierId,
+          supplierName == null ? "" : supplierName,
+          skuCode == null ? "" : skuCode,
+          skuName == null ? "" : skuName,
+          currency,
+          purchaseUnitCode,
+          moqQuantity,
+          leadTimeDays,
+          priority,
+          validFrom,
+          validTo,
+          tierList,
+          selectionState);
+    }
+  }
+
+  record EffectiveTierViewRaw(BigDecimal minQuantity, BigDecimal unitPrice) {}
+
 
   // ---- catalog 侧的响应形状（只声明本模块用到的字段） ----
 
