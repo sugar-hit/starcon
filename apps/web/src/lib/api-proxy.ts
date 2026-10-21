@@ -5394,6 +5394,76 @@ const services: readonly {
       /^defective\-dispositions(?:\/(?:capabilities|options|summary)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:decide|dispatch\-inventory|complete|cancel|export)|\/claims\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:submit|agree|reject|withdraw))?)?$/,
   },
   {
+    // 6.3.1.3 采购单审批（trade 服务，卷 06「采购与供应」的 L3 锚点 6.3.1「采购单」下的第三格）。
+    //
+    // 蓝图：「按金额阈值与采购员分级审批，支持批量审批、驳回并附意见，审批通过后锁定单据生成应付。」
+    // 输出「审批结果 + 审批链路记录；通过后触发 12 生成应付、8 允许收货」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 巨型正则里并 ——
+    // 那一支是单行超长 alternation，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「6.4.2.2 不良品处理」元素**之后**、「5.3.2.2 价格规则」元素**之前**，
+    // 与本批另外三条车道的插入点（6.3.2.1 / 6.6.2.1 / 11.4.1.1）互不重叠；既有条目一字未动。
+    //
+    // 🔴 为什么用 `purchase-order-approvals` 这个独立前缀：
+    //   * 用脚本逐条核对了本文件里**全部 117 条**既有正则（一条不漏、逐条 new RegExp 试跑）：
+    //     本模块的 **15 个形状**对它们**零命中**（既有条目不会先把它吃掉）。
+    //   * 首 token 与本仓已占用的邻近首 token 全部不同：
+    //     `purchase-orders`（6.3.1.1）、`purchase-order-editor`（6.3.1.2）、
+    //     `purchase-plans`（6.2.1.3）、`purchase-requests`（6.2.2.1）、
+    //     `purchase-arrivals`（6.3.2.2）、`purchase-analytics`（6.5.2.1）、
+    //     `purchase-reconciliations`（6.5.1.1）、`replenishment-suggestions`（6.2.1.2）、
+    //     `development-projects` / `development-samples`（6.6.1.x）。
+    //   * ⚠️ `purchase-orders` 与 `purchase-order-approvals` **只差两个连字符** ——
+    //     既有那条是**锚定**的（`^purchase\-orders(?:...)$`），吃不到本模块的路径；
+    //     本条也是锚定的，两者互不吃。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   purchase-order-approvals/capabilities            能力声明（GET）
+    //   purchase-order-approvals/rules                   规则列表（GET）+ 新建规则（POST）
+    //   purchase-order-approvals/rules/{uuid}            改规则（PUT）
+    //   purchase-order-approvals/rules/{uuid}/status     启用 / 停用规则（POST）
+    //   purchase-order-approvals/members                采购员分级 + 审批人（GET）
+    //   purchase-order-approvals/members/buyers         登记 / 改采购员分级（POST）
+    //   purchase-order-approvals/members/approvers      登记 / 改审批人（POST）
+    //   purchase-order-approvals/orders                 审批台账（GET，真分页 + 筛选）
+    //   purchase-order-approvals/orders/batch           批量审批 / 批量驳回（POST）
+    //   purchase-order-approvals/orders/{uuid}          审批详情（GET）
+    //   purchase-order-approvals/orders/{uuid}/approve  审批通过（POST）
+    //   purchase-order-approvals/orders/{uuid}/reject   驳回并附意见（POST）
+    //   purchase-order-approvals/payables               应付登记台账（GET）
+    //   purchase-order-approvals/payables/{uuid}/confirm 财务确认（POST）
+    //   purchase-order-approvals/payables/{uuid}/reject  财务驳回（POST）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / rules / members / orders / payables）排在
+    // {uuid} 段之前**，且 `orders/batch` 排在 `orders/{uuid}` 之前 ——
+    // 否则「batch」会被 uuid 支吃掉半截。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 ——
+    //    界面会以为功能已交付）：
+    //   * purchase-order-approvals —— 裸路径：本模块没有裸集合读，放行它会凭空多出一条 GET。
+    //   * purchase-order-approvals/orders/{uuid}/lines —— 行随 6.3.1.2 的编辑表单一起返回，
+    //     没有独立的行子资源端点。
+    //   * purchase-order-approvals/orders/{uuid}/chain、/payable、/receipt-release ——
+    //     审批链路、应付登记、收货放行**随详情一起返回**，没有独立的子资源端点。
+    //   * purchase-order-approvals/orders/{uuid}/revoke-receipt ——
+    //     🔴 **不存在**「撤销收货放行」的端点：审批通过后的采购单只能走
+    //     APPROVED → CLOSED（V254 的状态机钉死），要改数量与单价得走变更单或红冲重下。
+    //     放行它会让界面显示「已撤销」而其实没有。
+    //   * purchase-order-approvals/payables/{uuid}、/rules/{uuid}、/members/{uuid} ——
+    //     这三张表**没有**按 id 寻址的读端点（台账一次给全，详情按采购单取）。
+    //   * purchase-order-approvals/rules/{uuid}/delete —— 规则**不提供删除**：
+    //     已命中的规则是历史审批单的依据，删掉会让「按哪条规则批的」答不出来（用停用）。
+    //   * purchase-order-approvals/orders/{uuid}/tax —— **12 财务未交付**（本仓没有 finance
+    //     服务）：不代它开税额形状。
+    //   * purchase-order-approvals/change-orders —— 变更单 / 红冲重下**不在本模块内**：
+    //     本模块只锁不改，不代写变更单（否则同一张单会有两份金额真相）。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^purchase\-order\-approvals(?:\/(?:capabilities|rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/status)?)?|members(?:\/(?:buyers|approvers))?|orders(?:\/(?:batch|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:approve|reject))?)?)?|payables(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))$/,
+  },
+  {
     // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
     //
     // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
