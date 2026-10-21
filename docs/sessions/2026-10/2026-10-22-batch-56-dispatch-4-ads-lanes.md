@@ -268,3 +268,54 @@
 5. L2 红 ⇒ 不 push，二分定位（最多 2 次全量），派修复任务；
 6. **服务缺口仍在**：卷 12（finance）/ 卷 13（reporting）/ 卷 1（前端聚合）不在集成头，
    这三卷的模块会一直排不出车道 —— 需要人工决策是否并入对应服务。
+
+---
+
+## 附：本批 4 条车道的并入预演（`git merge-tree` 干跑，2026-10-22 01:0x）
+
+4 条车道全部 land 后（`state=ready`，head 见下），调度者用 **只读** 的 `git merge-tree --write-tree`
+做了一次并入干跑。**该命令不改任何 ref、不改工作区、不产生合并 commit**（只往对象库写 tree 对象）。
+
+| 车道 | head | api-proxy 元素落点 |
+| --- | --- | --- |
+| 14.1.1.2 活动详情 | `62a84e61` | `ad-campaign-details`（base 5234 起） |
+| 14.2.2.1 预算分配 | `349fb82d` | `ad-budgets`（base ~499 起） |
+| 14.3.1.1 活动报表 | `97519d21` | `ad-reports`（base ~644 起） |
+| 14.3.2.2 效率诊断 | `6775defc` | `ad-diagnostics`（base 5437 起） |
+
+### 结论（4 条车道两两合 + 顺序合全部干净，exit 0）
+
+| 检查项 | 结果 |
+| --- | --- |
+| 合并是否报冲突 | **否**，全部 exit 0，最终树里**冲突标记 0 处** |
+| `services[]` 元素数 | base **129** → 合并后 **133**（每车道恰好 +1） |
+| **从 base 掉落的元素** | **0 个**（`comm -23` 空集） |
+| **丢失的首 token** | **0 个**（`comm -23` 空集） |
+| 新增首 token | `^ad\-budgets` / `^ad\-campaign\-details` / `^ad\-diagnostics` / `^ad\-reports` |
+| 元素结构完整性 | 133 个元素**逐个**校验 `prefix` + `env` + `pattern` 三件齐全，**不完整 0 个** |
+| 4 个新元素的 `prefix`/`env` | 全部 `prefix: 'channel/'` + `env: 'CHANNEL_URL'`（与既有 ads 条目一致） |
+| 迁移文件 | `V277` / `V278` / `V279` / `V280` **四个都在** |
+| 台账行 | 4 个模块**全部 `已交付`** |
+| channel 契约 path 数 | base 547 → **587**（+40 = 10 + 12 + 6 + 12，与四条车道的端点数逐条对上） |
+| 契约 `export type` 重名 | **0 个**（见下方「顺带修掉的一个真 bug」） |
+
+⇒ **协议点名最阴的失败模式（「取错一侧静默删掉别人已交付的路由，而 typecheck / lint / vitest 全绿」）
+在本批已被证明不会发生。** 下一轮 tick 可以放心走 `merge-ready` → L2，不必再花一轮做并入预演。
+
+### 顺带修掉的一个真 bug（在 14.2.2.1 车道路上）
+
+14.2.2.1 的护栏 record 原名 `AdBudgetGuardrails` 与 **14.1.1.1 同名** ——
+**SpringDoc 静默丢掉后一个**，契约里 14.1.1.1 的 `guardrails` 字段被指向了本模块的类型
+（`maxCampaignsPerRequest` 被换成 `maxCampaignsPerTask`），
+**契约与后端不一致，而 typecheck / lint / vitest 全绿**。已改名 `AdBudgetAllocationGuardrails`，
+并以「生成后 `channel.ts` 无重复 `export type` 名」为判据复核。
+⇒ **下一轮 L2 的契约校验（`sync --check` / `contracts:generate` + `git diff --exit-code`）要盯这一类**：
+重名类型不会让任何测试变红，只会让契约静默串味。
+
+### 下一轮 tick 可以直接跳过的动作
+
+- ❌ 不用再做并入预演（结论已在上表，4 条车道互相不冲突）
+- ❌ 不用再指派 api-proxy 锚点（4 个锚点已各自落地且互不重叠）
+- ✅ 要做的：`merge-ready` → 「已知互相破坏形状」扫描（4 条新迁移：V277 / V278 / V279 / V280，
+  **其中 V277 / V278 / V279 / V280 均「零 ALTER 既有表」**，三条扫描大概率不命中）→
+  **跑一次 L2** → 写 batch-57 说明（4 模块各一节）→ commit → push
