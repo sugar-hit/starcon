@@ -1101,4 +1101,239 @@ class ServiceTicketIntegrationTest {
             .andReturn().getResponse().getContentAsString();
     assertThat(caps).contains("一张售后单只转一次工单").contains("15 客户与客服");
   }
+
+  // ==========================================================================
+  // 跨模块引用守卫（V276）：升级去向必须真实存在**且属于当前租户**
+  // ==========================================================================
+  //
+  // ⚠️ 这一节是 **V276 的自证**。
+  //   V270 原来用两条**跨模块外键**钉住「升级去向必须真实存在」，
+  //   但外键让 11.4.1.1 / 11.4.1.2 的 `truncate platform_dispute` 直接炸掉（跨车道破坏）。
+  //   V276 把它换成「同租户存在性守卫触发器」：
+  //   触发器**不挡 TRUNCATE**，但**照样挡住**「升级了但对方根本不存在」，
+  //   而且比原来的**裸 id** 外键**更严** —— 跨租户引用也拦。
+
+  /** 另一个租户：用来证明「跨租户引用」也被拦。 */
+  static final UUID otherTenant = UUID.randomUUID();
+
+  /**
+   * 以**超管**连接（绕过 RLS）执行一段 SQL 并提交。
+   *
+   * <p>用 jOOQ 的 {@code DSL.using(connection)} 而不是裸 JDBC Statement：拼装 SQL 的写法与
+   * {@code ServiceTicketService} 一致，免得测试里维护第二套绑参风格（同 ExchangeAuthorizationIntegrationTest）。
+   */
+  void runAsSuperuser(java.util.function.Consumer<org.jooq.DSLContext> work) throws Exception {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword())) {
+      c.setAutoCommit(false);
+      try {
+        work.accept(org.jooq.impl.DSL.using(c, org.jooq.SQLDialect.POSTGRES));
+        c.commit();
+      } catch (Exception e) {
+        c.rollback();
+        throw e;
+      }
+    }
+  }
+
+  /**
+   * 绕过服务层直连 SQL 写一行工单（只为打到 DB 守卫那一层）。
+   *
+   * <p>⚠️ 刻意**不**走 {@code ServiceTicketService}：服务层的升级动作会自己建出对方的单，
+   * 写不进去的路径根本到不了「守卫」这一层。
+   *
+   * <p>只写被测的那一个升级去向列，另一个留 NULL —— 免得测试里维护「绑 null 的 uuid」那套写法。
+   */
+  void insertTicketRow(
+      org.jooq.DSLContext dsl, UUID caseId, String tag, boolean dispute, UUID target) {
+    dsl.execute(
+        dispute
+            ? "insert into aftersales_service_ticket(id,tenant_id,ticket_no,case_id,ticket_status,"
+                + "priority,reason_note,owner_module,created_by,created_at,escalated_dispute_id)"
+                + " values(?::uuid,?::uuid,?,?::uuid,'OPEN','NORMAL','','11.4.2.1',?::uuid,?::timestamptz,?::uuid)"
+            : "insert into aftersales_service_ticket(id,tenant_id,ticket_no,case_id,ticket_status,"
+                + "priority,reason_note,owner_module,created_by,created_at,escalated_case_id)"
+                + " values(?::uuid,?::uuid,?,?::uuid,'OPEN','NORMAL','','11.4.2.1',?::uuid,?::timestamptz,?::uuid)",
+        UUID.randomUUID(), tenant, "TK-GRD-" + tag, caseId, user, T1, target);
+  }
+
+  /** 走应用路径写一行工单（运行角色 + RLS + 守卫）。 */
+  void insertTicketRow(UUID caseId, String tag, boolean dispute, UUID target) {
+    as(
+        () -> {
+          insertTicketRow(sql, caseId, tag, dispute, target);
+          return null;
+        });
+  }
+
+  /** 以超管连接写一行工单（RLS 完全不参与 ⇒ 拦它的只能是守卫本身）。 */
+  void insertTicketRowAsSuperuser(UUID caseId, String tag, boolean dispute, UUID target)
+      throws Exception {
+    runAsSuperuser(dsl -> insertTicketRow(dsl, caseId, tag, dispute, target));
+  }
+
+  /** 在**当前租户**名下建一条平台纠纷（走应用路径：运行角色 + RLS）。 */
+  UUID seedDispute(String tag) {
+    UUID id = UUID.randomUUID();
+    as(
+        () -> {
+          sql.execute(
+              "insert into platform_dispute(id,tenant_id,dispute_no,platform_code,platform_name,"
+                  + "platform_dispute_no,platform_order_no,dispute_type,dispute_reason,"
+                  + "dispute_currency,dispute_amount,evidence_deadline,dispute_status,created_by)"
+                  + " values(?::uuid,?::uuid,?,'AMAZON','Amazon',?,'','A_TO_Z','','USD',?::numeric,"
+                  + "?::timestamptz,'OPEN',?::uuid)",
+              id, tenant, "PDS-" + tag, "AZ-" + tag, AMOUNT,
+              OffsetDateTime.now(ZoneOffset.UTC).plusDays(14), user);
+          return null;
+        });
+    return id;
+  }
+
+  /** 在 **otherTenant** 名下建一条平台纠纷（超管连接，绕过 RLS）。 */
+  UUID seedOtherTenantDispute(String tag) throws Exception {
+    UUID id = UUID.randomUUID();
+    runAsSuperuser(
+        dsl ->
+            dsl.execute(
+                "insert into platform_dispute(id,tenant_id,dispute_no,platform_code,platform_name,"
+                    + "platform_dispute_no,platform_order_no,dispute_type,dispute_reason,"
+                    + "dispute_currency,dispute_amount,evidence_deadline,dispute_status,created_by)"
+                    + " values(?::uuid,?::uuid,?,'AMAZON','Amazon',?,'','A_TO_Z','','USD',?::numeric,"
+                    + "?::timestamptz,'OPEN',?::uuid)",
+                id, otherTenant, "OT-PDS-" + tag, "OT-AZ-" + tag, AMOUNT,
+                OffsetDateTime.now(ZoneOffset.UTC).plusDays(14), user));
+    return id;
+  }
+
+  /** 在 **otherTenant** 名下建一张售后单（超管连接，绕过 RLS）。 */
+  UUID seedOtherTenantCase(String tag) throws Exception {
+    UUID id = UUID.randomUUID();
+    runAsSuperuser(
+        dsl ->
+            dsl.execute(
+                "insert into aftersales_case(id,tenant_id,case_no,order_id,case_type,status,"
+                    + "reason_code,requested_amount,currency,requested_quantity,reply_due_at,"
+                    + "received_at,created_at) values(?::uuid,?::uuid,?,?::uuid,'RETURN_REFUND',"
+                    + "'RECEIVED','QUALITY_DEFECT',?::numeric,'USD',?::numeric,?::timestamptz,"
+                    + "?::timestamptz,?::timestamptz)",
+                id, otherTenant, "OT-CASE-" + tag, UUID.randomUUID(), AMOUNT, QTY,
+                T1.plusDays(3), T1, T1));
+    return id;
+  }
+
+  @Test
+  void 升级去向指向不存在的纠纷会被DB拒绝() {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-NODIS");
+
+    assertDbRefused(
+        () -> insertTicketRow(caseId, "NODIS", true, UUID.randomUUID()),
+        "升级去向的平台纠纷不存在或不属于当前租户");
+  }
+
+  @Test
+  void 升级去向指向别的租户的纠纷会被DB拒绝() throws Exception {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-XDIS");
+    UUID otherDispute = seedOtherTenantDispute("XDIS");
+
+    // 走应用路径：运行角色 + RLS + 守卫（任一层都能拦，但必须是**守卫自己的措辞**）。
+    assertDbRefused(
+        () -> insertTicketRow(caseId, "XDIS", true, otherDispute),
+        "升级去向的平台纠纷不存在或不属于当前租户");
+
+    // ⚠️ 再走一次**超管连接**（RLS 完全不参与）：
+    //   拦它的只能是守卫里的 tenant_id 判定 —— 这正是原来那条**裸 id 外键**放行的那个洞。
+    assertDbRefused(
+        () -> insertTicketRowAsSuperuser(caseId, "XDIS2", true, otherDispute),
+        "升级去向的平台纠纷不存在或不属于当前租户");
+  }
+
+  @Test
+  void 升级去向指向同租户真实存在的纠纷可以通过() {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-OKDIS");
+    UUID disputeId = seedDispute("OKDIS");
+
+    insertTicketRow(caseId, "OKDIS", true, disputeId);
+
+    assertThat(
+            as(
+                    () ->
+                        sql.fetchOne(
+                                "select escalated_dispute_id from aftersales_service_ticket"
+                                    + " where tenant_id = ?::uuid and case_id = ?::uuid",
+                                tenant, caseId)
+                            .get("escalated_dispute_id", UUID.class)))
+        .isEqualTo(disputeId);
+  }
+
+  @Test
+  void 升级去向指向不存在的售后单会被DB拒绝() {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-NOCASE");
+
+    assertDbRefused(
+        () -> insertTicketRow(caseId, "NOCASE", false, UUID.randomUUID()),
+        "升级去向的售后单不存在或不属于当前租户");
+  }
+
+  @Test
+  void 升级去向指向别的租户的售后单会被DB拒绝() throws Exception {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-XCASE");
+    UUID otherCase = seedOtherTenantCase("XCASE");
+
+    assertDbRefused(
+        () -> insertTicketRow(caseId, "XCASE", false, otherCase),
+        "升级去向的售后单不存在或不属于当前租户");
+
+    // ⚠️ 超管连接：RLS 不参与 ⇒ 拦它的只能是守卫里的 tenant_id 判定。
+    assertDbRefused(
+        () -> insertTicketRowAsSuperuser(caseId, "XCASE2", false, otherCase),
+        "升级去向的售后单不存在或不属于当前租户");
+  }
+
+  @Test
+  void 升级去向指向同租户真实存在的售后单可以通过() {
+    seedSla("", 24, 48);
+    UUID caseId = newCase("GRD-OKCASE");
+    // 升级去向是**另一张**售后单（咨询升级为投诉：新建一张售后单）。
+    UUID escalatedCaseId = newCase("GRD-OKCASE2");
+
+    insertTicketRow(caseId, "OKCASE", false, escalatedCaseId);
+
+    assertThat(
+            as(
+                    () ->
+                        sql.fetchOne(
+                                "select escalated_case_id from aftersales_service_ticket"
+                                    + " where tenant_id = ?::uuid and case_id = ?::uuid",
+                                tenant, caseId)
+                            .get("escalated_case_id", UUID.class)))
+        .isEqualTo(escalatedCaseId);
+  }
+
+  /** 沿 cause 链找最里面那条 SQLException —— DB 拒绝的**原文**在那里。 */
+  static java.sql.SQLException rootSqlException(Throwable error) {
+    for (Throwable t = error; t != null; t = t.getCause()) {
+      if (t instanceof java.sql.SQLException sql) {
+        return sql;
+      }
+      if (t.getCause() == t) {
+        break;
+      }
+    }
+    throw new AssertionError("异常链里没有 SQLException，说明不是 DB 拒绝：", error);
+  }
+
+  /** 断言一段工作被 DB 拒绝（23514 = 触发器/check 约束）。 */
+  static void assertDbRefused(
+      org.assertj.core.api.ThrowableAssert.ThrowingCallable work, String expectedFragment) {
+    var error = org.assertj.core.api.Assertions.catchThrowable(work);
+    assertThat(error).as("应当被 DB 拒绝").isNotNull();
+    var sqlError = rootSqlException(error);
+    assertThat(sqlError.getSQLState()).as("必须是 DB 层拒绝（23514）").isEqualTo("23514");
+    assertThat(sqlError.getMessage()).contains(expectedFragment);
+  }
 }

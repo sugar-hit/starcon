@@ -1329,4 +1329,167 @@ class PlatformDisputeAppealIntegrationTest {
   long versionOf(UUID appealId) {
     return as(() -> appeals.appealDetail(appealId).head().version());
   }
+
+  // ==========================================================================
+  // 十二、跨模块引用守卫（V276）：申诉单挂的纠纷必须真实存在**且属于当前租户**
+  // ==========================================================================
+  //
+  // ⚠️ 这一节是 **V276 的自证**。
+  //   V269 原来用一条**跨模块外键**（`platform_dispute_appeal.dispute_id →
+  //   platform_dispute(id)`）钉住「申诉必须挂在真实存在的纠纷上」，
+  //   但外键让 11.4.1.1 的 `truncate platform_dispute` 直接炸掉（跨车道破坏）。
+  //   V276 把它换成「同租户存在性守卫触发器」：
+  //   触发器**不挡 TRUNCATE**，但**照样挡住**「申诉了但对方根本不存在」，
+  //   而且比原来的**裸 id** 外键**更严** —— 跨租户引用也拦。
+  //
+  // ⚠️ 顺带说明：V269 自己在 `platform_dispute_appeal` 上挂的触发器
+  //   （submit / transition / event）**全是 BEFORE UPDATE / AFTER** ——
+  //   **没有一条管 INSERT 时的纠纷存在性** ⇒ 本守卫补的正是这一段。
+
+  /** 在**另一个租户**（other）的上下文里跑一段工作。 */
+  <T> T asOther(java.util.function.Supplier<T> work) {
+    return access.run(actors.get("Bearer tenant-other"), "trade.aftersales.write", work);
+  }
+
+  /**
+   * 以**超管**连接（绕过 RLS）执行一段 SQL 并提交。
+   *
+   * <p>用 jOOQ 的 {@code DSL.using(connection)} 而不是裸 JDBC Statement：拼装 SQL 的写法与
+   * {@code PlatformDisputeAppealService} 一致，免得测试里维护第二套绑参风格。
+   */
+  void runAsSuperuser(java.util.function.Consumer<org.jooq.DSLContext> work) throws Exception {
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword())) {
+      c.setAutoCommit(false);
+      try {
+        work.accept(org.jooq.impl.DSL.using(c, org.jooq.SQLDialect.POSTGRES));
+        c.commit();
+      } catch (Exception e) {
+        c.rollback();
+        throw e;
+      }
+    }
+  }
+
+  /** 在 **other** 租户名下建一件纠纷（超管连接，绕过 RLS）。 */
+  UUID seedOtherTenantDispute(String tag) throws Exception {
+    UUID id = UUID.randomUUID();
+    runAsSuperuser(
+        dsl ->
+            dsl.execute(
+                "insert into platform_dispute(id,tenant_id,dispute_no,platform_code,platform_name,"
+                    + "platform_dispute_no,platform_order_no,dispute_type,dispute_reason,"
+                    + "dispute_currency,dispute_amount,evidence_deadline,dispute_status,created_by)"
+                    + " values(?::uuid,?::uuid,?,'AMAZON','Amazon',?,'','A_TO_Z','','USD',?::numeric,"
+                    + "?::timestamptz,'OPEN',?::uuid)",
+                id,
+                other,
+                "OT-PDS-" + tag,
+                "OT-AZ-" + tag,
+                new BigDecimal("88.5000"),
+                OffsetDateTime.now(ZoneOffset.UTC).plusDays(14),
+                user));
+    return id;
+  }
+
+  /**
+   * 绕过服务层直连 SQL 写一行申诉单（只为打到 DB 守卫那一层）。
+   *
+   * <p>⚠️ 刻意**不**走 {@code PlatformDisputeAppealService}：服务层自己会校验纠纷，
+   * 那条路根本到不了「DB 守卫」这一层。
+   */
+  void insertAppealRow(org.jooq.DSLContext dsl, UUID tid, String tag, UUID disputeId) {
+    dsl.execute(
+        "insert into platform_dispute_appeal(id,tenant_id,appeal_no,dispute_id,appeal_status,"
+            + "appeal_text,template_code,claimed_currency,claimed_amount,created_by,created_at,"
+            + "updated_at,updated_by) values(?::uuid,?::uuid,?::varchar,?::uuid,'DRAFT',?,'',"
+            + "'USD',?::numeric,?::uuid,?::timestamptz,?::timestamptz,?::uuid)",
+        UUID.randomUUID(),
+        tid,
+        "PA-GRD-" + tag,
+        disputeId,
+        "守卫自证-" + tag,
+        new BigDecimal("88.5000"),
+        user,
+        OffsetDateTime.now(ZoneOffset.UTC),
+        OffsetDateTime.now(ZoneOffset.UTC),
+        user);
+  }
+
+  /** 走应用路径写一行申诉单（运行角色 + RLS + 守卫）。 */
+  void insertAppealRow(String tag, UUID disputeId) {
+    as(
+        () -> {
+          insertAppealRow(sql, tenant, tag, disputeId);
+          return null;
+        });
+  }
+
+  /** 以超管连接写一行申诉单（RLS 完全不参与 ⇒ 拦它的只能是守卫本身）。 */
+  void insertAppealRowAsSuperuser(String tag, UUID disputeId) throws Exception {
+    runAsSuperuser(dsl -> insertAppealRow(dsl, tenant, tag, disputeId));
+  }
+
+  @Test
+  void 申诉单挂不存在的纠纷会被DB拒绝() {
+    assertDbRefused(
+        () -> insertAppealRow("NODIS", UUID.randomUUID()),
+        "申诉单挂的纠纷不存在或不属于当前租户");
+  }
+
+  @Test
+  void 申诉单挂别的租户的纠纷会被DB拒绝() throws Exception {
+    UUID otherDispute = seedOtherTenantDispute("XDIS");
+
+    // 走应用路径：运行角色 + RLS + 守卫（必须是**守卫自己的措辞**）。
+    assertDbRefused(
+        () -> insertAppealRow("XDIS", otherDispute),
+        "申诉单挂的纠纷不存在或不属于当前租户");
+
+    // ⚠️ 再走一次**超管连接**（RLS 完全不参与）：
+    //   拦它的只能是守卫里的 tenant_id 判定 —— 这正是原来那条**裸 id 外键**放行的那个洞。
+    assertDbRefused(
+        () -> insertAppealRowAsSuperuser("XDIS2", otherDispute),
+        "申诉单挂的纠纷不存在或不属于当前租户");
+  }
+
+  @Test
+  void 申诉单挂同租户真实存在的纠纷可以通过() {
+    PlatformDisputeDetail d = newDispute("OKDIS", OffsetDateTime.now(ZoneOffset.UTC).plusDays(14));
+
+    insertAppealRow("OKDIS", d.head().id());
+
+    assertThat(
+            as(
+                    () ->
+                        sql.fetchOne(
+                                "select dispute_id from platform_dispute_appeal"
+                                    + " where tenant_id = ?::uuid and appeal_no = ?",
+                                tenant,
+                                "PA-GRD-OKDIS")
+                            .get("dispute_id", UUID.class)))
+        .isEqualTo(d.head().id());
+  }
+
+  /** 沿 cause 链找最里面那条 SQLException —— DB 拒绝的**原文**在那里。 */
+  static java.sql.SQLException rootSqlException(Throwable error) {
+    for (Throwable t = error; t != null; t = t.getCause()) {
+      if (t instanceof java.sql.SQLException sql) {
+        return sql;
+      }
+      if (t.getCause() == t) {
+        break;
+      }
+    }
+    throw new AssertionError("异常链里没有 SQLException，说明不是 DB 拒绝：", error);
+  }
+
+  /** 断言一段工作被 DB 拒绝（23514 = 触发器/check 约束）。 */
+  static void assertDbRefused(
+      org.assertj.core.api.ThrowableAssert.ThrowingCallable work, String expectedFragment) {
+    var error = org.assertj.core.api.Assertions.catchThrowable(work);
+    assertThat(error).as("应当被 DB 拒绝").isNotNull();
+    var sqlError = rootSqlException(error);
+    assertThat(sqlError.getSQLState()).as("必须是 DB 层拒绝（23514）").isEqualTo("23514");
+    assertThat(sqlError.getMessage()).contains(expectedFragment);
+  }
 }
