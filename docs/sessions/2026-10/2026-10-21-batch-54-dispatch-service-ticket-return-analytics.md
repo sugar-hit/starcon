@@ -158,3 +158,44 @@ batch-53 第三轮 L2 全绿时的字节一致（`6d31c64d`）。
 4. **`11.4.2.2 知识库与话术`（已交付）与本批 11.4.2.1 工单管理的转派/话术引用**：
    同服务内走授权 API，不要跨库读表。
 5. **配额节奏**：本轮 4+2=6 填满配额。下一轮回收后若在途归零，恢复满档 4 条/批。
+
+## ⚠️ 风险发现：共享契约文件与 CI 的校验口径存在偏差（**先于本批车道就存在**）
+
+收尾时 `11.4.2.1` 车道交来 `packages/api-contracts/src/trade.openapi.json`，文本 diff 高达 **10 万行**。
+逐键独立复核（base `6d31c64d` vs 车道 `87d2b41d`，用 JSON 语义比较而非文本比较）结论：
+
+| 维度 | base | 车道版 | 新增 | 删除 | **值变** |
+| --- | --- | --- | --- | --- | --- |
+| `paths` | 720 | 734 | 14 | **0** | **0** |
+| `components.schemas` | 1577 | 1603 | 26 | **0** | **0** |
+
+⇒ **纯新增**，没有删除、没有既有条目被改。10 万行来自 **JSON 键序整体位移**
+（新增 14 条 path 后对象顺序整体移动，codegen 原样落盘）。
+
+**但真正的问题在数字字面量**，已实测复现：
+
+```
+node   JSON.stringify({maximum:100.0})  →  {"maximum":100}    ← 塌掉小数
+python json.dumps({"maximum": 100.0})   →  {"maximum": 100.0} ← 保留
+```
+
+- 集成头 HEAD 版 `trade.openapi.json`（由 **`merge-union.mjs` 的 JS `JSON.stringify` 写出**）
+  形态是 `0` / `1` / `100`；
+- 各车道用 `pnpm contracts:generate`（**Python codegen**）生成，形态是 `0.0` / `1.0` / `100.0`；
+- CI（`.github/workflows/ci.yml:140-141`）跑 `pnpm contracts:generate` 后接
+  `git diff --exit-code -- packages/api-contracts/src`。
+
+⇒ **CI 期望 Python 形态，集成头存的是 JS 形态 ⇒ 该校验在集成头上必红。**
+这不是本批车道引入的（HEAD 早已是 JS 写出的形态），而是**合并驱动器与 codegen 的序列化差异**。
+
+**下一轮（batch-55）合并 5 条车道时的处理建议**：
+
+1. 5 条 ready 车道里有 **3 条**（6.6.2.2 V268 / 11.4.1.2 V269 / 11.4.2.1 V270）都重写了
+   `trade.openapi.json`，各自 ~5 万行 diff ⇒ **git 层面必然冲突**，必须由 `merge-union.mjs`
+   按「paths 键 / schema 名」三方求并（它走 `JSON.stringify` 逐键比较，数字字面量差异会被
+   判为「theirs 相对基线变了」而取 theirs，**不会**进 `conflictKeys`，实测这条路径是安全的）。
+2. 合并**之后**在集成头上补跑一次 `pnpm contracts:generate`，把文件形态统一回 CI 期望的
+   Python 原生形态，再跑 L2 —— 否则 CI 仍会因为数字字面量形态不一致而红。
+3. 根治方案（需要人工决策，不在调度侧权限内）：让 `merge-union.mjs` 写出时用与 codegen
+   一致的序列化（Python `json.dumps` 或 JS 里对 number 做显式格式化），否则每次合并都会
+   把契约文件重新写成 JS 形态，与 CI 校验长期拉锯。
