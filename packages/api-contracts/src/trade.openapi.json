@@ -35595,6 +35595,816 @@
           }
         }
       }
+    },
+    "/trade/quality-inspections/templates/{id}": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplateDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "put_trade_quality_inspections_templates_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "result",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "receiptCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "created"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}/items": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_id_items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingOrderItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderItemRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}/concessions": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_id_concessions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingConcessionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingConcessionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}/complete": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_id_complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingCompleteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}/cancel": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_id_cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/templates": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inspectionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncomingTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/templates/{id}/retire": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_templates_id_retire",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/templates/{id}/activate": {
+      "post": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "post_trade_quality_inspections_templates_id_activate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/{id}/export": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_id_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/summary": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currencyCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingInspectionSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/options": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingQualityInspectionOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/quality-inspections/capabilities": {
+      "get": {
+        "tags": [
+          "quality-inspection-controller"
+        ],
+        "operationId": "get_trade_quality_inspections_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingQualityInspectionCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -88091,6 +88901,1140 @@
             "type": "string"
           },
           "ticketOwner": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingTemplateInput": {
+        "required": [
+          "code",
+          "inspectionType",
+          "items",
+          "name",
+          "samplingRatio"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "inspectionType": {
+            "type": "string",
+            "enum": [
+              "INCOMING",
+              "FINISHED"
+            ]
+          },
+          "samplingRatio": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "minSampleQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "maxSampleQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "roundingMode": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "CEILING",
+              "ROUND_HALF_UP",
+              "FLOOR"
+            ]
+          },
+          "criticalFailureAction": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "REJECT_LOT",
+              "DEDUCT_ONLY"
+            ]
+          },
+          "defectiveTarget": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PENDING_INSPECTION",
+              "DEFECTIVE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingTemplateItemInput"
+            }
+          }
+        }
+      },
+      "IncomingTemplateItemInput": {
+        "required": [
+          "itemCode",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "enum": [
+              "APPEARANCE",
+              "FUNCTION",
+              "SPECIFICATION",
+              "PACKAGING",
+              "CERTIFICATION"
+            ]
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "critical": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "acceptanceCriteria": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "sampleCoverage": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "inspectionType": {
+            "type": "string"
+          },
+          "inspectionTypeLabel": {
+            "type": "string"
+          },
+          "samplingRatio": {
+            "type": "number"
+          },
+          "minSampleQuantity": {
+            "type": "number"
+          },
+          "maxSampleQuantity": {
+            "type": "number"
+          },
+          "roundingMode": {
+            "type": "string"
+          },
+          "roundingModeLabel": {
+            "type": "string"
+          },
+          "criticalFailureAction": {
+            "type": "string"
+          },
+          "criticalFailureActionLabel": {
+            "type": "string"
+          },
+          "defectiveTarget": {
+            "type": "string"
+          },
+          "defectiveTargetLabel": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncomingOrderInput": {
+        "required": [
+          "skuCode",
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "receiptCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "batchNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "lotSize": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "exchangeRate": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "unitConversionFactor": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "unitPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inspectionNo": {
+            "type": "string"
+          },
+          "inspectionType": {
+            "type": "string"
+          },
+          "inspectionTypeLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "categoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "arrivedQuantity": {
+            "type": "number"
+          },
+          "lotSize": {
+            "type": "number"
+          },
+          "sampleQuantity": {
+            "type": "number"
+          },
+          "sampledQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "concessionQuantity": {
+            "type": "number"
+          },
+          "grossDeductedQuantity": {
+            "type": "number"
+          },
+          "sellableQuantity": {
+            "type": "number"
+          },
+          "nonSellableQuantity": {
+            "type": "number"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "dispositionLabel": {
+            "type": "string"
+          },
+          "dispositionStatus": {
+            "type": "string"
+          },
+          "dispositionStatusLabel": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "deductedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "concludedItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "concessionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalFailure": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingOrderItemInput": {
+        "required": [
+          "result",
+          "templateItemId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "PASS",
+              "FAIL",
+              "CONCESSION"
+            ]
+          },
+          "failedSampleQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "deductedQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "defectType": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "defectDescription": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "sampledQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "inspectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingOrderItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemCodeLabel": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "failedSampleQuantity": {
+            "type": "number"
+          },
+          "deductedQuantity": {
+            "type": "number"
+          },
+          "defectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "defectDescription": {
+            "type": "string"
+          },
+          "inspectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncomingConcessionInput": {
+        "required": [
+          "permissionCode",
+          "quantity",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "permissionCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "APPEARANCE",
+              "FUNCTION",
+              "SPECIFICATION",
+              "PACKAGING",
+              "CERTIFICATION"
+            ]
+          }
+        }
+      },
+      "IncomingConcessionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemCodeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "permissionCode": {
+            "type": "string"
+          },
+          "approvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncomingCompleteInput": {
+        "type": "object",
+        "properties": {
+          "conclusionNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "inspectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingCancelInput": {
+        "required": [
+          "cancelReason"
+        ],
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "IncomingOrderPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/IncomingOrderRow"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingOrderItemRow"
+            }
+          },
+          "concessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingConcessionRow"
+            }
+          },
+          "missingItemCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missingItemLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pendingItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingTemplateItemRow"
+            }
+          },
+          "samplingBasis": {
+            "type": "string"
+          },
+          "balanceNote": {
+            "type": "string"
+          },
+          "dispositionNote": {
+            "type": "string"
+          },
+          "safetyNote": {
+            "type": "string"
+          },
+          "conclusionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingTemplateItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemCodeLabel": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "acceptanceCriteria": {
+            "type": "string"
+          },
+          "sampleCoverage": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "IncomingTemplatePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingTemplateRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingTemplateDetail": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/IncomingTemplateRow"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingTemplateItemRow"
+            }
+          }
+        }
+      },
+      "IncomingInspectionSummary": {
+        "type": "object",
+        "properties": {
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inspectingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "passedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "concessionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "arrivedQuantity": {
+            "type": "number"
+          },
+          "inspectedQuantity": {
+            "type": "number"
+          },
+          "qualifiedQuantity": {
+            "type": "number"
+          },
+          "defectiveQuantity": {
+            "type": "number"
+          },
+          "concessionQuantity": {
+            "type": "number"
+          },
+          "sellableQuantity": {
+            "type": "number"
+          },
+          "nonSellableQuantity": {
+            "type": "number"
+          },
+          "deductedAmount": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingQualityInspectionOptions": {
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingTemplateOption"
+            }
+          },
+          "itemCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "itemCodeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resultLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inspectionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inspectionTypeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roundingModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roundingModeLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncomingTemplateOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "inspectionType": {
+            "type": "string"
+          },
+          "inspectionTypeLabel": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "IncomingCapabilityItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "IncomingQualityInspectionCapabilities": {
+        "type": "object",
+        "properties": {
+          "upstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingCapabilityItem"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingCapabilityItem"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomingCapabilityItem"
+            }
+          },
+          "itemCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roundingModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "samplingRuleNote": {
+            "type": "string"
+          },
+          "quantityBalanceNote": {
+            "type": "string"
+          },
+          "concessionRuleNote": {
+            "type": "string"
+          },
+          "dispositionNote": {
             "type": "string"
           },
           "note": {

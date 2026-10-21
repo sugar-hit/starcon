@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **195** |
 | 完成率 | 58.1% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 28 | 0 | 50 | 78 |
 | **D7** | 15 | 0 | 140 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 25 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 2 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -243,7 +226,7 @@
 | 6.3.2.2 | 到货与逾期 | — | D6 | 已交付 | 迁移 trade `V235__purchase_arrival_tracking.sql`（**五张新表，零 ALTER 任何既有表**，跨车道 DDL 回归面 = 0）：`purchase_arrival_tracking` 到货跟踪单（可收/已收/未收三件套 + 承诺到货日快照 + 六态状态机 + 在途快照）+ `purchase_arrival_receipt` 到货流水（追加式，序号由 DB 排）+ `purchase_arrival_payable_confirmation` 应付部分确认（**trade 侧自有事实记录**）+ `purchase_arrival_disposition` 处置建议（依据由事实推导）+ `purchase_arrival_event` 留痕（追加式，UPDATE/DELETE 已收回）；全部 tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT trade_app，流水与留痕额外 REVOKE UPDATE/DELETE。**蓝图加粗句「部分到货必须立即更新已收数量并触发应付部分确认」落成数据库不变量而不是应用层约定**：① 已收数量永远由 DB 从到货流水重算（守卫①），表级 CHECK 再兜一道（已收+未收=可收），本模块**没有**「直接写已收数量」的入口；② 插入一条到货流水 ⇒ 同一事务内 DB 触发器（守卫③）更新头的数量与状态、**按「单价快照 × 本次到货数量」落一笔应付部分确认**、追加留痕 ⇒ 「登记了到货却没有应付部分确认」在本模块**没有代码路径**；③ 应付确认的金额/币种/单价/数量全部由 DB 取（守卫④），调用方传不进来。**六态显式状态机**（待发货/已发货在途/部分到货/全部到货/逾期未到/取消），合法流转在 Java 枚举 `PurchaseArrivalStatus.canTransitionTo` 与 DB 守卫① 两处逐条对齐，非法跃迁一律拒绝（守卫① 对「在途→逾期」另有一条专门的拒绝理由）。**「已发货但在途」不算逾期是硬规则不是文案**：IN_TRANSIT → OVERDUE 在守卫① 里被显式拒绝并写明理由（还在路上，判逾期会误伤），且在途单逾期天数恒为 0；在途滞留超 7 天另进预警看板（alertType=IN_TRANSIT_STALLED），两个口径不混。**逾期判定用数据库时钟**（DB 的 `now()`，逐字返回 evaluatedAt），日历日口径为「承诺日当天不算逾期，次日 00:00 起算」；逾期落库是幂等扫描（读取路径刷新，刻意不 bump version 以免客户端乐观锁无故失效）。**处置建议（催货/改供应商/调库存/延期售卖）每条都带推导依据**：人话 basis_note + 数字 basis_facts（jsonb），依据由事实拼出（逾期天数、缺口数量、已收比例、在途滞留天数、该供应商在本租户下的逾期单数与累计逾期天数），同事实同依据，不是写死的一段话。**跨服务边界**：8.2.1.1 收货单与 10.4.1.2 在途跟踪在 **warehouse 独立库** ⇒ 只经授权只读端口 `WarehouseReceiptQueryPort` / `FirstMileTrackingQueryPort` 读、本库只存逻辑引用与快照（无跨库 FK/视图/JOIN）；滞留天数取「最后一个轨迹节点距今几天」（节点事件流在详情里），**不用 ETA 口径**（拿 ETA 当滞留会让「建议催货」的依据是错的）；上游不可达一律 503 显式失败，不返回空集合冒充「没有收货单」。**6.3.1.x 采购单与 6.3.2.1 跟单未交付 ⇒ 逻辑引用**（采购单号 + 来源单据号 + 供应商标识），不建指向不存在的表的 FK；**12 财务（finance 服务）不存在** ⇒ 应付部分确认状态恒为 PENDING_FINANCE_CONFIRM、生效金额恒为 0，**不返回「已触发财务确认」这种假回执**，财务确认走独立动作 + 独立权限（trade.purchase.finance），确认为终态后整行冻结。端点 12 个：trade `GET/POST /trade/purchase-arrivals`（列表真分页 + 能力声明）+ `GET /trade/purchase-arrivals/{id}`（头+流水+应付确认+建议+留痕+可执行动作）+ `GET /trade/purchase-arrivals/overdue-board`（逾期未到 + 在途滞留两类预警）+ 动作 5 个（ship / arrivals / cancel / sync-in-transit / dispositions/{id}/resolve）+ 财务动作 2 个（payable-confirmations/{id}/confirm |
 | 6.4.1.1 | 加工单 | /purchase/processing | D6 | 已交付 | 迁移 trade `V97__trade_processing_order.sql`（五张表：processing_factory 加工厂档案 + processing_order 加工单 + processing_order_component 组件领用记录 + processing_order_event 状态与进度事件流 + processing_inbound_request 入库需求通知；全部 tenant_id NOT NULL + FORCE RLS + GRANT trade_app/starcon_app，事件流额外 REVOKE UPDATE/DELETE）。**归属 trade 而非新建 purchase 服务**：蓝图 README 系统地图 06 行写死「后端主责服务：trade + catalog（party）」，本仓不存在 purchase 服务，lane.mjs 的微服务盲区闸也是读这张表判卷能否落地；前端路由 /purchase/processing，后端命名空间按服务走（与 9.3.2.2 前端 /orders、后端 /trade/fulfillment/routing 同一纪律）。**组件领用量只有一个来源**：经 `BomVersionPort` 调 catalog 授权接口 GET /catalog/bom-versions/{id}/requirement（3.5.2.1 V25 已交付）取回 R7 三元组（单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP；**损耗率是百分数不是比率**，R6）并原样冻结，trade 不重算、不取整（取整是 3.5.2.2 与 06 采购建议的职责）；catalog 不可达显式 503，不返回空组件冒充「这个 BOM 没有组件」。**进度不靠一个 status 字段**：生命周期 DRAFT→RELEASED→IN_PROCESS→COMPLETED→RECEIVED（+CANCELLED）由 DB 触发器钉死合法迁移，每条组件 issued_quantity 独立推进（差额=还欠多少料），事件流 append-only 留痕；**完工数量（工厂报）与实收数量（仓库收）分列记**，未收满时加工单停在 COMPLETED 而非终态 RECEIVED（否则余量永远无处登记）。**入库需求通知 8 是真实可查表**，随「下达」生成、随作废取消。模块边界加粗句是验收项：trade **一张库存表都不碰**，组件出库与成品入库由 warehouse 的 `POST /warehouse/processing-orders/issues` 在**一个本地事务**里完成，复用 V1 既有 inventory_transaction/inventory_entry（kind='ADJUSTMENT'、ref_type='PROCESSING_ORDER'），UNIQUE(tenant_id,ref_type,ref_id) 顺带幂等，warehouse 侧**不新建表**（与 8.2.1.2 同一纪律）；两服务独立数据库，无跨库 FK/视图/JOIN。端点 13 个：trade 9 个（capabilities/requirements/factories/factories/{id}/orders/orders/{id}/orders/{id}/status/progress/components/issue）+ warehouse 4 个（capabilities/boundary/issues/executions）；页面 /purchase/processing（apps/web/src/app/purchase/processing/page.tsx + components/purchase/processing-order-workspace.tsx + processing-order-model.ts），api-proxy 白名单**求并**追加 trade/processing 与 warehouse/processing-orders 两支（两层 alternation 都求并），并实测反例确认守卫非空转。测试 ProcessingOrderIntegrationTest 27 例（trade）+ 16 例（warehouse），连接池压到 1，实跑 Testcontainers PostgreSQL 16，覆盖**组件出库与成品入库的同事务原子性专测**（组件不足整体回滚且一件未动、入库环节失败连带回滚已执行的出库、重复投递被幂等锚点挡住）、R7 口径、草稿 BOM 拒绝、DB 触发器直连绕过、租户隔离三断言与逐表 relforcerowsecurity；前端 processing-order-model.test.ts 24 例 + api-proxy 双向断言 6 例（真跑 proxy 断言 HTTP 状态码）。**顺带修掉三个真问题**：①apps/web/src/lib/api.ts 的 backends 漏了 trade 一项（9.3.2.2 的模型已在调 trade/ 却会抛「未知的接口路径」，本车道追加修复，union-safe）；②pageOrders/pageFactories 与 warehouse pageExecutions 的 jOOQ fetch 收到 List 未 toArray，静默按单参数绑定；③部分入库原本把加工单推进终态 RECEIVED。V97 不 ALTER 任何既有表，跨车道 DDL 回归面 = 0。**下游缺口**：8.4.1.1 组装单与 6.4.1.2 BOM 关联均未交付（后者效果上已被下达时冻结覆盖），capabilities 显式 available=false 并写明 ownerModule 与影响 |
 | 6.4.1.2 | BOM 关联 | /purchase/processing | D6 | 已交付 | 迁移 trade `V98__processing_bom_binding.sql`（两张新表：processing_bom_snapshot 冻结快照头 + processing_bom_snapshot_line 展开树明细；tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT trade_app/starcon_app，并按「授权在前、收回在后」REVOKE UPDATE/DELETE；一单一快照 UNIQUE(tenant_id,order_id)，TRUNCATED ⇒ reached_depth=max_depth，行数/采购行数自洽，4 个触发器：快照与明细不可改写、快照与明细写入时必须挂在草稿态加工单上）。**冻结语义是快照不是引用**：拍平 catalog 3.5.2.2 的整棵展开树（depth/path/子 BOM 判定/来源版本/单位用量/损耗率/需求量/可用/在途/缺口），读快照**不 join catalog、不 join 当前 BOM**，所以 BOM 中途改配影响不到已下达的加工单 —— 集成测试 `snapshotSurvivesBomChange` 改掉整棵 BOM 后逐行断言七列原封不动。**与 6.4.1.1 是互补不是重复**：6.4.1.1 冻结的是单层领料清单（processing_order_component，问「要领哪些料」），本模块冻结的是多层展开树（问「这批料当时按哪棵树、哪一版算的」）；不 ALTER 任何 V97 表、不加指向 processing_order 的 CHECK/触发器，跨车道 DDL 回归面 = 0（trade 全量 85 例含 6.4.1.1 的 27 例全绿）。**R1–R7 逐字沿用不另立一套**：展开由 catalog 3.5.2.2 真算，trade 只原样搬运；**R6 损耗率是百分数不是比率**（5 = 5%，scrap_rate NUMERIC(7,4) CHECK 0<=x<=100，服务层只做刻度对齐绝不做比率化）；R7 需求量 NUMERIC(19,6) 不取整；E1 逐层结转（深层按父行缺口驱动）因此必须同时冻结 available/in_transit/gap；E4 截断必须显形；R4 的 as_of 随快照冻结。对 catalog 的 V25/V26 表只存逻辑 ID，不建跨库 FK/视图/JOIN。端点 3 个：trade `POST/GET /trade/processing/orders/{orderId}/bom-binding`（冻结/读绑定，含漂移判定）+ `GET .../bom-binding/lines`（纯本地读展开树）；权限沿用 trade.processing.read/update，租户只来自已认证成员关系。页面 /purchase/processing 内嵌「BOM 冻结快照」面板（bom-binding-panel.tsx，与组件领用记录并排且明确区分；未冻结/空态/错误态/加载态齐全，截断显红，漂移告警措辞强调冻结仍然有效）。api-proxy 白名单**求并**追加 `bom-binding(?:\/lines)?` 一支（外层 2→2、module 层 4→4、orders 内层 3→4，逐分支核对无丢失），并写真 proxy 回归断言 9 例（含反向：refreeze/purge/delete/裸 bom-bindings 一律 404，且不误伤 6.4.1.1 与 9.3.2.2 既有分支）。测试 BomBindingIntegrationTest 21 例（trade，实跑 Testcontainers PostgreSQL 16，连接池压到 1，覆盖多租户三断言：两租户互不可见 / 伪造 X-Tenant-Id 无效且**断言行确实落在自称的租户名下** / 连接池归还后不串租户 20 轮）+ 前端 bom-binding-model.test.ts 11 例。契约由 codegen 重生成（catalog.ts +5 类型、trade.openapi.json +409 行，全部为新增）。 |
-| 6.4.2.1 | 质检单 | /purchase/quality | D6 | 未开发 | — |
+| 6.4.2.1 | 质检单 | /purchase/quality | D6 | 已交付 | 迁移 trade `V249__quality_inspection_order.sql`（**五张新表、零 ALTER 任何既有表**，跨车道 DDL 回归面 = 0）：quality_inspection_template（质检模板，按类目：抽样比例 0~1 的**比率** + 最小/最大抽样数 + **舍入口径** CEILING/ROUND_HALF_UP/FLOOR + 关键项不合格动作 REJECT_LOT/DEDUCT_ONLY + 不合格去向 PENDING_INSPECTION/DEFECTIVE）· quality_inspection_template_item（检验项定义，DB 层钉死蓝图点名的**五项** APPEARANCE/FUNCTION/SPECIFICATION/PACKAGING/CERTIFICATION，一模板一项 UNIQUE）· quality_inspection_order（质检单头：抽样规则**快照** + 应抽/实抽 + **三量** + 状态机 DRAFT→INSPECTING→COMPLETED/CANCELLED + 分流意图 + 币种/汇率快照/单位换算/单价/扣量金额 + 3.7.2.1 安全属性快照）· quality_inspection_order_item（**逐项**检验结论：一个检验项一条，带抽检不合格件数与**批次扣量**）· quality_inspection_concession（**让步接收**，append-only：原因与权限码 DB 层 CHECK 必填）；全部 tenant_id NOT NULL + ENABLE/**FORCE** RLS isolation + GRANT trade_app/starcon_app，让步接收表额外 **REVOKE UPDATE/DELETE**（只追加），模板与质检单 REVOKE DELETE。**🔴 蓝图加粗句「质检不合格的货不能直接进可售库存」的物理落点**：三量**互斥且完备** —— `qualified + defective + concession = lot_size`（本次质检覆盖的批量）由 DB 层 CHECK 在 COMPLETED 态强制；让步接收量**从扣量合计里面出**（`concession ≤ gross_deducted` 与 `defective + concession = gross_deducted` 两条 CHECK 钉死）—— 让步接收是「不合格里被批准放行的那部分」，不是把不合格改成合格；不合格量单列成**不可售量**，分流目标按模板写死（待检 / 残次），`disposition_status` 如实报出上游**是否真的分流了**。**分批到货**：批量 `lot_size ≤ arrived_quantity`，三量和的基数是 lot_size（本次质检覆盖的那一批）而不是到货量 —— 同一张收货单可以分几批来检；到货量由服务端读 8 收货后写入，**客户端只能指定「本次检哪一批」**。**抽样真的按比例算**：`应抽 = 批量 × 比例 → 夹逼 [最小, 最大] → 按批量封顶 → 按舍入口径取整`，整条**算式原文**写进 `sampling_basis` 落库，服务端算、客户端塞不进来（trade 的 ObjectMapper 开了 fail-on-unknown-properties，客户端传 `sampleQuantity` 直接 400 且零落库）。**逐项结论驱动扣量**：没有一个凭空的「总分」；每个检验项一条结论（结论 + 抽检不合格件数 + 批次扣量 + 缺陷类型/描述），缺任何一项结论**不许完结**（409 并列出缺哪几项）。**🔴 让步接收要权限 + 原因**：原因与权限码 DB 层 CHECK 必填（缺一 400），且服务层**真的校验记录人持有那个权限码**（只写一个码不算放行 ⇒ 403），让步记录 append-only（改写/删除被 DB 触发器挡下）。**跨服务纪律**：收货读 warehouse 的授权只读接口（`QualityInspectionWarehousePort`：GET /warehouse/goods-receipts + /{id}，按单号**逐字相等**匹配，warehouse 的 keyword 是模糊匹配），物理安全属性读 catalog 的授权只读接口（`QualityInspectionCatalogPort`：GET /catalog/physical-safety/skus/{skuId}，404=没档案、其它错误=503，**不混成同一个答案**）；转发的是**调用方自己的 bearer**，租户仍由上游按已认证成员关系解析，两道 RLS；上游不可达 ⇒ **显式 503，绝不返回空集合冒充「没有收货」**。**3.7.2.1 真的被用上**：读到「带电池/液体/危险品/磁性」的 SKU 而模板里**没有认证标识检验项** ⇒ **完结被拒**（409）。**🔴 库存分流未接线（如实标，不假装已分流）**：warehouse 侧**没有**可用的授权写端点 —— 唯一的质量状态写入口是 8.2.1.2 的**差异处置决定**，它必须挂在一条真实的收货差异上，不能拿来给一整批正常货做分流；所以本模块只落**分流意图**（disposition）并把 `disposition_status` 标成 `UNAVAILABLE`，`disposition_note` 写明「**没有真的分流**」—— **绝不出现 DISPATCHED 却其实没分流**的假记录；capabilities 的 downstream 显式 `available=false` + `ownerModule` + 影响说明（7.2.2.1 可售量口径在本模块交付后仍看不到本模块的扣量）。**6.4.2.2 不良品处理未交付** ⇒ 本模块只登记「让步接收」这一条（蓝图 6.4.2.1 输出句点名的三量之一），**不实现**退换货/返修/报废/转促销品的处置流程；**6.1.1.3 评级未交付** ⇒ 不产出任何评级结论；**6.5.1 对账未交付** ⇒ 只如实记录扣量金额，不代它发起对账。端点 14 个 `/trade/quality-inspections/**`：capabilities / options / templates（列表+新建）/ templates/{id}（详情+改）/ templates/{id}/activate / templates/{id}/retire / 集合读+新建 / {id} 详情 / {id}/items（逐项结论）/ {id}/concessions（让步）/ {id}/complete / {id}/cancel / {id}/export（真 CSV，三段：头+逐项结论+让步记录）/ summary；权限 `trade.quality-inspection.read` / `trade.quality-inspection.update`（让步另需 `trade.quality-inspection.concession`），租户只来自已认证成员关系（不信任 X-Tenant-Id）。**命名撞车已处理**：trade 服务**已**有一整套 `QualityInspection*`（11.x 的**退货质检** `/trade/return-quality`，V179 八张 `return_quality_*` 表）—— springdoc 以 record **简单类名**为 components.schemas 的键，重名会**静默覆盖**别人的字段形状，所以本模块的 record / enum 一律以 `IncomingQualityInspection` 开头（蓝图 06 卷 L3 锚点 6.4.2 的名字就叫「来料质检」）；表名前缀 `quality_inspection_*` 与 `return_quality_*` 也完全分开。前端 `/purchase/quality`（apps/web/src/app/purchase/quality/page.tsx + components/purchase/quality-inspection-{model,workspace}.tsx）：三量并排 + **等式直接写在页面上**（不自洽显红）、应抽/实抽与抽样算式、逐项结论表（含关键项标记与合计扣量）、让步记录表、抽样模板管理面板、新建质检单面板、能力声明横幅（把未接线的下游写明归属模块与影响）、**分流状态照实显示**（不写「已分流」）、加载·空·错误三态齐全。api-proxy **新增一条独立 `services[]` 元素**（`prefix: 'trade/'` + 自己的 `pattern`，根路径 `quality-inspections`，**不并既有 trade 巨型正则的 alternation**）；插入锚点按调度者修正后的新锚点（5.3.2.2 价格规则元素之前，基线 4625 行）；动手前用脚本逐条核对了本文件**全部 101 个** services[] 元素：**既有条目对本模块 14 个形状的命中数 = 0**（源码级复核：只有 catalog 那条巨型 alternation 里出现过 `quality-inspections` 记号，位置在 `supply/vendors/{uuid}/quality-inspections/{uuid}/void` —— 3.6.1.1 供应商详情下的**子路径**，不是根路径，两者不会互相吃掉）；刻意**不放行** `/dispatch`、`/disposition`（不存在「让 trade 直接分流库存」的端点 —— 放行它会让界面显示「已分流」而其实没有）、`/defectives`（6.4.2.2 未交付）、`/items/{itemId}`、`/concessions/{id}`、`/bulk`；既有 trade 模块入口（purchase-plans / purchase-arrivals / return-quality 等）实测未被误伤。契约由 codegen 重新生成（`python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`）：trade **+21 个 DTO、零删除、零形状变化**（纯新增）；catalog 侧只有「codegen 头部注释位置」的历史格式漂移（与本模块无关），已 revert 保持本车道 diff 只含 trade 契约。测试 `QualityInspectionIntegrationTest` **34 例** + `QualityInspectionTenancyIntegrationTest` **4 例**（Testcontainers 真实 PostgreSQL 16，连接池压到 1）：五张表 relforcerowsecurity + 运行角色真能读写 + **UPDATE/DELETE 权限皆已收回**、应抽数量按比例+夹逼+舍入口径算对（0.1→10 / FLOOR 0.125→12 / 最小抽样数托底→5）、**客户端塞抽样字段直接 400 且零落库**、到货量来自上游收货单（客户端报不上数）、批量超过到货量被拒、**分批质检批量可小于到货量**、上游 500 ⇒ **503 而不是冒充没有收货**、转发给上游的是调用方自己的 bearer、**三量之和 = 批量**（接口与落库两处都断言）、让步接收从扣量合计里出、**不合格量的去向与分流状态如实报未接线**、全部合格⇒可售、关键项不合格按模板整批拒收 vs 仅扣量、让步接收缺原因/缺权限码被拒、**权限码必须真的持有（403 且零落库）**、让步量不得超过扣量合计、缺检验项结论不能完结、危险品缺认证标识不能完结、危险品配了认证标识就能完结、终态不能再录结论也不能重复完结、检验项必须属于本单模板、**DB 层拒绝三量对不上的完成态 / 让步量超扣量合计**、让步记录只追加、capabilities 把未接线的下游标成不可用、真分页三页合起来恰好 3 条且互不重叠、CSV 三段齐全、401/404 边界、收货单不存在 404。**多租户三断言实跑在真实业务表上**（两租户互不可见含按主键直查对方单与对方模板 / 伪造 X-Tenant-Id 无效且**断言行确实落在自称的租户名下** / 连接池固定 1 条时 5 轮交替读写不串租户，另加事务外读零行）；直查断言**全部走应用账号 trade_app**（超管会绕过 RLS，断言本身失效）。L0 `backend ./mvnw -q compile` exit 0；`pnpm typecheck` 3 successful；L1 `./mvnw -pl services/trade -am test -Dtest='QualityInspection*'` **38 例全绿**（Flyway 实跑到 v249）；前端 `pnpm vitest run apps/web/src/app/api apps/web/src/components/purchase` **133 文件 / 838 例全绿**（含 api-proxy **全量 allowlist 回归** —— 因为改了 api-proxy.ts）。**已知缺口（如实记录）**：①**库存分流未接线**（warehouse 无可用授权写端点）—— 不合格量只落到本模块的不可售量口径里，7 库存的待检 / 残次 bucket 不会因此变化，要等 warehouse 提供批量质量状态写端点；②6.4.2.2 不良品处理、6.1.1.3 评级、6.5.1 对账均未交付 ⇒ 本模块只出三量与扣量金额，不产出处置结论、评级与对账单；③warehouse 当前**不接受 PURCHASE 来源的收货单**（8.2.1.1 自己的能力声明写明「6 采购与供应尚未交付」）⇒ 来料质检目前只能挂在已存在的收货单上，6.3 采购单交付后这条限制才解除；④trade 的页面权限码（`trade.quality-inspection.*`）在本仓**没有**像 channel/warehouse 那样在 identity 注册 page_resource —— 这是 trade 全服务的既有缺口（9.x / 11.x / 6.4.1.x 同款），本车道沿用兄弟模块做法**不改 identity**，以免与其他车道撞迁移号。 |
 | 6.4.2.2 | 不良品处理 | /purchase/quality | D6 | 未开发 | — |
 | 6.5.1.1 | 采购对账 | /purchase/reconciliation | D6 | 未开发 | — |
 | 6.5.2.1 | 采购分析 | /purchase/analytics | D6 | 未开发 | — |
@@ -557,3 +540,13 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 266 |
+| **未开发** | **199** |
+| 完成率 | 57.2% |
+| **D3** | 36 | 0 | 4 | 40 |
+| **D6** | 26 | 0 | 52 | 78 |
+| **D7** | 14 | 0 | 141 | 155 |
+| 05 | 定价与价目系统 | D6 | 15 | 19 |
+| 06 | 采购与供应系统 | D6 | 10 | 26 |
+| 07 | 库存核算系统 | D3 | 28 | 31 |
+| 16 | 合规与风控系统 | D7 | 1 | 23 |
