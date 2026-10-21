@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 273 |
+| 已交付 | 274 |
 | 进行中 | 0 |
-| **未开发** | **192** |
-| 完成率 | 58.7% |
+| **未开发** | **191** |
+| 完成率 | 58.9% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 58 | 0 | 2 | 60 |
 | **D5** | 52 | 0 | 0 | 52 |
 | **D6** | 31 | 0 | 47 | 78 |
-| **D7** | 15 | 0 | 140 | 155 |
+| **D7** | 16 | 0 | 139 | 155 |
 
 ## 分系统进度
 
@@ -47,7 +47,7 @@
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 1 | 22 |
 | 15 | 客户与客服系统 | D7 | 3 | 24 |
-| 16 | 合规与风控系统 | D7 | 2 | 23 |
+| 16 | 合规与风控系统 | D7 | 3 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 25 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
@@ -496,7 +496,7 @@
 | 16.3.2.3 | 销售税与 marketplace facilitator | — | D7 | 未开发 | — |
 | 16.4.1.1 | 侵权库 | — | D7 | 未开发 | — |
 | 16.4.1.2 | 检测与预警 | — | D7 | 未开发 | — |
-| 16.4.2.1 | 品牌授权 | — | D7 | 未开发 | — |
+| 16.4.2.1 | 品牌授权 | — | D7 | 已交付 | 迁移 channel `V248__brand_authorization.sql`（**纯新建 4 张表、零 ALTER 任何既有表**：`brand_authz_authorization` 授权档案 / `brand_authz_scope` 授权范围（店铺·国家·类目）/ `brand_authz_document` 授权文件引用 / `brand_authz_check` 校验凭据；均 tenant_id NOT NULL + ENABLE **与 FORCE** ROW LEVEL SECURITY + POLICY isolation + GRANT channel_app / REVOKE starcon_app；表前缀 `brand_authz_*` 与同批 `listing_compliance_*`（4.2.3.2）、`compliance_check_*`（16.2.2.1）以及 **catalog 服务自己库里的 `brand_authorization`（3.2.1.2）** 三个命名空间彼此隔离）。**🔴 与 catalog 3.2.1.2「品牌授权」不是同一件事**：catalog 那套是品牌档案自带的授权凭证（证书号 / 授权方 / 有效期），回答「这个品牌有没有被授权过」；本模块是**合规口径的授权档案**（授权方 / 授权范围 / 授权文件 / 被授权主体）+ **刊登时的范围校验结论**，回答「这一段范围、这一段时间、谁可以用这个品牌」。catalog 侧的一切只经授权只读端口读，**不建它的影子表、不跨库 SQL**，catalog 的能力**不算作本模块的交付物**。**🔴 授权期限是区间**（effective_from / effective_to，CHECK 住真区间），到期判定一律用**同源 DB 时钟**（服务层 `select now()` 取一次，同一事务里 Java 比较与 SQL 比较共用这一个时刻；剩余天数由 DB 按 `effective_to - now()` 算），**禁用 LocalDate.now()** —— 应用机与数据库机差半天，「授权还剩 0 天」就变成了差半天。**🔴 没有原因的 false 是不允许出现的**：每一次「不覆盖」都落到一条原因上（原因码 + 人话 + 关联授权 id + 严重度），DB 层还有 CHECK `conclusion='IN_SCOPE' OR jsonb_array_length(reasons)>0` 兜底。**🔴「判不了」是第三种状态**：上下文缺店铺 / 国家 / 类目（或店铺没有可解析的国家）⇒ conclusion=UNKNOWN + severity=REVIEW + 逐条原因（SHOP_UNRESOLVED / COUNTRY_UNRESOLVED / CATEGORY_UNRESOLVED），**发布闸门不放行** —— 「无法证明在授权范围内」不等于「已在授权范围内」。**🔴 阻断在服务端强制**：① 服务层 `POST /channel/brand-authorizations/publish-gate` 真算一遍，回 `allowed=false` + 逐条原因，页面上的红字只是显示、不是防线；② DB 层判定凭据 **append-only**（触发器 `guard_brand_authz_check_immutable` 钉住 in_scope / blocking / severity / conclusion / rule_version / evaluated_at / matched_authorization_id 事后改写不了），③ 授权的 `rule_version` **只能前进**（触发器 `guard_brand_authz_authorization_version`）—— 卷首约束「规则变更不能追溯改变历史判定」落成物理事实。**🔴 授权文件只存引用与元数据**（文件名 / 内容类型 / 字节数 / 存储句柄 / 上传时刻 / 上传人），**文件本体不入库**；16.4.2.2 授权凭证（真伪验证记录 / 文件版本 / 签署方信息 / 一键核验）未交付。**跨服务只经授权 HTTP API 读**：`BrandAuthorizationSourcePort` —— 03 品牌（catalog `GET /catalog/brands`，只读）+ 06.1.2.3 供应商资质（**trade 服务** `GET /trade/supplier-qualifications/suppliers` / `/qualifications`，只读；⚠️ 任务书把它写成 catalog，实测在 **trade** 服务，本车道按实测路径走）；转发调用方自己的 bearer，租户仍由上游按已认证成员关系解析，两道 RLS；**读不到就显式说读不到**（available=false + 原因），绝不返回空集合冒充「上游一个数据都没有」。授权范围里的**店铺与国家两维**从 channel 本库的 `shop` / `shop_marketplace` / `marketplace` 真实还原。端点 `/channel/brand-authorizations/**`（capabilities / authorizations（GET 列表真分页+真筛选、POST 录入）/ authorizations/{uuid}（GET 详情、PUT 修改）/ authorizations/{uuid}/enabled（PUT 停用启用）/ expiry-reminders（临期·已过期，真筛选+真分页）/ checks（POST 跑校验、GET 校验历史真分页）/ publish-gate（🔴 刊登闸门）/ candidates/brands |
 | 16.4.2.2 | 授权凭证 | — | D7 | 未开发 | — |
 | 16.5.1.1 | 黑名单 | — | D7 | 未开发 | — |
 | 16.5.1.2 | 风险评分 | — | D7 | 未开发 | — |
