@@ -93,3 +93,52 @@ pnpm vitest run apps/web/src/components/purchase packages/ui/src/lib/nav-routes.
 4. **6.2.1.1 的备货周期是租户级参数**：若要按 SKU 精度表达单张采购单的交期影响，
    需要 6.2.1.1 的快照入参支持逐 SKU 备货周期。
 5. 本模块的**延迟统计**目前依赖 6.3.2.2 的到货事实；当 6.3.2.2 补录到货流水时，历史延迟会随之变化（口径不变）。
+
+## 并入冲突修复（2026-10-21 第二轮，同一车道 `feat/6-3-2-1`）
+
+上一轮并入集成头时 `apps/web/src/lib/api-proxy.ts` 冲突，本车道被标 `conflict` 未并入。
+根因：集成头先后并入 **6.3.1.2 采购单创建与编辑**（正则首 token `purchase-order-editor`）
+与本模块 **6.3.2.1**（首 token `purchase-followups`），两者都把新 `services[]` 元素插在
+「6.3.1.1 采购单列表（`purchase-orders`）」之后，git 无法自动求并。
+
+本轮把车道 rebase 到集成头 `caffaa91`（`git rebase caffaa91`），并按**求并集**解决：
+
+| 文件 | 做法 | 校验 |
+| --- | --- | --- |
+| `apps/web/src/lib/api-proxy.ts` | 冲突块整理成**两个元素并存**，顺序 `purchase-orders`(6.3.1.1) → `purchase-order-editor`(6.3.1.2) → `purchase-followups`(6.3.2.1)；两个元素的注释块与 `pattern` 完整保留 | 6.3.1.2 元素相对集成头**逐字节一致**（取单边会静默删掉别人已交付的路由 ⇒ 页面 404 而 typecheck/lint/vitest 全绿）；整文件相对集成头只**新增** 6.3.2.1 那一条元素 |
+| `packages/api-contracts/**` | 按「类型名 / OpenAPI 路径」求并集 | `trade.openapi.json` 相对集成头 **+6 条路径、+15 个 schema，零删除、零丢失**；`identity`/`catalog`/`channel`/`warehouse`/`crm` 五份契约**逐字节不变** |
+| `docs/product/capability-blueprint/module-progress.md` | 按**模块 ID** 求并集 | 相对集成头**只变 6.3.2.1 那一行**（未开发 → 已交付 + 证据）；总览 / 分阶段 / 分系统统计行保持与集成头一致 |
+
+> ⚠️ **台账统计行为何没跟着改**：集成头 `caffaa91` 与本车道原提交的台账**本就未通过**
+> `node tools/module-progress/sync.mjs --check` —— 统计行是调度器另行 `sync` 生成的产物。
+> 本车道若在这里跑 `sync.mjs`，会连带**截断 6.3.1.2 的证据格**（该格含 `|`，
+> 而 sync 的行正则 `([^|\n]*)` 遇 `|` 即止）⇒ 静默 degrade 他人模块的交付记录。
+> ⇒ 本车道**不跑 sync、不手改统计行**，只保留自己那 6.3.2.1 一行。
+
+**迁移版本号**：仍是 `V259__purchase_followup_delivery.sql`（**没有建 V263**）。
+车道 state 里的 `migrationVersion: V263` 是上一轮 plan 的过期预分配，该字段只用于
+`plan` 阶段占位版本号，**不会据此生成迁移文件**；V259 与集成头已有的 V258 / V261 无冲突。
+
+**rebase 后的复验（真实结果）**：
+
+```
+./mvnw -q compile                                   → 退出 0
+./mvnw -pl services/trade -am test -Dtest='PurchaseFollowup*' \
+  -Dsurefire.failIfNoSpecifiedTests=false -DfailIfNoSpecifiedTests=false
+                                                   → Tests run: 27, Failures: 0, Errors: 0
+                                                     （PurchaseFollowupIntegrationTest 23 例 +
+                                                       PurchaseFollowupTenancyIntegrationTest 4 例，
+                                                       租户隔离三断言未删）
+pnpm typecheck                                      → 3/3 通过
+pnpm vitest run apps/web/src/app/api/trade          → 60 文件 330 例全绿
+                                                   （比上一轮的 58 文件 315 例多 2 个文件：
+                                                    并行车道新增的 purchase-order-edit /
+                                                    development-sample 两条 allowlist 用例）
+pnpm vitest run apps/web/src/components/purchase/purchase-followup-model.test.ts
+                                                   → 1 文件 14 例全绿
+```
+
+**未随本轮改变的既有结论**：上方「决策摘要」与「后续待办」是本模块**首轮**的设计结论，
+本轮只做并入冲突修复，未重审。其中「后续待办 1」提到的 **6.3.1.2 未交付**这一前提
+已在集成头失效（6.3.1.2 已并入 `caffaa91`）—— 跟单承诺日是否同步到采购单
+`promised_arrival_date`，属于**下一个模块的评审范围**，本车道不擅自实现。
