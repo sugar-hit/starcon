@@ -73,7 +73,7 @@
 - `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialModels.java` —— 传输模型（记录 / 枚举）
 - `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialRules.java` —— 纯规则（状态机 / 良率 / 成本偏差 / 建议举证）
 - `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialService.java` —— jOOQ 显式 SQL 服务
-- `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialController.java` —— 23 条路径
+- `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialController.java` —— 18 条路径 / 23 个动作
 - `backend/services/trade/src/main/java/com/starcon/trade/ProductionTrialBomPort.java` —— catalog BOM 版本候选端口（本车道新增，不动别的车道的 `BomVersionPort`）
 
 **新增（测试）**
@@ -93,7 +93,7 @@
 **改动**
 
 - `apps/web/src/lib/api-proxy.ts` —— 新增一条 `trial-productions` `services[]` 元素（既有条目一字未动）
-- `packages/api-contracts/src/contracts/trade.ts` + `packages/api-contracts/src/trade.openapi.json` —— codegen 产物（新增 31 个 DTO / 23 条路径）
+- `packages/api-contracts/src/contracts/trade.ts` + `packages/api-contracts/src/trade.openapi.json` —— codegen 产物（新增 31 个 DTO / 18 条路径）
 - `docs/product/capability-blueprint/module-progress.md` —— 只改 6.6.2.1 一行的「状态」「证据」两格
 
 ## 验证

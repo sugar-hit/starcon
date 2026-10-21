@@ -4156,7 +4156,7 @@ const services: readonly {
     //
     // 🔴 为什么用 `trial-productions` 这个独立前缀：
     //   * 已逐条核对本文件里**全部 109 条既有正则**（含 trade 的超长 alternation 分支）：
-    //     本模块的 19 个形状对它们的命中数 = **0**；
+    //     本模块的 18 个形状对它们的命中数 = **0**；
     //   * 逐条核对过邻近首 token：`purchase-orders` / `purchase-order-editor` /
     //     `purchase-plans` / `purchase-requests` / `replenishment-suggestions` /
     //     `development-projects` / `development-samples` / `quality-inspections` /
