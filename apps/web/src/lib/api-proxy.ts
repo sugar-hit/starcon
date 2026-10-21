@@ -3238,6 +3238,59 @@ const services: readonly {
       /^supplier-claims(?:\/(?:capabilities|candidates|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})?|submit|start-negotiation|negotiations|agree|reject|withdraw|settlements(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/(?:confirm|reject))?))?))?$/,
   },
   {
+    // 11.5.1.1 退货分析（trade 服务）。本条目是**新增一条 services[] 元素**，
+    // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
+    // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在 11.5.2.1 `quality-analysis` 那条**之前**：
+    // 两条同属 11.5 分析分区，前缀形状互不相交（`return-analysis/` vs `quality-analysis/`），
+    // 与其他车道的新增元素被既有条目隔开，git 能干净求并。
+    //
+    // ⚠️ 为什么用独立字面量 `return-analysis` 而不是并进既有 `return-quality` / `return-receipts`：
+    //   11.2.3.1 质检、11.2.2.1 实收、11.5.1.1 退货分析是三套独立的状态机与口径，
+    //   共用前缀会让「一个质检结论」被误写成「一笔退货」——
+    //   而退货率的分子分母口径与质检结论**根本不是同一个东西**。
+    //
+    // ---- 首 token「return-analysis」的零命中核对结论 ----
+    //   本文件既有全部 services[] 正则的**首 token**逐条核过：以 `return` 开头的只有
+    //   `return-quality` / `return-receipts` / `return-disposals` / `return-dispositions` /
+    //   `return-shipbacks` 五条，**首字面量与 `return-analysis` 不同** ——
+    //   `return-q` / `return-r` / `return-d` / `return-s` 都不会匹配 `return-a`，
+    //   所以既有分支既不会**误吃**本模块的路径，本模块也不会**误吃**它们的路径。
+    //   另外全文件字面量里也不存在 "return-analysis" 这个串（grep 零命中）。
+    //
+    // 形状逐个列出（**只放行本模块真实实现的路径**）：
+    //   return-analysis/capabilities        能力声明与边界（GET）
+    //   return-analysis/overview            退货分析总览（GET，按币种分组的退货率/拒退率/时效/平均退款金额）
+    //   return-analysis/breakdown           维度下钻（GET，dimension=SHOP|SKU|CATEGORY|REASON|BATCH）
+    //   return-analysis/trend               退货金额与退货率趋势（GET，granularity=DAY|WEEK|MONTH）
+    //   return-analysis/anomalies           异常识别（GET，含逐条阈值）
+    //   return-analysis/snapshots           报表快照列表（GET）/ 保存快照（POST）
+    //   return-analysis/basis               口径列表（GET）/ 登记口径（POST）
+    //   return-analysis/basis/{uuid}/supersede  口径换版（POST，换版即留痕）
+    //
+    // 判别顺序：**字面量子路径排在 UUID 段之前** ——
+    // alternation 是首个命中即返回，顺序反了会被通配支吃掉半截。
+    // id 段用**完整 UUID 形状** `[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}`（不是
+    // `[0-9a-f-]+`）：后者会把 `basis` 这种非 UUID 形状也当成 id 放行。
+    //
+    // 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 —— 界面会以为功能已交付）：
+    //   return-analysis                     —— **没有根端点**：本模块的入口是总览与能力声明，
+    //     放行裸路径等于让界面以为「退货分析列表」这个页面存在。
+    //   return-analysis/basis/{uuid}        —— 口径只有列表与换版两个动作，没有单独的读单条端点。
+    //   return-analysis/snapshots/{uuid}    —— 快照只有列表与新建，没有单条读端点。
+    //   return-analysis/forecast|predict    —— **退货率预测不存在**（本仓没有建模与预测设施），
+    //     放行一个预测入口等于让界面以为系统会预测退货率。
+    //   return-analysis/basis/{uuid}/delete —— 口径与快照都是留痕事实（换版写 superseded_by、
+    //     快照追加式），后端已收回 UPDATE/DELETE。
+    //   任何 DELETE / PUT 形状 —— 白名单是**按路径登记、不区分方法**的，
+    //     所以「不能删」的防线在服务端与 DB，不在这里。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^return\-analysis(?:\/(?:capabilities|overview|breakdown|trend|anomalies|snapshots|basis)|\/basis\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/supersede)$/,
+  },
+  {
     // 11.5.2.1 质量分析（trade 服务）。本条目是**新增一条 services[] 元素**，
     // 不是往既有 trade 分支的 alternation 里并分支 —— 那一支是一段超长单行正则，
     // 多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
