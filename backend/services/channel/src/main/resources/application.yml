@@ -5,6 +5,11 @@ server:
 spring:
   application:
     name: channel
+  servlet:
+    multipart:
+      # 16.2.2.2 认证扫描件直连上传（multipart）的上限；服务层另有 10 MB 硬限。
+      max-file-size: 10MB
+      max-request-size: 12MB
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
