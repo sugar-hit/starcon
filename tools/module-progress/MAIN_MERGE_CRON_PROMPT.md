@@ -149,9 +149,17 @@ git rev-list --left-right --count upstream/main...upstream/integration/module-de
 echo "=== 真实增量（看树差异，不看提交数）==="
 git diff --stat upstream/main upstream/integration/module-dev | tail -3
 git diff --quiet upstream/main upstream/integration/module-dev \
-  && echo "无新内容" || echo "有新增内容"
+  && echo "树差异为空" || echo "树差异非空（仍要过本节末尾的落地树判定）"
 echo "=== 合并预演（无副作用，不碰工作区）==="
 git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev
+echo "=== 落地树 vs main 树（两者相同 = 零变更）==="
+MT_OUT=$(git merge-tree --write-tree --name-only upstream/main upstream/integration/module-dev 2>&1)
+MT_TREE=$(printf '%s\n' "$MT_OUT" | head -1)
+MAIN_TREE=$(git rev-parse upstream/main^{tree})
+echo "落地树: $MT_TREE"
+echo "main 树: $MAIN_TREE"
+[ "$MT_TREE" = "$MAIN_TREE" ] \
+  && echo "零变更：本轮不开 PR" || echo "有新增内容：走第 4–7 节"
 ```
 
 `merge-tree` 会**提前告诉你哪些文件会真冲突**。它是只读的，**不要跳过**。
@@ -169,17 +177,47 @@ git merge-tree --write-tree --name-only upstream/main upstream/integration/modul
 同理，第 3.2 节的「可快进」判据在 squash 合入后**基本不成立** ——
 正常形态是「真合并」，且冲突解法见第 4 节。
 
+⚠️ **树差异非空 ≠ 有新内容要合入 —— 最终判据是「落地树哈希」**：
+
+树差异回答的是「两个分支的内容是否不同」，但**你要回答的是「合入后 `main` 会不会变」**。
+这两件事不等价：`main` 上可能已经有集成分支**没有**的文件（上一轮同步留下的会话记录、
+其他 PR 带进 `main` 的产物），这些差异会让树差异恒为非空，
+而**把集成分支合进来，`main` 一个字节都不会变**。
+
+⚠️ 2026-10-22 实测：树差异 31 个文件、12 万行增删，但**落地树哈希与 `main` 完全相同**
+（`git merge-tree --write-tree` 的输出 == `git rev-parse upstream/main^{tree}`），
+真合并后 `git diff upstream/main HEAD` 为空 ⇒ **零变更，不该开 PR**。
+
+⇒ **判断该不该开 PR，最终看落地树哈希**：
+
+| 落地树 vs `main` 树 | 含义                         | 本轮动作                        |
+| ------------------- | ---------------------------- | ------------------------------- |
+| **相同**            | 合入后 `main` 不变（零变更） | **本轮不开 PR**，简短汇报后结束 |
+| 不同                | 确有新内容要合入             | 走第 4–7 节                     |
+
+**为什么不能只看树差异**：树差异是**双向**的（既含「集成分支有、`main` 没有」，
+也含「`main` 有、集成分支没有」）。后一部分**不该**被合入动作改变 ——
+真合并时 git 会自动保留 `main` 侧，所以最终树与 `main` 相同。
+⇒ **树差异只用来提示「值得看一眼」，落地树哈希才是「该不该开 PR」的判据。**
+
+⚠️ **只跑 `merge-tree` 不够**：它给出的是**预演**结果。
+真合并后必须再核一次 `git write-tree` == `git rev-parse upstream/main^{tree}`，
+确认落地树确实等于 `main`，才敢断言「零变更」。
+
 ### 3.1 同步 PR 的现状（决定本轮走哪条路）
 
 ```bash
 gh pr list --base main --head chore/sync-module-dev --state open
 ```
 
-| 现状                            | 本轮动作                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------- |
-| 没有开着的 PR **且** 没有新内容 | **本轮无动作**，简短汇报后结束                                                        |
-| 没有开着的 PR **且** 有新内容   | 走第 4–7 节：建分支 → 合并 → 解冲突 → 验证 → 推送 → 建 PR                             |
-| 有开着的 PR                     | 看它的 CI 状态（第 7 节）：绿了就合；红了就报告；跑着就等；**有更新的内容就刷新分支** |
+| 现状                                               | 本轮动作                                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 没有开着的 PR **且** 落地树 == `main` 树（零变更） | **本轮无动作**，简短汇报后结束                                                        |
+| 没有开着的 PR **且** 落地树 != `main` 树           | 走第 4–7 节：建分支 → 合并 → 解冲突 → 验证 → 推送 → 建 PR                             |
+| 有开着的 PR                                        | 看它的 CI 状态（第 7 节）：绿了就合；红了就报告；跑着就等；**有更新的内容就刷新分支** |
+
+⚠️ **「有没有新内容」在第 3 节末尾已经换了判据** ——
+不要再用「树差异是否为空」直接决定开不开 PR，用**落地树哈希**。
 
 ### 3.2 三种合并形态，处理方式不同
 
