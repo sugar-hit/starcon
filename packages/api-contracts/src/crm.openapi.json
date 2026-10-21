@@ -1159,6 +1159,267 @@
         }
       }
     },
+    "/crm/message-inbox/sync": {
+      "post": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "post_crm_message_inbox_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageSyncInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageSyncAttempt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/messages": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_messages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "readStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buyerReference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderReference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformTimeFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformTimeTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessagePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "post_crm_message_inbox_messages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/batch": {
+      "post": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "post_crm_message_inbox_batch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmMessageBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/crm/knowledge/versions/{versionId}/references": {
       "get": {
         "tags": [
@@ -2089,6 +2350,176 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CrmReviewCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/shops": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_shops",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmMessageShopView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/platforms": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_platforms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformMessageAvailability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/options": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/messages/{messageId}": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_messages_messageId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/message-inbox/capabilities": {
+      "get": {
+        "tags": [
+          "message-inbox-controller"
+        ],
+        "operationId": "get_crm_message_inbox_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmMessageCapabilities"
                 }
               }
             }
@@ -3387,6 +3818,333 @@
           }
         }
       },
+      "CrmMessageSyncInput": {
+        "required": [
+          "platformCode",
+          "shopId"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "since": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CrmMessageSyncAttempt": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "fetchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "writtenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageAttachmentInput": {
+        "required": [
+          "fileName"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "文件名（必填）：附件没有名字就点不开"
+          },
+          "fileUrl": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "附件链接（对象存储地址等），可空"
+          },
+          "contentType": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "description": "MIME 类型，可空"
+          },
+          "sizeBytes": {
+            "type": "number",
+            "description": "字节数（0 表示未登记）；与本仓其它字节列同精度 numeric(19,6)",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageCreateInput": {
+        "required": [
+          "buyerReference",
+          "direction",
+          "messageType",
+          "orderReference",
+          "platformTime",
+          "shopId"
+        ],
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buyerReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "买家标识（平台买家号等）；本仓没有买家档案，只作逻辑引用"
+          },
+          "orderReference": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "订单标识（平台订单号或本仓销售单号）；蓝图要求消息必须关联订单"
+          },
+          "subject": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "body": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "direction": {
+            "minLength": 1,
+            "pattern": "INBOUND|OUTBOUND",
+            "type": "string"
+          },
+          "messageType": {
+            "minLength": 1,
+            "pattern": "PLATFORM_INBOX|BUYER_MESSAGE|SYSTEM_NOTICE|COMPLIANCE",
+            "type": "string"
+          },
+          "priority": {
+            "pattern": "LOW|NORMAL|HIGH|URGENT",
+            "type": "string"
+          },
+          "platformTime": {
+            "minLength": 1,
+            "type": "string",
+            "description": "平台侧时刻，例如 2026-10-10T08:00:00+08:00"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageAttachmentInput"
+            }
+          },
+          "externalMessageId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "pattern": "^$|^[A-Za-z0-9._:-]+$",
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "buyerReference": {
+            "type": "string"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "readStatus": {
+            "type": "string"
+          },
+          "readAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "readBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "platformTime": {
+            "type": "string"
+          },
+          "attachmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "source": {
+            "type": "string"
+          },
+          "externalMessageId": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageBatchInput": {
+        "required": [
+          "action",
+          "messageIds"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "pattern": "MARK_READ|MARK_UNREAD|ARCHIVE|SET_PRIORITY|RECORD_INTENT|CANCEL_INTENT",
+            "type": "string"
+          },
+          "messageIds": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "priority": {
+            "pattern": "LOW|NORMAL|HIGH|URGENT",
+            "type": "string"
+          },
+          "intentType": {
+            "pattern": "AFTERSALE_CASE|SERVICE_TICKET",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageBatchItem": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageNo": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageBatchResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeededCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageBatchItem"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          }
+        }
+      },
       "CrmRecordReferenceInput": {
         "required": [
           "consumer"
@@ -4449,6 +5207,440 @@
           },
           "truncated": {
             "type": "boolean"
+          }
+        }
+      },
+      "CrmMessageShopView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformMessageAvailability": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageOptions": {
+        "type": "object",
+        "properties": {
+          "platformCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "messageTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "directions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "readStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageShopBucket"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageShopBucket": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CrmMessageBucket": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CrmMessagePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CrmMessageSummary"
+          }
+        }
+      },
+      "CrmMessageSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "readCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "archivedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withAttachmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byPriority": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageBucket"
+            }
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageBucket"
+            }
+          },
+          "byShop": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageShopBucket"
+            }
+          }
+        }
+      },
+      "CrmMessageAttachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageDetail": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/CrmMessageRow"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageAttachment"
+            }
+          },
+          "orderContext": {
+            "$ref": "#/components/schemas/CrmMessageOrderContext"
+          },
+          "intents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageIntent"
+            }
+          }
+        }
+      },
+      "CrmMessageIntent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intentType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageOrderContext": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalOrderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "grandTotalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buyerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuCodes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "documentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "fulfillmentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "shippingWarehouse": {
+            "type": "string",
+            "nullable": true
+          },
+          "aftersalesStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CrmMessageCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmMessageCapabilityDimension"
+            }
+          },
+          "readStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "directions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "messageTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priorities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "batchActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "intentTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boundaryNote": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmMessageCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "impact": {
+            "type": "string"
           }
         }
       },
