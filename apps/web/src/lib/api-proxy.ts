@@ -4623,6 +4623,63 @@ const services: readonly {
       /^platform-fees(?:\/capabilities|\/directory|\/estimate|\/variance|\/actuals(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/void)?|\/rules(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/tiers)?)?)$/,
   },
   {
+    // 6.4.2.1 质检单（trade 服务，卷 06「采购与供应」的 L3 锚点 6.4.2「来料质检」）。
+    //
+    // 蓝图：「来料/成品质检：抽样比例、检验项（外观、功能、规格、包装、认证标识）、检验结果记录、
+    // 不合格判定与扣量。」输出「质检单（合格量/不合格量/让步接收量）；触发 7 库存的质量状态分流」。
+    //
+    // 本条目是**新增一条 services[] 元素**，不是往既有 trade 巨型正则里并 ——
+    // 那一支是单行超长 alternation，多车道同时并进去 git 必然判冲突（结构性，retry 不会自愈）。
+    // 插入锚点固定在「5.3.2.2 价格规则」元素**之前**，与并行车道的插入点互不重叠；
+    // 既有条目一字未动。
+    //
+    // 🔴 为什么用 `quality-inspections` 这个独立前缀：
+    //   * 用脚本逐条核对了本文件里**全部 96 条**既有正则：本模块的 **14 个形状**对它们
+    //     **零命中**（既有条目不会先把它吃掉）。
+    //   * catalog 侧有一条 `supply/vendors/{uuid}/quality-inspections/{uuid}/void`
+    //     （3.6.1.1 供应商详情里的质量表现）—— 那是**供应商档案下的子路径**，
+    //     挂在 `supply/vendors/` 之后，与本模块的**根路径** `quality-inspections`
+    //     是两个不同的形状，两者不会互相吃掉。
+    //   * trade 侧已有一套 `QualityInspection*`（11.x 的**退货质检** `/trade/return-quality`），
+    //     路径前缀不同（`return-quality/` vs `quality-inspections/`），也不会互相吃掉。
+    //
+    // 形状逐个列出（path 只有本模块自己的）：
+    //   quality-inspections                              质检单台账（GET，真分页 + 筛选）+ 新建质检单（POST）
+    //   quality-inspections/capabilities                 能力声明（上下游可用性 + 三条口径说明）
+    //   quality-inspections/options                      模板下拉与词表
+    //   quality-inspections/summary                      汇总（可售量 / 不可售量分列）
+    //   quality-inspections/templates                    模板列表（GET）+ 新建模板（POST）
+    //   quality-inspections/templates/{uuid}             模板详情（GET）+ 改模板（PUT）
+    //   quality-inspections/templates/{uuid}/activate    启用模板（POST）
+    //   quality-inspections/templates/{uuid}/retire      停用模板（POST）
+    //   quality-inspections/{uuid}                       质检单详情（GET）
+    //   quality-inspections/{uuid}/items                 录入逐项检验结论（POST）
+    //   quality-inspections/{uuid}/concessions           登记让步接收（POST，来源与权限码必填）
+    //   quality-inspections/{uuid}/complete              完结并判三量（POST）
+    //   quality-inspections/{uuid}/cancel                作废（POST，理由必填）
+    //   quality-inspections/{uuid}/export                导出 CSV（GET）
+    //
+    // ⚠️ 判别顺序：**字面量子路径（capabilities / options / summary / templates）排在
+    // {uuid} 段之前** —— 否则「capabilities」会被 uuid 支吃掉半截。
+    //
+    // 🔴 刻意**不放行**的形状（放行后端不存在的映射比 404 更糟 ——
+    //    界面会以为功能已交付）：
+    //   * quality-inspections/{uuid}/dispatch、/disposition —— **不存在**「让 trade 直接
+    //     把货分流到库存待检 / 残次 bucket」的端点：warehouse 当前没有可用的授权写端点，
+    //     本模块只记录分流**意图**。放行它会让界面显示「已分流」而其实没有。
+    //   * quality-inspections/{uuid}/defectives —— 6.4.2.2 不良品处置**未交付**。
+    //   * quality-inspections/{uuid}/items/{itemId} —— 没有「按 id 取单条检验结论」的端点，
+    //     结论随详情一起返回。
+    //   * quality-inspections/{uuid}/concessions/{id} —— 让步记录**只追加**，
+    //     不可改写也不可删除，所以没有按 id 寻址的形状。
+    //   * quality-inspections/bulk —— 没有批量端点。
+    prefix: 'trade/',
+    env: 'TRADE_URL',
+    fallback: 'http://127.0.0.1:8085',
+    pattern:
+      /^quality\-inspections(?:\/(?:capabilities|options|summary|templates(?:\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:activate|retire))?)?)|\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/(?:items|concessions|complete|cancel|export))?)?$/,
+  },
+  {
     // 5.3.2.2 价格规则（catalog 服务，卷 05 定价与价目的 L3 锚点 5.3.2）。
     //
     // 蓝图：「定义自动调价规则：触发条件（库存低于阈值/竞品降价/成本上涨/毛利低于下限/库龄超期）
