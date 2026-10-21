@@ -774,15 +774,14 @@ class InventoryBucketIntegrationTest {
     assertThat(actions)
         .extracting(BucketAction::action)
         .containsExactly("ADJUST", "TRANSFER", "LEDGER");
-    // 7.1.2.1 库存流水台账已交付 → 「查看流水」这条入口现在真的点得动，必须翻成 true，
-    // 否则页面上会出现一个已经交付却标着"未交付"的入口。7.4.1.1 调整与 7.5.1.1 调拨仍未交付，
-    // 继续如实标 false 并说明原因，而不是给一个点下去 404 的按钮。
+    // 7.1.2.1 库存流水台账与 7.4.1.1 调整单管理都已交付 → 这两个入口现在真的点得动，
+    // 必须翻成 true，否则页面上会出现一个已经交付却标着"未交付"的入口。
+    // 7.5.1.1 调拨仍未交付，继续如实标 false 并说明原因，而不是给一个点下去 404 的按钮。
     assertThat(actions)
-        .filteredOn(a -> a.action().equals("LEDGER"))
-        .singleElement()
-        .satisfies(a -> assertThat(a.available()).isTrue());
+        .filteredOn(a -> a.action().equals("LEDGER") || a.action().equals("ADJUST"))
+        .allMatch(a -> a.available());
     assertThat(actions)
-        .filteredOn(a -> a.action().equals("ADJUST") || a.action().equals("TRANSFER"))
+        .filteredOn(a -> a.action().equals("TRANSFER"))
         .allMatch(a -> !a.available());
     assertThat(actions).allMatch(a -> a.ownerModule() != null && !a.ownerModule().isBlank());
     assertThat(actions).allMatch(a -> a.note().contains(a.ownerModule()));
