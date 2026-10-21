@@ -9,3 +9,4 @@ export * from './contracts/crm';
 
 // 重名的类型：显式指定一份，消除 export * 的歧义。
 export type { Dimension } from './contracts/warehouse';
+export type { StreamingResponseBody } from './contracts/catalog';

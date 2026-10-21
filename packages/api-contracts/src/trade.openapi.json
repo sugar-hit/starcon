@@ -1195,6 +1195,87 @@
         }
       }
     },
+    "/trade/purchase-plans/campaigns/{id}": {
+      "put": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "put_trade_purchase_plans_campaigns_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanCampaignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanCampaignRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "delete_trade_purchase_plans_campaigns_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/trade/product-attribution/attributions/{id}/photos": {
       "put": {
         "tags": [
@@ -8901,6 +8982,592 @@
         }
       }
     },
+    "/trade/purchase-plans": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "planType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "period"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/lines/{lineId}/lock": {
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_id_lines_lineId_lock",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanLockInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLockResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/lines/{lineId}/adjust": {
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_id_lines_lineId_adjust",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanLineAdjustInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLineRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/confirm": {
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_id_confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/aggregate": {
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_id_aggregate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanAggregateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanAggregateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/lock-policies": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_lock_policies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "planType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLockPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_lock_policies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanLockPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLockPolicyRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/campaigns": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_campaigns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanCampaignPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "post_trade_purchase_plans_campaigns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchasePlanCampaignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanCampaignRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/purchase-arrivals": {
       "get": {
         "tags": [
@@ -9407,6 +10074,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PurchaseArrivalDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/facts/sync": {
+      "post": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "post_trade_purchase_analytics_facts_sync",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseAnalyticsSyncRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSyncResult"
                 }
               }
             }
@@ -25932,6 +26639,348 @@
         }
       }
     },
+    "/trade/purchase-plans/{id}": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/lines": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_id_lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lockStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/lines/{lineId}": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_id_lines_lineId",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanLineDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/{id}/export": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_id_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/summary": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "targetWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/options": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-plans/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-plan-controller"
+        ],
+        "operationId": "get_trade_purchase_plans_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasePlanCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/purchase-arrivals/{id}": {
       "get": {
         "tags": [
@@ -26071,6 +27120,931 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PurchaseArrivalCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/trend": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "MONTH"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/sync-runs": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_sync_runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSyncRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/supplier-concentration": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_supplier_concentration",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "topN",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsConcentration"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/summary": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_summary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/price-variance": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_price_variance",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "SUPPLIER"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsPriceVariance"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/options": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/on-time-rate": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_on_time_rate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsOnTimeRate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/facts": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_facts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onTimeStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "occurred"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsFactPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/facts/{id}": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_facts_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsFactDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/export": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "factKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onTimeStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "occurred"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/efficiency": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_efficiency",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CATEGORY"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsEfficiency"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/cost-to-sales-ratio": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_cost_to_sales_ratio",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsCostToSales"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/purchase-analytics/capabilities": {
+      "get": {
+        "tags": [
+          "purchase-analytics-controller"
+        ],
+        "operationId": "get_trade_purchase_analytics_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseAnalyticsCapabilities"
                 }
               }
             }
@@ -33888,1015 +35862,6 @@
           }
         }
       }
-    },
-    "/trade/purchase-plans/campaigns/{id}": {
-      "put": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "put_trade_purchase_plans_campaigns_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanCampaignInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanCampaignRow"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "delete_trade_purchase_plans_campaigns_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "planType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "campaignId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "targetWarehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "priority",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "periodStart",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "periodEnd",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "period"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanCreateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/lines/{lineId}/lock": {
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_id_lines_lineId_lock",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "lineId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanLockInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLockResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/lines/{lineId}/adjust": {
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_id_lines_lineId_adjust",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "lineId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanLineAdjustInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLineRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/confirm": {
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_id_confirm",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/aggregate": {
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_id_aggregate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanAggregateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanAggregateResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/lock-policies": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_lock_policies",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "planType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLockPolicyPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_lock_policies",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanLockPolicyInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLockPolicyRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/campaigns": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_campaigns",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shopCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanCampaignPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "post_trade_purchase_plans_campaigns",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePlanCampaignInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanCampaignRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_id",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/lines": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_id_lines",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "skuCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lockStatus",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLinePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/lines/{lineId}": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_id_lines_lineId",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "lineId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanLineDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/{id}/export": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_id_export",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "type": "string",
-                  "format": "byte"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/summary": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_summary",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "periodStart",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "periodEnd",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date"
-            }
-          },
-          {
-            "name": "targetWarehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanSummary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/options": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/trade/purchase-plans/capabilities": {
-      "get": {
-        "tags": [
-          "purchase-plan-controller"
-        ],
-        "operationId": "get_trade_purchase_plans_capabilities",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PurchasePlanCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -35557,7 +36522,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0,
+            "maximum": 0.0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -38703,6 +39668,130 @@
           }
         }
       },
+      "PurchasePlanCampaignInput": {
+        "required": [
+          "code",
+          "endDate",
+          "name",
+          "startDate"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "salesMultiplier": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "stockFactor": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "arrivalLeadDays": {
+            "maximum": 180,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PLANNED",
+              "ACTIVE",
+              "CLOSED"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanCampaignRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "salesMultiplier": {
+            "type": "number"
+          },
+          "stockFactor": {
+            "type": "number"
+          },
+          "arrivalLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "PhotoRegister": {
         "type": "object",
         "properties": {
@@ -39228,49 +40317,49 @@
             "type": "string"
           },
           "weightBuyerHistory": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightDeviceIpLink": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightOrderFrequency": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAmountAnomaly": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "weightAddressConcentration": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "manualReviewThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "holdShipmentThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": false,
@@ -39295,7 +40384,7 @@
             "format": "int32"
           },
           "amountAnomalyRatio": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 1.0001,
             "exclusiveMinimum": false,
@@ -39775,14 +40864,14 @@
             "format": "int32"
           },
           "belowCostToleranceRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fraudScoreThreshold": {
-            "maximum": 100,
+            "maximum": 100.0,
             "exclusiveMaximum": false,
             "minimum": 0.0001,
             "exclusiveMinimum": true,
@@ -45783,6 +46872,573 @@
           }
         }
       },
+      "PurchasePlanCreateInput": {
+        "required": [
+          "legalEntityId",
+          "periodEnd",
+          "periodStart",
+          "periodType",
+          "planType",
+          "targetWarehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "planType": {
+            "type": "string",
+            "enum": [
+              "ROUTINE",
+              "CAMPAIGN"
+            ]
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "periodType": {
+            "type": "string",
+            "enum": [
+              "MONTHLY",
+              "QUARTERLY"
+            ]
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "NORMAL",
+              "LOW"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planNo": {
+            "type": "string"
+          },
+          "planType": {
+            "type": "string"
+          },
+          "planTypeLabel": {
+            "type": "string"
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "campaignCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "campaignName": {
+            "type": "string",
+            "nullable": true
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "periodTypeLabel": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lockedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPlanQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalSuggestedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchasePlanLockInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanLockResult": {
+        "type": "object",
+        "properties": {
+          "planLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lockStatus": {
+            "type": "string"
+          },
+          "lockStatusLabel": {
+            "type": "string"
+          },
+          "lineStatus": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reservationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "errorStatus": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLineAdjustInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "planQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "expectedArrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "NORMAL",
+              "LOW"
+            ]
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planNo": {
+            "type": "string"
+          },
+          "planType": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceSuggestionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceBatchId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suggestedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "planQuantity": {
+            "type": "number"
+          },
+          "quantityBasis": {
+            "type": "string"
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetWarehouseCode": {
+            "type": "string"
+          },
+          "targetWarehouseName": {
+            "type": "string"
+          },
+          "expectedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "lockStatus": {
+            "type": "string"
+          },
+          "lockStatusLabel": {
+            "type": "string"
+          },
+          "lockReservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lockReservationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "lockRequestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lockConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lockFailureReason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchasePlanAggregateInput": {
+        "required": [
+          "sourceBatchId"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceBatchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "keyword": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "defaultPriority": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "NORMAL",
+              "LOW"
+            ]
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanAggregateResult": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planNo": {
+            "type": "string"
+          },
+          "sourceBatchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceBatchNo": {
+            "type": "string"
+          },
+          "scannedSuggestionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedExistingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedNotReplenishCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "truncatedNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLockPolicyInput": {
+        "required": [
+          "effectiveFrom",
+          "holdDays",
+          "lockEnabled",
+          "planType",
+          "requireConfirmed"
+        ],
+        "type": "object",
+        "properties": {
+          "planType": {
+            "type": "string",
+            "enum": [
+              "ROUTINE",
+              "CAMPAIGN"
+            ]
+          },
+          "lockEnabled": {
+            "type": "boolean"
+          },
+          "holdDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireConfirmed": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanLockPolicyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planType": {
+            "type": "string"
+          },
+          "planTypeLabel": {
+            "type": "string"
+          },
+          "lockEnabled": {
+            "type": "boolean"
+          },
+          "holdDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireConfirmed": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effective": {
+            "type": "boolean"
+          }
+        }
+      },
       "PurchaseArrivalCreate": {
         "type": "object",
         "properties": {
@@ -46336,6 +47992,83 @@
             "type": "string"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRequest": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "description": "ALL 或某个来源；空 = ALL",
+            "nullable": true
+          },
+          "from": {
+            "type": "string",
+            "description": "窗口起（含）。空 = 最近 90 天",
+            "format": "date",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "description": "窗口止（含）。空 = 今天",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncResult": {
+        "type": "object",
+        "properties": {
+          "runNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "scannedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "message": {
             "type": "string"
           }
         }
@@ -47658,7 +49391,7 @@
             "type": "string"
           },
           "measuredValue": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -48746,7 +50479,7 @@
             "type": "string"
           },
           "unitCost": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -57893,7 +59626,7 @@
             "type": "string"
           },
           "rateValue": {
-            "minimum": 1e-8,
+            "minimum": 1e-08,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -58005,12 +59738,12 @@
           "ratePercent": {
             "maximum": 0.999999,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
           "fixedAmount": {
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -59815,9 +61548,9 @@
             "type": "number"
           },
           "rebateRate": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -69755,6 +71488,429 @@
         },
         "description": "职责句的一块分析"
       },
+      "PurchasePlanPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanDetail": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/PurchasePlanRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLineRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLinePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLineRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanAdjustmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "field": {
+            "type": "string"
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "adjustedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjustedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchasePlanLineDetail": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "$ref": "#/components/schemas/PurchasePlanLineRow"
+          },
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanAdjustmentRow"
+            }
+          },
+          "lockLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLockLogRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLockLogRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reservationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PurchasePlanSummary": {
+        "type": "object",
+        "properties": {
+          "routine": {
+            "$ref": "#/components/schemas/PurchasePlanSummaryBucket"
+          },
+          "campaign": {
+            "$ref": "#/components/schemas/PurchasePlanSummaryBucket"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "targetWarehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanSummaryBucket": {
+        "type": "object",
+        "properties": {
+          "planType": {
+            "type": "string"
+          },
+          "planTypeLabel": {
+            "type": "string"
+          },
+          "planCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPlanQuantity": {
+            "type": "number"
+          },
+          "totalSuggestedQuantity": {
+            "type": "number"
+          },
+          "adjustedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lockedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestArrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "latestArrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "PurchasePlanCampaignOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "PurchasePlanLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanOptions": {
+        "type": "object",
+        "properties": {
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanWarehouseOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLegalEntityOption"
+            }
+          },
+          "campaigns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanCampaignOption"
+            }
+          },
+          "warehouseNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanLockPolicyPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLockPolicyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchasePlanCapabilities": {
+        "type": "object",
+        "properties": {
+          "suggestionAvailable": {
+            "type": "boolean"
+          },
+          "suggestionOwnerModule": {
+            "type": "string"
+          },
+          "suggestionNote": {
+            "type": "string"
+          },
+          "warehouseReferenceAvailable": {
+            "type": "boolean"
+          },
+          "warehouseReferenceNote": {
+            "type": "string"
+          },
+          "lockPortAvailable": {
+            "type": "boolean"
+          },
+          "lockPortNote": {
+            "type": "string"
+          },
+          "campaignCalendarAvailable": {
+            "type": "boolean"
+          },
+          "campaignCalendarNote": {
+            "type": "string"
+          },
+          "purchaseRequestAvailable": {
+            "type": "boolean"
+          },
+          "purchaseRequestNote": {
+            "type": "string"
+          },
+          "quantityFormula": {
+            "type": "string"
+          },
+          "arrivalFormula": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchasePlanCampaignPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanCampaignRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PurchaseArrivalPage": {
         "type": "object",
         "properties": {
@@ -70033,6 +72189,949 @@
           "blockedReason": {
             "type": "string",
             "description": "不可用的原因（available=false 时非空）",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsTrend": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsTrendPoint"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsTrendPoint": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PurchaseAnalyticsWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "granularity": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRunPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsSyncRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsSyncRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runNo": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "scannedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsConcentration": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsConcentrationBucket"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsConcentrationBucket": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsSupplierRow"
+            }
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "topShare": {
+            "type": "number"
+          },
+          "topN": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hhi": {
+            "type": "number"
+          },
+          "hhiScale": {
+            "type": "string"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unconvertedAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "PurchaseAnalyticsSupplierRow": {
+        "type": "object",
+        "properties": {
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number"
+          },
+          "cumulativeShare": {
+            "type": "number"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "onTimeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "baseAmount": {
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unconvertedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseAnalyticsSummary": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "purchaseAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "purchaseAmountTotal": {
+            "type": "number",
+            "description": "只有单一币种时才有合计；多币种不合并",
+            "nullable": true
+          },
+          "purchaseCurrencyNote": {
+            "type": "string"
+          },
+          "costFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receiptFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "planFactCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimOffsets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "unconvertedAmount": {
+            "type": "number"
+          },
+          "unconvertedNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsPriceVariance": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "comparison": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsPriceVarianceRow"
+            }
+          },
+          "currentPeriod": {
+            "type": "string",
+            "nullable": true
+          },
+          "previousPeriod": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "overallChangeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsPriceVarianceRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "currentQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "previousAveragePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "changeRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsOptionItem": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "factCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PurchaseAnalyticsOptions": {
+        "type": "object",
+        "properties": {
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "shops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOptionItem"
+            }
+          },
+          "factKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "onTimeStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastSyncNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PurchaseAnalyticsOnTimeRate": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "denominatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onTimeRate": {
+            "type": "number"
+          },
+          "denominatorRule": {
+            "type": "string"
+          },
+          "calendarRule": {
+            "type": "string"
+          },
+          "lateRows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsOnTimeRow"
+            }
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsOnTimeRow": {
+        "type": "object",
+        "properties": {
+          "factId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "delayDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsFactRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "factKey": {
+            "type": "string"
+          },
+          "factKind": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceDocNo": {
+            "type": "string"
+          },
+          "sourceDocId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefNo": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "occurredDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "skuRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "unitFactor": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "fxRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "baseAmount": {
+            "type": "number",
+            "description": "本位币金额；汇率未登记时为空（不是 0，也不按 1:1）",
+            "nullable": true
+          },
+          "fxStatus": {
+            "type": "string"
+          },
+          "fxRateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fxRateEffectiveDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "promisedArrivalDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "onTimeStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsFactDetail": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsFactRow"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "sourceDescription": {
+            "type": "string"
+          },
+          "drillDownNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StreamingResponseBody": {
+        "type": "object"
+      },
+      "PurchaseAnalyticsEfficiency": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsEfficiencyRow"
+            }
+          },
+          "dimensionNote": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsEfficiencyRow": {
+        "type": "object",
+        "properties": {
+          "dimensionCode": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "fulfillmentRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "planLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptFactCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCostToSales": {
+        "type": "object",
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/PurchaseAnalyticsWindow"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "nullable": true
+          },
+          "ratio": {
+            "type": "number",
+            "nullable": true
+          },
+          "ratioCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "salesAmounts": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCurrencyAmount"
+            }
+          },
+          "salesNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "basis": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseAnalyticsCapabilitySection"
+            }
+          },
+          "moduleNote": {
+            "type": "string"
+          },
+          "basisNote": {
+            "type": "string"
+          },
+          "currencyNote": {
+            "type": "string"
+          },
+          "drillDownNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          },
+          "syncNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseAnalyticsCapabilitySection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "不可用时这个能力归属哪个模块号",
+            "nullable": true
+          },
+          "blockedReason": {
+            "type": "string",
+            "description": "不可用的原因（available=false 时非空）",
+            "nullable": true
+          },
+          "impact": {
+            "type": "string",
+            "description": "不可用对本模块的影响（available=false 时非空）",
             "nullable": true
           },
           "detail": {
@@ -85437,1120 +88536,6 @@
           },
           "note": {
             "type": "string"
-          }
-        }
-      },
-      "PurchasePlanCampaignInput": {
-        "required": [
-          "code",
-          "endDate",
-          "name",
-          "startDate"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "shopCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "salesMultiplier": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "stockFactor": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "arrivalLeadDays": {
-            "maximum": 180,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "PLANNED",
-              "ACTIVE",
-              "CLOSED"
-            ]
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanCampaignRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "shopCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "salesMultiplier": {
-            "type": "number"
-          },
-          "stockFactor": {
-            "type": "number"
-          },
-          "arrivalLeadDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PurchasePlanCreateInput": {
-        "required": [
-          "legalEntityId",
-          "periodEnd",
-          "periodStart",
-          "periodType",
-          "planType",
-          "targetWarehouseId"
-        ],
-        "type": "object",
-        "properties": {
-          "planType": {
-            "type": "string",
-            "enum": [
-              "ROUTINE",
-              "CAMPAIGN"
-            ]
-          },
-          "campaignId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "periodType": {
-            "type": "string",
-            "enum": [
-              "MONTHLY",
-              "QUARTERLY"
-            ]
-          },
-          "periodStart": {
-            "type": "string",
-            "format": "date"
-          },
-          "periodEnd": {
-            "type": "string",
-            "format": "date"
-          },
-          "targetWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "priority": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "CRITICAL",
-              "HIGH",
-              "NORMAL",
-              "LOW"
-            ]
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planNo": {
-            "type": "string"
-          },
-          "planType": {
-            "type": "string"
-          },
-          "planTypeLabel": {
-            "type": "string"
-          },
-          "campaignId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "campaignCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "campaignName": {
-            "type": "string",
-            "nullable": true
-          },
-          "periodType": {
-            "type": "string"
-          },
-          "periodTypeLabel": {
-            "type": "string"
-          },
-          "periodStart": {
-            "type": "string",
-            "format": "date"
-          },
-          "periodEnd": {
-            "type": "string",
-            "format": "date"
-          },
-          "targetWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "targetWarehouseCode": {
-            "type": "string"
-          },
-          "targetWarehouseName": {
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string"
-          },
-          "legalEntityName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "priority": {
-            "type": "string"
-          },
-          "priorityLabel": {
-            "type": "string"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lockedLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failedLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPlanQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "totalSuggestedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PurchasePlanLockInput": {
-        "type": "object",
-        "properties": {
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanLockResult": {
-        "type": "object",
-        "properties": {
-          "planLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lockStatus": {
-            "type": "string"
-          },
-          "lockStatusLabel": {
-            "type": "string"
-          },
-          "lineStatus": {
-            "type": "string"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reservationNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "confirmedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "failed": {
-            "type": "boolean"
-          },
-          "errorStatus": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLineAdjustInput": {
-        "required": [
-          "reason"
-        ],
-        "type": "object",
-        "properties": {
-          "planQuantity": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "expectedArrivalDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "priority": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "CRITICAL",
-              "HIGH",
-              "NORMAL",
-              "LOW"
-            ]
-          },
-          "targetWarehouseId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLineRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planNo": {
-            "type": "string"
-          },
-          "planType": {
-            "type": "string"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "sourceSuggestionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceBatchId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "suggestedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "planQuantity": {
-            "type": "number"
-          },
-          "quantityBasis": {
-            "type": "string"
-          },
-          "targetWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "targetWarehouseCode": {
-            "type": "string"
-          },
-          "targetWarehouseName": {
-            "type": "string"
-          },
-          "expectedArrivalDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "priority": {
-            "type": "string"
-          },
-          "priorityLabel": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "lockStatus": {
-            "type": "string"
-          },
-          "lockStatusLabel": {
-            "type": "string"
-          },
-          "lockReservationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lockReservationNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "lockRequestedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lockConfirmedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lockFailureReason": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortRank": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "PurchasePlanAggregateInput": {
-        "required": [
-          "sourceBatchId"
-        ],
-        "type": "object",
-        "properties": {
-          "sourceBatchId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "keyword": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "defaultPriority": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "CRITICAL",
-              "HIGH",
-              "NORMAL",
-              "LOW"
-            ]
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanAggregateResult": {
-        "type": "object",
-        "properties": {
-          "planId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planNo": {
-            "type": "string"
-          },
-          "sourceBatchId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceBatchNo": {
-            "type": "string"
-          },
-          "scannedSuggestionCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedExistingCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedNotReplenishCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "truncated": {
-            "type": "boolean"
-          },
-          "truncatedNote": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLockPolicyInput": {
-        "required": [
-          "effectiveFrom",
-          "holdDays",
-          "lockEnabled",
-          "planType",
-          "requireConfirmed"
-        ],
-        "type": "object",
-        "properties": {
-          "planType": {
-            "type": "string",
-            "enum": [
-              "ROUTINE",
-              "CAMPAIGN"
-            ]
-          },
-          "lockEnabled": {
-            "type": "boolean"
-          },
-          "holdDays": {
-            "maximum": 365,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "requireConfirmed": {
-            "type": "boolean"
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanLockPolicyRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planType": {
-            "type": "string"
-          },
-          "planTypeLabel": {
-            "type": "string"
-          },
-          "lockEnabled": {
-            "type": "boolean"
-          },
-          "holdDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requireConfirmed": {
-            "type": "boolean"
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effective": {
-            "type": "boolean"
-          }
-        }
-      },
-      "PurchasePlanPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanDetail": {
-        "type": "object",
-        "properties": {
-          "plan": {
-            "$ref": "#/components/schemas/PurchasePlanRow"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanLineRow"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLinePage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanLineRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanAdjustmentRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "field": {
-            "type": "string"
-          },
-          "beforeValue": {
-            "type": "string",
-            "nullable": true
-          },
-          "afterValue": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "adjustedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "adjustedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PurchasePlanLineDetail": {
-        "type": "object",
-        "properties": {
-          "line": {
-            "$ref": "#/components/schemas/PurchasePlanLineRow"
-          },
-          "adjustments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanAdjustmentRow"
-            }
-          },
-          "lockLogs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanLockLogRow"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLockLogRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "planLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "actionLabel": {
-            "type": "string"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reservationNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "message": {
-            "type": "string"
-          },
-          "requestedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PurchasePlanSummary": {
-        "type": "object",
-        "properties": {
-          "routine": {
-            "$ref": "#/components/schemas/PurchasePlanSummaryBucket"
-          },
-          "campaign": {
-            "$ref": "#/components/schemas/PurchasePlanSummaryBucket"
-          },
-          "periodStart": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "periodEnd": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "targetWarehouseId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanSummaryBucket": {
-        "type": "object",
-        "properties": {
-          "planType": {
-            "type": "string"
-          },
-          "planTypeLabel": {
-            "type": "string"
-          },
-          "planCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPlanQuantity": {
-            "type": "number"
-          },
-          "totalSuggestedQuantity": {
-            "type": "number"
-          },
-          "adjustedLineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lockedLineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "failedLineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "earliestArrivalDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "latestArrivalDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          }
-        }
-      },
-      "PurchasePlanCampaignOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          }
-        }
-      },
-      "PurchasePlanLegalEntityOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanOptions": {
-        "type": "object",
-        "properties": {
-          "warehouses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanWarehouseOption"
-            }
-          },
-          "legalEntities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanLegalEntityOption"
-            }
-          },
-          "campaigns": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanCampaignOption"
-            }
-          },
-          "warehouseNote": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanWarehouseOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanLockPolicyPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanLockPolicyRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "PurchasePlanCapabilities": {
-        "type": "object",
-        "properties": {
-          "suggestionAvailable": {
-            "type": "boolean"
-          },
-          "suggestionOwnerModule": {
-            "type": "string"
-          },
-          "suggestionNote": {
-            "type": "string"
-          },
-          "warehouseReferenceAvailable": {
-            "type": "boolean"
-          },
-          "warehouseReferenceNote": {
-            "type": "string"
-          },
-          "lockPortAvailable": {
-            "type": "boolean"
-          },
-          "lockPortNote": {
-            "type": "string"
-          },
-          "campaignCalendarAvailable": {
-            "type": "boolean"
-          },
-          "campaignCalendarNote": {
-            "type": "string"
-          },
-          "purchaseRequestAvailable": {
-            "type": "boolean"
-          },
-          "purchaseRequestNote": {
-            "type": "string"
-          },
-          "quantityFormula": {
-            "type": "string"
-          },
-          "arrivalFormula": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PurchasePlanCampaignPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PurchasePlanCampaignRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       }
