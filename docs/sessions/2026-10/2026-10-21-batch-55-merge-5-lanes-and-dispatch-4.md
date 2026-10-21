@@ -235,6 +235,104 @@ V269:136 的约束名**不靠猜** —— 按「子表 + 父表」反查 `pg_con
    （V270:368-370 的原话）。守卫触发器把这个意图保住了。
 3. **改 V269 / V270 原文件** —— 迁移一旦发布就是历史，只能用新迁移往前修。
 
+### L2 批量验证：第 2 轮 —— 🟢 绿
+
+修复并入后重跑全量 `mvnw verify`（集成头 `976d7d42`）：
+
+```
+backend ............ SUCCESS [  0.002 s]
+tenancy ............ SUCCESS [  0.438 s]
+identity ........... SUCCESS [01:22 min]
+catalog ............ SUCCESS [05:15 min]
+channel ............ SUCCESS [07:17 min]
+warehouse .......... SUCCESS [13:10 min]
+trade .............. SUCCESS [16:45 min]
+crm ................ SUCCESS [ 15.393 s]
+BUILD SUCCESS   Total time: 44:06 min
+```
+
+**7667 例 / 451 个测试类 / Failures: 0 / Errors: 0 / Skipped: 0。**
+
+首轮红的那 4 个类，本轮在**集成头上**逐一复验：
+
+| 测试类 | 第 1 轮 | 第 2 轮 |
+| --- | --- | --- |
+| `PlatformDisputeIntegrationTest` | **27 error** | 27 绿 |
+| `PlatformDisputeTenancyIntegrationTest` | **4 error** | 4 绿 |
+| `PlatformDisputeAppealIntegrationTest` | **28 error** | 31 绿（含 3 例守卫自证） |
+| `PlatformDisputeAppealTenancyIntegrationTest` | **5 error** | 5 绿 |
+| `ServiceTicketIntegrationTest` | 29 绿 | 35 绿（含 6 例守卫自证） |
+| `ServiceTicketTenancyIntegrationTest` | 3 绿 | 3 绿 |
+
+本批 5 条新落地车道的测试也一并绿：
+`SourceAlternativeIntegrationTest` / `ReturnAnalyticsIntegrationTest`(26) /
+`AdCampaignIntegrationTest` / `AdKeywordIntegrationTest` / `AdRuleIntegrationTest`。
+
+台账核对：`node tools/module-progress/sync.mjs --check` → **✓ 台账与蓝图一致**。
+
+### L2 前端与契约半程
+
+| 步骤 | 结果 |
+| --- | --- |
+| `pnpm typecheck` | ✅ 3/3 successful |
+| `pnpm lint` | ✅ 3/3 successful（仅既有 warning，无 error） |
+| `pnpm test`（vitest 全量） | ✅ **424 个文件 / 6379 例全过** |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | ✅ BUILD EXIT=0（Next production build 通过） |
+| `node tools/module-progress/sync.mjs --check` | ✅ 台账与蓝图一致 |
+
+⇒ **L2 批次闸整体 🟢 绿。**
+
+### 合并后的契约与白名单核对
+
+调度者在并入后逐项核对（这些是本批最容易静默坏掉的地方）：
+
+- **10 个新 API 命名空间全部在 `api-proxy.ts` 里注册且互不重叠**：
+  `supplier-ratings` / `inventory/adjustment-approvals` / `mass-productions` /
+  `platform-dispute-appeals` / `service-tickets` / `source-alternatives` /
+  `return-analysis` / `ad-campaigns` / `ad-keywords` / `ad-rules`。
+- **契约里每个模块的端点都在**（union 驱动器按键求并，无覆盖）：
+  trade 789 paths / channel 547 / warehouse 518；
+  逐个命名空间核对：supplier-ratings 10、mass-productions 16、platform-dispute-appeals 11、
+  service-tickets 14、source-alternatives 10、return-analysis 8、ad-campaigns 8、
+  ad-keywords 13、ad-rules 16、inventory/adjustment-approvals 15 —— **一个不缺**。
+- **迁移版本号无撞车**：trade V266/V268–V272/V276、channel V273–V275、warehouse V267。
+
+### ⚠️ 一个必须记下的并发事故
+
+本轮 L2 跑着的时候，**另一个并发会话在同一集成头上动了手**：
+
+- `010becb4` `docs(blueprint): batch-55 台账并入 11 个模块（287 → 297）`
+- `223a2139` `docs(sessions): 补记 batch-55 并入 11 个模块与跨车道破坏修复`
+
+它**读走了本调度者工作区里尚未提交的说明文件**、连同台账一起 commit，并**已经 push 到
+`origin/integration/module-dev`**。
+
+- 好消息：这两个 commit **只动了 `docs/`**，**一行代码都没碰**（`git diff 976d7d42..223a2139`
+  排除 docs/ 后为空），本轮 6 条车道的并入成果**完好**。
+- 坏消息：**调度闸没有挡住它**（两个会话的闸不是同一个，或一方绕过了闸），
+  撞上了协议明确写过的形状「两个 tick 同时改同一个集成头」。
+  撞车窗口里它还起了一批 Testcontainers PG（本轮 L2 期间观测到 PG 峰值 41、其中 40 个属于本轮自己的 session）。
+  本轮 L2 **未受影响**（7667 例 0 failure / 0 error），但这是运气好，不是机制挡住了。
+- 本调度者的应对：**不重写已推送的历史**，不 `reset`、不 force push。
+  改为在已有提交之上**再补一个 commit**，把本轮真正的 L2 结果（第 2 轮 🟢 绿 + 前端半程）补进说明 ——
+  那两个并发 commit 里的说明是 23:41 写的，**写的时候 L2 第 2 轮还没跑完**，
+  所以它只记录了「L2 首轮红 → 定位 → 修复」，缺「修复后复跑绿」这半句。
+  **这半句由本 commit 补齐。**
+
+⚠️ **给下一轮的建议**：调度闸的互斥在本轮**没有真正生效**，原因已取证：
+`lane.mjs` 第 44 行 `const ROOT = process.env.LANE_ROOT ? resolve(process.env.LANE_ROOT) : join(HERE, '..', '..')`，
+闸目录是 `join(STATE_DIR, 'dispatch.gate')` —— **闸挂在 `ROOT` 下**。
+而 `/Users/guan/Projects/starcon/.dev-agent/dispatch.gate`（**主工作区**）在本轮
+**23:44:05 自己也建了一个**（mtime 取证），与集成头 worktree 里的那个
+（`/Users/guan/Projects/starcon-worktrees/integration/.dev-agent/dispatch.gate`）**是两个不同的目录**。
+⇒ 并发会话只要在**主工作区**里跑 `lane.mjs`（或带 `LANE_ROOT` 指过去），
+拿到的就是**另一把闸**，「同一把闸互斥」这件事在跨 worktree 时根本不成立。
+
+**下一轮开工第一件事：核对闸目录的绝对路径**（`ls -ld <各自 ROOT>/.dev-agent/dispatch.gate`），
+确认自己拿到的和对方拿的是**同一个目录**再 `gate acquire`。
+若确认是不同目录，**在开始任何写操作前**先与对方对齐 `LANE_ROOT`。
+（另一种更稳的做法：把闸目录锚定到**固定绝对路径**，不随 worktree 漂移。）
+
 ---
 
 # 已交付模块
@@ -453,6 +551,74 @@ V269:136 的约束名**不靠猜** —— 按「子表 + 父表」反查 `pg_con
    由租户 SLA 策略（`aftersales_reply_sla`，V164）按「平台精确档 > `''` 兜底档」解析当时生效的那一档；
    **解析不到就报错**（不编默认小时数）—— 编出来的时限会让「没配 SLA」和「承诺 48 小时」
    在绩效口径上混成同一件事。判定函数 `aftersales_ticket_sla_state` 是 **IMMUTABLE**。
+
+---
+
+# 本批收尾
+
+## 进度
+
+| 指标 | 开工时 | 收工时 |
+| --- | --- | --- |
+| 已交付 | 287 | **297**（+10） |
+| 进行中 | 0 | 0 |
+| 未开发 | 178 | **168** |
+| 完成率 | 61.7% | **63.9%** |
+| 距 465 还差 | 178 | **168** |
+
+分阶段：卷 06 采购与供应 D6 补齐（6.1.2.2 / 6.6.2.2），
+卷 11 售后与退货补齐 11.4.1.2 / 11.4.2.1 / 11.5.1.1，
+卷 14 广告与增长**从零起量**（14.1.1.1 / 14.1.3.1 / 14.2.2.2 三个 L3 首次交付）。
+
+## 容量闸判定
+
+| 闸 | 取值 | 判定 |
+| --- | --- | --- |
+| 静默窗口闸 | `SILENT_WINDOW=0` → 全天运行 | 放行 |
+| 强度档位 | 当前 < `TOKEN_HORIZON=2026-10-25T00:00+0800` → **full 模式**（LANES=4 / THROTTLE=50） | 满档 |
+| 批次节流闸 | 距上批 **55 分钟** ≥ 阈值 50 分钟 | 放行（通过后才写时间戳） |
+| 温度闸 | `Note: No thermal warning level has been recorded` | 正常 |
+| 配额闸 | 开工时 running = 1 < `RUNNING_QUOTA=6` | 放行 |
+| PG 闸 | 派发时带标签容器 = **0** < 6；**无标签孤儿容器 0 个** | 放行 |
+| load 闸 | `3.30/2.96/3.14`，远低于 `LOAD_LIMIT=12` | 放行 |
+
+**温度观测**：全程 `pmset -g therm` 报「No thermal warning level has been recorded」——
+**无任何降频项**。L2 期间 PG 峰值 **41**（40 个属于本轮 L2 自己的 session —— 仓库的集成测试
+每个测试类各起一个容器），ryuk 三个 session 都在跑，**结束后全部被回收，无孤儿容器**。
+
+## 吞吐预期（按当前档位现算，不引用任何历史文档里的写死数字）
+
+当前档位：`CRON=0 * * * *`（24 次/天）+ `SILENT_WINDOW=0` + `LANES=4` + `THROTTLE_MIN=50`
+⇒ 名义吞吐 = 4 × 24 = **96 个/天**；乘协议里的综合折损系数 0.70 ⇒ **约 67 个/天**。
+
+但**本轮不是正常节奏**：它包含了一次 L2 红 + 一次修复车道 + 一次完整重跑 L2，
+实际用时约 2 小时才交付 10 个。正常的干净轮次是 4 条车道 / 1 轮 L2。
+⇒ **诚实区间：约 30–60 个/天**，剩 168 个未开发 ⇒ **约 3–6 天**（不承诺单点日期）。
+
+## 风险提示
+
+1. **🔴 调度闸在本轮没有真正互斥** —— 并发会话在同一个集成头上 commit + push 了。
+   本轮代码未受影响（那两个 commit 只动 `docs/`），但机制上闸是漏的。
+   下一轮开工第一件事应核对闸目录的绝对路径是否跨会话一致。
+2. **11.5.1.1 退货分析没有自己的 `return-analysis-allowlist.test.ts`**
+   （其余 5 个新模块都有）。它**按协议跑了全量 allowlist 回归**（63 文件 / 351 例），
+   所以不是没验证，只是缺一条专属回归测试 —— 建议下一轮补。
+3. **V269:136 的 `ON DELETE CASCADE` 语义变化**已记在迁移与说明里：
+   删纠纷不再自动连带删申诉。取证是全仓无 DELETE 路径会删 `platform_dispute`，所以那条 CASCADE 此前是空转的；
+   但若 11.4.1.1 将来要支持删纠纷，「连带删还是拦住」应由那条线的拥有者决定。
+4. **卷 12 财务 / 卷 13 报表 / 卷 1 前端聚合**三个卷仍被微服务闸挡住
+   （`finance` / `reporting` / 前端聚合服务不在集成头），
+   `serviceBlocked` 已列出 12.1.1.1 / 13.1.1.1 / 1.1.1.1 等样本 —— 这三卷在服务落地前无法排车道。
+5. **仓库基线的 trade 契约存在既有漂移**（本轮三条车道各自独立发现并各自还原了它，
+   统一求并后 10 个命名空间的端点一个不缺）—— 漂移的**根因**在更早批次，本轮未追责，留给下一轮。
+
+## 收尾三件套
+
+| # | 动作 | 结果 |
+| --- | --- | --- |
+| ① | **写说明** | ✅ `docs/sessions/2026-10/2026-10-21-batch-55-merge-5-lanes-and-dispatch-4.md`（本文件，11 个模块各一节 + L2 两轮记录 + 收尾） |
+| ② | **commit** | ✅ 说明与台账进版本库（台账由并发会话在 `010becb4` 提交，本 commit 补齐说明的 L2 复跑绿结果） |
+| ③ | **push** | ✅ `git push origin integration/module-dev`（**只推集成头，未碰 main**） |
 
 ---
 
