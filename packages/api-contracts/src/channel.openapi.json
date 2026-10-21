@@ -32758,6 +32758,770 @@
           }
         }
       }
+    },
+    "/channel/ad-budgets/tasks": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "planId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "post_channel_ad_budgets_tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBudgetTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/tasks/{id}/apply": {
+      "post": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "post_channel_ad_budgets_tasks_id_apply",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/rules": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "post_channel_ad_budgets_rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBudgetRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/pools": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_pools",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPoolPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "post_channel_ad_budgets_pools",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBudgetPoolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPoolRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/plans": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_plans",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "poolId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPlanPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "post_channel_ad_budgets_plans",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComputeBudgetPlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPlanDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/tasks/{id}": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_tasks_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/rules/{id}": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_rules_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetRuleDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/rebalances": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_rebalances",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "planId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetRebalancePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/pools/{id}": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_pools_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPoolRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/plans/{id}": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_plans_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetPlanDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/options": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/ad-budgets/capabilities": {
+      "get": {
+        "tags": [
+          "ad-budget-allocation-controller"
+        ],
+        "operationId": "get_channel_ad_budgets_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdBudgetCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -32774,7 +33538,7 @@
             "type": "string"
           },
           "quantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -35184,7 +35948,7 @@
             "description": "🔴 归一后内部类型（不给 = 由 14.1.2.2 解析带出；给了必须与解析结果一致）"
           },
           "bid": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "🔴 关键词当前竞价（不给 = 0）"
@@ -40064,7 +40828,7 @@
             "description": "价格来源策略：PRICING_SERVICE / MANUAL"
           },
           "priceAmount": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "价格金额（priceSource=MANUAL 时必填；NUMERIC(19,4)，禁浮点）"
@@ -42498,7 +43262,7 @@
             "format": "uuid"
           },
           "pickupSlaHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -42513,7 +43277,7 @@
             "type": "number"
           },
           "afterSalesWindowHours": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -43137,7 +43901,7 @@
             "type": "string"
           },
           "amountPerWaybill": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -43977,7 +44741,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "组件数量（仅 BUNDLE 有意义，必须 > 0）"
@@ -46415,7 +47179,7 @@
             "format": "uuid"
           },
           "componentQuantity": {
-            "minimum": 1e-06,
+            "minimum": 0.000001,
             "exclusiveMinimum": true,
             "type": "number",
             "description": "套装组件数量；ONE_TO_MANY 必填且 > 0，其余基数必须为 null",
@@ -46758,9 +47522,9 @@
             }
           },
           "minSimilarity": {
-            "maximum": 1.0,
+            "maximum": 1,
             "exclusiveMaximum": false,
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "标题相似度收录下限；不传用模块默认值（PG pg_trgm similarity）",
@@ -55214,13 +55978,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -55420,13 +56184,13 @@
             "format": "int32"
           },
           "spend": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "花费（金额 numeric(19,4)）"
           },
           "sales": {
-            "minimum": 0.0,
+            "minimum": 0,
             "exclusiveMinimum": false,
             "type": "number",
             "description": "销售额（金额 numeric(19,4)）"
@@ -78862,6 +79626,1329 @@
             "description": "🔴 说明：删到一条不剩时整套不可售"
           }
         }
+      },
+      "CreateBudgetTaskRequest": {
+        "required": [
+          "planId"
+        ],
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "分配方案 id",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "执行理由（写进审计）"
+          }
+        }
+      },
+      "AdBudgetTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/AdBudgetTaskRow"
+          },
+          "lines": {
+            "type": "array",
+            "description": "🔴 逐条结果（含被护栏拒绝的那几条）",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetTaskLineRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBudgetTaskLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "明细 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "beforeBudget": {
+            "type": "string",
+            "description": "变更前日预算"
+          },
+          "targetBudget": {
+            "type": "string",
+            "description": "🔴 目标日预算"
+          },
+          "appliedBudget": {
+            "type": "string",
+            "description": "🔴 实际生效后的日预算（被拒时为 null）"
+          },
+          "budgetDelta": {
+            "type": "string",
+            "description": "调整额"
+          },
+          "result": {
+            "type": "string",
+            "description": "🔴 结果：APPLIED / REJECTED / SKIPPED"
+          },
+          "message": {
+            "type": "string",
+            "description": "🔴 结果说明（被拒时给出原因）"
+          }
+        },
+        "description": "🔴 逐条结果（含被护栏拒绝的那几条）"
+      },
+      "AdBudgetTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "任务 id",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "description": "所属方案 id",
+            "format": "uuid"
+          },
+          "poolName": {
+            "type": "string",
+            "description": "预算池名称"
+          },
+          "taskType": {
+            "type": "string",
+            "description": "任务类型"
+          },
+          "status": {
+            "type": "string",
+            "description": "🔴 状态：PENDING / APPLIED / PARTIALLY_APPLIED / FAILED / CANCELLED"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "requestedBy": {
+            "type": "string",
+            "description": "发起人（已认证成员）",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "description": "执行理由"
+          },
+          "appliedAt": {
+            "type": "string",
+            "description": "执行时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "lineCount": {
+            "type": "integer",
+            "description": "逐条条数",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "description": "已生效条数",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "description": "被护栏拒绝条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "跳过条数",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "任务"
+      },
+      "SaveBudgetRuleRequest": {
+        "required": [
+          "currency",
+          "ruleCode",
+          "ruleName",
+          "weights"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "规则名称"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string",
+            "description": "币种（一个规则一个币种）"
+          },
+          "scopePlatformId": {
+            "type": "string",
+            "description": "限定平台 id（为空 = 不限）",
+            "format": "uuid"
+          },
+          "scopeShopCode": {
+            "type": "string",
+            "description": "限定店铺编码（为空 = 不限）"
+          },
+          "minCampaignBudget": {
+            "type": "number",
+            "description": "规则级逐活动预算下限"
+          },
+          "maxCampaignBudget": {
+            "type": "number",
+            "description": "规则级逐活动预算上限"
+          },
+          "constrainedUtilization": {
+            "type": "number",
+            "description": "预算受限的利用率阈值（默认 0.95）"
+          },
+          "idleUtilization": {
+            "type": "number",
+            "description": "闲置预算的利用率阈值（默认 0.30）"
+          },
+          "weights": {
+            "minItems": 1,
+            "type": "array",
+            "description": "权重位（至少一个权重大于 0）",
+            "items": {
+              "$ref": "#/components/schemas/SaveBudgetWeight"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "description": "逐活动销售目标",
+            "items": {
+              "$ref": "#/components/schemas/SaveBudgetTarget"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "SaveBudgetTarget": {
+        "required": [
+          "campaignId",
+          "salesTarget"
+        ],
+        "type": "object",
+        "properties": {
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "salesTarget": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "销售目标（> 0，与规则同币种）"
+          },
+          "minBudget": {
+            "type": "number",
+            "description": "逐活动预算下限（覆盖规则级）"
+          },
+          "maxBudget": {
+            "type": "number",
+            "description": "逐活动预算上限（覆盖规则级）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "逐活动销售目标"
+      },
+      "SaveBudgetWeight": {
+        "required": [
+          "weight",
+          "weightSource"
+        ],
+        "type": "object",
+        "properties": {
+          "weightSource": {
+            "minLength": 1,
+            "type": "string",
+            "description": "权重来源：SALES_TARGET / ROAS / PROFIT"
+          },
+          "weight": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "description": "权重（>= 0）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "权重位（至少一个权重大于 0）"
+      },
+      "AdBudgetRuleDetail": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/AdBudgetRuleRow"
+          },
+          "targets": {
+            "type": "array",
+            "description": "🔴 销售目标清单",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetRuleTargetRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBudgetRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "规则 id",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string",
+            "description": "规则编码（租户内唯一）"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "规则名称"
+          },
+          "currency": {
+            "type": "string",
+            "description": "🔴 币种（一个规则一个币种，不折算）"
+          },
+          "scopePlatformId": {
+            "type": "string",
+            "description": "限定平台 id（为空 = 不限）",
+            "format": "uuid"
+          },
+          "scopePlatformCode": {
+            "type": "string",
+            "description": "限定平台编码"
+          },
+          "scopeShopCode": {
+            "type": "string",
+            "description": "限定店铺编码（为空 = 不限）"
+          },
+          "minCampaignBudget": {
+            "type": "string",
+            "description": "规则级逐活动预算下限"
+          },
+          "maxCampaignBudget": {
+            "type": "string",
+            "description": "规则级逐活动预算上限"
+          },
+          "constrainedUtilization": {
+            "type": "number",
+            "description": "🔴 预算受限的利用率阈值（>= 判受限）"
+          },
+          "idleUtilization": {
+            "type": "number",
+            "description": "🔴 闲置预算的利用率阈值（< 判闲置）"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "weights": {
+            "type": "array",
+            "description": "🔴 权重位（可插拔；PROFIT 当前恒为 0）",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetWeightRow"
+            }
+          },
+          "targetCount": {
+            "type": "integer",
+            "description": "销售目标条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "规则"
+      },
+      "AdBudgetRuleTargetRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "目标 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "salesTarget": {
+            "type": "string",
+            "description": "销售目标（与规则同币种）"
+          },
+          "minBudget": {
+            "type": "string",
+            "description": "逐活动预算下限（覆盖规则级）"
+          },
+          "maxBudget": {
+            "type": "string",
+            "description": "逐活动预算上限（覆盖规则级）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 销售目标清单"
+      },
+      "AdBudgetWeightRow": {
+        "type": "object",
+        "properties": {
+          "weightSource": {
+            "type": "string",
+            "description": "权重来源：SALES_TARGET 销售目标 / ROAS 历史 ROAS / PROFIT 利润"
+          },
+          "weight": {
+            "type": "number",
+            "description": "权重（>= 0；全部权重为 0 的规则建不出来）"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "position": {
+            "type": "integer",
+            "description": "求值顺序",
+            "format": "int32"
+          }
+        },
+        "description": "🔴 权重位（可插拔；PROFIT 当前恒为 0）"
+      },
+      "SaveBudgetPoolRequest": {
+        "required": [
+          "currency",
+          "periodEnd",
+          "periodStart",
+          "poolCode",
+          "poolName",
+          "ruleId",
+          "totalAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "poolCode": {
+            "minLength": 1,
+            "type": "string",
+            "description": "预算池编码（租户内唯一）"
+          },
+          "poolName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "预算池名称"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string",
+            "description": "币种（与规则一致）"
+          },
+          "totalAmount": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "description": "预算总额（> 0）"
+          },
+          "periodStart": {
+            "type": "string",
+            "description": "周期开始",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "description": "周期结束",
+            "format": "date"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "分配规则 id",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdBudgetPoolRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "预算池 id",
+            "format": "uuid"
+          },
+          "poolCode": {
+            "type": "string",
+            "description": "预算池编码"
+          },
+          "poolName": {
+            "type": "string",
+            "description": "预算池名称"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "totalAmount": {
+            "type": "string",
+            "description": "🔴 预算总额"
+          },
+          "periodStart": {
+            "type": "string",
+            "description": "周期开始",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "description": "周期结束",
+            "format": "date"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "分配规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "分配规则名称"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          },
+          "version": {
+            "type": "integer",
+            "description": "乐观锁版本",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "更新时刻",
+            "format": "date-time"
+          }
+        }
+      },
+      "ComputeBudgetPlanRequest": {
+        "required": [
+          "poolId",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object",
+        "properties": {
+          "poolId": {
+            "type": "string",
+            "description": "预算池 id",
+            "format": "uuid"
+          },
+          "windowStart": {
+            "type": "string",
+            "description": "统计窗口开始（显式给出，不从墙上时钟推导）",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "description": "统计窗口结束",
+            "format": "date"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        }
+      },
+      "AdBudgetPlanDetail": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/AdBudgetPlanRow"
+          },
+          "lines": {
+            "type": "array",
+            "description": "🔴 分配明细（逐活动冻结快照）",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetPlanLineRow"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "description": "🔴 未纳入分配的活动与原因",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetSkippedRow"
+            }
+          },
+          "rebalances": {
+            "type": "array",
+            "description": "🔴 再平衡建议（总额不变，只改分布）",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetRebalanceRow"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "说明"
+          }
+        }
+      },
+      "AdBudgetPlanLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "明细 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "campaignStatus": {
+            "type": "string",
+            "description": "活动状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "currentBudget": {
+            "type": "string",
+            "description": "🔴 当前日预算（null = 平台侧没有预算）"
+          },
+          "historicalSpend": {
+            "type": "string",
+            "description": "窗口内消耗"
+          },
+          "historicalSales": {
+            "type": "string",
+            "description": "窗口内销售额"
+          },
+          "historicalOrders": {
+            "type": "string",
+            "description": "窗口内订单"
+          },
+          "roas": {
+            "type": "string",
+            "description": "🔴 ROAS = 销售额 / 消耗；null = 不可比"
+          },
+          "acos": {
+            "type": "string",
+            "description": "🔴 ACOS = 消耗 / 销售额；null = 不可比"
+          },
+          "dailyAvgSpend": {
+            "type": "string",
+            "description": "🔴 日均消耗（窗口内总消耗 / 窗口自然日数）"
+          },
+          "utilization": {
+            "type": "string",
+            "description": "🔴 利用率 = 日均消耗 / 日预算；null = 不可比"
+          },
+          "salesTarget": {
+            "type": "string",
+            "description": "销售目标（未登记为 null）"
+          },
+          "score": {
+            "type": "string",
+            "description": "评分（各来源归一化后的加权和）"
+          },
+          "weight": {
+            "type": "string",
+            "description": "权重（= 评分 / 全体评分之和）"
+          },
+          "weightShare": {
+            "type": "string",
+            "description": "权重分额"
+          },
+          "allocatedBudget": {
+            "type": "string",
+            "description": "🔴 分配额"
+          },
+          "budgetDelta": {
+            "type": "string",
+            "description": "🔴 相对当前预算的增减额"
+          },
+          "budgetConstrained": {
+            "type": "boolean",
+            "description": "🔴 预算受限（利用率触顶）"
+          },
+          "idleBudget": {
+            "type": "boolean",
+            "description": "🔴 闲置预算（利用率过低）"
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "调整建议"
+          },
+          "reason": {
+            "type": "string",
+            "description": "判定依据（写清为什么给这个建议）"
+          },
+          "position": {
+            "type": "integer",
+            "description": "排序位",
+            "format": "int32"
+          }
+        },
+        "description": "🔴 分配明细（逐活动冻结快照）"
+      },
+      "AdBudgetPlanRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "方案 id",
+            "format": "uuid"
+          },
+          "poolId": {
+            "type": "string",
+            "description": "预算池 id",
+            "format": "uuid"
+          },
+          "poolName": {
+            "type": "string",
+            "description": "预算池名称"
+          },
+          "ruleId": {
+            "type": "string",
+            "description": "分配规则 id",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string",
+            "description": "分配规则名称"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "totalAmount": {
+            "type": "string",
+            "description": "🔴 预算总额"
+          },
+          "allocatedAmount": {
+            "type": "string",
+            "description": "🔴 已分配额（+ 未分配额 = 总额）"
+          },
+          "unallocatedAmount": {
+            "type": "string",
+            "description": "🔴 未分配额（受单活动上限挡下的部分）"
+          },
+          "releasedAmount": {
+            "type": "string",
+            "description": "🔴 释放额：收回去的钱"
+          },
+          "idleBudget": {
+            "type": "string",
+            "description": "🔴 闲置预算：有预算却花不出去的钱"
+          },
+          "constrainedShortfall": {
+            "type": "string",
+            "description": "🔴 预算受限缺口：想花却没预算的钱"
+          },
+          "campaignCount": {
+            "type": "integer",
+            "description": "纳入分配的活动条数",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "description": "未纳入分配的活动条数",
+            "format": "int32"
+          },
+          "windowStart": {
+            "type": "string",
+            "description": "🔴 统计窗口开始",
+            "format": "date"
+          },
+          "windowEnd": {
+            "type": "string",
+            "description": "🔴 统计窗口结束",
+            "format": "date"
+          },
+          "computedAt": {
+            "type": "string",
+            "description": "计算时刻",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "description": "方案"
+      },
+      "AdBudgetRebalanceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "建议 id",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "description": "所属方案 id",
+            "format": "uuid"
+          },
+          "fromCampaignId": {
+            "type": "string",
+            "description": "🔴 挪出预算的活动 id",
+            "format": "uuid"
+          },
+          "fromCampaignName": {
+            "type": "string",
+            "description": "挪出预算的活动名"
+          },
+          "toCampaignId": {
+            "type": "string",
+            "description": "🔴 挪入预算的活动 id",
+            "format": "uuid"
+          },
+          "toCampaignName": {
+            "type": "string",
+            "description": "挪入预算的活动名"
+          },
+          "amount": {
+            "type": "string",
+            "description": "🔴 建议调整额"
+          },
+          "reason": {
+            "type": "string",
+            "description": "建议依据"
+          },
+          "status": {
+            "type": "string",
+            "description": "状态"
+          },
+          "decidedAt": {
+            "type": "string",
+            "description": "决定时刻",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "创建时刻",
+            "format": "date-time"
+          }
+        },
+        "description": "🔴 再平衡建议（总额不变，只改分布）"
+      },
+      "AdBudgetSkippedRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "记录 id",
+            "format": "uuid"
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "活动 id",
+            "format": "uuid"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "活动名"
+          },
+          "platformCode": {
+            "type": "string",
+            "description": "平台编码"
+          },
+          "shopCode": {
+            "type": "string",
+            "description": "店铺编码"
+          },
+          "campaignStatus": {
+            "type": "string",
+            "description": "活动状态"
+          },
+          "currency": {
+            "type": "string",
+            "description": "币种"
+          },
+          "currentBudget": {
+            "type": "string",
+            "description": "当前日预算"
+          },
+          "skipReason": {
+            "type": "string",
+            "description": "🔴 未纳入原因：CURRENCY_MISMATCH / NO_SCORE_BASIS / STATUS_NOT_ELIGIBLE / OUT_OF_SCOPE"
+          },
+          "reason": {
+            "type": "string",
+            "description": "原因说明"
+          }
+        },
+        "description": "🔴 未纳入分配的活动与原因"
+      },
+      "AdBudgetTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBudgetRulePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetRuleRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBudgetRebalancePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetRebalanceRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBudgetPoolPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetPoolRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBudgetPlanPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "当前页数据",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetPlanRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合筛选条件的总条数",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码，从 0 起",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "description": "每页条数",
+            "format": "int32"
+          }
+        }
+      },
+      "AdBudgetAllocationGuardrails": {
+        "type": "object",
+        "properties": {
+          "maxSingleBudgetDelta": {
+            "type": "string",
+            "description": "单个活动一次允许调整的预算上限（绝对值）"
+          },
+          "maxTotalBudgetDelta": {
+            "type": "string",
+            "description": "一次执行任务允许的总预算调整上限（绝对值）"
+          },
+          "maxCampaignBudget": {
+            "type": "string",
+            "description": "单个活动的预算上限（调预算后的结果值不得超过）"
+          },
+          "maxCampaignsPerTask": {
+            "type": "integer",
+            "description": "一次执行任务最多允许的活动条数",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string",
+            "description": "护栏说明"
+          }
+        },
+        "description": "执行护栏上限"
+      },
+      "AdBudgetOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "取值"
+          },
+          "label": {
+            "type": "string",
+            "description": "展示名"
+          }
+        },
+        "description": "未纳入原因下拉项"
+      },
+      "AdBudgetOptions": {
+        "type": "object",
+        "properties": {
+          "weightSources": {
+            "type": "array",
+            "description": "权重来源下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "ruleStatuses": {
+            "type": "array",
+            "description": "规则状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "planStatuses": {
+            "type": "array",
+            "description": "方案状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "taskStatuses": {
+            "type": "array",
+            "description": "任务状态下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "description": "调整建议下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "skipReasons": {
+            "type": "array",
+            "description": "未纳入原因下拉项",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetOption"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "description": "本租户出现过的币种",
+            "items": {
+              "type": "string",
+              "description": "本租户出现过的币种"
+            }
+          },
+          "metricFrom": {
+            "type": "string",
+            "description": "🔴 最早可用指标日期（界面据此预填统计窗口）",
+            "format": "date"
+          },
+          "metricTo": {
+            "type": "string",
+            "description": "🔴 最晚可用指标日期",
+            "format": "date"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBudgetAllocationGuardrails"
+          },
+          "allocationNote": {
+            "type": "string",
+            "description": "分配口径说明"
+          },
+          "utilizationNote": {
+            "type": "string",
+            "description": "利用率判定口径"
+          }
+        }
+      },
+      "AdBudgetCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "description": "逐维度能力声明；未交付段 available=false",
+            "items": {
+              "$ref": "#/components/schemas/AdBudgetCapabilityDimension"
+            }
+          },
+          "weightSources": {
+            "type": "array",
+            "description": "权重来源取值（可插拔）",
+            "items": {
+              "type": "string",
+              "description": "权重来源取值（可插拔）"
+            }
+          },
+          "ruleStatuses": {
+            "type": "array",
+            "description": "规则状态取值",
+            "items": {
+              "type": "string",
+              "description": "规则状态取值"
+            }
+          },
+          "planStatuses": {
+            "type": "array",
+            "description": "方案状态取值",
+            "items": {
+              "type": "string",
+              "description": "方案状态取值"
+            }
+          },
+          "taskStatuses": {
+            "type": "array",
+            "description": "任务状态取值",
+            "items": {
+              "type": "string",
+              "description": "任务状态取值"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "description": "调整建议取值",
+            "items": {
+              "type": "string",
+              "description": "调整建议取值"
+            }
+          },
+          "skipReasons": {
+            "type": "array",
+            "description": "未纳入分配的原因取值",
+            "items": {
+              "type": "string",
+              "description": "未纳入分配的原因取值"
+            }
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/AdBudgetAllocationGuardrails"
+          },
+          "allocationNote": {
+            "type": "string",
+            "description": "🔴 分配口径说明（权重 / 归一化 / 余数处理）"
+          },
+          "utilizationNote": {
+            "type": "string",
+            "description": "🔴 利用率与闲置/受限的判定口径"
+          },
+          "profitNote": {
+            "type": "string",
+            "description": "🔴 利润维度当前不可用的说明"
+          },
+          "currencyNote": {
+            "type": "string",
+            "description": "🔴 币种口径说明"
+          },
+          "upstreamNote": {
+            "type": "string",
+            "description": "上游与数据截至时间的说明"
+          },
+          "boundaryNote": {
+            "type": "string",
+            "description": "下游与边界说明"
+          }
+        }
+      },
+      "AdBudgetCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "description": "维度键"
+          },
+          "description": {
+            "type": "string",
+            "description": "维度说明"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "本模块是否已交付"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源（表 / 上游模块）"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "未交付段的责任模块"
+          },
+          "impact": {
+            "type": "string",
+            "description": "不交付的影响"
+          }
+        },
+        "description": "逐维度能力声明；未交付段 available=false"
       }
     }
   }
